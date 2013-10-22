@@ -18,6 +18,6 @@ public class MeterPerSecondSpeedImpl extends AbstractSpeedImpl implements Speed 
 
     @Override
     public double getKilometersPerHour() {
-        return metersPerSecond/3.6;
+        return metersPerSecond*3.6;
     }
 }

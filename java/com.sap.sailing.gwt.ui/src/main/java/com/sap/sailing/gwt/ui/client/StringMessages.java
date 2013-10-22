@@ -527,7 +527,7 @@ public interface StringMessages extends Messages {
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
-    String courseDesignUpdateUrl();
+    String tracTracUpdateUrl();
     String passingSide();
     String refreshNow();
     String stopUpdating();
@@ -746,4 +746,24 @@ public interface StringMessages extends Messages {
     String timeSinceLastPositionFix();
     String timeSinceLastPositionFixTooltip();
     String trackingQuality();
+    String distanceToLineFiveSecondsBeforeStart();
+    String speedOverGroundFiveSecondsBeforeStart();
+    String distanceToLineFiveSecondsBeforeStartTooltip();
+    String speedOverGroundFiveSecondsBeforeStartTooltip();
+    String windImport_Upload();
+    String windImport_Title();
+    String windImport_BoatId();
+    String windImport_SelectedRacesWarning(int selectedRacesCount);
+    String windImport_AllRacesWarning();
+    String windImport_ResultHeader(String firstWindDate, String lastWindDate, int affectedRacesCount);
+    String windImport_ResultError(String errorMessage);
+    String windImport_ResultEntry(String raceName, String regattaName, int windFixesCount, String firstWindDate, String lastWindDate);
+    String showWindSpeedSeriesTooltip();
+    String showWindDirectionSeriesTooltip();
+    String combinedWindSourceTypeTooltip();
+    String courseBasedWindSourceTypeTooltip();
+    String trackBasedEstimationWindSourceTypeTooltip();
+    String expeditionWindSourceTypeTooltip();
+    String webWindSourceTypeTooltip();
+    String raceCommitteeWindSourceTypeTooltip();
 }

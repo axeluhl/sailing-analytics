@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
@@ -12,16 +12,16 @@ public class EventBaseImpl implements EventBase {
     private String publicationUrl;
     private final Venue venue;
     private boolean isPublic;
-    private final Serializable id;
+    private final UUID id;
 
-    public EventBaseImpl(String name, String venueName, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventBaseImpl(String name, String venueName, String publicationUrl, boolean isPublic, UUID id) {
         this(name, new VenueImpl(venueName), publicationUrl, isPublic, id);
     }
 
     /**
      * @param venue must not be <code>null</code>
      */
-    public EventBaseImpl(String name, Venue venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventBaseImpl(String name, Venue venue, String publicationUrl, boolean isPublic, UUID id) {
         assert venue != null;
         this.id = id;
         this.name = name;
@@ -31,7 +31,7 @@ public class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public Serializable getId() {
+    public UUID getId() {
         return id;
     }
 

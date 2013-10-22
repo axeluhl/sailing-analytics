@@ -9,7 +9,7 @@ import com.sap.sailing.server.RacingEventService;
 
 public abstract class AbstractSeriesOperation<ResultType> extends AbstractRacingEventServiceOperation<ResultType> {
     private static final long serialVersionUID = -7786133902346491275L;
-    private Logger logger = Logger.getLogger(AbstractSeriesOperation.class.getName());
+    private static final Logger logger = Logger.getLogger(AbstractSeriesOperation.class.getName());
     private final RegattaIdentifier regattaIdentifier;
     private final String seriesName;
     

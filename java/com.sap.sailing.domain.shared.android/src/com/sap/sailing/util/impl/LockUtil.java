@@ -11,8 +11,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 
 /**
@@ -155,10 +155,11 @@ public class LockUtil {
                     + "This is where the lock interaction happened:\n" + getCurrentStackTrace());
         } else {
             TimePoint now = MillisecondsTimePoint.now();
-            if (now.asMillis() - timePointWriteLockWasObtained.asMillis() > 10000l) {
+            final long heldWriteLockForMillis = now.asMillis() - timePointWriteLockWasObtained.asMillis();
+            if (heldWriteLockForMillis > 10000l) {
                 String stackTrace = getCurrentStackTrace();
-                logger.info("write lock " + lock.getName() + " was held for more than 10s. It got unlocked here: "
-                        + stackTrace);
+                logger.info("write lock " + lock.getName() + " was held for more than 10s (" + heldWriteLockForMillis
+                        + "ms). It got unlocked here: " + stackTrace);
             }
         }
     }

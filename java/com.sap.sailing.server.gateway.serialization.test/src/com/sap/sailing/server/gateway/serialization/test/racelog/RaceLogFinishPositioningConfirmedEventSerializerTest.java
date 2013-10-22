@@ -15,9 +15,9 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -47,7 +47,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorDeserializer(factory));
 
         now = MillisecondsTimePoint.now();
-        positioningList = new ArrayList<>();
+        positioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
     }
 
     @Test
@@ -64,15 +64,15 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNotNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(1, event.getPositionedCompetitors().size());
-        assertEquals(1, deserializedEvent.getPositionedCompetitors().size());
-        assertEquals(event.getPositionedCompetitors().get(0).getA(), deserializedEvent.getPositionedCompetitors()
+        assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(1, event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(1, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getA());
-        assertEquals(event.getPositionedCompetitors().get(0).getB(), deserializedEvent.getPositionedCompetitors()
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getB());
-        assertEquals(event.getPositionedCompetitors().get(0).getC(), deserializedEvent.getPositionedCompetitors()
+        assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC(), deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons()
                 .get(0).getC());
     }
 
@@ -89,9 +89,9 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(0, deserializedEvent.getPositionedCompetitors().size());
+        assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(0, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
     }
 
     @Test
@@ -107,10 +107,10 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
-        assertNotNull(event.getPositionedCompetitors());
-        assertNotNull(deserializedEvent.getPositionedCompetitors());
-        assertEquals(0, event.getPositionedCompetitors().size());
-        assertEquals(0, deserializedEvent.getPositionedCompetitors().size());
+        assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertNotNull(deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
+        assertEquals(0, event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+        assertEquals(0, deserializedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
     }
 
 }

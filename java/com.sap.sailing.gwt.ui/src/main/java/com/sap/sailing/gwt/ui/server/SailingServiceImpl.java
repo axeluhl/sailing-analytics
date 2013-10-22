@@ -48,7 +48,6 @@ import javax.servlet.http.HttpSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -65,12 +64,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -101,6 +97,7 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsFor
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -121,7 +118,9 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -808,10 +807,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             // note that the live URI may be null for races that were put into replay mode
             final String effectiveLiveURI;
-            if (liveURI == null || liveURI.trim().length() == 0) {
-                effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+            if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+                if (liveURI == null || liveURI.trim().length() == 0) {
+                    effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                } else {
+                    effectiveLiveURI = liveURI;
+                }
             } else {
-                effectiveLiveURI = liveURI;
+                effectiveLiveURI = null;
             }
             final String effectiveStoredURI;
             if (storedURI == null || storedURI.trim().length() == 0) {
@@ -1252,13 +1255,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GPSFixMoving fix = fixIter.next();
                         while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
                                 (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
-                            Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            Tack tack;
+                            try {
+                                tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                            } catch (NoWindException nwe) {
+                                tack = null;
+                            }
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
                             Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
+                            WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
@@ -1268,13 +1276,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 // check if fix was at date and if extrapolation is requested
                                 if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
                                     Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
-                                    Tack tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    Tack tack2;
+                                    try {
+                                        tack2 = trackedRace.getTack(competitor, toTimePointExcluding);
+                                    } catch (NoWindException nwe) {
+                                        tack2 = null;
+                                    }
                                     LegType legType2 = trackedLegOfCompetitor == null ? null : trackedRace
                                             .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
-                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
+                                    WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
                                             position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
@@ -2024,6 +2037,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
+            swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
+            swissTimingRaceRecordDTO.hasStartlist = rr.hasStartlist();
             result.add(swissTimingRaceRecordDTO);
         }
         return result;
@@ -2549,12 +2564,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid, courseAreaNames));
-
+        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid.toString(), courseAreaName);
         }
-
         return getEventById(eventUuid);
     }
 
@@ -3213,10 +3226,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
-        if (!isValidUrl(getMasterDataUrl, false)) {
-            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
-        }
+        host = host.split("://")[1];
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
@@ -3226,7 +3236,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         URL serverAddress = null;
       
         try {
-            serverAddress = parseUrl(getMasterDataUrl + query);
+            serverAddress = createUrl(host, query);
             //set up out communications stuff
             connection = null;
           
@@ -3259,16 +3269,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL parseUrl(String s) throws Exception {
-        URL u = new URL(s);
-        return new URI(
-               u.getProtocol(), 
-               u.getAuthority(), 
-               u.getPath(),
-               u.getQuery(), 
-               u.getRef()).
-               toURL();
-   }
+    private URL createUrl(String host, String query) throws Exception {
+        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
@@ -3276,7 +3279,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
-        StringBuffer queryStringBuffer = new StringBuffer("?");
+        StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
@@ -3287,28 +3290,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
         }
         return queryStringBuffer.toString();
-    }
-    
-    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
-            RegExp urlValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-        return urlValidator.exec(url) != null;
-    }
-    
-    private String createGetMasterDataForLgsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
-        return urlBuffer.toString();
-    }
-    
-    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
-        if (!host.endsWith("/")) {
-            urlBuffer.append("/");
-        }
-        if (!host.startsWith("http://")) {
-            urlBuffer.insert(0, "http://");
-        }
     }
 
 }

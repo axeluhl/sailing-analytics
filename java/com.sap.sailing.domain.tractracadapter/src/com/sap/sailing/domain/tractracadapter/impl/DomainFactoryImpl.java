@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +35,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -47,6 +46,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -469,42 +469,48 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, UUID raceId,
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
             String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
+            URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
                 raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+            } else {
+                logger.info("Already found RaceDefinitionImpl for race "+raceName);
+            }
+            DynamicTrackedRace trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
+            if (trackedRace == null) {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
+                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
-                    logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
-                    
-                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI,
-                            tracTracUsername, tracTracPassword,
-                            tracTracEventUuid, raceDefinition.getId());
+                    logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
+
+                    TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(
+                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                            raceDefinition.getId());
                     trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-                    
-                    synchronized (raceCache) {
-                        raceCache.put(raceId, raceDefinition);
-                        raceCache.notifyAll();
-                    }
-                    return trackedRace;
+
+                    TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
+                            tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                            raceDefinition.getId());
+                    trackedRace.addStartTimeChangedListener(startTimeHandler);
+                    raceCache.put(raceId, raceDefinition);
+                    raceCache.notifyAll();
                 } else {
-                    logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
-                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match regatta's boat class "+
-                            trackedRegatta.getRegatta().getBoatClass());
-                    return null;
+                    logger.warning("Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
+                            + " because boat class " + raceDefinition.getBoatClass()
+                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass());
                 }
             } else {
-                throw new RuntimeException("Race "+raceName+" already exists");
+                logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
             }
+            return trackedRace;
         }
     }
 

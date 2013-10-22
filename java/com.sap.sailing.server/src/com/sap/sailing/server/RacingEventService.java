@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -85,9 +87,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
-    TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
+    DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
-    TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
@@ -306,7 +308,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
@@ -376,7 +378,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
-    TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);
@@ -456,19 +458,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @param eventName
      *            The name of the new event
-     * @param venue
-     *            The name of the venue of the new event
      * @param publicationUrl
      *            The publication URL of the new event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param id
      *            The id of the new event
-     * @param regattaNames
-     *            The names of the regattas contained in the new event.<br />
+     * @param venue
+     *            The name of the venue of the new event
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, UUID id);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
@@ -487,7 +487,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return The new event
      */
-    void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    void updateEvent(UUID id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -496,11 +496,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #getEventByName(String) getEventByName(oldName)} can now be obtained by calling
      * {@link #getEventByName(String) getEventByName(newName)}.
      */
-    void renameEvent(Serializable id, String newEventName);
+    void renameEvent(UUID id, String newEventName);
 
-    void removeEvent(Serializable id);
+    void removeEvent(UUID id);
 
-    CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId);
+    CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -536,10 +536,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId);
 
-    void createEventWithoutReplication(Event result);
-
-    Event addCourseAreaWithoutReplication(Serializable eventId, CourseArea courseArea);
-
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
@@ -551,5 +547,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If set to true, the mthod will override any existing connection
      */
     void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
+
+    Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
+            UUID id);
+
+    CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
 }

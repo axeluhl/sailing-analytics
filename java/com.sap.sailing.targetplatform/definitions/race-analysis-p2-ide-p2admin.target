@@ -8,8 +8,17 @@
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.0.4.v20130625/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.v20110928-1809-7uF9LFpHFUqIcLhnJMmHQGXy3BJB"/>
-<repository location="http://download.eclipse.org/releases/indigo"/>
+<unit id="org.eclipse.osgi" version="3.9.0.v20130529-1710" />
+<unit id="org.eclipse.osgi.services" version="3.3.100.v20130513-1956" />
+<unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505" />
+<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337" />
+<unit id="org.eclipse.equinox.simpleconfigurator" version="1.0.400.v20130327-2119" />
+<unit id="org.eclipse.equinox.console" version="1.0.100.v20130429-0953" />
+<unit id="org.eclipse.equinox.launcher" version="1.3.0.v20130327-1440" />
+<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215" />
+<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036" />
+<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605" />
+<repository location="http://download.eclipse.org/releases/kepler"/>
 </location>
 <location path="${project_loc:com.sap.sailing.targetplatform.base}/gen/p2" type="Directory"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
@@ -20,11 +29,18 @@
 <unit id="org.jdom.source" version="1.0.0.v201005080400"/>
 <unit id="javax.servlet" version="3.0.0.v201112011016"/>
 <unit id="javax.servlet.source" version="3.0.0.v201112011016"/>
-<unit id="javax.servlet.jsp" version="2.2.0.v201112011158"/>
-<unit id="javax.servlet.jsp.source" version="2.2.0.v201112011158"/>
-<unit id="javax.el" version="2.2.0.v201303151357"/>
-<unit id="javax.el.source" version="2.2.0.v201303151357"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
+<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
+<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.codehaus.groovy.eclipse.feature.feature.group" version="2.8.0.xx-20130703-1700-e42-RELEASE"/>
+<unit id="org.codehaus.groovy.eclipse.feature.source.feature.group" version="2.8.0.xx-20130703-1700-e42-RELEASE"/>
+<repository location="http://dist.springsource.org/release/GRECLIPSE/e4.2"/>
 </location>
 </locations>
 </target>

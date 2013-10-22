@@ -22,7 +22,7 @@ public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl
     }
     
     @Override
-    public List<Triple<Serializable, String, MaxPointsReason>> getPositionedCompetitors() {
+    public List<Triple<Serializable, String, MaxPointsReason>> getPositionedCompetitorsIDsNamesMaxPointsReasons() {
         return positionedCompetitors;
     }
 

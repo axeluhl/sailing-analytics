@@ -816,32 +816,36 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void selectTrackedRaceInRaceList() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        final RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnWithFleet();
-        final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA().getRaceColumnName();
-        final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().getName();
-        sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
-                selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to determine tracked race linked to race column "
-                        + selectedRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
-                        + t.getMessage());
-            }
+        if (selectedLeaderboardName != null) {
+            final RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnWithFleet();
+            final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA()
+                    .getRaceColumnName();
+            final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().getName();
+            sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
+                    selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            errorReporter.reportError("Error trying to determine tracked race linked to race column "
+                                    + selectedRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
+                                    + t.getMessage());
+                        }
 
-            @Override
-            public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
-                if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
-                    RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
-                    if (raceIdentifier != null) {
-                        selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-                    } else {
-                        trackedRacesListComposite.clearSelection();
-                    }
-                } else {
-                    trackedRacesListComposite.clearSelection();
-                }
-            }
-        });
+                        @Override
+                        public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
+                            if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
+                                RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
+                                        .get(selectedFleetName);
+                                if (raceIdentifier != null) {
+                                    selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+                                } else {
+                                    trackedRacesListComposite.clearSelection();
+                                }
+                            } else {
+                                trackedRacesListComposite.clearSelection();
+                            }
+                        }
+                    });
+        }
     }
 
     private void selectRaceInList(String regattaName, String raceName) {
@@ -1193,7 +1197,9 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
         if (selectedRaceColumnAndFleetName != null) {
             if (selectedRaces.isEmpty()) {
-                unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(), selectedRaceColumnAndFleetName.getB());
+                if (selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null) {
+                    unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(), selectedRaceColumnAndFleetName.getB());
+                }
             } else {
                 linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(), selectedRaceColumnAndFleetName.getB(),
                         selectedRaces.iterator().next());

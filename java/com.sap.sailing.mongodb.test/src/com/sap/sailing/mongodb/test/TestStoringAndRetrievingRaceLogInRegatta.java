@@ -27,11 +27,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -259,10 +259,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
             assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
-            assertEquals(event.getPositionedCompetitors().size(), loadedPositioningEvent.getPositionedCompetitors().size());
-            assertEquals(event.getPositionedCompetitors().get(0).getA(), loadedPositioningEvent.getPositionedCompetitors().get(0).getA());
-            assertEquals(event.getPositionedCompetitors().get(0).getB(), loadedPositioningEvent.getPositionedCompetitors().get(0).getB());
-            assertEquals(event.getPositionedCompetitors().get(0).getC().name(), loadedPositioningEvent.getPositionedCompetitors().get(0).getC().name());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
@@ -289,10 +289,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(event.getPassId(), loadedConfirmedEvent.getPassId());
             assertEquals(event.getId(), loadedConfirmedEvent.getId());
             assertEquals(event.getInvolvedBoats().size(), loadedConfirmedEvent.getInvolvedBoats().size());
-            assertEquals(event.getPositionedCompetitors().size(), loadedConfirmedEvent.getPositionedCompetitors().size());
-            assertEquals(event.getPositionedCompetitors().get(0).getA(), loadedConfirmedEvent.getPositionedCompetitors().get(0).getA());
-            assertEquals(event.getPositionedCompetitors().get(0).getB(), loadedConfirmedEvent.getPositionedCompetitors().get(0).getB());
-            assertEquals(event.getPositionedCompetitors().get(0).getC().name(), loadedConfirmedEvent.getPositionedCompetitors().get(0).getC().name());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().size(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().size());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getA());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getB());
+            assertEquals(event.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons().get(0).getC().name());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
@@ -314,8 +314,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(now, loadedConfirmedEvent.getTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
             assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
-            assertNull(event.getPositionedCompetitors()); 
-            assertNull(loadedConfirmedEvent.getPositionedCompetitors());
+            assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
+            assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();
@@ -337,7 +337,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
         
         DBObject raceLogResult = new BasicDBObject();
-        raceLogResult.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceColumn.getRaceLogIdentifier(fleet).getIdentifier().toString()));       
+        raceLogResult.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceColumn.getRaceLogIdentifier(fleet).getDeprecatedIdentifier()));       
         raceLogResult.put(FieldNames.RACE_LOG_EVENT.name(), result);
         
         MongoObjectFactoryImpl factoryImpl = (MongoObjectFactoryImpl) mongoObjectFactory;

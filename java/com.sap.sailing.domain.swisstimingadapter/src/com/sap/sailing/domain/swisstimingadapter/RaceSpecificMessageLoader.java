@@ -21,4 +21,8 @@ public interface RaceSpecificMessageLoader {
     Iterable<Race> getRaces();
 
     Race getRace(String raceID);
+    
+    boolean hasRaceStartlist(String raceID);
+
+    boolean hasRaceCourse(String raceID);
 }

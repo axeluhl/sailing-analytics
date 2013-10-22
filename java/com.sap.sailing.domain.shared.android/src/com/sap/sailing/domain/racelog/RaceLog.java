@@ -66,4 +66,13 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     void addAllListeners(HashSet<RaceLogEventVisitor> listeners);
 
     Iterable<RaceLogEventVisitor> getAllListeners();
+
+    /**
+     * Like {@link #add(RaceLogEvent)}, only that no events are triggered. Use this method only when loading a race log,
+     * e.g., from a replication or master data import or when loading from the database.
+     * 
+     * @return <code>true</code> if the event was actually added which is the case if there was no equal event contained
+     *         in this race log yet
+     */
+    boolean load(RaceLogEvent event);
 }

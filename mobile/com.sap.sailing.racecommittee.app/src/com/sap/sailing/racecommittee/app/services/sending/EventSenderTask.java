@@ -1,8 +1,7 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URI;
+import java.net.URL;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -44,13 +43,8 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
 
         try {
             ExLog.i(TAG, "Posting event: " + serializedEvent);
-            HttpRequest post = new HttpJsonPostRequest(URI.create(url), serializedEvent.toString());
-            try {
-                final InputStream inputStream = post.execute();
-                inputStream.close();
-            } finally {
-                post.disconnect();
-            }
+            HttpRequest post = new HttpJsonPostRequest(new URL(url), serializedEvent.toString());
+            post.execute().close();
             ExLog.i(TAG, "Post successful for the following event: " + serializedEvent);
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));

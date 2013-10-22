@@ -28,7 +28,6 @@ import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
-import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.event.PolygonMouseOutHandler;
 import com.google.gwt.maps.client.event.PolygonMouseOverHandler;
@@ -216,8 +215,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private Map<CompetitorDTO, List<GPSFixDTO>> lastDouglasPeuckerResult;
     
-    private LatLng lastMousePosition;
-
     private CompetitorSelectionProvider competitorSelection;
 
     private List<RegattaAndRaceIdentifier> selectedRaces;
@@ -336,7 +333,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         }
                     }
                 });
-                
                 map.addMapDragEndHandler(new MapDragEndHandler() {
                     @Override
                     public void onDragEnd(MapDragEndEvent event) {
@@ -344,13 +340,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                     }
                 });
-                map.addMapMouseMoveHandler(new MapMouseMoveHandler() {
-                    @Override
-                    public void onMouseMove(MapMouseMoveEvent event) {
-                        lastMousePosition = event.getLatLng();
-                    }
-                });
-                
                 //If there was a time change before the API was loaded, reset the time
                 if (lastTimeChangeBeforeInitialization != null) {
                     timeChanged(lastTimeChangeBeforeInitialization);
@@ -1302,7 +1291,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addPolylineClickHandler(new PolylineClickHandler() {
             @Override
             public void onClick(PolylineClickEvent event) {
-                showCompetitorInfoWindow(competitorDTO, lastMousePosition);
+                showCompetitorInfoWindow(competitorDTO, event.getLatLng());
             }
         });
         result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {

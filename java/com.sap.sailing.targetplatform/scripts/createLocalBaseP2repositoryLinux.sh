@@ -1,8 +1,6 @@
 #!/bin/bash
 # see http://wiki.eclipse.org/Equinox/p2/Publisher for documentation
 
-set -u
-
 if [ "$ECLIPSE_HOME" = "" ]; then
     ECLIPSE_BIN=`which eclipse`
     ECLIPSE_HOME="`dirname $ECLIPSE_BIN`"

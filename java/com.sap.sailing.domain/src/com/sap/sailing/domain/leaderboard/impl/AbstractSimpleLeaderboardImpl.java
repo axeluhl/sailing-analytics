@@ -37,9 +37,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -49,6 +47,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -59,6 +58,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -342,9 +342,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
-    public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractSimpleLeaderboardImpl(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Double>();
-        this.scoreCorrection = scoreCorrection;
+        this.scoreCorrection = createScoreCorrection();
         this.displayNames = new HashMap<Competitor, String>();
         this.crossLeaderboardResultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = new HashSet<Competitor>();
@@ -352,6 +352,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.raceColumnListeners = new RaceColumnListeners();
         this.raceDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
         initTransientFields();
+    }
+    
+    /**
+     * Produces the score correction object to use in this leaderboard. Used by the constructor. Subclasses may override
+     * this method to create a more specific type of score correction. This implementation produces an object of type
+     * {@link ScoreCorrectionImpl}.
+     */
+    protected SettableScoreCorrection createScoreCorrection() {
+        return new ScoreCorrectionImpl(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -459,7 +468,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn);
+        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn, timePoint);
     }
 
     @Override
@@ -615,7 +624,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
         return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
-               (getScoreCorrection().isScoreCorrected(competitor, raceColumn) ||
+               (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
     }
@@ -1221,6 +1230,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         if (!competitorMarkPassings.isEmpty()) {
                             final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
                             if (firstMarkPassing.getWaypoint() == startWaypoint) {
+                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, 5);
+                                entryDTO.distanceToStartLineFiveSecondsBeforeStartInMeters = distanceToStartLineFiveSecondsBeforeStartOfRace == null ? null
+                                        : distanceToStartLineFiveSecondsBeforeStartOfRace.getMeters();
+                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, 5);
+                                entryDTO.speedOverGroundFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
+                                        : speedFiveSecondsBeforeStartOfRace.getKnots();
                                 Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(
                                         competitor, startOfRace);
                                 entryDTO.distanceToStartLineAtStartOfRaceInMeters = distanceToStartLineAtStartOfRace == null ? null

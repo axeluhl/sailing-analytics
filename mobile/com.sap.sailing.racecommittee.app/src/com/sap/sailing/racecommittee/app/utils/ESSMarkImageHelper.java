@@ -28,7 +28,7 @@ public class ESSMarkImageHelper extends MarkImageHelper {
         createMarkImageDescriptor(R.drawable.buoy_umpireboat, MarkType.UMPIREBOAT, null, null, null);
         createMarkImageDescriptor(R.drawable.buoy_rc_startboat, MarkType.STARTBOAT, null, null, null);
 
-        createMarkImageDescriptor(R.drawable.buoy_finish_flag, MarkType.LANDMARK, null, null, null);
+        createMarkImageDescriptor(R.drawable.buoy_finish_flag, MarkType.LANDMARK, "black", null, null);
     }
 
     public static ESSMarkImageHelper getInstance() {

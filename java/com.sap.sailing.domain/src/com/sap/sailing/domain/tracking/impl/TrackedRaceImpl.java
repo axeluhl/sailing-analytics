@@ -33,21 +33,18 @@ import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -57,12 +54,16 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -233,11 +234,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private long delayToLiveInMillis;
 
+    private enum WindLoadingState { NOT_STARTED, RUNNING, FINISHED };
     /**
      * The constructor loads wind fixes from the {@link #windStore} asynchronously. When completed, this flag is set to
      * <code>true</code>, and all threads currently waiting on this object are notified.
      */
-    private boolean windLoadingCompleted;
+    private WindLoadingState windLoadingCompleted;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
 
@@ -254,6 +256,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * without doing any further synchronization or locking.
      */
     private final NamedReentrantReadWriteLock serializationLock;
+    
+    /**
+     * Wind loading is started in a background thread during object construction. If a client needs to ensure that wind loading
+     * either has terminated or has not yet begun, it can obtain the read lock of this lock. The wind loading procedure will obtain
+     * the write lock before it starts loading wind fixes.
+     */
+    private final NamedReentrantReadWriteLock windLoadingLock;
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
 
@@ -266,7 +275,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "
-                + race.getName(), /* fair */true);
+                + race.getName(), /* fair */ true);
+        this.windLoadingLock = new NamedReentrantReadWriteLock("Wind loading lock for tracked race "
+                + race.getName(), /* fair */ false);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
         this.race = race;
@@ -325,23 +336,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
+        windLoadingCompleted = WindLoadingState.NOT_STARTED;
+        // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
         new Thread("Wind loader for tracked race " + getRace().getName()) {
             @Override
             public void run() {
-                // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
-                // It seems sufficiently unlikely that serialization is requested after the constructor succeeds and
-                // before this thread obtains the lock.
-                LockUtil.lockForRead(serializationLock);
+                LockUtil.lockForRead(getSerializationLock());
+                LockUtil.lockForWrite(getWindLoadingLock());
+                synchronized (TrackedRaceImpl.this) {
+                    windLoadingCompleted = WindLoadingState.RUNNING; // indicates that the serialization lock is now safely held
+                    TrackedRaceImpl.this.notifyAll();
+                }
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                 } finally {
-                    LockUtil.unlockAfterRead(serializationLock);
                     synchronized (TrackedRaceImpl.this) {
-                        windLoadingCompleted = true;
+                        windLoadingCompleted = WindLoadingState.FINISHED;
                         TrackedRaceImpl.this.notifyAll();
                     }
+                    LockUtil.unlockAfterWrite(getWindLoadingLock());
+                    LockUtil.unlockAfterRead(getSerializationLock());
                 }
             }
         }.start();
@@ -357,17 +373,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
+        synchronized (this) {
+            while (windLoadingCompleted == WindLoadingState.RUNNING) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Waiting for wind loading to start was interrupted", e);
+                }
+            }
+            
+        }
     }
-
+    
     /**
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
-        LockUtil.lockForWrite(serializationLock);
+        LockUtil.lockForWrite(getSerializationLock());
         try {
             s.defaultWriteObject();
         } finally {
-            LockUtil.unlockAfterWrite(serializationLock);
+            LockUtil.unlockAfterWrite(getSerializationLock());
         }
     }
 
@@ -391,7 +418,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
-        while (!windLoadingCompleted) {
+        while (windLoadingCompleted != WindLoadingState.FINISHED) {
             wait();
         }
     }
@@ -446,11 +473,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected NavigableSet<MarkPassing> createMarkPassingsCollectionForWaypoint(Waypoint waypoint) {
         final ConcurrentSkipListSet<MarkPassing> result = new ConcurrentSkipListSet<MarkPassing>(
                 MarkPassingByTimeComparator.INSTANCE);
-        LockUtil.lockForRead(serializationLock);
+        LockUtil.lockForRead(getSerializationLock());
         try {
             markPassingsForWaypoint.put(waypoint, result);
         } finally {
-            LockUtil.unlockAfterRead(serializationLock);
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
         return result;
     }
@@ -495,7 +522,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
             if (startTime == null) {
-                startTime = startTimeReceived;
+                startTime = getStartTimeReceived();
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
                 // If no official start time was received, try to estimate the start time using the mark passings for
@@ -1039,12 +1066,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings != null) {
@@ -1076,7 +1097,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (result == null) {
             // try again, this time with more expensive synchronization
             synchronized (markTracks) {
-                LockUtil.lockForRead(serializationLock);
+                LockUtil.lockForRead(getSerializationLock());
                 try {
                     result = markTracks.get(mark);
                     if (result == null) {
@@ -1084,7 +1105,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         markTracks.put(mark, result);
                     }
                 } finally {
-                    LockUtil.unlockAfterRead(serializationLock);
+                    LockUtil.unlockAfterRead(getSerializationLock());
                 }
             }
         }
@@ -1137,11 +1158,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     result = createWindTrack(windSource,
                             delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
                                     : delayForWindEstimationCacheInvalidation);
-                    LockUtil.lockForRead(serializationLock);
+                    LockUtil.lockForRead(getSerializationLock());
                     try {
                         windTracks.put(windSource, result);
                     } finally {
-                        LockUtil.unlockAfterRead(serializationLock);
+                        LockUtil.unlockAfterRead(getSerializationLock());
                     }
                 }
             }
@@ -1225,14 +1246,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
         synchronized (this.windSourcesToExclude) {
-            LockUtil.lockForRead(serializationLock);
+            LockUtil.lockForRead(getSerializationLock());
             try {
                 this.windSourcesToExclude.clear();
                 for (WindSource windSourceToExclude : windSourcesToExclude) {
                     this.windSourcesToExclude.add(windSourceToExclude);
                 }
             } finally {
-                LockUtil.unlockAfterRead(serializationLock);
+                LockUtil.unlockAfterRead(getSerializationLock());
             }
         }
         if (!old.equals(this.windSourcesToExclude)) {
@@ -1356,7 +1377,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
 
-    protected TimePoint getStartTimeReceived() {
+    @Override
+    public TimePoint getStartTimeReceived() {
         return startTimeReceived;
     }
 
@@ -1406,7 +1428,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         // expecting to hold the course's write lock
         invalidateMarkPassingTimes();
-        LockUtil.lockForRead(serializationLock);
+        LockUtil.lockForRead(getSerializationLock());
         try {
             // assuming that getRace().getCourse()'s write lock is held by the current thread
             updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
@@ -1435,7 +1457,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             updated(/* time point */null); // no maneuver cache invalidation required because we don't yet have mark
             // passings for new waypoint
         } finally {
-            LockUtil.unlockAfterRead(serializationLock);
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
     }
 
@@ -1473,11 +1495,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private void addStartToNextMarkCacheInvalidationListener(Mark mark) {
         GPSFixTrack<Mark, GPSFix> track = getOrCreateTrack(mark);
         StartToNextMarkCacheInvalidationListener listener = new StartToNextMarkCacheInvalidationListener(track);
-        LockUtil.lockForRead(serializationLock);
+        LockUtil.lockForRead(getSerializationLock());
         try {
             startToNextMarkCacheInvalidationListeners.put(mark, listener);
         } finally {
-            LockUtil.unlockAfterRead(serializationLock);
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
         track.addListener(listener);
     }
@@ -1492,11 +1514,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         StartToNextMarkCacheInvalidationListener listener = startToNextMarkCacheInvalidationListeners.get(mark);
         if (listener != null) {
             listener.stopListening();
-            LockUtil.lockForRead(serializationLock);
+            LockUtil.lockForRead(getSerializationLock());
             try {
                 startToNextMarkCacheInvalidationListeners.remove(mark);
             } finally {
-                LockUtil.unlockAfterRead(serializationLock);
+                LockUtil.unlockAfterRead(getSerializationLock());
             }
         }
     }
@@ -1504,7 +1526,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         invalidateMarkPassingTimes();
-        LockUtil.lockForRead(serializationLock);
+        LockUtil.lockForRead(getSerializationLock());
         try {
             // assuming that getRace().getCourse()'s write lock is held by the current thread
             updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(zeroBasedIndex,
@@ -1559,7 +1581,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         } finally {
-            LockUtil.unlockAfterRead(serializationLock);
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
     }
 
@@ -2411,6 +2433,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public RaceLog getRaceLog(Serializable identifier) {
         return attachedRaceLogs.get(identifier);
     }
+    
+    @Override
+    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+        if (getStartOfRace() == null) {
+            return null;
+        }
+
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        return getDistanceToStartLine(competitor, beforeStart);
+    }
 
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
@@ -2450,6 +2488,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         return result;
+    }
+    
+    @Override
+    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+        if (getStartOfRace() == null) {
+            return null;
+        }
+
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        return getTrack(competitor).getEstimatedSpeed(beforeStart);
     }
 
     @Override
@@ -2517,5 +2565,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             starboardMarkPosition = null;
         }
         return starboardMarkPosition;
+    }
+
+    protected NamedReentrantReadWriteLock getSerializationLock() {
+        return serializationLock;
+    }
+
+    protected NamedReentrantReadWriteLock getWindLoadingLock() {
+        return windLoadingLock;
     }
 }

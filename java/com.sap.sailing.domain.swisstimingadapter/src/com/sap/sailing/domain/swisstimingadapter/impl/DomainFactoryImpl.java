@@ -21,7 +21,6 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -31,6 +30,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -206,7 +206,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceType getRaceTypeFromRaceID(String raceID) {
         final RaceType result;
         if (raceID != null && raceID.length() >= 6) {
-            final String[] optionalEventIDAndMandatoryRaceID = raceID.split(";");
+            final String[] optionalEventIDAndMandatoryRaceID = raceID.split("_");
             final String swissTimingRaceCode = optionalEventIDAndMandatoryRaceID[optionalEventIDAndMandatoryRaceID.length-1].substring(0, 6).toUpperCase();
             RaceType raceType = raceTypeByID.get(swissTimingRaceCode);
             if (raceType == null) {

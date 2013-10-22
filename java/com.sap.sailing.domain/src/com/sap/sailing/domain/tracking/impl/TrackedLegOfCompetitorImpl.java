@@ -9,16 +9,16 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -599,11 +599,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Distance getManeuverLoss(TimePoint timePointBeforeManeuver,
             TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException {
-        // FIXME bug 156: the timePointAfterManeuver is not a good one to select the outbound speed from:
-        // instead, the outbound speed should be chosen as the maximum speed reached after the acceleration phase
-        // after the maneuver, at least within some reasonable threshold like five times the approximate
-        // "maneuver duration", whatever this means. Inbound, the timePointBeforeManeuver seems reasonable because
-        // it is when the direction change starts.
         assert timePointBeforeManeuver != null;
         assert timePointAfterManeuver != null;
         Distance result;

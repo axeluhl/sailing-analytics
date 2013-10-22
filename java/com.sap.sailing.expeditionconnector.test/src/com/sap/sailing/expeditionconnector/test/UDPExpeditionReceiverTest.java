@@ -28,11 +28,11 @@ import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -152,8 +152,9 @@ public class UDPExpeditionReceiverTest {
         ExpeditionWindTracker windTracker = new ExpeditionWindTracker(new MockedTrackedRace() {
             private static final long serialVersionUID = 4444197492014940699L;
             @Override
-            public void recordWind(Wind wind, WindSource windSource) {
+            public boolean recordWind(Wind wind, WindSource windSource) {
                 windFixes.add(wind);
+                return true;
             }
         }, null, receiver, /* ExpeditionWindTrackerFactory */ null);
         receiver.addListener(windTracker, /* validMessagesOnly */ false);
