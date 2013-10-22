@@ -337,6 +337,12 @@ public class DummyTrackedRace implements TrackedRace {
     }
 
     @Override
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public void removeListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
         

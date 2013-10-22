@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -96,6 +97,64 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    /**
+     * Introducing a new feature on {@link GPSFixTrack} that allows clients to find positions to a sequence of
+     * {@link Timed} objects in ascending order, this method compares those results to the ordinary explicit calls
+     * to {@link GPSFixTrack#getEstimatedPosition(TimePoint, boolean)}.
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void testGetEstimatedPositionSingleVsIteratedWithSmallerSteps() {
+        TimePoint start = gpsFix1.getTimePoint().minus((gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())/2);
+        TimePoint end = gpsFix5.getTimePoint().plus((gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())/2);
+        List<Timed> timeds = new ArrayList<>();
+        for (TimePoint t = start; !t.after(end); t = t.plus((gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())/10)) {
+            final TimePoint finalT = t;
+            timeds.add(new Timed() {public TimePoint getTimePoint() { return finalT; }});
+        }
+        assertEqualEstimatedPositionsSingleVsIterated(timeds, /* extrapolate */ true);
+        assertEqualEstimatedPositionsSingleVsIterated(timeds, /* extrapolate */ false);
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testGetEstimatedPositionSingleVsIteratedWithLargerSteps() {
+        TimePoint start = gpsFix1.getTimePoint().minus((gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())/2);
+        TimePoint end = gpsFix5.getTimePoint().plus((gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())/2);
+        List<Timed> timeds = new ArrayList<>();
+        for (TimePoint t = start; !t.after(end); t = t.plus(gpsFix5.getTimePoint().asMillis()-gpsFix1.getTimePoint().asMillis())) {
+            final TimePoint finalT = t;
+            timeds.add(new Timed() {public TimePoint getTimePoint() { return finalT; }});
+        }
+        assertEqualEstimatedPositionsSingleVsIterated(timeds, /* extrapolate */ true);
+        assertEqualEstimatedPositionsSingleVsIterated(timeds, /* extrapolate */ false);
+    }
+
+    private void assertEqualEstimatedPositionsSingleVsIterated(List<Timed> timeds, boolean extrapolate) {
+        List<Position> positions1 = new ArrayList<>();
+        for (Timed timed : timeds) {
+            positions1.add(track.getEstimatedPosition(timed.getTimePoint(), extrapolate));
+        }
+        List<Position> positions2 = new ArrayList<>();
+        track.lockForRead();
+        try {
+            for (Iterator<Position> pIter = track.getEstimatedPositions(timeds, extrapolate); pIter.hasNext();) {
+                positions2.add(pIter.next());
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        Iterator<Position> p1Iter = positions1.iterator();
+        Iterator<Position> p2Iter = positions2.iterator();
+        while (p1Iter.hasNext()) {
+            assertTrue(p2Iter.hasNext());
+            Position p1 = p1Iter.next();
+            Position p2 = p2Iter.next();
+            assertEquals("Diff between "+p1+" and "+p2, p1.getLatDeg(), p2.getLatDeg(), 0.000000001);
+            assertEquals("Diff between "+p1+" and "+p2, p1.getLngDeg(), p2.getLngDeg(), 0.000000001);
+        }
     }
     
     /**
