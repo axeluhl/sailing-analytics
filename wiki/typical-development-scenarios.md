@@ -25,7 +25,9 @@ Add a New Library which can not be found in any SAP Repository
 *	Copy the library (the jar file) to the folder /WEB-INF/lib
 *	Add the library to the bundle classpath (in the META-INF/manifest.mf file)
 *	Add a build dependency for the GWT compiler to the pom.xml
-*	Add the library to the central maven repository /home/trac/maven-repositories by using the mvn install:install -file command
+*	Add the library to our central maven repository /home/trac/maven-repositories by using the mvn: install:install-file command
+* Command sample to add the library gwt-maps-api-3.9.0-build-17.jar: mvn install:install-file -Dfile=/home/trac/git/java/com.sap.sailing.gwt.ui/WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar -DgroupId=com.github.branflake2267 -DartifactId=gwt-maps-api -Dversion=3.9.0-build-17 -Dpackaging=jar -DlocalRepositoryPath=/home/trac/maven-repositories
+
 
 ## Adding an GWT Extension Library (With Source Code)
 TODO (see Highcharts example)
