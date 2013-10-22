@@ -35,7 +35,9 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
             
             @Override
             public void onClick(ClickEvent event) {
-                parentPanel.arrangeByNothing();
+                if (parentPanel.hasData()) {
+                    parentPanel.arrangeByNothing();
+                }
             }
         });
         arrangeByNothingButton.setValue(true, false);
@@ -48,7 +50,9 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
             
             @Override
             public void onClick(ClickEvent event) {
-                parentPanel.arrangeByWindGaugeIds();
+                if (parentPanel.hasData()) {
+                    parentPanel.arrangeByWindGaugeIds();
+                }
             }
         });
         return arrangeByGaugesIdsButton;
@@ -60,7 +64,9 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
             
             @Override
             public void onClick(ClickEvent event) {
-                parentPanel.arrangeByDay();
+                if (parentPanel.hasData()) {
+                    parentPanel.arrangeByDay();
+                }
             }
         });
         return arrangeByDayButton;
@@ -72,7 +78,9 @@ public class PolarSheetsHistogramDataArrangeButtonBar extends HorizontalPanel{
             
             @Override
             public void onClick(ClickEvent event) {
-                parentPanel.arrangeByDayAndGaugeIds();
+                if (parentPanel.hasData()) {
+                    parentPanel.arrangeByDayAndGaugeIds();
+                }
             }
         });
         return arrangeByDayAndWindGaugeButton;

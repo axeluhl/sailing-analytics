@@ -1,26 +1,18 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.moxieapps.gwt.highcharts.client.Point;
-import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointSelectEventHandler;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -66,19 +58,12 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
-    
-    //Dual mapping. Another solution would be using commons BidiMap. 
-    //But this would require to attach source code for gwt
-    private Map<String,String> idNameMapping;
-    private Map<String,String> nameIdMapping;
-    
-    private Map<String,PolarSheetsData> polarSheetsData;
-
-    private ListBox nameListBox;
 
     private ScrollPanel leftScrollPanel;
 
     private PolarSheetGenerationSettings settings;
+    
+    private List<PolarSheetListChangeListener> polarSheetListChangeListeners = new ArrayList<PolarSheetListChangeListener>();
 
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
@@ -86,10 +71,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
-        idNameMapping = new HashMap<String, String>();
-        nameIdMapping = new HashMap<String, String>();
-        polarSheetsData = new HashMap<String, PolarSheetsData>();
+     
         setSize("100%", "100%");
 
         VerticalPanel leftPanel = addFilteredTrackedRacesList();
@@ -101,15 +83,20 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         leftPanel.add(dataCountLabel);
         DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
         PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
-        rightPanel.addNorth(polarSheetsChartPanel, 70);
+        DockLayoutPanel polarChartAndControlPanel = new DockLayoutPanel(Unit.PCT);
+        PolarChartControlPanel polarChartControlPanel = new PolarChartControlPanel(stringMessages,
+                polarSheetsChartPanel);
+        polarSheetListChangeListeners.add(polarChartControlPanel);
+        polarChartAndControlPanel.setWidth("100%");
+        polarChartAndControlPanel.setHeight("100%");
+        polarChartAndControlPanel.addWest(polarSheetsChartPanel, 80);
+        polarChartAndControlPanel.addEast(polarChartControlPanel, 20);
+        
+        
+        rightPanel.addNorth(polarChartAndControlPanel, 70);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
         histogramPanel.getElement().setAttribute("align", "top");
         rightPanel.addSouth(histogramPanel, 30);
-        nameListBox = new ListBox();
-        leftPanel.add(nameListBox);
-        Button exportButton = new Button("Export");
-        setExportButtonListener(exportButton);
-        leftPanel.add(exportButton);
 
         
         add(rightPanel);
@@ -118,87 +105,6 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         PolarSheetGenerationSettings initialSettings = PolarSheetGenerationSettingsImpl.createStandardPolarSettings();
         settings = initialSettings;
         chartPanel.setSettings(initialSettings);
-    }
-
-    private void setExportButtonListener(Button exportButton) {
-        ClickHandler handler = new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                String name = nameListBox.getItemText(nameListBox.getSelectedIndex());
-                if (name!=null && !name.isEmpty()) {
-                    StringBuffer exportData = new StringBuffer();
-                    exportData.append(name + "\n");
-                    Series[] seriesPerWindspeed = chartPanel.getSeriesPerWindspeedForName(name);
-                    for (Series series : seriesPerWindspeed) {
-                        if (series == null) {
-                            continue;
-                        }
-                        String nameOfSeries = chartPanel.getNameForSeries(series);
-                        String[] split = nameOfSeries.split("-");
-                        int windSpeed = Integer.parseInt(split[2]);
-                        Point[] points = series.getPoints();
-                        if (windSpeed == 4) {
-                            int[] degs = {0,50,60,110,130,180};
-                            exportData.append("4 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 6) {
-                            int[] degs = {0,47,60,110,135,180};
-                            exportData.append("6 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 8) {
-                            int[] degs = {0,43,60,110,135,180};
-                            exportData.append("8 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 10) {
-                            int[] degs = {0,41,60,110,140,180};
-                            exportData.append("10 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 12) {
-                            int[] degs = {0,40,60,110,145,180};
-                            exportData.append("12 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 14) {
-                            int[] degs = {0,39,60,110,155,180};
-                            exportData.append("14 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 16) {
-                            int[] degs = {0,38,60,110,155,180};
-                            exportData.append("16 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 20) {
-                            int[] degs = {0,38,60,110,160,180};
-                            exportData.append("20 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 25) {
-                            int[] degs = {0,39,60,110,168,180};
-                            exportData.append("25 " + createStringForDegrees(points, degs) + "\n");
-                        } else if (windSpeed == 30) {
-                            int[] degs = {0,41,60,110,157,180};
-                            exportData.append("30 " + createStringForDegrees(points, degs) + "\n");
-                        }
-                        
-                    }
-                    
-                    Window.alert(exportData.toString());
-                }
-                
-            }
-        };
-        
-        exportButton.addClickHandler(handler);
-        
-    }
-
-    private String createStringForDegrees(Point[] points, int[] degrees) {
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < degrees.length; i++) {
-            int deg = degrees[i];
-            double average;
-            if (deg > 0 && deg < 180) {
-                double windRight = points[deg].getY().doubleValue();
-                double windLeft = points[360 - deg].getY().doubleValue();
-                average = (windRight + windLeft) / 2;
-            } else {
-                average = points[deg].getY().doubleValue();
-            }
-            NumberFormat fmt = NumberFormat.getDecimalFormat();
-            fmt.overrideFractionDigits(2);
-            buffer.append(deg + " " + fmt.format(average) + " ");
-        }
-        return buffer.toString();
     }
     
     private void setEventListenersForPolarSheetChart() {
@@ -209,11 +115,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 String polarSheetNameWithWind = pointSelectEvent.getSeriesName();
                 String[] split = polarSheetNameWithWind.split("-");
                 String polarSheetName = split[0] + "-" + split[1];
-                String polarSheetId = nameIdMapping.get(polarSheetName);
                 int windSpeed = Integer.parseInt(split[2]); 
-                PolarSheetsData polarData = polarSheetsData.get(polarSheetId);
-                WindStepping stepping = polarData.getStepping();
-                PolarSheetsHistogramData histogramData = polarSheetsData.get(polarSheetId).getHistogramDataMap()
+                PolarSheetsData currentPolarSheetsData = chartPanel.getPolarSheetsDataMap().get(polarSheetName);
+                WindStepping stepping = currentPolarSheetsData.getStepping();
+                PolarSheetsHistogramData histogramData = currentPolarSheetsData.getHistogramDataMap()
                         .get(stepping.getLevelIndexForValue(windSpeed)).get(angle);
                 histogramPanel.setData(histogramData);
                 return true;
@@ -269,10 +174,10 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
 
             @Override
             public void onSuccess(PolarSheetGenerationResponse result) {
-                addNameForPolarSheet(result);
+                String name = createNameForPolarSheet(result);
                 dataCountLabel.setText(stringMessages.dataCount() + ": " + result.getData().getDataCount());
-                polarSheetsData.put(result.getId(), result.getData());
-                chartPanel.setData(idNameMapping.get(result.getId()), result.getData());
+                chartPanel.getPolarSheetsDataMap().put(result.getId(), result.getData());
+                chartPanel.setData(name, result.getData());
                 setCompletionLabel(stringMessages.generationFinished());
                 chartPanel.hideLoadingInfo();
                 polarSheetsTrackedRacesList.changeGenerationButtonState(true);
@@ -285,17 +190,18 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         });
     }
 
-    protected void addNameForPolarSheet(PolarSheetGenerationResponse result) {
+    private String createNameForPolarSheet(PolarSheetGenerationResponse result) {
         String boatClassName = result.getBoatClassName();
         int index = 0;
         String name = "";
         do {
             index++;
             name = boatClassName + "-" + index;
-        } while (nameIdMapping.containsKey(name));
-        nameListBox.addItem(name);
-        idNameMapping.put(result.getId(), name);
-        nameIdMapping.put(name, result.getId());
+        } while (chartPanel.getPolarSheetsDataMap().containsKey(name));
+        for (PolarSheetListChangeListener listener : polarSheetListChangeListeners) {
+            listener.polarSheetAdded(name);
+        }
+        return name;
     }
 
     protected void setCompletionLabel(String string) {

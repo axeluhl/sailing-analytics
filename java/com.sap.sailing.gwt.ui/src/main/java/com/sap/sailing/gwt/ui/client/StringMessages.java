@@ -788,4 +788,7 @@ public interface StringMessages extends Messages {
     String dataCount();
     String generationFinished();
     String generating();
+    String removeAllSheets();
+    String removeAll();
+    String selectSheet();
 }

@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Color;
@@ -37,10 +39,13 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     
     private Map<Series, String> nameForSeries = new HashMap<Series, String>();
     private PolarSheetGenerationSettings settings;
+    
+    private final Map<String,PolarSheetsData> polarSheetsDataMap;
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
         super(Unit.PCT);
         this.stringMessages = stringMessages;
+        polarSheetsDataMap = new HashMap<String, PolarSheetsData>();
         setSize("100%", "100%");
         chart = createPolarSheetChart();
         seriesMap = new HashMap<String, Series[]>();
@@ -195,6 +200,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                 chart.removeSeries(series);
             }
             seriesMap.remove(seriesId);
+            polarSheetsDataMap.remove(seriesId);
         }
     }
 
@@ -204,6 +210,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
     public void removeAllSeries() {
         chart.removeAllSeries();
         seriesMap.clear();
+        polarSheetsDataMap.clear();
     }
 
     /**
@@ -222,6 +229,7 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
                 newSeriesArray(id, result.getStepping().getRawStepping().length);
             }
             addValuesToSeries(id, result);
+            polarSheetsDataMap.put(id, result);
             chart.redraw();
         }
     }
@@ -273,6 +281,18 @@ public class PolarSheetsChartPanel extends DockLayoutPanel {
 
     public void setSettings(PolarSheetGenerationSettings newSettings) {
         settings = newSettings;   
+    }
+    
+    public List<String> getAllSeriesNames() {
+        List<String> result = new ArrayList<String>();
+        for (Entry<String, Series[]> entry : seriesMap.entrySet()) {
+            result.add(entry.getKey());
+        }
+        return result;
+    }
+
+    public Map<String, PolarSheetsData> getPolarSheetsDataMap() {
+        return polarSheetsDataMap;
     }
 
 }

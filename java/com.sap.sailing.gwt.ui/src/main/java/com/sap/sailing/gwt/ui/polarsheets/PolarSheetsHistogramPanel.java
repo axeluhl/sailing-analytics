@@ -137,6 +137,14 @@ public class PolarSheetsHistogramPanel extends DockLayoutPanel {
         }
     }
     
+    public boolean hasData() {
+        boolean hasData = true;
+        if (currentData == null) {
+            hasData = false;
+        }
+        return hasData;
+    }
+    
     
     
 
