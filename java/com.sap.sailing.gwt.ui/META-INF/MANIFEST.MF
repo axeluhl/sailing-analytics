@@ -40,6 +40,7 @@ Import-Package: javax.jms;version="1.1.0",
  org.osgi.util.tracker
 Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
- WEB-INF/lib/gwt-maps.jar,
- WEB-INF/lib/gwt-servlet.jar
+ WEB-INF/lib/gwt-servlet.jar,
+ WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
+ WEB-INF/lib/gwt-ajaxloader.jar
 TrackLifecycle: true

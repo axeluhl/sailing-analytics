@@ -205,9 +205,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource) {
         if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
+            return true;
+        } else {
+        	return false;
         }
     }
 
@@ -215,6 +218,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void addListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override

@@ -22,6 +22,24 @@ public class WindSourceTypeFormatter {
         return null;
     }
     
+    public static String tooltipFor(WindSourceType windSourceType, StringMessages stringMessages) {
+        switch (windSourceType) {
+        case COMBINED:
+            return stringMessages.combinedWindSourceTypeTooltip();
+        case COURSE_BASED:
+            return stringMessages.courseBasedWindSourceTypeTooltip();
+        case TRACK_BASED_ESTIMATION:
+            return stringMessages.trackBasedEstimationWindSourceTypeTooltip();
+        case EXPEDITION:
+            return stringMessages.expeditionWindSourceTypeTooltip();
+        case WEB:
+            return stringMessages.webWindSourceTypeTooltip();
+        case RACECOMMITTEE:
+            return stringMessages.raceCommitteeWindSourceTypeTooltip();
+        }
+        return null;
+    }
+    
     public static String format(WindSource windSource, StringMessages stringMessages) {
         return format(windSource.getType(), stringMessages)+(windSource.getId() == null ? "" : (" "+windSource.getId().toString()));
     }
