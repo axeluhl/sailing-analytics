@@ -261,7 +261,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private String createGetLgsUrl(String host) {
         StringBuffer urlBuffer = new StringBuffer(host);
         appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/leaderboardgroups");
+        urlBuffer.append("sailingserver/api/v1/leaderboardgroups");
         return urlBuffer.toString();
     }
 

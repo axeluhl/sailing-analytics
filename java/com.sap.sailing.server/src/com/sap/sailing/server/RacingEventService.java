@@ -47,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -86,9 +87,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
-    TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
+    DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
-    TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
@@ -307,7 +308,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+    DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
@@ -377,7 +378,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
-    TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateDefaultRegatta(String regattaBaseName, String boatClassName, Serializable id);

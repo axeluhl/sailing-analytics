@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator.util;
 
 /**
- * A class to implement a 2d point to support the capture of area aroud the point for displaying tooltips.
+ * A class to implement a 2d point to support the capture of area around the point for displaying tooltips.
  * The co-ordinates are in pixels.
  * 
  * @author Nidhi Sawhney(D054070)
@@ -11,7 +11,7 @@ public class ToolTip {
     private double x;
     private double y;
     
-    /*
+    /**
      * The tolerance in pixels around the point where the tool tip is to be displayed 
      */
     static final int toolTipTolerance = 50;
