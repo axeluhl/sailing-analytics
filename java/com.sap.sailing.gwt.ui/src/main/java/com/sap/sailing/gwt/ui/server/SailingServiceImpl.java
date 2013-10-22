@@ -2961,7 +2961,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (boatClass == null) {
                 boatClass = race.getRace().getBoatClass();
             }
-            if (!boatClass.getName().matches(race.getRace().getBoatClass().getName())) {
+            if (!boatClass.getName().toLowerCase().matches(race.getRace().getBoatClass().getName().toLowerCase())) {
                 return "Mixed";
             }
         }
