@@ -436,6 +436,15 @@ public interface TrackedRace extends Serializable {
      */
     void addListener(RaceChangeListener listener);
 
+    /**
+     * Like {@link #addListener(RaceChangeListener)}, but notifies the listener about the wind fixes known so far by the
+     * tracked race. This runs synchronized with the otherwise asynchronous loading of wind tracks, triggered by the
+     * constructor of the {@link TrackedRace} implementation classes. This procedure guarantees that eventually the
+     * listener will have received a notification for all wind fixes, regardless of whether they were already loaded at
+     * the time the listener is registered or they are loaded after the registration has completed.
+     */
+    void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded);
+
     void removeListener(RaceChangeListener listener);
 
     /**
@@ -601,4 +610,5 @@ public interface TrackedRace extends Serializable {
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
      */
     TimePoint getStartTimeReceived();
+
 }
