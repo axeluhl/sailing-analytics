@@ -794,7 +794,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, 
-                DetailType.TIME_TRAVELED,
+                DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
@@ -912,11 +912,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.TIME_TRAVELED,
-                    new FormattedDoubleDetailTypeColumn(DetailType.TIME_TRAVELED, new TimeTraveledInRaceInSeconds(),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_TIME_TRAVELED, getTimeTraveledRaceColumn());
 
             return result;
+        }
+
+        private TimeTraveledRaceColumn getTimeTraveledRaceColumn() {
+            return new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
         }
 
         private ManeuverCountRaceColumn getManeuverCountRaceColumn() {
@@ -1182,32 +1185,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     }
                 }
                 return result;
-            }
-        }
-
-        /**
-         * Accumulates the time traveled over all legs of a race
-         * 
-         * @author Lennart Hensler (D054527)
-         */
-        private class TimeTraveledInRaceInSeconds implements LegDetailField<Double> {
-            @Override
-            public Double get(LeaderboardRowDTO row) {
-                Long result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.timeInMilliseconds != null) {
-                                if (result == null) {
-                                    result = 0l;
-                                }
-                                result += legDetail.timeInMilliseconds;
-                            }
-                        }
-                    }
-                }
-                return result == null ? null : new Long(result / 1000).doubleValue();
             }
         }
 
