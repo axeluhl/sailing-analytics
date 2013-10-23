@@ -31,8 +31,6 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
     private ImageTransformer windRoseBackground;
     private ImageTransformer windRoseNeedle;
-    private int windBackgroundOffset = 20;
-    private int windNeedleOffset = 30;
     
     public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event) {
         super(map, zIndex);
