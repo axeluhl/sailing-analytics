@@ -3299,7 +3299,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition queryDefinition) {
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) {
         Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
         return query.run(getService());
     }

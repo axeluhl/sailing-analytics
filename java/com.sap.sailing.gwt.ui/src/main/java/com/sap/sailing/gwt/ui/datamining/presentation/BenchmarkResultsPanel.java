@@ -59,7 +59,7 @@ public class BenchmarkResultsPanel extends FlowPanel {
 
     private void runQuery(final ClientBenchmarkData benchmarkData) {
         final long startTime = System.currentTimeMillis();
-        getSailingService().runGPSFixQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
+        getSailingService().runQuery(queryDefinitionProvider.getQueryDefinition(), new AsyncCallback<QueryResult<Number>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running a query: " + caught.getMessage());

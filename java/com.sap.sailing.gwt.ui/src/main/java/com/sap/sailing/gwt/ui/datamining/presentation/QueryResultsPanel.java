@@ -70,7 +70,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             queryStatusLabel.setText(" | " + stringMessages.running());
-            getSailingService().runGPSFixQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
+            getSailingService().runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
