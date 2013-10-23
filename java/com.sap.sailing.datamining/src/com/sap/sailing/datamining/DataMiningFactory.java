@@ -25,7 +25,7 @@ import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetriever;
 import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
-import com.sap.sailing.datamining.impl.trackedLeg.TrackedLegRetriever;
+import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.TrackedLegOfCompetitorRetriever;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
@@ -62,8 +62,8 @@ public class DataMiningFactory {
         switch (dataType) {
         case GPSFix:
             return (DataRetriever<DataType>) new GPSFixRetriever();
-        case TrackedLeg:
-            return (DataRetriever<DataType>) new TrackedLegRetriever();
+        case TrackedLegOfCompetitor:
+            return (DataRetriever<DataType>) new TrackedLegOfCompetitorRetriever();
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: "
                 + dataType.toString());

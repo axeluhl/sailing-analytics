@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.trackedLeg;
+package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
 
 import com.sap.sailing.datamining.WindStrengthCluster;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
