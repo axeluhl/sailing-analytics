@@ -2941,7 +2941,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings) throws Exception {
+            PolarSheetGenerationSettings settings, String name) throws Exception {
         String id = UUID.randomUUID().toString();
         RacingEventService service = getService();
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
@@ -2950,7 +2950,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
         genWorker.startPolarSheetGeneration();
-        String name = getCommonBoatClass(trackedRaces);
+        if (name == null || name.isEmpty()) {
+            name = getCommonBoatClass(trackedRaces);
+        }
         PolarSheetsData result = genWorker.get();
         return new PolarSheetGenerationResponseImpl(id, name, result);
     }

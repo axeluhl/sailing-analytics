@@ -78,9 +78,9 @@ public class PolarSheetGenerationServiceTest {
         List<RegattaAndRaceIdentifier> idList = new ArrayList<RegattaAndRaceIdentifier>();
         idList.add(new RegattaNameAndRaceName("IrgendeineRegatta", "IrgendeinRennen"));
         
-        PolarSheetGenerationResponse triggerData = service.generatePolarSheetForRaces(idList, settings);
+        PolarSheetGenerationResponse triggerData = service.generatePolarSheetForRaces(idList, settings, "");
         Assert.assertNotNull(triggerData);
-        Assert.assertEquals(BOAT_CLASS, triggerData.getBoatClassName());
+        Assert.assertEquals(BOAT_CLASS, triggerData.getName());
         Assert.assertNotNull(triggerData.getId());
         
         PolarSheetsData results = triggerData.getData();

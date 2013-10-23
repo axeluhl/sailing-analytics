@@ -6,7 +6,7 @@ public interface PolarSheetGenerationResponse extends Serializable{
     
     public String getId();
     
-    public String getBoatClassName();
+    public String getName();
     
     public PolarSheetsData getData();
 

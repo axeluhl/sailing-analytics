@@ -421,7 +421,7 @@ public interface SailingServiceAsync {
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
+            PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 

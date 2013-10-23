@@ -7,16 +7,16 @@ public class PolarSheetGenerationResponseImpl implements PolarSheetGenerationRes
 
     private static final long serialVersionUID = -2160795576114448218L;
     private String id;
-    private String boatClassName;
+    private String name;
     private PolarSheetsData data;
 
     // For GWT serialization
     PolarSheetGenerationResponseImpl() {
     };
 
-    public PolarSheetGenerationResponseImpl(String id, String boatClassName, PolarSheetsData data) {
+    public PolarSheetGenerationResponseImpl(String id, String name, PolarSheetsData data) {
         this.id = id;
-        this.boatClassName = boatClassName;
+        this.name = name;
         this.data = data;
     }
 
@@ -31,8 +31,8 @@ public class PolarSheetGenerationResponseImpl implements PolarSheetGenerationRes
     }
 
     @Override
-    public String getBoatClassName() {
-        return boatClassName;
+    public String getName() {
+        return name;
     }
 
 }

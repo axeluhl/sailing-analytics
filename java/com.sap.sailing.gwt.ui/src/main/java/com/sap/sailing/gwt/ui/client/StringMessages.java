@@ -807,4 +807,6 @@ public interface StringMessages extends Messages {
     String expeditionWindSourceTypeTooltip();
     String webWindSourceTypeTooltip();
     String raceCommitteeWindSourceTypeTooltip();
+    String sheetName();
+    String sheetNameTooltip();
 }

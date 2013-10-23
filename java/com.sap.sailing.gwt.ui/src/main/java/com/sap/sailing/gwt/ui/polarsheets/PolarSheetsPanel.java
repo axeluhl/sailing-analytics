@@ -12,9 +12,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
@@ -59,11 +61,13 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
 
-    private ScrollPanel leftScrollPanel;
+    private final ScrollPanel leftScrollPanel;
 
     private PolarSheetGenerationSettings settings;
     
-    private List<PolarSheetListChangeListener> polarSheetListChangeListeners = new ArrayList<PolarSheetListChangeListener>();
+    private final List<PolarSheetListChangeListener> polarSheetListChangeListeners = new ArrayList<PolarSheetListChangeListener>();
+
+    private final TextBox namingBox;
 
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
@@ -81,6 +85,13 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
         leftPanel.add(dataCountLabel);
+        HorizontalPanel namingContainer = new HorizontalPanel();
+        Label namingLabel = new Label(stringMessages.sheetName() + ": ");
+        namingLabel.setTitle(stringMessages.sheetNameTooltip());
+        namingContainer.add(namingLabel);
+        namingBox = new TextBox();
+        namingContainer.add(namingBox);
+        leftPanel.add(namingContainer);
         DockLayoutPanel rightPanel = new DockLayoutPanel(Unit.PCT);
         PolarSheetsChartPanel polarSheetsChartPanel = createPolarSheetsChartPanel();
         DockLayoutPanel polarChartAndControlPanel = new DockLayoutPanel(Unit.PCT);
@@ -114,8 +125,8 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 int angle = (int) pointSelectEvent.getXAsLong();
                 String polarSheetNameWithWind = pointSelectEvent.getSeriesName();
                 String[] split = polarSheetNameWithWind.split("-");
-                String polarSheetName = split[0] + "-" + split[1];
-                int windSpeed = Integer.parseInt(split[2]); 
+                String polarSheetName = split[0];
+                int windSpeed = Integer.parseInt(split[1]); 
                 PolarSheetsData currentPolarSheetsData = chartPanel.getPolarSheetsDataMap().get(polarSheetName);
                 WindStepping stepping = currentPolarSheetsData.getStepping();
                 PolarSheetsHistogramData histogramData = currentPolarSheetsData.getHistogramDataMap()
@@ -169,7 +180,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
         polarSheetsTrackedRacesList.changeGenerationButtonState(false);
         setCompletionLabel(stringMessages.generating() + "...");
         chartPanel.showLoadingInfo();
-        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, settings,
+        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, settings, namingBox.getValue(),
                 new AsyncCallback<PolarSheetGenerationResponse>() {
 
             @Override
@@ -188,16 +199,17 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
                 errorReporter.reportError(caught.getLocalizedMessage());
             }
         });
+        namingBox.setValue("");
     }
 
     private String createNameForPolarSheet(PolarSheetGenerationResponse result) {
-        String boatClassName = result.getBoatClassName();
+        String sheetName = result.getName();
         int index = 0;
-        String name = "";
-        do {
+        String name = sheetName;
+        while (chartPanel.getPolarSheetsDataMap().containsKey(name)) {
             index++;
-            name = boatClassName + "-" + index;
-        } while (chartPanel.getPolarSheetsDataMap().containsKey(name));
+            name = sheetName + "_" + index;
+        } 
         for (PolarSheetListChangeListener listener : polarSheetListChangeListeners) {
             listener.polarSheetAdded(name);
         }

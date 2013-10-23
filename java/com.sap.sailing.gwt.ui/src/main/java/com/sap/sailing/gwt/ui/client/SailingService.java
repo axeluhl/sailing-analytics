@@ -300,7 +300,7 @@ public interface SailingService extends RemoteService {
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
 
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings) throws Exception;
+            PolarSheetGenerationSettings settings, String name) throws Exception;
     
     EventDTO getEventById(Serializable id);
     
