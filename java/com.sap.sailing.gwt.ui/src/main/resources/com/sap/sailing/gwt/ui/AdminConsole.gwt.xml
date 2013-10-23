@@ -46,7 +46,6 @@
   <source path='components'/>
   <source path='adminconsole'/>
   <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='masterdataimport'/>
   <source path='usermanagement'/>
   <source path='shared'/>
