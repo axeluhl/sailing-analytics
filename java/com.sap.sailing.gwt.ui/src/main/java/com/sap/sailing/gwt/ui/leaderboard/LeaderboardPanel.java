@@ -809,11 +809,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.TOTAL_DISTANCE_TRAVELED,
-                DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                                  DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                                  DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
+                                  DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -1636,34 +1634,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return result;
         }
     }
-    
-    private static class KingOfTheDownwindField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedDownwindInSeconds;
-        }
-    }
-    
-    private static class KingOfTheReachingField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedReachingInSeconds;
-        }
-    }
-
-    private static class KingOfTheUpwindField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedUpwindInSeconds;
-        }
-    }
-    
-    private static class TotalTimeSailedField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedInSeconds;
-        }
-    }
 
     private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
@@ -1678,22 +1648,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
         return result;
+    }
+
+    private OverallTimeTraveledColumn createOverallTimeTraveledColumn() {
+        return new OverallTimeTraveledColumn(this, stringMessages, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE,
+                LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
     }
 
     /**

@@ -6,39 +6,36 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
-import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 
-public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
+public class OverallTimeTraveledColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
     
-    private static final DetailType DETAIL_TYPE = DetailType.RACE_TIME_TRAVELED;
+    private static final DetailType DETAIL_TYPE = DetailType.TOTAL_TIME_SAILED_IN_SECONDS;
 
-    private RaceNameProvider raceNameProvider;
     private StringMessages stringMessages;
 
     private String columnStyle;
     private String headerStyle;
     private MinMaxRenderer minmaxRenderer;
 
-    public TimeTraveledRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider, StringMessages stringMessages, String headerStyle, String columnStyle,
-            String detailHeaderStyle, String detailColumnStyle) {
+    public OverallTimeTraveledColumn(LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String headerStyle, String columnStyle, String detailHeaderStyle,
+            String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true, new TextCell(), DETAIL_TYPE.getDefaultSortingOrder(), 
                 stringMessages, detailHeaderStyle, detailColumnStyle,
-                Arrays.asList(DetailType.RACE_TIME_TRAVELED_UPWIND, DetailType.RACE_TIME_TRAVELED_DOWNWIND, DetailType.RACE_TIME_TRAVELED_REACHING));
+                Arrays.asList(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS));
         setHorizontalAlignment(ALIGN_CENTER);
-        this.raceNameProvider = raceNameProvider;
         this.stringMessages = stringMessages;
         this.columnStyle = columnStyle;
         this.headerStyle = headerStyle;
@@ -47,37 +44,7 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     @Override
     public Double getDoubleValue(LeaderboardRowDTO row) {
-        Long result = null;
-        LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-        if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-            for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                if (legDetail != null) {
-                    if (legDetail.timeInMilliseconds != null) {
-                        if (result == null) {
-                            result = 0l;
-                        }
-                        result += legDetail.timeInMilliseconds;
-                    }
-                }
-            }
-        }
-        return result == null ? null : new Long(result / 1000).doubleValue();
-    }
-
-    private Double getTimeTraveledFor(LeaderboardRowDTO row, LegType legType) {
-        Long result = null;
-        LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-        if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-            for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                if (legDetail != null && legDetail.legType == legType && legDetail.timeInMilliseconds != null) {
-                    if (result == null) {
-                        result = 0l;
-                    }
-                    result += legDetail.timeInMilliseconds;
-                }
-            }
-        }
-        return result == null ? null : new Long(result / 1000).doubleValue();
+        return row.totalTimeSailedInSeconds;
     }
     
     @Override
@@ -86,42 +53,38 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
 
-        result.put(DetailType.RACE_TIME_TRAVELED_UPWIND,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_UPWIND, new RaceTimeTraveledUpwindInSeconds(),
+        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
+                new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeSailedUpwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.RACE_TIME_TRAVELED_DOWNWIND,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_DOWNWIND, new RaceTimeTraveledDownwindInSeconds(),
+        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
+                new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeSailedDownwindInSeconds(),
                         detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.RACE_TIME_TRAVELED_REACHING,
-                new FormattedDoubleDetailTypeColumn(DetailType.RACE_TIME_TRAVELED_REACHING, new RaceTimeTraveledReachingInSeconds(),
+        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
+                new TotalTimeColumn(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeSailedReachingInSeconds(),
                         detailHeaderStyle, detailColumnStyle));
 
         return result;
     }
     
-    private class RaceTimeTraveledUpwindInSeconds implements LegDetailField<Double> {
+    private static class TotalTimeSailedDownwindInSeconds implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.UPWIND);
+            return row.totalTimeSailedDownwindInSeconds;
         }
     }
     
-    private class RaceTimeTraveledDownwindInSeconds implements LegDetailField<Double> {
+    private static class TotalTimeSailedReachingInSeconds implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.DOWNWIND);
-        }
-    }
-    
-    private class RaceTimeTraveledReachingInSeconds implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return getTimeTraveledFor(row, LegType.REACHING);
+            return row.totalTimeSailedReachingInSeconds;
         }
     }
 
-    private String getRaceColumnName() {
-        return raceNameProvider.getRaceColumnName();
+    private static class TotalTimeSailedUpwindInSeconds implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedUpwindInSeconds;
+        }
     }
 
     @Override
@@ -158,12 +121,18 @@ public class TimeTraveledRaceColumn extends ExpandableSortableColumn<String> imp
 
     @Override
     public String getStringValueToRender(LeaderboardRowDTO row) {
-        String result = getValue(row);
-        if (!result.equals("")) {
-            return result;
+        Double timeInSeconds = getDoubleValue(row);
+        String result;
+        if (timeInSeconds == null) {
+            result = null;
         } else {
-            return null;
+            int hh = (int) (timeInSeconds / 3600);
+            int mm = (int) ((timeInSeconds - 3600 * hh) / 60);
+            int ss = (int) (timeInSeconds - 3600 * hh - 60 * mm);
+            NumberFormat numberFormat = NumberFormatterFactory.getDecimalFormat(2, 0);
+            result = "" + numberFormat.format(hh) + ":" + numberFormat.format(mm) + ":" + numberFormat.format(ss);
         }
+        return result;
     }
 
     @Override
