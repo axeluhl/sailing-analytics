@@ -1,6 +1,5 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.LegType;
@@ -9,7 +8,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public interface GPSFixContext {
+public interface TrackedLegContext {
 
     public LeaderboardGroup getLeaderboardGroup();
     public Leaderboard getLeaderboard();
@@ -19,7 +18,6 @@ public interface GPSFixContext {
     public TrackedLeg getTrackedLeg();
     public LegType getLegType();
     public int getLegNumber();
-    public Competitor getCompetitor();
     public Integer getYear();
 
 }

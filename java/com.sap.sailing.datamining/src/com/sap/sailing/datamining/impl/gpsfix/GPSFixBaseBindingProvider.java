@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.impl.gpsfix;
 import groovy.lang.Binding;
 
 import com.sap.sailing.datamining.BaseBindingProvider;
-import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.domain.common.LegType;
 
 public class GPSFixBaseBindingProvider implements BaseBindingProvider<GPSFixWithContext> {

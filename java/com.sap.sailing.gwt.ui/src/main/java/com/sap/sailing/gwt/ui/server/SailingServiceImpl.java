@@ -49,8 +49,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.DataMiningFactory;
-import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;

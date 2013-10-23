@@ -1,9 +1,8 @@
-package com.sap.sailing.datamining.impl.gpsfix;
+package com.sap.sailing.datamining.data.impl;
 
 import java.util.Calendar;
 
-import com.sap.sailing.datamining.GPSFixContext;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.datamining.data.TrackedLegContext;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.LegType;
@@ -16,24 +15,23 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class GPSFixContextImpl implements GPSFixContext {
+public class TrackedLegContextImpl implements TrackedLegContext {
     
     private LeaderboardGroup leaderboardGroup;
     private Leaderboard leaderboard;
     private CourseArea courseArea;
     private Fleet fleet;
     private TrackedRace trackedRace;
-    private LegType legType;
     private TrackedLeg trackedLeg;
+    private LegType legType;
     private int legNumber;
-    private Competitor competitor;
     private Integer year;
 
     private boolean legTypeHasBeenInitialized;
     private boolean yearHasBeenInitialized;
 
-    public GPSFixContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea,
-            Fleet fleet, TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber, Competitor competitor) {
+    public TrackedLegContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet,
+                                 TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
         this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;
         this.courseArea = courseArea;
@@ -41,7 +39,6 @@ public class GPSFixContextImpl implements GPSFixContext {
         this.trackedRace = trackedRace;
         this.trackedLeg = trackedLeg;
         this.legNumber = legNumber;
-        this.competitor = competitor;
     }
 
     @Override
@@ -88,11 +85,6 @@ public class GPSFixContextImpl implements GPSFixContext {
     }
 
     @Override
-    public Competitor getCompetitor() {
-        return competitor;
-    }
-
-    @Override
     public Integer getYear() {
         if (!yearHasBeenInitialized) {
             initializeYear();
@@ -132,5 +124,5 @@ public class GPSFixContextImpl implements GPSFixContext {
         year = calendar.get(Calendar.YEAR);
         yearHasBeenInitialized = true;
     }
-    
+
 }

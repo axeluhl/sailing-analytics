@@ -5,8 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.datamining.DataRetriever;
-import com.sap.sailing.datamining.GPSFixContext;
-import com.sap.sailing.datamining.GPSFixWithContext;
+import com.sap.sailing.datamining.data.GPSFixContext;
+import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.impl.GPSFixContextImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;

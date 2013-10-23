@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining;
 
+import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.domain.common.LegType;
