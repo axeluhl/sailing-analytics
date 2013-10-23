@@ -30,13 +30,14 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
     private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
     private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
-    
+   
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         checkUrlParameters();
+        createSimulatorPanel();
     }
 
     private void checkUrlParameters() {
@@ -52,9 +53,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             yRes = Integer.parseInt(verticalRes);
         }
-        String raceCourseStr = Window.Location.getParameter("raceCourse");
-      	// parsing of raceCourseStr is done in SimulatorMainPanel
-
         String autoUpdateStr = Window.Location.getParameter("autoUpdate");
         if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
             logger.config("Using default auto update " + autoUpdate);
@@ -110,15 +108,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
                 seedLines = 'f';
             }
         }
-        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, event, raceCourseStr, showGrid, showLines, seedLines, showArrows, showStreamlets);
-        createRaceBoardInOneScreenMode(mainPanel);
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-
-        //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, rightLabelName, stringMessages);
-        //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages, this);
         /*{
             @Override
@@ -136,7 +128,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         return logoAndTitlePanel;
     }
 
-    private void createRaceBoardInOneScreenMode(SimulatorMainPanel simulatorPanel) {
+    private void createSimulatorPanel() {
+        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
+                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showStreamlets);
 
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
@@ -150,7 +144,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         p.addNorth(logoAndTitlePanel, 68);
         p.add(simulatorPanel);
         p.addStyleName("dockLayoutPanel");
-
     }
 
 }
