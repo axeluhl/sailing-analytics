@@ -4,51 +4,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.datamining.DataRetriever;
 import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.GPSFixContextImpl;
+import com.sap.sailing.datamining.impl.AbstractDataRetriever;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class GPSFixRetriever implements DataRetriever<GPSFixWithContext> {
+public class GPSFixRetriever extends AbstractDataRetriever<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        for (LeaderboardGroup leaderboardGroup : racingEventService.getLeaderboardGroups().values()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                CourseArea courseArea = leaderboard.getDefaultCourseArea();
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                        if (trackedRace != null) {
-                            int legNumber = 1;
-                            for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                                TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
-                                if (trackedLeg != null) {
-                                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                                        GPSFixContext context = new GPSFixContextImpl(leaderboardGroup, leaderboard, courseArea, fleet, trackedRace, trackedLeg, legNumber, competitor);
-                                        data.addAll(retrieveDataFor(context));
-                                    }
-                                    legNumber++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(racingEventService);
+        for (Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext> baseDataEntry : baseData) {
+            GPSFixContext context = new GPSFixContextImpl(baseDataEntry.getB());
+            data.addAll(retrieveDataFor(context));
         }
         return data;
     }

@@ -50,7 +50,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
@@ -3301,7 +3300,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition queryDefinition) {
-        Query<GPSFixWithContext, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
+        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
         return query.run(getService());
     }
     
