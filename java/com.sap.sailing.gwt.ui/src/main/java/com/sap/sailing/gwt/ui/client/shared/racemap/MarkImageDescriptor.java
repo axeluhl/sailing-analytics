@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.MarkType;
 

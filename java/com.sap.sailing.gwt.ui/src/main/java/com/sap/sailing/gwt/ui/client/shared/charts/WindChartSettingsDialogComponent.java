@@ -65,6 +65,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         grid.setWidget(0, 1, windSpeedSourcesPanel);
 
         showWindSpeedSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindSpeedSeries());
+        showWindSpeedSeriesCheckbox.setTitle(stringMessages.showWindSpeedSeriesTooltip());
         showWindSpeedSeriesCheckbox.setValue(initialSettings.isShowWindSpeedSeries());
         showWindSpeedSeriesCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -78,6 +79,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         windSpeedSourcesPanel.add(showWindSpeedSeriesCheckbox);
 
         showWindDirectionsSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindDirectionSeries());
+        showWindDirectionsSeriesCheckbox.setTitle(stringMessages.showWindDirectionSeriesTooltip());
         showWindDirectionsSeriesCheckbox.setValue(initialSettings.isShowWindDirectionsSeries());
         showWindDirectionsSeriesCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -92,6 +94,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
 
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
+            checkbox.setTitle(WindSourceTypeFormatter.tooltipFor(windSourceType, stringMessages));
             checkbox.setEnabled(initialSettings.isShowWindDirectionsSeries());
             windDirectionsCheckboxes.put(windSourceType, checkbox);
             checkbox.setValue(initialSettings.getWindDirectionSourcesToDisplay().contains(windSourceType));
@@ -101,6 +104,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
+            checkbox.setTitle(WindSourceTypeFormatter.tooltipFor(windSourceType, stringMessages));
             checkbox.setEnabled(initialSettings.isShowWindSpeedSeries() && windSourceType.useSpeed());
             windSpeedCheckboxes.put(windSourceType, checkbox);
             checkbox.setValue(initialSettings.getWindSpeedSourcesToDisplay().contains(windSourceType));

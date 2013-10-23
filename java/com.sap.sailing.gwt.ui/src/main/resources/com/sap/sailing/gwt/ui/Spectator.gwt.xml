@@ -15,8 +15,10 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../Spectator.css" />
+
   <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
+  <inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
+  <inherits name='com.google.gwt.maps.Maps' />
   
   <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />

@@ -169,6 +169,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>WindImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindImportServlet</servlet-name>
+		<url-pattern>/expedition-import</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>

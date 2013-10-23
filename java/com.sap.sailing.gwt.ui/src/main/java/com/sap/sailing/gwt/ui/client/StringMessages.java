@@ -791,4 +791,20 @@ public interface StringMessages extends Messages {
     String removeAllSheets();
     String removeAll();
     String selectSheet();
+    String windImport_Upload();
+    String windImport_Title();
+    String windImport_BoatId();
+    String windImport_SelectedRacesWarning(int selectedRacesCount);
+    String windImport_AllRacesWarning();
+    String windImport_ResultHeader(String firstWindDate, String lastWindDate, int affectedRacesCount);
+    String windImport_ResultError(String errorMessage);
+    String windImport_ResultEntry(String raceName, String regattaName, int windFixesCount, String firstWindDate, String lastWindDate);
+    String showWindSpeedSeriesTooltip();
+    String showWindDirectionSeriesTooltip();
+    String combinedWindSourceTypeTooltip();
+    String courseBasedWindSourceTypeTooltip();
+    String trackBasedEstimationWindSourceTypeTooltip();
+    String expeditionWindSourceTypeTooltip();
+    String webWindSourceTypeTooltip();
+    String raceCommitteeWindSourceTypeTooltip();
 }
