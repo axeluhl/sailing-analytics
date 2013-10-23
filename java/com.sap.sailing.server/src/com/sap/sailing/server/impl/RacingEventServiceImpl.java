@@ -34,8 +34,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.DeviceConfiguration;
-import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -47,7 +45,14 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DeviceConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -191,7 +196,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     /**
      * Leaderboards managed by this racing event service
-     */
+    */
     private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
@@ -229,6 +234,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final MediaDB mediaDB;
 
     private final MediaLibrary mediaLibrary;
+    
+    protected final DeviceConfigurationMapImpl configurationMap;
 
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE
@@ -272,6 +279,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
+        this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -282,6 +290,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
+        loadStoredDeviceConfigurations();
     }
 
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
@@ -345,6 +354,30 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
                     dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
             mediaTrackAdded(mediaTrack);
+        }
+    }
+    
+    private void loadStoredDeviceConfigurations() {
+        DeviceConfigurationMatcher anyMatcher = DeviceConfigurationMatcherAny.INSTANCE;
+        DeviceConfigurationImpl configuration1 = new DeviceConfigurationImpl();
+        configuration1.setAllowedCourseAreaNames(Arrays.asList("Alpha", "Beta", "Stadium"));
+        configuration1.setMaximumRoundsForCourse(3);
+        configuration1.setResultsMailRecipient("lukas.niemeier@sap.com");
+        
+        DeviceConfigurationMatcher multiIdentifier = new DeviceConfigurationMatcherMulti(Arrays.asList("2", "3"));
+        DeviceConfigurationImpl configuration2 = new DeviceConfigurationImpl();
+        configuration2.setAllowedCourseAreaNames(Arrays.asList("GAMMA"));
+        configuration2.setMaximumRoundsForCourse(3);
+        
+        DeviceConfigurationMatcher identifier = new DeviceConfigurationMatcherSingle("3");
+        DeviceConfigurationImpl configuration3 = new DeviceConfigurationImpl();
+        configuration3.setAllowedCourseAreaNames(Arrays.asList("Timo"));
+        configuration3.setMaximumRoundsForCourse(1);
+        
+        synchronized (configurationMap) {
+            configurationMap.put(anyMatcher, configuration1);
+            configurationMap.put(identifier, configuration3);
+            configurationMap.put(multiIdentifier, configuration2);
         }
     }
 
@@ -1769,7 +1802,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (MediaTrack lg : mediaLibrary.allTracks()) {
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
-
+        
+        logger.info("Serializing configuration map...");
+        oos.writeObject(configurationMap);
+        logoutput.append("Serialized " + configurationMap.size() + " configuration entries\n");
+        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+            logoutput.append(String.format("%3s\n", matcher.toString()));
+        }
+        
         logger.info(logoutput.toString());
     }
 
@@ -1850,6 +1890,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
             for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
+            }
+            
+            configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
+            logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
+            for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+                logoutput.append(String.format("%3s\n", matcher.toString()));
             }
 
             logger.info(logoutput.toString());
@@ -2098,11 +2144,26 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
-        configuration.setAllowedCourseAreaNames(Arrays.asList("Alpha", "Beta", "Stadium"));
-        configuration.setMaximumRoundsForCourse(3);
-        configuration.setResultsMailRecipient("lukas.niemeier@sap.com");
-        return configuration;
+        return configurationMap.getByMatch(identifier);
+    }
+
+    @Override
+    public void addDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+        synchronized (configurationMap) {
+            configurationMap.put(matcher, configuration);
+        }
+    }
+
+    @Override
+    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+        synchronized (configurationMap) {
+            configurationMap.remove(matcher);
+        }
+    }
+
+    @Override
+    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations() {
+        return new HashMap<DeviceConfigurationMatcher, DeviceConfiguration>(configurationMap);
     }
 
 }

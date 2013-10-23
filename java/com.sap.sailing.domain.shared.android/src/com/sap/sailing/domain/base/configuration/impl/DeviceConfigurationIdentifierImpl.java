@@ -1,11 +1,13 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.base.configuration.impl;
 
-import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 
 public class DeviceConfigurationIdentifierImpl implements DeviceConfigurationIdentifier {
+
+    private static final long serialVersionUID = 2785847392322741468L;
     
     private final String clientIdentifier;
-    
+
     public DeviceConfigurationIdentifierImpl(String clientIdentifier) {
         this.clientIdentifier = clientIdentifier;
     }
@@ -13,11 +15,6 @@ public class DeviceConfigurationIdentifierImpl implements DeviceConfigurationIde
     @Override
     public String getClientIdentifier() {
         return clientIdentifier;
-    }
-
-    @Override
-    public String toString() {
-        return "TabletConfigurationIdentifierImpl [clientIdentifier=" + clientIdentifier + "]";
     }
 
 }

@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {

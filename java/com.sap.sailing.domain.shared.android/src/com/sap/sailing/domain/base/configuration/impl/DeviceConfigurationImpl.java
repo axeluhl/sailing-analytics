@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.base.configuration.impl;
 import java.util.List;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 
 public class DeviceConfigurationImpl implements DeviceConfiguration {
     

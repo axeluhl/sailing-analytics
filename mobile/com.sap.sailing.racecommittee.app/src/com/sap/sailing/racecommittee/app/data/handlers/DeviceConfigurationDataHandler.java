@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.data.handlers;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 
 public class DeviceConfigurationDataHandler extends DataHandler<DeviceConfiguration> {

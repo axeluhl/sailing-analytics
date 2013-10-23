@@ -5,7 +5,7 @@ import java.io.Reader;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 

@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
-import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.impl.DeviceConfigurationIdentifierImpl;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
@@ -37,10 +37,13 @@ public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
         logger.fine(String.format("Configuration requested by client %s.", identifier));
         
         DeviceConfiguration configuration = getService().getDeviceConfiguration(identifier);
-        
-        JsonSerializer<DeviceConfiguration> serializer = new DeviceConfigurationJsonSerializer();
-        JSONObject json = serializer.serialize(configuration);
-        json.writeJSONString(response.getWriter());
+        if (configuration != null) {
+            JsonSerializer<DeviceConfiguration> serializer = new DeviceConfigurationJsonSerializer();
+            JSONObject json = serializer.serialize(configuration);
+            json.writeJSONString(response.getWriter());
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No configuration for given identifier.");
+        }
     }
 
 }

@@ -66,6 +66,12 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -197,6 +203,9 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -3325,6 +3334,95 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (!host.startsWith("http://")) {
             urlBuffer.insert(0, "http://");
         }
+    }
+
+    @Override
+    public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
+        List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();
+        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : 
+            getService().getAllDeviceConfigurations().entrySet()) {
+            DeviceConfigurationMatcher matcher = entry.getKey();
+            configs.add(convertToDeviceConfigurationMatcherDTO(matcher));
+        }
+        return configs;
+    }
+
+    @Override
+    public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.type, matcherDto.clients);
+        DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
+        if (configuration == null) {
+            return null;
+        } else {
+            return convertToDeviceConfigurationDTO(configuration);
+        }
+    }
+
+    @Override
+    public DeviceConfigurationMatcherDTO addDeviceConfiguration(Type type, List<String> clientIds, List<String> allowedCourseAreaNames, Integer minRounds, Integer maxRounds, String mailRecipient) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
+        configuration.setMinimumRoundsForCourse(minRounds);
+        configuration.setMaximumRoundsForCourse(maxRounds);
+        configuration.setResultsMailRecipient(mailRecipient);
+        getService().addDeviceConfiguration(matcher, configuration);
+        return convertToDeviceConfigurationMatcherDTO(matcher);
+    }
+
+    @Override
+    public boolean removeDeviceConfiguration(Type type, List<String> clientIds) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
+        getService().removeDeviceConfiguration(matcher);
+        return true;
+    }
+
+    private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
+        List<String> clients = new ArrayList<String>();
+        DeviceConfigurationMatcherDTO.Type type = Type.UNKNOWN;
+        
+        if (matcher instanceof DeviceConfigurationMatcherSingle) {
+            type = Type.SINGLE;
+            clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
+        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
+            type = Type.MULTI;
+            clients.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers());
+        } else if (matcher instanceof DeviceConfigurationMatcherAny) {
+            type = Type.ANY;
+        }
+        
+        DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
+                type,
+                clients,  
+                matcher.getMatchingRank());
+        return dto;
+    }
+
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(Type type, List<String> clientIds) {
+        DeviceConfigurationMatcher matcher = null;
+        switch (type) {
+        case SINGLE:
+            matcher = new DeviceConfigurationMatcherSingle(clientIds.get(0));
+            break;
+        case MULTI:
+            matcher = new DeviceConfigurationMatcherMulti(clientIds);
+            break;
+        case ANY:
+            matcher = DeviceConfigurationMatcherAny.INSTANCE;
+            break;
+        default:
+            break;
+        }
+        return matcher;
+    }
+
+    private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
+        DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
+        dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
+        dto.minRoundsForCourse = configuration.getMinimumRoundsForCourse();
+        dto.maxRoundsForCourse = configuration.getMaximumRoundsForCourse();
+        dto.resultsMailRecipient = configuration.getResultsMailRecipient();
+        return dto;
     }
 
 }

@@ -7,6 +7,8 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.base,
+ com.sap.sailing.domain.base.configuration,
+ com.sap.sailing.domain.base.configuration.impl,
  com.sap.sailing.domain.base.impl,
  com.sap.sailing.domain.base.racegroup,
  com.sap.sailing.domain.base.racegroup.impl,

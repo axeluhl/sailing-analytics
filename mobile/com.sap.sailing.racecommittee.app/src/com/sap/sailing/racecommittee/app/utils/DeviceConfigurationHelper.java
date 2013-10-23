@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 

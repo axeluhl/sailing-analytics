@@ -26,8 +26,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.DeviceConfiguration;
-import com.sap.sailing.domain.base.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -555,10 +556,29 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
 
     /**
-     * Returns a tablet's configuration.
+     * Returns a mobile device's configuration.
      * @param identifier of the client (may include event)
      * @return the {@link DeviceConfiguration}
      */
     DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier);
+    
+    /**
+     * Adds a device configuration.
+     * @param matcher defining for which the configuration applies.
+     * @param configuration of the device.
+     */
+    void addDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+    
+    /**
+     * Removes a configuration by its matching object.
+     * @param matcher
+     */
+    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+
+    /**
+     * Returns all configurations and their matching objects. 
+     * @return the {@link DeviceConfiguration}s.
+     */
+    Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
 
 }

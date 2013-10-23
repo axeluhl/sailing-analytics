@@ -1,7 +1,6 @@
-package com.sap.sailing.domain.base;
+package com.sap.sailing.domain.base.configuration;
 
 import java.util.List;
-
 
 /**
  * Interface holding information about tablet's (RCApp) configuration.

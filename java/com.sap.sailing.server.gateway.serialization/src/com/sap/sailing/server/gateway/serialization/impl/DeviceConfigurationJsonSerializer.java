@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceConfiguration> {
