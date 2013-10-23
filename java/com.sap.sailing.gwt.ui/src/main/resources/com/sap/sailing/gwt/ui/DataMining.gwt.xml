@@ -6,9 +6,6 @@
   	<inherits name='com.google.gwt.user.theme.clean.Clean'/>
 	<stylesheet src="../DataMining.css" />
 
-	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.GoogleMaps' />
-
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
 
@@ -26,5 +23,4 @@
 	<source path='shared' />
 	<source path='common' />
 	<source path='actions' />
-	<source path='raceboard' />
 </module>

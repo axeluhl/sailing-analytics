@@ -48,7 +48,6 @@ import javax.servlet.http.HttpSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.GPSFixWithContext;
 import com.sap.sailing.datamining.Query;
@@ -1211,9 +1210,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
      *            as value
      * @param extrapolate
-     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
-     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
-     *            <code>date</code> and the estimated speed.
+     *            if <code>true</code> and no (exact or interpolated) position is known for <code>date</code>, the last
+     *            entry returned in the list of GPS fixes will be obtained by extrapolating from the competitors last
+     *            known position before <code>date</code> and the estimated speed.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
@@ -1253,7 +1252,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
-                        if(estimatedPosition != null && estimatedSpeed != null) {
+                        if (estimatedPosition != null && estimatedSpeed != null) {
                             fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
                         }
                     }
@@ -3233,10 +3232,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
-        if (!isValidUrl(getMasterDataUrl, false)) {
-            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
-        }
+        host = host.split("://")[1];
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
@@ -3246,7 +3242,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         URL serverAddress = null;
       
         try {
-            serverAddress = parseUrl(getMasterDataUrl + query);
+            serverAddress = createUrl(host, query);
             //set up out communications stuff
             connection = null;
           
@@ -3279,16 +3275,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL parseUrl(String s) throws Exception {
-        URL u = new URL(s);
-        return new URI(
-               u.getProtocol(), 
-               u.getAuthority(), 
-               u.getPath(),
-               u.getQuery(), 
-               u.getRef()).
-               toURL();
-   }
+    private URL createUrl(String host, String query) throws Exception {
+        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
@@ -3296,7 +3285,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
-        StringBuffer queryStringBuffer = new StringBuffer("?");
+        StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
@@ -3308,28 +3297,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return queryStringBuffer.toString();
     }
-    
-    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
-            RegExp urlValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-        return urlValidator.exec(url) != null;
-    }
-    
-    private String createGetMasterDataForLgsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
-        return urlBuffer.toString();
-    }
-    
-    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
-        if (!host.endsWith("/")) {
-            urlBuffer.append("/");
-        }
-        if (!host.startsWith("http://")) {
-            urlBuffer.insert(0, "http://");
-        }
-    }
+
     
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runGPSFixQuery(QueryDefinition queryDefinition) {

@@ -288,6 +288,11 @@
 		</repository>
 --> 
 		<repository>
+			<id>sailing-server-maven</id>
+			<url>http://maven.sapsailing.com/maven</url>
+		</repository>
+
+		<repository>
 			<id>central</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
@@ -297,9 +302,5 @@
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
 		</repository>
 
-		<repository>
-			<id>sailing-server-maven</id>
-			<url>http://maven.sapsailing.com/maven</url>
-		</repository>
 	</repositories>
 </project>
