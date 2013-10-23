@@ -104,6 +104,10 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
         outlierNeighborhoodPctLabel.setTitle(stringMessages.polarSheetOutlierDetectionMinimumPercTooltip());
         grid.setWidget(9, 0, outlierNeighborhoodPctLabel);
         outlierNeighborhoodPctBox = dialog.createDoubleBox(settings.getOutlierMinimumNeighborhoodPct(), 6);
+        if (!settings.shouldRemoveOutliers()) {
+            outlierNeighborhoodPctBox.setEnabled(false);
+            outlierRadiusBox.setEnabled(false);
+        }
         grid.setWidget(9, 1, outlierNeighborhoodPctBox);
         grid.setWidget(10, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
