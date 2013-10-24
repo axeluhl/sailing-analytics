@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.annotation.SuppressLint;
+
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -20,6 +22,8 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -165,6 +169,11 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
     @Override
     public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
         return courseAreaCache.get(courseAreaId);
+    }
+
+    @Override
+    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(Type type, List<String> clientIdentifiers) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }

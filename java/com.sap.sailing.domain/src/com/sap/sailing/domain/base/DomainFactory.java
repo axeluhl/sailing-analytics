@@ -113,7 +113,5 @@ public interface DomainFactory extends SharedDomainFactory {
      * @param trackedRace must not be <code>null</code>
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
-    
-    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type type, List<String> clientIdentifiers);
 
 }

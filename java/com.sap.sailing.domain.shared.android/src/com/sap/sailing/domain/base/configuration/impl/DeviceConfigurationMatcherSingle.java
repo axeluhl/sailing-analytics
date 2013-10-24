@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 
@@ -41,6 +44,11 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
     @Override
     public String toString() {
         return "DeviceConfigurationMatcherSingle [clientIdentifier=" + clientIdentifier + "]";
+    }
+
+    @Override
+    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+        return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), Arrays.asList(clientIdentifier));
     }
 
 }

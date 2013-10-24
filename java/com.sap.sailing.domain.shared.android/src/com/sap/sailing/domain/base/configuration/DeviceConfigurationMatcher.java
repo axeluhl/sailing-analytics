@@ -2,7 +2,9 @@ package com.sap.sailing.domain.base.configuration;
 
 import java.io.Serializable;
 
-public interface DeviceConfigurationMatcher extends Serializable {
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+
+public interface DeviceConfigurationMatcher extends IsManagedBySharedDomainFactory, Serializable {
     final static int RANK_SINGLE = 1;
     final static int RANK_MULTI = 2;
     final static int RANK_ANY = 3;

@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 
@@ -81,6 +83,8 @@ public interface SharedDomainFactory {
     CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
     
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
+    
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type type, List<String> clientIdentifiers);
 
 
 }

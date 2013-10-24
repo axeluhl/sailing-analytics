@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 
@@ -46,6 +48,11 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     @Override
     public String toString() {
         return "DeviceConfigurationMatcherMulti [clientIdentifiers=" + clientIdentifiers + "]";
+    }
+
+    @Override
+    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+        return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), clientIdentifiers);
     }
     
 }

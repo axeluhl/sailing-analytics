@@ -131,10 +131,12 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -2131,16 +2133,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         synchronized (configurationMap) {
             configurationMap.put(matcher, configuration);
-            mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
         }
+        mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
+        replicate(new CreateOrUpdateDeviceConfiguration(matcher, configuration));
     }
 
     @Override
     public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
         synchronized (configurationMap) {
             configurationMap.remove(matcher);
-            mongoObjectFactory.removeDeviceConfiguration(matcher);
         }
+        mongoObjectFactory.removeDeviceConfiguration(matcher);
+        replicate(new RemoveDeviceConfiguration(matcher));
     }
 
     @Override
