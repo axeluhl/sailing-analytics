@@ -809,4 +809,11 @@ public interface StringMessages extends Messages {
     String raceCommitteeWindSourceTypeTooltip();
     String sheetName();
     String sheetNameTooltip();
+    String timeDownwind();
+    String timeReaching();
+    String timeUpwind();
+    String raceTimeTooltip();
+    String raceTimeDownwindTooltip();
+    String raceTimeReachingTooltip();
+    String raceTimeUpwindTooltip();
 }

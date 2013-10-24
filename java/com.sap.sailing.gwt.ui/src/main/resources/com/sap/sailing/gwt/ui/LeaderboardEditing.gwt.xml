@@ -29,7 +29,6 @@
   <source path='client'/>
   <source path='adminconsole'/>
   <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='leaderboardedit'/>
   <source path='usermanagement'/>
   <source path='shared'/>
