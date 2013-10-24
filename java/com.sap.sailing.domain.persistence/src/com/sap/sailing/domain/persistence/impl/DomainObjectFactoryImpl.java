@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -37,6 +38,10 @@ import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -1256,5 +1261,66 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         
         Mark mark = DomainFactory.INSTANCE.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
         return mark;
+    }
+
+    @Override
+    public Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations() {
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> result = new HashMap<>();
+        DBCollection configurationCollection = database.getCollection(CollectionNames.CONFIGURATIONS.name());
+        
+        try {
+            for (DBObject dbObject : configurationCollection.find()) {
+                Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
+                result.put(entry.getA(), entry.getB());
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load configurations.");
+            logger.log(Level.SEVERE, "loadAllDeviceConfigurations", e);
+        }
+        
+        return result.entrySet();
+    }
+
+    private Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
+        DBObject matcherObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_MATCHER.name());
+        DBObject configObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
+        return new Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), loadConfiguration(configObject));
+    }
+
+    private DeviceConfigurationMatcher loadConfigurationMatcher(DBObject matcherObject) {
+        List<String> clientIdentifiers = new ArrayList<String>();
+        BasicDBList clientIdentifiersObject = (BasicDBList) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
+        for (Object clientIdentifier : clientIdentifiersObject) {
+            clientIdentifiers.add(clientIdentifier.toString());
+        }
+        String type = (String) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name());
+        return DomainFactory.INSTANCE.getOrCreateDeviceConfigurationMatcher(Type.valueOf(type), clientIdentifiers);
+    }
+
+    private DeviceConfiguration loadConfiguration(DBObject configObject) {
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        
+        Object allowedCourseAreaObjects = configObject.get(FieldNames.CONFIGURATION_CONFIG_ALLOWED_COURSE_AREA_NAMES.name());
+        if (allowedCourseAreaObjects != null) {
+            List<String> allowedCourseAreas = new ArrayList<String>();
+            for (Object allowedCourseAreaObject : (BasicDBList)allowedCourseAreaObjects) {
+                allowedCourseAreas.add(allowedCourseAreaObject.toString());
+            }
+            configuration.setAllowedCourseAreaNames(allowedCourseAreas);
+        }
+        Object minRounds = configObject.get(FieldNames.CONFIGURATION_CONFIG_MIN_ROUNDS.name());
+        if (minRounds != null) {
+            configuration.setMinimumRoundsForCourse(((Number)minRounds).intValue());
+        }
+        Object maxRounds = configObject.get(FieldNames.CONFIGURATION_CONFIG_MAX_ROUNDS.name());
+        if (maxRounds != null) {
+            configuration.setMaximumRoundsForCourse(((Number)maxRounds).intValue());
+        }
+        Object mail = configObject.get(FieldNames.CONFIGURATION_CONFIG_RESULTS_MAIL.name());
+        if (mail != null) {
+            configuration.setResultsMailRecipient(mail.toString());
+        }
+        
+        return configuration;
     }
 }

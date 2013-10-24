@@ -12,7 +12,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -22,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -48,11 +48,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -358,26 +354,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     private void loadStoredDeviceConfigurations() {
-        DeviceConfigurationMatcher anyMatcher = DeviceConfigurationMatcherAny.INSTANCE;
-        DeviceConfigurationImpl configuration1 = new DeviceConfigurationImpl();
-        configuration1.setAllowedCourseAreaNames(Arrays.asList("Alpha", "Beta", "Stadium"));
-        configuration1.setMaximumRoundsForCourse(3);
-        configuration1.setResultsMailRecipient("lukas.niemeier@sap.com");
-        
-        DeviceConfigurationMatcher multiIdentifier = new DeviceConfigurationMatcherMulti(Arrays.asList("2", "3"));
-        DeviceConfigurationImpl configuration2 = new DeviceConfigurationImpl();
-        configuration2.setAllowedCourseAreaNames(Arrays.asList("GAMMA"));
-        configuration2.setMaximumRoundsForCourse(3);
-        
-        DeviceConfigurationMatcher identifier = new DeviceConfigurationMatcherSingle("3");
-        DeviceConfigurationImpl configuration3 = new DeviceConfigurationImpl();
-        configuration3.setAllowedCourseAreaNames(Arrays.asList("Timo"));
-        configuration3.setMaximumRoundsForCourse(1);
-        
-        synchronized (configurationMap) {
-            configurationMap.put(anyMatcher, configuration1);
-            configurationMap.put(identifier, configuration3);
-            configurationMap.put(multiIdentifier, configuration2);
+        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : domainObjectFactory.loadAllDeviceConfigurations()) {
+            synchronized (configurationMap) {
+                configurationMap.put(entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -2151,6 +2131,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void addDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         synchronized (configurationMap) {
             configurationMap.put(matcher, configuration);
+            mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
         }
     }
 
@@ -2158,6 +2139,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
         synchronized (configurationMap) {
             configurationMap.remove(matcher);
+            mongoObjectFactory.removeDeviceConfiguration(matcher);
         }
     }
 

@@ -331,10 +331,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
 
     private final Executor executor;
+    
+    private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     private final DomainFactory tractracDomainFactory;
-
-    private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
     private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers;
     
@@ -3386,7 +3386,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
         } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
             type = Type.MULTI;
-            clients.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers());
+            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
         } else if (matcher instanceof DeviceConfigurationMatcherAny) {
             type = Type.ANY;
         }
@@ -3399,21 +3399,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(Type type, List<String> clientIds) {
-        DeviceConfigurationMatcher matcher = null;
         switch (type) {
         case SINGLE:
-            matcher = new DeviceConfigurationMatcherSingle(clientIds.get(0));
-            break;
+            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.SINGLE, clientIds);
         case MULTI:
-            matcher = new DeviceConfigurationMatcherMulti(clientIds);
-            break;
+            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.MULTI, clientIds);
         case ANY:
-            matcher = DeviceConfigurationMatcherAny.INSTANCE;
-            break;
+            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.ANY, clientIds);
         default:
-            break;
+            return null;
         }
-        return matcher;
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {

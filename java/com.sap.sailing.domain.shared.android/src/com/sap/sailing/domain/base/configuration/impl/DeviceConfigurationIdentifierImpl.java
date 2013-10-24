@@ -17,4 +17,9 @@ public class DeviceConfigurationIdentifierImpl implements DeviceConfigurationIde
         return clientIdentifier;
     }
 
+    @Override
+    public String toString() {
+        return "DeviceConfigurationIdentifierImpl [clientIdentifier=" + clientIdentifier + "]";
+    }
+
 }

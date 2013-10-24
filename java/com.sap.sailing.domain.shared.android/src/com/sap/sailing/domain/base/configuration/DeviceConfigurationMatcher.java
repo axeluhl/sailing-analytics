@@ -3,10 +3,28 @@ package com.sap.sailing.domain.base.configuration;
 import java.io.Serializable;
 
 public interface DeviceConfigurationMatcher extends Serializable {
-    public final static int RANK_SINGLE = 1;
-    public final static int RANK_MULTI = 2;
-    public final static int RANK_ANY = 3;
+    final static int RANK_SINGLE = 1;
+    final static int RANK_MULTI = 2;
+    final static int RANK_ANY = 3;
     
+    public enum Type {
+        SINGLE(RANK_SINGLE),
+        MULTI(RANK_MULTI),
+        ANY(RANK_ANY);
+        
+        private int matchingRank;
+        
+        private Type(int rank) {
+            this.matchingRank = rank;
+        }
+        
+        public int getRank() {
+            return matchingRank;
+        }
+    }
+    
+    Type getMatcherType();
     int getMatchingRank();
     boolean matches(DeviceConfigurationIdentifier identifier);
+    Serializable getMatcherIdentifier();
 }

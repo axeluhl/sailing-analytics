@@ -31,6 +31,11 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
@@ -102,6 +107,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
     
     private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+    
+    private final Map<Serializable, DeviceConfigurationMatcher> configurationMatcherCache;
 
     /**
      * Weak references to {@link Waypoint} objects of this type are registered with
@@ -139,6 +146,7 @@ public class DomainFactoryImpl implements DomainFactory {
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
         courseAreaCache = new HashMap<>();
+        configurationMatcherCache = new HashMap<>();
     }
     
     @Override
@@ -489,6 +497,33 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
         return courseAreaCache.get(courseAreaId);
+    }
+
+    @Override
+    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(Type type, List<String> clientIdentifiers) {
+        DeviceConfigurationMatcher probe = createMatcher(type, clientIdentifiers);
+        DeviceConfigurationMatcher matcher = configurationMatcherCache.get(probe.getMatcherIdentifier());
+        if (matcher == null) {
+            configurationMatcherCache.put(probe.getMatcherIdentifier(), probe);
+            matcher = probe;
+        }
+        return matcher;
+    }
+    
+    private DeviceConfigurationMatcher createMatcher(Type type, List<String> clientIdentifiers) {
+        DeviceConfigurationMatcher matcher = null;
+        switch (type) {
+        case SINGLE:
+            matcher = new DeviceConfigurationMatcherSingle(clientIdentifiers.get(0));
+            break;
+        case MULTI:
+            matcher = new DeviceConfigurationMatcherMulti(clientIdentifiers);
+            break;
+        case ANY:
+            matcher = DeviceConfigurationMatcherAny.INSTANCE;
+            break;
+        }
+        return matcher;
     }
 
 }

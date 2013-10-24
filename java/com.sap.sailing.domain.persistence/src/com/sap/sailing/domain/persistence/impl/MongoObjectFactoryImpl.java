@@ -27,6 +27,10 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -36,6 +40,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -853,6 +858,61 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             passing = passingSide.name();
         }
         return passing;
+    }
+
+    @Override
+    public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+        DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
+        
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        
+        DBObject entryObject = new BasicDBObject();
+        entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), storeDeviceConfigurationMatcher(matcher));
+        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), storeDeviceConfigurationObject(configuration));
+        
+        configurationsCollections.update(query, entryObject, /* upsrt */ true, /* multi */ false);
+    }
+
+    private DBObject storeDeviceConfigurationMatcher(DeviceConfigurationMatcher matcher) {
+        DBObject matcherObject = new BasicDBObject();
+        matcherObject.put(FieldNames.CONFIGURATION_MATCHER_TYPE.name(), matcher.getMatcherType().name());
+        if (matcher instanceof DeviceConfigurationMatcherSingle) {
+            BasicDBList client = new BasicDBList();
+            client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
+            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
+        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
+            BasicDBList clients = new BasicDBList();
+            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
+            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), clients);
+        }
+        return matcherObject;
+    }
+
+    private DBObject storeDeviceConfigurationObject(DeviceConfiguration configuration) {
+        DBObject configurationObject = new BasicDBObject();
+        if (configuration.getAllowedCourseAreaNames() != null) {
+            BasicDBList clients = new BasicDBList();
+            clients.addAll(configuration.getAllowedCourseAreaNames());
+            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_ALLOWED_COURSE_AREA_NAMES.name(), clients);
+        }
+        if (configuration.getMinimumRoundsForCourse() != null) {
+            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_MIN_ROUNDS.name(), configuration.getMinimumRoundsForCourse());
+        }
+        if (configuration.getMaximumRoundsForCourse() != null) {
+            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_MAX_ROUNDS.name(), configuration.getMaximumRoundsForCourse());
+        }
+        if (configuration.getResultsMailRecipient() != null) {
+            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_RESULTS_MAIL.name(), configuration.getResultsMailRecipient());
+        }
+        return configurationObject;
+    }
+
+    @Override
+    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

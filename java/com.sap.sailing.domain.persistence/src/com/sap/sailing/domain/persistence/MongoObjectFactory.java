@@ -7,6 +7,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -85,5 +87,9 @@ public interface MongoObjectFactory {
     void storeRegattaForRaceID(String id, Regatta regatta);
 
     void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
+
+    void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+
+    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
 
 }

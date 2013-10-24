@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -111,5 +113,7 @@ public interface DomainFactory extends SharedDomainFactory {
      * @param trackedRace must not be <code>null</code>
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
+    
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type type, List<String> clientIdentifiers);
 
 }

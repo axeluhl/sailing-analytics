@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 
@@ -18,8 +20,13 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
     }
 
     @Override
+    public Type getMatcherType() {
+        return Type.SINGLE;
+    }
+
+    @Override
     public int getMatchingRank() {
-        return RANK_SINGLE;
+        return getMatcherType().getRank();
     }
     
     public String getClientIdentifier() {
@@ -27,28 +34,8 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((clientIdentifier == null) ? 0 : clientIdentifier.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DeviceConfigurationMatcherSingle other = (DeviceConfigurationMatcherSingle) obj;
-        if (clientIdentifier == null) {
-            if (other.clientIdentifier != null)
-                return false;
-        } else if (!clientIdentifier.equals(other.clientIdentifier))
-            return false;
-        return true;
+    public Serializable getMatcherIdentifier() {
+        return String.format("%s%s", DeviceConfigurationMatcherSingle.class.getSimpleName(), clientIdentifier);
     }
 
 }

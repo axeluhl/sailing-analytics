@@ -95,6 +95,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.configuration = result;
         
         allowedCourseAreasBox = new TextBox();
+        allowedCourseAreasBox.setText("Alpha,Bravo,Charlie");
         allowedCourseAreasBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

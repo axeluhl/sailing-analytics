@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.persistence;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -86,4 +89,6 @@ public interface DomainObjectFactory {
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
     RaceLog loadRaceLog(RaceLogIdentifier identifier);
+
+    Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
 }

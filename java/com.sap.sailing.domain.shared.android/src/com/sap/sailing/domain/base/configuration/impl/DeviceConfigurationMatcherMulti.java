@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -9,10 +12,20 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     
     private static final long serialVersionUID = 2372299957258702516L;
     
-    private final List<String> clientIdentifiers;
+    private final SortedSet<String> clientIdentifiers;
     
     public DeviceConfigurationMatcherMulti(List<String> matchingClientIdentifiers) {
-        this.clientIdentifiers = matchingClientIdentifiers;
+        this.clientIdentifiers = new TreeSet<String>(matchingClientIdentifiers);
+    }
+
+    @Override
+    public Type getMatcherType() {
+        return Type.MULTI;
+    }
+
+    @Override
+    public int getMatchingRank() {
+        return getMatcherType().getRank();
     }
 
     @Override
@@ -20,38 +33,13 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
         return this.clientIdentifiers.contains(identifier.getClientIdentifier());
     }
 
-    @Override
-    public int getMatchingRank() {
-        return RANK_MULTI;
-    }
-
-    public List<String> getClientIdentifiers() {
+    public Iterable<String> getClientIdentifiers() {
         return clientIdentifiers;
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((clientIdentifiers == null) ? 0 : clientIdentifiers.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DeviceConfigurationMatcherMulti other = (DeviceConfigurationMatcherMulti) obj;
-        if (clientIdentifiers == null) {
-            if (other.clientIdentifiers != null)
-                return false;
-        } else if (!clientIdentifiers.equals(other.clientIdentifiers))
-            return false;
-        return true;
+    public Serializable getMatcherIdentifier() {
+        return String.format("%s%s", DeviceConfigurationMatcherMulti.class.getSimpleName(), clientIdentifiers.toString());
     }
     
 }
