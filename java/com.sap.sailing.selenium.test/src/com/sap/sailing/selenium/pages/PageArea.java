@@ -22,4 +22,14 @@ public class PageArea extends PageObject {
     public PageArea(WebDriver driver, WebElement element) {
         super(driver, element);
     }
+    
+    /**
+     * <p>Returns the underlying WebElement which is represented by the page object.</p>
+     * 
+     * @return
+     *   The underlying WebElement.
+     */
+    public WebElement getWebElement() {
+        return (WebElement) this.context;
+    }
 }
