@@ -6,63 +6,32 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import org.openqa.selenium.interactions.Actions;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.common.CSSConstants;
+import com.sap.sailing.selenium.pages.common.CSSHelper;
+
 
 /**
  * <p></p>
  * 
- * @author
- *   D049941
+ * @author D049941
+ * 
+ * @param <T>
+ *   The type of the data entries the table contains.
  */
 public abstract class CellTable2<T extends DataEntry> extends PageArea {
+    /**
+     * <p></p>
+     */
     public enum SortingOrder {
         Ascending,
         Descending,
         None;
     }
-    
-    public static class DefaultCellTable extends CellTable2<DataEntry> {
-        public DefaultCellTable(WebDriver driver, WebElement element) {
-            super(driver, element);
-        }
-
-        @Override
-        protected DataEntry createDataEntry(WebElement element) {
-            return new DataEntry(this, element);
-        }
-        
-    }
-    
-//    public class CellTableHead extends PageArea {
-//        public CellTableHead(WebElement element) {
-//            super(CellTable2.this.driver, element);
-//        }
-//        
-//    }
-//    
-//    public class CellTableFoot extends PageArea {
-//        public CellTableFoot(WebElement element) {
-//            super(CellTable2.this.driver, element);
-//        }
-//        
-//    }
-//    
-//    public class CellTableBody extends PageArea {
-//        public CellTableBody(WebElement element) {
-//            super(CellTable2.this.driver, element);
-//        }
-//        
-//    }
-
-    
     
     protected static final String TABLE_TAG_NAME = "table"; //$NON-NLS-1$
     
@@ -213,85 +182,39 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
         return entries;
     }
     
-    public List<T> getEntries(List<Object> descriptors) {
+    public void selectEntry(T entry) {
+        if(entry.table == this) {
+            entry.select();
+        }
+    }
+    
+    public void selectEntries(List<T> entries) {
+        // First deselect all selected entries
+        for(T entry : getSelectedEntries()) {
+            entry.deselect();
+        }
+        
+        // Select all specified entries
+        for(T entry : entries) {
+            if(entry.table == this) {
+                entry.appendToSelection();
+            }
+        }
+    }
+    
+    public List<T> getSelectedEntries() {
         List<T> entries = getEntries();
         Iterator<T> iterator = entries.iterator();
         
         while(iterator.hasNext()) {
             T entry = iterator.next();
             
-            if(!descriptors.contains(entry.getDescriptor()))
+            if(!entry.isSelected())
                 iterator.remove();
         }
         
         return entries;
     }
-    
-    protected abstract T createDataEntry(WebElement element);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-//    public void selectRow(WebElement row) {
-//        Actions actions = new Actions(this.driver);
-//        
-//        actions.moveToElement(row.findElement(By.tagName("td")), 1, 1);
-//        actions.click();
-//        
-//        actions.perform();
-//    }
-//    
-//    public void selectRows(List<WebElement> rows) {
-//        Actions actions = new Actions(this.driver);
-//        actions.keyDown(Keys.CONTROL);
-//        
-//        // First deselect all selected rows
-//        for(WebElement row : getSelectedRows()) {
-//            actions.moveToElement(row.findElement(By.tagName("td")), 1, 1);
-//            actions.click();
-//        }
-//        
-//        // Select all specified rows
-//        for(WebElement row : rows) {
-//            actions.moveToElement(row.findElement(By.tagName("td")), 1, 1);
-//            actions.click();
-//        }
-//        
-//        actions.keyUp(Keys.CONTROL);
-//        
-//        actions.perform();
-//    }
-//    
-//    public List<WebElement> getSelectedRows() {
-//        List<WebElement> rows = getRows();
-//        Iterator<WebElement> iterator = rows.iterator();
-//        
-//        while(iterator.hasNext()) {
-//            WebElement row = iterator.next();
-//            
-//            if(!CSSHelper.hasCSSClass(row, SELECTED_ROW_CSS_CLASS))
-//                iterator.remove();
-//        }
-//        
-//        return rows;
-//    }
     
     protected WebDriver getWebDriver() {
         return this.driver;
@@ -299,11 +222,10 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
     
     @Override
     protected void verify() {
-        WebElement element = (WebElement) this.context;
+        WebElement element = getWebElement();
         String tagName = element.getTagName();
-        String cssClass = element.getAttribute(CSSConstants.CSS_CLASS_ATTRIBUTE_NAME);
         
-        if(!TABLE_TAG_NAME.equalsIgnoreCase(tagName) || !CELL_TABLE_CSS_CLASS.equalsIgnoreCase(cssClass))
+        if(!TABLE_TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, CELL_TABLE_CSS_CLASS))
             throw new IllegalArgumentException("WebElement does not represent a CellTable");
     }
     
@@ -325,7 +247,7 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
             while(iterator.hasNext()) {
                 WebElement row = iterator.next();
                 
-                if(isRowForLoadingAnimation(row))
+                if(isRowForLoadingIndicator(row) || isRowForEmptyTableWidget(row))
                     iterator.remove();
             }
             
@@ -335,7 +257,14 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
         return Collections.emptyList();
     }
     
-    private boolean isRowForLoadingAnimation(WebElement row) {
+    protected abstract T createDataEntry(WebElement element);
+    
+    // TODO [D049941]: Implement this method
+    private boolean isRowForEmptyTableWidget(WebElement row) {
+        return false;
+    }
+    
+    private boolean isRowForLoadingIndicator(WebElement row) {
         List<WebElement> images = row.findElements(By.xpath(LOADING_ANIMATION_XPATH));
         
         if(images.isEmpty() || images.size() > 1)

@@ -21,6 +21,7 @@ import com.sap.sailing.selenium.pages.common.CSSConstants;
  * @author
  *   D049941
  */
+@Deprecated
 public class CellTable extends PageArea {
     public enum SortingOrder {
         Ascending,
