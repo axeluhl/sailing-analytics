@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -12,10 +12,11 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     
     private static final long serialVersionUID = 2372299957258702516L;
     
-    private final SortedSet<String> clientIdentifiers;
+    private final List<String> clientIdentifiers;
     
     public DeviceConfigurationMatcherMulti(List<String> matchingClientIdentifiers) {
-        this.clientIdentifiers = new TreeSet<String>(matchingClientIdentifiers);
+        this.clientIdentifiers = new ArrayList<String>(matchingClientIdentifiers);
+        Collections.sort(this.clientIdentifiers);
     }
 
     @Override
@@ -40,6 +41,11 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     @Override
     public Serializable getMatcherIdentifier() {
         return String.format("%s%s", DeviceConfigurationMatcherMulti.class.getSimpleName(), clientIdentifiers.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceConfigurationMatcherMulti [clientIdentifiers=" + clientIdentifiers + "]";
     }
     
 }

@@ -1288,13 +1288,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(DBObject matcherObject) {
+        Type type = Type.valueOf(matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name()).toString());
         List<String> clientIdentifiers = new ArrayList<String>();
         BasicDBList clientIdentifiersObject = (BasicDBList) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
-        for (Object clientIdentifier : clientIdentifiersObject) {
-            clientIdentifiers.add(clientIdentifier.toString());
+        if (clientIdentifiersObject != null) {
+            for (Object clientIdentifier : clientIdentifiersObject) {
+                clientIdentifiers.add(clientIdentifier.toString());
+            }
         }
-        String type = (String) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name());
-        return DomainFactory.INSTANCE.getOrCreateDeviceConfigurationMatcher(Type.valueOf(type), clientIdentifiers);
+        return DomainFactory.INSTANCE.getOrCreateDeviceConfigurationMatcher(type, clientIdentifiers);
     }
 
     private DeviceConfiguration loadConfiguration(DBObject configObject) {

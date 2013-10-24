@@ -38,4 +38,9 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
         return String.format("%s%s", DeviceConfigurationMatcherSingle.class.getSimpleName(), clientIdentifier);
     }
 
+    @Override
+    public String toString() {
+        return "DeviceConfigurationMatcherSingle [clientIdentifier=" + clientIdentifier + "]";
+    }
+
 }
