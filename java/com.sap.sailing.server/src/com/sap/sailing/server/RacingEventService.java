@@ -567,7 +567,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param matcher defining for which the configuration applies.
      * @param configuration of the device.
      */
-    void addDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
     
     /**
      * Removes a configuration by its matching object.

@@ -2128,7 +2128,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void addDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         synchronized (configurationMap) {
             configurationMap.put(matcher, configuration);
             mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);

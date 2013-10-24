@@ -911,8 +911,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
-        // TODO Auto-generated method stub
-        
+        DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        configurationsCollections.remove(query);
     }
 
 }

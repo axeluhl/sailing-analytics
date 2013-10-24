@@ -3366,7 +3366,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         configuration.setMinimumRoundsForCourse(minRounds);
         configuration.setMaximumRoundsForCourse(maxRounds);
         configuration.setResultsMailRecipient(mailRecipient);
-        getService().addDeviceConfiguration(matcher, configuration);
+        getService().createOrUpdateDeviceConfiguration(matcher, configuration);
         return convertToDeviceConfigurationMatcherDTO(matcher);
     }
 
