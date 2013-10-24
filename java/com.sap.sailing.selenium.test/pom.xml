@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -13,7 +13,7 @@
 
     <properties>
         <parameters.jetty>
-          -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8086
+          -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085
         </parameters.jetty>
         <!--
           NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the

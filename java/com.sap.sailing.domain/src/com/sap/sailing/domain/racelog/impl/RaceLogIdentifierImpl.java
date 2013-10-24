@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 
@@ -21,8 +21,16 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
     }
 
     @Override
-    public Serializable getIdentifier() {
-        return String.format("%s.%s.%s", template.getParentObjectName(), raceColumnName, fleetName);
+    public Triple<String, String, String> getIdentifier() {
+        return new Util.Triple<String, String, String>(template.getParentObjectName(), raceColumnName, fleetName);
+    }
+
+    @Override
+    public String getDeprecatedIdentifier() {
+        return String.format("%s.%s.%s", 
+                this.getTemplate().getParentObjectName(),
+                this.getRaceColumnName(),
+                this.getFleetName());
     }
 
     @Override

@@ -16,8 +16,6 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../Leaderboard.css" />
-  <!-- Google Maps API -->
-  <inherits name='com.google.gwt.maps.GoogleMaps' />
   
   <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
@@ -31,7 +29,6 @@
   <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='adminconsole'/>
   <source path='masterdataimport'/>
   <source path='usermanagement'/>

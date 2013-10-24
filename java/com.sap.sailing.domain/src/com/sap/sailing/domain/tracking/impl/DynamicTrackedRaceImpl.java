@@ -39,6 +39,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -63,6 +64,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient DynamicTrackedRaceLogListener logListener;
 
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
+    private transient Set<StartTimeChangedListener> startTimeChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -70,7 +72,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
-        this.courseDesignChangedListeners = new HashSet<>();
+        this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
+        this.startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -230,6 +233,46 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addListener(RaceChangeListener listener) {
         synchronized (getListeners()) {
             getListeners().add(listener);
+        }
+    }
+
+    /**
+     * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
+     * of the {@link #getWindLoadingLock() wind loading lock}, locking against the wind loading thread which uses the
+     * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
+     * hasn't started yet.
+     */
+    @Override
+    public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
+        if (notifyAboutWindFixesAlreadyLoaded) {
+            LockUtil.lockForRead(getWindLoadingLock());
+        }
+        try {
+            addListener(listener);
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                // Now notify all wind fixes we can get from the race by now. TrackedRace.getWindSource() delivers all wind
+                // sources known so far. If there is a wind track being loaded, it will be separately notified later by
+                // DynamicTrackedRaceImpl.createWindTrack(...).
+                // Holding the serialization lock 
+                for (WindSource windSource : getWindSources()) {
+                    if (windSource.getType().canBeStored()) {
+                        WindTrack windTrack = getOrCreateWindTrack(windSource);
+                        // replicate all wind fixed that may have been loaded by the wind store
+                        windTrack.lockForRead();
+                        try {
+                            for (Wind wind : windTrack.getRawFixes()) {
+                                listener.windDataReceived(wind, windSource);
+                            }
+                        } finally {
+                            windTrack.unlockAfterRead();
+                        }
+                    }
+                }
+            }
+        } finally {
+            if (notifyAboutWindFixesAlreadyLoaded) {
+                LockUtil.unlockAfterRead(getWindLoadingLock());
+            }
         }
     }
 
@@ -591,7 +634,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource) {
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfRace = getStartOfRace();
         TimePoint startOfTracking = getStartOfTracking();
@@ -606,6 +649,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
+            return true;
+        } else {
+        	return false;
         }
     }
 
@@ -704,6 +750,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
+        try {
+            for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
+                startTimeChangedListener.startTimeChanged(newStartTime);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void addStartTimeChangedListener(StartTimeChangedListener listener) {
+        this.startTimeChangedListeners.add(listener);
     }
 
 }

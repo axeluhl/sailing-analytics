@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.GwtHttpRequestUtils;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -82,8 +83,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
+        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
         raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible);
+                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
         
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -221,7 +223,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        p.addNorth(logoAndTitlePanel, 68);        
+        p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     
         p.add(raceBoardPanel);

@@ -101,6 +101,18 @@ public class DetailTypeFormatter {
             return stringMessages.timeSinceLastPositionFix();
         case RACE_TRACKING_QUALITY:
             return "TQ";
+        case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
+            return stringMessages.distanceToLineFiveSecondsBeforeStart();
+        case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
+            return stringMessages.speedOverGroundFiveSecondsBeforeStart();
+        case RACE_TIME_TRAVELED:
+            return stringMessages.time();
+        case RACE_TIME_TRAVELED_DOWNWIND:
+            return stringMessages.timeDownwind();
+        case RACE_TIME_TRAVELED_REACHING:
+            return stringMessages.timeReaching();
+        case RACE_TIME_TRAVELED_UPWIND:
+            return stringMessages.timeUpwind();
         }
         return null;
     }
@@ -124,6 +136,7 @@ public class DetailTypeFormatter {
         case TOTAL_AVERAGE_SPEED_OVER_GROUND:
         case SPEED_OVER_GROUND_AT_RACE_START:
         case SPEED_OVER_GROUND_WHEN_PASSING_START:
+        case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.knotsUnit();
 
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -139,6 +152,7 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_START_AT_RACE_START:
         case TOTAL_DISTANCE_TRAVELED:
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
+        case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
             return stringMessages.metersUnit();
 
         case GAP_TO_LEADER_IN_SECONDS:
@@ -147,6 +161,10 @@ public class DetailTypeFormatter {
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
+        case RACE_TIME_TRAVELED:
+        case RACE_TIME_TRAVELED_DOWNWIND:
+        case RACE_TIME_TRAVELED_REACHING:
+        case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.secondsUnit();
 
         case TOTAL_TIME_SAILED_IN_SECONDS:
@@ -170,13 +188,11 @@ public class DetailTypeFormatter {
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case RACE_TRACKING_QUALITY:
             return "";
-
-        default:
-            // Throwing an exception to get notified if an implementation of
-            // a detail type is missing.
-            throw new UnsupportedOperationException("There is currently no support for the enum value '" + detailType
-                    + "' in this method.");
         }
+        // Throwing an exception to get notified if an implementation of
+        // a detail type is missing.
+        throw new UnsupportedOperationException("There is currently no support for the enum value '" + detailType
+                + "' in this method.");
     }
     
     /**
@@ -276,6 +292,18 @@ public class DetailTypeFormatter {
             return stringMessages.timeSinceLastPositionFixTooltip();
         case RACE_TRACKING_QUALITY:
             return stringMessages.trackingQuality();
+        case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
+            return stringMessages.distanceToLineFiveSecondsBeforeStartTooltip();
+        case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
+            return stringMessages.speedOverGroundFiveSecondsBeforeStartTooltip();
+        case RACE_TIME_TRAVELED:
+            return stringMessages.raceTimeTooltip();
+        case RACE_TIME_TRAVELED_DOWNWIND:
+            return stringMessages.raceTimeDownwindTooltip();
+        case RACE_TIME_TRAVELED_REACHING:
+            return stringMessages.raceTimeReachingTooltip();
+        case RACE_TIME_TRAVELED_UPWIND:
+            return stringMessages.raceTimeUpwindTooltip();
         }
         
         return "";

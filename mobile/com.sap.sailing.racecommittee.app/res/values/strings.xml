@@ -6,7 +6,9 @@
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
     <string name="choose_running_course">Choose running course</string>
     <string name="service_info">SAP Race Committee Service</string>
-    <string name="service_title">Monitoring all races on selected event course.</string>
+    <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
+    <string name="service_text_num_races">Currently monitoring %d races.</string>
+    
     <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Restart</string>
@@ -167,7 +169,7 @@
     
     <string name="results_mail_subject">[Race Committee] %s</string>
     <string name="results_mail_body">Results for race %s are attached.</string>
-    <string name="wind_direction_degrees">Wind direction (degrees)</string>
+    <string name="wind_direction_degrees">Wind direction from (degrees)</string>
     <string name="wind_speed_knots">Wind speed (knots)</string>
     <string name="enter_wind_direction">1. Enter the wind direction</string>
     <string name="enter_wind_speed">2. Enter the wind speed</string>
@@ -178,7 +180,7 @@
     <string name="longitude">Longitude</string>
     <string name="wind_speed_direction_not_a_valid_number">The wind speed or direction is not a valid number. Please correct the value.</string>
     <string name="wind_location_or_fields_not_valid">The entered location, wind speed or direction is empty. Please correct the values.</string>
-    <string name="your_position">Your position</string>
+    <string name="waiting_for_gps">Waiting for GPS Signal&#8230;</string>
     <string name="store_wind_entry">4. Store wind entry</string>
     <string name="store_wind">Store wind</string>
     
@@ -186,6 +188,8 @@
     <string name="settings_category_general">General Settings</string>    
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
     <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
+    <string name="settings_general_language_header">Select Language</string>
+    <string name="settings_general_language_description">Select the language. You might need to restart the app to have changes applied.</string>
     
     <string name="settings_category_race">Race Settings</string>
     <string name="override_default_start_procedure_type_header">Override default start procedure type</string>
@@ -261,5 +265,9 @@
 	<string name="set_positionings">Set positionings</string>
 	<string name="confirm_positionings">Confirm positionings</string>
 	<string name="snap">Snap</string>
+	
+	<string name="logout_dialog_title">Are you sure want to logout?</string>
+	<string name="logout_dialog_message">Logging out stops automatic monitoring for all races.</string>
+	<string name="logout">Logout</string>
 	
 </resources>

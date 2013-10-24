@@ -77,7 +77,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox storedURITextBox;
     private TextBox liveURITextBox;
     private TextBox jsonURLTextBox;
-    private TextBox courseDesignUpdateURITextBox;
+    private TextBox tracTracUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
     private TextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
@@ -180,14 +180,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         grid.setWidget(4, 1, jsonURLTextBox);
         
         // Course design Update URL
-        Label courseDesignUpdateURLLabel = new Label(stringMessages.courseDesignUpdateUrl() + ":");
+        Label tracTracUpdateURLLabel = new Label(stringMessages.tracTracUpdateUrl() + ":");
         
-        courseDesignUpdateURITextBox = new TextBox();
-        courseDesignUpdateURITextBox.ensureDebugId("COURSEDESIGNUPDATEURI");
-        courseDesignUpdateURITextBox.setVisibleLength(100);
+        tracTracUpdateURITextBox = new TextBox();
+        tracTracUpdateURITextBox.ensureDebugId("TRACTRACUPDATEURI");
+        tracTracUpdateURITextBox.setVisibleLength(100);
         
-        grid.setWidget(5, 0, courseDesignUpdateURLLabel);
-        grid.setWidget(5, 1, courseDesignUpdateURITextBox);
+        grid.setWidget(5, 0, tracTracUpdateURLLabel);
+        grid.setWidget(5, 1, tracTracUpdateURITextBox);
         
         // TracTrac Username
         tractracUsernameTextBox = new TextBox();
@@ -461,7 +461,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String jsonURL = jsonURLTextBox.getValue();
         final String liveDataURI = liveURITextBox.getValue();
         final String storedDataURI = storedURITextBox.getValue();
-        final String courseDesignUpdateURI = courseDesignUpdateURITextBox.getValue();
+        final String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
         final String tractracUsername = tractracUsernameTextBox.getValue();
         final String tractracPassword = tractracPasswordTextBox.getValue();
 
@@ -540,7 +540,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private void trackSelectedRaces(boolean trackWind, boolean correctWind, final boolean simulateWithStartTimeNow) {
         String liveURI = liveURITextBox.getValue();
         String storedURI = storedURITextBox.getValue();
-        String courseDesignUpdateURI = courseDesignUpdateURITextBox.getValue();
+        String courseDesignUpdateURI = tracTracUpdateURITextBox.getValue();
         String tractracUsername = tractracUsernameTextBox.getValue();
         String tractracPassword = tractracPasswordTextBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
@@ -614,7 +614,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         jsonURLTextBox.setValue(config.jsonURL);
         liveURITextBox.setValue(config.liveDataURI);
         storedURITextBox.setValue(config.storedDataURI);
-        courseDesignUpdateURITextBox.setValue(config.courseDesignUpdateURI);
+        tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
         tractracUsernameTextBox.setValue(config.tractracUsername);
         tractracPasswordTextBox.setValue(config.tractracPassword);
     }

@@ -8,7 +8,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
@@ -40,7 +40,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogRaceStatusEventDeserializer(competitorDeserializer),
                 new RaceLogCourseAreaChangedEventDeserializer(competitorDeserializer),
                 new RaceLogCourseDesignChangedEventDeserializer(competitorDeserializer,
-                        new CourseDataDeserializer(
+                        new CourseBaseDeserializer(
                                 new WaypointDeserializer(
                                         new ControlPointDeserializer(
                                                 new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))))),

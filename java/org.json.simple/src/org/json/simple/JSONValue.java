@@ -219,6 +219,10 @@ public class JSONValue {
 		if(value instanceof List)
 			return JSONArray.toJSONString((List<?>)value);
 		
+                if (value instanceof Enum) {
+                    return '\"' + value.toString() + '\"';
+                }
+                
 		return value.toString();
 	}
 

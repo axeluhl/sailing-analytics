@@ -28,7 +28,7 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
                 events.add(itemSerializer.serialize(event));
             }
             result.put(FIELD_EVENTS, events);
-            result.put(FIELD_RACELOG_IDENTIFIER, object.getId());
+            result.put(FIELD_RACELOG_IDENTIFIER, object.getId().toString());
         } finally {
             object.unlockAfterRead();
         }

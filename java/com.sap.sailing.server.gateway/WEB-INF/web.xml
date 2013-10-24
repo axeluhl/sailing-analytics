@@ -169,30 +169,21 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>WindImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindImportServlet</servlet-name>
+		<url-pattern>/expedition-import</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
 		<url-pattern>/expeditionWindStatus</url-pattern>
-	</servlet-mapping>
-		
-	<servlet>
-		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingRssGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
-		<url-pattern>/rss/liveRaceRanking</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.MasterDataByLeaderboardGroupJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MasterDataByLeaderboardGroupJsonGetServlet</servlet-name>
-		<url-pattern>/masterdata/leaderboardgroups</url-pattern>
 	</servlet-mapping>
 			
 	<servlet>
@@ -203,26 +194,6 @@
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
 		<url-pattern>/trackfiles</url-pattern>
 	</servlet-mapping>
-
- 
-	<servlet id="jsp">
-     <servlet-name>jspServet</servlet-name>
-     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
-     <init-param>
-         <param-name>logVerbosityLevel</param-name>
-         <param-value>DEBUG</param-value>
-     </init-param>
-     <init-param>
-         <param-name>fork</param-name>
-         <param-value>false</param-value>
-     </init-param>
-     <init-param>
-         <param-name>keepgenerated</param-name>
-         <param-value>true</param-value>
-     </init-param>
- 
-     <load-on-startup>0</load-on-startup>
-   </servlet>
    
     <servlet>
         <servlet-name>websockettest</servlet-name>
@@ -234,10 +205,32 @@
         <url-pattern>/websockettest</url-pattern>
     </servlet-mapping>
 	
-<!-- 
-   <servlet-mapping>
-     <servlet-name>jspServet</servlet-name>
-     <url-pattern>*.jsp</url-pattern>
-   </servlet-mapping>
- --> 
+    <servlet>
+    	<servlet-name>Jersey REST API</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+			<init-param>
+         		<param-name>javax.ws.rs.Application</param-name>
+         		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
+     		</init-param>
+    	<load-on-startup>1</load-on-startup>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>Jersey REST API</servlet-name>
+    	<url-pattern>/api/*</url-pattern>
+  	</servlet-mapping>
+
+	<servlet>
+    	<servlet-name>Jersey REST SPI</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+			<init-param>
+         		<param-name>javax.ws.rs.Application</param-name>
+         		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
+     		</init-param>
+    	<load-on-startup>1</load-on-startup>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>Jersey REST SPI</servlet-name>
+    	<url-pattern>/spi/*</url-pattern>
+  	</servlet-mapping>
+  	
  </web-app>

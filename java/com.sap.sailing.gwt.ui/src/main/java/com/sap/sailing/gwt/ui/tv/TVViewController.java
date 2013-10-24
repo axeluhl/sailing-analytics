@@ -169,7 +169,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             ScrollPanel leaderboardContentPanel = new ScrollPanel();
             leaderboardContentPanel.add(leaderboardPanel);
             dockPanel.add(leaderboardContentPanel);
-            if(logoAndTitlePanel != null) {
+            if (logoAndTitlePanel != null) {
                 logoAndTitlePanel.setSubTitle(leaderboardName);
             }
             currentLiveRace = null;
@@ -180,7 +180,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     }
     
     private void showRaceBoard() {
-        if(activeTvView != TVViews.Raceboard) {
+        if (activeTvView != TVViews.Raceboard) {
             clearContentPanels();
             RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace);
             raceBoardPanel.setSize("100%", "100%");

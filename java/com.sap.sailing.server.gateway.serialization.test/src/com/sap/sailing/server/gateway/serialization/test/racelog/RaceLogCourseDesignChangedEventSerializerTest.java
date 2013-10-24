@@ -28,7 +28,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
@@ -61,7 +61,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                 new CourseBaseJsonSerializer(new WaypointJsonSerializer(new ControlPointJsonSerializer(
                         new MarkJsonSerializer(), new GateJsonSerializer(new MarkJsonSerializer())))));
         deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CompetitorDeserializer(factory),
-                new CourseDataDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
+                new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 

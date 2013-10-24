@@ -18,6 +18,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
@@ -263,6 +264,53 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+    
+    private class EstimatedPositionIterator implements Iterator<Position> {
+        private final Iterator<Timed> timedsIter;
+        private final boolean extrapolate;
+        private final NavigableSet<FixType> fixes;
+        private Iterator<FixType> subSetIterator;
+        private FixType earlierFix;
+        private FixType laterFix; // if this is null, earlierFix is also null
+        
+        public EstimatedPositionIterator(Iterable<Timed> timeds, boolean extrapolate) {
+            this.timedsIter = timeds.iterator();
+            this.extrapolate = extrapolate;
+            this.fixes = getFixes();
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return timedsIter.hasNext();
+        }
+
+        @Override
+        public Position next() {
+            TimePoint nextTimePoint = timedsIter.next().getTimePoint();
+            if (subSetIterator == null) {
+                earlierFix = getLastFixAtOrBefore(nextTimePoint);
+                subSetIterator = fixes.subSet(createDummyGPSFix(nextTimePoint), /* fromInclusive */true, fixes.last(), /* toInclusive */
+                        true).iterator();
+                laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+            } else {
+                while (laterFix != null && laterFix.getTimePoint().before(nextTimePoint)) {
+                    earlierFix = laterFix;
+                    laterFix = subSetIterator.hasNext() ? subSetIterator.next() : null;
+                }
+            }
+            return getEstimatedPosition(nextTimePoint, extrapolate, earlierFix, laterFix);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    @Override
+    public Iterator<Position> getEstimatedPositions(Iterable<Timed> timeds, boolean extrapolate) {
+        return new EstimatedPositionIterator(timeds, extrapolate);
     }
     
     @Override
@@ -617,8 +665,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
                 0.9, relativeTo);
         speeds.add(speedWithConfidence);
+        double bearingConfidence = 0.9;
+        if (speed.getKnots() < 0.01) {
+            bearingConfidence = 0;
+        }
         bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                bearingConfidence, // TODO use number of tracked satellites to determine confidence of single fix
                 relativeTo));
     }
 

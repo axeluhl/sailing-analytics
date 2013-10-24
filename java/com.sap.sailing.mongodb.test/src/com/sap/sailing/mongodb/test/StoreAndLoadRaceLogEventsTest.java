@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.persistence.MongoFactory;
@@ -58,7 +59,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Before
     public void setUp() {
         logIdentifier = mock(RaceLogIdentifier.class);
-        when(logIdentifier.getIdentifier()).thenReturn(UUID.randomUUID());
+        when(logIdentifier.getIdentifier()).thenReturn(new Triple<String, String, String>("a", "b", UUID.randomUUID().toString()));
     }
 
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {

@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import android.app.Fragment;
 
-public abstract class FragmentAttachedDialogFragment extends BaseDialogFragment {
+public abstract class FragmentAttachedDialogFragment extends AttachedDialogFragment {
 
     @Override
     protected DialogListenerHost getHost() {

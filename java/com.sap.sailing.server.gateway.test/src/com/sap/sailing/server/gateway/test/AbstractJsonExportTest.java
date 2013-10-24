@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -26,7 +27,6 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.AbstractTimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -37,6 +37,8 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 public abstract class AbstractJsonExportTest {
     protected RacingEventService racingEventService;
     protected MongoDBService service;    
+    
+    protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     public void setUp() {
         service = MongoDBService.INSTANCE;
@@ -75,7 +77,7 @@ public abstract class AbstractJsonExportTest {
     protected TimePoint parseTimepointFromJsonString(String timePointAsJsonString) throws ParseException {
         TimePoint result = null;
         if(timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
-            Date date = AbstractTimePoint.TIMEPOINT_FORMATTER.parse(timePointAsJsonString);
+            Date date = TIMEPOINT_FORMATTER.parse(timePointAsJsonString);
             result = new MillisecondsTimePoint(date);
         }
         return result;

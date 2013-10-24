@@ -8,8 +8,10 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.client.TimeZone;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.dto.PositionDTO;
@@ -32,8 +34,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
      */
     private static final long serialVersionUID = -6284996043723173190L;
 
-    // private static Logger logger = Logger.getLogger(PathCanvasOverlay.class.getName());
-
     private static int MinimumPxDistanceBetweenArrows = 60;
 
     private LatLng startPoint;
@@ -41,52 +41,49 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     private boolean totalTimeIsGiven = false;
     private long totalTimeMilliseconds = 0;
 
+    private String name;
 
-    protected String name;
-
-    public String pathColor = "Green";
-    public String textFont = "normal 10pt UbuntuRegular";
-
+    private String pathColor = "Green";
 
     /**
      * Whether or not to display the wind directions for the points on the optimal path.
      */
     public boolean displayWindAlongPath = true;
 
-    public PathCanvasOverlay(String name) {
-        super();
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name) {
+        super(map, zIndex);
         this.name = name;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams) {
-        super(timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams) {
+        super(map, zIndex, timer, windParams);
         this.name = name;
     }
 
-    public PathCanvasOverlay(String name, long totalTimeMilliseconds) {
-        super();
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds) {
+        super(map, zIndex);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(String name, long totalTimeMilliseconds, String color) {
-        super();
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, long totalTimeMilliseconds, String color) {
+        super(map, zIndex);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
         this.pathColor = color;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
-        super(timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds) {
+        super(map, zIndex, timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
     }
 
-    public PathCanvasOverlay(String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
-        super(timer, windParams);
+    public PathCanvasOverlay(MapWidget map, int zIndex, String name, Timer timer, WindFieldGenParamsDTO windParams, long totalTimeMilliseconds, String color) {
+        super(map, zIndex, timer, windParams);
         this.name = name;
         this.totalTimeIsGiven = true;
         this.totalTimeMilliseconds = totalTimeMilliseconds;
@@ -129,7 +126,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         //LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
         //LatLng end = LatLng.newInstance(windDTOList.get(numPoints - 1).position.latDeg, windDTOList.get(numPoints - 1).position.latDeg);
 
-        double distance = startPoint.distanceFrom(endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
+        double distance = SphericalUtils.computeDistanceBetween(startPoint, endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
 
         // Point startPx = getMap().convertLatLngToDivPixel(startPoint);
         // Point endPx = getMap().convertLatLngToDivPixel(endPoint);
@@ -203,16 +200,16 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         PositionDTO position = p1.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         position = p2.position;
         positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-        int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
+        double x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        double y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         // Context2d context2d = canvas.getContext2d();
         // context2d.setShadowBlur(weight);
@@ -228,10 +225,10 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         PositionDTO position = p.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        double x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        double y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         drawCircle(x1, y1, weight / 2., pathColor);
     }
@@ -248,16 +245,16 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         PositionDTO position = p1.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
 
-        int x1 = canvasPositionInPx.getX();
-        int y1 = canvasPositionInPx.getY();
+        double x1 = canvasPositionInPx.getX();
+        double y1 = canvasPositionInPx.getY();
 
         position = p2.position;
         positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-        canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-        int x2 = canvasPositionInPx.getX();
-        int y2 = canvasPositionInPx.getY();
+        canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
+        double x2 = canvasPositionInPx.getX();
+        double y2 = canvasPositionInPx.getY();
 
         double pxDistance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         if (pxDistance >= MinimumPxDistanceBetweenArrows) {
@@ -273,13 +270,21 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     public long getPathTime() {
-        if (this.totalTimeIsGiven) {
-            return this.totalTimeMilliseconds;
+        if (totalTimeIsGiven) {
+            return totalTimeMilliseconds;
         } else {
-            List<SimulatorWindDTO> windDTOList = wl.getMatrix();
+            List<SimulatorWindDTO> windDTOList = windFieldDTO.getMatrix();
             int numPoints = windDTOList.size();
             long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
             return totalTime;
         }
+    }
+
+    public String getPathColor() {
+        return pathColor;
+    }
+
+    public void setPathColor(String pathColor) {
+        this.pathColor = pathColor;
     }
 }

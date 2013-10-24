@@ -65,6 +65,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserDTO user;
+    private boolean autoSelectMedia;
 
     private MediaPlayer activeAudioPlayer;
     private Date currentRaceTime;
@@ -73,7 +74,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
 
     public MediaSelector(RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
             Timer raceTimer, MediaServiceAsync mediaService, StringMessages stringMessages,
-            ErrorReporter errorReporter, UserDTO user) {
+            ErrorReporter errorReporter, UserDTO user, boolean autoSelectMedia) {
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
@@ -81,6 +82,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.user = user;
+		this.autoSelectMedia = autoSelectMedia;
 
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
@@ -120,7 +122,6 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             }
 
         });
-
         setWidgetsVisible(false);
 
     }
@@ -249,12 +250,12 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     private void startPlaying() {
-        if (activeAudioPlayer != null) {
+        if ((activeAudioPlayer != null) && activeAudioPlayer.isCoveringCurrentRaceTime()) {
             activeAudioPlayer.playMedia();
         }
-        for (MediaPlayer player : videoPlayers.values()) {
-            if (player.isMediaPaused()) {
-                player.playMedia();
+        for (MediaPlayer videoPlayer : videoPlayers.values()) {
+            if (videoPlayer.isMediaPaused() && videoPlayer.isCoveringCurrentRaceTime()) {
+                videoPlayer.playMedia();
             }
         }
     }
@@ -286,6 +287,11 @@ public class MediaSelector implements PlayStateListener, TimeListener,
             setStatus(mediaTrack);
         }
         setWidgetsVisible((this.mediaTracks.size() > 0) || (this.user != null));
+        
+        toggleMediaButton.setValue(autoSelectMedia);
+        if (autoSelectMedia) {
+        	playDefault();
+        }
     }
 
     private void setWidgetsVisible(boolean isVisible) {
@@ -452,7 +458,7 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     private void ensurePlayState(final MediaPlayer mediaPlayer) {
         switch (this.currentPlayState) {
         case Playing:
-            if (mediaPlayer.isMediaPaused()) {
+            if (mediaPlayer.isMediaPaused() && mediaPlayer.isCoveringCurrentRaceTime()) {
                 mediaPlayer.playMedia();
             }
             break;

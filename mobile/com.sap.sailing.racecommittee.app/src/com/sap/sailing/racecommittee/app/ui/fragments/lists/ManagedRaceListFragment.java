@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
-public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
     public enum FilterMode {
         ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);
@@ -50,6 +49,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
             return displayName;
         }
     }
+
+    private static final String TAG = ManagedRaceListFragment.class.getName();
 
     private FilterMode filterMode;
     private ManagedRaceListAdapter adapter;
@@ -110,6 +111,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     public void setupOn(Collection<ManagedRace> races) {
+        ExLog.i(TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
+        
         unregisterOnAllRaces();
         managedRacesById.clear();
 
@@ -139,8 +142,11 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     private void initializeViewElements() {
         // 1. Group races by <boat class, series, fleet>
         initializeRacesByGroup();
+        
+        // 2. Remove previous view items
+        viewItems.clear();
 
-        // 2. Create view elements from tree
+        // 3. Create view elements from tree
         for (BoatClassSeriesFleet key : racesByGroup.navigableKeySet()) {
             // ... add the header view...
             viewItems.add(new RaceListDataTypeHeader(key));

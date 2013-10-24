@@ -11,7 +11,10 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void recordFix(Mark mark, GPSFix fix);
     
-    void recordWind(Wind wind, WindSource windSource);
+    /**
+     * @return True if the specified wind has been accepteed and added to this race's windtrack and database, else false.
+     */
+    boolean recordWind(Wind wind, WindSource windSource);
 
     void removeWind(Wind wind, WindSource windSource);
 
@@ -88,6 +91,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      *            the new course design to be published
      */
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
+    
+    void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
 
     void invalidateStartTime();
     
