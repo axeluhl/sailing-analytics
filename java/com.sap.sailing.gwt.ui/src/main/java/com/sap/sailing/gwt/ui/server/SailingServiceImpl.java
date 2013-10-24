@@ -42,8 +42,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -81,9 +79,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
-import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -121,8 +119,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -142,9 +139,7 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
-import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -326,7 +321,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers;
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
@@ -342,7 +336,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
     private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
-
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         tractracDomainFactory = DomainFactory.INSTANCE;
@@ -357,7 +350,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -2948,18 +2940,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
+    public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
+            PolarSheetGenerationSettings settings, String name) throws Exception {
         String id = UUID.randomUUID().toString();
         RacingEventService service = getService();
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
-        polarSheetGenerationWorkers.put(id, genWorker);
+        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
         genWorker.startPolarSheetGeneration();
-        String name = getCommonBoatClass(trackedRaces);
-        return new PolarSheetGenerationTriggerResponseImpl(id, name);
+        if (name == null || name.isEmpty()) {
+            name = getCommonBoatClass(trackedRaces);
+        }
+        PolarSheetsData result = genWorker.get();
+        return new PolarSheetGenerationResponseImpl(id, name, result);
     }
 
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
@@ -2968,95 +2963,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (boatClass == null) {
                 boatClass = race.getRace().getBoatClass();
             }
-            if (!boatClass.getName().matches(race.getRace().getBoatClass().getName())) {
+            if (!boatClass.getName().toLowerCase().matches(race.getRace().getBoatClass().getName().toLowerCase())) {
                 return "Mixed";
             }
         }
 
         return boatClass.getName();
-    }
-
-    @Override
-    public PolarSheetsData getPolarSheetsGenerationResults(String id) {
-        PolarSheetsData data = null;
-        if (polarSheetGenerationWorkers.containsKey(id)) {
-            PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
-            data = worker.getPolarData();
-            if (data.isComplete()) {
-                polarSheetGenerationWorkers.remove(id);
-                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-                if (httpServletRequest != null) {
-                    HttpSession session = httpServletRequest.getSession();
-                    session.setAttribute(id, worker.getCompleteData());
-                    session.setAttribute("stepping", worker.getStepping());
-                }       
-            }
-        } else {
-            //TODO Exception handling
-        }
-
-        return data;      
-    }
-
-    @Override
-    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        @SuppressWarnings("unchecked")
-        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
-        if (data == null) {
-            //TODO exception handling
-            return null;
-        }
-        List<BoatAndWindSpeed> dataForAngle = data.get(angle);
-        if (dataForAngle.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-        
-        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping");
-
-        List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
-        int windSpeedLevel = stepping.getLevelForValue(windSpeed);
-
-        for (BoatAndWindSpeed dataPoint: dataForAngle) {
-            if ((stepping.getLevelForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
-                dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
-            }
-        }
-
-        if (dataForAngleAndWindSpeed.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-
-        Double min = Collections.min(dataForAngleAndWindSpeed);
-        Double max = Collections.max(dataForAngleAndWindSpeed);
-        //TODO make number of columns dynamic to chart size
-        int numberOfColumns = 20;
-        double range = (max - min) / numberOfColumns;
-        Double[] xValues = new Double[numberOfColumns];
-        for (int i = 0; i < numberOfColumns; i++) {
-            xValues[i] = min + i * range + ( 0.5 * range);
-        }
-
-        Integer[] yValues = new Integer[numberOfColumns];
-        for (Double dataPoint : dataForAngleAndWindSpeed) {
-            int i = (int) (((dataPoint - min) / range));
-            if (i == numberOfColumns) {
-                //For max value
-                i = 19;
-            }
-            if (yValues[i] == null) {
-                yValues[i] = 0;
-            }
-            yValues[i]++;
-        }
-
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
-
-
-        return histogramData;
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {

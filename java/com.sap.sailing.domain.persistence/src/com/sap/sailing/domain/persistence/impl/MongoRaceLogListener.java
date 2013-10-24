@@ -2,7 +2,6 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.util.logging.Logger;
 
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -30,7 +29,7 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
     
     private final static Logger logger = Logger.getLogger(MongoRaceLogListener.class.getName());
 
-    public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory, DB database) {
+    public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory) {
         super();
         this.raceLogIdentifier = identifier;
         this.mongoObjectFactory = (MongoObjectFactoryImpl) mongoObjectFactory;

@@ -1407,6 +1407,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result = null;
         } else {
             result = new LegEntryDTO();
+            result.legType = trackedLeg.getTrackedLeg().getLegType(timePoint);
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
             final Distance averageCrossTrackError = trackedLeg.getAverageCrossTrackError(timePoint, waitForLatestAnalyses);
