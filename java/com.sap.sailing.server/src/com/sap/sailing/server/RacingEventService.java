@@ -56,7 +56,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
 

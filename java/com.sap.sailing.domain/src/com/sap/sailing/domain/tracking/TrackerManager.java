@@ -1,13 +1,10 @@
-package com.sap.sailing.domain.tractracadapter;
+package com.sap.sailing.domain.tracking;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 
 public interface TrackerManager {
