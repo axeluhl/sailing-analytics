@@ -31,7 +31,7 @@ public class AdminConsolePage extends HostPage {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            ".//div[@class=\"gwt-TabBarItem\" and @role=\"tab\"]/div[text()=\"{0}\"]/.."); //$NON-NLS-1$
+            ".//div[@role=\"tab\"]/div[text()=\"{0}\"]/.."); //$NON-NLS-1$
     
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$

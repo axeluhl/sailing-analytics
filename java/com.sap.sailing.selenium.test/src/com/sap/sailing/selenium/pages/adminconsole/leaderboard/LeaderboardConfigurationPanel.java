@@ -9,11 +9,13 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+
 import com.sap.sailing.selenium.pages.PageArea;
+
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetails.RaceDescriptor;
+
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
+
 import com.sap.sailing.selenium.pages.gwt.CellTable;
 
 public class LeaderboardConfigurationPanel extends PageArea {
@@ -116,6 +118,19 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public LeaderboardDetails getLeaderboardDetails(String leaderboard) {
+        CellTable table = getLeaderboardTable();
+        List<WebElement> rows = table.getRows();
+        
+        for(WebElement row : rows) {
+            WebElement name = row.findElement(By.xpath(".//td/div/a"));
+            
+            if(leaderboard.equals(name.getText())) {
+                table.selectRow(row);
+            
+                return new LeaderboardDetails(this.driver, this.leaderboardDetails);
+            }
+        }
+        
         return null;
     }
     

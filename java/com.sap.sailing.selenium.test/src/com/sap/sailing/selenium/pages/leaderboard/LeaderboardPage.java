@@ -21,7 +21,7 @@ import com.sap.sailing.selenium.pages.common.HTMLConstants;
 public class LeaderboardPage extends HostPage {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Leaderboard"; //$NON-NLS-1$
     
-    private static final String LEADERBOAR_PARAMTER_NAME = "name";
+    private static final String LEADERBOAR_PARAMTER_NAME = "name"; //$NON-NLS-1$
     
     private static final String AUTO_REFRESH_ENABLED_IMAGE = "url(\"data:image/png;base64," +           //$NON-NLS-1$
             "iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAR0lEQVR42mOoqan5T2vMMGoJxZZUV1fPB9IOWDC" + //$NON-NLS-1$

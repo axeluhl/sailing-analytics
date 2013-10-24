@@ -2,8 +2,10 @@ package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -49,10 +51,40 @@ public class LeaderboardDetails extends PageArea {
         public double getFactor() {
             return this.factor;
         }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.name, this.fleet);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object)
+                return true;
+            
+            if (object == null)
+                return false;
+            
+            if (getClass() != object.getClass())
+                return false;
+            
+            RaceDescriptor other = (RaceDescriptor) object;
+            
+            if(!Objects.equals(this.name, other.name))
+                return false;
+            
+            if(!Objects.equals(this.fleet, other.fleet))
+                return false;
+            
+            return true;
+        }
     }
     
     @FindBy(how = BySeleniumId.class, using = "RacesTable")
     private WebElement racesTable;
+    
+    @FindBy(how = ByXPath.class, using = "./../..//*[@selenium-id='TrackedRacesPanel']")
+    private WebElement trackedRacesPanel;
     
     public LeaderboardDetails(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -103,6 +135,20 @@ public class LeaderboardDetails extends PageArea {
         Actions.acceptAlert(this.driver);
     }
     
+    public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
+        CellTable raceTable = new CellTable(this.driver, this.racesTable);
+        WebElement raceRow = findRace(race);
+        
+        CellTable trackingTable = getTrackedRacesTable();
+        WebElement trackingRow = findTracking(tracking);
+        
+        if(raceRow == null || trackingRow == null) {
+        }
+        
+        raceTable.selectRow(raceRow);
+        trackingTable.selectRow(trackingRow);
+    }
+    
     private WebElement findRace(RaceDescriptor race) {
         CellTable table = new CellTable(this.driver, this.racesTable);
         List<WebElement> rows = table.getRows();
@@ -116,12 +162,34 @@ public class LeaderboardDetails extends PageArea {
             String linked = columns.get(3).getText();
             String factor = columns.get(4).getText();
             
-            RaceDescriptor descriptor = null;
+            RaceDescriptor descriptor = new RaceDescriptor(name, fleet, false, false, 0.0);
             
             if(descriptor.equals(race))
                 return row;
         }
         
         return null;
+    }
+    
+    private WebElement findTracking(TrackedRaceDescriptor tracking) {
+        CellTable trackingTable = getTrackedRacesTable();
+        
+        for(WebElement row : trackingTable.getRows()) {
+            List<WebElement> columns = row.findElements(By.tagName("td"));
+            String regatta = columns.get(0).getText();
+            String boatClass = columns.get(1).getText();
+            String raceName = columns.get(2).getText();
+            
+            TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, raceName);
+            
+            if(descriptor.equals(tracking))
+                return row;
+        }
+        
+        return null;
+    }
+    
+    private CellTable getTrackedRacesTable() {
+        return new CellTable(this.driver, findElementBySeleniumId(this.trackedRacesPanel, "TrackedRacesTable"));
     }
 }
