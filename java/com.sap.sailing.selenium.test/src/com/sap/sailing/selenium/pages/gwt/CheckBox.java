@@ -7,8 +7,13 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.common.CSSHelper;
 
 public class CheckBox extends PageArea {
+    protected static final String CHECKBOX_TAG_NAME = "span"; //$NON-NLS-1$
+    
+    private static final String CHECKBOX_CSS_CLASS = "gwt-CheckBox";
+    
     @FindBy(how = ByTagName.class, using = "input")
     private WebElement checkbox;
 
@@ -22,8 +27,9 @@ public class CheckBox extends PageArea {
     @Override
     protected void verify() {
         WebElement element = (WebElement) this.context;
+        String tagName = element.getTagName();
         
-        if(!element.getTagName().equals("span") || !element.getAttribute("class").equals("gwt-CheckBox"))
+        if(!CHECKBOX_TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, CHECKBOX_CSS_CLASS))
             throw new IllegalArgumentException("WebElement does not represent a CheckBox");
     }
     
