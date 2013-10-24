@@ -74,7 +74,7 @@ public interface TracTracAdapter {
      * way are all grouped into the single {@link Regatta} produced for the event listed in the JSON response. Note that
      * the many race trackers will have their TracTrac <code>Event</code> each, all with the same name, meaning the same
      * event but being distinct.
-     * 
+     * @param trackerManager TODO
      * @param jsonURL
      *            URL of a JSON response that contains an "event" object telling the event's name and ID, as well as a
      *            JSON array named "races" which tells ID and replay URL for the race. From those replay URLs the
@@ -84,8 +84,8 @@ public interface TracTracAdapter {
      *            that race is stopped; use -1 to wait forever
      * @param raceLogStore TODO
      */
-    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, 
-            String tracTracUsername, String tracTracPassword, RaceLogStore raceLogStore)
+    Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore, 
+            long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, RaceLogStore raceLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 

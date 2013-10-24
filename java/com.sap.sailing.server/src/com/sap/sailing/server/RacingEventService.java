@@ -55,6 +55,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
@@ -77,7 +78,8 @@ import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetit
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher, LeaderboardRegistry {
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
+        LeaderboardRegistry, TrackerManager {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 

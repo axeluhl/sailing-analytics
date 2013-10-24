@@ -146,7 +146,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.util.BuildVersion;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator, TrackerManager {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**

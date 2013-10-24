@@ -80,13 +80,13 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     }
 
     @Override
-    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore,
-            long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, RaceLogStore raceLogStore) throws Exception {
+    public Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
+            WindStore windStore, long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, RaceLogStore raceLogStore) throws Exception {
         JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, true);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(null, paramURL, liveURI, storedURI, courseDesignUpdateURI, raceLogStore,
+            regatta = addTracTracRace(trackerManager, paramURL, liveURI, storedURI, courseDesignUpdateURI, raceLogStore,
                     windStore, timeoutInMilliseconds, tracTracUsername, tracTracPassword).getRegatta();
         }
         return regatta;

@@ -72,7 +72,7 @@ public class RaceTrackerTest {
         logger.info("Calling service.addTracTracRace");
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
-                .addTracTracRace(null, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
         logger.info("Calling raceHandle.getRaces()");
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
@@ -130,7 +130,7 @@ public class RaceTrackerTest {
         assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
         service.removeRegatta(raceHandle.getRegatta());
         RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
-                .addTracTracRace(null, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
         TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedRegatta, newTrackedRegatta);
@@ -156,7 +156,7 @@ public class RaceTrackerTest {
         TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
-                .addTracTracRace(null, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
+                .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);

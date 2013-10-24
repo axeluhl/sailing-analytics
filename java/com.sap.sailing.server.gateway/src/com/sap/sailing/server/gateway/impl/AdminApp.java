@@ -475,10 +475,10 @@ public class AdminApp extends SailingServerHttpServlet {
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         
         //The course design update URI is not available at this place
-        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addRegatta(jsonURL,
-                liveURI, storedURI, /* courseDesignUpdateURI */null, getWindStore(req), /* timeoutInMilliseconds */
-                60000,
-                /* tracTracUsername */null, /* tracTracPassword */null, getRaceLogStore(req));
+        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addRegatta(getService(),
+                jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */null, /* timeoutInMilliseconds */
+                getWindStore(req),
+                60000, /* tracTracUsername */null, /* tracTracPassword */null, getRaceLogStore(req));
     }
 
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -520,11 +520,11 @@ public class AdminApp extends SailingServerHttpServlet {
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         //The course design update URI is not available at this place
-        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addTracTracRace(null, paramURL, liveURI, storedURI,
+        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addTracTracRace(getService(), paramURL, liveURI, storedURI,
                 /*courseDesignUpdateURI*/ null,
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                                 MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), getWindStore(req),
-                        /* timeoutInMilliseconds */ 60000, /*tracTracUsername*/ null, /*tracTracPassword*/ null);
+                        /* timeoutInMilliseconds */ 60000l, /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
