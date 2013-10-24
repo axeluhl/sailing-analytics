@@ -36,10 +36,9 @@ public class Activator implements BundleActivator {
     }
     
     public void stop(BundleContext context) throws Exception {
-        if(extenderBundleTracker != null) {
+        if (extenderBundleTracker != null) {
             extenderBundleTracker.close();
         }
-
         // stop the tracking of the wind and all races
         for (Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {
             racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());

@@ -79,6 +79,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         super();
         this.database = database;
     }
+    
+    @Override
+    public DB getDatabase() {
+        return database;
+    }
 
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();

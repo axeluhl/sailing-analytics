@@ -465,8 +465,7 @@ public class MasterDataImportTest {
         DomainFactory sourceDomainFactory = new DomainFactoryImpl();
         RacingEventService sourceService = new RacingEventServiceImpl(MongoDBService.INSTANCE,
                 SwissTimingFactory.INSTANCE, new com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl(
-                        sourceDomainFactory), new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(
-                        sourceDomainFactory), MediaDBFactory.INSTANCE.getDefaultMediaDB());
+                        sourceDomainFactory), sourceDomainFactory, MediaDBFactory.INSTANCE.getDefaultMediaDB());
         Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);

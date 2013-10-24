@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
 
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -94,4 +95,6 @@ public interface MongoObjectFactory {
      * @param competitor
      */
     void storeCompetitor(Competitor competitor);
+
+    DB getDatabase();
 }

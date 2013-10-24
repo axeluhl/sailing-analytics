@@ -40,6 +40,8 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -115,6 +117,8 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
 
     private static final String PARAM_NAME_WINDSTORE = "windstore";
+    
+    private static final String PARAM_NAME_RACELOGSTORE = "racelogstore";
 
     private static final String STORE_EMPTY = "empty";
 
@@ -191,7 +195,9 @@ public class AdminApp extends SailingServerHttpServlet {
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
     org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL, true).getB();
+        List<RaceRecord> raceRecords = getTracTracAdapterFactory()
+                .getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).getTracTracRaceRecords(jsonURL, true)
+                .getB();
         JSONArray result = new JSONArray();
         for (RaceRecord raceRecord : raceRecords) {
             JSONObject jsonRaceRecord = new JSONObject();
@@ -469,8 +475,10 @@ public class AdminApp extends SailingServerHttpServlet {
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         
         //The course design update URI is not available at this place
-        getService().addRegatta(jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */ null, getWindStore(req), /* timeoutInMilliseconds */ 60000,
-                /* tracTracUsername */ null, /* tracTracPassword */ null);
+        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addRegatta(jsonURL,
+                liveURI, storedURI, /* courseDesignUpdateURI */null, getWindStore(req), /* timeoutInMilliseconds */
+                60000,
+                /* tracTracUsername */null, /* tracTracPassword */null, getRaceLogStore(req));
     }
 
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -490,16 +498,33 @@ public class AdminApp extends SailingServerHttpServlet {
         return EmptyWindStore.INSTANCE;
     }
 
+    private RaceLogStore getRaceLogStore(HttpServletRequest req) throws UnknownHostException, MongoException {
+        String raceLogStore = req.getParameter(PARAM_NAME_RACELOGSTORE);
+        if (raceLogStore != null) {
+            if (raceLogStore.equals(STORE_EMPTY)) {
+                return EmptyRaceLogStore.INSTANCE;
+            } else if (raceLogStore.equals(STORE_MONGO)) {
+                return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+            } else {
+                log("Couldn't find race log store "+raceLogStore+". Using EmptyRaceLogStore instead.");
+                return EmptyRaceLogStore.INSTANCE;
+            }
+        }
+        return EmptyRaceLogStore.INSTANCE;
+    }
+
     private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         //The course design update URI is not available at this place
-        getService().addTracTracRace(paramURL, liveURI, storedURI, /*courseDesignUpdateURI*/ null,
-                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
-                        getWindStore(req), /* timeoutInMilliseconds */ 60000,
-                        /*tracTracUsername*/ null, /*tracTracPassword*/ null);
+        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addTracTracRace(null, paramURL, liveURI, storedURI,
+                /*courseDesignUpdateURI*/ null,
+                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                                MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), getWindStore(req),
+                        /* timeoutInMilliseconds */ 60000, /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

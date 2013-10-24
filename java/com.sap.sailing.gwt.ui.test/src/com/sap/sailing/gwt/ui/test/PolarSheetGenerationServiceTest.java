@@ -33,6 +33,8 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayAdapterFactory;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -40,6 +42,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
@@ -111,6 +114,24 @@ public class PolarSheetGenerationServiceTest {
         @Override
         protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
                 BundleContext bundleContext) {;
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(
+                BundleContext context) {
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
+                BundleContext context) {
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<SwissTimingReplayAdapterFactory, SwissTimingReplayAdapterFactory> createAndOpenSwissTimingReplayAdapterTracker(
+                BundleContext context) {
             return null;
         }
         

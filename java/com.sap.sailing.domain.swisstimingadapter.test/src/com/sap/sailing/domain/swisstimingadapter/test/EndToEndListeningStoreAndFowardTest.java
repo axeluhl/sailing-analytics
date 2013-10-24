@@ -117,8 +117,8 @@ public class EndToEndListeningStoreAndFowardTest {
         // important: construct a new domain factory each time to make sure the competitor cache starts out empty
         final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         racingEventService = new RacingEventServiceImpl(mongoDBService, SwissTimingFactory.INSTANCE,
-                new DomainFactoryImpl(baseDomainFactory),
-                new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(baseDomainFactory), MediaDB.TEST_STUB);
+                new DomainFactoryImpl(baseDomainFactory), baseDomainFactory,
+                MediaDB.TEST_STUB);
         raceHandles = new ArrayList<RacesHandle>();
     }
 
