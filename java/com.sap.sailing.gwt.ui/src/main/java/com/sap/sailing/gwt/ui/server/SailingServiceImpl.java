@@ -346,11 +346,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
-        baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
         domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        baseDomainFactory = getService().getBaseDomainFactory();
         tracTracAdapter = createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapter = createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
@@ -847,7 +847,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 effectiveStoredURI = storedURI;
             }
-            final RacesHandle raceHandle = getTracTracAdapter().addTracTracRace(null, regattaToAddTo,
+            final RacesHandle raceHandle = getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
                     record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
                     new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
@@ -1487,18 +1487,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
                 if (firstWaypoint != null) {
-                    final Pair<List<PositionDTO>, Triple<Double, NauticalSide, Distance>> markPositionDTOsAndLineAdvantage = getMarkPositionDTOsAndLineAngleToCombinedWindInDegreesAndAdvantage(dateAsTimePoint, trackedRace, firstWaypoint);
+                    final Pair<List<PositionDTO>, Triple<Pair<Distance, Double>, NauticalSide, Distance>> markPositionDTOsAndLineAdvantage = getMarkPositionDTOsAndLineLengthAndAngleToCombinedWindInDegreesAndAdvantage(dateAsTimePoint, trackedRace, firstWaypoint);
                     final List<PositionDTO> startMarkPositionDTOs = markPositionDTOsAndLineAdvantage.getA();
                     result.startMarkPositions = startMarkPositionDTOs;
-                    result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getB().getA();
+                    result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getB().getA().getA().getMeters();
+                    result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getB().getA().getB();
                     result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getB().getB();
                     result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getB().getC().getMeters();
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
                 if (lastWaypoint != null) {
-                    final Pair<List<PositionDTO>, Triple<Double, NauticalSide, Distance>> markPositionDTOsAndLineAdvantage = getMarkPositionDTOsAndLineAngleToCombinedWindInDegreesAndAdvantage(dateAsTimePoint, trackedRace, lastWaypoint);
+                    final Pair<List<PositionDTO>, Triple<Pair<Distance, Double>, NauticalSide, Distance>> markPositionDTOsAndLineAdvantage = getMarkPositionDTOsAndLineLengthAndAngleToCombinedWindInDegreesAndAdvantage(dateAsTimePoint, trackedRace, lastWaypoint);
                     result.finishMarkPositions = markPositionDTOsAndLineAdvantage.getA();
-                    result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getB().getA();
+                    result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getB().getA().getA().getMeters();
+                    result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getB().getA().getB();
                     result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getB().getB();
                     result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getB().getC().getMeters();
                 }
@@ -1631,7 +1633,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return marksIter.hasNext() == markDTOsIter.hasNext();
     }
 
-    private Pair<List<PositionDTO>, Triple<Double, NauticalSide, Distance>> getMarkPositionDTOsAndLineAngleToCombinedWindInDegreesAndAdvantage(
+    private Pair<List<PositionDTO>, Triple<Pair<Distance, Double>, NauticalSide, Distance>> getMarkPositionDTOsAndLineLengthAndAngleToCombinedWindInDegreesAndAdvantage(
             TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
         List<PositionDTO> markPositionDTOs = new ArrayList<PositionDTO>();
         List<Position> markPositions = new ArrayList<Position>();
@@ -1648,7 +1650,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 allMarksHavePositions = false;
             }
         }
-        final Triple<Double, NauticalSide, Distance> lineAngleAndAdvantage;
+        final Triple<Pair<Distance, Double>, NauticalSide, Distance> lineLengthAndAngleAndAdvantage;
         if (allMarksHavePositions && numberOfMarks == 2) {
             Wind combinedWind = trackedRace.getWind(markPositions.get(0), timePoint);
             Distance distanceFromFirstToSecondMark = markPositions.get(1).alongTrackDistance(markPositions.get(0), combinedWind.getFrom());
@@ -1672,13 +1674,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 advantageousSide = NauticalSide.PORT;
             }
-            lineAngleAndAdvantage = new Triple<Double, NauticalSide, Distance>(
-                    leewardMark.getBearingGreatCircle(windwardMark).getDifferenceTo(combinedWind.getFrom()).getDegrees(),
+            lineLengthAndAngleAndAdvantage = new Triple<Pair<Distance, Double>, NauticalSide, Distance>(
+                    new Pair<Distance, Double>(leewardMark.getDistance(windwardMark),
+                    Math.abs(leewardMark.getBearingGreatCircle(windwardMark).getDifferenceTo(combinedWind.getFrom()).getDegrees())),
                     advantageousSide, distanceAdvantage);
         } else {
-            lineAngleAndAdvantage = null;
+            lineLengthAndAngleAndAdvantage = null;
         }
-        return new Pair<List<PositionDTO>, Triple<Double, NauticalSide, Distance>>(markPositionDTOs, lineAngleAndAdvantage);
+        return new Pair<List<PositionDTO>, Triple<Pair<Distance, Double>, NauticalSide, Distance>>(markPositionDTOs, lineLengthAndAngleAndAdvantage);
     }
 
     private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {

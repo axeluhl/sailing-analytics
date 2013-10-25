@@ -54,7 +54,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -843,19 +842,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    /**
-     * If {@link #lastCombinedWindTrackInfoDTO} is valid and has a wind fix, the first fix is delivered, <code>null</code> otherwise.
-     */
-    private WindDTO getCombinedWind() {
-        final WindDTO result;
-        if (lastCombinedWindTrackInfoDTO != null && lastCombinedWindTrackInfoDTO.windFixes != null && !lastCombinedWindTrackInfoDTO.windFixes.isEmpty()) {
-            result = lastCombinedWindTrackInfoDTO.windFixes.get(0);
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
             Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
@@ -884,13 +870,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            // TODO bug 1026: add start line bias to tool tip; wind data is available from lastCombinedWindTrackInfoDTO
-                            final Triple<Double, NauticalSide, Double> angleToWindAndAdvantage;
-                            WindDTO combinedWind = getCombinedWind();
-                            if (combinedWind != null) {
-                                angleToWindAndAdvantage = getAngleToWindAndAdvantage(combinedWind, courseDTO.startMarkPositions.get(0), courseDTO.startMarkPositions.get(1));
+                            final String advantageText;
+                            if (courseDTO.startLineAngleToCombinedWind != null) {
+                                advantageText = " "+stringMessages.lineAngleToWindAndAdvantage(
+                                        NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
+                                        NumberFormat.getFormat("0.0").format(courseDTO.startLineAngleToCombinedWind),
+                                        courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
+                                        NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters));
+                            } else {
+                                advantageText = "";
                             }
-                            map.setTitle(stringMessages.startLine());
+                            map.setTitle(stringMessages.startLine()+advantageText);
                         }
                     });
                     startLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -936,8 +926,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            // TODO bug 1026: add start (and finish) line bias to tool tip; wind data is available from lastCombinedWindTrackInfoDTO
-                            map.setTitle(stringMessages.finishLine());
+                            final String advantageText;
+                            if (courseDTO.startLineAngleToCombinedWind != null) {
+                                advantageText = " "+stringMessages.lineAngleToWindAndAdvantage(
+                                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
+                                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineAngleToCombinedWind),
+                                        courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
+                                        NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters));
+                            } else {
+                                advantageText = "";
+                            }
+                            map.setTitle(stringMessages.finishLine()+advantageText);
                         }
                     });
                     finishLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
