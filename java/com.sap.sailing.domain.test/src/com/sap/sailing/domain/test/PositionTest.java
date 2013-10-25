@@ -159,6 +159,22 @@ public class PositionTest {
     }
     
     @Test
+    public void testSignedCrossTrackErrorToRight() {
+        Position p1 = new DegreePosition(20, 16);
+        Position p2 = new DegreePosition(15, 15);
+        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        assertTrue(result.getMeters() > 0);
+    }
+    
+    @Test
+    public void testSignedCrossTrackErrorToLeft() {
+        Position p1 = new DegreePosition(20, 14);
+        Position p2 = new DegreePosition(15, 15);
+        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        assertTrue(result.getMeters() < 0);
+    }
+    
+    @Test
     public void addBearings() {
         Bearing b1 = new DegreeBearingImpl(123);
         Bearing b2 = new DegreeBearingImpl(234);
