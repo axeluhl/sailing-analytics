@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.NamedImpl;
@@ -266,19 +265,6 @@ public class CourseImpl extends NamedImpl implements Course {
             Integer indexEntry = waypointIndexes.get(waypoint);
             if (indexEntry != null) {
                 result = indexEntry;
-            }
-            return result;
-        } finally {
-            unlockAfterRead();
-        }
-    }
-    
-    private Set<ControlPoint> getControlPoints() {
-        lockForRead();
-        try {
-            Set<ControlPoint> result = new HashSet<ControlPoint>();
-            for (Waypoint waypoint : getWaypoints()) {
-                result.add(waypoint.getControlPoint());
             }
             return result;
         } finally {
