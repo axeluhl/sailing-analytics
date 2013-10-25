@@ -8,8 +8,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -46,12 +44,9 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -151,9 +146,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
-    List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
-            throws InterruptedException, UnknownHostException, IOException, ParseException;
-
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
      * @param discardThresholds
@@ -199,23 +191,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
     void updateStoredRegatta(Regatta regatta);
-
-    /**
-     * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     */
-    RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds) 
-                    throws InterruptedException, UnknownHostException,
-                    IOException, ParseException, Exception;
-
-    SwissTimingFactory getSwissTimingFactory();
-
-    void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
@@ -404,8 +379,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
-
-    com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
 
     CourseArea getCourseArea(Serializable courseAreaId);
 

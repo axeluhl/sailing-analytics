@@ -6,8 +6,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,11 +82,6 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.swisstimingadapter.Race;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
-import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
-import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -102,7 +95,6 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -157,8 +149,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
-
     private final ExpeditionWindTrackerFactory windTrackerFactory;
 
     /**
@@ -197,10 +187,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final DomainObjectFactory domainObjectFactory;
 
-    private final SwissTimingFactory swissTimingFactory;
-
-    private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
-
     private final ConcurrentHashMap<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
 
     private final ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener> operationExecutionListeners;
@@ -229,22 +215,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB) {
-        this(domainObjectFactory, mongoObjectFactory, SwissTimingFactory.INSTANCE,
-                com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE, com.sap.sailing.domain.base.DomainFactory.INSTANCE, mediaDB);
+        this(domainObjectFactory, mongoObjectFactory, com.sap.sailing.domain.base.DomainFactory.INSTANCE,
+                mediaDB);
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            SwissTimingFactory swissTimingFactory,
-            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
             com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb) {
-        assert swissTimingDomainFactory.getBaseDomainFactory() == baseDomainFactory;
         logger.info("Created " + this);
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        this.swissTimingFactory = swissTimingFactory;
-        this.swissTimingDomainFactory = swissTimingDomainFactory;
-        swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
@@ -279,22 +259,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
     }
 
-    public RacingEventServiceImpl(MongoDBService mongoDBService, SwissTimingFactory swissTimingFactory,
-            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDB) {
+    public RacingEventServiceImpl(MongoDBService mongoDBService, com.sap.sailing.domain.base.DomainFactory baseDomainFactory,
+            MediaDB mediaDB) {
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), swissTimingFactory, swissTimingDomainFactory,
-                baseDomainFactory, mediaDB);
+                .getMongoObjectFactory(mongoDBService), baseDomainFactory, mediaDB);
     }
 
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
-    }
-
-    @Override
-    public com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory() {
-        return swissTimingDomainFactory;
     }
 
     private void loadRaceIDToRegattaAssociations() {
@@ -638,11 +611,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public SwissTimingFactory getSwissTimingFactory() {
-        return swissTimingFactory;
-    }
-
-    @Override
     public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
     }
@@ -733,35 +701,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             updateStoredRegatta(regatta);
         }
         return new Pair<Regatta, Boolean>(regatta, wasCreated);
-    }
-
-    @Override
-    public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
-            int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException,
-            ParseException {
-        List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port,
-                swissTimingAdapterPersistence, canSendRequests);
-        for (Race race : swissTimingConnector.getRaces()) {
-            String raceID = race.getRaceID();
-            TimePoint startTime = swissTimingConnector.getStartTime(raceID);
-            boolean hasCourse = swissTimingConnector.hasCourse(raceID);
-            boolean hasStartlist = swissTimingConnector.hasStartlist(raceID);
-            result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(raceID,
-                    race.getDescription(), startTime == null ? null : startTime.asDate(),
-                            hasCourse, hasStartlist));
-        }
-        return result;
-    }
-
-    @Override
-    public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds)
-            throws Exception {
-        return addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
-                raceID, canSendRequests, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
-                swissTimingDomainFactory, logStore, windStore, swissTimingAdapterPersistence), windStore,
-                timeoutInMilliseconds);
     }
 
     @Override
@@ -1395,20 +1334,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         logger.info("Removing regatta " + regatta.getName() + " from regattaTrackingCache");
         DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.remove(regatta);
         stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
-    }
-
-    @Override
-    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage) {
-        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, null);
-        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, null);
-        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, null);
-        if (swissTimingAdapterPersistence.getRace(stlSMMessage.getRaceID()) != null) {
-            throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
-        } else {
-            swissTimingAdapterPersistence.storeSailMasterMessage(racSMMessage);
-            swissTimingAdapterPersistence.storeSailMasterMessage(stlSMMessage);
-            swissTimingAdapterPersistence.storeSailMasterMessage(ccgSMMessage);
-        }
     }
 
     @Override
