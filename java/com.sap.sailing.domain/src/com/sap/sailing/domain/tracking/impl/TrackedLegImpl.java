@@ -260,7 +260,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     public Distance getCrossTrackError(Position p, TimePoint timePoint) {
         final Position approximatePosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
         final Bearing legBearing = getLegBearing(timePoint);
-        return approximatePosition==null || legBearing==null ? null : p.crossTrackError(approximatePosition, legBearing);
+        return approximatePosition==null || legBearing==null ? null : p.absoluteCrossTrackError(approximatePosition, legBearing);
     }
 
     @Override

@@ -154,7 +154,7 @@ public class PositionTest {
     public void testZeroCrossTrackError() {
         Position p1 = new DegreePosition(20, 15);
         Position p2 = new DegreePosition(15, 15);
-        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        Distance result = p1.absoluteCrossTrackError(p2, new DegreeBearingImpl(0));
         assertEquals(0, result.getMeters(), 0.0000001);
     }
     

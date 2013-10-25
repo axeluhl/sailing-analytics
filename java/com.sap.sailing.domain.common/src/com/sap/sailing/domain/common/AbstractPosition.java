@@ -114,9 +114,14 @@ public class AbstractPosition implements Position {
     }
     
     @Override
-    public Distance crossTrackError(Position pos2, Bearing bearing) {
-        return new CentralAngleDistance(Math.abs(Math.asin(Math.sin(pos2.getCentralAngleRad(this))
-                * Math.sin(pos2.getBearingGreatCircle(this).getRadians() - bearing.getRadians()))));
+    public Distance absoluteCrossTrackError(Position p, Bearing bearing) {
+        return new CentralAngleDistance(Math.abs(crossTrackError(p, bearing).getCentralAngleRad()));
+    }
+    
+    @Override
+    public Distance crossTrackError(Position p, Bearing bearing) {
+        return new CentralAngleDistance(Math.asin(Math.sin(p.getCentralAngleRad(this))
+                * Math.sin(p.getBearingGreatCircle(this).getRadians() - bearing.getRadians())));
     }
 
     @Override
@@ -132,7 +137,7 @@ public class AbstractPosition implements Position {
         // the great circle described by pos2 and bearing we should travel. This is an exception which will
         // surface as a division-by-zero exception or a NaN result
         return new CentralAngleDistance(direction * Math.acos(Math.cos(pos2.getCentralAngleRad(this))
-                / Math.cos(crossTrackError(pos2, bearing).getCentralAngleRad())));
+                / Math.cos(absoluteCrossTrackError(pos2, bearing).getCentralAngleRad())));
     }
 
     @Override
