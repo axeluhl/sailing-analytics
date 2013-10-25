@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.datamining.dimensions.GPSFixDimensionsManager;
+import com.sap.sailing.datamining.dimensions.TrackedLegOfCompetitorDimensionsManager;
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
@@ -111,11 +113,9 @@ public class DataMiningFactory {
         return compoundFilterCriteria;
     }
 
-    private static <ValueType> FilterCriteria<TrackedLegOfCompetitorWithContext> createTrackedLegOfCompetitorDimensionFilterCriteria(SharedDimension key, Iterable<?> values) {
-        //TODO fill the dimension, after the hierarchical dimensions has been implemented
-        throw new UnsupportedOperationException("Not yet implemented");
-//        Dimension<TrackedLegOfCompetitorWithContext, ValueType> dimension = null;
-//        return createDimensionFilterCriteria(dimension, values);
+    private static <ValueType> FilterCriteria<TrackedLegOfCompetitorWithContext> createTrackedLegOfCompetitorDimensionFilterCriteria(SharedDimension sharedDimension, Iterable<?> values) {
+        Dimension<TrackedLegOfCompetitorWithContext, ValueType> dimension = TrackedLegOfCompetitorDimensionsManager.getDimensionFor(sharedDimension);
+        return createDimensionFilterCriteria(dimension, values);
     }
 
     public static FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(Map<SharedDimension, Iterable<?>> selection) {
@@ -127,8 +127,8 @@ public class DataMiningFactory {
         return compoundFilterCriteria;
     }
     
-    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(SharedDimension gpsFix, Iterable<?> values) {
-        Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(gpsFix);
+    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(SharedDimension sharedDimension, Iterable<?> values) {
+        Dimension<GPSFixWithContext, ValueType> dimension = GPSFixDimensionsManager.getDimensionFor(sharedDimension);
         return createDimensionFilterCriteria(dimension, values);
     }
     
@@ -176,7 +176,7 @@ public class DataMiningFactory {
     public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimension> dimensionsToGroupBy) {
         Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new LinkedHashSet<Dimension<GPSFixWithContext, ValueType>>();
         for (SharedDimension dimensionType : dimensionsToGroupBy) {
-            Dimension<GPSFixWithContext, ValueType> dimension = Dimensions.GPSFix.getDimensionFor(dimensionType);
+            Dimension<GPSFixWithContext, ValueType> dimension = GPSFixDimensionsManager.getDimensionFor(dimensionType);
             dimensions.add(dimension);
         }
         return new GroupGPSFixesByDimension<ValueType>(dimensions);
