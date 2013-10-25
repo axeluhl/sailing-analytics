@@ -22,7 +22,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -53,9 +55,11 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
          * 
          * 505 Race 7: cb043bb4-9e92-11e0-85be-406186cbf87c
          * 
-         * 505 Race 10: 829bd366-9f53-11e0-85be-406186cbf87c
+         * 505 Race 10: 357c700a-9d9a-11e0-85be-406186cbf87c
+         * 
+         * To set by hand: Average Speeds
          */
-        String raceID = "cb043bb4-9e92-11e0-85be-406186cbf87c";
+        String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
         if (!loadData(raceID) && !forceReload) {
             System.out.println("Downloading new data from the web.");
             this.setUp("event_20110609_KielerWoch",
@@ -172,19 +176,25 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     public void compareMarkpasses() {
 
         final MarkPassingCalculator markPassCreator = new MarkPassingCalculator();
-        final int tolerance = 20000;
+        final int tolerance = 21000;
         int correctPasses = 0;
         int incorrectPasses = 0;
         int missingGivenMarkPassings = 0;
         int missingMarkPasses = 0;
         int numberOfCompetitors = 0;
+        TimePoint start = getTrackedRace().getStartOfRace();
+        TimePoint end = getTrackedRace().getEndOfRace();
+        TimePoint middle = start.plus(end.minus(start.asMillis()).asMillis() / 2);
         ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
         ArrayList<Waypoint> waypointsWithPassingInstructions = new ArrayList<Waypoint>();
         LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
         LinkedHashMap<Competitor, ArrayList<GPSFixMoving>> competitorTracks = new LinkedHashMap<Competitor, ArrayList<GPSFixMoving>>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
+        LinkedHashMap<Waypoint, Double> averageLegLength = new LinkedHashMap<>();
 
+        // TODO Fix Waypoint ID issue
+        System.out.println(start + ", " + end);
         // ///// Get Waypoints (Iterable of all Waypoints) /////
         try {
             getRace().getCourse().lockForRead();
@@ -197,13 +207,30 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         getRace().getCourse().getWaypoints();
 
         // Get LegTypes
-        ArrayList<TrackedLeg> legs = new ArrayList<>();
+        ArrayList<String> legs = new ArrayList<>();
         Iterator<TrackedLeg> itl = getTrackedRace().getTrackedLegs().iterator();
 
-  
         while (itl.hasNext()) {
-            legs.add(itl.next());
+            try {
+                legs.add(itl.next().getLegType(middle).toString());
+            } catch (NoWindException e) {
+            }
         }
+        // Get Leg Lengths
+        for (Waypoint wp : waypoints) {
+            double legBefore = 0;
+            double legAfter= 0;
+            
+            if(!wp.getId().equals(1)){
+            legBefore = getTrackedRace().getTrackedLegFinishingAt(wp).getGreatCircleDistance(middle)
+                    .getMeters();}if(!wp.getId().equals(waypoints.size())){
+            legAfter = getTrackedRace().getTrackedLegStartingAt(wp).getGreatCircleDistance(middle).getMeters();
+                    }
+            double averageLength = (legBefore
+                    + legAfter)/4;
+            averageLegLength.put(wp, averageLength);
+        }
+
         // Give Waypoints Passing Instructions
         for (int i = 0; i < waypoints.size(); i++) {
             WaypointImpl waypointWithPassingInstructions = null;
@@ -227,10 +254,10 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                 }
             }
             waypointsWithPassingInstructions.add(waypointWithPassingInstructions);
+            averageLegLength.put(waypointsWithPassingInstructions.get(i), averageLegLength.get(waypoints.get(i)));
         }
 
-        // /// Fill WayPointTracks (HashMap of WayPoints and their Tracks)
-
+        // Fill WayPointTracks (HashMap of WayPoints and their Tracks)
         for (Waypoint w : waypointsWithPassingInstructions) {
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
             for (Mark mark : w.getControlPoint().getMarks()) {
@@ -240,8 +267,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             wayPointTracks.put(w, marks);
         }
 
-        // For each competitor:
-
+        // For each competitor
         for (Competitor c : getRace().getCompetitors()) {
             // Get GPSFixes
             ArrayList<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
@@ -273,14 +299,14 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         }
         // Calculate MarkPasses!!
         long n = System.currentTimeMillis();
-        computedPasses = markPassCreator.calculateMarkpasses(wayPointTracks, competitorTracks, getTrackedRace()
-                .getStartOfRace(), getTrackedRace().getEndOfRace(), legs);
+        computedPasses = markPassCreator.calculateMarkpasses(wayPointTracks, competitorTracks, start, end, legs,
+                averageLegLength, getRace().getBoatClass().getHullLength().getMeters());
         System.out.println("Computation time: " + (System.currentTimeMillis() - n));
 
         // Compare computed and calculated MarkPassings
         boolean printAll = false;
         boolean printWrong = true;
-        boolean printNull = false;
+        boolean printNull = true;
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
             if (!c.getName().equals("Feldmann")) {

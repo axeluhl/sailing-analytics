@@ -15,19 +15,18 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 public class MarkPassingCalculator {
-    AbstractCandidateFinder finder = new CandidateFinder();
-    AbstractCandidateChooser chooser = new CandidateChooser();
+    CandidateFinder finder = new CandidateFinder();
+    CandidateChooser chooser = new CandidateChooser();
 
     @SuppressWarnings("serial")
     public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculateMarkpasses(
 
     LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks,
             LinkedHashMap<Competitor, ArrayList<GPSFixMoving>> competitorTracks, TimePoint startOfRace,
-            TimePoint endOfRace, ArrayList<TrackedLeg> legs) {
+            TimePoint endOfRace, ArrayList<String> legs, LinkedHashMap<Waypoint, Double> averageLegLength, Double boatLength) {
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculatedMarkpasses = new LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>>();
 
         for (Competitor c : competitorTracks.keySet()) {
@@ -65,11 +64,11 @@ public class MarkPassingCalculator {
                             }
                         }
                         wayPointPositions.put(w, markPositions);
-                    }
 
+                    }
                     // Find GPSFix-Candidates for each ControlPoint
                     LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = finder
-                            .findCandidates(competitorTracks.get(c), wayPointPositions);
+                            .findCandidates(competitorTracks.get(c), wayPointPositions, boatLength, averageLegLength);
 
                     // Create "Candidates"
                     ArrayList<Candidate> candidates = new ArrayList<Candidate>();
@@ -83,17 +82,17 @@ public class MarkPassingCalculator {
                         }
                     }
 
-                    Candidate end = new Candidate(wayPointTracks.keySet().size() + 1, endOfRace.plus(120000), 0);
+                    Candidate end = new Candidate(wayPointTracks.keySet().size() + 1, endOfRace.plus(60000), 0);
                     candidates.add(end);
                     // Find shortest Path and create calculated MarkPasses
 
-                    ArrayList<TimePoint> markPasses = chooser.getMarkPasses(candidates, start, end, wayPointPositions,
-                            legs);
-                    // TODO Missing MarkPass in the Middle!!
-                    Iterator<Waypoint> it = wayPointTracks.keySet().iterator();
-                    for (int i = markPasses.size() - 1; i >= 0; i--) {
-                        Waypoint w = it.next();
-                        computedPasses.put(w, new MarkPassingImpl(markPasses.get(i), w, c));
+                    LinkedHashMap<Integer, TimePoint> markPasses = chooser.getMarkPasses(candidates, start, end,
+                            wayPointPositions, legs);
+                    for (Waypoint w : wayPointTracks.keySet()) {
+                        try {
+                            computedPasses.put(w, new MarkPassingImpl(markPasses.get((Integer) w.getId()), w, c));
+                        } finally {
+                        }
                     }
                 }
                 calculatedMarkpasses.put(c, computedPasses);

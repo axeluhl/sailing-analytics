@@ -11,5 +11,5 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public interface AbstractCandidateFinder {
     public LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> findCandidates
     (ArrayList<GPSFixMoving> gpsFixes,
-            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions);
+            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, Double boatLength);
 }
