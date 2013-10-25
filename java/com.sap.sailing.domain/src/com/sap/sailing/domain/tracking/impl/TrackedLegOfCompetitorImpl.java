@@ -201,7 +201,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedMarkPosition == null) {
             return null;
         }
-        return getTrackedLeg().getWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
+        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
     }
 
     /**
@@ -266,7 +266,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 }
                 Position endPos = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(to, /* extrapolate */ false);
                 if (endPos != null) {
-                    Distance d = getTrackedLeg().getWindwardDistance(
+                    Distance d = getTrackedLeg().getAbsoluteWindwardDistance(
                             getTrackedRace().getTrack(getCompetitor())
                                     .getEstimatedPosition(start.getTimePoint(), false), endPos, to);
                     result = d.inTime(to.asMillis() - start.getTimePoint().asMillis());
@@ -358,14 +358,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
                             Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint);
                             result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
                             result = new MeterDistance(result.getMeters()
                                     + getTrackedRace().getTrackedLeg(leg)
-                                            .getWindwardDistance(currentPosition, leaderPosition, timePoint)
+                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint)
                                             .getMeters());
                             break;
                         }
@@ -485,7 +485,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (ourEstimatedPosition == null || leaderEstimatedPosition == null) {
                             return null;
                         } else {
-                            Distance windwardDistanceToGo = getTrackedLeg().getWindwardDistance(ourEstimatedPosition,
+                            Distance windwardDistanceToGo = getTrackedLeg().getAbsoluteWindwardDistance(ourEstimatedPosition,
                                     leaderEstimatedPosition, timePoint);
                             return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
                         }

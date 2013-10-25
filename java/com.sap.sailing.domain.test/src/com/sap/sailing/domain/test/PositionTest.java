@@ -149,6 +149,14 @@ public class PositionTest {
         Distance alongTrackDistanceFromP1ToPNorth = pNorth.alongTrackDistance(p1, bearingFromP1ToP2);
         assertEquals(0.5*p1.getDistance(p2).getMeters(), alongTrackDistanceFromP1ToPNorth.getMeters(), 0.001);
     }
+    
+    @Test
+    public void negativeAlongTrackDistanceTest() {
+        Position p1 = new DegreePosition(1, 0);
+        Position p2 = new DegreePosition(1, -0.0001);
+        final Bearing bearingFromP1ToP2 = p1.getBearingGreatCircle(p2);
+        assertEquals(-p1.getDistance(p2).getMeters(), p1.alongTrackDistance(p2, bearingFromP1ToP2).getMeters(), 0.001);
+    }
 
     @Test
     public void testZeroCrossTrackError() {

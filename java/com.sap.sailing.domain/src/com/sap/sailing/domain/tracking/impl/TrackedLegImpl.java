@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -276,13 +277,18 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return result;
     }
 
-    /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
-     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
-     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is returned.
-     * @param at the wind estimation is performed for this point in time
-     */
+    @Override
+    public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
+        final Distance preResult = getWindwardDistance(pos1, pos2, at);
+        final Distance result;
+        if (preResult.getMeters() >= 0) {
+            result = preResult;
+        } else {
+            result = new MeterDistance(-preResult.getMeters());
+        }
+        return result;
+    }
+    
     @Override
     public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
         if (isUpOrDownwindLeg(at)) {
@@ -291,7 +297,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
                 return pos2.alongTrackDistance(pos1, getLegBearing(at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                return projectionToLineThroughPos2.getDistance(pos2);
+                return projectionToLineThroughPos2.alongTrackDistance(pos2, wind.getBearing());
             }
         } else {
             // reaching leg, return distance projected onto leg's bearing
