@@ -286,48 +286,6 @@ public class CourseImpl extends NamedImpl implements Course {
         }
     }
     
-    private ControlPoint getControlPointForMark(Mark mark) {
-        lockForRead();
-        try {
-            for (ControlPoint controlPoint : getControlPoints()) {
-                for (Mark controlPointMark : controlPoint.getMarks()) {
-                    if (mark == controlPointMark) {
-                        return controlPoint;
-                    }
-                }
-            }
-            return null;
-        } finally {
-            unlockAfterRead();
-        }
-    }
-    
-    @Override
-    public Iterable<Leg> getLegsAdjacentTo(Mark mark) {
-        lockForRead();
-        try {
-            Set<Leg> result = new HashSet<Leg>();
-            ControlPoint controlPointForMark = getControlPointForMark(mark);
-            if (controlPointForMark != null) {
-                boolean first = true;
-                for (Leg leg : getLegs()) {
-                    if (first) {
-                        if (leg.getFrom().getControlPoint() == controlPointForMark) {
-                            result.add(leg);
-                        }
-                        first = false;
-                    }
-                    if (leg.getTo().getControlPoint() == controlPointForMark) {
-                        result.add(leg);
-                    }
-                }
-            }
-            return result;
-        } finally {
-            unlockAfterRead();
-        }
-    }
-
     @Override
     public Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
         lockForRead();
