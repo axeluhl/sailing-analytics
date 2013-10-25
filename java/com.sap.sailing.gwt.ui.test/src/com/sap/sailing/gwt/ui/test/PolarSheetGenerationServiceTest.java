@@ -44,7 +44,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
-import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayAdapterFactory;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -139,7 +139,7 @@ public class PolarSheetGenerationServiceTest {
         }
 
         @Override
-        protected ServiceTracker<SwissTimingReplayAdapterFactory, SwissTimingReplayAdapterFactory> createAndOpenSwissTimingReplayAdapterTracker(
+        protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
                 BundleContext context) {
             return null;
         }

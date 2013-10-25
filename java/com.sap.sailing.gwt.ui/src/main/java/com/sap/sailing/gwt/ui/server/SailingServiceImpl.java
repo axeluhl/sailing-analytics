@@ -161,8 +161,6 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
-import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayAdapter;
-import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayAdapterFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
@@ -343,7 +341,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final SwissTimingAdapter swissTimingAdapter;
 
-    private final SwissTimingReplayAdapter swissTimingReplayAdapter;
+    private final SwissTimingReplayService swissTimingReplayService;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -355,7 +353,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tracTracAdapter = createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapter = createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
-        swissTimingReplayAdapter = createAndOpenSwissTimingReplayAdapterTracker(context).getService().createSwissTimingReplayAdapter(baseDomainFactory);
+        swissTimingReplayService = createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
         scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
@@ -400,10 +398,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    protected ServiceTracker<SwissTimingReplayAdapterFactory, SwissTimingReplayAdapterFactory> createAndOpenSwissTimingReplayAdapterTracker(
+    protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
             BundleContext context) {
-        ServiceTracker<SwissTimingReplayAdapterFactory, SwissTimingReplayAdapterFactory> result = new ServiceTracker<SwissTimingReplayAdapterFactory, SwissTimingReplayAdapterFactory>(
-                context, SwissTimingReplayAdapterFactory.class.getName(), null);
+        ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> result = new ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory>(
+                context, SwissTimingReplayServiceFactory.class.getName(), null);
         result.open();
         return result;
     }
@@ -876,6 +874,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private SwissTimingAdapter getSwissTimingAdapter() {
         return swissTimingAdapter;
+    }
+    
+    private SwissTimingReplayService getSwissTimingReplayService() {
+        return swissTimingReplayService;
     }
 
     @Override
@@ -2116,8 +2118,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) {
-        List<SwissTimingReplayRace> replayRaces = SwissTimingReplayServiceFactory.INSTANCE
-                .createSwissTimingReplayService().listReplayRaces(swissTimingUrl);
+        List<SwissTimingReplayRace> replayRaces = getSwissTimingReplayService().listReplayRaces(swissTimingUrl);
         List<SwissTimingReplayRaceDTO> result = new ArrayList<SwissTimingReplayRaceDTO>(replayRaces.size()); 
         for (SwissTimingReplayRace replayRace : replayRaces) {
             result.add(new SwissTimingReplayRaceDTO(replayRace.getFlightNumber(), replayRace.getRaceId(), replayRace.getRsc(), replayRace.getName(), replayRace.getBoatClass(), replayRace.getStartTime(), replayRace.getLink()));
@@ -2156,10 +2157,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 regatta = getService().getRegatta(regattaIdentifier);
             }
-            SwissTimingReplayService replayService = SwissTimingReplayServiceFactory.INSTANCE
-                    .createSwissTimingReplayService();
-            replayService.loadRaceData(replayRaceDTO.link, getSwissTimingAdapter().getSwissTimingDomainFactory(), regatta,
-                    getService());
+            getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
         }
     }
 
