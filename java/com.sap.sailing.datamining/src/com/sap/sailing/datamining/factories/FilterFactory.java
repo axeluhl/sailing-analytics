@@ -9,8 +9,9 @@ import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.dimensions.GPSFixDimensionsManager;
-import com.sap.sailing.datamining.dimensions.TrackedLegOfCompetitorDimensionsManager;
+import com.sap.sailing.datamining.dimensions.DimensionManager;
+import com.sap.sailing.datamining.dimensions.GPSFixDimensionManager;
+import com.sap.sailing.datamining.dimensions.TrackedLegOfCompetitorDimensionManager;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
@@ -20,6 +21,9 @@ import com.sap.sailing.datamining.shared.SharedDimension;
 
 public final class FilterFactory {
     
+    private static final DimensionManager<GPSFixWithContext> GPSFixDimensionManager = new GPSFixDimensionManager();
+    private static final DimensionManager<TrackedLegOfCompetitorWithContext> TrackedLegOfCompetitorDimensionManager = new TrackedLegOfCompetitorDimensionManager();
+
     private FilterFactory() { }
 
     @SuppressWarnings("unchecked")
@@ -27,15 +31,7 @@ public final class FilterFactory {
         if (selection.isEmpty()) {
             return createNoFilter();
         }
-        
-        switch (dataType) {
-        case GPSFix:
-            return (Filter<DataType>) createCriteriaFilter(createGPSFixDimensionFilterCriteria(selection));
-        case TrackedLegOfCompetitor:
-            return (Filter<DataType>) createCriteriaFilter(createTrackedLegOfCompetitorDimensionFilterCriteria(selection));
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given data type: "
-                + dataType.toString());
+        return (Filter<DataType>) createCriteriaFilter(createAndCompoundDimensionFilterCritera(dataType, selection));
     }
 
     /**
@@ -50,36 +46,34 @@ public final class FilterFactory {
         };
     }
 
+    private static <DataType> FilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+        DimensionManager<DataType> dimensionManager = getDimensionManagerFor(dataType);
+        CompoundFilterCriteria<DataType> compoundCriteria = new AndCompoundFilterCriteria<DataType>();
+
+        for (Entry<SharedDimension, Iterable<?>> entry : selection.entrySet()) {
+            Dimension<DataType, ?> dimension = dimensionManager.getDimensionFor(entry.getKey());
+            if (dimension != null) {
+                FilterCriteria<DataType> criteria = createDimensionFilterCriteria(dimension, entry.getValue());
+                compoundCriteria.addCriteria(criteria);
+            }
+        }
+        return compoundCriteria;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <DataType> DimensionManager<DataType> getDimensionManagerFor(DataTypes dataType) {
+        switch (dataType) {
+        case GPSFix:
+            return (DimensionManager<DataType>) GPSFixDimensionManager;
+        case TrackedLegOfCompetitor:
+            return (DimensionManager<DataType>) TrackedLegOfCompetitorDimensionManager;
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given data type: "
+                + dataType.toString());
+    }
+
     public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
         return new FilterByCriteria<DataType>(criteria);
-    }
-    
-    private static FilterCriteria<TrackedLegOfCompetitorWithContext> createTrackedLegOfCompetitorDimensionFilterCriteria(Map<SharedDimension, Iterable<?>> selection) {
-        CompoundFilterCriteria<TrackedLegOfCompetitorWithContext> compoundFilterCriteria = new AndCompoundFilterCriteria<TrackedLegOfCompetitorWithContext>();
-        for (Entry<SharedDimension, Iterable<?>> selectionEntry : selection.entrySet()) {
-            FilterCriteria<TrackedLegOfCompetitorWithContext> criteria = createTrackedLegOfCompetitorDimensionFilterCriteria(selectionEntry.getKey(), selectionEntry.getValue());
-            compoundFilterCriteria.addCriteria(criteria);
-        }
-        return compoundFilterCriteria;
-    }
-
-    private static <ValueType> FilterCriteria<TrackedLegOfCompetitorWithContext> createTrackedLegOfCompetitorDimensionFilterCriteria(SharedDimension sharedDimension, Iterable<?> values) {
-        Dimension<TrackedLegOfCompetitorWithContext, ValueType> dimension = TrackedLegOfCompetitorDimensionsManager.getDimensionFor(sharedDimension);
-        return createDimensionFilterCriteria(dimension, values);
-    }
-
-    public static FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(Map<SharedDimension, Iterable<?>> selection) {
-        CompoundFilterCriteria<GPSFixWithContext> compoundFilterCriteria = new AndCompoundFilterCriteria<GPSFixWithContext>();
-        for (Entry<SharedDimension, Iterable<?>> selectionEntry : selection.entrySet()) {
-            FilterCriteria<GPSFixWithContext> criteria = createGPSFixDimensionFilterCriteria(selectionEntry.getKey(), selectionEntry.getValue());
-            compoundFilterCriteria.addCriteria(criteria);
-        }
-        return compoundFilterCriteria;
-    }
-    
-    public static <ValueType> FilterCriteria<GPSFixWithContext> createGPSFixDimensionFilterCriteria(SharedDimension sharedDimension, Iterable<?> values) {
-        Dimension<GPSFixWithContext, ValueType> dimension = GPSFixDimensionsManager.getDimensionFor(sharedDimension);
-        return createDimensionFilterCriteria(dimension, values);
     }
     
     @SuppressWarnings("unchecked")

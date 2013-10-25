@@ -8,7 +8,8 @@ import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Grouper;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.dimensions.GPSFixDimensionsManager;
+import com.sap.sailing.datamining.dimensions.DimensionManager;
+import com.sap.sailing.datamining.dimensions.GPSFixDimensionManager;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.impl.SmartQueryDefinition;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
@@ -17,6 +18,8 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.SharedDimension;
 
 public final class GrouperFactory {
+    
+    private static final DimensionManager<GPSFixWithContext> GPSFixDimensionManager = new GPSFixDimensionManager();
     
     private GrouperFactory() { }
 
@@ -59,7 +62,8 @@ public final class GrouperFactory {
     public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimension> dimensionsToGroupBy) {
         Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new LinkedHashSet<Dimension<GPSFixWithContext, ValueType>>();
         for (SharedDimension dimensionType : dimensionsToGroupBy) {
-            Dimension<GPSFixWithContext, ValueType> dimension = GPSFixDimensionsManager.getDimensionFor(dimensionType);
+            @SuppressWarnings("unchecked")
+            Dimension<GPSFixWithContext, ValueType> dimension = (Dimension<GPSFixWithContext, ValueType>) GPSFixDimensionManager.getDimensionFor(dimensionType);
             dimensions.add(dimension);
         }
         return new GroupGPSFixesByDimension<ValueType>(dimensions);

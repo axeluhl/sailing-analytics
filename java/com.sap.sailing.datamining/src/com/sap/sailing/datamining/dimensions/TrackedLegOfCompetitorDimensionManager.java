@@ -6,9 +6,43 @@ import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.domain.common.LegType;
 
-public class TrackedLegOfCompetitorDimensionsManager {
+public final class TrackedLegOfCompetitorDimensionManager implements DimensionManager<TrackedLegOfCompetitorWithContext> {
 
-    private TrackedLegOfCompetitorDimensionsManager() { }
+    public TrackedLegOfCompetitorDimensionManager() { }
+
+    /**
+     * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
+     */
+    public Dimension<TrackedLegOfCompetitorWithContext, ?> getDimensionFor(SharedDimension dimension) {
+        switch (dimension) {
+        case BoatClassName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) BoatClassName;
+        case CompetitorName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) CompetitorName;
+        case CourseAreaName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) CourseAreaName;
+        case FleetName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) FleetName;
+        case LegNumber:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) LegNumber;
+        case LegType:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) LegType;
+        case Nationality:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) Nationality;
+        case RaceName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) RaceName;
+        case RegattaName:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) RegattaName;
+        case SailID:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) SailID;
+        case WindStrength:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) WindStrength;
+        case Year:
+            return (Dimension<TrackedLegOfCompetitorWithContext, ?>) Year;
+        }
+        throw new IllegalArgumentException("Not yet implemented for the given dimension: "
+                + dimension.toString());
+    }
 
     public final static Dimension<TrackedLegOfCompetitorWithContext, String> RegattaName = new AbstractDimension<TrackedLegOfCompetitorWithContext, String>("Regatta") {
         @Override
@@ -94,40 +128,5 @@ public class TrackedLegOfCompetitorDimensionsManager {
             return data.getWindStrength().getName();
         }
     };
-
-    /**
-     * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
-     */
-    @SuppressWarnings("unchecked")
-    public static <ValueType> Dimension<TrackedLegOfCompetitorWithContext, ValueType> getDimensionFor(SharedDimension dimension) {
-        switch (dimension) {
-        case BoatClassName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) BoatClassName;
-        case CompetitorName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) CompetitorName;
-        case CourseAreaName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) CourseAreaName;
-        case FleetName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) FleetName;
-        case LegNumber:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) LegNumber;
-        case LegType:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) LegType;
-        case Nationality:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) Nationality;
-        case RaceName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) RaceName;
-        case RegattaName:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) RegattaName;
-        case SailID:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) SailID;
-        case WindStrength:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) WindStrength;
-        case Year:
-            return (Dimension<TrackedLegOfCompetitorWithContext, ValueType>) Year;
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given dimension: "
-                + dimension.toString());
-    }
 
 }
