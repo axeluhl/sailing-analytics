@@ -276,4 +276,27 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return result;
     }
 
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
+     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
+     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
+     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is returned.
+     * @param at the wind estimation is performed for this point in time
+     */
+    @Override
+    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
+        if (isUpOrDownwindLeg(at)) {
+            Wind wind = getTrackedRace().getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
+            if (wind == null) {
+                return pos2.alongTrackDistance(pos1, getLegBearing(at));
+            } else {
+                Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
+                return projectionToLineThroughPos2.getDistance(pos2);
+            }
+        } else {
+            // reaching leg, return distance projected onto leg's bearing
+            return pos2.alongTrackDistance(pos1, getLegBearing(at));
+        }
+    }
+
 }
