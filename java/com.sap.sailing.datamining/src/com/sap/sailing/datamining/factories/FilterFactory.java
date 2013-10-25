@@ -7,11 +7,8 @@ import java.util.Map.Entry;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
-import com.sap.sailing.datamining.dimensions.GPSFixDimensionManager;
-import com.sap.sailing.datamining.dimensions.TrackedLegOfCompetitorDimensionManager;
+import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
@@ -20,9 +17,6 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.SharedDimension;
 
 public final class FilterFactory {
-    
-    private static final DimensionManager<GPSFixWithContext> GPSFixDimensionManager = new GPSFixDimensionManager();
-    private static final DimensionManager<TrackedLegOfCompetitorWithContext> TrackedLegOfCompetitorDimensionManager = new TrackedLegOfCompetitorDimensionManager();
 
     private FilterFactory() { }
 
@@ -47,7 +41,7 @@ public final class FilterFactory {
     }
 
     private static <DataType> FilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
-        DimensionManager<DataType> dimensionManager = getDimensionManagerFor(dataType);
+        DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         CompoundFilterCriteria<DataType> compoundCriteria = new AndCompoundFilterCriteria<DataType>();
 
         for (Entry<SharedDimension, Iterable<?>> entry : selection.entrySet()) {
@@ -58,18 +52,6 @@ public final class FilterFactory {
             }
         }
         return compoundCriteria;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <DataType> DimensionManager<DataType> getDimensionManagerFor(DataTypes dataType) {
-        switch (dataType) {
-        case GPSFix:
-            return (DimensionManager<DataType>) GPSFixDimensionManager;
-        case TrackedLegOfCompetitor:
-            return (DimensionManager<DataType>) TrackedLegOfCompetitorDimensionManager;
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given data type: "
-                + dataType.toString());
     }
 
     public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {

@@ -7,19 +7,16 @@ import java.util.List;
 import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Grouper;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
-import com.sap.sailing.datamining.dimensions.GPSFixDimensionManager;
+import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
+import com.sap.sailing.datamining.impl.GroupByDimension;
 import com.sap.sailing.datamining.impl.SmartQueryDefinition;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
-import com.sap.sailing.datamining.impl.gpsfix.GroupGPSFixesByDimension;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.SharedDimension;
 
 public final class GrouperFactory {
-    
-    private static final DimensionManager<GPSFixWithContext> GPSFixDimensionManager = new GPSFixDimensionManager();
     
     private GrouperFactory() { }
 
@@ -50,23 +47,14 @@ public final class GrouperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <DataType> Grouper<DataType> createByDimensionGrouper(DataTypes dataType, List<?> dimensionsToGroupBy) {
-        switch (dataType) {
-        case GPSFix:
-            return (Grouper<DataType>) createGPSFixByDimensionGrouper((Collection<SharedDimension>) dimensionsToGroupBy);
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given data type: "
-                + dataType.toString());
-    }
-
-    public static <ValueType> Grouper<GPSFixWithContext> createGPSFixByDimensionGrouper(Collection<SharedDimension> dimensionsToGroupBy) {
-        Collection<Dimension<GPSFixWithContext, ValueType>> dimensions = new LinkedHashSet<Dimension<GPSFixWithContext, ValueType>>();
-        for (SharedDimension dimensionType : dimensionsToGroupBy) {
-            @SuppressWarnings("unchecked")
-            Dimension<GPSFixWithContext, ValueType> dimension = (Dimension<GPSFixWithContext, ValueType>) GPSFixDimensionManager.getDimensionFor(dimensionType);
+    private static <DataType, ValueType> Grouper<DataType> createByDimensionGrouper(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
+        DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
+        Collection<Dimension<DataType, ValueType>> dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>();
+        for (SharedDimension sharedDimension : dimensionsToGroupBy) {
+            Dimension<DataType, ValueType> dimension = (Dimension<DataType, ValueType>) dimensionManager.getDimensionFor(sharedDimension);
             dimensions.add(dimension);
         }
-        return new GroupGPSFixesByDimension<ValueType>(dimensions);
+        return new GroupByDimension<DataType, ValueType>(dimensions);
     }
 
 }
