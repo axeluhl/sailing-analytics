@@ -858,7 +858,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
-                            NumberFormat.getFormat("0.0").format(courseDTO.startLineAngleToCombinedWind),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleToCombinedWind)),
                             courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
                             NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
                 } else {
@@ -913,7 +913,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (courseDTO.startLineAngleToCombinedWind != null) {
                     finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                             NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
-                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineAngleToCombinedWind),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
                             courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
                             NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
                 } else {
