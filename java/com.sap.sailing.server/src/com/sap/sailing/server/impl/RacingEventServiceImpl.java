@@ -1706,12 +1706,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
 
-            mediaLibrary.deserialize(ois);
-            logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
-            for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
-                logoutput.append(String.format("%3s\n", mediatrack.toString()));
-            }
-
             persistentCompetitorCache.putAll((Map<Serializable, Competitor>) ois.readObject());
             logoutput.append("\nReceived " + persistentCompetitorCache.size() + " NEW competitors\n");
             for (Competitor competitor : persistentCompetitorCache.values()) {
