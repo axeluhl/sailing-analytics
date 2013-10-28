@@ -18,9 +18,9 @@ public class TeamJsonDeserializer implements JsonDeserializer<Team> {
 
 	private final JsonDeserializer<Person> personDeserializer;
 
-	public static TeamJsonDeserializer create() {
+	public static TeamJsonDeserializer create(DomainFactory baseDomainFactory) {
 		return new TeamJsonDeserializer(new PersonJsonDeserializer(
-				new NationalityJsonDeserializer(DomainFactory.INSTANCE)));
+				new NationalityJsonDeserializer(baseDomainFactory)));
 	}
 
 	public TeamJsonDeserializer(JsonDeserializer<Person> personDeserializer) {

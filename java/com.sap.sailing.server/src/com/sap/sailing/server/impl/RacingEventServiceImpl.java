@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -74,7 +75,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
@@ -206,17 +207,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final MediaLibrary mediaLibrary;
 
     public RacingEventServiceImpl() {
-        this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE
                 .getDefaultMongoObjectFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB());
     }
 
     /**
      * Uses the default factories for the tracking adapters
      */
-    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
+    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB) {
-        this(domainObjectFactory, mongoObjectFactory, com.sap.sailing.domain.base.DomainFactory.INSTANCE,
-                mediaDB);
+        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB);
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -254,20 +254,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadMediaLibary();
     }
 
-	public RacingEventServiceImpl(MongoDBService mongoDBService) {
-        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
-    }
-
-    public RacingEventServiceImpl(MongoDBService mongoDBService, com.sap.sailing.domain.base.DomainFactory baseDomainFactory,
-            MediaDB mediaDB) {
-        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE
-                .getMongoObjectFactory(mongoDBService), baseDomainFactory, mediaDB);
-    }
-
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
+    }
+    
+    @Override
+    public MongoObjectFactory getMongoObjectFactory() {
+        return mongoObjectFactory;
     }
 
     private void loadRaceIDToRegattaAssociations() {
@@ -312,9 +306,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     private void loadStoredCompetitors() {
-    	for (Competitor c : domainObjectFactory.loadAllCompetitors()) {
-    		registerCompetitorAsPersistent(c);
-    	}
+        for (Competitor c : domainObjectFactory.loadAllCompetitors()) {
+            registerCompetitorAsPersistent(c);
+        }
     }
 
     @Override
@@ -656,7 +650,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     baseRegattaName,
                     getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                     this,
-                    com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT),
                     id, null);
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
@@ -1938,26 +1932,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-	private void registerCompetitorAsPersistent(Competitor competitor) {
-		persistentCompetitorCache.put(competitor.getId(), competitor);
-	}
+    private void registerCompetitorAsPersistent(Competitor competitor) {
+        persistentCompetitorCache.put(competitor.getId(), competitor);
+    }
 
-	@Override
-	public Competitor createPersistentCompetitor(Serializable id, String name,
-			Team team, Boat boat) {
-		Competitor c = getBaseDomainFactory().getOrCreateCompetitor(id, name, team, boat);
-		registerCompetitorAsPersistent(c);
-		return c;
-	}
+    @Override
+    public Competitor createPersistentCompetitor(Serializable id, String name, Team team, Boat boat) {
+        Competitor c = getBaseDomainFactory().getOrCreateCompetitor(id, name, team, boat);
+        registerCompetitorAsPersistent(c);
+        return c;
+    }
 
-	@Override
-	public Collection<Competitor> getPersistentCompetitors() {
-		return persistentCompetitorCache.values();
-	}
+    @Override
+    public Collection<Competitor> getPersistentCompetitors() {
+        return persistentCompetitorCache.values();
+    }
 
-	@Override
-	public boolean isCompetitorPersistent(Competitor competitor) {
-		return persistentCompetitorCache.containsKey(competitor.getId());
-	}
+    @Override
+    public boolean isCompetitorPersistent(Competitor competitor) {
+        return persistentCompetitorCache.containsKey(competitor.getId());
+    }
 
 }

@@ -55,6 +55,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
@@ -462,8 +463,8 @@ public class MasterDataImportTest {
             InterruptedException {
         // Setup source service
         DomainFactory sourceDomainFactory = new DomainFactoryImpl();
-        RacingEventService sourceService = new RacingEventServiceImpl(MongoDBService.INSTANCE,
-                sourceDomainFactory, MediaDBFactory.INSTANCE.getDefaultMediaDB());
+        RacingEventService sourceService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getDefaultMediaDB());
         Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);

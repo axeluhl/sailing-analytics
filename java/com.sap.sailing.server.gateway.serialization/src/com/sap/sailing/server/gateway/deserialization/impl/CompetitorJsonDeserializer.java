@@ -18,12 +18,12 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
 	protected final SharedDomainFactory factory;
 	protected final JsonDeserializer<Team> teamJsonDeserializer;
 
-	public static CompetitorJsonDeserializer create() {
-		return new CompetitorJsonDeserializer(DomainFactory.INSTANCE,
+	public static CompetitorJsonDeserializer create(DomainFactory baseDomainFactory) {
+		return new CompetitorJsonDeserializer(baseDomainFactory,
 				new TeamJsonDeserializer(
 						new PersonJsonDeserializer(
 								new NationalityJsonDeserializer(
-										DomainFactory.INSTANCE))));
+										baseDomainFactory))));
 	}
 
 	public CompetitorJsonDeserializer(SharedDomainFactory factory) {

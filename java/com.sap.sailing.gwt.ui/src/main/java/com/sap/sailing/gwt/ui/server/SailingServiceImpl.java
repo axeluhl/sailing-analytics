@@ -135,10 +135,10 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -237,6 +237,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -346,17 +347,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
-        mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
-        domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         baseDomainFactory = getService().getBaseDomainFactory();
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory);
         tracTracAdapter = createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapter = createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
         swissTimingReplayService = createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
         scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
-        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
+        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE.createDomainObjectFactory(mongoObjectFactory.getDatabase(), tracTracAdapter.getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
@@ -2084,7 +2085,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<SwissTimingRaceRecordDTO> result = new ArrayList<SwissTimingRaceRecordDTO>();
         for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
             SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(rr.getRaceID(), rr.getDescription(), rr.getStartTime());
-            BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
+            BoatClass boatClass = swissTimingAdapter.getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
             swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();

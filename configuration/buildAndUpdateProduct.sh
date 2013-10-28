@@ -119,7 +119,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	    b) onegwtpermutationonly=1;;
+	b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;

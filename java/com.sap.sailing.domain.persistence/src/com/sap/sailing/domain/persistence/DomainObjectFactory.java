@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -94,4 +95,6 @@ public interface DomainObjectFactory {
      * @return
      */
     Collection<Competitor> loadAllCompetitors();
+
+    DomainFactory getBaseDomainFactory();
 }

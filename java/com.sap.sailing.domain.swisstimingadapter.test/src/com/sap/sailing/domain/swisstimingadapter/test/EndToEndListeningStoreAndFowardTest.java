@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
@@ -120,7 +121,8 @@ public class EndToEndListeningStoreAndFowardTest {
         // important: construct a new domain factory each time to make sure the competitor cache starts out empty
         final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         swissTimingAdapter = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
-        racingEventService = new RacingEventServiceImpl(mongoDBService, baseDomainFactory, MediaDB.TEST_STUB);
+        racingEventService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(
+                mongoDBService, baseDomainFactory), PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDB.TEST_STUB);
         raceHandles = new ArrayList<RacesHandle>();
     }
 

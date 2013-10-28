@@ -55,7 +55,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         serializer = new RaceLogCourseDesignChangedEventSerializer(CompetitorJsonSerializer.create(),
                 new CourseBaseJsonSerializer(new WaypointJsonSerializer(new ControlPointJsonSerializer(
                         new MarkJsonSerializer(), new GateJsonSerializer(new MarkJsonSerializer())))));
-        deserializer = new RaceLogCourseDesignChangedEventDeserializer(CompetitorJsonDeserializer.create(),
+        deserializer = new RaceLogCourseDesignChangedEventDeserializer(CompetitorJsonDeserializer.create(DomainFactory.INSTANCE),
                 new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();

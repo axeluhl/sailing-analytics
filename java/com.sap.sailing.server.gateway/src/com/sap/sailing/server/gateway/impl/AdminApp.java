@@ -37,7 +37,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -50,6 +50,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -488,8 +489,8 @@ public class AdminApp extends SailingServerHttpServlet {
                 return EmptyWindStore.INSTANCE;
             } else if (windStore.equals(STORE_MONGO)) {
                 return MongoWindStoreFactory.INSTANCE.getMongoWindStore(
-                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory()));
             } else {
                 log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
                 return EmptyWindStore.INSTANCE;
@@ -505,8 +506,8 @@ public class AdminApp extends SailingServerHttpServlet {
                 return EmptyRaceLogStore.INSTANCE;
             } else if (raceLogStore.equals(STORE_MONGO)) {
                 return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory()));
             } else {
                 log("Couldn't find race log store "+raceLogStore+". Using EmptyRaceLogStore instead.");
                 return EmptyRaceLogStore.INSTANCE;
@@ -522,8 +523,8 @@ public class AdminApp extends SailingServerHttpServlet {
         //The course design update URI is not available at this place
         getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addTracTracRace(getService(), paramURL, liveURI, storedURI,
                 /*courseDesignUpdateURI*/ null,
-                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                                MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), getWindStore(req),
+                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory())), getWindStore(req),
                         /* timeoutInMilliseconds */ 60000l, /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 

@@ -40,7 +40,8 @@ public class TracTracAdapterImpl implements TracTracAdapter {
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
     }
 
-    private DomainFactory getTracTracDomainFactory() {
+    @Override
+    public DomainFactory getTracTracDomainFactory() {
         return tractracDomainFactory;
     }
     

@@ -44,6 +44,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -443,4 +444,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     public boolean isCompetitorPersistent(Competitor competitor);
 
     public Collection<Competitor> getPersistentCompetitors();
+
+    MongoObjectFactory getMongoObjectFactory();
 }

@@ -55,16 +55,18 @@ public class ImportMasterDataOperation extends
 
     private static final Logger logger = Logger.getLogger(ImportMasterDataOperation.class.getName());
 
-    private LeaderboardGroupMasterData masterData;
+    private final LeaderboardGroupMasterData masterData;
 
-    private MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+    private final MasterDataImportObjectCreationCountImpl creationCount;
 
-    private DomainFactory domainFactory = DomainFactory.INSTANCE;
+    private final DomainFactory baseDomainFactory;
 
     private final boolean override;
 
-    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount) {
+    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
+        this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
+        this.baseDomainFactory = baseDomainFactory;
         this.masterData = masterData;
         this.override = override;
     }
@@ -311,7 +313,7 @@ public class ImportMasterDataOperation extends
             UUID courseAreaUUID = defaultCourseAreaId != null ? UUID.fromString(defaultCourseAreaId) : null;
             Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName,
                     UUID.fromString(id), series, isPersistent,
-                    domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
+                    baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
             toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());

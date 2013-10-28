@@ -20,6 +20,8 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public interface TracTracAdapter {
+    DomainFactory getTracTracDomainFactory();
+    
     /**
      * If not already tracking the URL/URI/URI combination, adds a single race tracker and starts tracking the race,
      * using the race's parameter URL which delivers the single configuration text file for that race. While the result
