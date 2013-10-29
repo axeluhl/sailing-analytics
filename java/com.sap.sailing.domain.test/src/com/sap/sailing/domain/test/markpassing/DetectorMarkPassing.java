@@ -13,7 +13,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public interface DetectorMarkPassing {
 
-    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes
+    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> findCandidates
     (ArrayList<GPSFixMoving> gpsFixes, 
      LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks);
      

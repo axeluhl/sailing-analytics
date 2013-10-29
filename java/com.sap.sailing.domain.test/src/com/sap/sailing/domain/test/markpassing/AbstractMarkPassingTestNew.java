@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
@@ -176,7 +178,6 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
     // //////!!!!!!!!!!!!!!!!!!!
 
     protected void compareMarkpasses() {
-        System.out.println("Started comparison");
 
         int correctPasses = 0;
         int incorrectPasses = 0;
@@ -196,13 +197,13 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
                 waypoints.add(w);
 
-
             }
 
         } finally {
             getRace().getCourse().unlockAfterRead();
         }
 
+        getRace().getCourse().getWaypoints();
 
         // Give Waypoints Passing Instructions
 
@@ -247,8 +248,6 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
             controlPoints.add(w.getControlPoint());
         }
 
-        System.out.println("Number of ControlPoints: " + controlPoints.size());
-
         for (ControlPoint cp : controlPoints) {
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
             for (Mark mark : cp.getMarks()) {
@@ -259,89 +258,144 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
         }
 
         // For each competitor:
+
         for (Competitor c : getRace().getCompetitors()) {
+            if (!c.getName().equals("Feldmann")) {
+                System.out.println("\n" + c.getName() + ":\n");
 
-            System.out.println("\n" + c.getName() + ":\n");
+                LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+                LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
 
-            LinkedHashMap<Waypoint, MarkPassing> givenPasses = new LinkedHashMap<Waypoint, MarkPassing>();
-            LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+                // Get GPSFixes
 
-            // Get GPSFixes
-
-            Iterable<GPSFixMoving> getGPSFixes;
-            ArrayList<GPSFixMoving> gpsFixes = new ArrayList<GPSFixMoving>();
-            try {
-                getTrackedRace().getTrack(c).lockForRead();
-                getGPSFixes = getTrackedRace().getTrack(c).getFixes();
-                Iterator<GPSFixMoving> it = getGPSFixes.iterator();
-                while (it.hasNext()) {
-
-                    gpsFixes.add(it.next());
-
-                }
-
-            } finally {
-                getTrackedRace().getTrack(c).unlockAfterRead();
-            }
-            // Get given Markpasses
-            for (Waypoint w : waypoints) {
-
-                MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
-
-                givenPasses.put(w, markPassing);
+                Iterable<GPSFixMoving> getGPSFixes;
+                ArrayList<GPSFixMoving> gpsFixes = new ArrayList<GPSFixMoving>();
                 try {
-                    givenPasses.get(w).getTimePoint();
-                } catch (NullPointerException e) {
-                    missingGivenMarkPassings++;
+                    getTrackedRace().getTrack(c).lockForRead();
+                    getGPSFixes = getTrackedRace().getTrack(c).getFixes();
+                    Iterator<GPSFixMoving> it = getGPSFixes.iterator();
+                    while (it.hasNext()) {
 
+                        gpsFixes.add(it.next());
+
+                    }
+
+                } finally {
+                    getTrackedRace().getTrack(c).unlockAfterRead();
                 }
-            }
+                // Get given Markpasses
+                for (Waypoint w : waypoints) {
 
-            // Compute MarkPassings
+                    MarkPassing markPassing = getTrackedRace().getMarkPassing(c, w);
 
-            if (!(gpsFixes.size() == 0)) {
-
-                // System.out.println("LastWaypoint: " + lastWayPoint);
-
-                LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes = detector.examineFixes(gpsFixes,
-                        controlPointTracks);
-
-
-
-                
-
-                // Compare computed and calculated MarkPassings
-
-                for (Waypoint w : computedPasses.keySet())
-
+                    givenPasses.put(w, markPassing);
                     try {
                         givenPasses.get(w).getTimePoint();
+                    } catch (NullPointerException e) {
+                        missingGivenMarkPassings++;
 
-                        long timedelta = givenPasses.get(w).getTimePoint().asMillis()
-                                - computedPasses.get(w).getTimePoint().asMillis();
+                    }
+                }
 
-                        if ((Math.abs(timedelta) < tolerance)) {
+                // Get Candidates for each ControlPoint
+                if (!(gpsFixes.size() == 0)) {
 
-                            correctPasses++;
+                    LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> allCandidates = detector
+                            .findCandidates(gpsFixes, controlPointTracks);
 
+                    // Give Candidates to each Waypoint
+                    LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
+
+                    for (Waypoint w : waypointsWithPassingInstructions) {
+
+                        if (w.getPassingInstructions().equals(PassingInstructions.LINE)) {
+
+                            waypointCandidates.put(w, allCandidates.get(w.getControlPoint()).get(1));
                         } else {
-                            System.out.println("Calculated: " + computedPasses.get(w));
-                            System.out.println("Given: " + givenPasses.get(w) + "\n");
 
-                            incorrectPasses++;
+                            waypointCandidates.put(w, allCandidates.get(w.getControlPoint()).get(0));
                         }
 
-                    } catch (NullPointerException e) {
-                        // missingGivenMarkPassings++;
+                    }
+
+                    // Create "Candidates" and all legal Edges
+                    ArrayList<Candidate> candidates = new ArrayList<Candidate>();
+                    ArrayList<Edge> edges = new ArrayList<Edge>();
+
+                    Candidate start = new Candidate(0, getTrackedRace().getStartOfRace().minus(60000), 0);
+                    candidates.add(start);
+                    Candidate end = new Candidate(waypoints.size() + 1, getTrackedRace().getEndOfRace().plus(1800000),
+                            0);
+
+
+                    for (Waypoint w : waypointCandidates.keySet()) {
+
+                        for (GPSFixMoving gps : waypointCandidates.get(w).keySet()) {
+
+                            Candidate ca = new Candidate((Integer) w.getId(), gps.getTimePoint(), waypointCandidates
+                                    .get(w).get(gps));
+                            candidates.add(ca);
+                        }
+                    }
+                    candidates.add(end);
+
+                    for (Candidate ca1 : candidates) {
+
+                        for (Candidate ca2 : candidates) {
+
+                            if (ca2.getWaypointID() - ca1.getWaypointID() > 0
+                                    && ca1.getTimePoint().before(ca2.getTimePoint())) {
+
+                                Edge e = new Edge(ca1, ca2);
+                                edges.add(e);
+                            }
+                        }
+                    }
+
+                    ArrayList<TimePoint> markPasses = findShortestPath(edges, start, end);
+
+                    for (int i = markPasses.size() - 1, j = 0; i >= 0; i--, j++) {
+                        computedPasses.put(waypoints.get(j),
+                                new MarkPassingImpl(markPasses.get(i), waypoints.get(j), c));
 
                     }
 
-                    finally {
-                    }
-            }
+                    // Compare computed and calculated MarkPassings
 
-            else {
-                System.out.println("Competitor has no GPSFixes");
+                    for (Waypoint w : waypoints)
+
+                        try {
+                            givenPasses.get(w).getTimePoint();
+
+                            long timedelta = givenPasses.get(w).getTimePoint().asMillis()
+                                    - computedPasses.get(w).getTimePoint().asMillis();
+
+                            if ((Math.abs(timedelta) < tolerance)) {
+                                
+System.out.println("Wow! Its right!!");
+                                correctPasses++;
+
+                            } else {
+                             //   System.out.println("Calculated: " + computedPasses.get(w));
+                             //   System.out.println("Given: " + givenPasses.get(w) + "\n");
+
+                                incorrectPasses++;
+                            }
+
+                        } catch (NullPointerException e) {
+                            // missingGivenMarkPassings++;
+
+                        }
+
+                        finally {
+                            System.out.println("Calculated: " + computedPasses.get(w));
+                            System.out.println("Given: " + givenPasses.get(w) + "\n");
+                        }
+                }
+
+                else {
+                    System.out.println("Competitor has no GPSFixes");
+                }
             }
         }
         System.out.println("Missing Given MarkPass: " + missingGivenMarkPassings);
@@ -357,5 +411,46 @@ public abstract class AbstractMarkPassingTestNew extends OnlineTracTracBasedTest
 
         assertTrue(accuracy > 0.9);
 
+    }
+
+    private ArrayList<TimePoint> findShortestPath(ArrayList<Edge> edges, Candidate start, Candidate end) {
+        ArrayList<TimePoint> markPasses = new ArrayList<TimePoint>();
+
+        LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<Candidate, Candidate>();
+        candidateWithParent.put(start, start);
+
+        while (!candidateWithParent.containsKey(end)) {
+
+            Edge startingEdge = new Edge(start, start);
+            Edge newCheapestEdge = startingEdge;
+
+            for (Candidate c : candidateWithParent.keySet()) {
+
+                for (Edge e : edges) {
+
+                    if (newCheapestEdge.equals(startingEdge)) {
+                        newCheapestEdge = e;
+
+                    } else {
+                        if (e.getStart().equals(c) && e.getCost() < newCheapestEdge.getCost()) {
+
+                            newCheapestEdge = e;
+                        }
+                    }
+                }
+
+            }
+            edges.remove(newCheapestEdge);
+            candidateWithParent.put(newCheapestEdge.getEnd(), newCheapestEdge.getStart());
+        }
+
+        Candidate onPath = end;
+        while (!onPath.equals(start)) {
+            Candidate nextStep = candidateWithParent.get(onPath);
+            markPasses.add(nextStep.getTimePoint());
+            onPath = nextStep;
+        }
+        markPasses.remove(start.getTimePoint());
+        return markPasses;
     }
 }

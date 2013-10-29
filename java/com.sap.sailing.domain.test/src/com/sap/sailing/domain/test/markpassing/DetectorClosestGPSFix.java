@@ -15,15 +15,15 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public class DetectorClosestGPSFix implements DetectorMarkPassing {
 
     @Override
-    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes(
+    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> findCandidates(
             ArrayList<GPSFixMoving> gpsFixes,
             LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks) {
 
-        LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes = new LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>>();
+        LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>> examineFixes = new LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<GPSFixMoving, Double>>>();
 
         for (ControlPoint cp : controlPointTracks.keySet()) {
 
-            ArrayList<LinkedHashMap<Double, GPSFixMoving>> ar = new ArrayList<LinkedHashMap<Double, GPSFixMoving>>();
+            ArrayList<LinkedHashMap<GPSFixMoving, Double>> ar = new ArrayList<LinkedHashMap<GPSFixMoving, Double>>();
 
             int numberofMarks = 0;
             Iterator<Mark> it = cp.getMarks().iterator();
@@ -33,30 +33,50 @@ public class DetectorClosestGPSFix implements DetectorMarkPassing {
             }
             if (numberofMarks == 1) {
 
-                LinkedHashMap<Double, GPSFixMoving> lhs = new LinkedHashMap<Double, GPSFixMoving>();
+                LinkedHashMap<GPSFixMoving, Double> lhs = new LinkedHashMap<GPSFixMoving, Double>();
 
-                for (GPSFixMoving fix : gpsFixes) {
+                for (int i = 1; i < gpsFixes.size() - 1; i++)
 
-                    lhs.put(distanceToWayPoint(controlPointTracks.get(cp), fix), fix);
+                    if (distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
+                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
+                            && distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
+                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
 
-                }
+                        lhs.put(gpsFixes.get(i), distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)));
+
+                    }
 
                 ar.add(lhs);
 
             }
 
             if (numberofMarks == 2) {
-                LinkedHashMap<Double, GPSFixMoving> lhsGate = new LinkedHashMap<Double, GPSFixMoving>();
-                LinkedHashMap<Double, GPSFixMoving> lhsLine = new LinkedHashMap<Double, GPSFixMoving>();
+                LinkedHashMap<GPSFixMoving, Double> lhsGate = new LinkedHashMap<GPSFixMoving, Double>();
+                LinkedHashMap<GPSFixMoving, Double> lhsLine = new LinkedHashMap<GPSFixMoving, Double>();
 
-                for (GPSFixMoving fix : gpsFixes) {
+                for (int i = 1; i < gpsFixes.size() - 1; i++) {
 
-                    lhsGate.put(distanceToWayPoint(controlPointTracks.get(cp), fix), fix);
-                    lhsLine.put(distanceToLine(controlPointTracks.get(cp), fix), fix);
+                    if (distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
+                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
+                            && distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToWayPoint(
+                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
 
+                        lhsGate.put(gpsFixes.get(i), distanceToWayPoint(controlPointTracks.get(cp), gpsFixes.get(i)));
+
+                    }
                 }
-                ar.add(lhsLine);
+                for (int i = 1; i < gpsFixes.size() - 1; i++)
+
+                    if (distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToLine(
+                            controlPointTracks.get(cp), gpsFixes.get(i - 1))
+                            && distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)) < distanceToLine(
+                                    controlPointTracks.get(cp), gpsFixes.get(i + 1))) {
+
+                        lhsLine.put(gpsFixes.get(i), distanceToLine(controlPointTracks.get(cp), gpsFixes.get(i)));
+                    }
+
                 ar.add(lhsGate);
+                ar.add(lhsLine);
 
             }
             examineFixes.put(cp, ar);
