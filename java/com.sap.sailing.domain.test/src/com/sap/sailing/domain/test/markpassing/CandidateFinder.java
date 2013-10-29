@@ -2,19 +2,15 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class CandidateFinder implements AbstractCandidateFinder {
@@ -23,7 +19,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     @Override
     public LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> findCandidates(
             ArrayList<GPSFixMoving> gpsFixes,
-            LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks) {
+            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions) {
 
         LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> examineFixes = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
 
@@ -37,9 +33,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 }
             });
         }
-        for (Waypoint wp : wayPointTracks.keySet()) {
-            LinkedHashMap<GPSFixMoving, Double> candidates = new LinkedHashMap<>();
-            ArrayList<LinkedHashMap<TimePoint, Position>> markPositions = new ArrayList<>();
+        for (Waypoint wp : markPositions.keySet()) {
+            
+         /*   ArrayList<LinkedHashMap<TimePoint, Position>> markPositions = new ArrayList<>();
             for (int i = 0; i < wayPointTracks.get(wp).size(); i++) {
                 LinkedHashMap<TimePoint, Position> markPosition = new LinkedHashMap<>();
                 Iterator<Timed> itTim = timeds.iterator();
@@ -53,24 +49,26 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 } finally {
                     wayPointTracks.get(wp).get(i).unlockAfterRead();
                 }
-            }
+            }*/
             // Calculate Distances
+            LinkedHashMap<GPSFixMoving, Double> candidates = new LinkedHashMap<>();
+            
             ArrayList<Position> pos0 = new ArrayList<>();
-            for (int i = 0; i < markPositions.size(); i++) {
-                pos0.add(markPositions.get(i).get(gpsFixes.get(0).getTimePoint()));
+            for (int i = 0; i < markPositions.get(wp).size(); i++) {
+                pos0.add(markPositions.get(wp).get(i).get(gpsFixes.get(0).getTimePoint()));
             }
             double costMinus = computeCost(wp.getPassingInstructions(), pos0, gpsFixes.get(0));
             ArrayList<Position> pos1 = new ArrayList<>();
-            for (int i = 0; i < markPositions.size(); i++) {
-                pos1.add(markPositions.get(i).get(gpsFixes.get(1).getTimePoint()));
+            for (int i = 0; i < markPositions.get(wp).size(); i++) {
+                pos1.add(markPositions.get(wp).get(i).get(gpsFixes.get(1).getTimePoint()));
             }
             double cost = computeCost(wp.getPassingInstructions(), pos1, gpsFixes.get(1));
             double costPlus;
 
             for (int i = 1; i < gpsFixes.size(); i++) {
                 ArrayList<Position> pos = new ArrayList<>();
-                for (int j = 0; j < markPositions.size(); j++) {
-                pos.add(markPositions.get(j).get(gpsFixes.get(i).getTimePoint()));
+                for (int j = 0; j < markPositions.get(wp).size(); j++) {
+                pos.add(markPositions.get(wp).get(j).get(gpsFixes.get(i).getTimePoint()));
             }
                 costPlus = computeCost(wp.getPassingInstructions(), pos, gpsFixes.get(i));
 
