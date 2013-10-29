@@ -2,9 +2,10 @@ package com.sap.sailing.domain.test.markpassing;
 
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -12,9 +13,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public interface DetectorMarkPassing {
 
-    public TimePoint computeMarkpass
+    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes
     (ArrayList<GPSFixMoving> gpsFixes, 
-     ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markPasses, 
-     TimePoint previousMarkPassing);
+     LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks);
      
 }

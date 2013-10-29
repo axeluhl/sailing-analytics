@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -147,14 +147,14 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 		// calculate mark passing bearing for waypoint
 		Bearing markToBoatBearing = markPos.getBearingGreatCircle(fix.getPosition());
 		Bearing passingBearing = getPassingBearing(waypoint, mark, fix.getTimePoint());					
-		NauticalSide passingSide = getPassingSideOfMark(waypoint, mark, fix.getTimePoint());
+		PassingInstructions passingSide = getPassingSideOfMark(waypoint, mark, fix.getTimePoint());
 		double passingBearingDelta = markToBoatBearing.getDifferenceTo(passingBearing).getDegrees();
 		if (passingSide == null || 
-				(passingSide.equals(NauticalSide.PORT) &&
+				(passingSide.equals(PassingInstructions.PORT) &&
 				passingBearingDelta > 0)) {
 			// markToBoatBearing is smaller than passing bearing -> passed on port
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
-		} else if (	passingSide.equals(NauticalSide.STARBOARD) &&
+		} else if (	passingSide.equals(PassingInstructions.STARBOARD) &&
 					passingBearingDelta < 0) {
 			// markToBoatBearing is greater than passing bearing -> passed on stb
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
@@ -224,7 +224,7 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 		Bearing boatToMark2Bearing = fix.getPosition().getBearingGreatCircle(mark2Pos);
 		Bearing mark2ToMark1Bearing = mark2Pos.getBearingGreatCircle(mark1Pos);
 		
-		NauticalSide passingSideOfMark1OfGate = getPassingSideForMark1OfGate(waypoint, fix.getTimePoint());
+		PassingInstructions passingSideOfMark1OfGate = getPassingSideForMark1OfGate(waypoint, fix.getTimePoint());
 		double mark1PassingBearingDelta = boatToMark1Bearing.getDifferenceTo(mark2ToMark1Bearing).getDegrees();
 		double mark2PassingBearingDelta = boatToMark2Bearing.getDifferenceTo(mark1ToMark2Bearing).getDegrees();
 		Mark closestMark = mark1;
@@ -232,12 +232,12 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 			closestMark = mark2;
 		}
 		
-		if (	passingSideOfMark1OfGate.equals(NauticalSide.STARBOARD) &&
+		if (	passingSideOfMark1OfGate.equals(PassingInstructions.STARBOARD) &&
 				mark1PassingBearingDelta < 0 &&				
 				mark2PassingBearingDelta > 0) {
 			// gate passed if mark1 had to be passed on stb
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, closestMark, competitor);
-		} else if (	passingSideOfMark1OfGate.equals(NauticalSide.PORT) &&
+		} else if (	passingSideOfMark1OfGate.equals(PassingInstructions.PORT) &&
 				mark1PassingBearingDelta > 0 &&				
 				mark2PassingBearingDelta < 0) {
 			// gate passed if mark1 had to be passed on port

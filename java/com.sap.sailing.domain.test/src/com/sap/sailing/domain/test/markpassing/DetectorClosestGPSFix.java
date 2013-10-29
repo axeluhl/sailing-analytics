@@ -1,12 +1,13 @@
 package com.sap.sailing.domain.test.markpassing;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -14,120 +15,214 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public class DetectorClosestGPSFix implements DetectorMarkPassing {
 
     @Override
-    public TimePoint computeMarkpass(ArrayList<GPSFixMoving> gpsFixes,
-            ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, TimePoint lastWayPoint) {
+    public LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes(
+            ArrayList<GPSFixMoving> gpsFixes,
+            LinkedHashMap<ControlPoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> controlPointTracks) {
 
-        TimePoint t = null;
-    //    for(int i=0; i<200; i++){
-       // System.out.println("Fix " + i + ": " + gpsFixes.get(i).getTimePoint() + ": " + distanceToWayPoint(markTracks,
-       //              gpsFixes.get(i)).getMeters());}
-   //     int fixesInZone = 0;
+        LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>> examineFixes = new LinkedHashMap<ControlPoint, ArrayList<LinkedHashMap<Double, GPSFixMoving>>>();
 
-    //    int totalFixes = 0;
-        try {
-       //     System.out.println(lastWayPoint.asDate());
+        for (ControlPoint cp : controlPointTracks.keySet()) {
 
-            ArrayList<GPSFixMoving> allFixes = gpsFixes;
+            ArrayList<LinkedHashMap<Double, GPSFixMoving>> ar = new ArrayList<LinkedHashMap<Double, GPSFixMoving>>();
 
-            // Remove GPSFixes before last MarkPassing
-
-            Iterator<GPSFixMoving> it = allFixes.iterator();
+            int numberofMarks = 0;
+            Iterator<Mark> it = cp.getMarks().iterator();
             while (it.hasNext()) {
-
-         //       totalFixes++;
-                if (it.next().getTimePoint().before(lastWayPoint)) {
-                    it.remove();
-                }
+                it.next();
+                numberofMarks++;
             }
+            if (numberofMarks == 1) {
 
-            // Create "Hotspot"
-            int startOfHotspot = 0;
-            int endOfHotspot = allFixes.size() - 1;
+                LinkedHashMap<Double, GPSFixMoving> lhs = new LinkedHashMap<Double, GPSFixMoving>();
 
-            for (int i = 0; i < allFixes.size(); i++) {
-              //  System.out.println(i + ": "+ allFixes.get(i).getTimePoint() + ": " + distanceToWayPoint(markTracks,
-              //      allFixes.get(i)).getMeters());
+                for (GPSFixMoving fix : gpsFixes) {
 
-                if (distanceToWayPoint(markTracks, allFixes.get(i)).getMeters() < 250) {
-                    startOfHotspot = i;
-        //            System.out.println(i + " Start: " + distanceToWayPoint(markTracks,
-         //           allFixes.get(i)).getMeters());
-                    break;
+                    lhs.put(distanceToWayPoint(controlPointTracks.get(cp), fix), fix);
+
                 }
+
+                ar.add(lhs);
 
             }
 
-            for (int i = startOfHotspot; i < allFixes.size(); i++) {
-                endOfHotspot = i;
-                if (distanceToWayPoint(markTracks, allFixes.get(i)).getMeters() > 250) {
+            if (numberofMarks == 2) {
+                LinkedHashMap<Double, GPSFixMoving> lhsGate = new LinkedHashMap<Double, GPSFixMoving>();
+                LinkedHashMap<Double, GPSFixMoving> lhsLine = new LinkedHashMap<Double, GPSFixMoving>();
 
-              //      System.out.println(i + " End: " + distanceToWayPoint(markTracks,
-              //      allFixes.get(i)).getMeters());
-                    break;
+                for (GPSFixMoving fix : gpsFixes) {
+
+                    lhsGate.put(distanceToWayPoint(controlPointTracks.get(cp), fix), fix);
+                    lhsLine.put(distanceToLine(controlPointTracks.get(cp), fix), fix);
+
                 }
+                ar.add(lhsLine);
+                ar.add(lhsGate);
+
             }
-            List<GPSFixMoving> hotspot = allFixes.subList(startOfHotspot, endOfHotspot);
+            examineFixes.put(cp, ar);
 
-    //        System.out.println("Hotspot: " + hotspot.size());
-            if (hotspot.size() > 0) {
-                Distance smallestDistance = distanceToWayPoint(markTracks, hotspot.get(0));
-
-                for (GPSFixMoving gpsFix : hotspot) {
-                    // TODO recognize passing instructions
-
-                    Distance distance = distanceToWayPoint(markTracks, gpsFix);
-
-                    if (distance.getMeters() <= smallestDistance.getMeters()) {
-
-                        smallestDistance = distance;
-                        t = gpsFix.getTimePoint();
-
-                    }
-
-                }
-            } else
-                System.out.println("No Fixes in Hotzone");
-
-        //    System.out.println("Total Fixes: " + totalFixes);
-         //   System.out.println("Fixes in Zone: " + fixesInZone);
-
-        }catch(NullPointerException e){
-            System.out.println("No previous Markpass");
-            
         }
-               
-            return t;
-        
+
+        return examineFixes;
     }
 
-    // Distance from a Competitor to a Waypoint
+    // Distance from a Competitor to a single WayPoint or Gate
 
-    private Distance distanceToWayPoint(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
+    private Double distanceToWayPoint(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
         if (markTracks.size() == 2) {
 
             if (gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true))
                     .getMeters() < gps.getPosition()
                     .getDistance(markTracks.get(1).getEstimatedPosition(gps.getTimePoint(), true)).getMeters()) {
 
-                return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true));
+                return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true))
+                        .getMeters();
 
             } else {
-                return gps.getPosition().getDistance(markTracks.get(1).getEstimatedPosition(gps.getTimePoint(), true));
+                return gps.getPosition().getDistance(markTracks.get(1).getEstimatedPosition(gps.getTimePoint(), true))
+                        .getMeters();
             }
         } else {
-            return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true));
+            return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true))
+                    .getMeters();
         }
     }
 
-    // create a StraightLine for a WayPoint at a specific TimePoint
-    /*
-     * private StraightLine calculateStraightLine(TimePoint p, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks) {
-     * 
-     * Vector2D location = new Vector2D(markTracks.get(0).getEstimatedPosition(p, true)); Vector2D direction =
-     * location.subtract(new Vector2D(markTracks.get(1).getEstimatedPosition(p, true)));
-     * 
-     * return new StraightLine(location, direction);
-     * 
-     * }
-     */
+    // Distance to a Line
+
+    private double distanceToLine(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
+
+        Line2D line = new Line2D.Double(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true).getLatDeg(),
+                markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true).getLngDeg(), markTracks.get(1)
+                        .getEstimatedPosition(gps.getTimePoint(), true).getLatDeg(), markTracks.get(1)
+                        .getEstimatedPosition(gps.getTimePoint(), true).getLngDeg());
+
+        CentralAngleDistance distance = new CentralAngleDistance(line.ptSegDist(gps.getPosition().getLatDeg(), gps
+                .getPosition().getLngDeg()));
+
+        return distance.getMeters();
+    }
+
 }
+
+/*
+ * 
+ * try {
+ * 
+ * 
+ * // Remove GPSFixes before last MarkPassing
+ * 
+ * Iterator<GPSFixMoving> it = gpsFixes.iterator(); while (it.hasNext()) {
+ * 
+ * // totalFixes++; if (it.next().getTimePoint().before(lastWayPoint)) { it.remove(); } }
+ * 
+ * if (!line) {
+ * 
+ * // Create "Hotspot" int startOfHotspot = 0; int endOfHotspot = gpsFixes.size() - 1;
+ * 
+ * for (int i = 0; i < gpsFixes.size(); i++) {
+ * 
+ * if (distanceToWayPoint(controlPointTracks, gpsFixes.get(i)).getMeters() < 250) { startOfHotspot = i;
+ * 
+ * break; }
+ * 
+ * }
+ * 
+ * for (int i = startOfHotspot; i < gpsFixes.size(); i++) { endOfHotspot = i; if (distanceToWayPoint(controlPointTracks,
+ * gpsFixes.get(i)).getMeters() > 250) {
+ * 
+ * break; } } List<GPSFixMoving> hotspot = gpsFixes.subList(startOfHotspot, endOfHotspot);
+ * 
+ * // Find smallest disance if (hotspot.size() > 0) { Distance smallestDistance = distanceToWayPoint(controlPointTracks,
+ * hotspot.get(0));
+ * 
+ * for (GPSFixMoving gpsFix : hotspot) {
+ * 
+ * Distance distance = distanceToWayPoint(controlPointTracks, gpsFix);
+ * 
+ * if (distance.getMeters() <= smallestDistance.getMeters()) {
+ * 
+ * smallestDistance = distance; t = gpsFix.getTimePoint();
+ * 
+ * }
+ * 
+ * } } else { // System.out.println("No Fixes in Hotzone"); }
+ * 
+ * // System.out.println("Total Fixes: " + totalFixes); // System.out.println("Fixes in Zone: " + fixesInZone);
+ * 
+ * 
+ * 
+ * 
+ * } else { // => Line
+ * 
+ * 
+ * // Create "Hotspot" int startOfHotspot = 0; int endOfHotspot = gpsFixes.size() - 1;
+ * 
+ * for (int i = 0; i < gpsFixes.size(); i++) {
+ * 
+ * if (distanceToLine(controlPointTracks, gpsFixes.get(i)) < 0.005) { startOfHotspot = i;
+ * 
+ * 
+ * break; }
+ * 
+ * }
+ * 
+ * for (int i = startOfHotspot; i < gpsFixes.size(); i++) { endOfHotspot = i; if (distanceToLine(controlPointTracks,
+ * gpsFixes.get(i)) > 0.005) {
+ * 
+ * break; } }
+ * 
+ * List<GPSFixMoving> hotspot = gpsFixes.subList(startOfHotspot, endOfHotspot);
+ * 
+ * // distance to line!! if (hotspot.size() > 0) { double smallestDistance = distanceToLine(controlPointTracks,
+ * hotspot.get(0));
+ * 
+ * for (GPSFixMoving gpsFix : hotspot) {
+ * 
+ * double distance = distanceToLine(controlPointTracks, gpsFix);
+ * 
+ * if (distance <= smallestDistance) {
+ * 
+ * smallestDistance = distance; t = gpsFix.getTimePoint();
+ * 
+ * }
+ * 
+ * } } else { // System.out.println("No Fixes in Hotzone"); }
+ * 
+ * // System.out.println("Total Fixes: " + totalFixes); // System.out.println("Fixes in Zone: " + fixesInZone);
+ * 
+ * } } catch (NullPointerException e) { // System.out.println("No previous Markpass");
+ * 
+ * }
+ * 
+ * return t;
+ * 
+ * }
+ * 
+ * // Distance to a Line
+ * 
+ * private double distanceToLine(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) {
+ * 
+ * Line2D line = new Line2D.Double(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true).getLatDeg(),
+ * markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true).getLngDeg(), markTracks.get(1)
+ * .getEstimatedPosition(gps.getTimePoint(), true).getLatDeg(), markTracks.get(1)
+ * .getEstimatedPosition(gps.getTimePoint(), true).getLngDeg());
+ * 
+ * double distance = line.ptSegDist(gps.getPosition().getLatDeg(), gps.getPosition().getLngDeg());
+ * 
+ * return distance; }
+ * 
+ * // Distance from a Competitor to a single WayPoint or Gate
+ * 
+ * private Distance distanceToWayPoint(ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> markTracks, GPSFixMoving gps) { if
+ * (markTracks.size() == 2) {
+ * 
+ * if (gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true)) .getMeters() <
+ * gps.getPosition() .getDistance(markTracks.get(1).getEstimatedPosition(gps.getTimePoint(), true)).getMeters()) {
+ * 
+ * return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true));
+ * 
+ * } else { return gps.getPosition().getDistance(markTracks.get(1).getEstimatedPosition(gps.getTimePoint(), true)); } }
+ * else { return gps.getPosition().getDistance(markTracks.get(0).getEstimatedPosition(gps.getTimePoint(), true)); } }
+ */
+

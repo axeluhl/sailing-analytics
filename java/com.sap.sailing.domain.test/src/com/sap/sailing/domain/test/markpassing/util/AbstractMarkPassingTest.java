@@ -29,7 +29,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -399,23 +399,23 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 * @param waypoint - the {@link Waypoint} to get the passing side of
 	 * @param m - the {@link Mark} of the {@link Waypoint} to get the passing side of
 	 * @param timePoint - the {@link TimePoint} to get the passing side at
-	 * @return the {@link NauticSide} the given {@link Mark} of the given {@link Waypoint} has to be passed on at the given {@link TimePoint}
+	 * @return the {@link NauticSide} the given {@link Mark} of the given {@link WayPoint} has to be passed on at the given {@link TimePoint}
 	 */
-	protected NauticalSide getPassingSideOfMark(Waypoint waypoint, Mark m, TimePoint timePoint) {
+	protected PassingInstructions getPassingSideOfMark(Waypoint waypoint, Mark m, TimePoint timePoint) {
 		if (isGate(waypoint)) {
-			NauticalSide mark1PassingSide = getPassingSideForMark1OfGate(waypoint, timePoint);
+			PassingInstructions mark1PassingSide = getPassingSideForMark1OfGate(waypoint, timePoint);
 			if (m.equals(waypoint.getMarks().iterator().next())) {
 				// m is mark 1 of gate
 				return mark1PassingSide;
-			} else if (mark1PassingSide.equals(NauticalSide.STARBOARD)){
+			} else if (mark1PassingSide.equals(PassingInstructions.STARBOARD)){
 				// m is mark 2 of gate -> opposite passingSide of mark 1
-				return NauticalSide.PORT;
+				return PassingInstructions.PORT;
 			} else {
-				return NauticalSide.STARBOARD;
+				return PassingInstructions.STARBOARD;
 			}
 		} else {
 			// waypoint is not a gate
-			return waypoint.getPassingSide();
+			return waypoint.getPassingInstructions();
 		}
 	}
 
@@ -425,7 +425,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 * @param timePoint - the {@link TimePoint} to calculate the passing side at
 	 * @return the {@link NauticSide} the {@link Mark} 1 of the given {@link Waypoint} has to be passed on
 	 */
-	protected NauticalSide getPassingSideForMark1OfGate(Waypoint waypoint, TimePoint timePoint) {
+	protected PassingInstructions getPassingSideForMark1OfGate(Waypoint waypoint, TimePoint timePoint) {
 		if (!isGate(waypoint)) {
 			return null;
 		}
@@ -455,9 +455,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 			Bearing mark1ToNextWp = mark1Pos.getBearingGreatCircle(nextWpPos);
 			Bearing mark2ToNextWp = mark2Pos.getBearingGreatCircle(nextWpPos);
 			if (mark1ToNextWp.getDifferenceTo(mark2ToNextWp).getDegrees() > 0) {
-				return NauticalSide.STARBOARD;
+				return PassingInstructions.STARBOARD;
 			} else {
-				return NauticalSide.PORT;
+				return PassingInstructions.PORT;
 			}
 		} else {
 			// racing direction is from previous waypoint
@@ -465,9 +465,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 			Bearing prevWpToMark1 = prevWpPos.getBearingGreatCircle(mark1Pos);
 			Bearing prevWpToMark2 = prevWpPos.getBearingGreatCircle(mark2Pos);
 			if (prevWpToMark1.getDifferenceTo(prevWpToMark2).getDegrees() > 0) {
-				return NauticalSide.PORT;
+				return PassingInstructions.PORT;
 			} else {
-				return NauticalSide.STARBOARD;
+				return PassingInstructions.STARBOARD;
 			}
 		}
 	}
@@ -553,8 +553,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 			}
 			
 			// depending on passing side, set the bearing difference
-			NauticalSide passingSide = getPassingSideOfMark(waypoint, mark, time);
-			if (passingSide != null && passingSide.equals(NauticalSide.STARBOARD)) {	
+			PassingInstructions passingSide = getPassingSideOfMark(waypoint, mark, time);
+			if (passingSide != null && passingSide.equals(PassingInstructions.STARBOARD)) {	
 				bearingDiff = new DegreeBearingImpl(-90);
 			} else {	
 				bearingDiff = new DegreeBearingImpl(90);

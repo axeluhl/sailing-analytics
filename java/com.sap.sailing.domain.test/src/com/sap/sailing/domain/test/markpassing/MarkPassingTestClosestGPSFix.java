@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
+
 public class MarkPassingTestClosestGPSFix extends AbstractMarkPassingTestNew {
 
     public MarkPassingTestClosestGPSFix() throws MalformedURLException, URISyntaxException {
@@ -13,10 +14,15 @@ public class MarkPassingTestClosestGPSFix extends AbstractMarkPassingTestNew {
 
     }
 
+  
+    
     @Test
     public void compareMarkpasses() {
 
+
         super.compareMarkpasses();
+        
+
 
     }
 
