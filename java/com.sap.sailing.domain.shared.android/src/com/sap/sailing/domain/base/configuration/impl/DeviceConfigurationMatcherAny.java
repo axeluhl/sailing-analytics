@@ -8,6 +8,9 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 
+/**
+ * Matches all {@link DeviceConfigurationIdentifier}.
+ */
 public enum DeviceConfigurationMatcherAny implements DeviceConfigurationMatcher {
     INSTANCE;
 

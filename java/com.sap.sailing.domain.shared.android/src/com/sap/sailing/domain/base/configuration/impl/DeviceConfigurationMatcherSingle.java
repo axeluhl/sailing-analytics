@@ -8,6 +8,9 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 
+/**
+ * Matches a single {@link DeviceConfigurationIdentifier}.
+ */
 public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatcher {
     
     private static final long serialVersionUID = -3662453614818373801L;
