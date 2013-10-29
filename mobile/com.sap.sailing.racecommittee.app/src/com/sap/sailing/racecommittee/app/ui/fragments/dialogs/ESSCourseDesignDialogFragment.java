@@ -281,7 +281,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
             if (controlPoint instanceof Mark) {
                 CourseListDataElement element = new CourseListDataElement();
                 element.setLeftMark((Mark) controlPoint);
-                element.setRoundingDirection(getRoundingDirection(waypoint.getPassingSide()));
+                element.setRoundingDirection(getRoundingDirection(waypoint.getPassingInstructions()));
                 elementList.add(element);
             } else if (controlPoint instanceof Gate) {
                 Gate gate = (Gate) controlPoint;

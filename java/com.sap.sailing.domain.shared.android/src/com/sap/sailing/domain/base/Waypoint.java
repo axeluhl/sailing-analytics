@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.WithID;
 
 /**
@@ -21,5 +21,5 @@ public interface Waypoint extends Named, WithID, IsManagedBySharedDomainFactory 
      * Return the passing side for the waypoint. Null is allowed e.g. when the waypoint is a gate.
      * @return
      */
-    NauticalSide getPassingSide();
+    PassingInstructions getPassingInstructions();
 }

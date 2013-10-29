@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -43,8 +44,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     }
     
     protected void compareCourseData(CourseBase storedCourse, CourseBase loadedCourse) {
-        assertEquals(storedCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(loadedCourse.getFirstWaypoint().getPassingSide(), null);
+        assertEquals(storedCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(loadedCourse.getFirstWaypoint().getPassingInstructions(), null);
         Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
         Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
         
@@ -57,8 +58,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         compareMarks(storedGate.getLeft(), loadedGate.getLeft());
         compareMarks(storedGate.getRight(), loadedGate.getRight());
         
-        assertEquals(storedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(loadedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(storedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(loadedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
         Assert.assertTrue(storedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(loadedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         
@@ -83,7 +84,7 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
                 "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), NauticalSide.PORT));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), PassingInstructions.PORT));
         
         return course;
     }

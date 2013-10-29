@@ -30,7 +30,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -813,7 +813,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeWaypoint(Waypoint waypoint) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), getPassingSide(waypoint.getPassingSide()));
+        // TODO should this be renamed WAYPOINT_PASSINGINSTRUCTIONS?
+        result.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), getPassingInstructions(waypoint.getPassingInstructions()));
         result.put(FieldNames.CONTROLPOINT.name(), storeControlPoint(waypoint.getControlPoint()));
         return result;
     }
@@ -850,10 +851,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private String getPassingSide(NauticalSide passingSide) {
+    private String getPassingInstructions(PassingInstructions passingInstructions) {
         String passing = null;
-        if (passingSide != null) {
-            passing = passingSide.name();
+        if (passingInstructions != null) {
+            passing = passingInstructions.name();
         }
         return passing;
     }

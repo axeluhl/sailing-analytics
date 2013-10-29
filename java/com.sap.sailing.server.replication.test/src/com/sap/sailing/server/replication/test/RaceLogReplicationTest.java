@@ -343,8 +343,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     }
     
     protected void compareCourseBase(CourseBase masterCourse, CourseBase replicatedCourse) {
-        assertEquals(masterCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(replicatedCourse.getFirstWaypoint().getPassingSide(), null);
+        assertEquals(masterCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(replicatedCourse.getFirstWaypoint().getPassingInstructions(), null);
         Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
         Assert.assertTrue(replicatedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
         
@@ -357,8 +357,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         compareMarks(masterGate.getLeft(), replicatedGate.getLeft());
         compareMarks(masterGate.getRight(), replicatedGate.getRight());
         
-        assertEquals(masterCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(replicatedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(masterCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(replicatedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
         Assert.assertTrue(masterCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(replicatedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         

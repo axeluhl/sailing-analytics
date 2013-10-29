@@ -96,8 +96,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     }
 
     protected void compareCourseData(CourseBase serializedCourse, CourseBase deserializedCourse) {
-        assertEquals(serializedCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(deserializedCourse.getFirstWaypoint().getPassingSide(), null);
+        assertEquals(serializedCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(deserializedCourse.getFirstWaypoint().getPassingInstructions(), null);
         Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
         Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
 
@@ -108,8 +108,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         compareMarks(serializedGate.getLeft(), deserializedGate.getLeft());
         compareMarks(serializedGate.getRight(), deserializedGate.getRight());
 
-        assertEquals(serializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(deserializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
         Assert.assertTrue(serializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(deserializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
 

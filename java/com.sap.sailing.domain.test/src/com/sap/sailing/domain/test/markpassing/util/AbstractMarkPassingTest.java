@@ -394,7 +394,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
 	/**
 	 * Get the passing side of any given {@link Mark}.
-	 * For single buoys this returns {@link Waypoint#getPassingSide()}, for gates, the passing side of the {@link Waypoint}'s first {@link Mark} is calculated and depending on the given {@link Mark} is returned unchanged (m = Mark 1) or inverted (m = Mark 2).
+	 * For single buoys this returns {@link Waypoint#getPassingInstructions()}, for gates, the passing side of the {@link Waypoint}'s first {@link Mark} is calculated and depending on the given {@link Mark} is returned unchanged (m = Mark 1) or inverted (m = Mark 2).
 	 * Since the calculation of the passing side uses the {@link DynamicGPSFixTrack} of the {@link Waypoint}'s {@link Mark}s, a {@link TimePoint} has to be specified.
 	 * @param waypoint - the {@link Waypoint} to get the passing side of
 	 * @param m - the {@link Mark} of the {@link Waypoint} to get the passing side of

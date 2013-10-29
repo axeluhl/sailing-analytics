@@ -40,7 +40,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -147,11 +147,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) throws PatchFailedException {
-        List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>>();
-        for (Pair<TracTracControlPoint, NauticalSide> tractracControlPoint : controlPoints) {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, PassingInstructions>> controlPoints) throws PatchFailedException {
+        List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions>>();
+        for (Pair<TracTracControlPoint, PassingInstructions> tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
-            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>(newDomainControlPoint, tractracControlPoint.getB()));
+            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions>(newDomainControlPoint, tractracControlPoint.getB()));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
@@ -198,9 +198,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) {
+    public Course createCourse(String name, Iterable<Pair<TracTracControlPoint, PassingInstructions>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (Pair<TracTracControlPoint, NauticalSide> controlPoint: controlPoints) {
+        for (Pair<TracTracControlPoint, PassingInstructions> controlPoint: controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }

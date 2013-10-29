@@ -34,7 +34,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
@@ -66,16 +66,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         private final ControlPointDTO controlPoint;
         private final MarkDTO oldMark;
         private MarkDTO newMark;
-        private NauticalSide passingSide;
-        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, NauticalSide passingSide, MarkDTO oldMark) {
+        private PassingInstructions passingInstructions;
+        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, PassingInstructions passingInstructions, MarkDTO oldMark) {
             super();
             this.controlPoint = controlPoint;
-            this.passingSide = passingSide;
+            this.passingInstructions = passingInstructions;
             this.oldMark = oldMark;
             this.newMark = oldMark;
         }
-        public NauticalSide getPassingSide() {
-            return passingSide;
+        public PassingInstructions getPassingInstructions() {
+            return passingInstructions;
         }
         public MarkDTO getNewMark() {
             return newMark;
@@ -230,8 +230,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
                 String result = "";
-                if(cpaoanb.getPassingSide() != null) {
-                    result = cpaoanb.getPassingSide().name();
+                if(cpaoanb.getPassingInstructions() != null) {
+                    result = cpaoanb.getPassingInstructions().name();
                 }
                 return result;
             }
@@ -346,7 +346,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
         Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
-        List<Pair<ControlPointDTO, NauticalSide>> controlPoints = new ArrayList<Pair<ControlPointDTO, NauticalSide>>();
+        List<Pair<ControlPointDTO, PassingInstructions>> controlPoints = new ArrayList<Pair<ControlPointDTO, PassingInstructions>>();
         for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
             if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
                 oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
@@ -360,7 +360,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     controlPointToAdd = cpaoanb.getControlPoint();
                 }
-                controlPoints.add(new Pair<ControlPointDTO, NauticalSide>(controlPointToAdd, cpaoanb.passingSide));
+                controlPoints.add(new Pair<ControlPointDTO, PassingInstructions>(controlPointToAdd, cpaoanb.passingInstructions));
             }
         }
         sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
@@ -546,7 +546,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         for (WaypointDTO waypointDTO : raceCourseDTO.waypoints) {
             ControlPointDTO controlPointDTO = waypointDTO.controlPoint;
             for (MarkDTO mark : controlPointDTO.getMarks()) {
-                ControlPointAndOldAndNewMark waypointAndOldAndNewMark = new ControlPointAndOldAndNewMark(controlPointDTO, waypointDTO.passingSide, mark);
+                ControlPointAndOldAndNewMark waypointAndOldAndNewMark = new ControlPointAndOldAndNewMark(controlPointDTO, waypointDTO.passingInstructions, mark);
                 waypointsAndOldAndNewMarks.add(waypointAndOldAndNewMark);
             }
         }

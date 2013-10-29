@@ -4,22 +4,22 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 
 public class WaypointImpl implements Waypoint {
     private static final long serialVersionUID = 1600863368078653897L;
     private final ControlPoint controlPoint;
     private static int idCounter = 1;
     private final int id;
-    private final NauticalSide passingSide;    
+    private final PassingInstructions passingInstructions;    
 
     public WaypointImpl(ControlPoint controlPoint) {
         this(controlPoint, null);
     }
     
-    public WaypointImpl(ControlPoint controlPoint, NauticalSide passingSide) {
+    public WaypointImpl(ControlPoint controlPoint, PassingInstructions passingInstructions) {
         this.controlPoint = controlPoint;
-        this.passingSide = passingSide;
+        this.passingInstructions = passingInstructions;
         id = idCounter++;
     }
     
@@ -54,8 +54,8 @@ public class WaypointImpl implements Waypoint {
     }
 
     @Override
-    public NauticalSide getPassingSide() {
-        return passingSide;
+    public PassingInstructions getPassingInstructions() {
+        return passingInstructions;
     }
     
 }

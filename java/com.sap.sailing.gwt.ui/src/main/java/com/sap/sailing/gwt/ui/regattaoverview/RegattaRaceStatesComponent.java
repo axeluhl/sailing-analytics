@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -725,16 +725,22 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getWaypointNameLabel(WaypointDTO waypointDTO) {
         String result = waypointDTO.getName();
-        result += (waypointDTO.passingSide == null) ? "" : ", to " + getNauticalSideAsText(waypointDTO.passingSide);
+        result += (waypointDTO.passingInstructions == null) ? "" : ", to " + getPassingInstructionsAsText(waypointDTO.passingInstructions);
         return result;
     }
 
-    private String getNauticalSideAsText(NauticalSide passingSide) {
-        switch (passingSide) {
+    private String getPassingInstructionsAsText(PassingInstructions passingInstructions) {
+        switch (passingInstructions) {
         case PORT:
             return stringMessages.portSide();
         case STARBOARD:
             return stringMessages.starboardSide();
+        case GATE:
+            return stringMessages.gate();
+        case LINE:
+            return stringMessages.line();
+        case OFFSET:
+            return stringMessages.offset();
         default:
             return "";
         }

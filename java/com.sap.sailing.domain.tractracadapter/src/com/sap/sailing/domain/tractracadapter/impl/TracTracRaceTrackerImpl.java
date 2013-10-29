@@ -31,7 +31,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -284,7 +284,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         final ClientParamsPHP clientParams;
         try {
             clientParams = new ClientParamsPHP(paramURL, new InputStreamReader(paramURL.openStream()));
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions>> newCourseControlPointsWithPassingSide = getControlPointsWithPassingSide(clientParams,
                     new ControlPointProducer<com.sap.sailing.domain.base.ControlPoint>() {
                         @Override
                         public com.sap.sailing.domain.base.ControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
@@ -297,7 +297,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 logger.log(Level.INFO, "Found data for non-existing race "+raceName+" in "+paramURL+". Creating RaceDefinition.");
                 final Iterable<Competitor> competitors = getCompetitors(clientParams);
                 final Iterable<com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Competitor> competitorsInClientParams = clientParams.getCompetitors();
-                List<Pair<TracTracControlPoint, NauticalSide>> ttControlPointsAndPassingSide = getControlPointsWithPassingSide(clientParams,
+                List<Pair<TracTracControlPoint, PassingInstructions>> ttControlPointsAndPassingSide = getControlPointsWithPassingSide(clientParams,
                         new ControlPointProducer<TracTracControlPoint>() {
                     @Override
                     public TracTracControlPoint produceControlPoint(TracTracControlPoint ttControlPoint) {
@@ -384,11 +384,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * If they differ, a {@link Course#update(Iterable, com.sap.sailing.domain.base.DomainFactory) course update} is triggered.
      */
     private void compareAndUpdateCourseIfNecessary(
-            List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide) {
+            List<Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions>> newCourseControlPointsWithPassingInstructions) {
         assert getRaces() != null;
         // to check if a course update is required, compare to the existing course's control points:
         List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-        for (Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide> controlPointAndPassingSide : newCourseControlPointsWithPassingSide) {
+        for (Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstructions> controlPointAndPassingSide : newCourseControlPointsWithPassingInstructions) {
             newCourseControlPoints.add(controlPointAndPassingSide.getA());
         }
         List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
@@ -400,9 +400,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
                 logger.info("Detected course change based on clientparams.php contents for races " + getRaces());
                 try {
-                    course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
+                    course.update(newCourseControlPointsWithPassingInstructions, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException pfe) {
-                    logger.severe("Failed to apply course update " + newCourseControlPointsWithPassingSide
+                    logger.severe("Failed to apply course update " + newCourseControlPointsWithPassingInstructions
                             + " to course " + course);
                     logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                 }
@@ -414,16 +414,16 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         T produceControlPoint(TracTracControlPoint ttControlPoint);
     }
     
-    private <T> List<Pair<T, NauticalSide>> getControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
-        List<Pair<T, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
+    private <T> List<Pair<T, PassingInstructions>> getControlPointsWithPassingSide( final ClientParamsPHP clientParams, ControlPointProducer<T> controlPointProducer) {
+        List<Pair<T, PassingInstructions>> newCourseControlPointsWithPassingSide = new ArrayList<>();
         final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRace().getDefaultRoute().getControlPoints();
-        Map<Integer, NauticalSide> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
+        Map<Integer, PassingInstructions> passingSideData = domainFactory.getMetadataParser().parsePassingSideData(
                 clientParams.getRace().getDefaultRoute().getMetadata(), newTracTracControlPoints);
         int i = 1;
         for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
-            NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
+            PassingInstructions passingInstructions = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
             final T newControlPoint = controlPointProducer.produceControlPoint(newTracTracControlPoint);
-            newCourseControlPointsWithPassingSide.add(new Pair<T, NauticalSide>(newControlPoint, nauticalSide));
+            newCourseControlPointsWithPassingSide.add(new Pair<T, PassingInstructions>(newControlPoint, passingInstructions));
             i++;
         }
         return newCourseControlPointsWithPassingSide;

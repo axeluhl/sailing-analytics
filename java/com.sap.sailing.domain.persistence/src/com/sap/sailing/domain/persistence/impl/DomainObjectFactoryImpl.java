@@ -47,7 +47,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -1203,16 +1203,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
-            NauticalSide passingSide = null;
+            PassingInstructions passingInstructions = null;
+            // TODO should this be renamed to WAYPOINT_PASSINGINSTRUCTIONS?
             String waypointPassingSide = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
             if (waypointPassingSide != null) {
-                passingSide = NauticalSide.valueOf(waypointPassingSide);
+                passingInstructions = PassingInstructions.valueOf(waypointPassingSide);
             }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
-            if (passingSide == null) {
+            if (passingInstructions == null) {
                 waypoint = new WaypointImpl(controlPoint);
             } else {
-                waypoint = new WaypointImpl(controlPoint, passingSide);
+                waypoint = new WaypointImpl(controlPoint, passingInstructions);
             }
             courseData.addWaypoint(i++, waypoint);
         }
