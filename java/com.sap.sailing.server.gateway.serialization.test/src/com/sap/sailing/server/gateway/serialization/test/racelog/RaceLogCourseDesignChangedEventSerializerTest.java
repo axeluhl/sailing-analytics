@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -90,7 +91,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                 MarkType.BUOY, "black", "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
                 "green", "round", "circle"), "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white",
-                "conical", "bold"), NauticalSide.PORT));
+                "conical", "bold"), PassingInstructions.PORT));
 
         return course;
     }
