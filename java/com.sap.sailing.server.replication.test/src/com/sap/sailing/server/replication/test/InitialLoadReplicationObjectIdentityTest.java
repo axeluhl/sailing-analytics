@@ -49,9 +49,9 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     @Before
     public void setUp() throws Exception {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.getDB().dropDatabase();
         this.master = new RacingEventServiceImpl(mongoDBService);
         this.replica = new RacingEventServiceImpl(mongoDBService);
-        mongoDBService.getDB().dropDatabase();
     }
     
     public void performReplicationSetup() throws Exception {
@@ -71,9 +71,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         String venue = "Default Venue";
         List<String> courseAreaNames = new ArrayList<String>();
         courseAreaNames.add("Default");
-        master.addEvent(eventName, venue, "", false, "monsterevent", courseAreaNames);
-        assertNotNull(master.getEvent("monsterevent"));
-        assertNull(replica.getEvent("monsterevent"));
+        final UUID eventId = UUID.randomUUID();
+        master.addEvent(eventName, venue, "", false, eventId);
+        assertNotNull(master.getEvent(eventId));
+        assertNull(replica.getEvent(eventId));
         
         /* Regatta */
         final String baseEventName = "Kiel Week 2012";
@@ -124,7 +125,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
             }
         }
 
-        assertNotNull(replica.getEvent("monsterevent"));
+        assertNotNull(replica.getEvent(eventId));
         assertNotNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
         assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
         assertNotNull(replica.getLeaderboardByName(leaderboardName));

@@ -22,7 +22,7 @@
 	</entry-point>
 
 	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.maps.GoogleMaps' />
+	<inherits name='com.google.gwt.maps.Maps' />
 
 	<!-- Highcharts API -->
 	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />

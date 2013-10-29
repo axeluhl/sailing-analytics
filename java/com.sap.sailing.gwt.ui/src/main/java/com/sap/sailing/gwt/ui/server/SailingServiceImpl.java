@@ -42,13 +42,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.regexp.shared.RegExp;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -82,9 +79,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
-import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -122,8 +119,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
-import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -143,9 +139,7 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
-import com.sap.sailing.domain.polarsheets.PolarSheetsWindStepping;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -327,7 +321,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers;
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
@@ -343,7 +336,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
     private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
-
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         tractracDomainFactory = DomainFactory.INSTANCE;
@@ -358,7 +350,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
         leaderboardDifferenceCacheByIdPair = new LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO>(LEADERBOARD_DIFFERENCE_CACHE_SIZE, 0.75f, /* accessOrder */ true) {
             private static final long serialVersionUID = 3775119859130148488L;
             @Override
@@ -1205,9 +1196,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
      *            as value
      * @param extrapolate
-     *            if <code>true</code> and no position is known for <code>date</code>, the last entry returned in the
-     *            list of GPS fixes will be obtained by extrapolating from the competitors last known position before
-     *            <code>date</code> and the estimated speed.
+     *            if <code>true</code> and no (exact or interpolated) position is known for <code>date</code>, the last
+     *            entry returned in the list of GPS fixes will be obtained by extrapolating from the competitors last
+     *            known position before <code>date</code> and the estimated speed.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
@@ -1247,7 +1238,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
                         Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
-                        if(estimatedPosition != null && estimatedSpeed != null) {
+                        if (estimatedPosition != null && estimatedSpeed != null) {
                             fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
                         }
                     }
@@ -2565,12 +2556,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid, courseAreaNames));
-
+        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid.toString(), courseAreaName);
         }
-
         return getEventById(eventUuid);
     }
 
@@ -2951,18 +2940,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
+    public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
+            PolarSheetGenerationSettings settings, String name) throws Exception {
         String id = UUID.randomUUID().toString();
         RacingEventService service = getService();
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
-        polarSheetGenerationWorkers.put(id, genWorker);
+        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
         genWorker.startPolarSheetGeneration();
-        String name = getCommonBoatClass(trackedRaces);
-        return new PolarSheetGenerationTriggerResponseImpl(id, name);
+        if (name == null || name.isEmpty()) {
+            name = getCommonBoatClass(trackedRaces);
+        }
+        PolarSheetsData result = genWorker.get();
+        return new PolarSheetGenerationResponseImpl(id, name, result);
     }
 
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
@@ -2971,95 +2963,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (boatClass == null) {
                 boatClass = race.getRace().getBoatClass();
             }
-            if (!boatClass.getName().matches(race.getRace().getBoatClass().getName())) {
+            if (!boatClass.getName().toLowerCase().matches(race.getRace().getBoatClass().getName().toLowerCase())) {
                 return "Mixed";
             }
         }
 
         return boatClass.getName();
-    }
-
-    @Override
-    public PolarSheetsData getPolarSheetsGenerationResults(String id) {
-        PolarSheetsData data = null;
-        if (polarSheetGenerationWorkers.containsKey(id)) {
-            PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
-            data = worker.getPolarData();
-            if (data.isComplete()) {
-                polarSheetGenerationWorkers.remove(id);
-                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-                if (httpServletRequest != null) {
-                    HttpSession session = httpServletRequest.getSession();
-                    session.setAttribute(id, worker.getCompleteData());
-                    session.setAttribute("stepping", worker.getStepping());
-                }       
-            }
-        } else {
-            //TODO Exception handling
-        }
-
-        return data;      
-    }
-
-    @Override
-    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
-        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-        HttpSession session = httpServletRequest.getSession();
-        @SuppressWarnings("unchecked")
-        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
-        if (data == null) {
-            //TODO exception handling
-            return null;
-        }
-        List<BoatAndWindSpeed> dataForAngle = data.get(angle);
-        if (dataForAngle.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-        
-        PolarSheetsWindStepping stepping = (PolarSheetsWindStepping) session.getAttribute("stepping");
-
-        List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
-        int windSpeedLevel = stepping.getLevelForValue(windSpeed);
-
-        for (BoatAndWindSpeed dataPoint: dataForAngle) {
-            if ((stepping.getLevelForValue(dataPoint.getWindSpeed().getKnots()) == windSpeedLevel)) {
-                dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
-            }
-        }
-
-        if (dataForAngleAndWindSpeed.size() < 1) {
-            //TODO exception handling
-            return null;
-        }
-
-        Double min = Collections.min(dataForAngleAndWindSpeed);
-        Double max = Collections.max(dataForAngleAndWindSpeed);
-        //TODO make number of columns dynamic to chart size
-        int numberOfColumns = 20;
-        double range = (max - min) / numberOfColumns;
-        Double[] xValues = new Double[numberOfColumns];
-        for (int i = 0; i < numberOfColumns; i++) {
-            xValues[i] = min + i * range + ( 0.5 * range);
-        }
-
-        Integer[] yValues = new Integer[numberOfColumns];
-        for (Double dataPoint : dataForAngleAndWindSpeed) {
-            int i = (int) (((dataPoint - min) / range));
-            if (i == numberOfColumns) {
-                //For max value
-                i = 19;
-            }
-            if (yValues[i] == null) {
-                yValues[i] = 0;
-            }
-            yValues[i]++;
-        }
-
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
-
-
-        return histogramData;
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
@@ -3229,10 +3138,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        String getMasterDataUrl = createGetMasterDataForLgsUrl(host);
-        if (!isValidUrl(getMasterDataUrl, false)) {
-            throw new RuntimeException("Not a valid URL for fetching leaderboardgroups masterdata: " + getMasterDataUrl);
-        }
+        host = host.split("://")[1];
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
@@ -3242,7 +3148,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         URL serverAddress = null;
       
         try {
-            serverAddress = parseUrl(getMasterDataUrl + query);
+            serverAddress = createUrl(host, query);
             //set up out communications stuff
             connection = null;
           
@@ -3275,16 +3181,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL parseUrl(String s) throws Exception {
-        URL u = new URL(s);
-        return new URI(
-               u.getProtocol(), 
-               u.getAuthority(), 
-               u.getPath(),
-               u.getQuery(), 
-               u.getRef()).
-               toURL();
-   }
+    private URL createUrl(String host, String query) throws Exception {
+        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
@@ -3292,7 +3191,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
-        StringBuffer queryStringBuffer = new StringBuffer("?");
+        StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
@@ -3303,28 +3202,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
         }
         return queryStringBuffer.toString();
-    }
-    
-    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
-            RegExp urlValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-        return urlValidator.exec(url) != null;
-    }
-    
-    private String createGetMasterDataForLgsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/masterdata/leaderboardgroups");
-        return urlBuffer.toString();
-    }
-    
-    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
-        if (!host.endsWith("/")) {
-            urlBuffer.append("/");
-        }
-        if (!host.startsWith("http://")) {
-            urlBuffer.insert(0, "http://");
-        }
     }
 
 }

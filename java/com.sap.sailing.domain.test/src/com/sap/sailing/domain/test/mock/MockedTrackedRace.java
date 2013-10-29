@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -204,9 +205,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource) {
         if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
+            return true;
+        } else {
+        	return false;
         }
     }
 
@@ -214,6 +218,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void addListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void addListener(RaceChangeListener listener, boolean notifyAboutWindFixesAlreadyLoaded) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -821,6 +831,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     public void onStartTimeChangedByRaceCommittee(TimePoint newStartTime) {
         // TODO Auto-generated method stub
         

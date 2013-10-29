@@ -30,7 +30,7 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     }
 
     @Override
-    protected Flags performAnalyzation() {
+    protected Flags performAnalysis() {
         StartProcedureType type = procedureAnalyzer.analyze();
         if (StartProcedureType.RRS26.equals(type)) {
             for (RaceLogEvent event : getPassEventsDescending()) {

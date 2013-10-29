@@ -14,7 +14,7 @@ public abstract class IndividualRecallFinder extends RaceLogAnalyzer<TimePoint> 
     protected abstract boolean isRelevant(RaceLogFlagEvent flagEvent);
     
     @Override
-    protected TimePoint performAnalyzation() {
+    protected TimePoint performAnalysis() {
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
