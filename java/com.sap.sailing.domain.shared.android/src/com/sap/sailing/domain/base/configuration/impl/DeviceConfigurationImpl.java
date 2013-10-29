@@ -4,6 +4,8 @@ import java.util.List;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 
 public class DeviceConfigurationImpl implements DeviceConfiguration {
+
+    private static final long serialVersionUID = 6084215932610324314L;
     
     private List<String> allowedCourseAreaNames;
     private Integer minRounds;
