@@ -1014,8 +1014,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(identifier.getIdentifier()));
             loadRaceLogEvents(result, query);
             
-            // query for obsolete events
-            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getObsoleteIdentifier()));
+            // query for events with deprecated identifier format
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getDeprecatedIdentifier()));
             loadRaceLogEvents(result, query);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
