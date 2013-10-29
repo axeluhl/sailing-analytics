@@ -96,5 +96,8 @@ public interface MongoObjectFactory {
      */
     void storeCompetitor(Competitor competitor);
 
+    void removeAllCompetitors();
+
     DB getDatabase();
+
 }

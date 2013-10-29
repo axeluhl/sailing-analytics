@@ -867,15 +867,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return passing;
     }
 
-	@Override
-	public void storeCompetitor(Competitor competitor) {
+    @Override
+    public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        
         JSONObject json = competitorSerializer.serialize(competitor);
         BasicDBObject query = new BasicDBObject(FieldNames.COMPETITOR_ID.name(), competitor.getId());
         DBObject entry = (DBObject) JSON.parse(json.toString());
-      
-        collection.update(query, entry, /* upsrt */ true, /* multi */ false);
-	}
+        collection.update(query, entry, /* upsrt */true, /* multi */false);
+    }
+    
+    @Override
+    public void removeAllCompetitors() {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        collection.drop();
+    }
 
 }

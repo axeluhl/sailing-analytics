@@ -30,7 +30,7 @@ public class CreatePersistentCompetitor extends
 
 	@Override
 	public Competitor internalApplyTo(RacingEventService toState) {
-		return toState.createPersistentCompetitor(id, name, team, boat);
+		return toState.getBaseDomainFactory().getOrCreateCompetitor(id, name, team, boat);
 	}
 
 	@Override

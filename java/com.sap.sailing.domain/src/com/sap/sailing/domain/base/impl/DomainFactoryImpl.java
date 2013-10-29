@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -88,7 +89,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<String, BoatClass> boatClassCache;
     
-    private final Map<Serializable, Competitor> competitorCache;
+    private final CompetitorStore competitorStore;
     
     private final Map<Serializable, CourseArea> courseAreaCache;
     
@@ -135,7 +136,7 @@ public class DomainFactoryImpl implements DomainFactory {
         markCache = new HashMap<Serializable, Mark>();
         markIdCache = new HashMap<>();
         boatClassCache = new HashMap<String, BoatClass>();
-        competitorCache = new HashMap<Serializable, Competitor>();
+        competitorStore = new TransientCompetitorStoreImpl();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
         courseAreaCache = new HashMap<>();
@@ -288,23 +289,12 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getExistingCompetitorById(Serializable competitorId) {
-        return competitorCache.get(competitorId);
+        return competitorStore.getExistingCompetitorById(competitorId);
     }
 
     @Override
-    public synchronized Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
-        Competitor result = new CompetitorImpl(id, name, team, boat);
-        competitorCache.put(id, result);
-        return result;
-    }
-    
-    @Override
     public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat) {
-        Competitor result = getExistingCompetitorById(competitorId);
-        if (result == null) {
-            result = createCompetitor(competitorId, name, team, boat);
-        }
-        return result;
+        return competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
     }
 
     @Override

@@ -1,0 +1,63 @@
+package com.sap.sailing.domain.base.impl;
+
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
+
+public class TransientCompetitorStoreImpl implements CompetitorStore {
+    private final ConcurrentHashMap<Serializable, Competitor> competitorCache;
+    
+    public TransientCompetitorStoreImpl() {
+        competitorCache = new ConcurrentHashMap<>();
+    }
+    
+    private Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
+        Competitor result = new CompetitorImpl(id, name, team, boat);
+        addNewCompetitor(id, result);
+        return result;
+    }
+
+    /**
+     * Adds the <code>competitor</code> to this transient competitor collection so that it is available in
+     * {@link #getExistingCompetitorById(Serializable)}. Subclasses may override in case they need to take additional
+     * measures such as durably storing the competitor. Overriding implementations must call this implementation.
+     */
+    protected void addNewCompetitor(Serializable id, Competitor competitor) {
+        competitorCache.put(id, competitor);
+    }
+    
+    @Override
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat) {
+        Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
+        if (result == null) {
+            synchronized(this) {
+                result = getExistingCompetitorById(competitorId); //  try again, now with synchronization
+                if (result == null) {
+                    result = createCompetitor(competitorId, name, team, boat);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Competitor getExistingCompetitorById(Serializable competitorId) {
+        return competitorCache.get(competitorId);
+    }
+
+    @Override
+    public int size() {
+        return competitorCache.size();
+    }
+
+    @Override
+    public void clear() {
+        competitorCache.clear();
+    }
+
+}

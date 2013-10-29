@@ -247,7 +247,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             Team team = getOrCreateTeam(name, nationality, competitorId);
             Boat boat = new BoatImpl(shortName, boatClass, shortName);
-            result = baseDomainFactory.createCompetitor(competitorId, name, team, boat);
+            result = baseDomainFactory.getOrCreateCompetitor(competitorId, name, team, boat);
         }
         return result;
     }

@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -26,7 +24,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -54,7 +51,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
-import com.sap.sailing.server.operationaltransformation.CreatePersistentCompetitor;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -427,23 +423,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             UUID id);
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
-
-    /**
-     * Creates a persistent competitor, that can then be used for smartphone tracking, as it will be available on
-     * all servers, even after restarting them.
-     * 
-     * To replicate, use {@link CreatePersistentCompetitor}.
-     * @param id
-     * @param name
-     * @param team
-     * @param boat
-     * @return
-     */
-    Competitor createPersistentCompetitor(Serializable id, String name, Team team, Boat boat);
-    
-    public boolean isCompetitorPersistent(Competitor competitor);
-
-    public Collection<Competitor> getPersistentCompetitors();
 
     MongoObjectFactory getMongoObjectFactory();
 }

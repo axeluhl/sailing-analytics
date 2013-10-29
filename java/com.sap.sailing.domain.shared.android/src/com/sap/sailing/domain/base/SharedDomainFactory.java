@@ -74,8 +74,6 @@ public interface SharedDomainFactory {
 
     Competitor getExistingCompetitorById(Serializable competitorId);
 
-    Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
-
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
     
     CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
