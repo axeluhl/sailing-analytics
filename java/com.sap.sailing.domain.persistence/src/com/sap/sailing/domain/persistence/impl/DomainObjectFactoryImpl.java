@@ -1270,22 +1270,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return mark;
     }
 
-	@Override
-	public Collection<Competitor> loadAllCompetitors() {
+    @Override
+    public Collection<Competitor> loadAllCompetitors() {
         ArrayList<Competitor> result = new ArrayList<Competitor>();
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-
         try {
             for (DBObject o : collection.find()) {
-            	JSONObject json = Helpers.toJSONObjectSafe(JSON.serialize(o));
-            	Competitor c = competitorDeserializer.deserialize(json);
+                JSONObject json = Helpers.toJSONObjectSafe(JSON.serialize(o));
+                Competitor c = competitorDeserializer.deserialize(json);
                 result.add(c);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
             logger.log(Level.SEVERE, "loadCompetitors", e);
         }
-
         return result;
-	}
+    }
 }
