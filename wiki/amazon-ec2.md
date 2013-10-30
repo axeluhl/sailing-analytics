@@ -87,13 +87,13 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 ### Create a new Analytics application instance ready for production
 
-Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and SERVER_STARTUP_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and BUILD_COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
 <pre>
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
@@ -110,7 +110,7 @@ REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER_STARTUP_NOTIFY field then you will get an email once the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been started.
 
 ### Testing code on a server
 
