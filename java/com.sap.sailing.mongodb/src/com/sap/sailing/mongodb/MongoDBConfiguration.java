@@ -24,7 +24,7 @@ public class MongoDBConfiguration {
             defaultHostName = System.getProperty(MONGO_HOSTNAME);
         } else {
             if (System.getenv("MONGODB_HOST") != null) {
-                defaultHostName = System.getenv(MONGO_HOSTNAME);
+                defaultHostName = System.getenv("MONGODB_HOST");
             }
         }
         
@@ -33,7 +33,7 @@ public class MongoDBConfiguration {
             defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT).trim());
         } else {
             if (System.getenv("MONGODB_PORT") != null) {
-                defaultPort = Integer.valueOf(System.getenv(MONGO_PORT).trim());
+                defaultPort = Integer.valueOf(System.getenv("MONGODB_PORT").trim());
             }
         }
         String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
