@@ -85,9 +85,9 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 ## HowTo
 
-### Create a new Analytics application instance
+### Create a new Analytics application instance ready for production
 
-Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and SERVER_STARTUP_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
 <pre>
 BUILD_BEFORE_START=True
@@ -110,7 +110,11 @@ REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER-STARTUP-NOTIFY field then you will get an email once the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER_STARTUP_NOTIFY field then you will get an email once the server has been started.
+
+### Testing code on a server
+
+Starting a test is as easy as starting up a new instance. Just make sure that you fill the field RUN_TESTS and set it to `True`. Also set the field BUILD_FROM to a gitspec that matches the code branch that you want to test. After tests has been run and the server has been started you will get an email giving you all the details. You can then access your instance or simply shut it down.
 
 ### Setup replicated instances with ELB
 
