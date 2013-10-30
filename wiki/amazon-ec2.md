@@ -79,7 +79,7 @@ The architecture is divided into logical tiers. These are represented by firewal
 <td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
 <td>Sailing Analytics App</td>
 <td>X11,Firefox,Hudson</td>
-<td>Instance handling the access to all historical races.</td>
+<td>Instance that can be used to run tests</td>
 </tr>
 </table>
 
