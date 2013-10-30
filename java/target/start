@@ -6,8 +6,9 @@
 # check if automatic tests and build should be executed
 # before starting up the server
 if [[ $BUILD_BEFORE_START == "True" ]]; then
+    `which mail` -s "Build of $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
     `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.log
-    `which mail` -s "Build complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+    `which mail` -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
 fi
 
 PARAM=$@
