@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Boat;
@@ -58,6 +59,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public void clear() {
         competitorCache.clear();
+    }
+    
+    protected Iterable<Competitor> getCompetitors() {
+        return Collections.unmodifiableCollection(competitorCache.values());
     }
 
 }

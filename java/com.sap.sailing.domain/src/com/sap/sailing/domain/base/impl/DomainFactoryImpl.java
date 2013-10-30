@@ -129,14 +129,21 @@ public class DomainFactoryImpl implements DomainFactory {
 
     private final Set<String> mayStartWithNoUpwindLeg;
     
+    /**
+     * Uses a transient competitor store
+     */
     public DomainFactoryImpl() {
+        this(new TransientCompetitorStoreImpl());
+    }
+    
+    public DomainFactoryImpl(CompetitorStore competitorStore) {
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
         markIdCache = new HashMap<>();
         boatClassCache = new HashMap<String, BoatClass>();
-        competitorStore = new TransientCompetitorStoreImpl();
+        this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
         courseAreaCache = new HashMap<>();

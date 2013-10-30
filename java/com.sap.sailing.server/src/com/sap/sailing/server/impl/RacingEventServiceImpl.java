@@ -275,6 +275,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public MongoObjectFactory getMongoObjectFactory() {
         return mongoObjectFactory;
     }
+    
+    @Override
+    public DomainObjectFactory getDomainObjectFactory() {
+        return domainObjectFactory;
+    }
 
     private void loadRaceIDToRegattaAssociations() {
         persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
@@ -1702,8 +1707,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
-            for (Map.Entry<Serializable, Competitor> e : ((Map<Serializable, Competitor>) ois.readObject()).entrySet()) {
-                persistentCompetitorStore.getOrCreateCompetitor(e.getKey(), e.getValue().getName(), e.getValue().getTeam(), e.getValue().getBoat());
+            for (Competitor competitor : ((PersistentCompetitorStore) ois.readObject()).getCompetitors()) {
+                persistentCompetitorStore.getOrCreateCompetitor(competitor.getId(), competitor.getName(), competitor.getTeam(), competitor.getBoat());
             }
             logoutput.append("\nReceived " + persistentCompetitorStore.size() + " NEW competitors\n");
 
