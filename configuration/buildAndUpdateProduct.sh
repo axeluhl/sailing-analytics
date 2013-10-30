@@ -333,10 +333,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
-    # some Maven plugins do not honor argLine parameters so we need to set some here
-    export mongo.host=$MONGODB_HOST
-    export mongo.port=$MONGODB_PORT
-
 	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
