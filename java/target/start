@@ -6,6 +6,15 @@
 # check if automatic tests and build should be executed
 # before starting up the server
 if [[ $BUILD_BEFORE_START == "True" ]]; then
+
+    # check for available memory - build can not be started with less than 1GB
+    MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
+    if [ $MEM_TOTAL -lt 924 ]; then
+        echo "Could not start build process with less than 1GB of RAM!"
+        echo "Not enough RAM for completing the build process! You need at least 1GB." | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY
+        exit 10
+    fi
+
     echo "OK" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
     `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
      STATUS=$?
