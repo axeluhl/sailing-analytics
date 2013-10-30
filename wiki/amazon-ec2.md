@@ -89,6 +89,8 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and BUILD_COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
+Attention: You can not start the building process on t1.micro instances having less than 1.5 GB of RAM!
+
 <pre>
 BUILD_BEFORE_START=True
 BUILD_FROM=master
