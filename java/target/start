@@ -11,10 +11,10 @@ if [[ $BUILD_BEFORE_START == "True" ]]; then
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        `which mail` -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+        `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
      else
         echo "Deployment Failed"
-        `which mail` -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+        `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
         exit
      fi 
 fi
