@@ -67,7 +67,7 @@ build ()
     if [[ $COMPILE_GWT == "True" ]]; then
         GWT=""
     fi
-    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $TEST $GWT -u build
+    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $TESTS $GWT -u build
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Build Successful"
