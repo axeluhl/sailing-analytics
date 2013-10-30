@@ -113,7 +113,7 @@ SERVER_STARTUP_NOTIFY=
 
 After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
 
-You can now access this instance by either using the Administrator key or the Sailing User key:
+You can now access this instance by either using the Administrator key (for root User) or the Sailing User key (for user sailing):
 
 <pre>
 ssh -i .ssh/Administrator.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
@@ -122,7 +122,7 @@ ssh -i .ssh/Administrator.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaw
 or
 
 <pre>
-ssh -i .ssh/SailingUser.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
 </pre>
 
 ### Testing code on a server
