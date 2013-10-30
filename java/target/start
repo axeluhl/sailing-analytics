@@ -11,10 +11,10 @@ if [[ $BUILD_BEFORE_START == "True" ]]; then
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        `which uuencode` last_automatic_build.log build.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY
+        cat last_automatic_build.log build.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY
      else
         echo "Deployment Failed"
-        `which uuencode` last_automatic_build.log error.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY
+        cat last_automatic_build.log error.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY
         exit
      fi 
 fi
@@ -77,7 +77,7 @@ if [[ $PARAM == "" ]]; then
     if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                `which mail` -s "Server $SERVER_NAME startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Satrtup failed" | `which mail` -s "Server $SERVER_NAME startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
     fi
