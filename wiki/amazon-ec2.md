@@ -113,6 +113,18 @@ SERVER_STARTUP_NOTIFY=
 
 After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
 
+You can now access this instance by either using the Administrator key or the Sailing User key:
+
+<pre>
+ssh -i .ssh/Administrator.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+or
+
+<pre>
+ssh -i .ssh/SailingUser.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
 ### Testing code on a server
 
 Starting a test is as easy as starting up a new instance. Just make sure that you fill the field RUN_TESTS and set it to `True`. Also set the field BUILD_FROM to a gitspec that matches the code branch that you want to test. After tests has been run and the server has been started you will get an email giving you all the details. You can then access your instance or simply shut it down.
