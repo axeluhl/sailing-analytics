@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -109,8 +108,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         compareMarks(serializedGate.getLeft(), deserializedGate.getLeft());
         compareMarks(serializedGate.getRight(), deserializedGate.getRight());
 
-        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
-        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstructions.PORT);
+        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstructions.PORT);
         Assert.assertTrue(serializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(deserializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
 
