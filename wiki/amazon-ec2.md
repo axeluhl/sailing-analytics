@@ -44,7 +44,6 @@ The architecture is divided into logical tiers. These are represented by firewal
 <tr>
 <td><b>Name</b></td>
 <td><b>Access Key(s)</b></td>
-<td><b>Open Ports</b></td>
 <td><b>Security Group</b></td>
 <td><b>Services</b></td>
 <td><b>Description</b></td>
@@ -52,7 +51,6 @@ The architecture is divided into logical tiers. These are represented by firewal
 <tr>
 <td>Webserver (Elastic IP: 54.229.94.254)</td>
 <td>Administrator</td>
-<td>IN: 20, 80, 443, 2010-2015<br/>OUT: ALL</td>
 <td>Webserver</td>
 <td>Apache, GIT, Piwik, Bugzilla, Wiki</td>
 <td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
@@ -60,15 +58,13 @@ The architecture is divided into logical tiers. These are represented by firewal
 <tr>
 <td>DB & Messaging</td>
 <td>Administrator</td>
-<td>IN: 22, 5672, 10200-10210, 27017<br/>OUT: ALL</td>
 <td>Database and Messaging</td>
-<td>MongoDB, MySQL</td>
+<td>MongoDB, MySQL, RabbitMQ</td>
 <td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
 </tr>
 <tr>
 <td>Archive</td>
 <td>Administrator, Sailing User</td>
-<td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
 <td>Sailing Analytics App</td>
 <td>Java App</td>
 <td>Instance handling the access to all historical races.</td>
@@ -76,7 +72,6 @@ The architecture is divided into logical tiers. These are represented by firewal
 <tr>
 <td>Build and Test</td>
 <td>Administrator, Sailing User</td>
-<td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
 <td>Sailing Analytics App</td>
 <td>X11,Firefox,Hudson</td>
 <td>Instance that can be used to run tests</td>
