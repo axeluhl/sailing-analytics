@@ -14,9 +14,8 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
-import com.sap.sailing.domain.common.PolarSheetsData;
-import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -303,11 +302,8 @@ public interface SailingService extends RemoteService {
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
 
-    PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces);
-    
-    PolarSheetsData getPolarSheetsGenerationResults(String id);
-    
-    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel);
+    PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
+            PolarSheetGenerationSettings settings, String name) throws Exception;
     
     EventDTO getEventById(Serializable id);
     

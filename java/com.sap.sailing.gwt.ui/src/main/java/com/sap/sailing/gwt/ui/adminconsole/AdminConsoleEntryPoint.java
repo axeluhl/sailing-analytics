@@ -47,9 +47,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.setSize("99%", "95%");
         verticalPanel.add(tabPanel); //, 10, 10);
         
-        final DeviceConfigurationPanel deviceConfigurationPanel = new DeviceConfigurationPanel(sailingService, stringMessages, this);
-        tabPanel.add(deviceConfigurationPanel, "Device Configuration", false);
-        
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
         SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
@@ -125,6 +122,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(stringMessages, sailingService, this, sailingEventManagementPanel, leaderboardGroupConfigPanel);
         tabPanel.add(masterDataImportPanel, stringMessages.masterDataImportPanel(), /* asHTML */ false);
+        
+        final DeviceConfigurationPanel deviceConfigurationPanel = new DeviceConfigurationPanel(sailingService, stringMessages, this);
+        tabPanel.add(deviceConfigurationPanel, "Device Configuration", false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

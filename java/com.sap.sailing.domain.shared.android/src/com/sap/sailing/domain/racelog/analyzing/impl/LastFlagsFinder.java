@@ -25,7 +25,7 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
     }
 
     @Override
-    protected List<RaceLogFlagEvent> performAnalyzation() {
+    protected List<RaceLogFlagEvent> performAnalysis() {
 
         Iterator<RaceLogEvent> iterator = getPassEventsDescending().iterator();
         RaceLogFlagEvent flagEvent = getNextFlagEvent(iterator);

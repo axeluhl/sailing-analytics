@@ -12,7 +12,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     }
 
     @Override
-    protected RaceLogRaceStatus performAnalyzation() {
+    protected RaceLogRaceStatus performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;

@@ -1,12 +1,12 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.io.Serializable;
+import java.util.UUID;
 
 public abstract class AbstractEventOperation<ResultType> extends AbstractRacingEventServiceOperation<ResultType> {
     private static final long serialVersionUID = 1200611694004927369L;
-    private final Serializable id;
+    private final UUID id;
 
-    public AbstractEventOperation(Serializable id) {
+    public AbstractEventOperation(UUID id) {
         super();
         this.id = id;
     }
@@ -15,7 +15,7 @@ public abstract class AbstractEventOperation<ResultType> extends AbstractRacingE
         return getId().equals(other.getId());
     }
     
-    protected Serializable getId() {
+    protected UUID getId() {
         return id;
     }
     

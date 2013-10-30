@@ -3,6 +3,8 @@ package com.sap.sailing.domain.common.impl;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.WindStepping;
 
 public class PolarSheetsDataImpl implements PolarSheetsData {
 
@@ -14,20 +16,24 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     
     private int dataCount;
     
-    private Integer[] stepping;
+    private WindStepping stepping;
 
     private Map<Integer,Integer[]> dataCountPerAngleForWindspeed;
-    
+
+    private Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap;
+
     //For GWT Serialization
     PolarSheetsDataImpl() {};
    
-    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed, Integer[] stepping) {
+    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed, WindStepping stepping, Map<Integer, Map<Integer, PolarSheetsHistogramData>> histogramDataMap) {
         this.averagedPolarDataByWindSpeed = averagedPolarDataByWindSpeed;
         this.complete = complete;
         this.dataCount = dataCount;
         this.dataCountPerAngleForWindspeed = dataCountPerAngleForWindspeed;
         this.stepping = stepping;
+        this.histogramDataMap = histogramDataMap;
     }
+
 
     @Override
     public Number[][] getAveragedPolarDataByWindSpeed() {
@@ -51,8 +57,13 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     }
     
     @Override
-    public Integer[] getStepping() {
+    public WindStepping getStepping() {
         return stepping;
+    }
+    
+    @Override
+    public Map<Integer, Map<Integer,PolarSheetsHistogramData>> getHistogramDataMap() {
+        return histogramDataMap;
     }
 
 }

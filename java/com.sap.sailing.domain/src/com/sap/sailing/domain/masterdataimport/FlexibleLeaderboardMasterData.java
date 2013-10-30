@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
@@ -48,8 +47,8 @@ public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
 
     @Override
     public Leaderboard getLeaderboard() {
-        return new FlexibleLeaderboardImpl(getName(), new ScoreCorrectionImpl(), getResultDiscardingRule(),
-                scoringScheme, courseArea);
+        return new FlexibleLeaderboardImpl(getName(), getResultDiscardingRule(), scoringScheme,
+                courseArea);
     }
 
     public List<RaceColumnMasterData> getRaceColumns() {
