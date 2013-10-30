@@ -19,7 +19,7 @@ checks ()
         JAVA_VERSION=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
         if [ "$JAVA_VERSION" -lt 17 ]; then
             echo "The current Java version ($JAVA_VERSION) does not match the requirements (>= 1.7)."
-            exit
+            exit 10
         fi
         JAVA_BINARY=`which java`
         echo "Using Java from $JAVA_BINARY"
