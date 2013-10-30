@@ -108,9 +108,10 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
+SERVER_STARTUP_NOTIFY=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
 
 ### Testing code on a server
 
