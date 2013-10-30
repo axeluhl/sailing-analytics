@@ -23,7 +23,7 @@ public class MongoDBConfiguration {
         if (System.getProperty(MONGO_HOSTNAME) != null) {
             defaultHostName = System.getProperty(MONGO_HOSTNAME);
         } else {
-            if (System.getenv(MONGO_HOSTNAME) != null) {
+            if (System.getenv("MONGODB_HOST") != null) {
                 defaultHostName = System.getenv(MONGO_HOSTNAME);
             }
         }
@@ -32,7 +32,7 @@ public class MongoDBConfiguration {
         if (System.getProperty(MONGO_PORT) != null) {
             defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT).trim());
         } else {
-            if (System.getenv(MONGO_PORT) != null) {
+            if (System.getenv("MONGODB_PORT") != null) {
                 defaultPort = Integer.valueOf(System.getenv(MONGO_PORT).trim());
             }
         }
@@ -46,7 +46,7 @@ public class MongoDBConfiguration {
         if (System.getProperty(MONGO_HOSTNAME) != null) {
             defaultHostName = System.getProperty(MONGO_HOSTNAME);
         } else {
-            if (System.getenv(MONGO_HOSTNAME) != null) {
+            if (System.getenv("MONGODB_HOST") != null) {
                 defaultHostName = System.getenv(MONGO_HOSTNAME);
             }
         }
@@ -55,7 +55,7 @@ public class MongoDBConfiguration {
         if (System.getProperty(MONGO_PORT) != null) {
             defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT).trim());
         } else {
-            if (System.getenv(MONGO_PORT) != null) {
+            if (System.getenv("MONGODB_PORT") != null) {
                 defaultPort = Integer.valueOf(System.getenv(MONGO_PORT).trim());
             }
         }
