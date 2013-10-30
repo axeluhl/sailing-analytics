@@ -15,9 +15,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
-import com.sap.sailing.domain.common.PolarSheetsData;
-import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -424,11 +423,8 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
-    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces, AsyncCallback<PolarSheetGenerationTriggerResponse> asyncCallback);
-
-    void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
-
-    void getPolarSheetData(String polarSheetId, int angle, int windSpeedLevel, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
+            PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
@@ -451,8 +447,8 @@ public interface SailingServiceAsync {
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
 
-    
-    void importMasterData(String host, String[] names, boolean override, AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
+    void importMasterData(String host, String[] names, boolean override,
+            AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
     <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
