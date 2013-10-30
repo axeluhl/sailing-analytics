@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -32,7 +31,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -329,7 +328,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
                 throw new IllegalStateException("Each waypoints needs a passing side");
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(),
-                        getNauticalSide(courseElement.getRoundingDirection()));
+                        getPassingInstructions(courseElement.getRoundingDirection()));
 
                 waypoints.add(waypoint);
             }
@@ -347,28 +346,29 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         return design;
     }
 
-    private NauticalSide getNauticalSide(RoundingDirection roundingDirection) {
-        NauticalSide side = null;
-        if (roundingDirection.name().equalsIgnoreCase(NauticalSide.PORT.name())) {
-            side = NauticalSide.PORT;
-        } else if (roundingDirection.name().equalsIgnoreCase(NauticalSide.STARBOARD.name())) {
-            side = NauticalSide.STARBOARD;
+    @SuppressLint("DefaultLocale")
+    private PassingInstructions getPassingInstructions(RoundingDirection roundingDirection) {
+        final PassingInstructions result;
+        if (roundingDirection == RoundingDirection.None || roundingDirection == null) {
+            result = null;
+        } else {
+            result = PassingInstructions.valueOf(roundingDirection.name().toUpperCase());
         }
-        return side;
+        return result;
     }
 
-    private RoundingDirection getRoundingDirection(NauticalSide passingSide) {
-        RoundingDirection direction = null;
-        if (passingSide == null) {
-            direction = RoundingDirection.None;
-        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
-            direction = RoundingDirection.Port;
-        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Starboard.name())) {
-            direction = RoundingDirection.Starboard;
+    @SuppressLint("DefaultLocale")
+    private RoundingDirection getRoundingDirection(PassingInstructions passingInstructions) {
+        final RoundingDirection result;
+        if (passingInstructions == null) {
+            result = null;
+        } else if (passingInstructions == PassingInstructions.LINE) {
+            result = RoundingDirection.Gate;
         } else {
-            direction = RoundingDirection.Gate;
+            result = RoundingDirection.valueOf(passingInstructions.name().substring(0, 1)
+                + passingInstructions.name().substring(1, passingInstructions.name().length()).toLowerCase());
         }
-        return direction;
+        return result;
     }
 
     private void createUsePreviousCourseDialog() {

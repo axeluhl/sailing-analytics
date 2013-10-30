@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.annotation.SuppressLint;
+
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -28,7 +29,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstructions;
 
 public enum DomainFactoryImpl implements SharedDomainFactory {
     INSTANCE;
@@ -100,9 +101,9 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
         return new GateImpl(id, left, right, name);
     }
 
-    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstructions passingInstructions) {
         synchronized (waypointCache) {
-            Waypoint result = new WaypointImpl(controlPoint, passingSide);
+            Waypoint result = new WaypointImpl(controlPoint, passingInstructions);
             waypointCache.put(result.getId(), result);
             return result;
         }
