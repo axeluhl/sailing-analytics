@@ -15,13 +15,6 @@
   <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
   <stylesheet src="../Spectator.css" />
-
-  <!-- Google Maps API -->
-  <inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
-  <inherits name='com.google.gwt.maps.Maps' />
-  
-  <!-- Highcharts API -->
-  <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <inherits name="com.google.gwt.resources.Resources" />
   
@@ -36,12 +29,7 @@
   <source path='client'/>
   <source path='shared'/>
   <source path='spectator'/>
-  <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='adminconsole'/>
+  <source path='leaderboard'/>
   <source path='usermanagement'/>
-  <source path='test'/>
-  <source path='actions'/>
-  <source path='masterdataimport'/>
-  <source path='simulator'/>
 </module>

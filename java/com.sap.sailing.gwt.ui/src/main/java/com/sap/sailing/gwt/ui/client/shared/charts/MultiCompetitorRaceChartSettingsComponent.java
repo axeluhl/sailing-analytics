@@ -19,7 +19,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
     private final DetailType initialDetailType;
     private final List<DetailType> availableDetailsTypes;    
     
-    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages) {
+    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages, boolean hasOverallLeaderboard) {
         super(settings, stringMessages);
         this.initialDetailType = settings.getDetailType();
         
@@ -31,7 +31,10 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes.add(DetailType.OVERALL_RANK);
+        
+        if (hasOverallLeaderboard) {
+            availableDetailsTypes.add(DetailType.OVERALL_RANK);
+        }
     }
 
     @Override

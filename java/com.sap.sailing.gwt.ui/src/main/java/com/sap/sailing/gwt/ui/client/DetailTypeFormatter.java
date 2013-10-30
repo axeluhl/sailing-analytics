@@ -109,6 +109,14 @@ public class DetailTypeFormatter {
             return stringMessages.distanceToLineFiveSecondsBeforeStart();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.speedOverGroundFiveSecondsBeforeStart();
+        case RACE_TIME_TRAVELED:
+            return stringMessages.time();
+        case RACE_TIME_TRAVELED_DOWNWIND:
+            return stringMessages.timeDownwind();
+        case RACE_TIME_TRAVELED_REACHING:
+            return stringMessages.timeReaching();
+        case RACE_TIME_TRAVELED_UPWIND:
+            return stringMessages.timeUpwind();
         }
         return null;
     }
@@ -157,6 +165,10 @@ public class DetailTypeFormatter {
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS:
         case TIME_TRAVELED:
+        case RACE_TIME_TRAVELED:
+        case RACE_TIME_TRAVELED_DOWNWIND:
+        case RACE_TIME_TRAVELED_REACHING:
+        case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.secondsUnit();
 
         case TOTAL_TIME_SAILED_IN_SECONDS:
@@ -294,6 +306,14 @@ public class DetailTypeFormatter {
             return stringMessages.distanceToLineFiveSecondsBeforeStartTooltip();
         case RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START:
             return stringMessages.speedOverGroundFiveSecondsBeforeStartTooltip();
+        case RACE_TIME_TRAVELED:
+            return stringMessages.raceTimeTooltip();
+        case RACE_TIME_TRAVELED_DOWNWIND:
+            return stringMessages.raceTimeDownwindTooltip();
+        case RACE_TIME_TRAVELED_REACHING:
+            return stringMessages.raceTimeReachingTooltip();
+        case RACE_TIME_TRAVELED_UPWIND:
+            return stringMessages.raceTimeUpwindTooltip();
         }
         
         return "";

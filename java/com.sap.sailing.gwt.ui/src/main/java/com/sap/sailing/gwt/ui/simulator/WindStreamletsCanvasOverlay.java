@@ -48,20 +48,17 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     private String arrowHeadColor = "Blue";
     private HandlerRegistration mouseMoveHandlerRegistration;
     private WindFieldMapMouseMoveHandler windFieldMapMouseMoveHandler;
-    private double arrowLength = 15;
 
     private int xRes;
-    private int yRes;
     private Timer timer;
 
     private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
 
-    public WindStreamletsCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes, int yRes) {
+    public WindStreamletsCanvasOverlay(MapWidget map, int zIndex, final Timer timer, int xRes) {
         super(map, zIndex);
         
         this.timer = timer;
         this.xRes = xRes;
-        this.yRes = yRes;
 
         windFieldDTO = null;
         windFieldPoints = new HashMap<ToolTip, SimulatorWindDTO>();
@@ -71,7 +68,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     }
 
     public WindStreamletsCanvasOverlay(MapWidget map, int zIndex) {
-        this(map, zIndex, null, 0, 0);
+        this(map, zIndex, null, 0);
     }
 
     @Override

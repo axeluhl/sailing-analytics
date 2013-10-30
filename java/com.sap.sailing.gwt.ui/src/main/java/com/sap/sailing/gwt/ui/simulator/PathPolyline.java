@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.events.overlaycomplete.polyline.PolylineCompleteMapHandler;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.events.click.ClickMapEvent;
+import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
-import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.maps.client.overlays.Polyline;
+import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -144,90 +145,90 @@ public class PathPolyline {
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(turnPoints);
         polyline.setPath(pointsAsArray);
         
-        // TODO MigrationV3: 
-//        polyline.addPolylineLineUpdatedHandler(new PolylineLineUpdatedHandler() {
-//            @Override
-//            public void onUpdate(PolylineLineUpdatedEvent event) {
-//
-//                if (simulatorMainPanel.isPathPolylineFreeMode()) {
-//
-//                    List<LatLng> newTurnPoints = new ArrayList<LatLng>();
-//                    for (int index = 0; index < polyline.getPath().getLength(); index++) {
-//                        newTurnPoints.add(polyline.getPath().get(index));
-//                    }
-//                    turnPoints = newTurnPoints.toArray(new LatLng[0]);
-//                    drawPolylineOnMap();
-//
-//                } else {
-//
-//                    final int indexOfMovedPoint = getIndexOfMovedPoint();
-//                    final int noOfPoints = turnPoints.length;
-//
-//                    boolean secondPart = false;
-//
-//                    if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1 || noOfPoints == 3) {
-//                        // start and end points cannot be moved!
-//                        // nor a 3-turns line.
-//                    } else {
-//
-//                        Pair newPositionOfMovedPointAndFlag = getNewPositionOfMovedPointCurved(indexOfMovedPoint);
-//                        LatLng newPositionOfMovedPoint = newPositionOfMovedPointAndFlag.point;
-//                        Boolean projectionOfAfterEdge = newPositionOfMovedPointAndFlag.flag;
-//
-//                        LatLng oldPositionOfFirstBeforeMovedPoint = turnPoints[indexOfMovedPoint - 1];
-//                        LatLng oldPositionOfMovedPoint = turnPoints[indexOfMovedPoint];
-//                        LatLng oldPositionOfAfterBeforeMovedPoint = turnPoints[indexOfMovedPoint + 1];
-//
-//                        if (indexOfMovedPoint == 1) {
-//                            // if the indexOfMovedPoint == 1, only the next point will be changed, as the start one
-//                            // cannot be moved
-//                            turnPoints[indexOfMovedPoint + 1] = getNewPositionOfPointAfterMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-//                            secondPart = true;
-//
-//                        } else if (indexOfMovedPoint == noOfPoints - 2) {
-//                            // if indexOfMovedPoint == noOfPoints - 2, only the previous point will be changed, as the
-//                            // end one cannot be moved.
-//                            turnPoints[indexOfMovedPoint - 1] = getNewPositionOfPointBeforeMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-//                            secondPart = false;
-//
-//                        } else {
-//
-//                            LatLng possibleNewPositionOfPointBeforeMoved = getNewPositionOfPointBeforeMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-//                            if (projectionOfAfterEdge
-//                                    && PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1], EPSILON) == false) {
-//
-//                                secondPart = false;
-//
-//                                //System.out.println("old Point: "+turnPoints[indexOfMovedPoint-1].getLatitude()+", "+turnPoints[indexOfMovedPoint-1].getLongitude());
-//                                //System.out.println("new Point: "+possibleNewPositionOfPointBeforeMoved.getLatitude()+", "+possibleNewPositionOfPointBeforeMoved.getLongitude());
-//                                turnPoints[indexOfMovedPoint - 1] = possibleNewPositionOfPointBeforeMoved;
-//
-//                            }
-//
-//                            LatLng possibleNewPositionOfPointAfterMoved = getNewPositionOfPointAfterMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-//                            if (!projectionOfAfterEdge
-//                                    && PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1], EPSILON) == false) {
-//
-//                                secondPart = true;
-//                                turnPoints[indexOfMovedPoint + 1] = possibleNewPositionOfPointAfterMoved;
-//
-//                            }
-//                        }
-//
-//                        turnPoints[indexOfMovedPoint] = newPositionOfMovedPoint;
-//
-//                        turnPoints = checkIfAnyTurnsMustGo(turnPoints, indexOfMovedPoint, secondPart, oldPositionOfFirstBeforeMovedPoint,
-//                                oldPositionOfMovedPoint, oldPositionOfAfterBeforeMovedPoint);
-//
-//                        turnPoints = eliminateSpikes(turnPoints);
-//
-//                        turnPoints = eliminateTriangles(turnPoints);
-//                    }
-//
-//                    drawPolylineOnMap();
-//                }
-//            }
-//        });
+        // TODO MigrationV3: the Polyline used to support a PolylineLineUpdatedHandler; the new Maps v3 wrapper doesn't; temporarily replacing by a click handler, but a more thorough migration is required here...
+        polyline.addClickHandler(new ClickMapHandler() {
+            @Override
+            public void onEvent(ClickMapEvent event) {
+
+                if (simulatorMainPanel.isPathPolylineFreeMode()) {
+
+                    List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+                    for (int index = 0; index < polyline.getPath().getLength(); index++) {
+                        newTurnPoints.add(polyline.getPath().get(index));
+                    }
+                    turnPoints = newTurnPoints.toArray(new LatLng[0]);
+                    drawPolylineOnMap();
+
+                } else {
+
+                    final int indexOfMovedPoint = getIndexOfMovedPoint();
+                    final int noOfPoints = turnPoints.length;
+
+                    boolean secondPart = false;
+
+                    if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1 || noOfPoints == 3) {
+                        // start and end points cannot be moved!
+                        // nor a 3-turns line.
+                    } else {
+
+                        Pair newPositionOfMovedPointAndFlag = getNewPositionOfMovedPointCurved(indexOfMovedPoint);
+                        LatLng newPositionOfMovedPoint = newPositionOfMovedPointAndFlag.point;
+                        Boolean projectionOfAfterEdge = newPositionOfMovedPointAndFlag.flag;
+
+                        LatLng oldPositionOfFirstBeforeMovedPoint = turnPoints[indexOfMovedPoint - 1];
+                        LatLng oldPositionOfMovedPoint = turnPoints[indexOfMovedPoint];
+                        LatLng oldPositionOfAfterBeforeMovedPoint = turnPoints[indexOfMovedPoint + 1];
+
+                        if (indexOfMovedPoint == 1) {
+                            // if the indexOfMovedPoint == 1, only the next point will be changed, as the start one
+                            // cannot be moved
+                            turnPoints[indexOfMovedPoint + 1] = getNewPositionOfPointAfterMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            secondPart = true;
+
+                        } else if (indexOfMovedPoint == noOfPoints - 2) {
+                            // if indexOfMovedPoint == noOfPoints - 2, only the previous point will be changed, as the
+                            // end one cannot be moved.
+                            turnPoints[indexOfMovedPoint - 1] = getNewPositionOfPointBeforeMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            secondPart = false;
+
+                        } else {
+
+                            LatLng possibleNewPositionOfPointBeforeMoved = getNewPositionOfPointBeforeMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            if (projectionOfAfterEdge
+                                    && PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1], EPSILON) == false) {
+
+                                secondPart = false;
+
+                                //System.out.println("old Point: "+turnPoints[indexOfMovedPoint-1].getLatitude()+", "+turnPoints[indexOfMovedPoint-1].getLongitude());
+                                //System.out.println("new Point: "+possibleNewPositionOfPointBeforeMoved.getLatitude()+", "+possibleNewPositionOfPointBeforeMoved.getLongitude());
+                                turnPoints[indexOfMovedPoint - 1] = possibleNewPositionOfPointBeforeMoved;
+
+                            }
+
+                            LatLng possibleNewPositionOfPointAfterMoved = getNewPositionOfPointAfterMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            if (!projectionOfAfterEdge
+                                    && PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1], EPSILON) == false) {
+
+                                secondPart = true;
+                                turnPoints[indexOfMovedPoint + 1] = possibleNewPositionOfPointAfterMoved;
+
+                            }
+                        }
+
+                        turnPoints[indexOfMovedPoint] = newPositionOfMovedPoint;
+
+                        turnPoints = checkIfAnyTurnsMustGo(turnPoints, indexOfMovedPoint, secondPart, oldPositionOfFirstBeforeMovedPoint,
+                                oldPositionOfMovedPoint, oldPositionOfAfterBeforeMovedPoint);
+
+                        turnPoints = eliminateSpikes(turnPoints);
+
+                        turnPoints = eliminateTriangles(turnPoints);
+                    }
+
+                    drawPolylineOnMap();
+                }
+            }
+        });
 
         polyline.setMap(map);
         simulatorMap.setPolyline(polyline);

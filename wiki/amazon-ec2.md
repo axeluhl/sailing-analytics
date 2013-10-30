@@ -26,15 +26,16 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 ## EC2 Server Architecture for Sailing Analytics
 
-The architecture is divided into 3 logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. The following image depicts the parts of the architecture.
+The architecture is divided into logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. Each tier can contain one or more instances. The following image depicts the parts of the architecture.
 
 <img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
 
 ### Tiers
 
-* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned.
-* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
-* **Instances**: Space where all instances, that are not grouped, live.
+* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned. In the image you can see one configured instance that delivers content for sapsailing.com. It has some services running on it like an Apache, the GIT repository and the UDP mirror. The Apache is configured to proxy HTTP(S) connections to an Archive or Live server.
+* **Balancer**: Features an Elastic Load Balancer. Such balancers can be configured to distribute traffic among many other running instances. Internally an ELB consists of multiple balancing instances on which load is distributed by a DNS round robin so that bandwidth is not a limiting factor.
+* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier. In the standard setup this tier only contains one database server that handles connections to MongoDB, MySQL and RabbitMQ.
+* **Instances**: Space where all instances, that are not logically grouped, live. In the image one can see three running instances. One serving archived data, one serving a live event and one for build and test purposes.
 * **Balancer+Group**: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
 
 ### Instances
@@ -78,9 +79,36 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 
 ### Create a new Analytics application instance
 
-Find detailed instructions on how to create a new instance here: [[wiki/amazon-ec2-create-new-app-instance]].
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+
+<pre>
+BUILD_BEFORE_START=True
+BUILD_FROM=master
+RUN_TESTS=False
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_NAME=LIVE1
+MEMORY=1024m
+REPLICATION_HOST=172.31.25.253
+REPLICATION_CHANNEL=sapsailinganalytics-live
+TELNET_PORT=14888
+SERVER_PORT=8888
+MONGODB_HOST=172.31.25.253
+MONGODB_PORT=10202
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
+</pre>
+
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER-STARTUP-NOTIFY field then you will get an email once the server has been started.
 
 ### Setup replicated instances with ELB
+
+
+
+### Access build server and tests
 
 ### Access MongoDB database
 

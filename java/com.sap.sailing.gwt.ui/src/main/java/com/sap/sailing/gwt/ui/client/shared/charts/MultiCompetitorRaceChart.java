@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -11,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -26,26 +28,36 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
  */
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
-    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
-                timeRangeWithZoomProvider, stringMessages, errorReporter, compactChart, allowTimeAdjust, null, null);
-    }
+    private boolean hasOverallLeaderboard;
     
     public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
-            String leaderboardGroupName, String leaderboardName) {
+            final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
+            final String leaderboardGroupName, String leaderboardName) {
         super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        if (leaderboardGroupName != null) {
+            sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
+                    new AsyncCallback<LeaderboardGroupDTO>() {
+                        @Override
+                        public void onSuccess(LeaderboardGroupDTO group) {
+                            hasOverallLeaderboard = group != null ? group.hasOverallLeaderboard() : false;
+                        }
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error fetching the leaderboard group '" + leaderboardGroupName
+                                    + "': " + caught.getMessage());
+                        }
+                    });
+        } else {
+            hasOverallLeaderboard = false;
+        }
     }
 
     @Override
     public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages());
+        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
     }
 
     @Override
