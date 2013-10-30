@@ -118,10 +118,6 @@ Starting a test is as easy as starting up a new instance. Just make sure that yo
 
 ### Setup replicated instances with ELB
 
-
-
-### Access build server and tests
-
 ### Access MongoDB database
 
 ## Glossary
