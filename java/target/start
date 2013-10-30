@@ -7,14 +7,14 @@
 # before starting up the server
 if [[ $BUILD_BEFORE_START == "True" ]]; then
     echo "OK" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
-    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.log
+    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        cat last_automatic_build.log build.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY
+        echo "OK" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY
      else
         echo "Deployment Failed"
-        cat last_automatic_build.log error.log | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY
+        echo "ERROR" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY
         exit
      fi 
 fi
@@ -93,7 +93,7 @@ if [[ $PARAM == "" ]]; then
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-        `which mail` -s "Server $SERVER_NAME started up!" $SERVER_STARTUP_NOTIFY < env.sh
+        echo "OK" | `which mail` -s "Server $SERVER_NAME started up!" -a env.sh $SERVER_STARTUP_NOTIFY
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open"
