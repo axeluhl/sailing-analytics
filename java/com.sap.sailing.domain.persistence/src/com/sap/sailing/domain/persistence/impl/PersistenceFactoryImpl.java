@@ -16,6 +16,11 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
         this.defaultMongoObjectFactory = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
     }
 
+    /**
+     * A default domain object factory for test purposes only. In a server environment, ensure NOT to use this and use
+     * {@link #getDomainObjectFactory(MongoDBService, DomainFactory)} instead, using the base domain factory that
+     * is provided by <code>RacingEventService.getBaseDomainFactory</code>.
+     */
     @Override
     public DomainObjectFactory getDefaultDomainObjectFactory() {
         return defaultDomainObjectFactory;

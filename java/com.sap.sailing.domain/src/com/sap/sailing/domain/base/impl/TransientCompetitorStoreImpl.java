@@ -7,9 +7,9 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Team;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 
-public class TransientCompetitorStoreImpl implements CompetitorStore {
+public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
+    private static final long serialVersionUID = -4198298775476586931L;
     private final ConcurrentHashMap<Serializable, Competitor> competitorCache;
     
     public TransientCompetitorStoreImpl() {

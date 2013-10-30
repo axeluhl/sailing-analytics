@@ -1,5 +1,7 @@
 package com.sap.sailing.server.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -7,6 +9,7 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 
 /**
  * Manages a persistent set of {@link Competitor}s using a {@link MongoObjectFactory} to update the persistent store,
@@ -17,13 +20,23 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
  * 
  */
 public class PersistentCompetitorStore extends TransientCompetitorStoreImpl implements CompetitorStore {
-    private final MongoObjectFactory storeTo;
+    private static final long serialVersionUID = 9205956018421790908L;
+    private transient MongoObjectFactory storeTo;
     
     public PersistentCompetitorStore(DomainObjectFactory loadFrom, MongoObjectFactory storeTo) {
         this.storeTo = storeTo;
         for (Competitor competitor : loadFrom.loadAllCompetitors()) {
             addCompetitorToTransientStore(competitor.getId(), competitor);
         }
+    }
+    
+    /**
+     * Uses the {@link PersistenceFactory#getDefaultMongoObjectFactory() default DB persistence} to store new competitors.
+     * Use {@link #setStoreTo} to change this after de-serialization.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        storeTo = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
     }
     
     private void addCompetitorToTransientStore(Serializable id, Competitor competitor) {

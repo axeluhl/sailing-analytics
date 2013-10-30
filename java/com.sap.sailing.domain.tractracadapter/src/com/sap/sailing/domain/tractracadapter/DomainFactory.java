@@ -52,6 +52,11 @@ import com.tractrac.clientmodule.data.Position;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
+    /**
+     * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use what can be
+     * reached from <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance
+     * used by all other services linked to the <code>RacingEventService</code>.
+     */
     static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();

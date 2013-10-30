@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -101,6 +103,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
@@ -177,7 +180,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
     
-    private final CompetitorStore persistentCompetitorCache;
+    private final PersistentCompetitorStore persistentCompetitorStore;
 
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
 
@@ -203,13 +206,26 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final MediaLibrary mediaLibrary;
 
+    /**
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #persistentCompetitorStore
+     * competitor store} for competitor management. This base domain factory is then also used for the construction of
+     * the {@link DomainObjectFactory}.
+     */
     public RacingEventServiceImpl() {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE
-                .getDefaultMongoObjectFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB());
+        // FIXME cyclic initialization dependency across PersistentCompetitorStore, DomainFactoryImpl and DomainObjectFactoryImpl
+        this(new DomainFactoryImpl());
+    }
+    
+    private RacingEventServiceImpl(DomainFactory baseDomainFactory) {
+        this(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory), PersistenceFactory.INSTANCE
+                .getDefaultMongoObjectFactory(), baseDomainFactory, MediaDBFactory.INSTANCE.getDefaultMediaDB());
     }
 
     /**
-     * Uses the default factories for the tracking adapters
+     * Uses the default factories for the tracking adapters and the {@link DomainFactory base domain factory} of the
+     * {@link PersistenceFactory#getDefaultDomainObjectFactory() default domain object factory}. This constructor should
+     * be used for testing because the {@link DomainObjectFactory} will usually not provide a {@link DomainFactory base
+     * domain factory} with the proper {@link CompetitorStore} as required for competitor persistence.
      */
     public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB) {
@@ -242,7 +258,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        persistentCompetitorCache = new PersistentCompetitorStore(domainObjectFactory, mongoObjectFactory); // loads competitors
+        persistentCompetitorStore = new PersistentCompetitorStore(domainObjectFactory, mongoObjectFactory); // loads competitors
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -1599,8 +1615,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
         logger.info("Serializing persisted competitors...");
-        oos.writeObject(persistentCompetitorCache);
-        logoutput.append("Serialized " + persistentCompetitorCache.size() + " persisted competitors\n");
+        oos.writeObject(persistentCompetitorStore);
+        logoutput.append("Serialized " + persistentCompetitorStore.size() + " persisted competitors\n");
         logger.fine(logoutput.toString());
     }
 
@@ -1633,7 +1649,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardsByName.clear();
             eventsById.clear();
             mediaLibrary.clear();
-            persistentCompetitorCache.clear();
+            persistentCompetitorStore.clear();
 
             StringBuffer logoutput = new StringBuffer();
 
@@ -1684,10 +1700,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
 
+            // only copy the competitors from the deserialized competitor store; don't use it because it will have set
+            // a default Mongo object factory
             for (Map.Entry<Serializable, Competitor> e : ((Map<Serializable, Competitor>) ois.readObject()).entrySet()) {
-                persistentCompetitorCache.getOrCreateCompetitor(e.getKey(), e.getValue().getName(), e.getValue().getTeam(), e.getValue().getBoat());
+                persistentCompetitorStore.getOrCreateCompetitor(e.getKey(), e.getValue().getName(), e.getValue().getTeam(), e.getValue().getBoat());
             }
-            logoutput.append("\nReceived " + persistentCompetitorCache.size() + " NEW competitors\n");
+            logoutput.append("\nReceived " + persistentCompetitorStore.size() + " NEW competitors\n");
 
             logger.info(logoutput.toString());
             logger.info("Done with initial replication on " + this);
