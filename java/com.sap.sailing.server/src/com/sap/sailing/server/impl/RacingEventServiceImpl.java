@@ -227,8 +227,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * be used for testing because the {@link DomainObjectFactory} will usually not provide a {@link DomainFactory base
      * domain factory} with the proper {@link CompetitorStore} as required for competitor persistence.
      */
-    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            MediaDB mediaDB) {
+    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB) {
         this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB);
     }
 
