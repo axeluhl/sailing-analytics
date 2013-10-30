@@ -25,7 +25,7 @@ Leave Kernel and RAM disk to Default. Then put the configuration for this server
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
-SERVER_STARTUP-NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
@@ -40,9 +40,10 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
+SERVER_STARTUP_NOTIFY=
 </pre>
 
-It does not really matter which SERVER_PORTS you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port.
+It does not really matter which SERVER_PORT you use because there is only one app per instance. But this makes it easier to configure instances for Apache, a Load Balancer or other uses. If you want to create a cluster that is self-replicating and has a load balancer in front of it then make sure that all your instances are running on the same port.
 
 <img src="/wiki/images/amazon/StartInstance5.JPG" width="70%" height="70%"/>
 
