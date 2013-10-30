@@ -59,11 +59,15 @@ checkout_code ()
 build ()
 {
     cd $PROJECT_HOME
-    ADDITIONAL="-t"
+    TESTS="-t"
     if [[ $RUN_TESTS == "True" ]]; then
-        ADDITIONAL=""
+        TESTS=""
     fi
-    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ADDITIONAL -u build
+    GWT="-g"
+    if [[ $COMPILE_GWT == "True" ]]; then
+        GWT=""
+    fi
+    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $TEST $GWT -u build
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Build Successful"
