@@ -6,15 +6,24 @@
 # check if automatic tests and build should be executed
 # before starting up the server
 if [[ $BUILD_BEFORE_START == "True" ]]; then
-    `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
-    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.log
+
+    # check for available memory - build can not be started with less than 1GB
+    MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
+    if [ $MEM_TOTAL -lt 924 ]; then
+        echo "Could not start build process with less than 1GB of RAM!"
+        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        exit 10
+    fi
+
+    echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready." | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
+    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        `which mail` -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+        echo "OK" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
      else
         echo "Deployment Failed"
-        `which mail` -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+        echo "ERROR" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
         exit
      fi 
 fi
@@ -73,11 +82,11 @@ if [[ $PARAM == "" ]]; then
     echo "Starting server..."
     sleep 10
 
-    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
-    if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
+    SERVER_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+    if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                `which mail` -s "Server $SERVER_NAME startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server failed - check the logs" | `which mail` -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
     fi
@@ -93,7 +102,7 @@ if [[ $PARAM == "" ]]; then
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-        `which mail` -s "Server $SERVER_NAME started up!" $SERVER_STARTUP_NOTIFY < env.sh
+        echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open"

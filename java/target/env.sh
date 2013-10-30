@@ -26,6 +26,7 @@ REPLICATE_MASTER_QUEUE_PORT=
 DEPLOY_TO=
 BUILD_BEFORE_START=False
 BUILD_FROM=master
+COMPILE_GWT=True
 RUN_TESTS=False
 CODE_DIRECTORY=code
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
@@ -34,6 +35,7 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 # whenever the server has been started
 SERVER_STARTUP_NOTIFY=
 
+INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
 ADDITIONAL_JAVA_ARGS="-XX:+UseMembar"
 
 JAVA_HOME=$HOME/jdk1.7.0_02
@@ -56,5 +58,8 @@ if [[ ! -z "$ON_AMAZON" ]]; then
   # set directory where to deploy code to
   # this is fixed on EC2 instances
   DEPLOY_TO=server
+  INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
+  INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+  INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
 fi
 
