@@ -15,7 +15,7 @@ if [[ $BUILD_BEFORE_START == "True" ]]; then
         exit 10
     fi
 
-    echo "OK" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
+    echo "Build process has been started - it can take 5 to 10 minutes until your instance is ready." | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
     `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
@@ -86,7 +86,7 @@ if [[ $PARAM == "" ]]; then
     if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Satrtup failed" | `which mail` -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server failed - check the logs" | `which mail` -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
     fi
