@@ -17,29 +17,29 @@ public final class GPSFixDimensionManager implements DimensionManager<GPSFixWith
     public Dimension<GPSFixWithContext, ?> getDimensionFor(SharedDimension dimension) {
         switch (dimension) {
         case BoatClassName:
-            return (Dimension<GPSFixWithContext, ?>) BoatClassNameDimension;
+            return BoatClassNameDimension;
         case CompetitorName:
-            return (Dimension<GPSFixWithContext, ?>) CompetitorNameDimension;
+            return CompetitorNameDimension;
         case CourseAreaName:
-            return (Dimension<GPSFixWithContext, ?>) CourseAreaNameDimension;
+            return CourseAreaNameDimension;
         case FleetName:
-            return (Dimension<GPSFixWithContext, ?>) FleetNameDimension;
+            return FleetNameDimension;
         case LegNumber:
-            return (Dimension<GPSFixWithContext, ?>) LegNumberDimension;
+            return LegNumberDimension;
         case LegType:
-            return (Dimension<GPSFixWithContext, ?>) LegTypeDimension;
+            return LegTypeDimension;
         case Nationality:
-            return (Dimension<GPSFixWithContext, ?>) NationalityDimension;
+            return NationalityDimension;
         case RaceName:
-            return (Dimension<GPSFixWithContext, ?>) RaceNameDimension;
+            return RaceNameDimension;
         case RegattaName:
-            return (Dimension<GPSFixWithContext, ?>) RegattaNameDimension;
+            return RegattaNameDimension;
         case SailID:
-            return (Dimension<GPSFixWithContext, ?>) SailIDDimension;
+            return SailIDDimension;
         case WindStrength:
-            return (Dimension<GPSFixWithContext, ?>) WindStrengthDimension;
+            return WindStrengthDimension;
         case Year:
-            return (Dimension<GPSFixWithContext, ?>) YearDimension;
+            return YearDimension;
         }
         throw new IllegalArgumentException("Not yet implemented for the given dimension: "
                 + dimension.toString());
