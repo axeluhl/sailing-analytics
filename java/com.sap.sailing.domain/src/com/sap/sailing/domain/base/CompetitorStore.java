@@ -21,4 +21,6 @@ public interface CompetitorStore {
      * Removes all competitors from this store. Use with due care.
      */
     void clear();
+    
+    Iterable<Competitor> getCompetitors();
 }

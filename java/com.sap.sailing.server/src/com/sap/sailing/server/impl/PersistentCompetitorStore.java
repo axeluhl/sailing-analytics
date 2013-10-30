@@ -69,9 +69,4 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeCompetitor(competitor);
         super.addNewCompetitor(id, competitor);
     }
-
-    @Override
-    protected Iterable<Competitor> getCompetitors() {
-        return super.getCompetitors();
-    }
 }

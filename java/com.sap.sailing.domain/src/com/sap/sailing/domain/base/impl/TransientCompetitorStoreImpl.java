@@ -61,7 +61,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorCache.clear();
     }
     
-    protected Iterable<Competitor> getCompetitors() {
+    @Override
+    public Iterable<Competitor> getCompetitors() {
         return Collections.unmodifiableCollection(competitorCache.values());
     }
 

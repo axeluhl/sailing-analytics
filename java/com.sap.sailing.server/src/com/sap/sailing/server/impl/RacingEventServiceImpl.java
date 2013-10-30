@@ -1701,7 +1701,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
-            for (Competitor competitor : ((PersistentCompetitorStore) ois.readObject()).getCompetitors()) {
+            for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
                 persistentCompetitorStore.getOrCreateCompetitor(competitor.getId(), competitor.getName(), competitor.getTeam(), competitor.getBoat());
             }
             logoutput.append("\nReceived " + persistentCompetitorStore.size() + " NEW competitors\n");
