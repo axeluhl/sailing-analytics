@@ -84,6 +84,10 @@ deploy ()
         DEPLOY="-s $DEPLOY_TO"
     fi
     $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install
+
+    # make sure to clean up data behind because this can eat up some space
+    find . -name "*.class" | xargs rm -rf
+    find . -name "bin" | xargs rm -rf
 }
 
 checks

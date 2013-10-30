@@ -335,13 +335,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
-    STATUS=$?
-    if [ $STATUS -eq 0 ]; then
-        echo "Build Successful"
-    else
-        echo "Build failed"
-        exit 10
-    fi 
 
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
