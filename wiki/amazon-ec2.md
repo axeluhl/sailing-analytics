@@ -44,8 +44,8 @@ The architecture is divided into logical tiers. These are represented by firewal
 <tr>
 <td><b>Name</b></td>
 <td><b>Access Key(s)</b></td>
-<td><b>Security Group</b></td>
 <td><b>Open Ports</b></td>
+<td><b>Security Group</b></td>
 <td><b>Services</b></td>
 <td><b>Description</b></td>
 </tr>
@@ -54,7 +54,7 @@ The architecture is divided into logical tiers. These are represented by firewal
 <td>Administrator</td>
 <td>IN: 20, 80, 443, 2010-2015<br/>OUT: ALL</td>
 <td>Webserver</td>
-<td>Apache, GIT, Piwik, Bugzilla</td>
+<td>Apache, GIT, Piwik, Bugzilla, Wiki</td>
 <td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
 </tr>
 <tr>
@@ -73,19 +73,27 @@ The architecture is divided into logical tiers. These are represented by firewal
 <td>Java App</td>
 <td>Instance handling the access to all historical races.</td>
 </tr>
+<tr>
+<td>Build and Test</td>
+<td>Administrator, Sailing User</td>
+<td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
+<td>Sailing Analytics App</td>
+<td>X11,Firefox,Hudson</td>
+<td>Instance that can be used to run tests</td>
+</tr>
 </table>
 
 ## HowTo
 
-### Create a new Analytics application instance
+### Create a new Analytics application instance ready for production
 
-Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD-FROM and BUILD-COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and BUILD_COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
 
 <pre>
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
 REPLICATION_HOST=172.31.25.253
@@ -100,15 +108,28 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
+SERVER_STARTUP_NOTIFY=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the SERVER-STARTUP-NOTIFY field then you will get an email once the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
+
+You can now access this instance by either using the Administrator key (for root User) or the Sailing User key (for user sailing):
+
+<pre>
+ssh -i .ssh/Administrator.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+or
+
+<pre>
+ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+### Testing code on a server
+
+Starting a test is as easy as starting up a new instance. Just make sure that you fill the field RUN_TESTS and set it to `True`. Also set the field BUILD_FROM to a gitspec that matches the code branch that you want to test. After tests has been run and the server has been started you will get an email giving you all the details. You can then access your instance or simply shut it down.
 
 ### Setup replicated instances with ELB
-
-
-
-### Access build server and tests
 
 ### Access MongoDB database
 

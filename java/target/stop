@@ -5,6 +5,9 @@
 TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
 if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         echo "Could not find server on telnet port $TELNET_PORT. Perhaps server is not running?"
+        if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+            `which mail` -s "Server $SERVER_NAME could not be stopped!" $SERVER_STARTUP_NOTIFY
+        fi
         exit
 fi
 
@@ -12,3 +15,6 @@ NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
 echo -n exit | $NC_CMD > /dev/null
 
 echo "Stopped server $SERVER_NAME"
+if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+    `which mail` -s "Server $SERVER_NAME stopped successfully!" $SERVER_STARTUP_NOTIFY
+fi

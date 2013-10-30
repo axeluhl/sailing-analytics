@@ -12,8 +12,8 @@ find_project_home ()
         PARENT_DIR=`cd $1/..;pwd`
         OUTPUT=$(find_project_home $PARENT_DIR)
 
-        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/code" ] && [ -d "$PARENT_DIR/code/.git" ]; then
-            OUTPUT="$PARENT_DIR/code"
+        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
+            OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
         fi
         echo $OUTPUT
         return 0
@@ -329,8 +329,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
-	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+    # make sure to honour the service configuration
+    # needed to make sure that tests use the right servers
+    APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
@@ -393,6 +397,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/

@@ -3,6 +3,22 @@
 # source variables
 . `pwd`/env.sh
 
+# check if automatic tests and build should be executed
+# before starting up the server
+if [[ $BUILD_BEFORE_START == "True" ]]; then
+    `which mail` -r simon.marcel.pamies@sap.com -s "Build of $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
+    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.log
+     STATUS=$?
+     if [ $STATUS -eq 0 ]; then
+        echo "Deployment Successful"
+        `which mail` -s "Build of $SERVER_NAME complete" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+     else
+        echo "Deployment Failed"
+        `which mail` -s "Build of $SERVER_NAME failed" $BUILD_COMPLETE_NOTIFY < last_automatic_build.log
+        exit
+     fi 
+fi
+
 PARAM=$@
 
 # make some checks
@@ -60,6 +76,9 @@ if [[ $PARAM == "" ]]; then
     TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
     if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
+            if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+                `which mail` -s "Server $SERVER_NAME startup failed!" $SERVER_STARTUP_NOTIFY
+            fi
             exit
     fi
 
@@ -72,8 +91,12 @@ if [[ $PARAM == "" ]]; then
     echo "EXPEDITION_PORT: $EXPEDITION_PORT"
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
+
+    if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
+        `which mail` -s "Server $SERVER_NAME started up!" $SERVER_STARTUP_NOTIFY < env.sh
+    fi
 elif [[ $PARAM == "debug" ]]; then
-    echo "Starting remote debugging session on port 8000"
+    echo "Starting remote debugging session on port 8000 - make sure this port is open"
     $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
 elif [[ $PARAM == "fg" ]]; then
     $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
