@@ -118,4 +118,6 @@ public interface DomainFactory extends SharedDomainFactory {
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
+    CompetitorStore getCompetitorStore();
+
 }

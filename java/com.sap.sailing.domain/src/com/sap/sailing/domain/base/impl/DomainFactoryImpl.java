@@ -488,4 +488,9 @@ public class DomainFactoryImpl implements DomainFactory {
         return courseAreaCache.get(courseAreaId);
     }
 
+    @Override
+    public CompetitorStore getCompetitorStore() {
+        return competitorStore;
+    }
+
 }

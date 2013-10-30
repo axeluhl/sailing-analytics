@@ -42,7 +42,6 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -103,7 +102,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
@@ -180,7 +178,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
     
-    private final PersistentCompetitorStore persistentCompetitorStore;
+    private final CompetitorStore persistentCompetitorStore;
 
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
 
@@ -212,27 +210,24 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * the {@link DomainObjectFactory}.
      */
     public RacingEventServiceImpl() {
-        // FIXME cyclic initialization dependency across PersistentCompetitorStore, DomainFactoryImpl and DomainObjectFactoryImpl
-        this(new DomainFactoryImpl());
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()));
     }
     
-    private RacingEventServiceImpl(DomainFactory baseDomainFactory) {
-        this(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory), PersistenceFactory.INSTANCE
-                .getDefaultMongoObjectFactory(), baseDomainFactory, MediaDBFactory.INSTANCE.getDefaultMediaDB());
+    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore) {
+        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore);
     }
 
     /**
      * Uses the default factories for the tracking adapters and the {@link DomainFactory base domain factory} of the
      * {@link PersistenceFactory#getDefaultDomainObjectFactory() default domain object factory}. This constructor should
-     * be used for testing because the {@link DomainObjectFactory} will usually not provide a {@link DomainFactory base
-     * domain factory} with the proper {@link CompetitorStore} as required for competitor persistence.
+     * be used for testing because it provides a transient {@link CompetitorStore} as required for competitor persistence.
      */
     public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB) {
-        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB);
+        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore());
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb) {
+            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore persistentCompetitorStore) {
         logger.info("Created " + this);
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
@@ -257,7 +252,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        persistentCompetitorStore = new PersistentCompetitorStore(domainObjectFactory, mongoObjectFactory); // loads competitors
+        this.persistentCompetitorStore = persistentCompetitorStore;
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();

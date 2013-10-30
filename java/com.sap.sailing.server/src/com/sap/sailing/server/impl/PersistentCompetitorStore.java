@@ -6,10 +6,13 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Manages a persistent set of {@link Competitor}s using a {@link MongoObjectFactory} to update the persistent store,
@@ -22,12 +25,30 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 public class PersistentCompetitorStore extends TransientCompetitorStoreImpl implements CompetitorStore {
     private static final long serialVersionUID = 9205956018421790908L;
     private transient MongoObjectFactory storeTo;
+    private transient DomainObjectFactory loadFrom;
     
     public PersistentCompetitorStore(DomainObjectFactory loadFrom, MongoObjectFactory storeTo) {
         this.storeTo = storeTo;
+        this.loadFrom = loadFrom;
         for (Competitor competitor : loadFrom.loadAllCompetitors()) {
             addCompetitorToTransientStore(competitor.getId(), competitor);
         }
+    }
+    
+    public PersistentCompetitorStore(MongoObjectFactory storeTo) {
+        this(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, new DomainFactoryImpl()), storeTo);
+    }
+    
+    DomainObjectFactory getDomainObjectFactory() {
+        return loadFrom;
+    }
+    
+    MongoObjectFactory getMongoObjectFactory() {
+        return storeTo;
+    }
+    
+    DomainFactory getBaseDomainFactory() {
+        return loadFrom.getBaseDomainFactory();
     }
     
     /**
