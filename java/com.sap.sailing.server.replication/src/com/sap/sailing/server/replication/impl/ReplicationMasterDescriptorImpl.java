@@ -41,7 +41,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException, UnsupportedEncodingException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString()
                 + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "=" + java.net.URLEncoder.encode(BuildVersion.getBuildVersion(), "UTF-8"));
@@ -49,21 +49,21 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name()
                 + "&" + ReplicationServlet.SERVER_UUID + "=" + uuid.toString());
     }
     
     @Override
     public URL getInitialLoadURL() throws MalformedURLException {
-        return new URL("http", hostname, servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
+        return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.INITIAL_LOAD.name());
     }
 
     @Override
     public synchronized QueueingConsumer getConsumer() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost(getHostname());
+        connectionFactory.setHost(getMessagingHostname());
         int port = getMessagingPort();
         if (port != 0) {
             connectionFactory.setPort(port);
