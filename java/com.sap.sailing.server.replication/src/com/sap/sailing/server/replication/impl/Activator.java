@@ -35,14 +35,13 @@ public class Activator implements BundleActivator {
             if (System.getenv(REPLICATION_HOST) == null) {
                 exchangeHost = "localhost";
             } else {
-                logger.info("Using environment variable REPLICATION_HOST as host!");
                 exchangeHost = System.getenv(REPLICATION_HOST);
             }
         }
         replicationInstancesManager = new ReplicationInstancesManager();
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, exchangeHost, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
-        logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName);
+        logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
