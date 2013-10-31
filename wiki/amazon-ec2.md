@@ -137,9 +137,14 @@ Here are the steps to create a load balanced setup:
 
 - Create a master instance holding all data
 - Create `n` instances that are configured to connect to the master server
-- Create a load balancer
+- Create a load balancer that redirects everything from port 80 to let's say port 8888.
 - Associate all your instances
-- Connect your domain with the IP of the load balancer
+- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
+
+Two things are still needed before this setup can be executed:
+
+- Make it possible to configure instances that way that they automatically connect to a master upon start
+- Check what happens if the ELB acts as a transparent proxy not revealing the underlying instance name and address (should be)
 
 ### Access MongoDB database
 
