@@ -20,6 +20,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final String hostname;
     private final String exchangeName;
     private final int servletPort;
+    private final String messagingHostname;
     private final int messagingPort;
     private final String queueName;
     
@@ -28,8 +29,9 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     /**
      * @param messagingPort 0 means use default port
      */
-    public ReplicationMasterDescriptorImpl(String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
+    public ReplicationMasterDescriptorImpl(String messagingHostname, String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
         this.hostname = hostname;
+        this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
@@ -136,6 +138,11 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     @Override
     public int getMessagingPort() {
         return messagingPort;
+    }
+    
+    @Override
+    public String getMessagingHostname() {
+        return messagingHostname;
     }
 
     @Override

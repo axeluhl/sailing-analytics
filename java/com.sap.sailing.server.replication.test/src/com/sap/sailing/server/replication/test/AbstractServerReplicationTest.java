@@ -98,7 +98,9 @@ public abstract class AbstractServerReplicationTest {
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
         masterReplicator.registerReplica(replicaDescriptor);
-        masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
+        // connect to exchange host and local server running as master
+        // master server and exchange host can be two different hosts
+        masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, "localhost", exchangeName, SERVLET_PORT, 0, UUID.randomUUID().toString());
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, exchangeHost, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator, masterDescriptor);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);

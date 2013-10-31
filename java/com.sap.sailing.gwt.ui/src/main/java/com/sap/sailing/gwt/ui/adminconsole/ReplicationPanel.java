@@ -155,6 +155,7 @@ public class ReplicationPanel extends FlowPanel {
                         addButton.setEnabled(false);
                         stopReplicationButton.setEnabled(false);
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
+                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
