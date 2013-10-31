@@ -102,7 +102,11 @@ if [[ $PARAM == "" ]]; then
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-        echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        if [[ ! -z "$ON_AMAZON" ]]; then
+            echo "Go to $INSTANCE_DNS:$SERVER_PORT to reach your instance!" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        else
+            echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        fi
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open"
