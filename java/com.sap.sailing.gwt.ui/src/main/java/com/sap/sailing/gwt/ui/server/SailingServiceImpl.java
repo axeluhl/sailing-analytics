@@ -2312,6 +2312,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 break;
             case REGATTA_RANK:
+            case OVERALL_RANK:
                 List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumn);
                 int rank = 1;
                 for(CompetitorDTO competitor: competitorsFromBestToWorst) {

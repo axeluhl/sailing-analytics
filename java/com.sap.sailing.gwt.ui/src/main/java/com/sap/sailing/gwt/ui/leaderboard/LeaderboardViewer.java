@@ -27,10 +27,10 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
     public LeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings leaderboardSettings, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn, 
+            UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
             boolean showCharts, DetailType chartDetailType) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
-                new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages);
+                new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
 
         FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);

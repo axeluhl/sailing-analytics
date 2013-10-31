@@ -145,6 +145,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
       
         switch(selectedDetailType) {
             case REGATTA_RANK:
+            case OVERALL_RANK:
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
@@ -226,6 +227,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         raceColumnNames.clear();
                         
                         switch(selectedDetailType) {
+                        case OVERALL_RANK:
                         case REGATTA_RANK:
                             fillTotalRanksSeries(result, chartSeries);
                             break;

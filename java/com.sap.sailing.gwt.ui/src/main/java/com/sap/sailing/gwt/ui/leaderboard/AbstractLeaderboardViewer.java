@@ -31,17 +31,19 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     private FlowPanel componentsNavigationPanel;
 
     protected final Timer timer;
+    protected final boolean hideToolbar;
     
     private final static String STYLE_VIEWER_TOOLBAR = "viewerToolbar";
     private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
     private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
 
     public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages) {
+            Timer timer, StringMessages stringMessages, boolean hideToolbar) {
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
+        this.hideToolbar = hideToolbar;
     }
     
     protected FlowPanel createViewerPanel() {
@@ -51,15 +53,21 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
 
-        componentsNavigationPanel = new FlowPanel();
-        componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
-        mainPanel.add(componentsNavigationPanel);
+        if(!hideToolbar) {
+            componentsNavigationPanel = new FlowPanel();
+            componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
+            mainPanel.add(componentsNavigationPanel);
+        }
         
         return mainPanel;
     }
     
     protected <SettingsType> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
+        if(hideToolbar) {
+            return;
+        }
+        
         final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName(); 
         final CheckBox checkBox= new CheckBox(componentName);
         final Button settingsButton = new Button("");
