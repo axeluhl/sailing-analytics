@@ -12,8 +12,9 @@ public class Activator implements BundleActivator {
     
     private static final String PROPERTY_NAME_EXCHANGE_NAME = "replication.exchangeName";
     private static final String PROPERTY_NAME_EXCHANGE_HOST = "replication.exchangeHost";
-    private static final String REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
-    private static final String REPLICATION_HOST = "REPLICATION_HOST";
+    
+    public static final String REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
+    public static final String REPLICATION_HOST = "REPLICATION_HOST";
 
     private ReplicationInstancesManager replicationInstancesManager;
     
@@ -34,6 +35,7 @@ public class Activator implements BundleActivator {
             if (System.getenv(REPLICATION_HOST) == null) {
                 exchangeHost = "localhost";
             } else {
+                logger.info("Using environment variable REPLICATION_HOST as host!");
                 exchangeHost = System.getenv(REPLICATION_HOST);
             }
         }

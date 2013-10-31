@@ -28,6 +28,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.server.replication.impl.Activator;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
 import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
@@ -72,8 +73,11 @@ public abstract class AbstractServerReplicationTest {
      */
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
-        final String exchangeName = "test-sapsailinganalytics-exchange";
-        final String exchangeHost = "localhost";
+        String exchangeName = "test-sapsailinganalytics-exchange";
+        String exchangeHost = "localhost";
+        if (System.getenv(Activator.REPLICATION_HOST) != null) {
+            exchangeHost = System.getenv(Activator.REPLICATION_HOST);
+        }
         final UUID serverUuid = UUID.randomUUID();
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
