@@ -152,7 +152,7 @@ Competitor c = competitorDeserializer.deserialize(json);
 
 ## Import Another Year of Magnetic Declination Values
 
-Under java/com.sap.sailing.declination/resources we store magnetic declination values, using one file per year. The resolution at which we usually store those is one degree of latitude and longitude, each. When for a year those values aren't found in a file, an online request is performed to the [[www.ngdc.noaa.gov/geomag-web/]](NOAA service) which can be time and bandwidth consuming. Therefore, it is a good idea to keep a file with cached declination values around for the current year.
+Under java/com.sap.sailing.declination/resources we store magnetic declination values, using one file per year. The resolution at which we usually store those is one degree of latitude and longitude, each. When for a year those values aren't found in a file, an online request is performed to the [NOAA Service](http://www.ngdc.noaa.gov/geomag-web/) which can be time and bandwidth consuming. Therefore, it is a good idea to keep a file with cached declination values around for the current year.
 
 To produce such a file, use the main(...) method of class com.sap.sailing.declination.impl.DeclinationStore. There are pre-defined launch configurations in place in the com.sap.sailing.declination bundle project. Adjust the from/to year parameters for the current year. The process usually takes several hours to complete at a one-degree resolution. Don't forget to commit the resulting resources/declination-<year> file to git.
 
