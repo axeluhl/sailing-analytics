@@ -51,7 +51,11 @@ checkout_code ()
 {
     cd $PROJECT_HOME
     GIT_BINARY=`which git`
-    $GIT_BINARY reset --hard
+    if [[ $COMPILE_GWT == "True" ]]; then
+        # only reset if GWT gets compiled
+        # if not p2build will not work
+        $GIT_BINARY reset --hard
+    fi
     $GIT_BINARY checkout $BUILD_FROM
     $GIT_BINARY pull
 }
@@ -84,10 +88,6 @@ deploy ()
         DEPLOY="-s $DEPLOY_TO"
     fi
     $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install
-
-    # make sure to clean up data behind because this can eat up some space
-    find . -name "*.class" | xargs rm -rf
-    find . -name "bin" | xargs rm -rf
 }
 
 checks

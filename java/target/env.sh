@@ -60,6 +60,7 @@ if [[ ! -z "$ON_AMAZON" ]]; then
   DEPLOY_TO=server
   INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
   INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
+  INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
   INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
 fi
 

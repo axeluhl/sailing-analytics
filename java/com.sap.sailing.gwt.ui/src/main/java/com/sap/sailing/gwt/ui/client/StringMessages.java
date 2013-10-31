@@ -817,4 +817,5 @@ public interface StringMessages extends Messages {
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
+    String explainExchangeHostName();
 }
