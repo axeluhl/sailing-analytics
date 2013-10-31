@@ -816,4 +816,6 @@ public interface StringMessages extends Messages {
     String raceTimeDownwindTooltip();
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
+    String exchangeHost();
+    String explainExchangeHostName();
 }
