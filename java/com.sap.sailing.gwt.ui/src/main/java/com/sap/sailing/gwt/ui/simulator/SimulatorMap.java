@@ -381,22 +381,21 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey);  
     }
 
     private void initializeOverlays() {
         if (mode == SailingSimulatorConstants.ModeEvent) {
             if (regattaAreaCanvasOverlay == null) {
-                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent());
+                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this);
                 regattaAreaCanvasOverlay.addToMap();
             }
         }
     	
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX);
+        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode);
 
         if (mode == SailingSimulatorConstants.ModeEvent) {
             regattaAreaCanvasOverlay.setRaceCourseCanvas(raceCourseCanvasOverlay);
-            regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         }
 
         if (windParams.isShowArrows()) {

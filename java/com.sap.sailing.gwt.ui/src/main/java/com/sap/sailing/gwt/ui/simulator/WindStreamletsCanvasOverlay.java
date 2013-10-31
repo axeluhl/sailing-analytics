@@ -87,7 +87,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     public void removeFromMap() {
         super.removeFromMap();
         
-        mouseMoveHandlerRegistration.removeHandler();
+        if (mouseMoveHandlerRegistration != null) {
+        	mouseMoveHandlerRegistration.removeHandler();
+        }
 
         if (timer != null) {
             timer.removeTimeListener(this);

@@ -8,8 +8,6 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
-import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
-import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.overlays.Circle;
 import com.google.gwt.maps.client.overlays.CircleOptions;
 import com.sap.sailing.gwt.ui.client.shared.racemap.ImageTransformer;
@@ -21,23 +19,27 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
     private static SimulatorResources resources = GWT.create(SimulatorResources.class);
 
+    private SimulatorMap simulatorMap;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private VenueDescriptor venue; 
     private CourseAreaDescriptor currentCourseArea = null;
     
-    private boolean pan;
+    private boolean initial;
     private double raceBearing = 0.0;
     private double diffBearing = 0.0;
 
     private ImageTransformer windRoseBackground;
     private ImageTransformer windRoseNeedle;
     
-    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event) {
+    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, SimulatorMap simulatorMap) {
         super(map, zIndex);
+		this.simulatorMap = simulatorMap;
         this.venue = VenueDescriptorFactory.createVenue(event);
+        this.currentCourseArea = this.venue.getDefaultCourseArea();
 
         windRoseBackground = new ImageTransformer(resources.windRoseBackground());
         windRoseNeedle = new ImageTransformer(resources.windRoseNeedle());
+                
     }
 
     @Override
@@ -49,16 +51,18 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 //        getPane().add(windRoseNeedle.getCanvas(), getWidgetPosLeft() + windBackgroundOffset + windNeedleOffset,
 //                getWidgetPosTop() + windNeedleOffset);
 
-        int counter = 1;
+        int counter = 0;
         for (CourseAreaDescriptor courseArea : venue.getCourseAreas()) {
             drawCircleFromRadius(counter++, courseArea);
         }
         
         map.panTo(venue.getCenterPos());
+        this.initial = true;
     }
 
     @Override
     protected void draw() {
+    	
         super.draw();
 
         if(mapProjection != null) {
@@ -70,6 +74,12 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
             clearCanvas();
             drawRegattaAreas();
+
+            if (this.initial) {
+            	updateRaceCourse(0, 0);
+            	this.initial = false;
+            }
+            
         }
     }
 
@@ -81,6 +91,8 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     protected void drawRegattaAreas() {
         windRoseBackground.drawTransformedImage(0.0, 1.0);
         windRoseNeedle.drawTransformedImage(raceBearing + 180.0, 1.0);
+        //windRoseNeedle.drawToCanvas(getCanvas(), boatDrawingAngle, realBoatSizeScaleFactor);
+
 
         LatLng cPos = LatLng.newInstance(54.4344, 10.19659167);
         Point centerPoint = mapProjection.fromLatLngToDivPixel(cPos);
@@ -101,6 +113,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
     // TODO MigrationV3: This is not the right place to create Circles being not drawn to the canvas -> move to SimulatorMap
     public void drawCircleFromRadius(int regIdx, CourseAreaDescriptor courseArea) {
+    	 
         CircleOptions circleOptions = CircleOptions.newInstance();
         circleOptions.setStrokeColor("white");
         circleOptions.setStrokeWeight(1);
@@ -109,39 +122,32 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
         circleOptions.setFillOpacity(0.0);
         circleOptions.setCenter(courseArea.getCenterPos());
         Circle circle = Circle.newInstance(circleOptions);
-        circle.setRadius(courseArea.getRadius());
+        circle.setRadius(courseArea.getRadiusInMeters());
         
         final int regIdxFinal = regIdx;
 
         circle.addClickHandler(new ClickMapHandler() {
             public void onEvent(ClickMapEvent e) {
-                // System.out.println("Click: "+currentRegArea.name);
+                //System.out.println("Click: "+currentCourseArea.getName());
                 CourseAreaDescriptor newRegArea = venue.getCourseAreas().get(regIdxFinal);
 
                 if (newRegArea != currentCourseArea) {
                     currentCourseArea = newRegArea;
-                    // simulatorMap.clearOverlays();
+                    simulatorMap.clearOverlays();
                     updateRaceCourse(0, 0);
                     raceCourseCanvasOverlay.draw();
                 }
 
-                pan = true;
                 map.panTo(currentCourseArea.getCenterPos());
+				if (map.getZoom() < 14) {
+					map.setZoom(14);
+				}
+				
             }
         });
 
         circle.setMap(getMap());
-        getMap().addMouseOutMoveHandler(new MouseOutMapHandler() {
-            public void onEvent(MouseOutMapEvent event) {
-                if (pan) {
-                    pan = false;
-                    if (map.getZoom() < 14) {
-                        map.setZoom(14);
-                    }
-                }
-
-            };
-        });
+                
     }
 
     protected void updateRaceCourse(int type, double bearing) {
