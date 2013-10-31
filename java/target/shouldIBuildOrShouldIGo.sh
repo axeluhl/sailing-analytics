@@ -51,7 +51,11 @@ checkout_code ()
 {
     cd $PROJECT_HOME
     GIT_BINARY=`which git`
-    $GIT_BINARY reset --hard
+    if [[ $COMPILE_GWT == "True" ]]; then
+        # only reset if GWT gets compiled
+        # if not p2build will not work
+        $GIT_BINARY reset --hard
+    fi
     $GIT_BINARY checkout $BUILD_FROM
     $GIT_BINARY pull
 }
