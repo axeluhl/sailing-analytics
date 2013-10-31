@@ -60,7 +60,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     }
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"),
+        return new Mongo(dbConfiguration.getHostName(),
                 dbConfiguration.getPort());
     }
     

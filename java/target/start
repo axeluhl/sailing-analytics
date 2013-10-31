@@ -79,7 +79,8 @@ REPLICATION_PARAMETERS="-Dreplication.start=$REPLICATE_ON_START -Dreplicate.mast
 
 if [[ $PARAM == "" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
-    echo "Starting server..."
+    JAVA_PID=$!
+    echo "Starting server... (PID: $JAVA_PID)"
     sleep 10
 
     SERVER_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
@@ -102,7 +103,11 @@ if [[ $PARAM == "" ]]; then
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-        echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        if [[ ! -z "$ON_AMAZON" ]]; then
+            echo "Go to $INSTANCE_DNS:$SERVER_PORT to reach your instance!" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        else
+            echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+        fi
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open"

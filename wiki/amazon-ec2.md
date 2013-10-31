@@ -90,6 +90,7 @@ Attention: You can not start the building process on t1.micro instances having l
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
+COMPILE_GWT=True
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
@@ -127,6 +128,25 @@ ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazona
 Starting a test is as easy as starting up a new instance. Just make sure that you fill the field RUN_TESTS and set it to `True`. Also set the field BUILD_FROM to a gitspec that matches the code branch that you want to test. After tests has been run and the server has been started you will get an email giving you all the details. You can then access your instance or simply shut it down.
 
 ### Setup replicated instances with ELB
+
+The main concept behind ELB is that there is one instance that you configure in the "Load Balancers" tab that serves as the main entry point for all requests going to your application. This instance can be told to pass through requests from one port to another. In order to make this ELB instance aware of the Analytics EC2 Instances it should balance over you need to add all instances that should be part of the setup to the ELB instance.
+
+A closer look reveals that an ELB instance consists itself of many other invisible instances. These are behind a DNS round robin configuration that redirects each incoming request to one of these instances. These invisible instances then decide upon the rules you've created how and where to distribute this request to one of the associated instances.
+
+Here are the steps to create a load balanced setup:
+
+- Create a master instance holding all data
+- Create `n` instances that are configured to connect to the master server
+- Create a load balancer that redirects everything from port 80 to let's say port 8888.
+- Associate all your instances
+- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
+
+Two things are still needed before this setup can be executed:
+
+- Make it possible to configure instances that way that they automatically connect to a master upon start
+- Check what happens if the ELB acts as a transparent proxy not revealing the underlying instance name and address (should be)
+
+Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 ### Access MongoDB database
 
