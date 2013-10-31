@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.Nationality;
 
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
     private static final long serialVersionUID = -4198298775476586931L;
@@ -17,7 +16,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorCache = new ConcurrentHashMap<>();
     }
     
-    private Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
+    private Competitor createCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {
         Competitor result = new CompetitorImpl(id, name, team, boat);
         addNewCompetitor(id, result);
         return result;
@@ -33,7 +32,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
         Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             synchronized(this) {
@@ -69,6 +68,17 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public void removeCompetitor(Competitor competitor) {
         competitorCache.remove(competitor.getId());
+    }
+
+    @Override
+    public Competitor updateCompetitor(Serializable id, String newName, String newSailId, Nationality newNationality) {
+        DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorById(id);
+        if (competitor != null) {
+            competitor.setName(newName);
+            competitor.getBoat().setSailId(newSailId);
+            competitor.getTeam().setNationality(newNationality);
+        }
+        return competitor;
     }
     
 }

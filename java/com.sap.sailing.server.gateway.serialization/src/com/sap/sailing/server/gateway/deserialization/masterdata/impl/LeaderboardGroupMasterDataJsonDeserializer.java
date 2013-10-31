@@ -9,13 +9,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
-import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
@@ -47,9 +47,9 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
     public static JsonDeserializer<LeaderboardGroupMasterData> create(DomainFactory domainFactory) {
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserializer(domainFactory);
-        JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
-        JsonDeserializer<Team> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
-        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
+        JsonDeserializer<DynamicPerson> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
+        JsonDeserializer<DynamicTeam> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
+        JsonDeserializer<DynamicCompetitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
                 boatClassDeserializer, teamDeserializer, domainFactory);
         JsonDeserializer<RaceLogEvent> raceLogEventDeserializer = RaceLogEventDeserializer.create(domainFactory);
         JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(

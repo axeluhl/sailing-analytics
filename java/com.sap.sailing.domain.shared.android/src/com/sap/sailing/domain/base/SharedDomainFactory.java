@@ -3,6 +3,9 @@ package com.sap.sailing.domain.base;
 import java.io.Serializable;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 
@@ -74,10 +77,18 @@ public interface SharedDomainFactory {
 
     Competitor getExistingCompetitorById(Serializable competitorId);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
     
+    /**
+     * Same as {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} but returns the writable
+     * specialization of the {@link Competitor} interface. Use with care because the setters offered by the <code>Dynamic...</code>
+     * subinterfaces don't automatically replicate or store the changes.
+     */
+    DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team, DynamicBoat boat);
+
     CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
     
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
+
 
 }

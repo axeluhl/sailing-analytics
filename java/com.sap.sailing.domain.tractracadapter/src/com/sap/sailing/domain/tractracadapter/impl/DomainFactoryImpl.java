@@ -19,21 +19,21 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -87,9 +87,9 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
-    private final Map<Pair<String, UUID>, Person> personCache = new HashMap<>();
+    private final Map<Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
     
-    private final Map<Serializable, Team> teamCache = new HashMap<>();
+    private final Map<Serializable, DynamicTeam> teamCache = new HashMap<>();
     
     /**
      * Caches regattas by their name and their boat class's name
@@ -245,20 +245,20 @@ public class DomainFactoryImpl implements DomainFactory {
                 nationality = null;
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
-            Team team = getOrCreateTeam(name, nationality, competitorId);
-            Boat boat = new BoatImpl(shortName, boatClass, shortName);
+            DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
+            DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
             result = baseDomainFactory.getOrCreateCompetitor(competitorId, name, team, boat);
         }
         return result;
     }
 
     @Override
-    public Team getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
+    public DynamicTeam getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
         synchronized (teamCache) {
-            Team result = teamCache.get(competitorId);
+            DynamicTeam result = teamCache.get(competitorId);
             if (result == null) {
                 String[] sailorNames = name.split("\\b*\\+\\b*");
-                List<Person> sailors = new ArrayList<Person>();
+                List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
                 for (String sailorName : sailorNames) {
                     sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
                 }
@@ -270,10 +270,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Person getOrCreatePerson(String name, Nationality nationality, UUID competitorId) {
+    public DynamicPerson getOrCreatePerson(String name, Nationality nationality, UUID competitorId) {
         synchronized (personCache) {
             Pair<String, UUID> key = new Pair<String, UUID>(name, competitorId);
-            Person result = personCache.get(key);
+            DynamicPerson result = personCache.get(key);
             if (result == null) {
                 result = new PersonImpl(name, nationality, /* date of birth unknown */null, /* description */"");
                 personCache.put(key, result);

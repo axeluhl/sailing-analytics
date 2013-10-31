@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -33,12 +32,14 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -180,24 +181,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -345,22 +346,22 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
         Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
-        Team team2 = new TeamImpl("Pros2", sailors2, coach2);
-        Boat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
+        DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
         CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", team2, boat2);
         competitors.add(competitor2);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -500,22 +501,22 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         Competitor competitor = sourceDomainFactory.getOrCreateCompetitor(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Test Mustermann", new NationalityImpl("GER"), new Date(645487200000L), "desc"));
         Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
-        Team team2 = new TeamImpl("Pros2", sailors2, coach2);
-        Boat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
+        DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
         Competitor competitor2 = sourceDomainFactory.getOrCreateCompetitor(competitor2UUID, "Froderik", team2, boat2);
         competitors.add(competitor2);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -632,24 +633,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -808,24 +809,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -978,24 +979,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -1103,24 +1104,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);
@@ -1277,24 +1278,24 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
         Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
-        Set<Person> sailors2 = new HashSet<Person>();
+        Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
         sailors2.add(new PersonImpl("Angela Merkel", new NationalityImpl("GER"), new Date(645487200000L),
                 "segelt auch mit"));
         Person coach2 = new PersonImpl("Peer Steinbrueck", new NationalityImpl("GER"), new Date(645487200000L),
                 "Bester Coach");
-        Team team2 = new TeamImpl("Noobs", sailors2, coach2);
-        Boat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
+        DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
+        DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta);

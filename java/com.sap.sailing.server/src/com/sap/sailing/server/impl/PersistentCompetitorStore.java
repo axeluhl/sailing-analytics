@@ -7,6 +7,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -79,5 +80,13 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.removeCompetitor(competitor);
         super.removeCompetitor(competitor);
     }
+
+    @Override
+    public Competitor updateCompetitor(Serializable id, String newName, String newSailId, Nationality newNationality) {
+        Competitor result = super.updateCompetitor(id, newName, newSailId, newNationality);
+        storeTo.storeCompetitor(result);
+        return result;
+    }
+    
     
 }

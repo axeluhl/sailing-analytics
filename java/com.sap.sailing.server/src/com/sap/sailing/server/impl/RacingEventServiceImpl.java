@@ -42,6 +42,7 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -1702,7 +1703,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
             for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
-                persistentCompetitorStore.getOrCreateCompetitor(competitor.getId(), competitor.getName(), competitor.getTeam(), competitor.getBoat());
+                DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
+                persistentCompetitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
             logoutput.append("\nReceived " + persistentCompetitorStore.size() + " NEW competitors\n");
 

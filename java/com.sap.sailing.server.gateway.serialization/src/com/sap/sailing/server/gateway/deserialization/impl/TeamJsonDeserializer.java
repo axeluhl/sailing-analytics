@@ -8,32 +8,33 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Person;
-import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 
-public class TeamJsonDeserializer implements JsonDeserializer<Team> {
+public class TeamJsonDeserializer implements JsonDeserializer<DynamicTeam> {
 
-	private final JsonDeserializer<Person> personDeserializer;
+	private final JsonDeserializer<DynamicPerson> personDeserializer;
 
 	public static TeamJsonDeserializer create(DomainFactory baseDomainFactory) {
 		return new TeamJsonDeserializer(new PersonJsonDeserializer(
 				new NationalityJsonDeserializer(baseDomainFactory)));
 	}
 
-	public TeamJsonDeserializer(JsonDeserializer<Person> personDeserializer) {
+	public TeamJsonDeserializer(JsonDeserializer<DynamicPerson> personDeserializer) {
 		this.personDeserializer = personDeserializer;
 	}
 
 	@Override
-	public Team deserialize(JSONObject object)
+	public DynamicTeam deserialize(JSONObject object)
 			throws JsonDeserializationException {
 		String name = (String) object.get(TeamJsonSerializer.FIELD_NAME);
 		Person coach = personDeserializer.deserialize((JSONObject) object
 				.get(TeamJsonSerializer.FIELD_COACH));
-		Set<Person> sailors = new HashSet<Person>();
+		Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
 
 		JSONArray sailorsJson = (JSONArray) object
 				.get(TeamJsonSerializer.FIELD_SAILORS);
