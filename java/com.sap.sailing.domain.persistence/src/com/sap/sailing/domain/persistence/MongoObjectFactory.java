@@ -98,6 +98,8 @@ public interface MongoObjectFactory {
 
     void removeAllCompetitors();
 
+    void removeCompetitor(Competitor competitor);
+
     DB getDatabase();
 
 }

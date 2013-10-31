@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -1276,7 +1277,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (DBObject o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(JSON.serialize(o));
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
                 Competitor c = competitorDeserializer.deserialize(json);
                 result.add(c);
             }

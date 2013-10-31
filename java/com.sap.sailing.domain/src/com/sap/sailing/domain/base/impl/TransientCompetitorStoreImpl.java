@@ -66,4 +66,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         return Collections.unmodifiableCollection(competitorCache.values());
     }
 
+    @Override
+    public void removeCompetitor(Competitor competitor) {
+        competitorCache.remove(competitor.getId());
+    }
+    
 }

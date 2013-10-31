@@ -23,4 +23,6 @@ public interface CompetitorStore {
     void clear();
     
     Iterable<Competitor> getCompetitors();
+    
+    void removeCompetitor(Competitor competitor);
 }

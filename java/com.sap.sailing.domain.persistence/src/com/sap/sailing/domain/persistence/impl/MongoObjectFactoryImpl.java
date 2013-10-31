@@ -871,7 +871,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        BasicDBObject query = new BasicDBObject(FieldNames.COMPETITOR_ID.name(), competitor.getId());
+        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false);
     }
@@ -882,4 +882,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         collection.drop();
     }
 
+    @Override
+    public void removeCompetitor(Competitor competitor) {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
+        collection.remove(query);
+    }
 }

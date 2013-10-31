@@ -18,12 +18,12 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_NATIONALITY_ISO3 = "nationalityISO3";
     public static final String FIELD_TEAM = "team";
     public static final String FIELD_BOAT = "boat";
-  
+
     private final JsonSerializer<Team> teamJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
-    
+
     public static CompetitorJsonSerializer create() {
-    	return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
+        return new CompetitorJsonSerializer(TeamJsonSerializer.create(), BoatJsonSerializer.create());
     }
 
     public CompetitorJsonSerializer() {
@@ -34,26 +34,24 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         this.teamJsonSerializer = teamJsonSerializer;
         this.boatJsonSerializer = teamBoatSerializer;
     }
-    
+
     @Override
     public JSONObject serialize(Competitor competitor) {
         JSONObject result = new JSONObject();
-        
         result.put(FIELD_ID, competitor.getId().toString());
         result.put(FIELD_NAME, competitor.getName());
-        result.put(FIELD_SAILID, competitor.getBoat()==null?"":competitor.getBoat().getSailID());
+        result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam().getNationality();
         result.put(FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());
         CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
         result.put(FIELD_NATIONALITY_ISO2, countryCode == null ? "" : countryCode.getTwoLetterISOCode());
         result.put(FIELD_NATIONALITY_ISO3, countryCode == null ? "" : countryCode.getThreeLetterISOCode());
-        if(teamJsonSerializer != null) {
+        if (teamJsonSerializer != null) {
             result.put(FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
-        if(boatJsonSerializer != null) {
+        if (boatJsonSerializer != null) {
             result.put(FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }
-
         return result;
     }
 }

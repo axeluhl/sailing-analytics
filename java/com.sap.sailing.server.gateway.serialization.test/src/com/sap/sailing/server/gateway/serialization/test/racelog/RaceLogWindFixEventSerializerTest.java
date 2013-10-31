@@ -48,7 +48,7 @@ public class RaceLogWindFixEventSerializerTest {
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
                 new PersonJsonSerializer(new NationalityJsonSerializer())), null), new WindJsonSerializer(
                 new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory, null),
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory, null, /* boatDeserializer */ null),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
 
         now = MillisecondsTimePoint.now();

@@ -17,4 +17,5 @@ Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.media
 Bundle-ActivationPolicy: lazy
 Import-Package: org.json.simple,
+ org.json.simple.parser,
  org.osgi.framework;version="1.6.0"

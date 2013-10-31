@@ -27,16 +27,14 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     private transient MongoObjectFactory storeTo;
     private transient DomainObjectFactory loadFrom;
     
-    public PersistentCompetitorStore(DomainObjectFactory loadFrom, MongoObjectFactory storeTo) {
+    public PersistentCompetitorStore(MongoObjectFactory storeTo) {
+        DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this);
+        DomainObjectFactory loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory);
         this.storeTo = storeTo;
         this.loadFrom = loadFrom;
         for (Competitor competitor : loadFrom.loadAllCompetitors()) {
             addCompetitorToTransientStore(competitor.getId(), competitor);
         }
-    }
-    
-    public PersistentCompetitorStore(MongoObjectFactory storeTo) {
-        this(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, new DomainFactoryImpl()), storeTo);
     }
     
     DomainObjectFactory getDomainObjectFactory() {
@@ -69,4 +67,17 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeCompetitor(competitor);
         super.addNewCompetitor(id, competitor);
     }
+
+    @Override
+    public void clear() {
+        storeTo.removeAllCompetitors();
+        super.clear();
+    }
+
+    @Override
+    public void removeCompetitor(Competitor competitor) {
+        storeTo.removeCompetitor(competitor);
+        super.removeCompetitor(competitor);
+    }
+    
 }
