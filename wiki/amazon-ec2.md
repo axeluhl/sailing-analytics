@@ -129,6 +129,18 @@ Starting a test is as easy as starting up a new instance. Just make sure that yo
 
 ### Setup replicated instances with ELB
 
+The main concept behind ELB is that there is one instance that you configure in the "Load Balancers" tab that serves as the main entry point for all requests going to your application. This instance can be told to pass through requests from one port to another. In order to make this ELB instance aware of the Analytics EC2 Instances it should balance over you need to add all instances that should be part of the setup to the ELB instance.
+
+A closer look reveals that an ELB instance consists itself of many other invisible instances. These are behind a DNS round robin configuration that redirects each incoming request to one of these instances. These invisible instances then decide upon the rules you've created how and where to distribute this request to one of the associated instances.
+
+Here are the steps to create a load balanced setup:
+
+- Create a master instance holding all data
+- Create `n` instances that are configured to connect to the master server
+- Create a load balancer
+- Associate all your instances
+- Connect your domain with the IP of the load balancer
+
 ### Access MongoDB database
 
 ## Glossary
