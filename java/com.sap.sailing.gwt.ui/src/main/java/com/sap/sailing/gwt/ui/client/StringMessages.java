@@ -444,7 +444,6 @@ public interface StringMessages extends Messages {
     String raceTotalPointsTooltip();
     String regattaTotalPointsTooltip();
     String overallLeaderboardSelection();
-    String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
     String passedTo(String name);
@@ -820,4 +819,7 @@ public interface StringMessages extends Messages {
     String raceTimeDownwindTooltip();
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
+    String hideToolbar();
+    String showSeriesLeaderboards();
+    String showOverallLeaderboard();
 }

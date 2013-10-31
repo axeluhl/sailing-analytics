@@ -51,6 +51,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
     private static final String PARAM_SHOW_CHARTS = "showCharts";
     private static final String PARAM_CHART_DETAIL = "chartDetail";
+    private static final String PARAM_SHOW_OVERALL_LEADERBOARD = "showOverallLeaderboard";
+    private static final String PARAM_SHOW_SERIES_LEADERBOARDS = "showSeriesLeaderboards";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -144,7 +146,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
         }
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-        boolean showCharts =  GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_CHARTS, false);  
+        boolean showCharts = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_CHARTS, false);
+        boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_OVERALL_LEADERBOARD, false);
+        boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_SERIES_LEADERBOARDS, false);
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(PARAM_CHART_DETAIL, null);
         DetailType chartDetailType;
         if(chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
@@ -158,11 +162,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         if (leaderboardType.isMetaLeaderboard()) {
             leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType);
+                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showSeriesLeaderboards);
         } else {
             leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
-                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType);
+                    showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
         }
         contentScrollPanel.setWidget(leaderboardViewer);
         mainPanel.add(contentScrollPanel);
@@ -252,18 +256,29 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     public static class LeaderboardUrlSettings {
         private final LeaderboardSettings leaderboardSettings;
         private final boolean embedded;
+        private final boolean hideToolbar;
         private final boolean showRaceDetails;
         private final boolean autoExpandLastRaceColumn;
         private final boolean autoRefresh;
+        private final boolean showCharts;
+        private final DetailType chartDetail;
+        private final boolean showOverallLeaderboard;
+        private final boolean showSeriesLeaderboards;
         
         public LeaderboardUrlSettings(LeaderboardSettings leaderboardSettings, boolean embedded,
-                boolean showRaceDetails, boolean autoRefresh, boolean autoExpandLastRaceColumn) {
+                boolean hideToolbar, boolean showRaceDetails, boolean autoRefresh, boolean autoExpandLastRaceColumn,
+                boolean showCharts, DetailType chartDetail, boolean showOverallLeaderboard, boolean showSeriesLeaderboards) {
             super();
             this.leaderboardSettings = leaderboardSettings;
             this.embedded = embedded;
+            this.hideToolbar = hideToolbar;
             this.showRaceDetails = showRaceDetails;
             this.autoRefresh = autoRefresh;
             this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
+            this.showCharts = showCharts;
+            this.chartDetail = chartDetail;
+            this.showOverallLeaderboard = showOverallLeaderboard;
+            this.showSeriesLeaderboards = showSeriesLeaderboards;
         }
 
         public LeaderboardSettings getLeaderboardSettings() {
@@ -284,6 +299,26 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
 
         public boolean isAutoExpandLastRaceColumn() {
             return autoExpandLastRaceColumn;
+        }
+
+        public boolean isHideToolbar() {
+            return hideToolbar;
+        }
+
+        public boolean isShowCharts() {
+            return showCharts;
+        }
+
+        public DetailType getChartDetail() {
+            return chartDetail;
+        }
+
+        public boolean isShowOverallLeaderboard() {
+            return showOverallLeaderboard;
+        }
+
+        public boolean isShowSeriesLeaderboards() {
+            return showSeriesLeaderboards;
         }
     }
     
@@ -340,7 +375,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
                 + (leaderboardDisplayName != null ? "&displayName="+leaderboardDisplayName : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
-
+                + (settings.isHideToolbar() ? "&"+PARAM_HIDE_TOOLBAR+"=true" : "")
+                + (settings.isShowCharts() ? "&"+PARAM_SHOW_CHARTS+"=true" : "")
+                + (settings.isShowCharts() ? "&"+PARAM_CHART_DETAIL+"="+settings.getChartDetail().name() : "")
+                + (settings.isShowOverallLeaderboard() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARD+"=true" : "")
+                + (settings.isShowSeriesLeaderboards() ? "&"+PARAM_SHOW_SERIES_LEADERBOARDS+"=true" : "")
                 + (!settings.isAutoRefresh() || (settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() != 0) ? "" :
                     "&"+PARAM_REFRESH_INTERVAL_MILLIS+"="+settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds())

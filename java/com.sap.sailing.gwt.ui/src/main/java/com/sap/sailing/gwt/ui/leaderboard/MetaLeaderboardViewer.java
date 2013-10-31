@@ -30,7 +30,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
             LeaderboardSettings leaderboardSettings, String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
-            boolean showCharts, DetailType chartDetailType) {
+            boolean showCharts, DetailType chartDetailType, boolean showSeriesLeaderboards) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
                 new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
 
@@ -54,7 +54,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
         multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, showRaceDetails, autoExpandLastRaceColumn);
-        multiLeaderboardPanel.setVisible(false);
+        multiLeaderboardPanel.setVisible(showSeriesLeaderboards);
         
         mainPanel.add(metaLeaderboardPanel);
         mainPanel.add(multiCompetitorChart);

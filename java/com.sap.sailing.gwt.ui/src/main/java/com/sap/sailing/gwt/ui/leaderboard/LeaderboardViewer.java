@@ -28,7 +28,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             LeaderboardSettings leaderboardSettings, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
-            boolean showCharts, DetailType chartDetailType) {
+            boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
                 new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
 
