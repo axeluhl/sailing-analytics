@@ -90,6 +90,7 @@ Attention: You can not start the building process on t1.micro instances having l
 BUILD_BEFORE_START=True
 BUILD_FROM=master
 RUN_TESTS=False
+COMPILE_GWT=True
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_NAME=LIVE1
 MEMORY=1024m
