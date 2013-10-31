@@ -161,3 +161,5 @@ Experience has shown that sometimes the SAP HTTP proxy doesn't properly resolve 
 `java -cp com.sap.sailing.domain_*.jar:com.sap.sailing.domain.common_*.jar:com.sap.sailing.declination_*.jar:com.sap.sailing.domain.shared.android_*.jar com.sap.sailing.declination.impl.DeclinationStore 2014 2014 1`
 
 Run this inside a tmux window to be sure that logging off does not interrupt the process. After the process completes, copy the resulting declination-<year> file to your git workspace to `java/com.sap.sailing.declination/resources` and commit.
+
+There is also a script java/target/importdeclination that automates these steps.
