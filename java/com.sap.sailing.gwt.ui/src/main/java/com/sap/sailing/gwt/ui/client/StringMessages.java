@@ -688,6 +688,8 @@ public interface StringMessages extends Messages {
     String addReplicationMaster();
     String connect();
     String connectToMaster();
+    String exchangeHost();
+    String explainExchangeHostName();
     String explainReplicationHostname();
     String explainReplicationExchangeName();
     String explainReplicationExchangePort();
@@ -817,5 +819,4 @@ public interface StringMessages extends Messages {
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
-    String explainExchangeHostName();
 }
