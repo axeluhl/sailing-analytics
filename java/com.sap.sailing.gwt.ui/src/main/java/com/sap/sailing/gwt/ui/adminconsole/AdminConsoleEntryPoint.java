@@ -124,7 +124,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(masterDataImportPanel, stringMessages.masterDataImportPanel(), /* asHTML */ false);
         
         final DeviceConfigurationPanel deviceConfigurationPanel = new DeviceConfigurationPanel(sailingService, stringMessages, this);
-        tabPanel.add(deviceConfigurationPanel, "Device Configuration", false);
+        tabPanel.add(deviceConfigurationPanel, stringMessages.deviceConfiguration(), false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

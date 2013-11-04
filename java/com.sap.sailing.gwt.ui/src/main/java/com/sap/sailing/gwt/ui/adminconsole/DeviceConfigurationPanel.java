@@ -14,14 +14,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SelectionProvider;
 import com.sap.sailing.gwt.ui.client.SelectionProviderImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 
 public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO> {
@@ -59,7 +57,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
     private void setupControlPanel(VerticalPanel mainPanel) {
         HorizontalPanel deviceManagementControlPanel = new HorizontalPanel();
         deviceManagementControlPanel.setSpacing(5);
-        addConfigurationButton = new Button("Add Configuration");
+        addConfigurationButton = new Button(stringMessages.addConfiguration());
         addConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

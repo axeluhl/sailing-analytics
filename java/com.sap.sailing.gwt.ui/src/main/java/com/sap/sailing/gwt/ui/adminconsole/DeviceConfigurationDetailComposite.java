@@ -26,6 +26,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
     
     private CaptionPanel captionPanel;
     private Grid mainGrid;
@@ -42,14 +43,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
     public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
         
         this.matcher = null;
         this.configuration = null;
         
-        captionPanel = new CaptionPanel("Configuration");
+        captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         mainGrid = new Grid(4, 2);
-        updateButton = new Button("Update");
+        updateButton = new Button(stringMessages.save());
         updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -83,9 +85,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
     
     private void markAsDrity(boolean dirty) {
         if (dirty) {
-            captionPanel.setCaptionText("Configuration*");
+            captionPanel.setCaptionText(stringMessages.configuration() + "*");
         } else {
-            captionPanel.setCaptionText("Configuration");
+            captionPanel.setCaptionText(stringMessages.configuration());
         }
     }
     
@@ -115,7 +117,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
             allowedCourseAreasBox.setText(builder.substring(0, builder.length() - 1));
         }
-        mainGrid.setWidget(0, 0, new Label("Allowed Course Areas"));
+        mainGrid.setWidget(0, 0, new Label(stringMessages.allowedCourseAreas()));
         mainGrid.setWidget(0, 1, allowedCourseAreasBox);
         
         minRoundsBox = new TextBox();
@@ -129,7 +131,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (result.minRoundsForCourse != null) {
             minRoundsBox.setText(result.minRoundsForCourse.toString());
         }
-        mainGrid.setWidget(1, 0, new Label("Minimum Rounds for Course"));
+        mainGrid.setWidget(1, 0, new Label(stringMessages.minimumRoundsForCourse()));
         mainGrid.setWidget(1, 1, minRoundsBox);
         
         maxRoundsBox = new TextBox();
@@ -143,7 +145,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (result.maxRoundsForCourse != null) {
             maxRoundsBox.setText(result.maxRoundsForCourse.toString());
         }
-        mainGrid.setWidget(2, 0, new Label("Maximum Rounds for Course"));
+        mainGrid.setWidget(2, 0, new Label(stringMessages.maximumRoundsForCourse()));
         mainGrid.setWidget(2, 1, maxRoundsBox);
         
         mailRecipientBox = new TextBox();
@@ -157,7 +159,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (result.resultsMailRecipient != null) {
             mailRecipientBox.setText(result.resultsMailRecipient);
         }
-        mainGrid.setWidget(3, 0, new Label("Results Mail Recipient"));
+        mainGrid.setWidget(3, 0, new Label(stringMessages.resultsMailRecipient()));
         mainGrid.setWidget(3, 1, mailRecipientBox);
     }
 

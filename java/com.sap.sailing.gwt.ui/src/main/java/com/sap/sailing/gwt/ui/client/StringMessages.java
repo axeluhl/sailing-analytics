@@ -816,4 +816,12 @@ public interface StringMessages extends Messages {
     String raceTimeDownwindTooltip();
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
+    String addConfiguration();
+    String noConfigurations();
+    String errorRetrievingConfiguration();
+    String allowedCourseAreas();
+    String minimumRoundsForCourse();
+    String maximumRoundsForCourse();
+    String resultsMailRecipient();
+    String deviceConfiguration();
 }

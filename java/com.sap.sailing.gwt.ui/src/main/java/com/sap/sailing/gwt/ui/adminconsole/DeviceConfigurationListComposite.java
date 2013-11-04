@@ -30,7 +30,6 @@ public class DeviceConfigurationListComposite extends Composite {
     private final CellTable<DeviceConfigurationMatcherDTO> configurationTable;
     private ListDataProvider<DeviceConfigurationMatcherDTO> configurationsDataProvider;
     
-    
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
 
@@ -38,6 +37,7 @@ public class DeviceConfigurationListComposite extends Composite {
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
 
     private static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
 
@@ -46,12 +46,13 @@ public class DeviceConfigurationListComposite extends Composite {
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
 
-        noConfigurationsLabel = new Label("There are no configurations.");
+        noConfigurationsLabel = new Label(stringMessages.noConfigurations());
         noConfigurationsLabel.setWordWrap(false);
         panel.add(noConfigurationsLabel);
 
@@ -93,7 +94,7 @@ public class DeviceConfigurationListComposite extends Composite {
             
             @Override
             public void onFailure(Throwable caught) {
-                noConfigurationsLabel.setText("Error retrieving configuration data from server.");
+                noConfigurationsLabel.setText(stringMessages.errorRetrievingConfiguration());
                 noConfigurationsLabel.setVisible(true);
                 configurationTable.setVisible(false);
                 errorReporter.reportError("Error retrieving configuration data from server: " + caught.getMessage());
