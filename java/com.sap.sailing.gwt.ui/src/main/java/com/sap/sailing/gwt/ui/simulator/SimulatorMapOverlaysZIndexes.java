@@ -16,7 +16,8 @@ public interface SimulatorMapOverlaysZIndexes {
     public static int WINDSTREAMLETS_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 5;
     public static int WINDLINE_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 6;
     public static int PATH_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 7;
-    public static int PATHLEGEND_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 8;
+    public static int WIND_ROSE_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 8;
+    public static int PATHLEGEND_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 9;
 
     /** the z-index of the info window should always be higher than the rest */
     public static int INFO_WINDOW_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 50;
