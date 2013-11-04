@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
@@ -44,6 +45,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
+import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
@@ -145,11 +147,11 @@ public class OnlineDataManager extends DataManager {
                                         new RaceCellDeserializer(new RaceLogDeserializer(
                                                 RaceLogEventDeserializer.create(domainFactory)))))));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
-                        + "/sailingserver/rc/racegroups?courseArea="
-                        + courseAreaId.toString()), parser, handler);
+                    + "/sailingserver/rc/racegroups?"+
+                    RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
+                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler);
             }
         });
     }
@@ -173,9 +175,9 @@ public class OnlineDataManager extends DataManager {
 
                 return new OnlineDataLoader<Collection<Mark>>(context, new URL(AppPreferences
                         .getServerBaseURL(context)
-                        + "/sailingserver/rc/marks?leaderboard="
-                        + raceGroupName
-                        + "&raceColumn=" + raceColumnName + "&fleet=" + fleetName), parser, handler);
+                    + "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
+                    "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName 
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
         });
     }
@@ -200,8 +202,9 @@ public class OnlineDataManager extends DataManager {
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
                 return new OnlineDataLoader<CourseBase>(context, new URL(AppPreferences.getServerBaseURL(context)
-                        + "/sailingserver/rc/currentcourse?leaderboard=" + raceGroupName + "&raceColumn="
-                        + raceColumnName + "&fleet=" + fleetName), parser, handler);
+                    + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
+                    + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
+                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
         });
     }
@@ -225,11 +228,11 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(AppPreferences
-                        .getServerBaseURL(context)
-                        + "/sailingserver/rc/competitors?leaderboard="
-                        + raceGroupName
-                        + "&raceColumn=" + raceColumnName + "&fleet=" + fleetName), parser, handler);
+                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(
+                        AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/competitors?"
+                                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&"
+                                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
+                                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
             }
         });
     }

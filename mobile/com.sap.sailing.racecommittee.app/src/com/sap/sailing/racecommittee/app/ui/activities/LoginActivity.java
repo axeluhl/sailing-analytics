@@ -171,6 +171,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             @Override
             public void onDialogPositiveButton(AttachedDialogFragment dialog) {
+                AppPreferences.setAuthor(LoginActivity.this, loginDialog.getAuthor());
                 switch (loginDialog.getSelectedLoginType()) {
                 case OFFICER:
                     ExLog.i(TAG, "Communication with backend is active.");

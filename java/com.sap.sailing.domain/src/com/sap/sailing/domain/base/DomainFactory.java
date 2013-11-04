@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;

@@ -18,8 +18,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -41,7 +43,8 @@ public class RaceLogWindFixEventSerializerTest {
     private RaceLogWindFixEventDeserializer deserializer;
     private RaceLogWindFixEvent event;
     private TimePoint now;
-
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
@@ -53,7 +56,7 @@ public class RaceLogWindFixEventSerializerTest {
 
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, 0, createWindFix());
+        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, createWindFix());
     }
 
     @Test

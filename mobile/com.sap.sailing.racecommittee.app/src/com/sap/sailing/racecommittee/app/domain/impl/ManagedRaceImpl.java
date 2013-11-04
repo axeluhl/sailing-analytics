@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import android.content.Context;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -27,9 +29,9 @@ public class ManagedRaceImpl implements ManagedRace {
     private Collection<Competitor> competitors;
     private CourseBase courseOnServer;
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, StartProcedureType defaultStartProcedureType,
-            RaceLog raceLog) {
-        this(identifier, new RaceStateImpl(defaultStartProcedureType, raceLog));
+    public ManagedRaceImpl(Context context, ManagedRaceIdentifier identifier,
+            StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
+        this(identifier, new RaceStateImpl(context, defaultStartProcedureType, raceLog));
     }
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {

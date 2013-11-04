@@ -9,7 +9,9 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
@@ -22,6 +24,8 @@ public class AppPreferences {
 
     private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
+    private final static String PREFERENCE_AUTHOR_NAME = "authorName";
+    private final static String PREFERENCE_AUTHOR_PRIORITY = "authorPriority";
     private final static String PREFERENCE_WIND_BEARING = "windBearingPref";
     private final static String PREFERENCE_WIND_SPEED = "windSpeedPref";
     
@@ -169,6 +173,19 @@ public class AppPreferences {
     public static void setMailRecipient(Context context, String mail) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(PREFERENCE_MAIL_RECIPIENT, mail).commit();
+    }
+    
+    public static void setAuthor(Context context, RaceLogEventAuthor author) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).apply();
+        sp.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).apply();
+    }
+    
+    public static RaceLogEventAuthor getAuthor(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String authorName = sp.getString(PREFERENCE_AUTHOR_NAME, "<anonymous>");
+        int authorPriority = sp.getInt(PREFERENCE_AUTHOR_PRIORITY, 0);
+        return new RaceLogEventAuthorImpl(authorName, authorPriority);
     }
     
     public static int getMaxRounds(Context context) {

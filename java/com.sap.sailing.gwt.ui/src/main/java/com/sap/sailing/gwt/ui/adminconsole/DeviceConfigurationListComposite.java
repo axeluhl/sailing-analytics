@@ -38,7 +38,6 @@ public class DeviceConfigurationListComposite extends Composite {
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final StringMessages stringMessages;
 
     private static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
 
@@ -47,7 +46,6 @@ public class DeviceConfigurationListComposite extends Composite {
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.stringMessages = stringMessages;
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();

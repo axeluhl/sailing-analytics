@@ -25,7 +25,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -51,21 +53,22 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     private RaceLogCourseDesignChangedEventDeserializer deserializer;
     private RaceLogCourseDesignChangedEvent event;
     private TimePoint now;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
         serializer = new RaceLogCourseDesignChangedEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(nationalityJsonSerializer))),
-                new CourseBaseJsonSerializer(new WaypointJsonSerializer(new ControlPointJsonSerializer(
-                        new MarkJsonSerializer(), new GateJsonSerializer(new MarkJsonSerializer())))));
+                new PersonJsonSerializer(nationalityJsonSerializer))), new CourseBaseJsonSerializer(
+                new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
+                        new GateJsonSerializer(new MarkJsonSerializer())))));
         deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CompetitorDeserializer(factory),
                 new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, createCourseData());
+        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, author, 0, createCourseData());
     }
 
     @Test

@@ -5,17 +5,18 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 
 public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implements RaceLogProtestStartTimeEvent {
     private static final long serialVersionUID = -1800827552916395996L;
     
-    private TimePoint protestStartTime;
+    private final TimePoint protestStartTime;
     
-    public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
-            List<Competitor> pInvolvedBoats, int pPassId, TimePoint protestStartTime) {
-        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint,
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, TimePoint protestStartTime) {
+        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.protestStartTime = protestStartTime;
     }
 

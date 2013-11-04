@@ -2,8 +2,7 @@ package com.sap.sailing.server;
 
 import java.io.Serializable;
 
-import com.sap.sailing.operationaltransformation.Operation;
-import com.sap.sailing.operationaltransformation.Transformer;
+import com.sap.sailing.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
@@ -13,7 +12,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 
-public interface RacingEventServiceOperation<ResultType> extends Operation<RacingEventService>, Serializable {
+public interface RacingEventServiceOperation<ResultType> extends OperationWithTransformationSupport<RacingEventService, RacingEventServiceOperation<?>>, Serializable {
     /**
      * Performs the actual operation, applying it to the <code>toState</code> service. The operation's result is
      * returned.
@@ -25,24 +24,6 @@ public interface RacingEventServiceOperation<ResultType> extends Operation<Racin
      */
     boolean requiresSynchronousExecution();
     
-    /**
-     * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations
-     * along which to transform this operation, assuming this is the client operation. See
-     * {@link Transformer#transform(Operation, Operation)} for the specification.
-     * 
-     * @return the result of transforming <code>this</code> operation along <code>serverOp</code>
-     */
-    RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp);
-
-    /**
-     * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations
-     * along which to transform this operation, assuming this is the server operation. See
-     * {@link Transformer#transform(Operation, Operation)} for the specification.
-     * 
-     * @return the result of transforming <code>this</code> operation along <code>clientOp</code>
-     */
-    RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp);
-
     /**
      * Assumes this is the "server" operation and transforms the client's <code>removeColumnFromLeaderboardClientOp</code> according to this
      * operation. The default implementation will probably pass on the untransformed client operation. However, if this

@@ -20,8 +20,10 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFinishPositioningConfirmedEventDeserializer;
@@ -38,7 +40,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     private RaceLogFinishPositioningConfirmedEvent event;
     private TimePoint now;
     private List<Triple<Serializable, String, MaxPointsReason>> positioningList;
-
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
@@ -54,7 +57,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
         positioningList.add(new Triple<Serializable, String, MaxPointsReason>(UUID.randomUUID(), "SAP Extreme",
                 MaxPointsReason.NONE));
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, positioningList);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);
@@ -79,7 +82,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEventWithoutPositioningBackwardsCompatible()
             throws JsonDeserializationException {
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, null);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, null);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);
@@ -97,7 +100,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEventWithEmptyPositioning()
             throws JsonDeserializationException {
-        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0, positioningList);
+        event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer
                 .deserialize(jsonConfirmationEvent);

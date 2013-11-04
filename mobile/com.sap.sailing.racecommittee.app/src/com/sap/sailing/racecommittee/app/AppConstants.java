@@ -14,9 +14,10 @@ public class AppConstants {
     public final static String SERVICE_UNIQUE_ID = "serviceUID";
     public final static String RACING_EVENT_TIME = "racingEventTime";
     public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
-    public final static String EXTRAS_SERIALIZED_EVENT = "json";
+    public final static String EXTRAS_JSON_SERIALIZED_EVENT = "json";
     public final static String EXTRAS_EVENT_SENDER_RESPONSE_HANDLER_CALLBACK = "responseHandlerCallback";
     public final static String EXTRAS_URL = "url";
+    public final static String EXTRAS_CALLBACK_CLASS = "callbackClass";
     public final static String OPTIONAL_EXTRAS  = "optionalExtra";
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";

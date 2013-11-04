@@ -15,6 +15,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;
 import com.sap.sailing.operationaltransformation.PeerImpl;
@@ -24,7 +25,6 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
-import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 
 public class OperationalTransformationTest {
@@ -41,7 +41,7 @@ public class OperationalTransformationTest {
         MongoDBService.INSTANCE.getDB().dropDatabase();
         racingEventServiceServer = new RacingEventServiceImpl();
         racingEventServiceReplica = new RacingEventServiceImpl();
-        OperationalTransformer transformer = new OperationalTransformer();
+        OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<>();
         server = new PeerImpl<>(transformer, racingEventServiceServer, Role.SERVER);
         replica = new PeerImpl<>(transformer, racingEventServiceReplica, Role.CLIENT);
         // wire the peers:
