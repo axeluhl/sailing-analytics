@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-
 import android.content.Context;
+
+import com.sap.sailing.racecommittee.app.AppConstants;
 
 /**
  * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.

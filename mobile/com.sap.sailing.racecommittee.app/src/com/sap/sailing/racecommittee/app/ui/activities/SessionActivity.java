@@ -1,15 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
+
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class SessionActivity extends BaseActivity {
 

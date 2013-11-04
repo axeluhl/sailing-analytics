@@ -9,8 +9,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
-import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;

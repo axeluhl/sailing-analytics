@@ -11,10 +11,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-
 import android.os.Environment;
 import android.util.Log;
+
+import com.sap.sailing.racecommittee.app.AppConstants;
 
 public class FileLoggingTask implements Runnable {
 
