@@ -258,6 +258,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveCompetitors;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -3264,10 +3265,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void removeCompetitors(Iterable<CompetitorDTO> competitorsToRemove) {
+    public void removeCompetitors(Iterable<CompetitorDTO> competitorDTOsToRemove) {
+        List<Competitor> competitorsToRemove = new ArrayList<Competitor>();
         CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
-        for (CompetitorDTO competitorToRemove : competitorsToRemove) {
-            competitorStore.removeCompetitor(competitorStore.getExistingCompetitorByIdAsString(competitorToRemove.getIdAsString()));
+        for (CompetitorDTO competitorToRemove : competitorDTOsToRemove) {
+            competitorsToRemove.add(competitorStore.getExistingCompetitorByIdAsString(competitorToRemove.getIdAsString()));
         }
+        getService().apply(new RemoveCompetitors(competitorsToRemove));
     }
 }
