@@ -2303,7 +2303,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
         if(detailType != null) {
             switch (detailType) {
-            case RACE_TOTAL_POINTS:
+            case REGATTA_TOTAL_POINTS:
                 for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
                     LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
                     values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);

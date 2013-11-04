@@ -149,7 +149,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
-            case RACE_TOTAL_POINTS:
+            case REGATTA_TOTAL_POINTS:
                 chart.getYAxis().setTickInterval(5.0);
                 chart.getYAxis().setReversed(false);
                 break;
@@ -231,7 +231,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
                         case REGATTA_RANK:
                             fillTotalRanksSeries(result, chartSeries);
                             break;
-                        case RACE_TOTAL_POINTS:
+                        case REGATTA_TOTAL_POINTS:
                             fillTotalPointsSeries(result, chartSeries);
                             break;
                         default:
