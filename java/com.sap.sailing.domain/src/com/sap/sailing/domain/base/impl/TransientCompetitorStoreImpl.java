@@ -11,9 +11,11 @@ import com.sap.sailing.domain.base.Nationality;
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
     private static final long serialVersionUID = -4198298775476586931L;
     private final ConcurrentHashMap<Serializable, Competitor> competitorCache;
+    private final ConcurrentHashMap<String, Competitor> competitorsByIdAsString;
     
     public TransientCompetitorStoreImpl() {
         competitorCache = new ConcurrentHashMap<>();
+        competitorsByIdAsString = new ConcurrentHashMap<>();
     }
     
     private Competitor createCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {
@@ -29,6 +31,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
      */
     protected void addNewCompetitor(Serializable id, Competitor competitor) {
         competitorCache.put(id, competitor);
+        competitorsByIdAsString.put(id.toString(), competitor);
     }
     
     @Override
@@ -51,6 +54,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
+    public Competitor getExistingCompetitorByIdAsString(String competitorIdAsString) {
+        return competitorsByIdAsString.get(competitorIdAsString);
+    }
+
+    @Override
     public int size() {
         return competitorCache.size();
     }
@@ -68,6 +76,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     @Override
     public void removeCompetitor(Competitor competitor) {
         competitorCache.remove(competitor.getId());
+        competitorsByIdAsString.remove(competitor.getId().toString());  
     }
 
     @Override

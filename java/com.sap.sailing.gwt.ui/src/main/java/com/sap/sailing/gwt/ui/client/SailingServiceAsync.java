@@ -446,6 +446,10 @@ public interface SailingServiceAsync {
 
     void importMasterData(String host, String[] names, boolean override,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
+
+    void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+
+    void removeCompetitors(Iterable<CompetitorDTO> competitorsToRemove, AsyncCallback<Void> callback);
     
 }
 

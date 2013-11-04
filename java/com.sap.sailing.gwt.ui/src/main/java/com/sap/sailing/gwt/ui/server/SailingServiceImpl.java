@@ -48,6 +48,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
@@ -792,9 +793,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<Competitor> competitors) {
+    private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor c : competitors) {
+        for (Competitor c : iterable) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
             result.add(competitorDTO);
         }
@@ -2189,9 +2190,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Finds a competitor in a sequence of competitors that has an {@link Competitor#getId()} equal to <code>id</code>. 
      */
-    private Competitor getCompetitorById(Iterable<Competitor> competitors, String id) {
+    private Competitor getCompetitorByIdAsString(Iterable<Competitor> competitors, String idAsString) {
         for (Competitor c : competitors) {
-            if (c.getId().toString().equals(id)) {
+            if (c.getId().toString().equals(idAsString)) {
                 return c;
             }
         }
@@ -2273,7 +2274,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
                     @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
-                                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
+                                Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                         competitorDTO.getIdAsString());
                                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
@@ -3257,4 +3258,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return queryStringBuffer.toString();
     }
 
+    @Override
+    public Iterable<CompetitorDTO> getCompetitors() {
+        return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitors());
+    }
+    
+    @Override
+    public void removeCompetitors(Iterable<CompetitorDTO> competitorsToRemove) {
+        CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
+        for (CompetitorDTO competitorToRemove : competitorsToRemove) {
+            competitorStore.removeCompetitor(competitorStore.getExistingCompetitorByIdAsString(competitorToRemove.getIdAsString()));
+        }
+    }
 }

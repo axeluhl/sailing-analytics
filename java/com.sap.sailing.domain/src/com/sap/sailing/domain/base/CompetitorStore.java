@@ -15,6 +15,8 @@ import com.sap.sailing.domain.base.impl.DynamicTeam;
 public interface CompetitorStore {
 
     Competitor getExistingCompetitorById(Serializable competitorId);
+    
+    Competitor getExistingCompetitorByIdAsString(String idAsString);
 
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
 

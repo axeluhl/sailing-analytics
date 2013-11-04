@@ -819,4 +819,8 @@ public interface StringMessages extends Messages {
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
+    String doYouReallyWantToRemoveEvents();
+    String doYouReallyWantToRemoveEvent(String eventName);
+    String doYouReallyWantToRemoveCompetitors();
+    String doYouReallyWantToRemoveCompetitor(String name);
 }
