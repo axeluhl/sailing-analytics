@@ -85,7 +85,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
         regattaDisplayers.add(trackedRacesManagementPanel);
         
-        CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, stringMessages, this);
+        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, stringMessages, this);
         //trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(competitorPanel, stringMessages.competitors(), false);
@@ -137,6 +137,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 }
                 if (mediaPanel.isVisible()) {
                     mediaPanel.onShow();
+                }
+                if (competitorPanel.isVisible()) {
+                    competitorPanel.refreshCompetitorList();
                 }
             }
         });

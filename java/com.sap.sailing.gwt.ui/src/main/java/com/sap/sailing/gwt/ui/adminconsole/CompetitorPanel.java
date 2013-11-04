@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -13,6 +15,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -53,14 +56,24 @@ public class CompetitorPanel extends SimplePanel {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        
+        competitorProvider = new ListDataProvider<CompetitorDTO>();
+        ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(competitorProvider.getList());
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
         HorizontalPanel competitorsPanel = new HorizontalPanel();
         competitorsPanel.setSpacing(5);
         mainPanel.add(competitorsPanel);
-
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                refreshCompetitorList();
+            }
+        });
+        buttonPanel.add(refreshButton);
         removeCompetitorsButton = new Button(stringMessages.remove());
         removeCompetitorsButton.setEnabled(false);
         removeCompetitorsButton.addClickHandler(new ClickHandler() {
@@ -71,7 +84,8 @@ public class CompetitorPanel extends SimplePanel {
                 }
             }
         });
-        competitorsPanel.add(removeCompetitorsButton);
+        buttonPanel.add(removeCompetitorsButton);
+        competitorsPanel.add(buttonPanel);
 
         // sailing events table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
@@ -80,6 +94,13 @@ public class CompetitorPanel extends SimplePanel {
                 return competitor.getName();
             }
         };
+        competitorNameColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
 
         TextColumn<CompetitorDTO> boatClassColumn = new TextColumn<CompetitorDTO>() {
             @Override
@@ -87,6 +108,13 @@ public class CompetitorPanel extends SimplePanel {
                 return competitor.getBoatClass() != null ? competitor.getBoatClass().getName() : "";
             }
         };
+        boatClassColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(boatClassColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getBoatClass().getName().compareTo(o2.getBoatClass().getName());
+            }
+        });
         
         Column<CompetitorDTO, SafeHtml> sailIdColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
@@ -108,6 +136,13 @@ public class CompetitorPanel extends SimplePanel {
                 return sb.toSafeHtml();
             }
         };
+        sailIdColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getSailID().compareTo(o2.getSailID());
+            }
+        });
 
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
@@ -116,7 +151,9 @@ public class CompetitorPanel extends SimplePanel {
             public void update(int index, CompetitorDTO competitor, String value) {
                 if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveCompetitor(competitor.getName()))) {
-                        removeCompetitors(Collections.singleton(competitor));
+                        List<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>(1);
+                        competitors.add(competitor);
+                        removeCompetitors(competitors);
                     }
                 } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditCompetitorDialog(competitor);
@@ -125,10 +162,12 @@ public class CompetitorPanel extends SimplePanel {
         });
 
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
-        competitorTable.addColumn(competitorNameColumn, stringMessages.event());
-        competitorTable.addColumn(boatClassColumn, stringMessages.venue());
+        competitorProvider.addDataDisplay(competitorTable);
+        competitorTable.addColumnSortHandler(competitorColumnListHandler);
+        competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
+        competitorTable.addColumn(competitorNameColumn, stringMessages.name());
+        competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
-
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -137,9 +176,6 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         competitorTable.setSelectionModel(competitorSelectionModel);
-
-        competitorProvider = new ListDataProvider<CompetitorDTO>();
-        competitorProvider.addDataDisplay(competitorTable);
         mainPanel.add(competitorTable);
 
     }
@@ -154,7 +190,7 @@ public class CompetitorPanel extends SimplePanel {
             sailingService.removeCompetitors(competitors, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to remove the competitors:" + caught.getMessage());
+                    errorReporter.reportError("Error trying to remove the competitors: " + caught.getMessage());
                 }
                 @Override
                 public void onSuccess(Void result) {
@@ -164,7 +200,7 @@ public class CompetitorPanel extends SimplePanel {
         }
     }
 
-    private void refreshCompetitorList() {
+    void refreshCompetitorList() {
         sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
