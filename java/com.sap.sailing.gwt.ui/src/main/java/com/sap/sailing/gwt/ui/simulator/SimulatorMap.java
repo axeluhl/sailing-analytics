@@ -216,6 +216,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             refreshWindFieldOverlay(windFieldDTO);
 
             timeListeners.clear();
+
             if (windParams.isShowArrows()) {
                 timeListeners.add(windFieldCanvasOverlay);
             }
@@ -525,7 +526,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
         }
 
-        this.timer.setTime(this.windParams.getStartTime().getTime());
         if (this.windParams.isShowArrows()) {
             this.windFieldCanvasOverlay.draw();
         }
@@ -562,6 +562,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setyRes(yRes);
 
         busyIndicator.setBusy(true);
+        timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getSimulatorResults(mode, raceCourseDirection, windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
 

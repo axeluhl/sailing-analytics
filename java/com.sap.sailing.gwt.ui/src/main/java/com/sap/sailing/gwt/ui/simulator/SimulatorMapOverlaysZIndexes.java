@@ -11,9 +11,9 @@ public interface SimulatorMapOverlaysZIndexes {
     
     public static int REGATTA_AREA_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 1;
     public static int RACE_COURSE_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 2;
-    public static int WINDFIELD_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 3;
-    public static int WINDSTREAMLETS_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 4;
-    public static int WINDGRID_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 5;
+    public static int WINDGRID_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 3;
+    public static int WINDFIELD_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 4;
+    public static int WINDSTREAMLETS_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 5;
     public static int WINDLINE_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 6;
     public static int PATH_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 7;
     public static int PATHLEGEND_ZINDEX = BASE_CANVAS_OVERLAY_ZINDEX + 8;
