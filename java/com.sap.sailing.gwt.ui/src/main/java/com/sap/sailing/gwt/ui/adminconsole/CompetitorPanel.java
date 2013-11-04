@@ -10,6 +10,8 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -22,13 +24,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -47,7 +50,9 @@ public class CompetitorPanel extends SimplePanel {
     private CellTable<CompetitorDTO> competitorTable;
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
+    private Iterable<CompetitorDTO> allCompetitors;
     private Button removeCompetitorsButton;
+    private TextBox filterField;
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
@@ -161,6 +166,18 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
 
+        HorizontalPanel filterBoxWithLabel = new HorizontalPanel();
+        filterBoxWithLabel.setSpacing(5);
+        filterBoxWithLabel.add(new Label(stringMessages.filterCompetitors()));
+        filterField = new TextBox();
+        filterField.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                applyFilter();
+            }
+        });
+        filterBoxWithLabel.add(filterField);
+        mainPanel.add(filterBoxWithLabel);
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
         competitorProvider.addDataDisplay(competitorTable);
         competitorTable.addColumnSortHandler(competitorColumnListHandler);
@@ -209,10 +226,39 @@ public class CompetitorPanel extends SimplePanel {
 
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
-                competitorProvider.getList().clear();
-                Util.addAll(result, competitorProvider.getList());
+                allCompetitors = result;
+                applyFilter();
             }
         });
+    }
+
+    private void applyFilter() {
+        competitorProvider.getList().clear();
+        for (CompetitorDTO competitor : allCompetitors) {
+            if (filterMatches(competitor)) {
+                competitorProvider.getList().add(competitor);
+            }
+        }
+    }
+
+    private boolean filterMatches(CompetitorDTO competitor) {
+        if (!getFilterText().trim().isEmpty()) {
+            String[] filterWords = getFilterText().split(" ");
+            String[] matchAgainsts = new String[] { competitor.getName(), competitor.getBoatClass().getName(), competitor.getSailID() };
+            outer: for (String filterWord : filterWords) {
+                for (String matchAgainst : matchAgainsts) {
+                    if (matchAgainst.toLowerCase().indexOf(filterWord.trim().toLowerCase()) >= 0) {
+                        continue outer; // found a match
+                    }
+                }
+                return false; // no match found for filterWord; filter does not match
+            }
+        }
+        return true; // found a match for all filter words
+    }
+
+    private String getFilterText() {
+        return filterField.getText();
     }
 
 }
