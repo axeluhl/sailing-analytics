@@ -148,4 +148,18 @@ Competitor c = competitorDeserializer.deserialize(json);
 
 3. Whenever you add a Domain Object to an instance, it somehow has to be replicated to the other instances. To do so, create an Operation which you can then `apply()` to the `RacingEventService`, which will then replicate it to other intsances (the operations are basically commands as in the Command pattern, with the added difficulty of operational transformation to provide a uniform final state when operations are applied in different orders on different instances). Internally, the apply-mechanism writes to an `ObjectOutputStream`, which on the other side is evaluated by an `ObjectInputStreamResolvingAgainstDomainFactory`. For this reason, all objects implementing the `IsManagedBySharedDomainFactory` interface are resolved against the domain factory via their `resolve()` implementation. This removes the chance of duplicate instances representing the same actual object.
 
-4. Also, whenever a replica (slave) instance registers with the master instance, it is provided with the current state of the master as an initial load. To do so, the master instance exports its state via the `serializeForInitialReplication()` method in the `RacintEventServiceImpl`, while the replica recieves the object stream output by the master via the `initiallyFillFrom()` method. Again, an `ObjectInputStreamResolvingAgainstDomainFactory` is used. 
+4. Also, whenever a replica (slave) instance registers with the master instance, it is provided with the current state of the master as an initial load. To do so, the master instance exports its state via the `serializeForInitialReplication()` method in the `RacintEventServiceImpl`, while the replica recieves the object stream output by the master via the `initiallyFillFrom()` method. Again, an `ObjectInputStreamResolvingAgainstDomainFactory` is used.
+
+## Import Another Year of Magnetic Declination Values
+
+Under java/com.sap.sailing.declination/resources we store magnetic declination values, using one file per year. The resolution at which we usually store those is one degree of latitude and longitude, each. When for a year those values aren't found in a file, an online request is performed to the [NOAA Service](http://www.ngdc.noaa.gov/geomag-web/) which can be time and bandwidth consuming. Therefore, it is a good idea to keep a file with cached declination values around for the current year.
+
+To produce such a file, use the `main(...)` method of class `com.sap.sailing.declination.impl.DeclinationStore`. There are pre-defined launch configurations in place in the com.sap.sailing.declination bundle project. Adjust the from/to year parameters for the current year. The process usually takes several hours to complete at a one-degree resolution. Don't forget to commit the resulting resources/declination-<year> file to git.
+
+Experience has shown that sometimes the SAP HTTP proxy doesn't properly resolve the NOAA service. In those cases, it is more convenient to run the process from either sapsailing.com or stg.sailtracks.de, using something like following command from a server's plugins/ directory after creating the resources/ subdirectory:
+
+`java -cp com.sap.sailing.domain_*.jar:com.sap.sailing.domain.common_*.jar:com.sap.sailing.declination_*.jar:com.sap.sailing.domain.shared.android_*.jar com.sap.sailing.declination.impl.DeclinationStore 2014 2014 1`
+
+Run this inside a tmux window to be sure that logging off does not interrupt the process. After the process completes, copy the resulting declination-<year> file to your git workspace to `java/com.sap.sailing.declination/resources` and commit.
+
+There is also a script java/target/importdeclination that automates these steps.

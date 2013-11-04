@@ -104,7 +104,7 @@ if [[ $PARAM == "" ]]; then
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
         if [[ ! -z "$ON_AMAZON" ]]; then
-            echo "Go to $INSTANCE_DNS:$SERVER_PORT to reach your instance!" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         else
             echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         fi
