@@ -32,6 +32,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -198,8 +199,17 @@ public class CompetitorPanel extends SimplePanel {
     }
     
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
-        // TODO Auto-generated method stub
-        
+        new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+            @Override
+            public void ok(CompetitorDTO competitor) {
+//                sailingService.updateCompetitor(competitor);
+            }
+
+            @Override
+            public void cancel() {
+                // TODO Auto-generated method stub
+            }
+        }).show();
     }
 
     private void removeCompetitors(Collection<CompetitorDTO> competitors) {
