@@ -255,6 +255,7 @@
 	<string name="start">Start</string>
 	
 	<string name="application_information">Application Information</string>
+	<string name="application_identifier">Identifier</string>
 	<string name="application_version">Version</string>
 	<string name="application_install_date">Install Date</string>
 	<string name="persistence_information">Persistence Status</string>

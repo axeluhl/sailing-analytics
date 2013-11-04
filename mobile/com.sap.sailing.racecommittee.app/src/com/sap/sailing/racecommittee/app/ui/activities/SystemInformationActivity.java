@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 
 public class SystemInformationActivity extends BaseActivity {
@@ -41,6 +42,9 @@ public class SystemInformationActivity extends BaseActivity {
     }
 
     private void setupVersionView() {
+        TextView identifierView = (TextView) findViewById(R.id.system_information_application_identifier);
+        identifierView.setText(AppPreferences.getAndroidIdentifier(getApplicationContext()));
+        
         TextView versionView = (TextView) findViewById(R.id.system_information_application_version);
         PackageInfo info = getPackageInfo();
         if (info == null) {
