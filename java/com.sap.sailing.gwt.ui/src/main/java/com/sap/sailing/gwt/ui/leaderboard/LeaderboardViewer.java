@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.List;
+
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -23,16 +26,17 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
 
     private final LeaderboardPanel leaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
+    private LeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            LeaderboardSettings leaderboardSettings, RaceIdentifier preselectedRace, String leaderboardGroupName,
-            String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
+    public LeaderboardViewer(final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
+            final LeaderboardSettings leaderboardSettings, final RaceIdentifier preselectedRace, final String leaderboardGroupName,
+            String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
+            final UserAgentDetails userAgent, boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn, 
             boolean showCharts, DetailType chartDetailType, boolean showOverallLeaderboard) {
         super(new CompetitorSelectionModel(/* hasMultiSelection */true), asyncActionsExecutor, 
                 new Timer(PlayModes.Replay, /*delayBetweenAutoAdvancesInMilliseconds*/ 3000l), stringMessages, hideToolbar);
 
-        FlowPanel mainPanel = createViewerPanel();
+        final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
 
         leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
@@ -51,9 +55,35 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
 
         addComponentToNavigationMenu(leaderboardPanel, false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
+        // Remark: For now we only add the overallLeaderboardPanel to the navigation menu in case it's visible from the beginning
         
         if(showCharts) {
             multiCompetitorChart.timeChanged(timer.getTime());
+        }
+        
+        if(showOverallLeaderboard) {
+            sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
+                @Override
+                public void onSuccess(List<String> result) {
+                    if(result.size() == 1) {
+                        String overallLeaderboardName = result.get(0);
+                        overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                                leaderboardSettings, preselectedRace, competitorSelectionProvider, timer,
+                                leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                                false, /* raceTimesInfoProvider */null, false,  /* adjustTimerDelay */ true);
+                        mainPanel.add(overallLeaderboardPanel);
+                        addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
+                                /* hasSettingsWhenComponentIsInvisible*/ true);
+                    }
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    overallLeaderboardPanel = null;
+                }
+            });
+        } else {
+            overallLeaderboardPanel = null;
         }
     }
     
