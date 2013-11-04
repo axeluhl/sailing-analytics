@@ -17,7 +17,7 @@ public class Edge {
     }
     public double getCost() {
         return start.getCost() + end.getCost() + timeDifference/1000 + (numberOfLegs-1)*penaltyForSkipped;
-        //TODO Fix weight
+        //TODO Weight
        
     }
     public Candidate getStart() {

@@ -76,14 +76,6 @@ public class MarkImpl extends NamedImpl implements Mark {
         return getId() + " " + (getColor() == null ? "" : (getColor() + " ")) + super.toString();
     }
 
-    @Override
-    public boolean hasTwoMarks() {
-        return false;
-    }
 
-    @Override
-    public boolean isLine() {
-        return false;
-    }
 
 }

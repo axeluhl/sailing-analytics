@@ -61,8 +61,8 @@ public class CandidateChooser {
         for (Waypoint w : markPositions.keySet()) {
             waypoints.add(w);
         }
-        for (int i = c1.getID(); i < c2.getID(); i++) {
-                if (!(i == waypoints.size()||i == 0)) {
+        for (int i = c1.getID(); i < c2.getID()-1; i++) {
+                if (!(i == waypoints.size()-1||i == 0)) {
                     double averageSpeed = 7;
                     String lt;
                     lt = legs.get(i - 1).toString();

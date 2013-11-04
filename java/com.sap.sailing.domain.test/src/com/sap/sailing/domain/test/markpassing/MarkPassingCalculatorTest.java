@@ -138,6 +138,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
      * Saves current result of getTrackedRace to disk for future reuse.
      */
     private void saveData() {
+
         DynamicTrackedRace trackedRace = getTrackedRace();
         String racePath = "resources/" + trackedRace.getRace().getId() + ".data";
         FileOutputStream fs = null;
@@ -195,7 +196,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
         // TODO Fix Waypoint ID issue
         System.out.println(start + ", " + end);
-        // ///// Get Waypoints (Iterable of all Waypoints) /////
+        /////// Get Waypoints (Iterable of all Waypoints) /////
         try {
             getRace().getCourse().lockForRead();
             for (Waypoint w : getRace().getCourse().getWaypoints()) {

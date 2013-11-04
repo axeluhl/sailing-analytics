@@ -28,7 +28,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -1227,21 +1227,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
-            } else if (controlPointClass.equals(Gate.class.getSimpleName())) {
-                Gate gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+            } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
+                ControlPointWithTwoMarks gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = gate;
             }
         }
         return controlPoint;
     }
 
-    private Gate loadGate(DBObject dbObject) {
+    private ControlPointWithTwoMarks loadGate(DBObject dbObject) {
         Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
         String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
         Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
         Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
         
-        Gate gate = DomainFactory.INSTANCE.createGate(gateId, leftMark, rightMark, gateName);
+        ControlPointWithTwoMarks gate = DomainFactory.INSTANCE.createControlPointWithTwoMarks(gateId, leftMark, rightMark, gateName);
         return gate;
     }
 

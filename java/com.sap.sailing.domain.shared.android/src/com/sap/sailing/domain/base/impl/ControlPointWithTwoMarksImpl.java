@@ -4,13 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.domain.base.Line;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 
-public class LineImpl implements Line {
-
-
-    private static final long serialVersionUID = -2771299397766434232L;
+public class ControlPointWithTwoMarksImpl implements ControlPointWithTwoMarks {
+    private static final long serialVersionUID = 2807354812133070574L;
     private final Mark left;
     private final Mark right;
     private final String name;
@@ -19,10 +17,11 @@ public class LineImpl implements Line {
     /**
      * @param name also used as ID for the mark; if you have a better ID, use {@link GateImpl(Serializable, Mark, Mark, String)} instead.
      */
-    public LineImpl(Mark left, Mark right, String name) {
+    public ControlPointWithTwoMarksImpl(Mark left, Mark right, String name) {
         this(/* ID */ name, left, right, name);
     }
-    public LineImpl(Serializable id, Mark left, Mark right, String name) {
+    
+    public ControlPointWithTwoMarksImpl(Serializable id, Mark left, Mark right, String name) {
         this.id = id;
         this.left = left;
         this.right = right;
@@ -61,17 +60,4 @@ public class LineImpl implements Line {
     public Serializable getId() {
         return id;
     }
-
-    @Override
-    public boolean isLine() {
-       
-        return true;
-    }
-
-    @Override
-    public boolean hasTwoMarks() {
-        // TODO Auto-generated method stub
-        return true;
-    }
-
 }

@@ -26,7 +26,8 @@ public class MarkPassingCalculator {
 
     LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks,
             LinkedHashMap<Competitor, ArrayList<GPSFixMoving>> competitorTracks, TimePoint startOfRace,
-            TimePoint endOfRace, ArrayList<String> legs, LinkedHashMap<Waypoint, Double> averageLegLength, Double boatLength) {
+            TimePoint endOfRace, ArrayList<String> legs, LinkedHashMap<Waypoint, Double> averageLegLength,
+            Double boatLength) {
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculatedMarkpasses = new LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>>();
 
         for (Competitor c : competitorTracks.keySet()) {

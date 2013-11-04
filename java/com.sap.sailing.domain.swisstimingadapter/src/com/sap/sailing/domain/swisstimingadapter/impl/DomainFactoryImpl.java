@@ -254,7 +254,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<String> markNameIter = devices.iterator();
                     String left = markNameIter.next();
                     String right = markNameIter.next();
-                    result = baseDomainFactory.createGate(getOrCreateMark(left), getOrCreateMark(right), left + "/" + right);
+                    result = baseDomainFactory.createControlPointWithTwoMarks(getOrCreateMark(left), getOrCreateMark(right), left + "/" + right);
                     break;
                 default:
                     throw new RuntimeException(

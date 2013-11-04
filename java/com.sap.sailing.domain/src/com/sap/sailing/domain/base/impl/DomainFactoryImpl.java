@@ -25,7 +25,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
@@ -199,13 +199,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Gate createGate(Mark left, Mark right, String name) {
-       return new GateImpl(left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(left, right, name);
     }
 
     @Override
-    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
-       return new GateImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(id, left, right, name);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.test.markpassing;
 
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstructions;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class CandidateFinder{
@@ -71,7 +69,7 @@ public class CandidateFinder{
                 }
             }
             allCandidates.put(wp, relativToHotzoneAndCourseSize);
-            // TODO Factor in if the candidate is behind the mark!!
+            // TODO Factor in if the candidate is behind the mark (Splining?)
         }
         return allCandidates;
     }
@@ -83,16 +81,12 @@ public class CandidateFinder{
                 || p.equals(PassingInstructions.OFFSET)) {
             distance = gps.getPosition().getDistance(markPositions.get(0)).getMeters();
         }
-
         if (p.equals(PassingInstructions.LINE)) {
-            Line2D line = new Line2D.Double(markPositions.get(0).getLatDeg(), markPositions.get(0).getLngDeg(),
-                    markPositions.get(1).getLatDeg(), markPositions.get(1).getLngDeg());
-            distance = new CentralAngleDistance(line.ptSegDist(gps.getPosition().getLatDeg(), gps.getPosition()
-                    .getLngDeg())).getMeters();
+        	//TODO Distance to Line!!
+        	distance = gps.getPosition().crossTrackError(markPositions.get(0), markPositions.get(0).getBearingGreatCircle(markPositions.get(1))).getMeters();
         }
-
         if (p.equals(PassingInstructions.GATE)) {
-            // TODO Choose only correct Mark to avoid nonsensical Candidates!!
+            // TODO Choose only correct Mark to avoid nonsensical Candidates (Splining?)
             if (gps.getPosition().getDistance(markPositions.get(0)).getMeters() < gps.getPosition()
                     .getDistance(markPositions.get(1)).getMeters()) {
                 distance = gps.getPosition().getDistance(markPositions.get(0)).getMeters();

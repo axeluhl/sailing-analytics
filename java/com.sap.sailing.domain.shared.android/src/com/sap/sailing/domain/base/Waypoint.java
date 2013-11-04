@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.WithID;
 
 /**
  * Waypoints constitute {@link Course}s and demarcate their {@link Leg}s. A waypoint's position is defined by a
- * {@link ControlPoint}, such as a {@link Mark} or a {@link Gate}. The same control point can be used by multiple
+ * {@link ControlPoint}, such as a {@link Mark} or a {@link ControlPointWithTwoMarks}. The same control point can be used by multiple
  * waypoints.<p>
  * 
  * @author Axel Uhl (d043530)

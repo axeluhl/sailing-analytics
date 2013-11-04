@@ -186,7 +186,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     Iterator<Mark> markIter = marks.iterator();
                     Mark mark1 = markIter.next();
                     Mark mark2 = markIter.next();
-                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPoint.getName());
+                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(controlPoint.getId(), mark1, mark2, controlPoint.getName());
                 } else {
                     Mark mark = marks.iterator().next();
                     domainControlPoint = mark;

@@ -54,7 +54,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -1480,10 +1480,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
         ControlPointDTO result;
-        if (controlPoint instanceof Gate) {
-            final Mark left = ((Gate) controlPoint).getLeft();
+        if (controlPoint instanceof ControlPointWithTwoMarks) {
+            final Mark left = ((ControlPointWithTwoMarks) controlPoint).getLeft();
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            final Mark right = ((Gate) controlPoint).getRight();
+            final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
         } else {
@@ -1496,9 +1496,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint) {
         ControlPointDTO result;
-        if (controlPoint instanceof Gate) {
-            final Mark left = ((Gate) controlPoint).getLeft();
-            final Mark right = ((Gate) controlPoint).getRight();
+        if (controlPoint instanceof ControlPointWithTwoMarks) {
+            final Mark left = ((ControlPointWithTwoMarks) controlPoint).getLeft();
+            final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, null), convertToMarkDTO(right, null)); 
         } else {
             result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName());
@@ -1547,7 +1547,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
-                        newControlPoint = baseDomainFactory.createGate(id, left, right, gateDTO.getName());
+                        newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
                         newControlPoints.add(new Pair<ControlPoint, PassingInstructions>(newControlPoint, null));
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());

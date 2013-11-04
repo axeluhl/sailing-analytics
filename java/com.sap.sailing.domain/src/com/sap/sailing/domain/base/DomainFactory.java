@@ -62,11 +62,11 @@ public interface DomainFactory extends SharedDomainFactory {
     Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
 
     /**
-     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
+     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead
      */
-    Gate createGate(Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
     
-    Gate createGate(Serializable id, Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name);
 
     /**
      * The waypoint created is weakly cached so that when requested again by

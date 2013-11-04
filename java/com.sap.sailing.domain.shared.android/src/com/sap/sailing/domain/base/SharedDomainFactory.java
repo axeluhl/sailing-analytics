@@ -46,9 +46,9 @@ public interface SharedDomainFactory {
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
      */
-    Gate createGate(Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 
-    Gate createGate(Serializable id, Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name);
 
     /**
      * The waypoint created is weakly cached so that when requested again by

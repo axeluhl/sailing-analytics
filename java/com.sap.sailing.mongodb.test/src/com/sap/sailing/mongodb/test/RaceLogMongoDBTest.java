@@ -10,10 +10,10 @@ import junit.framework.Assert;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -46,11 +46,11 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     protected void compareCourseData(CourseBase storedCourse, CourseBase loadedCourse) {
         assertEquals(storedCourse.getFirstWaypoint().getPassingInstructions(), null);
         assertEquals(loadedCourse.getFirstWaypoint().getPassingInstructions(), null);
-        Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
-        Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
+        Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         
-        Gate storedGate = (Gate) storedCourse.getFirstWaypoint().getControlPoint();
-        Gate loadedGate = (Gate) loadedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks storedGate = (ControlPointWithTwoMarks) storedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks loadedGate = (ControlPointWithTwoMarks) loadedCourse.getFirstWaypoint().getControlPoint();
         
         assertEquals(storedGate.getId(), loadedGate.getId());
         assertEquals(storedGate.getName(), loadedGate.getName());
@@ -80,7 +80,7 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     protected CourseBase createCourseBase() {
         CourseBase course = new CourseDataImpl("Test Course");
         
-        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
+        course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
                 "Upper gate")));

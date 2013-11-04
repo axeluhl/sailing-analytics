@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -824,14 +824,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (controlPoint instanceof Mark) {
             result.put(FieldNames.CONTROLPOINT_CLASS.name(), Mark.class.getSimpleName());
             result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeMark((Mark) controlPoint));
-        } else if (controlPoint instanceof Gate) {
-            result.put(FieldNames.CONTROLPOINT_CLASS.name(), Gate.class.getSimpleName());
-            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeGate((Gate) controlPoint));
+        } else if (controlPoint instanceof ControlPointWithTwoMarks) {
+            result.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
+            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeGate((ControlPointWithTwoMarks) controlPoint));
         }
         return result;
     }
 
-    private DBObject storeGate(Gate gate) {
+    private DBObject storeGate(ControlPointWithTwoMarks gate) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.GATE_ID.name(), gate.getId());
         result.put(FieldNames.GATE_NAME.name(), gate.getName());

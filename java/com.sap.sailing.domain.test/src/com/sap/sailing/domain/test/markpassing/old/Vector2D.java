@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing.util;
+package com.sap.sailing.domain.test.markpassing.old;
 
 import java.util.ArrayList;
 import java.util.List;

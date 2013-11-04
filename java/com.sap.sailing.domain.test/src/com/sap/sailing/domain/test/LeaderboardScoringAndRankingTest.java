@@ -25,7 +25,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -877,8 +877,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         final TimePoint startOfR1 = withinR1.minus(10000);
         final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
         final TimePoint afterEndOfR1 = endOfR1.plus(1000);
-        final Waypoint start = new WaypointImpl(new GateImpl(new MarkImpl("Start Pin End"), new MarkImpl("Start Committee Boat"), "Start"));
-        final Waypoint finish = new WaypointImpl(new GateImpl(new MarkImpl("Finish Pin End"), new MarkImpl("Finish Committee Boat"), "Finish"));
+        final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Start Pin End"), new MarkImpl("Start Committee Boat"), "Start"));
+        final Waypoint finish = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pin End"), new MarkImpl("Finish Committee Boat"), "Finish"));
         FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
                 new LowPoint(), null);
         final MockedTrackedRaceWithStartTimeAndRanks trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(f1)) {
@@ -951,7 +951,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
             final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
-            final Waypoint start = new WaypointImpl(new GateImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
+            final Waypoint start = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
             final Waypoint finish = new WaypointImpl(new MarkImpl("FinishBuoy"));
             TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
                 private static final long serialVersionUID = 1L;
