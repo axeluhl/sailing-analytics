@@ -48,7 +48,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
@@ -258,7 +257,6 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
-import com.sap.sailing.server.operationaltransformation.RemoveCompetitors;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -3265,16 +3263,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitors());
     }
     
-    @Override
-    public void removeCompetitors(Iterable<CompetitorDTO> competitorDTOsToRemove) {
-        List<Competitor> competitorsToRemove = new ArrayList<Competitor>();
-        CompetitorStore competitorStore = getService().getBaseDomainFactory().getCompetitorStore();
-        for (CompetitorDTO competitorToRemove : competitorDTOsToRemove) {
-            competitorsToRemove.add(competitorStore.getExistingCompetitorByIdAsString(competitorToRemove.getIdAsString()));
-        }
-        getService().apply(new RemoveCompetitors(competitorsToRemove));
-    }
-
     @Override
     public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
         return getBaseDomainFactory().convertToCompetitorDTO(

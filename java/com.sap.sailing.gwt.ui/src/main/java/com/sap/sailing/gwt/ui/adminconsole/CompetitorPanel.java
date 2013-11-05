@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -30,7 +28,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -52,7 +49,6 @@ public class CompetitorPanel extends SimplePanel {
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
     private List<CompetitorDTO> allCompetitors;
-    private Button removeCompetitorsButton;
     private TextBox filterField;
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -80,17 +76,6 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         buttonPanel.add(refreshButton);
-        removeCompetitorsButton = new Button(stringMessages.remove());
-        removeCompetitorsButton.setEnabled(false);
-        removeCompetitorsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveCompetitors())) {
-                    removeCompetitors(competitorSelectionModel.getSelectedSet());
-                }
-            }
-        });
-        buttonPanel.add(removeCompetitorsButton);
         competitorsPanel.add(buttonPanel);
 
         // sailing events table
@@ -155,13 +140,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
             public void update(int index, CompetitorDTO competitor, String value) {
-                if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveCompetitor(competitor.getName()))) {
-                        List<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>(1);
-                        competitors.add(competitor);
-                        removeCompetitors(competitors);
-                    }
-                } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditCompetitorDialog(competitor);
                 }
             }
@@ -187,12 +166,6 @@ public class CompetitorPanel extends SimplePanel {
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
-        competitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                removeCompetitorsButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
-            }
-        });
         competitorTable.setSelectionModel(competitorSelectionModel);
         mainPanel.add(competitorTable);
 
@@ -226,21 +199,6 @@ public class CompetitorPanel extends SimplePanel {
             public void cancel() {
             }
         }).show();
-    }
-
-    private void removeCompetitors(Collection<CompetitorDTO> competitors) {
-        if (!competitors.isEmpty()) {
-            sailingService.removeCompetitors(competitors, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to remove the competitors: " + caught.getMessage());
-                }
-                @Override
-                public void onSuccess(Void result) {
-                    refreshCompetitorList();
-                }
-            });
-        }
     }
 
     void refreshCompetitorList() {

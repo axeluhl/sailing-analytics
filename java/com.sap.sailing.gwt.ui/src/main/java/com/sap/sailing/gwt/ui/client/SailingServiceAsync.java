@@ -449,8 +449,6 @@ public interface SailingServiceAsync {
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void removeCompetitors(Iterable<CompetitorDTO> competitorsToRemove, AsyncCallback<Void> callback);
-
     void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
 }
