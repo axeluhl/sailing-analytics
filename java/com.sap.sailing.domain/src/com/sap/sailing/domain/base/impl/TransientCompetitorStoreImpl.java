@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
@@ -19,7 +21,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private static final long serialVersionUID = -4198298775476586931L;
     private final ConcurrentHashMap<Serializable, Competitor> competitorCache;
     private final ConcurrentHashMap<String, Competitor> competitorsByIdAsString;
-    private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+    private transient WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
     
     private final NamedReentrantReadWriteLock lock;
 
@@ -27,6 +29,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         lock = new NamedReentrantReadWriteLock("CompetitorStore", /* fair */ false);
         competitorCache = new ConcurrentHashMap<>();
         competitorsByIdAsString = new ConcurrentHashMap<>();
+        weakCompetitorDTOCache = new WeakHashMap<>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
         weakCompetitorDTOCache = new WeakHashMap<>();
     }
     
