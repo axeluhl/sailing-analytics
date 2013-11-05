@@ -825,4 +825,5 @@ public interface StringMessages extends Messages {
     String doYouReallyWantToRemoveCompetitor(String name);
     String filterCompetitors();
     String editCompetitor();
+    String pleaseEnterASailNumber();
 }

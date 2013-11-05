@@ -51,7 +51,7 @@ public class CompetitorPanel extends SimplePanel {
     private CellTable<CompetitorDTO> competitorTable;
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
-    private Iterable<CompetitorDTO> allCompetitors;
+    private List<CompetitorDTO> allCompetitors;
     private Button removeCompetitorsButton;
     private TextBox filterField;
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -202,12 +202,28 @@ public class CompetitorPanel extends SimplePanel {
         new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
-//                sailingService.updateCompetitor(competitor);
+                sailingService.updateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to update competitor: "+caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                        // replace updated competitor in competitor list
+                        for (int i=0; i<allCompetitors.size(); i++) {
+                            if (allCompetitors.get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
+                                allCompetitors.set(i, updatedCompetitor);
+                                applyFilter();
+                                break;
+                            }
+                        }
+                    }
+                });
             }
 
             @Override
             public void cancel() {
-                // TODO Auto-generated method stub
             }
         }).show();
     }
@@ -236,7 +252,10 @@ public class CompetitorPanel extends SimplePanel {
 
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
-                allCompetitors = result;
+                allCompetitors = new ArrayList<CompetitorDTO>();
+                for (CompetitorDTO c : result) {
+                    allCompetitors.add(c);
+                }
                 applyFilter();
             }
         });

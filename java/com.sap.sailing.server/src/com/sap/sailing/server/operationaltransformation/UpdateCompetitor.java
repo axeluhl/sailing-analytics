@@ -2,11 +2,12 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Void> {
+public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Competitor> {
     private static final long serialVersionUID = 1172181354320184263L;
     private final Serializable id;
     private final String newName;
@@ -22,9 +23,8 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Void> 
     }
 
     @Override
-    public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(id, newName, newSailId, newNationality);
-        return null;
+    public Competitor internalApplyTo(RacingEventService toState) throws Exception {
+        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(id, newName, newSailId, newNationality);
     }
 
     @Override

@@ -273,6 +273,7 @@ import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForComp
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
@@ -3272,5 +3273,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             competitorsToRemove.add(competitorStore.getExistingCompetitorByIdAsString(competitorToRemove.getIdAsString()));
         }
         getService().apply(new RemoveCompetitors(competitorsToRemove));
+    }
+
+    @Override
+    public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
+        return getBaseDomainFactory().convertToCompetitorDTO(
+                getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
+                competitor.getSailID(), getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode()))));
     }
 }
