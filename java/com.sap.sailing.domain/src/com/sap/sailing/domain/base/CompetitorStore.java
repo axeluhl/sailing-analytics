@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 /**
  * Manages a set of {@link Competitor} objects. There may be a transient implementation based on a simple cache,
@@ -27,6 +28,9 @@ public interface CompetitorStore {
      */
     void clear();
     
+    /**
+     * Obtains a non-live snapshot of the list of competitors managed by this store.
+     */
     Iterable<? extends Competitor> getCompetitors();
     
     void removeCompetitor(Competitor competitor);
@@ -38,7 +42,8 @@ public interface CompetitorStore {
      * be sufficient to ensure that subsequent DTOs produced from the competitor modified will reflect the changes.<p>
      * 
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
-     * @return TODO
      */
-    Competitor updateCompetitor(Serializable id, String newName, String newSailId, Nationality newNationality);
+    Competitor updateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality);
+
+    CompetitorDTO convertToCompetitorDTO(Competitor c);
 }

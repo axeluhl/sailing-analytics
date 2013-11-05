@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -41,9 +39,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -101,8 +97,6 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
     
-    private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
-
     /**
      * Weak references to {@link Waypoint} objects of this type are registered with
      * {@link DomainFactoryImpl#waypointCacheReferenceQueue} upon construction so that when their referents are no
@@ -136,7 +130,6 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     public DomainFactoryImpl(CompetitorStore competitorStore) {
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
@@ -336,19 +329,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
-        CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
-        if (competitorDTO == null) {
-            final Nationality nationality = c.getTeam().getNationality();
-            CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-            competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
-                    : countryCode.getTwoLetterISOCode(),
-                    countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
-                            : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
-                            new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
-                                    .getMeters()));
-            weakCompetitorDTOCache.put(c, competitorDTO);
-        }
-        return competitorDTO;
+        return competitorStore.convertToCompetitorDTO(c);
     }
 
     @Override

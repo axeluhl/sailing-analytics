@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -9,6 +14,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -47,19 +53,35 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 }, /* animationEnabled */true, callback);
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
-        this.name = new TextBox();
-        this.name.setText(competitorToEdit.getName());
-        this.threeLetterIocCountryCode = new ListBox();
+        this.name = createTextBox(competitorToEdit.getName());
+        this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;
-        for (CountryCode cc : ccf.getAll()) {
-            this.threeLetterIocCountryCode.addItem(cc.getThreeLetterIOCCode()+" "+cc.getName(), cc.getThreeLetterIOCCode());
-            if (cc.getThreeLetterIOCCode().equals(competitorToEdit.getThreeLetterIocCountryCode())) {
-                this.threeLetterIocCountryCode.setSelectedIndex(i);
+        List<CountryCode> ccs = new ArrayList<CountryCode>();
+        Util.addAll(ccf.getAll(), ccs);
+        Collections.sort(ccs, new Comparator<CountryCode>() {
+            @Override
+            public int compare(CountryCode o1, CountryCode o2) {
+                return Util.compareToWithNull(o1.getThreeLetterIOCCode(), o2.getThreeLetterIOCCode());
+            }
+        });
+        for (CountryCode cc : ccs) {
+            if (cc.getThreeLetterIOCCode() != null) {
+                this.threeLetterIocCountryCode.addItem(cc.getThreeLetterIOCCode() + " " + cc.getName(), cc.getThreeLetterIOCCode());
+                if (cc.getThreeLetterIOCCode().equals(competitorToEdit.getThreeLetterIocCountryCode())) {
+                    this.threeLetterIocCountryCode.setSelectedIndex(i);
+                }
+                i++;
             }
         }
-        this.sailId = new TextBox();
-        this.sailId.setText(competitorToEdit.getSailID());
+        this.sailId = createTextBox(competitorToEdit.getSailID());
+    }
+
+    
+    @Override
+    public void show() {
+        super.show();
+        name.setFocus(true);
     }
 
     @Override

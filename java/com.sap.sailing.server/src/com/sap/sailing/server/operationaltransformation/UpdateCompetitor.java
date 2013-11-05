@@ -1,7 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.server.RacingEventService;
@@ -9,14 +7,14 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Competitor> {
     private static final long serialVersionUID = 1172181354320184263L;
-    private final Serializable id;
+    private final String idAsString;
     private final String newName;
     private final String newSailId;
     private final Nationality newNationality;
     
-    public UpdateCompetitor(Serializable id, String newName, String newSailId, Nationality newNationality) {
+    public UpdateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality) {
         super();
-        this.id = id;
+        this.idAsString = idAsString;
         this.newName = newName;
         this.newSailId = newSailId;
         this.newNationality = newNationality;
@@ -24,7 +22,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
 
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(id, newName, newSailId, newNationality);
+        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newSailId, newNationality);
     }
 
     @Override
