@@ -22,8 +22,6 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Dynami
     
     private final SharedDomainFactory domainFactory;
     
-    
-
     public CompetitorMasterDataDeserializer(JsonDeserializer<BoatClass> boatClassDeserializer,
             JsonDeserializer<DynamicTeam> teamDeserializer, SharedDomainFactory domainFactory) {
         this.boatClassDeserializer = boatClassDeserializer;
