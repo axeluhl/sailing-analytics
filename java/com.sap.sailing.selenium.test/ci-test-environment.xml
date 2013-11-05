@@ -57,7 +57,6 @@
   -->
   <!--
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
-  -->  
      <!--
      <capabilities>
         <capability>
@@ -66,11 +65,9 @@
         </capability>
      </capabilities>
      -->
-     <!--
   </driver-definition>
-     -->
   
-  <!-- -->
+  <!--
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver" />
-  <!-- -->
+  -->
 </test-environment>
