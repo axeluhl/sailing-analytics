@@ -6,9 +6,9 @@
 
 Stop any SailingServers currently running on your local machine (if you fail to do so, the Maven build will be unable to write some of the build artifacts in the com.sap.sailing.gwt.ui project). Build using the git-managed build script from configuration/buildAndUpdateProduct.sh. To lower round-trip times, we introduced the -b option that only builds one GWT permuation (Chrome, English). You may use the -t option to keep the Maven build from running the tests. If inside the SAP VPN, additionally use the -p option to ensure the HTTP proxy is being used. This makes for a command line like this:
 
-  ./configuration/buildAndUpdateProduct.sh -p -b -t build
+  `./configuration/buildAndUpdateProduct.sh -p -b -t build`
 
-After the build has completed (hopefully successfully), refresh the com.sap.sailing.gwt.ui project in your Eclipse workspace. Make sure you have the ChromeSeleniumDriver installed. You can download it for your platform from [here](http://chromedriver.storage.googleapis.com/index.html). On Windows, you need to install it to c:\apps\ChromeSeleniumDriver\chromedriver.exe.
+After the build has completed (hopefully successfully), refresh the `com.sap.sailing.gwt.ui` project in your Eclipse workspace. Make sure you have the ChromeSeleniumDriver installed. You can download it for your platform from [here](http://chromedriver.storage.googleapis.com/index.html). On Windows, you need to install it to `c:\apps\ChromeSeleniumDriver\chromedriver.exe`.
 
 Start the SailingServer launch configuration (with / without proxy, depending on your VPN state). Then, launch the JUnit launch configuration com.sap.sailing.selenium.test (with / without proxy). It will run the Selenium tests against your local server, running on port 8888.
 
