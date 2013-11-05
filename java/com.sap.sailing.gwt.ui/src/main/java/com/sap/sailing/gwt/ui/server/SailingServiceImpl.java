@@ -78,7 +78,7 @@ import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -1515,14 +1515,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * the course of the race identified by <code>raceIdentifier</code>.
      */
     @Override
-    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstructions>> controlPoints) {
+    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
             Iterable<Waypoint> waypoints = course.getWaypoints();
-            List<Pair<ControlPoint, PassingInstructions>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstructions>>();
+            List<Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
             int lastMatchPosition = -1;
-            for (Pair<ControlPointDTO, PassingInstructions> controlPointAndPassingSide : controlPoints) {
+            for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingSide : controlPoints) {
                 ControlPointDTO controlPointDTO = controlPointAndPassingSide.getA();
                 ControlPoint matchFromOldCourse = null;
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
@@ -1530,7 +1530,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
                     if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
                         matchFromOldCourse = controlPointAtI;
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstructions>(matchFromOldCourse, null));
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(matchFromOldCourse, null));
                         lastMatchPosition = i;
                     }
                 }
@@ -1548,11 +1548,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
                         newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstructions>(newControlPoint, null));
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
-                        PassingInstructions passingInstructions = controlPointAndPassingSide.getB();
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstructions>(newControlPoint, passingInstructions));
+                        PassingInstruction passingInstructions = controlPointAndPassingSide.getB();
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
                     }
                 }
             }

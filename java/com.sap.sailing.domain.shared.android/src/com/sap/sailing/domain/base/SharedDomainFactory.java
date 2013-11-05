@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 
 public interface SharedDomainFactory {
 
@@ -54,7 +54,7 @@ public interface SharedDomainFactory {
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
-    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstructions passingSide);
+    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingSide);
 
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 

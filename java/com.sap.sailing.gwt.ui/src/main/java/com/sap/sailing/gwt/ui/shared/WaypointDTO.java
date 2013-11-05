@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 
 public class WaypointDTO extends NamedDTO {
@@ -12,11 +12,11 @@ public class WaypointDTO extends NamedDTO {
     
     public ControlPointDTO controlPoint;
     
-    public PassingInstructions passingInstructions;
+    public PassingInstruction passingInstructions;
     
     WaypointDTO() {}
     
-    public WaypointDTO(String name, ControlPointDTO controlPoint, List<MarkDTO> marks, PassingInstructions passingInstructions) {
+    public WaypointDTO(String name, ControlPointDTO controlPoint, List<MarkDTO> marks, PassingInstruction passingInstructions) {
         super(name);
         this.setName(name);
         this.marks = marks;

@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -90,7 +90,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                 MarkType.BUOY, "black", "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
                 "green", "round", "circle"), "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white",
-                "conical", "bold"), PassingInstructions.PORT));
+                "conical", "bold"), PassingInstruction.Port));
 
         return course;
     }
@@ -108,8 +108,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         compareMarks(serializedGate.getLeft(), deserializedGate.getLeft());
         compareMarks(serializedGate.getRight(), deserializedGate.getRight());
 
-        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstructions.PORT);
-        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstructions.PORT);
+        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(serializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(deserializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
 

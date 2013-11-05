@@ -14,8 +14,8 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -23,13 +23,13 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 
 public enum DomainFactoryImpl implements SharedDomainFactory {
     INSTANCE;
@@ -93,15 +93,15 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
         markIdCache.put(id.toString(), id);
     }
 
-    public Gate createGate(Mark left, Mark right, String name) {
-        return new GateImpl(left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
+        return new ControlPointWithTwoMarksImpl(left, right, name);
     }
 
-    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
-        return new GateImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
+        return new ControlPointWithTwoMarksImpl(id, left, right, name);
     }
 
-    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstructions passingInstructions) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstructions) {
         synchronized (waypointCache) {
             Waypoint result = new WaypointImpl(controlPoint, passingInstructions);
             waypointCache.put(result.getId(), result);

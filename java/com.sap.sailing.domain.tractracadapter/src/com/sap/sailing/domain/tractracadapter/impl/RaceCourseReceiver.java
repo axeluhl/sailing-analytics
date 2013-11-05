@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -106,12 +106,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
-        Map<Integer, PassingInstructions> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
-        List<Util.Pair<TracTracControlPoint, PassingInstructions>> ttControlPoints = new ArrayList<>();
+        Map<Integer, PassingInstruction> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
+        List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
-            PassingInstructions nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
-            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstructions>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
+            PassingInstruction nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
             i++;
         }
 

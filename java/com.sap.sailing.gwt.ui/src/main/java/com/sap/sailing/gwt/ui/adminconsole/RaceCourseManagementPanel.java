@@ -34,7 +34,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
@@ -66,15 +66,15 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         private final ControlPointDTO controlPoint;
         private final MarkDTO oldMark;
         private MarkDTO newMark;
-        private PassingInstructions passingInstructions;
-        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, PassingInstructions passingInstructions, MarkDTO oldMark) {
+        private PassingInstruction passingInstructions;
+        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, PassingInstruction passingInstructions, MarkDTO oldMark) {
             super();
             this.controlPoint = controlPoint;
             this.passingInstructions = passingInstructions;
             this.oldMark = oldMark;
             this.newMark = oldMark;
         }
-        public PassingInstructions getPassingInstructions() {
+        public PassingInstruction getPassingInstructions() {
             return passingInstructions;
         }
         public MarkDTO getNewMark() {
@@ -346,7 +346,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
         Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
-        List<Pair<ControlPointDTO, PassingInstructions>> controlPoints = new ArrayList<Pair<ControlPointDTO, PassingInstructions>>();
+        List<Pair<ControlPointDTO, PassingInstruction>> controlPoints = new ArrayList<Pair<ControlPointDTO, PassingInstruction>>();
         for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
             if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
                 oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
@@ -360,7 +360,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     controlPointToAdd = cpaoanb.getControlPoint();
                 }
-                controlPoints.add(new Pair<ControlPointDTO, PassingInstructions>(controlPointToAdd, cpaoanb.passingInstructions));
+                controlPoints.add(new Pair<ControlPointDTO, PassingInstruction>(controlPointToAdd, cpaoanb.passingInstructions));
             }
         }
         sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {

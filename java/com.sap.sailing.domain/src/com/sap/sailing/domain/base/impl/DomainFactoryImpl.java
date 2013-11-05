@@ -34,7 +34,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -209,7 +209,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstructions passingInstructions) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstructions) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
             Waypoint result = new WaypointImpl(controlPoint, passingInstructions);

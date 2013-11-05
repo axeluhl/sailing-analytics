@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -729,17 +729,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return result;
     }
 
-    private String getPassingInstructionsAsText(PassingInstructions passingInstructions) {
+    private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
-        case PORT:
+        case Port:
             return stringMessages.portSide();
-        case STARBOARD:
+        case Starboard:
             return stringMessages.starboardSide();
-        case GATE:
+        case Gate:
             return stringMessages.gate();
-        case LINE:
+        case Line:
             return stringMessages.line();
-        case OFFSET:
+        case Offset:
             return stringMessages.offset();
         default:
             return "";

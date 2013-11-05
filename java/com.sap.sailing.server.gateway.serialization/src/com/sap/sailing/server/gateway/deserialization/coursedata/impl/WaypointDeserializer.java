@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
@@ -25,9 +25,9 @@ public class WaypointDeserializer implements JsonDeserializer<Waypoint> {
     public Waypoint deserialize(JSONObject object) throws JsonDeserializationException {
         // TODO shouldn't this then be renamed to FIELD_PASSING_INSTRUCTIONS?
         Object passingInstructionsObject = object.get(WaypointJsonSerializer.FIELD_PASSING_SIDE);
-        PassingInstructions passingInstructions = null;
+        PassingInstruction passingInstructions = null;
         if (passingInstructionsObject != null) {
-            passingInstructions = PassingInstructions.valueOf(passingInstructionsObject.toString());
+            passingInstructions = PassingInstruction.valueOf(passingInstructionsObject.toString());
         }
         ControlPoint controlPoint = controlPointDeserializer.deserialize((JSONObject) object.get(WaypointJsonSerializer.FIELD_CONTROL_POINT));
         Waypoint waypoint = null;

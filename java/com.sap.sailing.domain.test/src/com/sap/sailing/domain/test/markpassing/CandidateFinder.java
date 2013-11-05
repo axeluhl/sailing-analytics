@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -74,18 +74,18 @@ public class CandidateFinder{
         return allCandidates;
     }
 
-    private Double computeDistance(PassingInstructions p, ArrayList<Position> markPositions, GPSFixMoving gps) {
+    private Double computeDistance(PassingInstruction p, ArrayList<Position> markPositions, GPSFixMoving gps) {
         double distance = 0;
 
-        if (p.equals(PassingInstructions.PORT) || p.equals(PassingInstructions.STARBOARD)
-                || p.equals(PassingInstructions.OFFSET)) {
+        if (p.equals(PassingInstruction.Port) || p.equals(PassingInstruction.Starboard)
+                || p.equals(PassingInstruction.Offset)) {
             distance = gps.getPosition().getDistance(markPositions.get(0)).getMeters();
         }
-        if (p.equals(PassingInstructions.LINE)) {
+        if (p.equals(PassingInstruction.Line)) {
         	//TODO Distance to Line!!
         	distance = gps.getPosition().crossTrackError(markPositions.get(0), markPositions.get(0).getBearingGreatCircle(markPositions.get(1))).getMeters();
         }
-        if (p.equals(PassingInstructions.GATE)) {
+        if (p.equals(PassingInstruction.Gate)) {
             // TODO Choose only correct Mark to avoid nonsensical Candidates (Splining?)
             if (gps.getPosition().getDistance(markPositions.get(0)).getMeters() < gps.getPosition()
                     .getDistance(markPositions.get(1)).getMeters()) {

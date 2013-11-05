@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -21,24 +22,24 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
@@ -280,14 +281,14 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
             if (controlPoint instanceof Mark) {
                 CourseListDataElement element = new CourseListDataElement();
                 element.setLeftMark((Mark) controlPoint);
-                element.setRoundingDirection(getRoundingDirection(waypoint.getPassingInstructions()));
+                element.setPassingInstructions(waypoint.getPassingInstructions());
                 elementList.add(element);
-            } else if (controlPoint instanceof Gate) {
-                Gate gate = (Gate) controlPoint;
+            } else if (controlPoint instanceof ControlPointWithTwoMarks) {
+                ControlPointWithTwoMarks controlPointTwoMarks = (ControlPointWithTwoMarks) controlPoint;
                 CourseListDataElement element = new CourseListDataElement();
-                element.setLeftMark(gate.getLeft());
-                element.setRightMark(gate.getRight());
-                element.setRoundingDirection(RoundingDirection.Gate);
+                element.setLeftMark(controlPointTwoMarks.getLeft());
+                element.setRightMark(controlPointTwoMarks.getRight());
+                element.setPassingInstructions(waypoint.getPassingInstructions());
                 elementList.add(element);
             }
         }
@@ -313,22 +314,22 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
 
         for (CourseListDataElement courseElement : courseElements) {
-            if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)||courseElement.getPassingInstructions().equals(PassingInstruction.Line))
                     && courseElement.getRightMark() != null) {
-                String gateName = "Gate " + courseElement.getLeftMark().getName() + " / "
+                String controlPointName = courseElement.getPassingInstructions()+ " " + courseElement.getLeftMark().getName() + " / "
                         + courseElement.getRightMark().getName();
-                Gate gate = new GateImpl(courseElement.getLeftMark(), courseElement.getRightMark(), gateName);
-                Waypoint waypoint = new WaypointImpl(gate);
+                ControlPointWithTwoMarks controlPoint = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement.getRightMark(), controlPointName);
+                Waypoint waypoint = new WaypointImpl(controlPoint);
 
                 waypoints.add(waypoint);
-            } else if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
+            } else if (courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
                     && courseElement.getRightMark() == null) {
                 throw new IllegalStateException("Gate has no right buoy");
-            } else if (courseElement.getRoundingDirection().equals(RoundingDirection.None)) {
+            } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
                 throw new IllegalStateException("Each waypoints needs a passing side");
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(),
-                        getPassingInstructions(courseElement.getRoundingDirection()));
+                        getPassingInstructions(courseElement.getPassingInstructions()));
 
                 waypoints.add(waypoint);
             }
@@ -347,26 +348,12 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     @SuppressLint("DefaultLocale")
-    private PassingInstructions getPassingInstructions(RoundingDirection roundingDirection) {
-        final PassingInstructions result;
-        if (roundingDirection == RoundingDirection.None || roundingDirection == null) {
+    private PassingInstruction getPassingInstructions(PassingInstruction roundingDirection) {
+        final PassingInstruction result;
+        if (roundingDirection == PassingInstruction.None || roundingDirection == null) {
             result = null;
         } else {
-            result = PassingInstructions.valueOf(roundingDirection.name().toUpperCase());
-        }
-        return result;
-    }
-
-    @SuppressLint("DefaultLocale")
-    private RoundingDirection getRoundingDirection(PassingInstructions passingInstructions) {
-        final RoundingDirection result;
-        if (passingInstructions == null) {
-            result = null;
-        } else if (passingInstructions == PassingInstructions.LINE) {
-            result = RoundingDirection.Gate;
-        } else {
-            result = RoundingDirection.valueOf(passingInstructions.name().substring(0, 1)
-                + passingInstructions.name().substring(1, passingInstructions.name().length()).toLowerCase());
+            result = PassingInstruction.valueOf(roundingDirection.name().toUpperCase());
         }
         return result;
     }
@@ -403,7 +390,7 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         if (courseElements.isEmpty()) {
             addNewCourseElementToList(mark);
         } else {
-            CourseListDataElement gateCourseElement = getFirstGateCourseElementWithoutRightMark();
+            CourseListDataElement gateCourseElement = getFirstGateOrLineCourseElementWithoutRightMark();
             if (gateCourseElement != null) {
                 gateCourseElement.setRightMark(mark);
                 courseElementAdapter.notifyDataSetChanged();
@@ -413,9 +400,9 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         }
     }
 
-    private CourseListDataElement getFirstGateCourseElementWithoutRightMark() {
+    private CourseListDataElement getFirstGateOrLineCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : courseElements) {
-            if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)||courseElement.getPassingInstructions().equals(PassingInstruction.Line))
                     && courseElement.getRightMark() == null) {
                 return courseElement;
             }
@@ -431,14 +418,14 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
 
     private void createRoundingDirectionDialog(final CourseListDataElement courseElement) {
         List<String> directions = new ArrayList<String>();
-        for (RoundingDirection direction : RoundingDirection.relevantValues()) {
+        for (PassingInstruction direction : PassingInstruction.relevantValues()) {
             directions.add(direction.name());
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int position) {
-                        RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
+                        PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
                         onRoundingDirectionPicked(courseElement, pickedDirection);
                     }
                 });
@@ -446,8 +433,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
         builder.show();
     }
 
-    protected void onRoundingDirectionPicked(CourseListDataElement courseElement, RoundingDirection pickedDirection) {
-        courseElement.setRoundingDirection(pickedDirection);
+    protected void onRoundingDirectionPicked(CourseListDataElement courseElement, PassingInstruction pickedDirection) {
+        courseElement.setPassingInstructions(pickedDirection);
         if (!courseElements.contains(courseElement)) {
             courseElements.add(courseElement);
         }

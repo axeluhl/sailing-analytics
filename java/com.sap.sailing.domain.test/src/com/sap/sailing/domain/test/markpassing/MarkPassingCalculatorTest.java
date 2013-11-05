@@ -23,7 +23,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -237,7 +237,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             WaypointImpl waypointWithPassingInstructions = null;
             if (i == 0 || i == waypoints.size() - 1) {
                 waypointWithPassingInstructions = new WaypointImpl(waypoints.get(i).getControlPoint(),
-                        PassingInstructions.LINE);
+                        PassingInstruction.Line);
             } else {
                 int numberofMarks = 0;
                 Iterator<Mark> it = waypoints.get(i).getMarks().iterator();
@@ -247,19 +247,21 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                 }
                 if (numberofMarks == 2) {
                     waypointWithPassingInstructions = new WaypointImpl(waypoints.get(i).getControlPoint(),
-                            PassingInstructions.GATE);
+                            PassingInstruction.Gate);
                 }
                 if (numberofMarks == 1) {
                     waypointWithPassingInstructions = new WaypointImpl(waypoints.get(i).getControlPoint(),
-                            PassingInstructions.PORT);
+                            PassingInstruction.Port);
                 }
             }
             waypointsWithPassingInstructions.add(waypointWithPassingInstructions);
             averageLegLength.put(waypointsWithPassingInstructions.get(i), averageLegLength.get(waypoints.get(i)));
         }
 
+
         // Fill WayPointTracks (HashMap of WayPoints and their Tracks)
         for (Waypoint w : waypointsWithPassingInstructions) {
+        	System.out.println(w.getPassingInstructions());
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
             for (Mark mark : w.getControlPoint().getMarks()) {
                 DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(mark);
