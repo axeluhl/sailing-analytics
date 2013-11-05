@@ -298,7 +298,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat) {
-        return (DynamicCompetitor) getOrCreateDynamicCompetitor(fromString, name, team, boat);
+        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, team, boat);
     }
 
     @Override
