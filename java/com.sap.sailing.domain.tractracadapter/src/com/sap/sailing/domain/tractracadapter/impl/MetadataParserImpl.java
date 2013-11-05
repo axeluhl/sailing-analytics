@@ -14,7 +14,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -89,15 +89,15 @@ public class MetadataParserImpl implements MetadataParser {
      * </pre>
      */
     @Override
-    public Map<Integer, PassingInstructions> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
-        Map<Integer, PassingInstructions> result = new HashMap<Integer, PassingInstructions>();
+    public Map<Integer, PassingInstruction> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
+        Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
             int i=1;
             for (TracTracControlPoint controlPoint : controlPoints) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    result.put(i, PassingInstructions.valueOf(seqValue));
+                    result.put(i, PassingInstruction.valueOf(seqValue));
                 }
                 i++;
             }

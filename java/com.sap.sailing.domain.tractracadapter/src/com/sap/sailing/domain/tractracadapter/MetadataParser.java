@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.common.PassingInstructions;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 
@@ -33,7 +33,7 @@ public interface MetadataParser {
         Serializable getId();
     }
     
-    Map<Integer, PassingInstructions> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
+    Map<Integer, PassingInstruction> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
 
     /**
      * Returns as many metadata objects as there are marks in the control point (two for a gate, one otherwise)

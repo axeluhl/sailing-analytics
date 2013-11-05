@@ -134,6 +134,8 @@
         <item>Port</item>
         <item>Starboard</item>
         <item>Gate</item>
+        <item >Line</item>
+        <item >Offset</item>
     </string-array>
     <string-array name="course_element_changers">
         <item>Move up</item>

@@ -852,11 +852,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private String getPassingInstructions(PassingInstruction passingInstructions) {
-        String passing = null;
+        final String passing;
         if (passingInstructions != null) {
             passing = passingInstructions.name();
+        } else {
+        	passing = null;
         }
         return passing;
     }
-
 }

@@ -24,7 +24,7 @@ public class WaypointDeserializer implements JsonDeserializer<Waypoint> {
     @Override
     public Waypoint deserialize(JSONObject object) throws JsonDeserializationException {
         // TODO shouldn't this then be renamed to FIELD_PASSING_INSTRUCTIONS?
-        Object passingInstructionsObject = object.get(WaypointJsonSerializer.FIELD_PASSING_SIDE);
+        Object passingInstructionsObject = object.get(WaypointJsonSerializer.FIELD_PASSING_INSTRUCTIONS);
         PassingInstruction passingInstructions = null;
         if (passingInstructionsObject != null) {
             passingInstructions = PassingInstruction.valueOf(passingInstructionsObject.toString());
