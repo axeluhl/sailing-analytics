@@ -878,12 +878,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     @Override
     public void removeAllCompetitors() {
+        logger.info("Removing all persistent competitor info");
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         collection.drop();
     }
 
     @Override
     public void removeCompetitor(Competitor competitor) {
+        logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
         collection.remove(query);

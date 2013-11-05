@@ -14,12 +14,16 @@ import com.sap.sailing.server.RacingEventService;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+
+    private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
     
     private static ExtenderBundleTracker extenderBundleTracker;
 
     private final RacingEventService racingEventService;
 
     public Activator() {
+        boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
+        logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
         racingEventService = new RacingEventServiceImpl();
     }

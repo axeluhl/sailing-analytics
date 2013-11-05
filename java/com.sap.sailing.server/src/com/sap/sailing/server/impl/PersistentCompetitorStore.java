@@ -28,13 +28,21 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     private transient MongoObjectFactory storeTo;
     private transient DomainObjectFactory loadFrom;
     
-    public PersistentCompetitorStore(MongoObjectFactory storeTo) {
+    /**
+     * @param clear
+     *            if <code>true</code>, the persistent competitor store is initially cleared, with all persistent
+     *            competitor data removed; use with caution!
+     */
+    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clear) {
         DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this);
-        DomainObjectFactory loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory);
+        this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory);
         this.storeTo = storeTo;
-        this.loadFrom = loadFrom;
-        for (Competitor competitor : loadFrom.loadAllCompetitors()) {
-            addCompetitorToTransientStore(competitor.getId(), competitor);
+        if (clear) {
+            storeTo.removeAllCompetitors();
+        } else {
+            for (Competitor competitor : loadFrom.loadAllCompetitors()) {
+                addCompetitorToTransientStore(competitor.getId(), competitor);
+            }
         }
     }
     

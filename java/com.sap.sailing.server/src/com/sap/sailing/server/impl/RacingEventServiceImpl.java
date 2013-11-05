@@ -208,10 +208,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #persistentCompetitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
-     * the {@link DomainObjectFactory}.
+     * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
+     * removes all previously persistent competitors. This is the default for testing and for backward compatibility with
+     * prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()));
+        this(true);
+    }
+    
+    /**
+     * Like {@link #RacingEventServiceImpl()}, but allows callers to specify that the persistent competitor collection
+     * be cleared before the service starts.
+     * 
+     * @param clearPersistentCompetitorStore
+     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the correcponding
+     *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors
+     *            created and stored during previous service executions will initially be loaded.
+     */
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore));
     }
     
     private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore) {
