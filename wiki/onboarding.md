@@ -72,7 +72,7 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
-- Install the GWT Browser Plugin (Chrome or Firefox) for the GWT Development mode
+- Install the GWT Browser Plugin (Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably) for the GWT Development mode
 
 #### Additional steps required for Android projects
 
