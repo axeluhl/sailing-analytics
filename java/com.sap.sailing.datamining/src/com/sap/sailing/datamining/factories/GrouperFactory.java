@@ -11,24 +11,24 @@ import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.impl.GroupByDimension;
-import com.sap.sailing.datamining.impl.SmartQueryDefinition;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimension;
 
 public final class GrouperFactory {
     
     private GrouperFactory() { }
 
-    public static <DataType> Grouper<DataType> createGrouper(SmartQueryDefinition smartQueryDefinition) {
-        switch (smartQueryDefinition.getGrouperType()) {
+    public static <DataType> Grouper<DataType> createGrouper(QueryDefinition queryDefinition) {
+        switch (queryDefinition.getGrouperType()) {
         case Custom:
-            return createDynamicGrouper(smartQueryDefinition.getCustomGrouperScriptText(), smartQueryDefinition.getDataType());
+            return createDynamicGrouper(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
         case Dimensions:
-            return createByDimensionGrouper(smartQueryDefinition.getDataType(), smartQueryDefinition.getDimensionsToGroupBy());
+            return createByDimensionGrouper(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
         }
         throw new IllegalArgumentException("Not yet implemented for the given grouper type: "
-                + smartQueryDefinition.getGrouperType().toString());
+                + queryDefinition.getGrouperType().toString());
     }
 
     public static <DataType> Grouper<DataType> createDynamicGrouper(String grouperScriptText, DataTypes dataType) {

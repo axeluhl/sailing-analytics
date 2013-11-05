@@ -2,15 +2,18 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.DataTypes;
 
-public class StatisticAndAggregatorType {
+public class ResultCalculationInformation {
     
     private StatisticType statisticType;
     private AggregatorType aggregatorType;
+    private DataTypes dataType;
     
-    public StatisticAndAggregatorType(StatisticType statisticType, AggregatorType aggregatorType) {
+    public ResultCalculationInformation(StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
+        this.dataType = dataType;
     }
 
     public StatisticType getStatisticType() {
@@ -19,6 +22,10 @@ public class StatisticAndAggregatorType {
 
     public AggregatorType getAggregatorType() {
         return aggregatorType;
+    }
+
+    public DataTypes getDataType() {
+        return dataType;
     }
     
     @Override

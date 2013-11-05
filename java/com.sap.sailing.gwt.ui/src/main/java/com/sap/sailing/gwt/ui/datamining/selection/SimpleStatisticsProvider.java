@@ -5,34 +5,35 @@ import java.util.HashMap;
 
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.datamining.shared.DataTypes;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
 
 public class SimpleStatisticsProvider implements StatisticsProvider {
     
-    private HashMap<Pair<StatisticType, AggregatorType>, StatisticAndAggregatorType> statisticsMap;
+    private HashMap<Triple<StatisticType, AggregatorType, DataTypes>, ResultCalculationInformation> statisticsMap;
 
     public SimpleStatisticsProvider() {
-        statisticsMap = new HashMap<Pair<StatisticType, AggregatorType>, StatisticAndAggregatorType>();
+        statisticsMap = new HashMap<Triple<StatisticType, AggregatorType, DataTypes>, ResultCalculationInformation>();
     }
 
     @Override
-    public void addStatistic(StatisticType statisticType, AggregatorType aggregatorType) {
-        Pair<StatisticType, AggregatorType> key = new Pair<StatisticType, AggregatorType>(statisticType, aggregatorType);
+    public void addStatistic(StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+        Triple<StatisticType, AggregatorType, DataTypes> key = new Triple<StatisticType, AggregatorType, DataTypes>(statisticType, aggregatorType, dataType);
         if (!statisticsMap.containsKey(key)) {
-            StatisticAndAggregatorType statistic = new StatisticAndAggregatorType(statisticType, aggregatorType);
+            ResultCalculationInformation statistic = new ResultCalculationInformation(statisticType, aggregatorType, dataType);
             statisticsMap.put(key, statistic);
         }
     }
 
     @Override
-    public StatisticAndAggregatorType getStatistic(StatisticType statisticType, AggregatorType aggregatorType) {
-        Pair<StatisticType, AggregatorType> key = new Pair<StatisticType, AggregatorType>(statisticType, aggregatorType);
+    public ResultCalculationInformation getStatistic(StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+        Triple<StatisticType, AggregatorType, DataTypes> key = new Triple<StatisticType, AggregatorType, DataTypes>(statisticType, aggregatorType, dataType);
         return statisticsMap.get(key);
     }
 
     @Override
-    public Collection<StatisticAndAggregatorType> getAllStatistics() {
+    public Collection<ResultCalculationInformation> getAllStatistics() {
         return statisticsMap.values();
     }
 

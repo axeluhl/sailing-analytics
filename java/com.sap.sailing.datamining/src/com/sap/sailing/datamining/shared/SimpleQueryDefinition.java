@@ -16,6 +16,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
     private GrouperType grouperType;
     private StatisticType statisticType;
     private AggregatorType aggregatorType;
+    private DataTypes dataType;
 
     private String customGrouperScriptText;
     private List<SharedDimension> dimensionsToGroupBy;
@@ -27,10 +28,11 @@ public class SimpleQueryDefinition implements QueryDefinition {
     @Deprecated
     SimpleQueryDefinition() { }
 
-    public SimpleQueryDefinition(GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType) {
+    public SimpleQueryDefinition(GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
+        this.dataType = dataType;
 
         customGrouperScriptText = "";
         dimensionsToGroupBy = new ArrayList<SharedDimension>();
@@ -50,6 +52,11 @@ public class SimpleQueryDefinition implements QueryDefinition {
     @Override
     public AggregatorType getAggregatorType() {
         return aggregatorType;
+    }
+    
+    @Override
+    public DataTypes getDataType() {
+        return dataType;
     }
 
     @Override

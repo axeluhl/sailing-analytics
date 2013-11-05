@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.datamining.WindStrengthCluster;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 
 public interface TrackedLegOfCompetitorWithContext {
@@ -20,5 +21,6 @@ public interface TrackedLegOfCompetitorWithContext {
     public String getCompetitorSailID();
     public String getCompetitorNationality();
     public WindStrengthCluster getWindStrength();
+    public Distance getDistanceTraveled();
 
 }

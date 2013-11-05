@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimension;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
@@ -33,7 +34,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     private SelectionTablesPanel selectionTablesPanel;
     
     private StatisticsProvider statisticsProvider;
-    private ValueListBox<StatisticAndAggregatorType> statisticsListBox;
+    private ValueListBox<ResultCalculationInformation> statisticsListBox;
 
     private GroupBySelectionPanel groupBySelectionPanel;
 
@@ -56,7 +57,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     
     @Override
     public QueryDefinition getQueryDefinition() {
-        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(groupBySelectionPanel.getGrouperType(), getStatisticType(), getAggregatorType());
+        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(groupBySelectionPanel.getGrouperType(), getStatisticType(), getAggregatorType(), getDataType());
         switch (queryDTO.getGrouperType()) {
         case Custom:
             queryDTO.setCustomGrouperScriptText(groupBySelectionPanel.getCustomGrouperScriptText());
@@ -73,7 +74,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         }
         return queryDTO;
     }
-    
+
     @Override
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
         setBlockChangeNotification(true);
@@ -86,7 +87,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     }
 
     private void applyStatistic(QueryDefinition queryDefinition) {
-        statisticsListBox.setValue(statisticsProvider.getStatistic(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType()), false);
+        statisticsListBox.setValue(statisticsProvider.getStatistic(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType(), queryDefinition.getDataType()), false);
     }
 
     private StatisticType getStatisticType() {
@@ -95,6 +96,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
 
     private AggregatorType getAggregatorType() {
         return statisticsListBox.getValue().getAggregatorType();
+    }
+    
+    private DataTypes getDataType() {
+        return statisticsListBox.getValue().getDataType();
     }
 
     private HorizontalPanel createFunctionsPanel() {
@@ -119,9 +124,9 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         functionsPanel.add(groupBySelectionPanel);
 
         functionsPanel.add(new Label(getStringMessages().statisticToCalculate() + ": "));
-        statisticsListBox = new ValueListBox<StatisticAndAggregatorType>(new Renderer<StatisticAndAggregatorType>() {
+        statisticsListBox = new ValueListBox<ResultCalculationInformation>(new Renderer<ResultCalculationInformation>() {
             @Override
-            public String render(StatisticAndAggregatorType statisticAndAggregatorType) {
+            public String render(ResultCalculationInformation statisticAndAggregatorType) {
                 if (statisticAndAggregatorType == null) {
                     return "";
                 }
@@ -129,20 +134,22 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
             }
 
             @Override
-            public void render(StatisticAndAggregatorType statisticAndAggregatorType, Appendable appendable)
+            public void render(ResultCalculationInformation statisticAndAggregatorType, Appendable appendable)
                     throws IOException {
                 appendable.append(render(statisticAndAggregatorType));
             }
         });
-        statisticsListBox.addValueChangeHandler(new ValueChangeHandler<StatisticAndAggregatorType>() {
+        statisticsListBox.addValueChangeHandler(new ValueChangeHandler<ResultCalculationInformation>() {
             @Override
-            public void onValueChange(ValueChangeEvent<StatisticAndAggregatorType> event) {
+            public void onValueChange(ValueChangeEvent<ResultCalculationInformation> event) {
                 notifyQueryDefinitionChanged();
             }
         });
-        statisticsProvider.addStatistic(StatisticType.DataAmount, AggregatorType.Sum);
-        statisticsProvider.addStatistic(StatisticType.Speed, AggregatorType.Average);
-        statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.DataAmount, AggregatorType.Sum), false);
+        statisticsProvider.addStatistic(StatisticType.DataAmount, AggregatorType.Sum, DataTypes.GPSFix);
+        statisticsProvider.addStatistic(StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        statisticsProvider.addStatistic(StatisticType.Distance_TrackedLegOfCompetitor, AggregatorType.Sum, DataTypes.TrackedLegOfCompetitor);
+        statisticsProvider.addStatistic(StatisticType.Distance_TrackedLegOfCompetitor, AggregatorType.Average, DataTypes.TrackedLegOfCompetitor);
+        statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.DataAmount, AggregatorType.Sum, DataTypes.GPSFix), false);
         statisticsListBox.setAcceptableValues(statisticsProvider.getAllStatistics());
         functionsPanel.add(statisticsListBox);
 

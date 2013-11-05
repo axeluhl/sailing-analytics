@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.SharedDimension;
@@ -155,7 +156,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
     }
 
     private static QueryDefinition getStandardQueryDefinition() {
-        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average);
+        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RaceName);
         return standardDefinition;
