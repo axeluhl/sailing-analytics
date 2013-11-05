@@ -12,6 +12,10 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private final String newSailId;
     private final Nationality newNationality;
     
+    /**
+     * @param idAsString Identified the competitor to update
+     * @param newNationality if <code>null</code>, the competitor obtains the "NONE" nationality, usually represented by a white flag
+     */
     public UpdateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality) {
         super();
         this.idAsString = idAsString;

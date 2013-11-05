@@ -59,14 +59,21 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         int i=0;
         List<CountryCode> ccs = new ArrayList<CountryCode>();
         Util.addAll(ccf.getAll(), ccs);
+        ccs.add(null); // representing no nationality (NONE / white flag)
         Collections.sort(ccs, new Comparator<CountryCode>() {
             @Override
             public int compare(CountryCode o1, CountryCode o2) {
-                return Util.compareToWithNull(o1.getThreeLetterIOCCode(), o2.getThreeLetterIOCCode());
+                return Util.compareToWithNull(o1 == null ? null : o1.getThreeLetterIOCCode(), o2 == null ? null : o2.getThreeLetterIOCCode());
             }
         });
         for (CountryCode cc : ccs) {
-            if (cc.getThreeLetterIOCCode() != null) {
+            if (cc == null) {
+                this.threeLetterIocCountryCode.addItem("", ""); // the NONE country code that uses the empty, white flag
+                if (competitorToEdit.getThreeLetterIocCountryCode() == null || competitorToEdit.getThreeLetterIocCountryCode().isEmpty()) {
+                    this.threeLetterIocCountryCode.setSelectedIndex(i);
+                }
+                i++;
+            } else if (cc.getThreeLetterIOCCode() != null) {
                 this.threeLetterIocCountryCode.addItem(cc.getThreeLetterIOCCode() + " " + cc.getName(), cc.getThreeLetterIOCCode());
                 if (cc.getThreeLetterIOCCode().equals(competitorToEdit.getThreeLetterIocCountryCode())) {
                     this.threeLetterIocCountryCode.setSelectedIndex(i);

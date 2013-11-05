@@ -3279,6 +3279,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
         return getBaseDomainFactory().convertToCompetitorDTO(
                 getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getSailID(), getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode()))));
+                competitor.getSailID(),
+                (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
+                    getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode()))));
     }
 }
