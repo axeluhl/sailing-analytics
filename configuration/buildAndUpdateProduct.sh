@@ -162,7 +162,8 @@ if [[ "$@" == "release" ]]; then
 
     RELEASE_NOTES=""
     echo "Please provide me with some notes about this release. You can add more than"
-    echo "one line. Please include major changes or new features. You can save by hitting ctrl+d."
+    echo "one line. Please include major changes or new features. After your notes I will"
+    echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
     while read -e -p "> " line; do
         RELEASE_NOTES="$RELEASE_NOTES\n$line"
     done
@@ -231,6 +232,7 @@ if [[ "$@" == "release" ]]; then
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
+    cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     
     cd $PROJECT_HOME
     rm -rf build/*
