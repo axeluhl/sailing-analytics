@@ -161,6 +161,7 @@ if [[ "$@" == "release" ]]; then
     fi
 
     RELEASE_NOTES=""
+    echo ""
     echo "Please provide me with some notes about this release. You can add more than"
     echo "one line. Please include major changes or new features. After your notes I will"
     echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
@@ -172,7 +173,10 @@ if [[ "$@" == "release" ]]; then
         echo -e "\nCome on - I can not release without at least some notes about this release!"
         exit
     fi
-    echo -e "\nThank you! Now preparing everything for the release..."
+    echo -e "\nThank you! One last thing..."
+
+    echo "How many weeks of commits do you want to include (0=No commits)?"
+    read -p "> " -e COMMIT_WEEK_COUNT
 
     mkdir -p $PROJECT_HOME/dist
     mkdir -p $PROJECT_HOME/build
@@ -180,10 +184,10 @@ if [[ "$@" == "release" ]]; then
     RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
     echo -e $RELEASE_NOTES > $PROJECT_HOME/build/release-notes.txt
     echo "" >> $PROJECT_HOME/build/release-notes.txt
-    echo "Commits for the last 4 weeks:" >> $PROJECT_HOME/build/release-notes.txt
+    echo "Commits for the last $COMMIT_WEEK_COUNT weeks:" >> $PROJECT_HOME/build/release-notes.txt
     echo "" >> $PROJECT_HOME/build/release-notes.txt
     cd $PROJECT_HOME
-    git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=4.weeks >> $PROJECT_HOME/build/release-notes.txt
+    git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
     cd $PROJECT_HOME/build
     ACDIR=$PROJECT_HOME/build
