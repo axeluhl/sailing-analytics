@@ -81,7 +81,13 @@ if [[ $PARAM == "" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
-    sleep 10
+    if [[ ! -z "$ON_AMAZON" ]]; then
+        # give instances on amazon more time to start because
+        # they may be influenced by the server's boot process
+        sleep 120
+    else
+        sleep 10
+    fi
 
     SERVER_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
     NETSTAT_INFO=`netstat -ntpl 2>/dev/null`
