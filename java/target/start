@@ -5,7 +5,7 @@
 
 # check if automatic tests and build should be executed
 # before starting up the server
-if [[ $BUILD_BEFORE_START == "True" ]]; then
+if [[ $BUILD_BEFORE_START == "True" ]] || [[ $INSTALL_FROM_RELEASE != "" ]]; then
 
     # check for available memory - build can not be started with less than 1GB
     MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
