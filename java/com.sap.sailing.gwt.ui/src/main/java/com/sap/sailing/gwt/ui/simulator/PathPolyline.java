@@ -9,10 +9,14 @@ import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
+import com.google.gwt.maps.client.overlays.MapCanvasProjection;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
+import com.google.gwt.maps.client.overlays.OverlayView;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -66,6 +70,8 @@ public class PathPolyline {
     private List<SimulatorWindDTO> allPoints = null;
     private SimulatorServiceAsync simulatorService = null;
     private MapWidget map = null;
+    protected OverlayView mapView;
+    protected MapCanvasProjection mapProjection;
     private ErrorReporter errorReporter = null;
     private boolean warningAlreadyShown = false;
     private SimulatorMap simulatorMap = null;
@@ -114,6 +120,12 @@ public class PathPolyline {
         this.allPoints = pathPoints;
         this.simulatorService = simulatorService;
         this.map = map;
+        this.mapView = OverlayView.newInstance(map, new OverlayViewOnDrawHandler() {
+            @Override
+            public void onDraw(OverlayViewMethods methods) {
+                mapProjection = methods.getProjection();
+            }
+        }, null, null);
         this.selectedBoatClassIndex = selection.boatClassIndex;
         this.selectedRaceIndex = selection.raceIndex;
         this.selectedCompetitorIndex = selection.competitorIndex;
@@ -234,7 +246,7 @@ public class PathPolyline {
         simulatorMap.setPolyline(polyline);
         polyline.setEditable(true);
         // old call: polyline.setEditingEnabled(PolyEditingOptions.newInstance(turnPoints.length - 1));
-
+        
         getTotalTime();
     }
 
@@ -1037,7 +1049,7 @@ public class PathPolyline {
 
     /**
      * Converts a LatLng object to a TwoD object. Considering that a LatLng represent a point on a sphere, and that the
-     * TwoDPoint represent one on a plane, it will use the MapWidget aproximation to a container pixel in order to do
+     * TwoDPoint represent one on a plane, it will use the MapWidget approximation to a container pixel in order to do
      * so.
      * 
      * @param latLng
@@ -1045,8 +1057,7 @@ public class PathPolyline {
      * @returns a TwoDPoint object.
      */
     private TwoDPoint toTwoDPoint(LatLng latLng) {
-        // TODO MigrationV3: Point point = map.convertLatLngToContainerPixel(latLng);
-        Point point = Point.newInstance(latLng.getLatitude(), latLng.getLongitude());
+        Point point = this.mapProjection.fromLatLngToContainerPixel(latLng);
         return new TwoDPoint(point.getX(), point.getY());
     }
 
@@ -1065,8 +1076,7 @@ public class PathPolyline {
      * @returns a LatLng object.
      */
     private LatLng toLatLng(TwoDPoint point) {
-        return LatLng.newInstance((int) point.getX(), (int) point.getY());
-        // TODO MigrationV3: return this.map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
+        return this.mapProjection.fromContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
     }
 
     /**
