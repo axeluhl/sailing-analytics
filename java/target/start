@@ -84,10 +84,12 @@ if [[ $PARAM == "" ]]; then
     sleep 10
 
     SERVER_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+    NETSTAT_INFO=`netstat -ntpl 2>/dev/null`
+    PROCESS_INFO=`ps auxwww`
     if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Startup of java server failed - check the logs" | `which mail` -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | `which mail` -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
     fi
