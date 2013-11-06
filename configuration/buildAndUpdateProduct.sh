@@ -87,15 +87,21 @@ if [ $# -eq 0 ]; then
     echo "-m <path to file> Specify alternate maven configuration (possibly has side effect on proxy setting)"
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
+    echo "                  This parameter can also hold the name of the release if you are using the release command."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
+    echo ""
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
+    echo ""
     echo "all: invokes build and then install"
+    echo ""
     echo "release: Releases a server package to the location specified by -w parameter. The release is named using the branch name and the date."
+    echo "You can overwrite the generated release name by specifying a name with the parameter -n. Do not use spaces or other special characters!"
+    echo "Example: $0 -w trac@sapsailing.com -n release-ess-brazil-2013 release"
     echo ""
     echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
     echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
@@ -196,6 +202,10 @@ if [[ "$@" == "release" ]]; then
     sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
     sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
+
+    if [[ $OSGI_BUNDLE_NAME != "" ]]; then
+        SIMPLE_VERSION_INFO=$OSGI_BUNDLE_NAME
+    fi
      
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
