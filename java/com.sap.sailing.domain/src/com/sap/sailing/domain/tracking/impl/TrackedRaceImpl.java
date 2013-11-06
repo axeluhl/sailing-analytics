@@ -84,8 +84,8 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -98,7 +98,7 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
-public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
+public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -107,10 +107,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
-
-    private final RaceDefinition race;
-
-    private final TrackedRegatta trackedRegatta;
 
     private TrackedRaceStatus status;
 
@@ -201,13 +197,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
 
-    /**
-     * A tracked race can maintain a number of sources for wind information from which a client can select. As all
-     * intra-leg computations are done dynamically based on wind information, selecting a different wind information
-     * source can alter the intra-leg results. See {@link #currentWindSource}.
-     */
-    private final Map<WindSource, WindTrack> windTracks;
-
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
@@ -218,14 +207,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private final Map<Mark, StartToNextMarkCacheInvalidationListener> startToNextMarkCacheInvalidationListeners;
 
-    protected long millisecondsOverWhichToAverageWind;
-
-    private transient WindStore windStore;
-
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
-
-    private transient CombinedWindTrackImpl combinedWindTrack;
 
     protected transient HashMap<Serializable, RaceLog> attachedRaceLogs;
 
@@ -242,20 +225,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private WindLoadingState windLoadingCompleted;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
-
-    /**
-     * Serializing an instance of this class has to serialized the various data structures holding the tracked race's
-     * state. When a race is currently on, these structures change very frequently, and
-     * {@link ConcurrentModificationException}s during serialization will be the norm rather than the exception. To
-     * avoid this, all modifications to any data structure that is not in itself synchronized obtains this lock's
-     * <em>read</em> lock (note that this may be confusing at first, but we'd like to support many concurrent writers;
-     * they each perform their own locking on the individual data structures they write; we only want to lock out a
-     * single serialization call which with this lock is represented as the "writer"). The serialization method
-     * {@link #writeObject(ObjectOutputStream)} obtains the <em>write</em> lock. Deadlocks are avoided because the
-     * serialization, once it obtains this write lock, it keeps serializing and releases the write lock when it's done,
-     * without doing any further synchronization or locking.
-     */
-    private final NamedReentrantReadWriteLock serializationLock;
     
     /**
      * Wind loading is started in a background thread during object construction. If a client needs to ensure that wind loading
@@ -269,23 +238,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines, final WindStore windStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation) {
-        super();
+        super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
         locksForMarkPassings = new IdentityHashMap<>();
         attachedRaceLogs = new HashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
-        this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "
-                + race.getName(), /* fair */ true);
         this.windLoadingLock = new NamedReentrantReadWriteLock("Wind loading lock for tracked race "
                 + race.getName(), /* fair */ false);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
-        this.race = race;
-        this.windStore = windStore;
         this.windSourcesToExclude = new HashSet<WindSource>();
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
-        this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
@@ -335,7 +299,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     MarkPassingByTimeComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
-        windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
         windLoadingCompleted = WindLoadingState.NOT_STARTED;
         // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
         new Thread("Wind loader for tracked race " + getRace().getName()) {
@@ -370,7 +333,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
-        this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
@@ -1128,61 +1090,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         .scale(0.5));
             }
         }
-        return result;
-    }
-
-    /**
-     * For wind sources of the special type {@link WindSourceType#COMBINED}, emits a new {@link CombinedWindTrackImpl}
-     * which will not be added to {@link #windTracks} and will not lead to the wind source being listed in
-     * {@link #getWindSources()} or {@link #getWindSources(WindSourceType)}. For all other wind sources, checks
-     * {@link #windTracks} for the respective source. If found, it's returned; otherwise the wind track is created
-     * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks}
-     * before being returned.
-     * 
-     * @param delayForWindEstimationCacheInvalidation
-     *            if <code>-1</code> and the parameter is accessed, it will be replaced by
-     *            {@link #getMillisecondsOverWhichToAverageWind()}/2
-     */
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result;
-        if (windSource.getType() == WindSourceType.COMBINED) {
-            if (combinedWindTrack == null) {
-                combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
-            }
-            result = combinedWindTrack;
-        } else {
-            synchronized (windTracks) {
-                result = windTracks.get(windSource);
-                if (result == null) {
-                    result = createWindTrack(windSource,
-                            delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
-                                    : delayForWindEstimationCacheInvalidation);
-                    LockUtil.lockForRead(getSerializationLock());
-                    try {
-                        windTracks.put(windSource, result);
-                    } finally {
-                        LockUtil.unlockAfterRead(getSerializationLock());
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
-        return getOrCreateWindTrack(windSource, -1);
-    }
-
-    /**
-     * Creates a wind track for the <code>windSource</code> specified and stores it in {@link #windTracks}. The
-     * averaging interval is set according to the averaging interval set for all other wind sources, or the default if
-     * no other wind source exists yet.
-     */
-    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result = windStore.getWindTrack(trackedRegatta, this, windSource, millisecondsOverWhichToAverageWind,
-                delayForWindEstimationCacheInvalidation);
         return result;
     }
 
@@ -2310,28 +2217,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
-        Set<WindSource> result = new HashSet<WindSource>();
-        for (WindSource windSource : getWindSources()) {
-            if (windSource.getType() == type) {
-                result.add(windSource);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Iterable<WindSource> getWindSources() {
-        while (true) {
-            try {
-                return new HashSet<WindSource>(windTracks.keySet());
-            } catch (ConcurrentModificationException cme) {
-                logger.info("Caught " + cme + "; trying again.");
-            }
-        }
-    }
-
-    @Override
     public Iterable<Mark> getMarks() {
         while (true) {
             try {
@@ -2565,10 +2450,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             starboardMarkPosition = null;
         }
         return starboardMarkPosition;
-    }
-
-    protected NamedReentrantReadWriteLock getSerializationLock() {
-        return serializationLock;
     }
 
     protected NamedReentrantReadWriteLock getWindLoadingLock() {

@@ -228,7 +228,7 @@ public class ImportMasterDataOperation extends
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta);
+                DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta, null, null);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }

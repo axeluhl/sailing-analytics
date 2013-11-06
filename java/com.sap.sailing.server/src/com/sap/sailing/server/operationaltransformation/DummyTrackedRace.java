@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -33,21 +32,22 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class DummyTrackedRace implements TrackedRace {
+public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
     private Iterable<? extends Competitor> competitors;
     private Regatta regatta;
 
-    public DummyTrackedRace(Iterable<? extends Competitor> competitors, Regatta regatta) {
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
+            final WindStore windStore, final TrackedRegatta trackedRegatta) {
+        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta, windStore, -1);
         this.competitors = competitors;
         this.regatta = regatta;
     }
@@ -179,28 +179,6 @@ public class DummyTrackedRace implements TrackedRace {
 
     @Override
     public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        return null;
-    }
-
-    @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
-        return null;
-    }
-
-    @Override
-    public Iterable<WindSource> getWindSources() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
-        return null;
-    }
-
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        // TODO Auto-generated method stub
         return null;
     }
 
