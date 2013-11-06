@@ -3,35 +3,43 @@
 # source variables
 . `pwd`/env.sh
 
+PARAM=$@
+
 # check if automatic tests and build should be executed
 # before starting up the server
-if [[ $BUILD_BEFORE_START == "True" ]] || [[ $INSTALL_FROM_RELEASE != "" ]]; then
+if [[ $PARAM != "no-update" ]]; then
+    if [[ $BUILD_BEFORE_START == "True" ]] || [[ $INSTALL_FROM_RELEASE != "" ]]; then
 
-    # check for available memory - build can not be started with less than 1GB
-    MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
-    if [ $MEM_TOTAL -lt 924 ]; then
-        echo "Could not start build process with less than 1GB of RAM!"
-        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
-        exit 10
+        # check for available memory - build can not be started with less than 1GB
+        MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
+        if [ $MEM_TOTAL -lt 924 ]; then
+            echo "Could not start build process with less than 1GB of RAM!"
+            echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+            exit 10
+        fi
+
+        if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+            echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready. " | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
+        fi
+
+        `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
+         STATUS=$?
+         if [ $STATUS -eq 0 ]; then
+            echo "Deployment Successful"
+            echo "OK - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+         else
+            echo "Deployment Failed"
+            echo "ERROR - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+            exit
+         fi 
+
+        # enable special environment configuration
+        if [[ $USE_ENVIRONMENT != "" ]]; then
+            ./$USE_ENVIRONMENT
+        fi
+
     fi
-
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-        echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready. " | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
-    fi
-
-    `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
-     STATUS=$?
-     if [ $STATUS -eq 0 ]; then
-        echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
-     else
-        echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
-        exit
-     fi 
 fi
-
-PARAM=$@
 
 # make some checks
 JAVA_BINARY=$JAVA_HOME/bin/java
@@ -80,7 +88,7 @@ APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpediti
 # Apply parameters for automatic replication start
 REPLICATION_PARAMETERS="-Dreplication.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT"
 
-if [[ $PARAM == "" ]]; then
+if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console $TELNET_PORT -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
