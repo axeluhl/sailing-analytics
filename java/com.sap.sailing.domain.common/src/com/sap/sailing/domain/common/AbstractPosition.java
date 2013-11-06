@@ -134,7 +134,27 @@ public class AbstractPosition implements Position {
         return new CentralAngleDistance(direction * Math.acos(Math.cos(pos2.getCentralAngleRad(this))
                 / Math.cos(crossTrackError(pos2, bearing).getCentralAngleRad())));
     }
-
+    
+    @Override
+	public Distance getDistanceToLine(Position left, Position right) {
+		final Distance distance;
+		double toLeft = Math.abs(left.getBearingGreatCircle(this)
+				.getDifferenceTo(left.getBearingGreatCircle(right)).getDegrees());
+		double toRight = Math.abs(right.getBearingGreatCircle(this)
+				.getDifferenceTo(right.getBearingGreatCircle(left)).getDegrees());
+		if (toLeft > 90) {
+			distance = this.getDistance(left);
+		} else {
+			if (toRight > 90) {
+				distance = this.getDistance(right);
+			} else {
+				distance = this.crossTrackError(left,
+						left.getBearingGreatCircle(right));
+			}
+		}
+		return distance;
+	}
+    
     @Override
     public String toString() {
         return "("+getLatDeg()+","+getLngDeg()+")";

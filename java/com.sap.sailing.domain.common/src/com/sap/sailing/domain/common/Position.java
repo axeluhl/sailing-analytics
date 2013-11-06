@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+
 public interface Position extends Serializable {
     double getLatRad();
 
@@ -56,5 +57,10 @@ public interface Position extends Serializable {
      * if the angle between this position and the great circle is 90 degrees then there is
      * no solution, and a <code>NaN</code> or exception will result.
      */
+
     Distance alongTrackDistance(Position from, Bearing bearing);
+    
+    /**Computes the distance from this position to a line between <code>left<code> and <code>right<code>.
+     */
+    Distance getDistanceToLine(Position left, Position right);
 }

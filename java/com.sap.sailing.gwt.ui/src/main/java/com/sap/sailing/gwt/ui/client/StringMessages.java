@@ -818,4 +818,6 @@ public interface StringMessages extends Messages {
     String raceTimeUpwindTooltip();
     String line();
     String offset();
+    String exchangeHost();
+    String explainExchangeHostName();
 }

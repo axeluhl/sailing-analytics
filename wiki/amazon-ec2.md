@@ -26,15 +26,16 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 ## EC2 Server Architecture for Sailing Analytics
 
-The architecture is divided into 3 logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. The following image depicts the parts of the architecture.
+The architecture is divided into logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. Each tier can contain one or more instances. The following image depicts the parts of the architecture.
 
 <img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
 
 ### Tiers
 
-* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned.
-* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier.
-* **Instances**: Space where all instances, that are not grouped, live.
+* **Webserver**: Holds one or more webserver instances that represent the public facing part of the architecture. Only instances running in this tier should have an Elastic IP assigned. In the image you can see one configured instance that delivers content for sapsailing.com. It has some services running on it like an Apache, the GIT repository and the UDP mirror. The Apache is configured to proxy HTTP(S) connections to an Archive or Live server.
+* **Balancer**: Features an Elastic Load Balancer. Such balancers can be configured to distribute traffic among many other running instances. Internally an ELB consists of multiple balancing instances on which load is distributed by a DNS round robin so that bandwidth is not a limiting factor.
+* **Database**: Instances handling all operations related to persistence. Must be reachable by the "Instance" and "Balancer+Group" tier. In the standard setup this tier only contains one database server that handles connections to MongoDB, MySQL and RabbitMQ.
+* **Instances**: Space where all instances, that are not logically grouped, live. In the image one can see three running instances. One serving archived data, one serving a live event and one for build and test purposes.
 * **Balancer+Group**: Analytics instances grouped and managed by an Elastic Load Balancer. A group is just a term describing multiple instances replicating from one master instance. The word "group" does in this context not refer to the so called "Placement Groups".
 
 ### Instances
@@ -44,43 +45,114 @@ The architecture is divided into 3 logical tiers. These are represented by firew
 <td><b>Name</b></td>
 <td><b>Access Key(s)</b></td>
 <td><b>Security Group</b></td>
-<td><b>Open Ports</b></td>
 <td><b>Services</b></td>
 <td><b>Description</b></td>
 </tr>
 <tr>
 <td>Webserver (Elastic IP: 54.229.94.254)</td>
 <td>Administrator</td>
-<td>IN: 20, 80, 443, 2010-2015<br/>OUT: ALL</td>
 <td>Webserver</td>
-<td>Apache, GIT, Piwik, Bugzilla</td>
+<td>Apache, GIT, Piwik, Bugzilla, Wiki</td>
 <td>This tier holds one instance that has one public Elastic IP associated. This instance manages all domains and subdomains associated with this project. It also contains the public GIT repository.</td>
 </tr>
 <tr>
 <td>DB & Messaging</td>
 <td>Administrator</td>
-<td>IN: 22, 5672, 10200-10210, 27017<br/>OUT: ALL</td>
 <td>Database and Messaging</td>
-<td>MongoDB, MySQL</td>
+<td>MongoDB, MySQL, RabbitMQ</td>
 <td>All databases needed by either the Analytics applications or tools like Piwik and Bugzilla are managed by this instance.</td>
 </tr>
 <tr>
 <td>Archive</td>
 <td>Administrator, Sailing User</td>
-<td>IN: 22, 2010-2015, 8880-8899<br/>OUT: ALL</td>
 <td>Sailing Analytics App</td>
 <td>Java App</td>
 <td>Instance handling the access to all historical races.</td>
+</tr>
+<tr>
+<td>Build and Test</td>
+<td>Administrator, Sailing User</td>
+<td>Sailing Analytics App</td>
+<td>X11,Firefox,Hudson</td>
+<td>Instance that can be used to run tests</td>
 </tr>
 </table>
 
 ## HowTo
 
-### Create a new Analytics application instance
+### Create a new Analytics application instance ready for production
 
-Find detailed instructions on how to create a new instance here: [[wiki/amazon-ec2-create-new-app-instance]].
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and BUILD_COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+
+Attention: You can not start the building process on t1.micro instances having less than 1.5 GB of RAM!
+
+<pre>
+BUILD_BEFORE_START=True
+BUILD_FROM=master
+RUN_TESTS=False
+COMPILE_GWT=True
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_NAME=LIVE1
+MEMORY=1024m
+REPLICATION_HOST=172.31.25.253
+REPLICATION_CHANNEL=sapsailinganalytics-live
+TELNET_PORT=14888
+SERVER_PORT=8888
+MONGODB_HOST=172.31.25.253
+MONGODB_PORT=10202
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
+SERVER_STARTUP_NOTIFY=
+</pre>
+
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
+
+You can now access this instance by either using the Administrator key (for root User) or the Sailing User key (for user sailing):
+
+<pre>
+ssh -i .ssh/Administrator.pem root@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+or
+
+<pre>
+ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+If you want to connect your instance to a subdomain then log onto the main webserver with the Administrator key as root, open the file `/etc/httpd/conf.d/001-events.conf` and put something like this there. As you can see you have to specify the IP address and the port the java server is running on. Make sure to always use the internal IP.
+
+<pre>
+Use Spectator idm.sapsailing.com "505 IDM 2013" 172.31.22.12 8888
+</pre>
+
+### Testing code on a server
+
+Starting a test is as easy as starting up a new instance. Just make sure that you fill the field RUN_TESTS and set it to `True`. Also set the field BUILD_FROM to a gitspec that matches the code branch that you want to test. After tests has been run and the server has been started you will get an email giving you all the details. You can then access your instance or simply shut it down.
 
 ### Setup replicated instances with ELB
+
+The main concept behind ELB is that there is one instance that you configure in the "Load Balancers" tab that serves as the main entry point for all requests going to your application. This instance can be told to pass through requests from one port to another. In order to make this ELB instance aware of the Analytics EC2 Instances it should balance over you need to add all instances that should be part of the setup to the ELB instance.
+
+A closer look reveals that an ELB instance consists itself of many other invisible instances. These are behind a DNS round robin configuration that redirects each incoming request to one of these instances. These invisible instances then decide upon the rules you've created how and where to distribute this request to one of the associated instances.
+
+Here are the steps to create a load balanced setup:
+
+- Create a master instance holding all data
+- Create `n` instances that are configured to connect to the master server
+- Create a load balancer that redirects everything from port 80 to let's say port 8888.
+- Associate all your instances
+- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
+
+Two things are still needed before this setup can be executed:
+
+- Make it possible to configure instances that way that they automatically connect to a master upon start
+- Check what happens if the ELB acts as a transparent proxy not revealing the underlying instance name and address (should be)
+
+Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 ### Access MongoDB database
 
