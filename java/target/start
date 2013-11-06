@@ -15,15 +15,18 @@ if [[ $BUILD_BEFORE_START == "True" ]] || [[ $INSTALL_FROM_RELEASE != "" ]]; the
         exit 10
     fi
 
-    echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready." | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
+    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+        echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready. " | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
+    fi
+
     `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
      STATUS=$?
      if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+        echo "OK - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
      else
         echo "Deployment Failed"
-        echo "ERROR" | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        echo "ERROR - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
         exit
      fi 
 fi
