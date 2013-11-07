@@ -179,7 +179,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
     
-    private final CompetitorStore persistentCompetitorStore;
+    private final CompetitorStore competitorStore;
 
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
 
@@ -206,7 +206,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final MediaLibrary mediaLibrary;
 
     /**
-     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #persistentCompetitorStore
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
      * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
      * removes all previously persistent competitors. This is the default for testing and for backward compatibility with
@@ -243,7 +243,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore persistentCompetitorStore) {
+            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore) {
         logger.info("Created " + this);
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
@@ -268,7 +268,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        this.persistentCompetitorStore = persistentCompetitorStore;
+        this.competitorStore = competitorStore;
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -1630,8 +1630,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logoutput.append(String.format("%3s\n", lg.toString()));
         }
         logger.info("Serializing persisted competitors...");
-        oos.writeObject(persistentCompetitorStore);
-        logoutput.append("Serialized " + persistentCompetitorStore.size() + " persisted competitors\n");
+        oos.writeObject(competitorStore);
+        logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
         logger.fine(logoutput.toString());
     }
 
@@ -1664,7 +1664,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardsByName.clear();
             eventsById.clear();
             mediaLibrary.clear();
-            persistentCompetitorStore.clear();
+            competitorStore.clear();
 
             StringBuffer logoutput = new StringBuffer();
 
@@ -1719,9 +1719,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // a default Mongo object factory
             for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
                 DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
-                persistentCompetitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
-            logoutput.append("\nReceived " + persistentCompetitorStore.size() + " NEW competitors\n");
+            logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
 
             logger.info(logoutput.toString());
             logger.info("Done with initial replication on " + this);
