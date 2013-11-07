@@ -19,7 +19,8 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
 
     public DynamicBoat deserialize(JSONObject object) throws JsonDeserializationException {
         String name = object.get(BoatJsonSerializer.FIELD_NAME).toString();
-        String sailId = object.get(BoatJsonSerializer.FIELD_SAIL_ID).toString();
+        final Object sailID = object.get(BoatJsonSerializer.FIELD_SAIL_ID);
+        String sailId = sailID == null ? null : sailID.toString();
         BoatClass boatClass = null;
         if (boatClassDeserializer != null) {
             boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object, BoatJsonSerializer.FIELD_BOAT_CLASS));

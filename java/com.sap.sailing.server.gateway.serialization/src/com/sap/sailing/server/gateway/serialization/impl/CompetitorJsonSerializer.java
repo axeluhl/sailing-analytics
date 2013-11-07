@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Boat;
@@ -38,7 +41,12 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     @Override
     public JSONObject serialize(Competitor competitor) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, competitor.getId().toString());
+        // Special treatment for UUIDs. They are represented as String because JSON doesn't have a way to represent them otherwise.
+        // However, other, e.g., numeric, types used to encode a serializable ID must be preserved according to JSON semantics.
+        // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID becore
+        // returning the ID as is.
+        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
+        result.put(FIELD_ID, competitorId);
         result.put(FIELD_NAME, competitor.getName());
         result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam().getNationality();

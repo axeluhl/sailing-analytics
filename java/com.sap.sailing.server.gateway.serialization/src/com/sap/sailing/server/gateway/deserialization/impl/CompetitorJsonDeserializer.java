@@ -36,7 +36,9 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
-        competitorId = Helpers.tryUuidConversion(competitorId);
+        if (competitorId instanceof String) {
+            competitorId = Helpers.tryUuidConversion(competitorId);
+        }
         String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
         DynamicTeam team = null;
         DynamicBoat boat = null;
