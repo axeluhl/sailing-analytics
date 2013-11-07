@@ -207,7 +207,7 @@ public class PositionTest {
     	Position p4 = new DegreePosition(5, 0);
     	Position p5 = new DegreePosition(2, 2);
     	Position p6 = new DegreePosition(0, -2);
-    	assertEquals(p2.getDistanceToLine(left, right).getMeters(), p2.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters(), delta);
+    	assertEquals(p2.getDistanceToLine(left, right).getMeters(), Math.abs(p2.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters()), delta);
     	assertEquals(p3.getDistanceToLine(left, right).getMeters(), p3.getDistance(left).getMeters(), delta);
     	assertEquals(p4.getDistanceToLine(left, right).getMeters(), p4.getDistance(right).getMeters(), delta);
     	assertEquals(p5.getDistanceToLine(left, right).getMeters(), p5.getDistance(right).getMeters(), delta);
