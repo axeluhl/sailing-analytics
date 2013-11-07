@@ -2,7 +2,6 @@ package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 
@@ -156,7 +155,7 @@ public class AbstractPosition implements Position {
         }
         // Right now this always returns a positiv value. It might be possible to change it so that the sign indicates
         // which side of the Line the Position is on.
-        return new MeterDistance(Math.abs(distance.getMeters()));
+        return distance;
     }
 
     @Override
