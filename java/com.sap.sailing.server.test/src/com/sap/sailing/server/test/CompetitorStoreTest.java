@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -47,14 +48,14 @@ public class CompetitorStoreTest {
         
         CompetitorStore persistentStore2 = new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */ false);
         Competitor competitor2 = persistentStore2.getExistingCompetitorById(template.getId());
-        assertTrue(competitor2 != template); // the new store loads new instances from the database
+        assertNotSame(competitor2, template); // the new store loads new instances from the database
         assertEquals(template.getId(), competitor2.getId());
         assertEquals(template.getTeam().getNationality(), competitor2.getTeam().getNationality());
         DynamicTeam differentTeam = AbstractLeaderboardTest.createCompetitor("Test Competitor").getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), differentTeam, template.getBoat());
         assertSame(competitor2, competitor3); // use existing competitor despite the different team
-        assertTrue(differentTeam != competitor2.getTeam()); // team expected to remain unchanged
+        assertNotSame(differentTeam, competitor2.getTeam()); // team expected to remain unchanged
         assertEquals(competitor.getTeam().getNationality(), competitor3.getTeam().getNationality()); // no updatability requested; nationality expected to remain unchanged
         
         // now mark the competitor as to update from defaults
