@@ -11,14 +11,13 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
-public class CandidateFinder{
+public class CandidateFinder {
 
     @SuppressWarnings("serial")
-  
     public LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> findCandidates(
             ArrayList<GPSFixMoving> gpsFixes,
-            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions,
-            Double boatLength, LinkedHashMap<Waypoint, Double> legLength) {
+            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, Double boatLength,
+            LinkedHashMap<Waypoint, Double> legLength) {
         LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> allCandidates = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
 
         // Get Waypoint Positions
@@ -35,7 +34,7 @@ public class CandidateFinder{
 
             // Calculate Distances
             LinkedHashMap<GPSFixMoving, Double> distances = new LinkedHashMap<>();
-            LinkedHashMap<GPSFixMoving, Double> relativToHotzoneAndCourseSize = new LinkedHashMap<>();
+            LinkedHashMap<GPSFixMoving, Double> costRelativToHotzoneAndCourseSize = new LinkedHashMap<>();
             ArrayList<Position> pos0 = new ArrayList<>();
             for (int i = 0; i < markPositions.get(wp).size(); i++) {
                 pos0.add(markPositions.get(wp).get(i).get(gpsFixes.get(0).getTimePoint()));
@@ -62,13 +61,15 @@ public class CandidateFinder{
                 cost = costPlus;
             }
             for (GPSFixMoving gps : distances.keySet()) {
-                if (distances.get(gps) < boatLength*3){
-                    relativToHotzoneAndCourseSize.put(gps, distances.get(gps)/legLength.get(wp));
+                //TODO LegLength defines hotzone!!!!!
+                if (distances.get(gps) < legLength.get(wp)/100) {
+                    costRelativToHotzoneAndCourseSize.put(gps, distances.get(gps) / legLength.get(wp));
                 } else {
-                    relativToHotzoneAndCourseSize.put(gps, Math.pow(distances.get(gps), 3)/legLength.get(wp));
+                    //TODO is 10000  way to high? would is skip automatically? so wouldnt work on faraway passes?                  
+                    costRelativToHotzoneAndCourseSize.put(gps, distances.get(gps)/legLength.get(wp) *10000);
                 }
             }
-            allCandidates.put(wp, relativToHotzoneAndCourseSize);
+            allCandidates.put(wp, costRelativToHotzoneAndCourseSize);
             // TODO Factor in if the candidate is behind the mark (Splining?)
         }
         return allCandidates;
@@ -82,11 +83,11 @@ public class CandidateFinder{
             distance = gps.getPosition().getDistance(markPositions.get(0)).getMeters();
         }
         if (p.equals(PassingInstruction.Line)) {
-        	//TODO Distance to Line!!
-        	distance = gps.getPosition().crossTrackError(markPositions.get(0), markPositions.get(0).getBearingGreatCircle(markPositions.get(1))).getMeters();
+            distance = gps.getPosition().getDistanceToLine(markPositions.get(0), markPositions.get(1)).getMeters();
         }
         if (p.equals(PassingInstruction.Gate)) {
-            // TODO Choose only correct Mark to avoid nonsensical Candidates (Splining?)
+            // TODO Choose only correct Mark to avoid nonsensical Candidates
+            // (Splining?)
             if (gps.getPosition().getDistance(markPositions.get(0)).getMeters() < gps.getPosition()
                     .getDistance(markPositions.get(1)).getMeters()) {
                 distance = gps.getPosition().getDistance(markPositions.get(0)).getMeters();

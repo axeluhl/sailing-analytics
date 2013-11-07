@@ -398,14 +398,14 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 * @param timePoint - the {@link TimePoint} to get the passing side at
 	 * @return the {@link NauticSide} the given {@link Mark} of the given {@link WayPoint} has to be passed on at the given {@link TimePoint}
 	 */
-	protected PassingInstruction getPassingSideOfMark(Waypoint waypoint, Mark m, TimePoint timePoint) {
+	protected PassingInstruction getPassingInstructionOfMark(Waypoint waypoint, Mark m, TimePoint timePoint) {
 		if (isGate(waypoint)) {
-			PassingInstruction mark1PassingSide = getPassingSideForMark1OfGate(waypoint, timePoint);
+			PassingInstruction mark1PassingInstruction = getPassingInstructionForMark1OfGate(waypoint, timePoint);
 			if (m.equals(waypoint.getMarks().iterator().next())) {
 				// m is mark 1 of gate
-				return mark1PassingSide;
-			} else if (mark1PassingSide.equals(PassingInstruction.Starboard)){
-				// m is mark 2 of gate -> opposite passingSide of mark 1
+				return mark1PassingInstruction;
+			} else if (mark1PassingInstruction.equals(PassingInstruction.Starboard)){
+				// m is mark 2 of gate -> opposite PassingInstruction of mark 1
 				return PassingInstruction.Port;
 			} else {
 				return PassingInstruction.Starboard;
@@ -422,7 +422,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 * @param timePoint - the {@link TimePoint} to calculate the passing side at
 	 * @return the {@link NauticSide} the {@link Mark} 1 of the given {@link Waypoint} has to be passed on
 	 */
-	protected PassingInstruction getPassingSideForMark1OfGate(Waypoint waypoint, TimePoint timePoint) {
+	protected PassingInstruction getPassingInstructionForMark1OfGate(Waypoint waypoint, TimePoint timePoint) {
 		if (!isGate(waypoint)) {
 			return null;
 		}
@@ -550,8 +550,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 			}
 			
 			// depending on passing side, set the bearing difference
-			PassingInstruction passingSide = getPassingSideOfMark(waypoint, mark, time);
-			if (passingSide != null && passingSide.equals(PassingInstruction.Starboard)) {	
+			PassingInstruction passingInstruction = getPassingInstructionOfMark(waypoint, mark, time);
+			if (passingInstruction != null && passingInstruction.equals(PassingInstruction.Starboard)) {	
 				bearingDiff = new DegreeBearingImpl(-90);
 			} else {	
 				bearingDiff = new DegreeBearingImpl(90);

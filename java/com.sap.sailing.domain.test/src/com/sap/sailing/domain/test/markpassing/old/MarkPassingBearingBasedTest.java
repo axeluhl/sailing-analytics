@@ -147,14 +147,14 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 		// calculate mark passing bearing for waypoint
 		Bearing markToBoatBearing = markPos.getBearingGreatCircle(fix.getPosition());
 		Bearing passingBearing = getPassingBearing(waypoint, mark, fix.getTimePoint());					
-		PassingInstruction passingSide = getPassingSideOfMark(waypoint, mark, fix.getTimePoint());
+		PassingInstruction passingInstruction = getPassingInstructionOfMark(waypoint, mark, fix.getTimePoint());
 		double passingBearingDelta = markToBoatBearing.getDifferenceTo(passingBearing).getDegrees();
-		if (passingSide == null || 
-				(passingSide.equals(PassingInstruction.Port) &&
+		if (passingInstruction == null || 
+				(passingInstruction.equals(PassingInstruction.Port) &&
 				passingBearingDelta > 0)) {
 			// markToBoatBearing is smaller than passing bearing -> passed on port
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
-		} else if (	passingSide.equals(PassingInstruction.Starboard) &&
+		} else if (	passingInstruction.equals(PassingInstruction.Starboard) &&
 					passingBearingDelta < 0) {
 			// markToBoatBearing is greater than passing bearing -> passed on stb
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
@@ -224,20 +224,21 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 		Bearing boatToMark2Bearing = fix.getPosition().getBearingGreatCircle(mark2Pos);
 		Bearing mark2ToMark1Bearing = mark2Pos.getBearingGreatCircle(mark1Pos);
 		
-		PassingInstruction passingSideOfMark1OfGate = getPassingSideForMark1OfGate(waypoint, fix.getTimePoint());
+		PassingInstruction PassingInstructionOfMark1OfGate = getPassingInstructionForMark1OfGate(waypoint, fix.getTimePoint());
 		double mark1PassingBearingDelta = boatToMark1Bearing.getDifferenceTo(mark2ToMark1Bearing).getDegrees();
 		double mark2PassingBearingDelta = boatToMark2Bearing.getDifferenceTo(mark1ToMark2Bearing).getDegrees();
 		Mark closestMark = mark1;
 		if (mark2 != null && fix.getPosition().getDistance(mark1Pos).compareTo(fix.getPosition().getDistance(mark2Pos)) < 0) {
 			closestMark = mark2;
+			
 		}
 		
-		if (	passingSideOfMark1OfGate.equals(PassingInstruction.Starboard) &&
+		if (	PassingInstructionOfMark1OfGate.equals(PassingInstruction.Starboard) &&
 				mark1PassingBearingDelta < 0 &&				
 				mark2PassingBearingDelta > 0) {
 			// gate passed if mark1 had to be passed on stb
 			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, closestMark, competitor);
-		} else if (	passingSideOfMark1OfGate.equals(PassingInstruction.Port) &&
+		} else if (	PassingInstructionOfMark1OfGate.equals(PassingInstruction.Port) &&
 				mark1PassingBearingDelta > 0 &&				
 				mark2PassingBearingDelta < 0) {
 			// gate passed if mark1 had to be passed on port
