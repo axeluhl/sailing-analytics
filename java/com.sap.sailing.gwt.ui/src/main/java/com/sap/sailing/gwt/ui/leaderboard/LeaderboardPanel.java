@@ -92,6 +92,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 /**
@@ -282,7 +283,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * attribute when required the first time.
      */
     private RaceTimesInfoProvider raceTimesInfoProvider;
-
+    private RaceTimesInfoProviderListener raceTimesInfoProviderListener;
+    
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -322,7 +324,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
-        if (!newSettings.updateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
+        if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
@@ -423,12 +425,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
         if (timer.getPlayState() != Timer.PlayStates.Playing) {
             // wait for the first update and adjust leaderboard once the race times have been received
-            final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
+            raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
                 @Override
                 public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+                    // remove 
                     timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-                    updateLeaderboard(getLeaderboard());
-                    getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
+                    // remove the listener only in case a leaderboard has already been loaded
+                    if(getLeaderboard() != null) {
+                        updateLeaderboard(getLeaderboard());
+                        getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
+                        raceTimesInfoProviderListener = null;
+                    }
                 }
             };
             getRaceTimesInfoProvider().addRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
@@ -1353,7 +1360,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         this.adjustTimerDelay = adjustTimerDelay;
         overallDetailColumnMap = createOverallDetailColumnMap();
-        settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
+        settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
         }
@@ -2464,5 +2471,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     public RaceColumnSelection getRaceColumnSelection() {
         return raceColumnSelection;
+    }
+    
+    public void removeAllListeners() {
+        if(raceTimesInfoProviderListener != null) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
+        }
+        if(raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener((LastNRacesColumnSelection) raceColumnSelection);
+        }
+        if(timer != null) {
+            timer.removeTimeListener(this);
+        }
     }
 }

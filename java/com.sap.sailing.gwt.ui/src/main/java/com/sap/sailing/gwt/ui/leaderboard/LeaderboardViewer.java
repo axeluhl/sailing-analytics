@@ -61,6 +61,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
             multiCompetitorChart.timeChanged(timer.getTime());
         }
         
+        overallLeaderboardPanel = null;
         if(showOverallLeaderboard) {
             sailingService.getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
                 @Override
@@ -79,11 +80,9 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                 
                 @Override
                 public void onFailure(Throwable caught) {
-                    overallLeaderboardPanel = null;
+                    // DO NOTHING
                 }
             });
-        } else {
-            overallLeaderboardPanel = null;
         }
     }
     

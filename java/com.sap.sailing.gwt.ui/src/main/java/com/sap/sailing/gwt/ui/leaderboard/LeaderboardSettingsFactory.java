@@ -133,4 +133,42 @@ public class LeaderboardSettingsFactory {
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
                 /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy);
     }
+    
+    public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {
+        List<DetailType> maneuverDetails = copyDetailTypes(settingsWithDetails.getManeuverDetailsToShow());
+        List<DetailType> legDetails = copyDetailTypes(settingsWithDetails.getLegDetailsToShow());
+        List<DetailType> raceDetails = copyDetailTypes(settingsWithDetails.getRaceDetailsToShow());
+        List<DetailType> overallDetailsToShow = copyDetailTypes(settingsWithDetails.getOverallDetailsToShow());
+        Long refreshIntervalInMs = settingsWithDetails.getDelayBetweenAutoAdvancesInMilliseconds();
+        
+        RaceColumnSelectionStrategies strategy = settingsWithRaceSelection.getActiveRaceColumnSelectionStrategy();
+        List<String> namesOfRaceColumnsToShow = copyRaceNamesList(settingsWithRaceSelection.getNamesOfRaceColumnsToShow());
+        List<String> namesOfRacesToShow = copyRaceNamesList(settingsWithRaceSelection.getNamesOfRacesToShow());
+        Integer numberOfLastRacesToShow = settingsWithRaceSelection.getNumberOfLastRacesToShow();
+        boolean autoExpandPreSelectedRace = settingsWithRaceSelection.isAutoExpandPreSelectedRace();
+        String nameOfRaceToSort = settingsWithRaceSelection.getNameOfRaceToSort();
+        boolean sortAscending = settingsWithRaceSelection.isSortAscending();
+        boolean updateUponPlayStateChange = settingsWithRaceSelection.isUpdateUponPlayStateChange();
+
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
+                namesOfRaceColumnsToShow, namesOfRacesToShow, numberOfLastRacesToShow, autoExpandPreSelectedRace, refreshIntervalInMs,
+                nameOfRaceToSort, sortAscending, updateUponPlayStateChange, strategy);
+    }
+    
+    private List<DetailType> copyDetailTypes(List<DetailType> detailTypes) {
+        List<DetailType> result = null;
+        if(detailTypes != null) {
+            result = new ArrayList<DetailType>(detailTypes);
+        }
+        return result;
+    }
+    
+    private List<String> copyRaceNamesList(List<String> raceNames) {
+        List<String> result = null;
+        if(raceNames != null) {
+            result = new ArrayList<String>(raceNames);
+        }
+        return result;
+    }
+
 }

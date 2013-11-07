@@ -134,7 +134,7 @@ public class LeaderboardSettings {
      * If <code>true</code>, an update of the settings will behave like a manual settings update, meaning that
      * the settings won't automatically be replaced / adjusted when the play state changes.
      */
-    public boolean updateUponPlayStateChange() {
+    public boolean isUpdateUponPlayStateChange() {
         return updateUponPlayStateChange;
     }
 
