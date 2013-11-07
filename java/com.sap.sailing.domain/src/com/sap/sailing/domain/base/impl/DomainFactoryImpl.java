@@ -292,6 +292,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
+        return competitorStore.isCompetitorToUpdateDuringGetOrCreate(competitor);
+    }
+
+    @Override
     public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
         return competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
     }

@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -235,7 +236,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName) {
         Competitor result = baseDomainFactory.getExistingCompetitorById(competitorId);
-        if (result == null) {
+        if (result == null || baseDomainFactory.isCompetitorToUpdateDuringGetOrCreate(result)) {
             BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
             Nationality nationality;
             try {
@@ -252,8 +253,12 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    @Override
-    public DynamicTeam getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
+    /**
+     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
+     * is split along "+" signs with one {@link Person} object created for each part. If an existing team is found, its
+     * nationality will be updated to match <code>nationality</code>.
+     */
+    private DynamicTeam getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
         synchronized (teamCache) {
             DynamicTeam result = teamCache.get(competitorId);
             if (result == null) {
@@ -264,6 +269,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
                 result = new TeamImpl(name, sailors, /* TODO coach not known */null);
                 teamCache.put(competitorId, result);
+            } else {
+                result.setNationality(nationality);
             }
             return result;
         }

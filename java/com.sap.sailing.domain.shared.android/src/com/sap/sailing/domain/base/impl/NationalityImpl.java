@@ -47,5 +47,9 @@ public class NationalityImpl implements Nationality {
     public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
         return domainFactory.getOrCreateNationality(getThreeLetterIOCAcronym());
     }
-    
+
+    @Override
+    public String toString() {
+        return getThreeLetterIOCAcronym();
+    }
 }

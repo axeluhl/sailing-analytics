@@ -127,7 +127,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType) {
         Competitor result = getCompetitorByBoatIDAndRaceType(competitor.getBoatID(), raceType);
-        if (result == null) {
+        if (result == null || baseDomainFactory.isCompetitorToUpdateDuringGetOrCreate(result)) {
             DynamicBoat boat = new BoatImpl(competitor.getName(), raceType.getBoatClass(), competitor.getBoatID());
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
             for (String teamMemberName : competitor.getName().split("[-+&]")) {

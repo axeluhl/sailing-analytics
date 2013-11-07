@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import android.annotation.SuppressLint;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Gate;
@@ -136,8 +137,14 @@ public enum DomainFactoryImpl implements SharedDomainFactory {
         return getOrCreateBoatClass(name, /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
     }
 
+    @Override
     public DynamicCompetitor getExistingCompetitorById(Serializable competitorId) {
         return competitorCache.get(competitorId);
+    }
+
+    @Override
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
+        return false;
     }
 
     public DynamicCompetitor createCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {

@@ -85,11 +85,17 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
             updateCompetitor(result.getId().toString(), name, boat.getSailID(), team.getNationality());
+            competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
     }
 
-    protected boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
+    private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {
+        competitorsToUpdateDuringGetOrCreate.remove(result);
+    }
+
+    @Override
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
         return competitorsToUpdateDuringGetOrCreate.contains(result);
     }
 

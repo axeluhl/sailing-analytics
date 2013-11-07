@@ -75,7 +75,21 @@ public interface SharedDomainFactory {
      */
     BoatClass getOrCreateBoatClass(String name);
 
+    /**
+     * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
+     * the caller must check the result of {@link #isCompetitorToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,
+     * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} to cause an update of the
+     * competitor's values.
+     */
     Competitor getExistingCompetitorById(Serializable competitorId);
+
+    /**
+     * Checks if the <code>competitor</code> shall be updated from the default provided by, e.g., a tracking infrastructure.
+     * Callers of {@link #getExistingCompetitorById(Serializable)} or {@link #getExistingCompetitorByIdAsString(String)}
+     * must call this method in case they retrieve a valid competitor by ID and have data available that can be used to update
+     * the competitor.
+     */
+    boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
     
