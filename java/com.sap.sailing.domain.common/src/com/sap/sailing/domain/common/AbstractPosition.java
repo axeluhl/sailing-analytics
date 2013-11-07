@@ -151,7 +151,7 @@ public class AbstractPosition implements Position {
             if (toRight > 90) {
                 distance = this.getDistance(right);
             } else {
-                distance = this.crossTrackError(left, left.getBearingGreatCircle(right));
+                distance = this.absoluteCrossTrackError(left, left.getBearingGreatCircle(right));
             }
         }
         // Right now this always returns a positiv value. It might be possible to change it so that the sign indicates
