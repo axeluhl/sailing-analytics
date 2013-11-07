@@ -89,7 +89,7 @@ public class MetadataParserImpl implements MetadataParser {
      * </pre>
      */
     @Override
-    public Map<Integer, PassingInstruction> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
+    public Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);

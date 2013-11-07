@@ -33,7 +33,7 @@ public interface MetadataParser {
         Serializable getId();
     }
     
-    Map<Integer, PassingInstruction> parsePassingSideData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
+    Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
 
     /**
      * Returns as many metadata objects as there are marks in the control point (two for a gate, one otherwise)

@@ -226,7 +226,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         controlPointsTable.addColumn(nameColumn, stringMessages.controlPoint());
-        TextColumn<ControlPointAndOldAndNewMark> passingSideColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
+        TextColumn<ControlPointAndOldAndNewMark> passingInstructionsColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
                 String result = "";
@@ -236,7 +236,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 return result;
             }
         };        
-        controlPointsTable.addColumn(passingSideColumn, "Passing side");
+        controlPointsTable.addColumn(passingInstructionsColumn, "Passing instructions");
         TextColumn<ControlPointAndOldAndNewMark> oldMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {

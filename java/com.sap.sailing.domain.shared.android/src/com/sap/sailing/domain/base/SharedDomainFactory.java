@@ -54,7 +54,7 @@ public interface SharedDomainFactory {
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
-    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingSide);
+    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction);
 
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 

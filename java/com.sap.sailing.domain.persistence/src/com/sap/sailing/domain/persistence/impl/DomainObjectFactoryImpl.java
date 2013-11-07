@@ -1205,9 +1205,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Waypoint waypoint = null;
             PassingInstruction passingInstructions = null;
             // TODO should this be renamed to WAYPOINT_PASSINGINSTRUCTIONS?
-            String waypointPassingSide = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
-            if (waypointPassingSide != null) {
-                passingInstructions = PassingInstruction.valueOf(waypointPassingSide);
+            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGINSTRUCTION.name());
+            if (waypointPassingInstruction != null) {
+                passingInstructions = PassingInstruction.valueOf(waypointPassingInstruction);
             }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
             if (passingInstructions == null) {

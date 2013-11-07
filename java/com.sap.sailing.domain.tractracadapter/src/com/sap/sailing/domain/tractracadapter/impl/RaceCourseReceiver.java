@@ -106,11 +106,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
-        Map<Integer, PassingInstruction> courseWaypointPassingSides = getDomainFactory().getMetadataParser().parsePassingSideData(routeMetadataString, routeControlPoints);
+        Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
         List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
         for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
-            PassingInstruction nauticalSide = courseWaypointPassingSides.containsKey(i) ? courseWaypointPassingSides.get(i) : null;
+            PassingInstruction nauticalSide = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), nauticalSide));
             i++;
         }

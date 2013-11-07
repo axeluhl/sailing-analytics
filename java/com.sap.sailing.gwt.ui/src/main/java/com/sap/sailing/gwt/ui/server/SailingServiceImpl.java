@@ -1522,8 +1522,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Iterable<Waypoint> waypoints = course.getWaypoints();
             List<Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
             int lastMatchPosition = -1;
-            for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingSide : controlPoints) {
-                ControlPointDTO controlPointDTO = controlPointAndPassingSide.getA();
+            for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
+                ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
                 ControlPoint matchFromOldCourse = null;
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
                     Waypoint waypointAtI = Util.get(waypoints, i);
@@ -1551,7 +1551,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
-                        PassingInstruction passingInstructions = controlPointAndPassingSide.getB();
+                        PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
                         newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
                     }
                 }
