@@ -110,6 +110,10 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
                                         csvLine.add(maxPointsReason.name());
                                         csvLine.add(totalRacePoints);
                                     }
+                                } else {
+                                    /* Make sure to also include null columns */
+                                    csvLine.add(0);
+                                    csvLine.add(0);
                                 }
                             }
                         }

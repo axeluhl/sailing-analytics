@@ -196,5 +196,26 @@ public class PositionTest {
         assertEquals(180., b3.getDifferenceTo(b6).getDegrees(), 0.000000001);
         assertEquals(-180., b6.getDifferenceTo(b3).getDegrees(), 0.000000001);
     }
+    @Test
+    public void distanceToLineTest(){
+    	double delta = 0.000000001;
+    	Position left = new DegreePosition(-1, -1);
+    	Position right = new DegreePosition(1, 1);
+    	Position p1 = new DegreePosition(0,0);
+    	Position p2 = new DegreePosition(1, -1);
+    	Position p3 = new DegreePosition(-2, 0);
+    	Position p4 = new DegreePosition(5, 0);
+    	Position p5 = new DegreePosition(2, 2);
+    	Position p6 = new DegreePosition(0, -2);
+    	assertEquals(p2.getDistanceToLine(left, right).getMeters(), p2.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters(), delta);
+    	assertEquals(p3.getDistanceToLine(left, right).getMeters(), p3.getDistance(left).getMeters(), delta);
+    	assertEquals(p4.getDistanceToLine(left, right).getMeters(), p4.getDistance(right).getMeters(), delta);
+    	assertEquals(p5.getDistanceToLine(left, right).getMeters(), p5.getDistance(right).getMeters(), delta);
+    	assertEquals(p1.getDistanceToLine(p3, p4).getMeters(), 0, delta);
+    	assertEquals(p4.getDistanceToLine(p1, p3).getMeters(), p4.getDistance(p1).getMeters(), delta);
+    	assertEquals(p6.getDistanceToLine(p3, p4).getMeters(), p6.getDistance(p1).getMeters(), delta);
+    	assertEquals(p6.getDistanceToLine(p1, p4).getMeters(), p6.getDistance(p1).getMeters(), delta);
+    	assertEquals(right.getDistanceToLine(p6, p1).getMeters(), right.getDistance(p1).getMeters(), delta);
+    }
 
 }

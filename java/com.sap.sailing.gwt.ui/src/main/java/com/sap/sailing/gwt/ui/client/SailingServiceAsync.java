@@ -303,7 +303,7 @@ public interface SailingServiceAsync {
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 
-    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort,
+    void startReplicatingFromMaster(String messagingHost, String masterName, String exchangeName, int servletPort, int messagingPort,
             AsyncCallback<Void> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);

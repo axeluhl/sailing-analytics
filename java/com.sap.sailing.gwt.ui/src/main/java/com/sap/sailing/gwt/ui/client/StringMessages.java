@@ -822,4 +822,6 @@ public interface StringMessages extends Messages {
     String hideToolbar();
     String showSeriesLeaderboards();
     String showOverallLeaderboard();
+    String exchangeHost();
+    String explainExchangeHostName();
 }

@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
-import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing a wind field. The overlay covers the whole map and displays
@@ -44,8 +43,6 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     protected Map<ToolTip, SimulatorWindDTO> windFieldPoints;
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
-
-    protected WindFieldMapMouseMoveHandler mmHandler;
     
     protected double arrowLength = 15;
     protected WindFieldGenParamsDTO windParams = null;
@@ -93,11 +90,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     @Override
     public void addToMap() {
         super.addToMap();
-        if(mmHandler == null) {
-            mmHandler = new WindFieldMapMouseMoveHandler(this);
-        }
-        mmHandler.setWindFieldPoints(windFieldPoints);
-        mouseMoveHandlerRegistration = addMouseMoveHandler(mmHandler);
+
         if (timer != null) {
             timer.addTimeListener(this);
         }
@@ -127,7 +120,6 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         canvas.getContext2d().clearRect(0.0 /*canvas.getAbsoluteLeft()*/, 0.0/*canvas.getAbsoluteTop()*/,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         windFieldPoints.clear();
-        mmHandler.clear();
     }
 
     protected void drawWindField() {

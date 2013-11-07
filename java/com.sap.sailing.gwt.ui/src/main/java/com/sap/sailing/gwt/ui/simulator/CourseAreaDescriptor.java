@@ -58,6 +58,10 @@ public class CourseAreaDescriptor {
         return radius;
     }
 
+    public double getRadiusInMeters() {
+        return (radius*1852.0);
+    }
+
     public LatLng getCenterPos() {
         return centerPos;
     }
