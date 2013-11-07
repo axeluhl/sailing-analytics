@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -28,7 +30,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -76,6 +81,14 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         buttonPanel.add(refreshButton);
+        final Button allowReloadButton = new Button(stringMessages.allowReload());
+        allowReloadButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                allowUpdate(competitorSelectionModel.getSelectedSet());
+            }
+        });
+        buttonPanel.add(allowReloadButton);
         competitorsPanel.add(buttonPanel);
 
         // sailing events table
@@ -143,15 +156,10 @@ public class CompetitorPanel extends SimplePanel {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditCompetitorDialog(competitor);
                 } else if (CompetitorConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
-                    sailingService.allowCompetitorResetToDefaults(competitor, new AsyncCallback<Void>() {
-                        @Override public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to allow resetting competitor "+competitor.getName()
-                                    +" to defaults: "+caught.getMessage());
-                        }
-                        @Override public void onSuccess(Void result) {}
-                    });
+                    allowUpdate(Collections.singleton(competitor));
                 }
             }
+
         });
 
         HorizontalPanel filterBoxWithLabel = new HorizontalPanel();
@@ -176,9 +184,29 @@ public class CompetitorPanel extends SimplePanel {
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorTable.setSelectionModel(competitorSelectionModel);
         mainPanel.add(competitorTable);
-
+        competitorSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
+            }
+        });
+        allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
     }
     
+    private void allowUpdate(final Iterable<CompetitorDTO> competitors) {
+        List<CompetitorDTO> serializableSingletonList = new ArrayList<CompetitorDTO>();
+        Util.addAll(competitors, serializableSingletonList);
+        sailingService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
+            @Override public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to allow resetting competitors "+competitors
+                        +" to defaults: "+caught.getMessage());
+            }
+            @Override public void onSuccess(Void result) {
+                Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
+            }
+        });
+    }
+
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
         new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override

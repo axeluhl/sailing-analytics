@@ -106,7 +106,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
         
         // now allow for resetting to default through some event, such as receiving a GPS position
-        master.apply(new AllowCompetitorResetToDefaults(competitor.getId().toString()));
+        master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
         master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName,
                 competitor.getBoat().getSailID(), competitor.getTeam().getNationality());

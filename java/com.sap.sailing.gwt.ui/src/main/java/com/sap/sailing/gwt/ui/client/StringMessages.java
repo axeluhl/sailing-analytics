@@ -826,4 +826,6 @@ public interface StringMessages extends Messages {
     String filterCompetitors();
     String editCompetitor();
     String pleaseEnterASailNumber();
+    String successfullyAllowedCompetitorReset(String names);
+    String allowReload();
 }

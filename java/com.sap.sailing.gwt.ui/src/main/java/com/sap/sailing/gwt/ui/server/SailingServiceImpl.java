@@ -3274,8 +3274,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void allowCompetitorResetToDefaults(CompetitorDTO competitor) {
-        getService().apply(new AllowCompetitorResetToDefaults(competitor.getIdAsString()));
+    public void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors) {
+        List<String> competitorIdsAsStrings = new ArrayList<String>();
+        for (CompetitorDTO competitor : competitors) {
+            competitorIdsAsStrings.add(competitor.getIdAsString());
+        }
+        getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
 
 }

@@ -329,5 +329,5 @@ public interface SailingService extends RemoteService {
 
     CompetitorDTO updateCompetitor(CompetitorDTO competitor);
 
-    void allowCompetitorResetToDefaults(CompetitorDTO competitor);
+    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
 }

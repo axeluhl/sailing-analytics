@@ -1,25 +1,32 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.ArrayList;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class AllowCompetitorResetToDefaults extends AbstractRacingEventServiceOperation<Void> {
     private static final long serialVersionUID = 5133140671156755328L;
-    private final String competitorIdAsString;
+    private final Iterable<String> competitorIdsAsStrings;
     
-    public AllowCompetitorResetToDefaults(String competitorIdAsString) {
+    public AllowCompetitorResetToDefaults(Iterable<String> competitorIdsAsStrings) {
         super();
-        this.competitorIdAsString = competitorIdAsString;
+        final ArrayList<String> arrayList = new ArrayList<>(); // to guarantee serializability, even if an unmodifiable or singleton is passed
+        this.competitorIdsAsStrings = arrayList;
+        Util.addAll(competitorIdsAsStrings, arrayList);
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         final CompetitorStore competitorStore = toState.getBaseDomainFactory().getCompetitorStore();
-        Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorIdAsString);
-        if (competitor != null) {
-            competitorStore.allowCompetitorResetToDefaults(competitor);
+        for (String competitorIdAsString : competitorIdsAsStrings) {
+            Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorIdAsString);
+            if (competitor != null) {
+                competitorStore.allowCompetitorResetToDefaults(competitor);
+            }
         }
         return null;
     }
