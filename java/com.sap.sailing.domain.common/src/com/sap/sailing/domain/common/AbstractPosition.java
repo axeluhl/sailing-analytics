@@ -134,7 +134,8 @@ public class AbstractPosition implements Position {
         // the great circle described by pos2 and bearing we should travel. This is an exception which will
         // surface as a division-by-zero exception or a NaN result
         return new CentralAngleDistance(direction
-                / Math.cos(absoluteCrossTrackError(pos2, bearing).getCentralAngleRad())));
+                * Math.acos(Math.cos(pos2.getCentralAngleRad(this))
+                        / Math.cos(crossTrackError(pos2, bearing).getCentralAngleRad())));
     }
 
     @Override
