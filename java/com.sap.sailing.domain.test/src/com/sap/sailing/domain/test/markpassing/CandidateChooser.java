@@ -61,7 +61,7 @@ public class CandidateChooser {
         for (Waypoint w : markPositions.keySet()) {
             waypoints.add(w);
         }
-        //TODO Get real average speeds
+        //TODO Get real average speeds!!
         for (int i = c1.getID(); i < c2.getID()-1; i++) {
                 if (!(i == waypoints.size()-1||i == 0)) {
                     double averageSpeed = 7;

@@ -193,9 +193,8 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
         LinkedHashMap<Waypoint, Double> averageLegLength = new LinkedHashMap<>();
+        
         System.out.println("Start: " + start + ", End: " + end);
-
-        // TODO Fix Waypoint ID issue
 
         // Get Waypoints
         try {
@@ -238,6 +237,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
         for (Waypoint wp : waypoints) {
             int index = waypoints.indexOf(wp);
+            
             // Get Leg Lengths
             double legBefore = 0;
             double legAfter = 0;
@@ -335,8 +335,8 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
         // Compare computed and calculated MarkPassings
         boolean printAll = false;
-        boolean printWrong = false;
-        boolean printNull = false;
+        boolean printWrong = true;
+        boolean printNull = true;
         for (Competitor c : getRace().getCompetitors()) {
 
             System.out.println(c.getName() + "\n");

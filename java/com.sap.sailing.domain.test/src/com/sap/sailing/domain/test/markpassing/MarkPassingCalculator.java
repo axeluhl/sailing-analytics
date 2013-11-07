@@ -90,14 +90,10 @@ public class MarkPassingCalculator {
                     LinkedHashMap<Integer, TimePoint> markPasses = chooser.getMarkPasses(candidates, start, end,
                             wayPointPositions, legs);
                     for (Waypoint w : wayPointTracks.keySet()) {
-                        try {
                             computedPasses.put(w, new MarkPassingImpl(markPasses.get(waypoints.indexOf(w)+1), w, c));
-                        } finally {
-                        }
                     }
                 }
                 calculatedMarkpasses.put(c, computedPasses);
-            
         }
         return calculatedMarkpasses;
     }
