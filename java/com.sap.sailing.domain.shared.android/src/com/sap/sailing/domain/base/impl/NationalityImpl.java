@@ -49,6 +49,31 @@ public class NationalityImpl implements Nationality {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((threeLetterIOCAcronym == null) ? 0 : threeLetterIOCAcronym.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NationalityImpl other = (NationalityImpl) obj;
+        if (threeLetterIOCAcronym == null) {
+            if (other.threeLetterIOCAcronym != null)
+                return false;
+        } else if (!threeLetterIOCAcronym.equals(other.threeLetterIOCAcronym))
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return getThreeLetterIOCAcronym();
     }
