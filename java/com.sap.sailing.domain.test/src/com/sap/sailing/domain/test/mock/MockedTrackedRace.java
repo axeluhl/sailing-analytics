@@ -424,6 +424,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         return false;
                     }
+
+                    @Override
+                    public RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
                 };
             }
 

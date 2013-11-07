@@ -17,14 +17,28 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.NationalityImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
+import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 
 /**
@@ -56,7 +70,14 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
-        Competitor competitor = AbstractLeaderboardTest.createCompetitor("Der mit dem Kiel zieht");
+        final String competitorName = "Der mit dem Kiel zieht";
+        Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
+                123, competitorName,
+                new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
+                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
+                        new NationalityImpl("NED"),
+                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null));
         Iterable<Competitor> competitors = Collections.singleton(competitor);
         final String raceName = "Test Race";
         RaceDefinition raceDefinition = new RaceDefinitionImpl(raceName, new CourseImpl("Empty Course", emptyWaypointList),
@@ -83,5 +104,22 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getBoat().getSailID(), competitor.getTeam().getNationality()));
         Thread.sleep(1000);
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
+        
+        // now allow for resetting to default through some event, such as receiving a GPS position
+        master.apply(new AllowCompetitorResetToDefaults(competitor.getId().toString()));
+        // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
+        master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName,
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality());
+        final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
+                EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l));
+        trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
+                new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));
+        Thread.sleep(1000);
+        TrackedRace replicatedTrackedRace = replica.getTrackedRace(raceIdentifier);
+        assertNotNull(replicatedTrackedRace);
+        assertNotNull(replicatedTrackedRace.getTrack(replicatedCompetitor).getFirstRawFix());
+        assertEquals(competitorName, replicatedCompetitor.getName());
    }
 }

@@ -22,6 +22,7 @@ import org.junit.Before;
 
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
@@ -95,7 +96,9 @@ public abstract class AbstractServerReplicationTest {
         if (replica != null) {
             this.replica = replica;
         } else {
-            this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+            this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                    // replica gets its own base DomainFactory:
+                    new DomainFactoryImpl()), PersistenceFactory.INSTANCE
                     .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();

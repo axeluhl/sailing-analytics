@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -100,4 +101,6 @@ public interface Regatta extends Named, WithID {
      *         keeps discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
+
+    RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 }
