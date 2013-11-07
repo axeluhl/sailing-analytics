@@ -14,6 +14,13 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_ID = "id";
+    
+    /**
+     * The field identified by this name tells the fully-qualified class name from which the value of the field identified
+     * by {@link #FIELD_ID} has been created. When deserializing, the ID needs to be re-constructed as an instance of that
+     * type.
+     */
+    public static final String FIELD_ID_TYPE = "idtype";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SAILID = "sailID";
     public static final String FIELD_NATIONALITY = "nationality";
@@ -45,6 +52,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         // However, other, e.g., numeric, types used to encode a serializable ID must be preserved according to JSON semantics.
         // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID becore
         // returning the ID as is.
+        result.put(FIELD_ID_TYPE, competitor.getId().getClass().getName());
         Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
         result.put(FIELD_ID, competitorId);
         result.put(FIELD_NAME, competitor.getName());

@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -36,21 +38,29 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable competitorId = (Serializable) object.get(CompetitorJsonSerializer.FIELD_ID);
-        if (competitorId instanceof String) {
-            competitorId = Helpers.tryUuidConversion(competitorId);
+        try {
+            Class<?> idClass = Class.forName((String) object.get(CompetitorJsonSerializer.FIELD_ID_TYPE));
+            if (Number.class.isAssignableFrom(idClass)) {
+                Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                competitorId = (Serializable) constructorFromString.newInstance(competitorId.toString());
+            } else if (UUID.class.isAssignableFrom(idClass)) {
+                competitorId = Helpers.tryUuidConversion(competitorId);
+            }
+            String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
+            DynamicTeam team = null;
+            DynamicBoat boat = null;
+            if (teamJsonDeserializer != null) {
+                team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
+                        CompetitorJsonSerializer.FIELD_TEAM));
+            }
+            if (boatJsonDeserializer != null) {
+                boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
+                        CompetitorJsonSerializer.FIELD_BOAT));
+            }
+            Competitor competitor = factory.getOrCreateCompetitor(competitorId, name, team, boat);
+            return competitor;
+        } catch (Exception e) {
+            throw new JsonDeserializationException(e);
         }
-        String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
-        DynamicTeam team = null;
-        DynamicBoat boat = null;
-        if (teamJsonDeserializer != null) {
-            team = teamJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                    CompetitorJsonSerializer.FIELD_TEAM));
-        }
-        if (boatJsonDeserializer != null) {
-            boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
-                    CompetitorJsonSerializer.FIELD_BOAT));
-        }
-        Competitor competitor = factory.getOrCreateCompetitor(competitorId, name, team, boat);
-        return competitor;
     }
 }
