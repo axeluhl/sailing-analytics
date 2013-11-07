@@ -9,11 +9,11 @@ public class Candidate {
     private double cost;
     int id;
 
-    public Candidate(Waypoint w, TimePoint p, double cost) {
+    public Candidate(Waypoint w, TimePoint p, double cost, int id) {
         this.w = w;
         this.p = p;
         this.cost = cost;
-        id = (Integer) w.getId();
+        this.id = id;
     }
 
     public Candidate(int id, TimePoint p, double cost) {

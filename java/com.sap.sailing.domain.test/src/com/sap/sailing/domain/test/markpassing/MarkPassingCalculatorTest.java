@@ -187,6 +187,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         TimePoint end = getTrackedRace().getEndOfRace();
         TimePoint middle = start.plus(end.minus(start.asMillis()).asMillis() / 2);
         ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+        ArrayList<Waypoint> waypointsToReplace = new ArrayList<>();
         LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>> wayPointTracks = new LinkedHashMap<Waypoint, ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>>();
         LinkedHashMap<Competitor, ArrayList<GPSFixMoving>> competitorTracks = new LinkedHashMap<Competitor, ArrayList<GPSFixMoving>>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
@@ -206,7 +207,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             getRace().getCourse().unlockAfterRead();
         }
         getRace().getCourse().getWaypoints();
-        System.out.println(waypoints.size() + " Waypoints");
+        System.out.println(waypoints.size() + " Waypoints: ");
 
         // Get LegTypes
         ArrayList<String> legs = new ArrayList<>();
@@ -219,8 +220,22 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             }
         }
 
-        // Get Waypoint Info
-        ArrayList<Waypoint> toReplace = new ArrayList<>();
+        // Get given Markpasses
+        for (Competitor c : getRace().getCompetitors()) {
+
+            LinkedHashMap<Waypoint, MarkPassing> givenMarkPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+            for (Waypoint wp : waypoints) {
+                MarkPassing markPassing = getTrackedRace().getMarkPassing(c, wp);
+                givenMarkPasses.put(wp, markPassing);
+                try {
+                    givenMarkPasses.get(wp).getTimePoint();
+                } catch (NullPointerException e) {
+                    missingGivenMarkPassings++;
+                }
+            }
+            givenPasses.put(c, givenMarkPasses);
+        }
+
         for (Waypoint wp : waypoints) {
             int index = waypoints.indexOf(wp);
             // Get Leg Lengths
@@ -238,18 +253,6 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             double averageLength = (legBefore + legAfter) / number;
             averageLegLength.put(wp, averageLength);
 
-            for (Competitor c : getRace().getCompetitors()) {
-                // Get given Markpasses
-                LinkedHashMap<Waypoint, MarkPassing> givenMarkPasses = new LinkedHashMap<Waypoint, MarkPassing>();
-                MarkPassing markPassing = getTrackedRace().getMarkPassing(c, wp);
-                givenMarkPasses.put(wp, markPassing);
-                try {
-                    givenMarkPasses.get(wp).getTimePoint();
-                } catch (NullPointerException e) {
-                    missingGivenMarkPassings++;
-                }
-                givenPasses.put(c, givenMarkPasses);
-            }
             // Give Waypoints Passing Instructions
             try {
                 // TODO get rid of try/catch
@@ -278,31 +281,27 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                         }
                     }
                 }
-                toReplace.add(index, waypointWithPassingInstructions);
+                waypointsToReplace.add(index, waypointWithPassingInstructions);
             }
         }
 
-        for (Waypoint wp : toReplace) {
-            // TODO Replace given MarkPasses
-            Waypoint oldWaypoint = waypoints.get(toReplace.indexOf(wp));
-            System.out.println(oldWaypoint);
+        for (Waypoint wp : waypointsToReplace) {
+            Waypoint oldWaypoint = waypoints.get(waypointsToReplace.indexOf(wp));
             double averageLength = averageLegLength.get(oldWaypoint);
-            System.out.println(averageLength);
             for (Competitor c : getRace().getCompetitors()) {
-                MarkPassing m = givenPasses.get(c).get(oldWaypoint);
-                System.out.println(m);
+                MarkPassing m = givenPasses.get(c).get(waypoints.get(waypointsToReplace.indexOf(wp)));
                 givenPasses.get(c).remove(m);
                 givenPasses.get(c).put(wp, m);
             }
             waypoints.remove(oldWaypoint);
             averageLegLength.remove(oldWaypoint);
-            waypoints.add(toReplace.indexOf(wp), wp);
+            waypoints.add(waypointsToReplace.indexOf(wp), wp);
             averageLegLength.put(wp, averageLength);
         }
 
         for (Waypoint wp : waypoints) {
             // Get Waypoint Tracks
-            System.out.println(wp.getPassingInstructions());
+            System.out.println(wp + ": " + wp.getPassingInstructions());
             ArrayList<DynamicGPSFixTrack<Mark, GPSFix>> marks = new ArrayList<DynamicGPSFixTrack<Mark, GPSFix>>();
             for (Mark mark : wp.getControlPoint().getMarks()) {
                 DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(mark);
@@ -327,11 +326,11 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             competitorTracks.put(c, fixes);
         }
         System.out.println(numberOfCompetitors + " Competitors");
-        
+
         // Calculate MarkPasses!!
         long n = System.currentTimeMillis();
         computedPasses = markPassCreator.calculateMarkpasses(wayPointTracks, competitorTracks, start, end, legs,
-                averageLegLength, getRace().getBoatClass().getHullLength().getMeters());
+                averageLegLength, getRace().getBoatClass().getHullLength().getMeters(), waypoints);
         System.out.println("Computation time: " + (System.currentTimeMillis() - n));
 
         // Compare computed and calculated MarkPassings
