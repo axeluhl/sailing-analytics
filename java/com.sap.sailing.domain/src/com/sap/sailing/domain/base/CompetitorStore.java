@@ -20,6 +20,19 @@ public interface CompetitorStore {
     Competitor getExistingCompetitorByIdAsString(String idAsString);
 
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    
+    /**
+     * When a competitor is queried using {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)}
+     * , and the competitor object for that ID already exists, it is generally returned unchanged, and the name, team
+     * and boat parameters are not evaluated. This makes the data in this competitor store generally "write-once." This
+     * method can be used to reset a competitor object to what a tracking provider or an external system supplies to
+     * {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)}. After calling this method, the
+     * next call to {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} with
+     * <code>competitor</code>'s {@link Competitor#getId() ID} will
+     * {@link #updateCompetitor(String, String, String, Nationality)} the competitor in its updatable properties such as
+     * the name, the sail ID and the nationality.
+     */
+    void allowCompetitorResetToDefaults(Competitor competitor);
 
     int size();
 

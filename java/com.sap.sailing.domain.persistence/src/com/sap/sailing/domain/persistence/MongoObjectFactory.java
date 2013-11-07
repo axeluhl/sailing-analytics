@@ -92,7 +92,7 @@ public interface MongoObjectFactory {
      * Stores a competitor, including the team and boat. This should not be done for competitors for which
      * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
      * where this data is otherwise not recoverable.
-     * @param competitor
+     * @param competitor the competitor to store/update in the database
      */
     void storeCompetitor(Competitor competitor);
 

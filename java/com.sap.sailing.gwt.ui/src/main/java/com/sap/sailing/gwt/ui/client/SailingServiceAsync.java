@@ -451,5 +451,7 @@ public interface SailingServiceAsync {
 
     void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
+    void allowCompetitorResetToDefaults(CompetitorDTO competitor, AsyncCallback<Void> asyncCallback);
+
 }
 

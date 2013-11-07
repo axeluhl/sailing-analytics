@@ -18,7 +18,10 @@ import com.sap.sailing.mongodb.MongoDBService;
 /**
  * Manages a persistent set of {@link Competitor}s using a {@link MongoObjectFactory} to update the persistent store,
  * and a {@link DomainObjectFactory} for initially filling this store's in-memory representation from the persistent
- * store.
+ * store.<p>
+ * 
+ * Note that the results of calling {@link CompetitorStore#allowCompetitorResetToDefaults(Competitor)} are not stored
+ * persistently and therefore will be reset when re-initializing a competitor store from the database.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -95,6 +98,4 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeCompetitor(result);
         return result;
     }
-    
-    
 }

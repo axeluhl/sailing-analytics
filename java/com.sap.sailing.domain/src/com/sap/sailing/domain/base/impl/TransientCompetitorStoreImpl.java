@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -19,16 +22,25 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 public class TransientCompetitorStoreImpl implements CompetitorStore, Serializable {
     private static final long serialVersionUID = -4198298775476586931L;
-    private final ConcurrentHashMap<Serializable, Competitor> competitorCache;
-    private final ConcurrentHashMap<String, Competitor> competitorsByIdAsString;
+    private final Map<Serializable, Competitor> competitorCache;
+    private final Map<String, Competitor> competitorsByIdAsString;
+    
+    /**
+     * The competitors contained in this map will have their changeable properties
+     * {@link #updateCompetitor(String, String, String, Nationality) updated} upon the next call to
+     * {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} for their ID.
+     */
+    private final Set<Competitor> competitorsToUpdateDuringGetOrCreate;
+    
     private transient WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
     
     private final NamedReentrantReadWriteLock lock;
 
     public TransientCompetitorStoreImpl() {
         lock = new NamedReentrantReadWriteLock("CompetitorStore", /* fair */ false);
-        competitorCache = new ConcurrentHashMap<>();
-        competitorsByIdAsString = new ConcurrentHashMap<>();
+        competitorCache = new HashMap<>();
+        competitorsByIdAsString = new HashMap<>();
+        competitorsToUpdateDuringGetOrCreate = new HashSet<>();
         weakCompetitorDTOCache = new WeakHashMap<>();
     }
     
@@ -71,8 +83,14 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
+        } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
+            updateCompetitor(result.getId().toString(), name, boat.getSailID(), team.getNationality());
         }
         return result;
+    }
+
+    protected boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
+        return competitorsToUpdateDuringGetOrCreate.contains(result);
     }
 
     @Override
@@ -185,5 +203,14 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             }
         }
     }
-    
+
+    @Override
+    public void allowCompetitorResetToDefaults(Competitor competitor) {
+        LockUtil.lockForWrite(lock);
+        try {
+            competitorsToUpdateDuringGetOrCreate.add(competitor);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
 }

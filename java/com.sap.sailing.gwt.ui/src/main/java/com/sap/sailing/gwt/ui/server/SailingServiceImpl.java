@@ -245,6 +245,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
+import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -3271,4 +3272,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
                     getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode()))));
     }
+
+    @Override
+    public void allowCompetitorResetToDefaults(CompetitorDTO competitor) {
+        getService().apply(new AllowCompetitorResetToDefaults(competitor.getIdAsString()));
+    }
+
 }

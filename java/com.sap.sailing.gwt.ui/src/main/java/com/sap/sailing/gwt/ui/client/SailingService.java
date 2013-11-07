@@ -328,4 +328,6 @@ public interface SailingService extends RemoteService {
     Iterable<CompetitorDTO> getCompetitors();
 
     CompetitorDTO updateCompetitor(CompetitorDTO competitor);
+
+    void allowCompetitorResetToDefaults(CompetitorDTO competitor);
 }

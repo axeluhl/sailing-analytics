@@ -139,9 +139,17 @@ public class CompetitorPanel extends SimplePanel {
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override
-            public void update(int index, CompetitorDTO competitor, String value) {
+            public void update(int index, final CompetitorDTO competitor, String value) {
                 if (CompetitorConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditCompetitorDialog(competitor);
+                } else if (CompetitorConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
+                    sailingService.allowCompetitorResetToDefaults(competitor, new AsyncCallback<Void>() {
+                        @Override public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to allow resetting competitor "+competitor.getName()
+                                    +" to defaults: "+caught.getMessage());
+                        }
+                        @Override public void onSuccess(Void result) {}
+                    });
                 }
             }
         });
