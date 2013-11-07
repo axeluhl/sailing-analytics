@@ -54,7 +54,8 @@ public class CompetitorStoreTest {
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), differentTeam, template.getBoat());
         assertSame(competitor2, competitor3); // use existing competitor despite the different team
-        assertSame(competitor.getTeam(), competitor3.getTeam());
+        assertTrue(differentTeam != competitor2.getTeam()); // team expected to remain unchanged
+        assertEquals(competitor.getTeam().getNationality(), competitor3.getTeam().getNationality()); // no updatability requested; nationality expected to remain unchanged
         
         // now mark the competitor as to update from defaults
         persistentStore2.allowCompetitorResetToDefaults(competitor2);
