@@ -31,7 +31,7 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -91,7 +91,7 @@ public class OfflineDataManager extends DataManager {
                 1, RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+                raceGroup), RacingProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -100,7 +100,7 @@ public class OfflineDataManager extends DataManager {
          */
 
         ManagedRace q2 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+                raceGroup), RacingProcedureType.ESS, log);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -108,7 +108,7 @@ public class OfflineDataManager extends DataManager {
          * RaceLogRaceStatus.FINISHED));
          */
         ManagedRace q3 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
-                raceGroup), StartProcedureType.ESS, log);
+                raceGroup), RacingProcedureType.ESS, log);
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);

@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -75,10 +75,10 @@ public interface RaceLogEventFactory {
             int passId, Long gateLineOpeningTimeInMillis);
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, StartProcedureType type);
+            Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type);
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            int passId, StartProcedureType type);
+            int passId, RacingProcedureType type);
 
     RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint timePoint, RaceLogEventAuthor author,
             Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);

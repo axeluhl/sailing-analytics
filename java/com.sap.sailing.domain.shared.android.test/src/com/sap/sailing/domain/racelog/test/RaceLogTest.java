@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
@@ -59,15 +60,17 @@ public class RaceLogTest {
     }
     
     @Test
-    public void testAddEventDifferentPassSameTimePoint() {
+    public void testAddEventDifferentPassButSameTimePoint() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
         
         when(eventOne.getPassId()).thenReturn(0);
-        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(1);
-        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("b");
         
         assertTrue(raceLog.add(eventOne));
@@ -80,15 +83,18 @@ public class RaceLogTest {
     }
     
     @Test
-    public void testAddEventSamePassSameTimePointDifferentId() {
+    public void testAddEventSamePassAndSameAuthorAndSameTimePointButDifferentId() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
+        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
         
         when(eventOne.getPassId()).thenReturn(0);
-        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getAuthor()).thenReturn(author);
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
-        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getAuthor()).thenReturn(author);
+        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("b");
         
         assertTrue(raceLog.add(eventOne));
@@ -101,15 +107,18 @@ public class RaceLogTest {
     }
     
     @Test
-    public void testWontAddEventSamePassSameTimePointSameId() {
+    public void testWontAddEventSamePassAndSameAuthorAndSameTimePointAndSameId() {
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
+        RaceLogEventAuthor author = mock(RaceLogEventAuthor.class);
         
         when(eventOne.getPassId()).thenReturn(0);
-        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventOne.getAuthor()).thenReturn(author);
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventOne.getId()).thenReturn("a");
         when(eventTwo.getPassId()).thenReturn(0);
-        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(0));
+        when(eventTwo.getAuthor()).thenReturn(author);
+        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(0));
         when(eventTwo.getId()).thenReturn("a");
         
         assertTrue(raceLog.add(eventOne));
@@ -151,19 +160,26 @@ public class RaceLogTest {
         RaceLogEvent event1 = mock(RaceLogEvent.class);
         RaceLogEvent event2 = mock(RaceLogEvent.class);
         RaceLogEvent event3 = mock(RaceLogEvent.class);
+        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
+        when(minorAuthor.getPriority()).thenReturn(3);
+        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        when(majorAuthor.getPriority()).thenReturn(1);
         
-        when(event1.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
-        when(event2.getTimePoint()).thenReturn(new MillisecondsTimePoint(2));
-        when(event3.getTimePoint()).thenReturn(new MillisecondsTimePoint(3));
+        when(event1.getAuthor()).thenReturn(majorAuthor);
+        when(event1.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
+        when(event2.getAuthor()).thenReturn(minorAuthor);
+        when(event2.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
+        when(event3.getAuthor()).thenReturn(minorAuthor);
+        when(event3.getCreatedAt()).thenReturn(new MillisecondsTimePoint(3));
         
         raceLog.add(event1);
         raceLog.add(event2);
         raceLog.add(event3);
         
         raceLog.lockForRead();
-        assertEquals(event3, Util.get(raceLog.getRawFixesDescending(), 0));
-        assertEquals(event2, Util.get(raceLog.getRawFixesDescending(), 1));
-        assertEquals(event1, Util.get(raceLog.getRawFixesDescending(), 2));
+        assertEquals(event1, Util.get(raceLog.getRawFixesDescending(), 0));
+        assertEquals(event3, Util.get(raceLog.getRawFixesDescending(), 1));
+        assertEquals(event2, Util.get(raceLog.getRawFixesDescending(), 2));
         raceLog.unlockAfterRead();
     }
     
@@ -172,21 +188,35 @@ public class RaceLogTest {
         RaceLogEvent event1 = mock(RaceLogEvent.class);
         RaceLogEvent event2 = mock(RaceLogEvent.class);
         RaceLogEvent event3 = mock(RaceLogEvent.class);
+        RaceLogEvent event4 = mock(RaceLogEvent.class);
+        RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
+        when(minorAuthor.getPriority()).thenReturn(3);
+        RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
+        when(majorAuthor.getPriority()).thenReturn(1);
         
         when(event1.getPassId()).thenReturn(1);
-        when(event1.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
+        when(event1.getAuthor()).thenReturn(majorAuthor);
+        when(event1.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
         when(event2.getPassId()).thenReturn(1);
-        when(event2.getTimePoint()).thenReturn(new MillisecondsTimePoint(2));
-        when(event3.getPassId()).thenReturn(0);
-        when(event3.getTimePoint()).thenReturn(new MillisecondsTimePoint(3));
+        when(event2.getAuthor()).thenReturn(minorAuthor);
+        when(event2.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
+        when(event3.getPassId()).thenReturn(1);
+        when(event3.getAuthor()).thenReturn(minorAuthor);
+        when(event3.getCreatedAt()).thenReturn(new MillisecondsTimePoint(3));
+        when(event4.getPassId()).thenReturn(0);
+        when(event4.getAuthor()).thenReturn(majorAuthor);
+        when(event4.getCreatedAt()).thenReturn(new MillisecondsTimePoint(4));
         
         raceLog.add(event1);
         raceLog.add(event2);
         raceLog.add(event3);
+        raceLog.add(event4);
         
         raceLog.lockForRead();
-        assertEquals(event2, Util.get(raceLog.getFixesDescending(), 0));
-        assertEquals(event1, Util.get(raceLog.getFixesDescending(), 1));
+        assertEquals(3, Util.size(raceLog.getFixesDescending()));
+        assertEquals(event1, Util.get(raceLog.getFixesDescending(), 0));
+        assertEquals(event3, Util.get(raceLog.getFixesDescending(), 1));
+        assertEquals(event2, Util.get(raceLog.getFixesDescending(), 2));
         raceLog.unlockAfterRead();
     }
     

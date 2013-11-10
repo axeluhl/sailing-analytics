@@ -9,7 +9,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
@@ -222,10 +222,10 @@ public class AppPreferences {
         sp.edit().putString(PREFERENCE_MIN_ROUNDS, String.valueOf(minRounds)).commit();
     }
     
-    public static StartProcedureType getDefaultStartProcedureType(Context context) {
+    public static RacingProcedureType getDefaultStartProcedureType(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String defaultStartProcedureType = sp.getString(PREFERENCE_DEFAULT_START_PROCEDURE_TYPE, "RRS26");
-        StartProcedureType type = StartProcedureType.valueOf(defaultStartProcedureType);
+        RacingProcedureType type = RacingProcedureType.valueOf(defaultStartProcedureType);
         return type;
     }
     

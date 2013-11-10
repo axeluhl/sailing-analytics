@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -165,14 +165,14 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, StartProcedureType type) {
+            Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type) {
         return new RaceLogStartProcedureChangedEventImpl(MillisecondsTimePoint.now(), author, timePoint, id,
                 competitors, passId, type);
     }
 
     @Override
     public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            int passId, StartProcedureType type) {
+            int passId, RacingProcedureType type) {
         return createStartProcedureChangedEvent(timePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, type);
     }
 

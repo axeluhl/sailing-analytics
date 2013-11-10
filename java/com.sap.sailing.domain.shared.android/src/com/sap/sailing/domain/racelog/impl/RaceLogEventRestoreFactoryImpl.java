@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -92,7 +92,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, StartProcedureType type) {
+            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type) {
         return new RaceLogStartProcedureChangedEventImpl(createdAt, author, timePoint, id, competitors, passId, type);
     }
 

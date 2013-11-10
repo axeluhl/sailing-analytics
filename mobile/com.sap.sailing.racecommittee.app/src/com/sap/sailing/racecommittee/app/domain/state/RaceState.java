@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
@@ -56,7 +56,7 @@ public interface RaceState extends StartProcedureListener {
     /**
      * @return the active or default start procedure type.
      */
-    StartProcedureType getStartProcedureType();
+    RacingProcedureType getStartProcedureType();
     
     /**
      * @return the start procedure of the race
@@ -148,7 +148,7 @@ public interface RaceState extends StartProcedureListener {
      */
     RaceLogRaceStatus getStatus();
 
-    void createNewStartProcedure(StartProcedureType selectedStartProcedureType);
+    void createNewStartProcedure(RacingProcedureType selectedStartProcedureType);
 
     /**
      * Sets a new wind fix.

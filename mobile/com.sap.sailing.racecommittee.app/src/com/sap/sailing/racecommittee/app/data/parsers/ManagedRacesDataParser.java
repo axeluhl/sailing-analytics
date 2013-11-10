@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -66,7 +66,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        StartProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
+        RacingProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
         return new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl(name,
                new FleetIdentifierImpl(fleet, series, raceGroup)), startType, raceLog);
 

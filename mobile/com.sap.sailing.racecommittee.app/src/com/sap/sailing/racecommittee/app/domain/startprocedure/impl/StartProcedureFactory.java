@@ -2,13 +2,13 @@ package com.sap.sailing.racecommittee.app.domain.startprocedure.impl;
 
 import android.content.Context;
 
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 
 public class StartProcedureFactory {
 
-    public static StartProcedure create(Context context, StartProcedureType type, RaceLog raceLog) {
+    public static StartProcedure create(Context context, RacingProcedureType type, RaceLog raceLog) {
         switch (type) {
         case ESS:
             return new ExtremeSailingSeriesStartProcedure(context, raceLog);

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
@@ -15,17 +15,17 @@ public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl impl
 
     private static final long serialVersionUID = -8102049547516570034L;
 
-    private final StartProcedureType startProcedureType;
+    private final RacingProcedureType startProcedureType;
 
     public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, StartProcedureType startProcedureType) {
+            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, RacingProcedureType startProcedureType) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
 
         this.startProcedureType = startProcedureType;
     }
 
     @Override
-    public StartProcedureType getStartProcedureType() {
+    public RacingProcedureType getStartProcedureType() {
         return startProcedureType;
     }
 

@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -30,7 +30,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private CourseBase courseOnServer;
 
     public ManagedRaceImpl(Context context, ManagedRaceIdentifier identifier,
-            StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
+            RacingProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this(identifier, new RaceStateImpl(context, defaultStartProcedureType, raceLog));
     }
 

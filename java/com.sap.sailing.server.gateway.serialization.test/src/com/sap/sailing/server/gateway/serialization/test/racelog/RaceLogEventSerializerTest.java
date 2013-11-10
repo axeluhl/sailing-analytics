@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -145,7 +145,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testStartProcedureTypeChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, author, 0, StartProcedureType.ESS);
+        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, author, 0, RacingProcedureType.ESS);
         serializer.serialize(event);
         verify(startProcedureTypeChangedEventSerializer).serialize(event);
     }

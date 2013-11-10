@@ -23,7 +23,7 @@ import android.widget.TimePicker;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -43,7 +43,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     protected boolean isReset;
-    private StartProcedureType selectedStartProcedureType;
+    private RacingProcedureType selectedStartProcedureType;
 
     protected Spinner spinnerStartProcedure;
     protected TimePicker pickerTime;
@@ -142,13 +142,13 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     private void setupStartProcedureSpinner() {
-        ArrayAdapter<StartProcedureType> adapter = new ArrayAdapter<StartProcedureType>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, StartProcedureType.values());
+        ArrayAdapter<RacingProcedureType> adapter = new ArrayAdapter<RacingProcedureType>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, RacingProcedureType.values());
         spinnerStartProcedure.setAdapter(adapter);
         spinnerStartProcedure.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selectedStartProcedureType = (StartProcedureType) adapterView.getItemAtPosition(position);
+                selectedStartProcedureType = (RacingProcedureType) adapterView.getItemAtPosition(position);
             }
 
             @Override
@@ -157,12 +157,12 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         });
 
         //TODO read the preferences from AppPreferences
-        StartProcedureType type = StartProcedureType.ESS;
+        RacingProcedureType type = RacingProcedureType.ESS;
         boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
                 "overrideDefaultStartProcedureType", false);
         if (overrideStartProcedureType) {
-            type = StartProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
-                    "defaultStartProcedureType", StartProcedureType.ESS.name()));
+            type = RacingProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
+                    "defaultStartProcedureType", RacingProcedureType.ESS.name()));
         } else {
             type = getRace().getState().getStartProcedureType();
         }

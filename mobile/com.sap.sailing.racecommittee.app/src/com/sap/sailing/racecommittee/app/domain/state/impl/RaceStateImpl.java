@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -26,7 +26,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -42,7 +42,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private static final String TAG = RaceStateImpl.class.getSimpleName();
     
-    protected StartProcedureType defaultStartProcedureType;
+    protected RacingProcedureType defaultStartProcedureType;
     protected RaceLog raceLog;
     protected StartProcedure startProcedure;
     
@@ -58,12 +58,12 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishingTimeFinder finishingTimeFinder;
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
-    private StartProcedureTypeAnalyzer startProcedureTypeAnalyzer;
+    private RacingProcedureTypeAnalyzer startProcedureTypeAnalyzer;
     private ProtestStartTimeFinder protestStartTimeAnalyzer;
 
     private final Context context;
 
-    public RaceStateImpl(Context context, StartProcedureType defaultStartProcedureType, RaceLog raceLog) {
+    public RaceStateImpl(Context context, RacingProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this.context = context;
         this.defaultStartProcedureType = defaultStartProcedureType;
         this.raceLog = raceLog;
@@ -81,7 +81,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
-        this.startProcedureTypeAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
+        this.startProcedureTypeAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         this.protestStartTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
         
         registerStartProcedure();
@@ -104,8 +104,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public StartProcedureType getStartProcedureType() {
-        StartProcedureType type = startProcedureTypeAnalyzer.analyze();
+    public RacingProcedureType getStartProcedureType() {
+        RacingProcedureType type = startProcedureTypeAnalyzer.analyze();
         return type == null ? defaultStartProcedureType : type;
     }
 
@@ -113,7 +113,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         if (startProcedure != null) {
             startProcedure.setStartProcedureListener(null);
         }
-        StartProcedureType type = getStartProcedureType();
+        RacingProcedureType type = getStartProcedureType();
         startProcedure = StartProcedureFactory.create(context, type, raceLog);
         startProcedure.setStartProcedureListener(this);
     }
@@ -143,7 +143,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     @Override
-    public void createNewStartProcedure(StartProcedureType type) {
+    public void createNewStartProcedure(RacingProcedureType type) {
         if (!type.equals(startProcedureTypeAnalyzer.analyze())) {
             RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), AppPreferences.getAuthor(context), raceLog.getCurrentPassId(), type);
             this.raceLog.add(event);
