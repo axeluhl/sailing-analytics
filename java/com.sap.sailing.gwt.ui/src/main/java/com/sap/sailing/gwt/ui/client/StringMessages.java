@@ -688,6 +688,8 @@ public interface StringMessages extends Messages {
     String addReplicationMaster();
     String connect();
     String connectToMaster();
+    String exchangeHost();
+    String explainExchangeHostName();
     String explainReplicationHostname();
     String explainReplicationExchangeName();
     String explainReplicationExchangePort();
@@ -818,6 +820,14 @@ public interface StringMessages extends Messages {
     String raceTimeUpwindTooltip();
     String line();
     String offset();
-    String exchangeHost();
-    String explainExchangeHostName();
+    String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
+    String doYouReallyWantToRemoveEvents();
+    String doYouReallyWantToRemoveEvent(String eventName);
+    String doYouReallyWantToRemoveCompetitors();
+    String doYouReallyWantToRemoveCompetitor(String name);
+    String filterCompetitors();
+    String editCompetitor();
+    String pleaseEnterASailNumber();
+    String successfullyAllowedCompetitorReset(String names);
+    String allowReload();
 }

@@ -149,13 +149,37 @@ public class PositionTest {
         Distance alongTrackDistanceFromP1ToPNorth = pNorth.alongTrackDistance(p1, bearingFromP1ToP2);
         assertEquals(0.5*p1.getDistance(p2).getMeters(), alongTrackDistanceFromP1ToPNorth.getMeters(), 0.001);
     }
+    
+    @Test
+    public void negativeAlongTrackDistanceTest() {
+        Position p1 = new DegreePosition(1, 0);
+        Position p2 = new DegreePosition(1, -0.0001);
+        final Bearing bearingFromP1ToP2 = p1.getBearingGreatCircle(p2);
+        assertEquals(-p1.getDistance(p2).getMeters(), p1.alongTrackDistance(p2, bearingFromP1ToP2).getMeters(), 0.001);
+    }
 
     @Test
     public void testZeroCrossTrackError() {
         Position p1 = new DegreePosition(20, 15);
         Position p2 = new DegreePosition(15, 15);
-        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        Distance result = p1.absoluteCrossTrackError(p2, new DegreeBearingImpl(0));
         assertEquals(0, result.getMeters(), 0.0000001);
+    }
+    
+    @Test
+    public void testSignedCrossTrackErrorToRight() {
+        Position p1 = new DegreePosition(20, 16);
+        Position p2 = new DegreePosition(15, 15);
+        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        assertTrue(result.getMeters() > 0);
+    }
+    
+    @Test
+    public void testSignedCrossTrackErrorToLeft() {
+        Position p1 = new DegreePosition(20, 14);
+        Position p2 = new DegreePosition(15, 15);
+        Distance result = p1.crossTrackError(p2, new DegreeBearingImpl(0));
+        assertTrue(result.getMeters() < 0);
     }
     
     @Test
@@ -207,7 +231,7 @@ public class PositionTest {
     	Position p4 = new DegreePosition(5, 0);
     	Position p5 = new DegreePosition(2, 2);
     	Position p6 = new DegreePosition(0, -2);
-    	assertEquals(p2.getDistanceToLine(left, right).getMeters(), Math.abs(p2.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters()), delta);
+    	assertEquals(p2.getDistanceToLine(left, right).getMeters(), p2.absoluteCrossTrackError(left, left.getBearingGreatCircle(right)).getMeters(), delta);
     	assertEquals(p3.getDistanceToLine(left, right).getMeters(), p3.getDistance(left).getMeters(), delta);
     	assertEquals(p4.getDistanceToLine(left, right).getMeters(), p4.getDistance(right).getMeters(), delta);
     	assertEquals(p5.getDistanceToLine(left, right).getMeters(), p5.getDistance(right).getMeters(), delta);

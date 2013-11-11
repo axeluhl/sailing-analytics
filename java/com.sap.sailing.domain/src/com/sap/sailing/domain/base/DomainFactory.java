@@ -24,6 +24,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public interface DomainFactory extends SharedDomainFactory {
+    /**
+     * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use
+     * the <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance used
+     * by all other services linked to the <code>RacingEventService</code>.
+     */
     static DomainFactory INSTANCE = new DomainFactoryImpl();
 
     /**
@@ -113,5 +118,7 @@ public interface DomainFactory extends SharedDomainFactory {
      * @param trackedRace must not be <code>null</code>
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
+
+    CompetitorStore getCompetitorStore();
 
 }

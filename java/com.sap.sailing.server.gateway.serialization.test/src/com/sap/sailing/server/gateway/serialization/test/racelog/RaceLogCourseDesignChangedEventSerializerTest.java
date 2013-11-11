@@ -32,7 +32,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogCourseDesignChangedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -40,9 +40,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 
 public class RaceLogCourseDesignChangedEventSerializerTest {
@@ -55,12 +52,10 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
-        NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-        serializer = new RaceLogCourseDesignChangedEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(nationalityJsonSerializer))),
+        serializer = new RaceLogCourseDesignChangedEventSerializer(CompetitorJsonSerializer.create(),
                 new CourseBaseJsonSerializer(new WaypointJsonSerializer(new ControlPointJsonSerializer(
                         new MarkJsonSerializer(), new GateJsonSerializer(new MarkJsonSerializer())))));
-        deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CompetitorDeserializer(factory),
+        deserializer = new RaceLogCourseDesignChangedEventDeserializer(CompetitorJsonDeserializer.create(DomainFactory.INSTANCE),
                 new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();

@@ -56,19 +56,18 @@ public class Replicator implements Runnable {
     private boolean stopped = false;
     
     /**
-     * Starts the replicator immediately, not holding back messages received but forwarding them directly.
-     * 
      * @param master
      *            descriptor of the master server from which this replicator receives messages
      * @param racingEventServiceTracker
      *            OSGi service tracker for the replica to which to apply the messages received
-     * @param consumer the RabbitMQ consumer from which to load messages
+     * @param startSuspended
+     *            decides whether to stars the replicator immediately, not holding back messages received but forwarding
+     *            them directly.
+     * @param consumer
+     *            the RabbitMQ consumer from which to load messages
+     * @param baseDomainFactory TODO
      */
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, QueueingConsumer consumer) {
-        this(master, racingEventServiceTracker, /* startSuspended */ false, consumer);
-    }
-    
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
+    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer, DomainFactory baseDomainFactory) {
         this.queue = new ArrayList<RacingEventServiceOperation<?>>();
         this.master = master;
         this.racingEventServiceTracker = racingEventServiceTracker;
@@ -84,7 +83,6 @@ public class Replicator implements Runnable {
     @Override
     public void run() {
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        
         while (true) {
             if (isBeingStopped()) {
                 break;
@@ -96,8 +94,8 @@ public class Replicator implements Runnable {
                 // Set this object's class's class loader as context for de-serialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-                ObjectInputStream ois = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(
-                        new ByteArrayInputStream(bytesFromMessage));
+                ObjectInputStream ois = racingEventServiceTracker.getRacingEventService().getBaseDomainFactory()
+                        .createObjectInputStreamResolvingAgainstThisFactory(new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
             } catch (ConsumerCancelledException cce) {

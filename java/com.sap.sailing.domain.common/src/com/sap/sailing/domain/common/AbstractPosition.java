@@ -2,7 +2,6 @@ package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 
@@ -111,9 +110,14 @@ public class AbstractPosition implements Position {
     }
 
     @Override
-    public Distance crossTrackError(Position pos2, Bearing bearing) {
-        return new CentralAngleDistance(Math.abs(Math.asin(Math.sin(pos2.getCentralAngleRad(this))
-                * Math.sin(pos2.getBearingGreatCircle(this).getRadians() - bearing.getRadians()))));
+    public Distance absoluteCrossTrackError(Position p, Bearing bearing) {
+        return new CentralAngleDistance(Math.abs(crossTrackError(p, bearing).getCentralAngleRad()));
+    }
+    
+    @Override
+    public Distance crossTrackError(Position p, Bearing bearing) {
+        return new CentralAngleDistance(Math.asin(Math.sin(p.getCentralAngleRad(this))
+                * Math.sin(p.getBearingGreatCircle(this).getRadians() - bearing.getRadians())));
     }
 
     @Override
@@ -146,12 +150,12 @@ public class AbstractPosition implements Position {
             if (toRight > 90) {
                 distance = this.getDistance(right);
             } else {
-                distance = this.crossTrackError(left, left.getBearingGreatCircle(right));
+                distance = this.absoluteCrossTrackError(left, left.getBearingGreatCircle(right));
             }
         }
         // Right now this always returns a positiv value. It might be possible to change it so that the sign indicates
         // which side of the Line the Position is on.
-        return new MeterDistance(Math.abs(distance.getMeters()));
+        return distance;
     }
 
     @Override

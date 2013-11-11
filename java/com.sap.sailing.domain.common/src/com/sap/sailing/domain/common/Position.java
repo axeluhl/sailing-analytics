@@ -48,6 +48,12 @@ public interface Position extends Serializable {
     /**
      * @return an unsigned distance
      */
+    Distance absoluteCrossTrackError(Position p, Bearing bearing);
+    
+    /**
+     * @return a signed distance; positive distances mean that this position is to the right (starboard) of the
+     * line one gets when traveling from <code>p</code> with <code>bearing</code>
+     */
     Distance crossTrackError(Position p, Bearing bearing);
 
     /**
