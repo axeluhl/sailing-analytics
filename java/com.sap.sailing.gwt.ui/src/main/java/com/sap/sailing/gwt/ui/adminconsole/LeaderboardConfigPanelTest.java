@@ -70,7 +70,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.util.FilterTextBox;
+import com.sap.sailing.util.FilterableTable;
 
 public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
     TrackedRaceChangedListener {
@@ -104,7 +104,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
     private final CaptionPanel trackedRacesCaptionPanel;
     private final List<RegattaDTO> allRegattas;
 
-    private FilterTextBox<StrippedLeaderboardDTO> filterLeaderboardTextbox;
+    private FilterableTable<StrippedLeaderboardDTO> filterLeaderboardTextbox;
 
     final SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
@@ -201,7 +201,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
         List<String> sortingCriteria = new ArrayList<String>();
         sortingCriteria.add("name");
         sortingCriteria.add("displayName");
-        filterLeaderboardTextbox = new FilterTextBox<StrippedLeaderboardDTO>(leaderboardList, availableLeaderboardList, leaderboardTable, sortingCriteria);
+        //TODO initiate filterLeadoerboardTextbox
         leaderboardConfigControlsPanel.add(filterLeaderboardTextbox);
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
