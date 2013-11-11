@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -107,7 +108,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType) {
-        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, raceType));
+        return baseDomainFactory.getCompetitorStore().getExistingCompetitorById(getCompetitorID(boatID, raceType));
     }
 
     @Override
@@ -127,7 +128,8 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, RaceType raceType) {
         Competitor result = getCompetitorByBoatIDAndRaceType(competitor.getBoatID(), raceType);
-        if (result == null || baseDomainFactory.isCompetitorToUpdateDuringGetOrCreate(result)) {
+        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
             DynamicBoat boat = new BoatImpl(competitor.getName(), raceType.getBoatClass(), competitor.getBoatID());
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
             for (String teamMemberName : competitor.getName().split("[-+&]")) {
@@ -135,7 +137,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
+            result = competitorStore.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
                     competitor.getName(), team, boat);
         }
         return result;

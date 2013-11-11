@@ -22,6 +22,7 @@ public class RaceEventSender implements RaceLogChangedListener {
         this.race = race;
     }
 
+    @Override
     public void eventAdded(RaceLogEvent event) {
         JSONObject serializedEvent = serializer.serialize(event);
         service.startService(

@@ -47,7 +47,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogFinishPositioningConfirmedEventSerializer(new CompetitorJsonSerializer(
                 new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())), null));
-        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory, null, /* boatDeserializer */ null));
+        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null));
 
         now = MillisecondsTimePoint.now();
         positioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -38,15 +39,15 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
 
     public TransientCompetitorStoreImpl() {
         lock = new NamedReentrantReadWriteLock("CompetitorStore", /* fair */ false);
-        competitorCache = new HashMap<>();
-        competitorsByIdAsString = new HashMap<>();
-        competitorsToUpdateDuringGetOrCreate = new HashSet<>();
-        weakCompetitorDTOCache = new WeakHashMap<>();
+        competitorCache = new HashMap<Serializable, Competitor>();
+        competitorsByIdAsString = new HashMap<String, Competitor>();
+        competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        weakCompetitorDTOCache = new WeakHashMap<>();
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
     }
     
     private Competitor createCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {
@@ -88,6 +89,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
+    }
+    
+    @Override
+    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat) {
+        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, team, boat);
     }
 
     private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {

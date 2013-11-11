@@ -1196,7 +1196,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<Competitor> competitors = new ArrayList<Competitor>();
         for (Object object : dbCompetitorList) {
             Serializable competitorId = (Serializable) object;
-            Competitor competitor = baseDomainFactory.getExistingCompetitorById(competitorId);
+            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
             competitors.add(competitor);
         }
         return competitors;

@@ -35,7 +35,7 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Dynami
         String id = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
         DynamicBoat boat = createBoatFromJson((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_BOAT));
         DynamicTeam team = teamDeserializer.deserialize((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_TEAM));
-        return domainFactory.getOrCreateDynamicCompetitor(UUID.fromString(id), name, team, boat);
+        return domainFactory.getCompetitorStore().getOrCreateDynamicCompetitor(UUID.fromString(id), name, team, boat);
         
     }
     
