@@ -14,6 +14,10 @@ public class TeamJsonSerializer implements JsonSerializer<Team> {
     public static final String FIELD_NATIONALITY = "nationality";
     
     private final JsonSerializer<Person> personJsonSerializer;
+    
+    public static TeamJsonSerializer create() {
+    	return new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()));
+    }
 
     public TeamJsonSerializer(JsonSerializer<Person> personJsonSerializer) {
         this.personJsonSerializer = personJsonSerializer;

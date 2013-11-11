@@ -14,14 +14,18 @@ import com.sap.sailing.server.RacingEventService;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+
+    private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
     
     private static ExtenderBundleTracker extenderBundleTracker;
 
     private final RacingEventService racingEventService;
 
     public Activator() {
+        boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
+        logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
-        racingEventService = new RacingEventServiceImpl();
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors);
     }
     
     public void start(BundleContext context) throws Exception {
@@ -36,10 +40,9 @@ public class Activator implements BundleActivator {
     }
     
     public void stop(BundleContext context) throws Exception {
-        if(extenderBundleTracker != null) {
+        if (extenderBundleTracker != null) {
             extenderBundleTracker.close();
         }
-
         // stop the tracking of the wind and all races
         for (Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {
             racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());

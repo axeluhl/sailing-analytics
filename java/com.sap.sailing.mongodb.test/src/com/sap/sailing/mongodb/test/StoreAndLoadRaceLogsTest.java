@@ -15,11 +15,12 @@ import org.junit.Test;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -31,10 +32,10 @@ import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 
 public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
 
-    protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) MongoFactory.INSTANCE
+    protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getMongoObjectFactory(getMongoService());
-    protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) MongoFactory.INSTANCE
-            .getDomainObjectFactory(getMongoService());
+    protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
+            .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
     protected RaceLogEventFactory eventFactory = RaceLogEventFactory.INSTANCE;
 
     public StoreAndLoadRaceLogsTest() throws UnknownHostException, MongoException {

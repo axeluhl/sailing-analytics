@@ -109,7 +109,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         
         Mongo mySecondMongo = newMongo();
         DB secondDatabase = mySecondMongo.getDB(dbConfiguration.getDatabaseName());
-        WindTrack result = new DomainObjectFactoryImpl(secondDatabase).loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
+        WindTrack result = new DomainObjectFactoryImpl(secondDatabase, com.sap.sailing.domain.base.DomainFactory.INSTANCE).loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
                 30000);
         double myBearingDeg = 123.4;
         result.lockForRead();

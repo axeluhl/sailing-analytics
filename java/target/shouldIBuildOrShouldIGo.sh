@@ -47,6 +47,27 @@ find_project_home ()
     echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
 }
 
+load_from_release_file ()
+{
+    cd $USER_HOME/servers/server
+    rm -rf plugins start stop status native-libraries org.eclipse.osgi
+    echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
+    `which wget` http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
+    `which tar` xvzf $INSTALL_FROM_RELEASE.tar.gz
+    echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
+    `which wget` http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+    chmod a+x $USE_ENVIRONMENT
+    ./$USE_ENVIRONMENT
+    echo "Configuration for this server is:"
+    echo "SERVER_NAME: $SERVER_NAME"
+    echo "SERVER_PORT: $SERVER_PORT"
+    echo "MEMORY: $MEMORY"
+    echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+}
+
 checkout_code ()
 {
     cd $PROJECT_HOME
@@ -91,6 +112,11 @@ deploy ()
 }
 
 checks
-checkout_code
-build
-deploy
+
+if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+    load_from_release_file
+else
+    checkout_code
+    build
+    deploy
+fi
