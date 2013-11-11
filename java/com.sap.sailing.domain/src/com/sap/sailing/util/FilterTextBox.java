@@ -9,27 +9,21 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.Named;
 
 public class FilterTextBox extends TextBox {
 
-    ListDataProvider<Named> data;
-    List<Named> availableData;
-    CellTable<Named> table;
-    String sortingCriteria;
+    ListDataProvider<Object> data;
+    List<Object> availableData;
+    CellTable<Object> table;
 
-    public FilterTextBox(ListDataProvider<Named> data, List<Named> availableData, CellTable<Named> table, String sortingCriteria) {
-        this.data = data;
-        this.availableData = availableData;
-        this.table = table;
-        this.sortingCriteria = sortingCriteria;
+    public FilterTextBox(ListDataProvider<?> data, List<?> availableData, CellTable<?> table) {
+        
         addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 filter();
             }
         });
-
     }
 
     public void filter() {
@@ -38,11 +32,11 @@ public class FilterTextBox extends TextBox {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         data.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (Named obj : availableData) {
+            for (Object obj : availableData) {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!obj.getName().toUpperCase().contains(textAsUppercase)) {
+                    if (!obj.toString().toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
                     }
