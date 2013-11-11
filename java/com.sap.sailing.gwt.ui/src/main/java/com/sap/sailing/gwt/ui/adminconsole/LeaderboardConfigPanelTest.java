@@ -104,7 +104,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
     private final CaptionPanel trackedRacesCaptionPanel;
     private final List<RegattaDTO> allRegattas;
 
-    private FilterTextBox filterLeaderboardTextbox;
+    private FilterTextBox<StrippedLeaderboardDTO> filterLeaderboardTextbox;
 
     final SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
@@ -198,7 +198,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        filterLeaderboardTextbox = new FilterTextBox(leaderboardList, availableLeaderboardList, leaderboardTable);
+        filterLeaderboardTextbox = new FilterTextBox<StrippedLeaderboardDTO>(leaderboardList, availableLeaderboardList, leaderboardTable);
         leaderboardConfigControlsPanel.add(filterLeaderboardTextbox);
         
         leaderboardRemoveButton = new Button(stringMessages.remove());

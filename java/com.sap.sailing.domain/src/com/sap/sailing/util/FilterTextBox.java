@@ -10,14 +10,17 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class FilterTextBox extends TextBox {
+public class FilterTextBox<T> extends TextBox {
 
-    ListDataProvider<Object> data;
-    List<Object> availableData;
-    CellTable<Object> table;
+    ListDataProvider<T> filteredData;
+    List<T> availableData;
+    CellTable<T> display;
 
-    public FilterTextBox(ListDataProvider<?> data, List<?> availableData, CellTable<?> table) {
-        
+    public FilterTextBox(ListDataProvider<T> filteredData, List<T> availableData, CellTable<T> display) {
+        this.filteredData = filteredData;
+        this.availableData = availableData;
+        this.display = display;
+
         addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
@@ -30,26 +33,26 @@ public class FilterTextBox extends TextBox {
 
         String text = getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        data.getList().clear();
+        filteredData.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (Object obj : availableData) {
+            for (T obj : availableData) {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!obj.toString().toUpperCase().contains(textAsUppercase)) {
+                    if (obj.toString().toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
                     }
                 }
                 if (!failed) {
-                    data.getList().add(obj);
+                    filteredData.getList().add(obj);
                 }
             }
         } else {
-            data.getList().addAll(availableData);
+            filteredData.getList().addAll(availableData);
         }
         // now sort again according to selected criterion
-        ColumnSortEvent.fire(table, table.getColumnSortList());
+        ColumnSortEvent.fire(display, display.getColumnSortList());
 
     }
 }
