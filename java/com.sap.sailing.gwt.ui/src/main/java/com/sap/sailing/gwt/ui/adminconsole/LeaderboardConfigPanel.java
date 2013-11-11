@@ -284,8 +284,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         TextColumn<StrippedLeaderboardDTO> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                String result = leaderboard.isRegattaLeaderboard ? "Regatta" : "Flexible";
-                if(leaderboard.isMetaLeaderboard) {
+                String result = leaderboard.type.isRegattaLeaderboard() ? "Regatta" : "Flexible";
+                if(leaderboard.type.isMetaLeaderboard()) {
                     result += " , Meta"; 
                 }
                 return result;
@@ -320,10 +320,10 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(leaderboardDTO);
-                    if (leaderboardDTO.isMetaLeaderboard) {
+                    if (leaderboardDTO.type.isMetaLeaderboard()) {
                         Window.alert("This is a meta leaderboard. It can't be changed here.");
                     } else {
-                        if (leaderboardDTO.isRegattaLeaderboard) {
+                        if (leaderboardDTO.type.isRegattaLeaderboard()) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
                                     leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
                                     leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
@@ -479,7 +479,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 new DisablableCheckboxCell(new IsEnabled() {
                     @Override
                     public boolean isEnabled() {
-                        return getSelectedLeaderboard() != null && !getSelectedLeaderboard().isRegattaLeaderboard;
+                        return getSelectedLeaderboard() != null && !getSelectedLeaderboard().type.isRegattaLeaderboard();
                     }
                 })) {
             @Override
@@ -550,7 +550,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (getSelectedLeaderboard().isRegattaLeaderboard) {
+                if (getSelectedLeaderboard().type.isRegattaLeaderboard()) {
                     Window.alert(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta());
                 } else {
                     addRaceColumnsToLeaderboard();
@@ -818,33 +818,32 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         if (selectedLeaderboardName != null) {
             final RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnWithFleet();
-            final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA()
-                    .getRaceColumnName();
+            final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA().getRaceColumnName();
             final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().getName();
             sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
                     selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to determine tracked race linked to race column "
-                                    + selectedRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
-                                    + t.getMessage());
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError("Error trying to determine tracked race linked to race column "
+                            + selectedRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
+                            + t.getMessage());
+                }
+    
+                @Override
+                public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
+                    if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
+                                    RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
+                                            .get(selectedFleetName);
+                        if (raceIdentifier != null) {
+                            selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+                        } else {
+                            trackedRacesListComposite.clearSelection();
                         }
-
-                        @Override
-                        public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
-                            if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
-                                RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
-                                        .get(selectedFleetName);
-                                if (raceIdentifier != null) {
-                                    selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-                                } else {
-                                    trackedRacesListComposite.clearSelection();
-                                }
-                            } else {
-                                trackedRacesListComposite.clearSelection();
-                            }
-                        }
-                    });
+                    } else {
+                        trackedRacesListComposite.clearSelection();
+                    }
+                }
+            });
         }
     }
 
@@ -870,7 +869,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
         final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceColumnWithFleet.getA(), getSelectedLeaderboard().isRegattaLeaderboard, stringMessages, new DialogCallback<RaceColumnDescriptor>() {
+                raceColumnWithFleet.getA(), getSelectedLeaderboard().type.isRegattaLeaderboard(), stringMessages, new DialogCallback<RaceColumnDescriptor>() {
             @Override
             public void cancel() {
             }
@@ -1007,12 +1006,12 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             }
             selectedLeaderBoardPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
-            if (!selectedLeaderboard.isMetaLeaderboard) {
+            if (!selectedLeaderboard.type.isMetaLeaderboard()) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
-            addRaceColumnsButton.setVisible(!selectedLeaderboard.isRegattaLeaderboard);
-            columnMoveUpButton.setVisible(!selectedLeaderboard.isRegattaLeaderboard);
-            columnMoveDownButton.setVisible(!selectedLeaderboard.isRegattaLeaderboard);
+            addRaceColumnsButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
+            columnMoveUpButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
+            columnMoveDownButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);

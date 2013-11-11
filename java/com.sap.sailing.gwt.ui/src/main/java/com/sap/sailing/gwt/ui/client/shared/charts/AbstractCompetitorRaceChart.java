@@ -59,7 +59,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 
 /**
- * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward
+ * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
  * distance to leader) for different races in a chart.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
@@ -70,7 +70,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends RaceChart implements
+public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
     private static final int MAX_SERIES_POINTS = 10000;
@@ -90,7 +90,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
     
-    public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
@@ -99,7 +99,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 null, null);
     }
 
-    public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
@@ -127,12 +127,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     }
 
     /**
-     * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also clears the
-     * {@link #chartData}, the {@link #dataSeriesByCompetitor} and the {@link #markPassingSeriesByCompetitor}.
-     * 
-     * @param detailType
-     *            The detail type for the new chart.
-     * @return A chart for the given detail Type
+     * Creates a new chart.
+     * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
      */
     private Chart createChart() {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
@@ -161,13 +157,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
                 public boolean onClick(ChartClickEvent chartClickEvent) {
-                    return AbstractChartPanel.this.onClick(chartClickEvent);
+                    return AbstractCompetitorRaceChart.this.onClick(chartClickEvent);
                 }
             });
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
                 @Override
                 public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                    return AbstractChartPanel.this.onXAxisSelectionChange(chartSelectionEvent);
+                    return AbstractCompetitorRaceChart.this.onXAxisSelectionChange(chartSelectionEvent);
                 }
             });
         }
@@ -242,10 +238,9 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(
-                                getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
-                                timer.getPlayMode() == PlayModes.Live);
                         hideLoading();
+                        errorReporter.reportError(stringMessages.errorFetchingChartData(caught.getMessage()),
+                                timer.getPlayMode() == PlayModes.Live);
                     }
                 });
         asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
@@ -294,7 +289,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
     /**
      * Creates the series for all selected competitors if these aren't created yet.<br />
-     * Fills the series for the selected competitors with the data in {@link AbstractChartPanel#chartData}.<br />
+     * Fills the series for the selected competitors with the data in {@link AbstractCompetitorRaceChart#chartData}.<br />
      */
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, boolean append) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
@@ -476,10 +471,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     protected DetailType getSelectedDetailType() {
         return this.selectedDetailType;
     }
-
-    private boolean hasReversedYAxis(DetailType detailType) {
-        return detailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS;
-    }
     
     /**
      * Updates the {@link #selectedDetailType} field, clears the chart for the new <code>selectedDetailType</code> and
@@ -535,12 +526,16 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return hasDetailTypeChanged;
     }
 
-    private boolean isYAxisReversed() {
+    private boolean hasReversedYAxis(DetailType detailType) {
         return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
-               selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
-               selectedDetailType == DetailType.RACE_RANK ||
-               selectedDetailType == DetailType.REGATTA_RANK ||
-               selectedDetailType == DetailType.OVERALL_RANK;
+                selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
+                selectedDetailType == DetailType.RACE_RANK ||
+                selectedDetailType == DetailType.REGATTA_RANK ||
+                selectedDetailType == DetailType.OVERALL_RANK;
+    }
+    
+    private boolean isYAxisReversed() {
+        return hasReversedYAxis(selectedDetailType);
     }
 
     @Override
@@ -562,7 +557,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      * 
      * @param markPassingInRange
      *            A Boolean matrix filled by
-     *            {@link AbstractChartPanel#fillPotentialXValues(double, double, ArrayList, ArrayList, ArrayList)
+     *            {@link AbstractCompetitorRaceChart#fillPotentialXValues(double, double, ArrayList, ArrayList, ArrayList)
      *            fillPotentialXValues(...)}
      * @return A pair of Booleans. Value A contains false if a passing is not in the selection (error), so that the
      *         selection range needs to be refactored. Value B returns true if two passings are in range before the

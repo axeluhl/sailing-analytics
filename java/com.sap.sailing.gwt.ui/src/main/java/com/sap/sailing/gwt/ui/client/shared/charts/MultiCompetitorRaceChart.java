@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 /**
- * MultiChartPanel is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
+ * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
  * leader) for different races in a chart. The chart type can be selected from the settings.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
@@ -26,19 +26,11 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
+public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
     private boolean hasOverallLeaderboard;
     
-    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
-                timeRangeWithZoomProvider, stringMessages, errorReporter, compactChart, allowTimeAdjust, null, null);
-    }
-    
-    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
@@ -64,12 +56,12 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     }
 
     @Override
-    public SettingsDialogComponent<MultiChartSettings> getSettingsDialogComponent() {
-        return new MultiChartSettingsComponent(new MultiChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
+        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
     }
 
     @Override
-    public void updateSettings(MultiChartSettings newSettings) {
+    public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
         boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
@@ -79,7 +71,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     }
 
     @Override
-    protected Component<MultiChartSettings> getComponent() {
+    protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;
     }
 
