@@ -15,21 +15,20 @@ public class FilterTextBox<T> extends TextBox {
     ListDataProvider<T> filteredData;
     List<T> availableData;
     CellTable<T> display;
-    List<String> strings;
+    List<String> fieldsByWhichToFilter;
+    KeyUpHandler keyUpHandler = new KeyUpHandler() {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+            filter();
+        }
+    };
 
     public FilterTextBox(ListDataProvider<T> filteredData, List<T> availableData, CellTable<T> display,
-            List<String> strings) {
+            List<String> fieldsByWhichToFilter) {
         this.filteredData = filteredData;
         this.availableData = availableData;
         this.display = display;
-        this.strings = strings;
-
-        addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                filter();
-            }
-        });
+        this.fieldsByWhichToFilter = fieldsByWhichToFilter;
     }
 
     public void filter() {
@@ -41,16 +40,15 @@ public class FilterTextBox<T> extends TextBox {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    for (String s : strings) {
+                    for (String s : fieldsByWhichToFilter) {
                         try {
-                            if (((String) obj.getClass().getField(s).get(obj)).toUpperCase().contains(textAsUppercase)) {
+                            if (!obj.getClass().getField(s).get(obj).toString().toUpperCase().contains(textAsUppercase)) {
                                 failed = true;
                                 break;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
                                 | SecurityException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            failed = true;
                         }
                     }
                 }
