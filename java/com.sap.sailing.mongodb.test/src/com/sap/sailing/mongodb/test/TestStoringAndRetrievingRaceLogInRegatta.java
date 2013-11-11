@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
@@ -84,8 +84,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     @Before
     public void setUp() {
         now = MillisecondsTimePoint.now();
-        mongoObjectFactory = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        domainObjectFactory = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
 
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         regatta = createRegattaAndAddRaceColumns(1, regattaName, boatClass, true,
@@ -244,7 +244,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
-        Competitor storedCompetitor = DomainFactory.INSTANCE.createCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
         List<Triple<Serializable, String, MaxPointsReason>> storedPositioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         
@@ -274,7 +274,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.createCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
         List<Triple<Serializable, String, MaxPointsReason>> storedPositioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
         storedPositioningList.add(new Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         

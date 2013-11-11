@@ -122,7 +122,6 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean override = overrideSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override,
                     new AsyncCallback<MasterDataImportObjectCreationCount>() {
-
                         @Override
                         public void onSuccess(MasterDataImportObjectCreationCount result) {
                             int leaderboardsCreated = result.getLeaderboardCount();
@@ -313,7 +312,6 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void addSelectionChangedListener() {
         leaderboardgroupListBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 changeButtonStateAccordingToApplicationState();

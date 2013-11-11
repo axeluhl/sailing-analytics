@@ -246,4 +246,22 @@ public class Util {
         return result;
     }
     
+    public static <T> int compareToWithNull(Comparable<T> o1, T o2) {
+        final int result;
+        if (o1 == null) {
+            if (o2 == null) {
+                result = 0;
+            } else {
+                result = -1;
+            }
+        } else {
+            if (o2 == null) {
+                result = 1;
+            } else {
+                result = o1.compareTo(o2);
+            }
+        }
+        return result;
+    }
+    
 }

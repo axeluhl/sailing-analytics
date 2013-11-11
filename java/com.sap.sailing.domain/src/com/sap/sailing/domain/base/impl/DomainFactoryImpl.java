@@ -14,13 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -29,15 +29,12 @@ import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
-import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Placemark;
@@ -46,9 +43,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -93,7 +88,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<String, BoatClass> boatClassCache;
     
-    private final Map<Serializable, Competitor> competitorCache;
+    private final CompetitorStore competitorStore;
     
     private final Map<Serializable, CourseArea> courseAreaCache;
     
@@ -105,8 +100,6 @@ public class DomainFactoryImpl implements DomainFactory {
     private final ConcurrentHashMap<Serializable, WeakWaypointReference> waypointCache;
     
     private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
-    
-    private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
     
     private final Map<Serializable, DeviceConfigurationMatcher> configurationMatcherCache;
 
@@ -135,14 +128,20 @@ public class DomainFactoryImpl implements DomainFactory {
 
     private final Set<String> mayStartWithNoUpwindLeg;
     
+    /**
+     * Uses a transient competitor store
+     */
     public DomainFactoryImpl() {
-        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
+        this(new TransientCompetitorStoreImpl());
+    }
+    
+    public DomainFactoryImpl(CompetitorStore competitorStore) {
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
         markIdCache = new HashMap<>();
         boatClassCache = new HashMap<String, BoatClass>();
-        competitorCache = new HashMap<Serializable, Competitor>();
+        this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
         courseAreaCache = new HashMap<>();
@@ -296,23 +295,22 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getExistingCompetitorById(Serializable competitorId) {
-        return competitorCache.get(competitorId);
+        return competitorStore.getExistingCompetitorById(competitorId);
     }
 
     @Override
-    public synchronized Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
-        Competitor result = new CompetitorImpl(id, name, team, boat);
-        competitorCache.put(id, result);
-        return result;
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
+        return competitorStore.isCompetitorToUpdateDuringGetOrCreate(competitor);
     }
-    
+
     @Override
-    public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat) {
-        Competitor result = getExistingCompetitorById(competitorId);
-        if (result == null) {
-            result = createCompetitor(competitorId, name, team, boat);
-        }
-        return result;
+    public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
+        return competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
+    }
+
+    @Override
+    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat) {
+        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, team, boat);
     }
 
     @Override
@@ -343,19 +341,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
-        CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
-        if (competitorDTO == null) {
-            final Nationality nationality = c.getTeam().getNationality();
-            CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-            competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
-                    : countryCode.getTwoLetterISOCode(),
-                    countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
-                            : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
-                            new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
-                                    .getMeters()));
-            weakCompetitorDTOCache.put(c, competitorDTO);
-        }
-        return competitorDTO;
+        return competitorStore.convertToCompetitorDTO(c);
     }
 
     @Override
@@ -497,6 +483,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public CourseArea getExistingCourseAreaById(Serializable courseAreaId) {
         return courseAreaCache.get(courseAreaId);
+    }
+
+    @Override
+    public CompetitorStore getCompetitorStore() {
+        return competitorStore;
     }
 
     @Override

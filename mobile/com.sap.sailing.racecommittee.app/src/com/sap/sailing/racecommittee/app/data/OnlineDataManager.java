@@ -55,7 +55,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeseri
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -217,7 +217,7 @@ public class OnlineDataManager extends DataManager {
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
                 SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory);
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this,
                         managedRace);

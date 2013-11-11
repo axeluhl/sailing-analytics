@@ -125,6 +125,17 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
         return moveLeaderboardColumnUp;
     }
 
+    @Override
+    public RacingEventServiceOperation<?> transformCreatePersistentCompetitorClientOp(
+            CreatePersistentCompetitor createPersistentCompetitor) {
+        return createPersistentCompetitor;
+    }
+
+    @Override
+    public RacingEventServiceOperation<?> transformCreatePersistentCompetitorServerOp(
+            CreatePersistentCompetitor createPersistentCompetitor) {
+        return createPersistentCompetitor;
+    }
     public static RacingEventServiceOperation<Void> getNoOp() {
         return null;
     }

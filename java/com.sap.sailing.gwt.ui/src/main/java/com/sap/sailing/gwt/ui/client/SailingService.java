@@ -239,7 +239,7 @@ public interface SailingService extends RemoteService {
     
     ReplicationStateDTO getReplicaInfo();
 
-    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort) throws Exception;
+    void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws Exception;
 
     void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
 
@@ -327,6 +327,12 @@ public interface SailingService extends RemoteService {
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
+
+    Iterable<CompetitorDTO> getCompetitors();
+
+    CompetitorDTO updateCompetitor(CompetitorDTO competitor);
+
+    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     
     List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers();
     

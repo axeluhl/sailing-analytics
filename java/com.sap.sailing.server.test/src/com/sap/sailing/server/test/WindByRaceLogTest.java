@@ -75,7 +75,7 @@ public class WindByRaceLogTest {
         
         final String boatClassName = "49er";
         // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
         Competitor competitor = createCompetitor(masterDomainFactory);
         int[] discardThreshold = {1, 2};

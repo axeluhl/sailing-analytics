@@ -15,7 +15,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -73,7 +73,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, author, 0, Flags.AP, Flags.ALPHA, true);
         {
-            DBObject rcEventForMongo = ((MongoObjectFactoryImpl) MongoFactory.INSTANCE.getDefaultMongoObjectFactory())
+            DBObject rcEventForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory())
                     .storeRaceLogFlagEvent(rcEvent);
             DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
             coll.insert(rcEventForMongo);
@@ -83,7 +83,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
             assertNotNull(coll);
             DBObject object = coll.findOne();
-            RaceLogFlagEvent readRcEvent = (RaceLogFlagEvent) ((DomainObjectFactoryImpl) MongoFactory.INSTANCE.getDefaultDomainObjectFactory()).loadRaceLogEvent(object);
+            RaceLogFlagEvent readRcEvent = (RaceLogFlagEvent) ((DomainObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()).loadRaceLogEvent(object);
             assertEquals(rcEvent.getTimePoint(), readRcEvent.getTimePoint());
             assertEquals(rcEvent.getId(), readRcEvent.getId());
             assertEquals(rcEvent.getPassId(), readRcEvent.getPassId());

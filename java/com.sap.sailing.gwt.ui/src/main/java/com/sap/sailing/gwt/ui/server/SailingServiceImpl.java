@@ -141,7 +141,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
@@ -161,6 +160,8 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -172,6 +173,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
@@ -185,8 +187,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.SailingService;
@@ -251,6 +254,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
+import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -277,6 +281,7 @@ import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForComp
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
@@ -327,8 +332,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final Executor executor;
     
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
-
-    private final DomainFactory tractracDomainFactory;
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
@@ -344,17 +347,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
     private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
+    private final TracTracAdapter tracTracAdapter;
+
+    private final SwissTimingAdapter swissTimingAdapter;
+
+    private final SwissTimingReplayService swissTimingReplayService;
+
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
-        tractracDomainFactory = DomainFactory.INSTANCE;
-        baseDomainFactory = tractracDomainFactory.getBaseDomainFactory();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
-        mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
-        domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
+        baseDomainFactory = getService().getBaseDomainFactory();
+        mongoObjectFactory = getService().getMongoObjectFactory();
+        domainObjectFactory = getService().getDomainObjectFactory();
+        tracTracAdapter = createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
+        swissTimingAdapter = createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
+        swissTimingReplayService = createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
+        scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
+        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE.createDomainObjectFactory(mongoObjectFactory.getDatabase(), tracTracAdapter.getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
@@ -380,6 +391,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+    }
+
+    protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
+        ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
+                context, TracTracAdapterFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
+            BundleContext context) {
+        ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> result = new ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory>(
+                context, SwissTimingAdapterFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
+            BundleContext context) {
+        ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> result = new ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory>(
+                context, SwissTimingReplayServiceFactory.class.getName(), null);
+        result.open();
+        return result;
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -768,9 +802,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<Competitor> competitors) {
+    private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor c : competitors) {
+        for (Competitor c : iterable) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
             result.add(competitorDTO);
         }
@@ -780,7 +814,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL, boolean listHiddenRaces) throws MalformedURLException, IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         com.sap.sailing.domain.common.impl.Util.Pair<String,List<RaceRecord>> raceRecords;
-        raceRecords = getService().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
+        raceRecords = getTracTracAdapter().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
             if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
@@ -803,7 +837,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithTracTrac for regatta "+regattaToAddTo+" for race records "+rrs+" with liveURI "+liveURI+" and storedURI "+storedURI);
         for (TracTracRaceRecordDTO rr : rrs) {
             // reload JSON and load clientparams.php
-            RaceRecord record = getService().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
+            RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
             logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() + " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
             // note that the live URI may be null for races that were put into replay mode
             final String effectiveLiveURI;
@@ -822,13 +856,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 effectiveStoredURI = storedURI;
             }
-            final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, record.getParamURL(),
-                    effectiveLiveURI == null ? null : new URI(effectiveLiveURI), new URI(effectiveStoredURI),
-                    new URI(courseDesignUpdateURI), new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
+            final RacesHandle raceHandle = getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
+                    record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
+                    new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
+                    new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
+                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
@@ -842,6 +876,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }.start();
             }
         }
+    }
+
+    private TracTracAdapter getTracTracAdapter() {
+        return tracTracAdapter;
+    }
+    
+    private SwissTimingAdapter getSwissTimingAdapter() {
+        return swissTimingAdapter;
+    }
+    
+    private SwissTimingReplayService getSwissTimingReplayService() {
+        return swissTimingReplayService;
     }
 
     @Override
@@ -858,7 +904,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
-        tractracMongoObjectFactory.storeTracTracConfiguration(tractracDomainFactory.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
+        tractracMongoObjectFactory.storeTracTracConfiguration(tracTracAdapter.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
                 courseDesignUpdateURI, tracTracUsername, tracTracPassword));
     }
 
@@ -1450,11 +1496,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
                 if (firstWaypoint != null) {
-                    result.startMarkPositions = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
+                    final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
+                    final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
+                    result.startMarkPositions = startMarkPositionDTOs;
+                    result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                    result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                    result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                    result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
                 if (lastWaypoint != null) {
-                    result.finishMarkPositions = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
+                    final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
+                    final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
+                    result.finishMarkPositions = finishMarkPositionDTOs;
+                    result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                    result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                    result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                    result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
                 }
             }
         }
@@ -1585,16 +1643,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return marksIter.hasNext() == markDTOsIter.hasNext();
     }
 
-    private List<PositionDTO> getMarkPositionDTOs(TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
-        List<PositionDTO> startMarkPositions = new ArrayList<PositionDTO>();
+    private List<PositionDTO> getMarkPositionDTOs(
+            TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
+        List<PositionDTO> markPositionDTOs = new ArrayList<PositionDTO>();
         for (Mark startMark : waypoint.getMarks()) {
             final Position estimatedMarkPosition = trackedRace.getOrCreateTrack(startMark)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);
             if (estimatedMarkPosition != null) {
-                startMarkPositions.add(new PositionDTO(estimatedMarkPosition.getLatDeg(), estimatedMarkPosition.getLngDeg()));
+                markPositionDTOs.add(new PositionDTO(estimatedMarkPosition.getLatDeg(), estimatedMarkPosition.getLngDeg()));
             }
         }
-        return startMarkPositions;
+        return markPositionDTOs;
     }
 
     private List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
@@ -1701,7 +1760,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
     }
-
+    
     @Override
     public List<String> getLeaderboardNames() throws Exception {
         return new ArrayList<String>(getService().getLeaderboards().keySet());
@@ -2032,9 +2091,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) 
             throws UnknownHostException, IOException, InterruptedException, ParseException {
         List<SwissTimingRaceRecordDTO> result = new ArrayList<SwissTimingRaceRecordDTO>();
-        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getService().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
+        for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
             SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(rr.getRaceID(), rr.getDescription(), rr.getStartTime());
-            BoatClass boatClass = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE.getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
+            BoatClass boatClass = swissTimingAdapter.getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
             swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
@@ -2055,11 +2114,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port + " and canSendRequests=" + canSendRequests);
         for (SwissTimingRaceRecordDTO rr : rrs) {
-            final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
+            final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.ID, hostname,
+                    port,
                     canSendRequests,
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {
                     public void run() {
@@ -2077,13 +2136,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) {
-        getService().storeSwissTimingDummyRace(racMessage,stlMesssage,ccgMessage);
+        getSwissTimingAdapter().storeSwissTimingDummyRace(racMessage,stlMesssage,ccgMessage);
     }
 
     @Override
     public List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) {
-        List<SwissTimingReplayRace> replayRaces = SwissTimingReplayServiceFactory.INSTANCE
-                .createSwissTimingReplayService().listReplayRaces(swissTimingUrl);
+        List<SwissTimingReplayRace> replayRaces = getSwissTimingReplayService().listReplayRaces(swissTimingUrl);
         List<SwissTimingReplayRaceDTO> result = new ArrayList<SwissTimingReplayRaceDTO>(replayRaces.size()); 
         for (SwissTimingReplayRace replayRace : replayRaces) {
             result.add(new SwissTimingReplayRaceDTO(replayRace.getFlightNumber(), replayRace.getRaceId(), replayRace.getRsc(), replayRace.getName(), replayRace.getBoatClass(), replayRace.getStartTime(), replayRace.getLink()));
@@ -2122,10 +2180,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 regatta = getService().getRegatta(regattaIdentifier);
             }
-            SwissTimingReplayService replayService = SwissTimingReplayServiceFactory.INSTANCE
-                    .createSwissTimingReplayService();
-            replayService.loadRaceData(replayRaceDTO.link, getService().getSwissTimingDomainFactory(), regatta,
-                    getService());
+            getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
         }
     }
 
@@ -2144,9 +2199,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Finds a competitor in a sequence of competitors that has an {@link Competitor#getId()} equal to <code>id</code>. 
      */
-    private Competitor getCompetitorById(Iterable<Competitor> competitors, String id) {
+    private Competitor getCompetitorByIdAsString(Iterable<Competitor> competitors, String idAsString) {
         for (Competitor c : competitors) {
-            if (c.getId().toString().equals(id)) {
+            if (c.getId().toString().equals(idAsString)) {
                 return c;
             }
         }
@@ -2228,7 +2283,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
                     @Override
                             public CompetitorRaceDataDTO call() throws NoWindException {
-                                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(),
+                                Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                         competitorDTO.getIdAsString());
                                 ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
                                 ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
@@ -2537,11 +2592,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
+    public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
         // the queue name must be always the same for this server. in order to achieve
         // this we're using the unique server identifier
         getReplicationService().startToReplicateFrom(
-                ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, exchangeName, servletPort, messagingPort, 
+                ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(messagingHost, masterHost, exchangeName, servletPort, messagingPort, 
                         getReplicationService().getServerIdentifier().toString()));
     }
 
@@ -3210,6 +3265,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
         }
         return queryStringBuffer.toString();
+    }
+
+    @Override
+    public Iterable<CompetitorDTO> getCompetitors() {
+        return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitors());
+    }
+    
+    @Override
+    public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
+        return getBaseDomainFactory().convertToCompetitorDTO(
+                getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
+                competitor.getSailID(),
+                (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
+                    getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode()))));
+    }
+
+    @Override
+    public void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors) {
+        List<String> competitorIdsAsStrings = new ArrayList<String>();
+        for (CompetitorDTO competitor : competitors) {
+            competitorIdsAsStrings.add(competitor.getIdAsString());
+        }
+        getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
 
     @Override

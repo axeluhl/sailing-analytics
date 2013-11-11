@@ -51,6 +51,12 @@ public enum CollectionNames {
     /**
      * Stores the race log events for a tracked race.
      */
+
+    
+    /**
+     * Stores competitors for smartphone tracking.
+     */
+    COMPETITORS,
     RACE_LOGS,
     
     /**

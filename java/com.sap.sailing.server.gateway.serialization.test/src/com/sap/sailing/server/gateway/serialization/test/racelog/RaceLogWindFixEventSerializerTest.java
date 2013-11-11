@@ -25,7 +25,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogWindFixEventDeserializer;
@@ -49,9 +49,9 @@ public class RaceLogWindFixEventSerializerTest {
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogWindFixEventSerializer(new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer()))), new WindJsonSerializer(
+                new PersonJsonSerializer(new NationalityJsonSerializer())), null), new WindJsonSerializer(
                 new PositionJsonSerializer()));
-        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorDeserializer(factory),
+        deserializer = new RaceLogWindFixEventDeserializer(new CompetitorJsonDeserializer(factory, null, /* boatDeserializer */ null),
                 new WindJsonDeserializer(new PositionJsonDeserializer()));
 
         now = MillisecondsTimePoint.now();

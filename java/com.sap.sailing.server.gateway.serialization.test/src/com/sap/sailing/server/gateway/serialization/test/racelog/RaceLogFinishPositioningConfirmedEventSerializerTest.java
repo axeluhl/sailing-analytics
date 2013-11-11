@@ -25,7 +25,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFinishPositioningConfirmedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -46,8 +46,8 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
         serializer = new RaceLogFinishPositioningConfirmedEventSerializer(new CompetitorJsonSerializer(
-                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer()))));
-        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorDeserializer(factory));
+                new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())), null));
+        deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory, null, /* boatDeserializer */ null));
 
         now = MillisecondsTimePoint.now();
         positioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
