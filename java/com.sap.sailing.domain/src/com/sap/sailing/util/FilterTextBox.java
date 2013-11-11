@@ -15,11 +15,14 @@ public class FilterTextBox<T> extends TextBox {
     ListDataProvider<T> filteredData;
     List<T> availableData;
     CellTable<T> display;
+    List<String> strings;
 
-    public FilterTextBox(ListDataProvider<T> filteredData, List<T> availableData, CellTable<T> display) {
+    public FilterTextBox(ListDataProvider<T> filteredData, List<T> availableData, CellTable<T> display,
+            List<String> strings) {
         this.filteredData = filteredData;
         this.availableData = availableData;
         this.display = display;
+        this.strings = strings;
 
         addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -30,7 +33,6 @@ public class FilterTextBox<T> extends TextBox {
     }
 
     public void filter() {
-
         String text = getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         filteredData.getList().clear();
@@ -39,9 +41,17 @@ public class FilterTextBox<T> extends TextBox {
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (obj.toString().toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
+                    for (String s : strings) {
+                        try {
+                            if (((String) obj.getClass().getField(s).get(obj)).toUpperCase().contains(textAsUppercase)) {
+                                failed = true;
+                                break;
+                            }
+                        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+                                | SecurityException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     }
                 }
                 if (!failed) {
@@ -53,6 +63,5 @@ public class FilterTextBox<T> extends TextBox {
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(display, display.getColumnSortList());
-
     }
 }

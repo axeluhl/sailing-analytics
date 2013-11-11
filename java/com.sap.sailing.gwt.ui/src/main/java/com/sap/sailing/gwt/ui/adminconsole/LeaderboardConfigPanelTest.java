@@ -198,7 +198,10 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        filterLeaderboardTextbox = new FilterTextBox<StrippedLeaderboardDTO>(leaderboardList, availableLeaderboardList, leaderboardTable);
+        List<String> sortingCriteria = new ArrayList<String>();
+        sortingCriteria.add("name");
+        sortingCriteria.add("displayName");
+        filterLeaderboardTextbox = new FilterTextBox<StrippedLeaderboardDTO>(leaderboardList, availableLeaderboardList, leaderboardTable, sortingCriteria);
         leaderboardConfigControlsPanel.add(filterLeaderboardTextbox);
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
