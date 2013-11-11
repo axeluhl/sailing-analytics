@@ -43,6 +43,8 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -55,6 +57,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
@@ -120,6 +123,24 @@ public class PolarSheetGenerationServiceTest {
         @Override
         protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
                 BundleContext bundleContext) {;
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(
+                BundleContext context) {
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
+                BundleContext context) {
+            return null;
+        }
+
+        @Override
+        protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
+                BundleContext context) {
             return null;
         }
         

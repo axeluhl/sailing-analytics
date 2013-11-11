@@ -32,7 +32,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testLoadRaceJson() throws Exception {
         String swissTimingUrlText = "/2012_OSG.json";
         InputStream inputStream = getClass().getResourceAsStream(swissTimingUrlText);
-        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl();
+        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE);
         List<SwissTimingReplayRace> races = swissTimingReplayService.parseJSONObject(inputStream , swissTimingUrlText);
         assertEquals(201, races.size());
         assertEquals("446483", races.get(0).getRaceId());

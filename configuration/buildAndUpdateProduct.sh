@@ -127,7 +127,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	    b) onegwtpermutationonly=1;;
+	b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -400,7 +400,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
                 mv $i.sed $i
             done
         else
@@ -408,7 +408,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
                 mv $i.sed $i
             done
         fi

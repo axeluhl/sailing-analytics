@@ -824,4 +824,14 @@ public interface StringMessages extends Messages {
     String showOverallLeaderboard();
     String exchangeHost();
     String explainExchangeHostName();
+    String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
+    String doYouReallyWantToRemoveEvents();
+    String doYouReallyWantToRemoveEvent(String eventName);
+    String doYouReallyWantToRemoveCompetitors();
+    String doYouReallyWantToRemoveCompetitor(String name);
+    String filterCompetitors();
+    String editCompetitor();
+    String pleaseEnterASailNumber();
+    String successfullyAllowedCompetitorReset(String names);
+    String allowReload();
 }

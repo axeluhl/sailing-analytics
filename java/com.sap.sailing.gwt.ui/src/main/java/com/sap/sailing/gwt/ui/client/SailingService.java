@@ -330,4 +330,10 @@ public interface SailingService extends RemoteService {
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
+
+    Iterable<CompetitorDTO> getCompetitors();
+
+    CompetitorDTO updateCompetitor(CompetitorDTO competitor);
+
+    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
 }
