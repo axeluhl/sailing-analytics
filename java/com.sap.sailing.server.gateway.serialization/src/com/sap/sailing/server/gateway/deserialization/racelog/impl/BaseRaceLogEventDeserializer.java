@@ -54,7 +54,7 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         if (authorName != null && authorPriority != null) {
             author = new RaceLogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = null;
+            author = new RaceLogEventAuthorImpl("default", 4);
         }
         return deserialize(
                 object, 
