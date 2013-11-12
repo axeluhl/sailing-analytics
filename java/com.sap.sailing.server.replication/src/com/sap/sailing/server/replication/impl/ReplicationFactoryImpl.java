@@ -5,8 +5,8 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 
 public class ReplicationFactoryImpl implements ReplicationFactory {
     @Override
-    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
-        return new ReplicationMasterDescriptorImpl(hostname, exchangeName, servletPort, messagingPort, queueName);
+    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
+        return new ReplicationMasterDescriptorImpl(messagingHostname, hostname, exchangeName, servletPort, messagingPort, queueName);
     }
 
 }

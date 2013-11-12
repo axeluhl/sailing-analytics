@@ -74,12 +74,8 @@ public interface SharedDomainFactory {
      */
     BoatClass getOrCreateBoatClass(String name);
 
-    Competitor getExistingCompetitorById(Serializable competitorId);
-
-    Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
-
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
-    
+    CompetitorStore getCompetitorStore();
+   
     CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
     
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);

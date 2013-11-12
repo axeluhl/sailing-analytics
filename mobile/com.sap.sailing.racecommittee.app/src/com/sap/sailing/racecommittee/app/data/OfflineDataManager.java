@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -50,8 +51,8 @@ public class OfflineDataManager extends DataManager {
     private static boolean isInitialized = false;
     private final Context context;
 
-    public OfflineDataManager(Context context, DataStore dataStore) {
-        super(context, dataStore);
+    protected OfflineDataManager(Context context, DataStore dataStore, SharedDomainFactory domainFactory) {
+        super(context, dataStore, domainFactory);
         this.context = context;
         if (!isInitialized) {
             isInitialized = true;

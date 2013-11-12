@@ -62,6 +62,7 @@ import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.CentralAngleDistance;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -80,6 +81,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -2574,4 +2576,79 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected NamedReentrantReadWriteLock getWindLoadingLock() {
         return windLoadingLock;
     }
+    
+    /**
+     * If the <code>waypoint</code> is not a line, or no position can be determined for one of its marks at <code>timePoint</code>,
+     * <code>null</code> is returned. If no wind information is available but required to compute the advantage, <code>null</code> is
+     * returned.
+     */
+    private LineLengthAndAdvantage getLineLengthAndAdvantage(TimePoint timePoint, Waypoint waypoint) {
+        List<Position> markPositions = new ArrayList<Position>();
+        int numberOfMarks = 0;
+        boolean allMarksHavePositions = true;
+        for (Mark startMark : waypoint.getMarks()) {
+            numberOfMarks++;
+            final Position estimatedMarkPosition = getOrCreateTrack(startMark).getEstimatedPosition(timePoint, /* extrapolate */false);
+            if (estimatedMarkPosition != null) {
+                markPositions.add(estimatedMarkPosition);
+            } else {
+                allMarksHavePositions = false;
+            }
+        }
+        LineLengthAndAdvantage result = null;
+        try {
+            if (allMarksHavePositions && numberOfMarks == 2) {
+                Wind combinedWind = getWind(markPositions.get(0), timePoint);
+                Distance distanceFromFirstToSecondMark;
+                final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
+                final boolean isStartLine = indexOfWaypoint == 0;
+                final TrackedLeg legDeterminingDirection = getTrackedLeg(
+                        getRace().getCourse().getLegs().get(isStartLine?0:indexOfWaypoint-1));
+                distanceFromFirstToSecondMark = legDeterminingDirection
+                        .getWindwardDistance(markPositions.get(0), markPositions.get(1), timePoint);
+                final Position worseMark;
+                final Position betterMark;
+                final Distance distanceAdvantage;
+                if ((isStartLine && distanceFromFirstToSecondMark.getMeters() > 0) ||
+                        (!isStartLine && distanceFromFirstToSecondMark.getMeters() < 0)) {
+                    // first mark is worse than second mark
+                    worseMark = markPositions.get(1);
+                    betterMark = markPositions.get(0);
+                } else {
+                    // first mark is worse than second mark
+                    worseMark = markPositions.get(0);
+                    betterMark = markPositions.get(1);
+                }
+                if (distanceFromFirstToSecondMark.getMeters() >= 0) {
+                    distanceAdvantage = distanceFromFirstToSecondMark;
+                } else {
+                    distanceAdvantage = new CentralAngleDistance(-distanceFromFirstToSecondMark.getCentralAngleRad());
+                }
+                final NauticalSide advantageousSide;
+                if (betterMark.crossTrackError(worseMark, legDeterminingDirection.getLegBearing(timePoint)).getCentralAngleRad() > 0) {
+                    advantageousSide = NauticalSide.STARBOARD;
+                } else {
+                    advantageousSide = NauticalSide.PORT;
+                }
+                result = new LineLengthAndAdvantageImpl(timePoint, waypoint, worseMark.getDistance(betterMark),
+                        worseMark.getBearingGreatCircle(betterMark).getDifferenceTo(combinedWind.getFrom()),
+                        advantageousSide, distanceAdvantage);
+            }
+        } catch (NoWindException e) {
+            // result remains null;
+        }
+        return result;
+    }
+
+
+    @Override
+    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+        return getLineLengthAndAdvantage(at, getRace().getCourse().getFirstWaypoint());
+    }
+
+    @Override
+    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+        return getLineLengthAndAdvantage(at, getRace().getCourse().getLastWaypoint());
+    }
+
 }

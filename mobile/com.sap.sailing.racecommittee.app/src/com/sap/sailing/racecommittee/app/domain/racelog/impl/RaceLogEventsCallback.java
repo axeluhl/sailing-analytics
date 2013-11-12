@@ -18,7 +18,6 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.ServerReplyCallback;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -31,7 +30,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     public void onReply(Intent originalIntent, Context context, InputStream inputStream) {
         ReadonlyDataManager dataManager = DataManager.create(context);
         final List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
-        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        SharedDomainFactory domainFactory = DataManager.create(context).getDataStore().getDomainFactory();
         
         JSONParser parser = new JSONParser();
         try {
@@ -46,18 +45,23 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             }
         } catch (Exception e) {
             ExLog.e(TAG, "Error parsing server response");
+            ExLog.ex(TAG, e);
         }
         
         String raceId = originalIntent.getStringExtra(AppConstants.RACE_ID_KEY);
-        RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
-        if (raceLog != null) {
-            ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
-            for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
-                raceLog.add(eventToAddToRaceLog);
-                ExLog.i(TAG, "added event " + eventToAddToRaceLog.toString() + " to client's race log");
+        if (dataManager.getDataStore().hasRace(raceId)) {
+            RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
+            if (raceLog != null) {
+                ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
+                for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
+                    raceLog.add(eventToAddToRaceLog);
+                    ExLog.i(TAG, "added event " + eventToAddToRaceLog.toString() + " to client's race log");
+                }
+            } else {
+                ExLog.w(TAG, "Couldn't retrieve race log for race ID " + raceId);
             }
         } else {
-            ExLog.w(TAG, "Couldn't retrieve race log for race ID " + raceId);
+            ExLog.w(TAG, "There is no race with id " + raceId);
         }
     }
 

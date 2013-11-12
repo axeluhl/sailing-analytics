@@ -13,7 +13,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -85,7 +84,7 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             return;
         }
 
-        JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(DomainFactory.INSTANCE);
+        JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(getService().getBaseDomainFactory());
 
         try {
             logger.fine("Post issued for " + leaderboardName + ", " + raceColumnName + ", " + fleetName + " to add a race log event");

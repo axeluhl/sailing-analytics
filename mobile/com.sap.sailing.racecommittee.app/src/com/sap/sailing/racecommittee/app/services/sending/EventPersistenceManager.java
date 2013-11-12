@@ -21,7 +21,6 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.FileHandlerUtils;
@@ -92,6 +91,14 @@ public class EventPersistenceManager {
             removePersistedEvent(eventLine);
         }
     }
+    
+    /**
+     * Removes all pending events and clears the persistence file.
+     */
+    public synchronized void removeAllEvents() {
+        persistedEvents.clear();
+        writePersistedEventsToFile();
+    }
 
     /**
      * @param eventLine
@@ -152,7 +159,7 @@ public class EventPersistenceManager {
             return;
         }
         try {
-            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DomainFactoryImpl.INSTANCE);
+            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DataManager.create(context).getDataStore().getDomainFactory());
             RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEventAsJson));
             boolean added = store.getRace(raceId).getRaceLog().add(event);
             if (added) {

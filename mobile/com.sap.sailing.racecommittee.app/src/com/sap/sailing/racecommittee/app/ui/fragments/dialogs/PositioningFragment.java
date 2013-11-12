@@ -25,15 +25,16 @@ import android.widget.Toast;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
@@ -203,7 +204,7 @@ public class PositioningFragment extends RaceDialogFragment {
     private void deleteObsoleteCompetitorsFromPositionedList(Collection<Competitor> validCompetitors) {
         List<Triple<Serializable, String, MaxPointsReason>> toBeDeleted = new ArrayList<Util.Triple<Serializable, String, MaxPointsReason>>();
         for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
-            if (!validCompetitors.contains(DomainFactoryImpl.INSTANCE.getExistingCompetitorById(positionedItem.getA()))) {
+            if (!validCompetitors.contains(getCompetitorStore().getExistingCompetitorById(positionedItem.getA()))) {
                 toBeDeleted.add(positionedItem);
             }
         }
@@ -212,7 +213,7 @@ public class PositioningFragment extends RaceDialogFragment {
 
     private void deletePositionedCompetitorsFromUnpositionedList() {
         for (Triple<Serializable, String, MaxPointsReason> positionedItem : positionedCompetitors) {
-            Competitor competitor = DomainFactoryImpl.INSTANCE.getExistingCompetitorById(positionedItem.getA());
+            Competitor competitor = getCompetitorStore().getExistingCompetitorById(positionedItem.getA());
             competitors.remove(competitor);
         }
     }
@@ -299,7 +300,7 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     protected void onCompetitorRemovedFromPositioningList(Triple<Serializable, String, MaxPointsReason> item) {
-        Competitor competitor = DomainFactoryImpl.INSTANCE.getExistingCompetitorById(item.getA());
+        Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getA());
         addNewCompetitorToCompetitorList(competitor);
         removeCompetitorFromPositionings(item);
         getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
@@ -314,6 +315,10 @@ public class PositioningFragment extends RaceDialogFragment {
     protected void removeCompetitorFromPositionings(Triple<Serializable, String, MaxPointsReason> item) {
         positionedCompetitors.remove(item);
         positioningAdapter.notifyDataSetChanged();
+    }
+
+    private CompetitorStore getCompetitorStore() {
+        return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorStore();
     }
 
 }

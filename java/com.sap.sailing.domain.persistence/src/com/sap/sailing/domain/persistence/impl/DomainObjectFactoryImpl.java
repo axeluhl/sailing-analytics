@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -21,6 +24,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -117,18 +121,29 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
+    private final CompetitorJsonDeserializer competitorDeserializer;
 
     private final DB database;
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
+    private final DomainFactory baseDomainFactory;
     
-    public DomainObjectFactoryImpl(DB db) {
+    public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory) {
         super();
+        this.baseDomainFactory = baseDomainFactory;
+        this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.database = db;
         this.raceLogEventFactory = RaceLogEventRestoreFactory.INSTANCE;
+    }
+    
+    @Override
+    public DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
     }
 
     public Wind loadWind(DBObject object) {
@@ -373,7 +388,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             CourseArea courseArea = null;
             if (courseAreaId != null) {
                 UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = DomainFactory.INSTANCE.getExistingCourseAreaById(courseAreaUuid);
+                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
             
             result = new FlexibleLeaderboardImpl(raceLogStore, (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME
@@ -425,7 +440,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private ScoringScheme loadScoringScheme(DBObject dbLeaderboard) {
         ScoringSchemeType scoringSchemeType = getScoringSchemeType(dbLeaderboard);
-        final ScoringScheme scoringScheme = DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType);
+        final ScoringScheme scoringScheme = baseDomainFactory.createScoringScheme(scoringSchemeType);
         return scoringScheme;
     }
 
@@ -832,7 +847,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private CourseArea loadCourseArea(DBObject courseAreaDBObject) {
         String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
         Serializable id = (Serializable) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
-        return DomainFactory.INSTANCE.getOrCreateCourseArea(id, name);
+        return baseDomainFactory.getOrCreateCourseArea(id, name);
     }
 
     @Override
@@ -867,7 +882,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BoatClass boatClass = null;
             if (boatClassName != null) {
                 boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
-                boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
+                boatClass = baseDomainFactory.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
@@ -879,7 +894,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             CourseArea courseArea = null;
             if (courseAreaId != null) {
                 UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-                courseArea = DomainFactory.INSTANCE.getExistingCourseAreaById(courseAreaUuid);
+                courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
             
             result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
@@ -1181,7 +1196,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<Competitor> competitors = new ArrayList<Competitor>();
         for (Object object : dbCompetitorList) {
             Serializable competitorId = (Serializable) object;
-            Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
+            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
             competitors.add(competitor);
         }
         return competitors;
@@ -1255,7 +1270,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
         Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
         
-        Gate gate = DomainFactory.INSTANCE.createGate(gateId, leftMark, rightMark, gateName);
+        Gate gate = baseDomainFactory.createGate(gateId, leftMark, rightMark, gateName);
         return gate;
     }
 
@@ -1267,8 +1282,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
         MarkType markType = MarkType.valueOf((String) dbObject.get(FieldNames.MARK_TYPE.name()));
         
-        Mark mark = DomainFactory.INSTANCE.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
+        Mark mark = baseDomainFactory.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
         return mark;
+    }
+
+    @Override
+    public Collection<Competitor> loadAllCompetitors() {
+        ArrayList<Competitor> result = new ArrayList<Competitor>();
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        try {
+            for (DBObject o : collection.find()) {
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                Competitor c = competitorDeserializer.deserialize(json);
+                result.add(c);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
+            logger.log(Level.SEVERE, "loadCompetitors", e);
+        }
+        return result;
     }
 
     @Override
@@ -1304,7 +1336,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 clientIdentifiers.add(clientIdentifier.toString());
             }
         }
-        return DomainFactory.INSTANCE.getOrCreateDeviceConfigurationMatcher(type, clientIdentifiers);
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIdentifiers);
     }
 
     private DeviceConfiguration loadConfiguration(DBObject configObject) {

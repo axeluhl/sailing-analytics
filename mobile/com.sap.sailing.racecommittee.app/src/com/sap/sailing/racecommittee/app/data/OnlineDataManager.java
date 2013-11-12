@@ -44,7 +44,6 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -55,7 +54,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeseri
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -74,8 +73,8 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventD
 public class OnlineDataManager extends DataManager {
     private static final String TAG = OnlineDataManager.class.getName();
 
-    OnlineDataManager(Context context, DataStore dataStore) {
-        super(context, dataStore);
+    protected OnlineDataManager(Context context, DataStore dataStore, SharedDomainFactory domainFactory) {
+        super(context, dataStore, domainFactory);
     }
 
     public void addEvents(Collection<EventBase> events) {
@@ -102,7 +101,6 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<EventBase>>(callback, new LoaderCreator<Collection<EventBase>>() {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
-                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
                 DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
                         new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory))));
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
@@ -139,7 +137,6 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
                 JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(context,
                         new RaceGroupDeserializer(boatClassDeserializer, new SeriesWithRowsDeserializer(
@@ -162,7 +159,6 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Mark>>(callback, new LoaderCreator<Collection<Mark>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Mark>>> create(int id, Bundle args) throws Exception {
-                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
                 DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
@@ -188,7 +184,6 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<CourseBase>(callback, new LoaderCreator<CourseBase>() {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
-                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
                 JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(
                         new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
                                 new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
@@ -216,8 +211,7 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
-                SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore());
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this,
                         managedRace);

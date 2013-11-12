@@ -11,12 +11,13 @@ import java.util.Map.Entry;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 
@@ -26,10 +27,10 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
         super();
     }
 
-    protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) MongoFactory.INSTANCE
+    protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getMongoObjectFactory(getMongoService());
-    protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) MongoFactory.INSTANCE
-            .getDomainObjectFactory(getMongoService());
+    protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
+            .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
 
     @Test
     public void testStoreEmptyConfiguration() {
