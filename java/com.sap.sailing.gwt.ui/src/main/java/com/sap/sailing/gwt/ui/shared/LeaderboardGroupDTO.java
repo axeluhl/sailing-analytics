@@ -82,7 +82,7 @@ public class LeaderboardGroupDTO extends NamedDTO {
     public boolean containsRegattaLeaderboard() {
         boolean result = false;
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
-            if(leaderboard.isRegattaLeaderboard) {
+            if (leaderboard.type.isRegattaLeaderboard()) {
                 result = true;
                 break;
             }

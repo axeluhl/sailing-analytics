@@ -49,6 +49,8 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJs
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
@@ -117,8 +119,9 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
-            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(
-                    new TeamJsonSerializer(new PersonJsonSerializer(nationalityJsonSerializer)));
+            CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+                    new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
+                    new BoatClassJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer);
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 

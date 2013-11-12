@@ -7,6 +7,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
+import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
@@ -35,6 +37,23 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     public FullCanvasOverlay(MapWidget map, int zIndex) {
         super(map, zIndex);
+        
+        /*getMap().addDragEndHandler( new DragEndMapHandler() {
+			@Override
+			public void onEvent(DragEndMapEvent event) {
+				// TODO Auto-generated method stub
+				draw();
+			};	
+		});*/
+
+        getMap().addCenterChangeHandler(new CenterChangeMapHandler() {
+ 			@Override
+			public void onEvent(CenterChangeMapEvent event) {
+				// TODO Auto-generated method stub
+				draw();				
+			};
+        });
+        
     }
     
     /**

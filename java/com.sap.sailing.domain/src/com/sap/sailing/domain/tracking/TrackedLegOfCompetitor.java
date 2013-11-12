@@ -8,12 +8,10 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -176,18 +174,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
     Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
-
-    /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
-     * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
-     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
-     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
-     * distance to <code>mark</code> is returned.
-     * 
-     * @param at
-     *            the wind estimation is performed for this point in time
-     */
-    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
     /**
      * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the

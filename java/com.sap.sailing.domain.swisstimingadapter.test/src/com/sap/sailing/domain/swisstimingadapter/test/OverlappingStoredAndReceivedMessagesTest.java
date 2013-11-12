@@ -198,26 +198,25 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
 
     @Override
     public Iterable<Race> getRaces() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Race getRace(String raceID) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean hasRaceStartlist(String raceID) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean hasRaceCourse(String raceID) {
-        // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
+    public void storeSailMasterMessage(SailMasterMessage message) {
+    }
 }

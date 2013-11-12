@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.maps.client.LoadApi;
@@ -42,6 +43,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -52,6 +54,9 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
  *
  */
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
+	
+    private static SimulatorResources resources = GWT.create(SimulatorResources.class);
+
     private MapWidget map;
     private boolean dataInitialized;
     private boolean overlaysInitialized;
@@ -62,11 +67,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
     private WindLineCanvasOverlay windLineCanvasOverlay;
-    // TODO MigrationV3: should not be public 
-    public RegattaAreaCanvasOverlay regattaAreaCanvasOverlay;
+
+    private RegattaAreaCanvasOverlay regattaAreaCanvasOverlay;
+    private ImageCanvasOverlay windRoseCanvasOverlay;
+    private ImageCanvasOverlay windNeedleCanvasOverlay;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
-    // TODO MigrationV3: should not be public 
-    public RaceCourseCanvasOverlay raceCourseCanvasOverlay;
+
+    private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private PathLegendCanvasOverlay legendCanvasOverlay;
     
     private List<TimeListenerWithStoppingCriteria> timeListeners;
@@ -216,6 +223,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             refreshWindFieldOverlay(windFieldDTO);
 
             timeListeners.clear();
+
             if (windParams.isShowArrows()) {
                 timeListeners.add(windFieldCanvasOverlay);
             }
@@ -381,29 +389,38 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey);  
     }
 
     private void initializeOverlays() {
         if (mode == SailingSimulatorConstants.ModeEvent) {
             if (regattaAreaCanvasOverlay == null) {
-                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent());
+                regattaAreaCanvasOverlay = new RegattaAreaCanvasOverlay(map, SimulatorMapOverlaysZIndexes.REGATTA_AREA_ZINDEX, getMainPanel().getEvent(), this);
                 regattaAreaCanvasOverlay.addToMap();
+                
+                int offsetLeft = 50;
+                int offsetTop = 25;
+                windRoseCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseBackground());
+                windRoseCanvasOverlay.setOffset(offsetLeft, offsetTop);
+                windRoseCanvasOverlay.addToMap();
+                windNeedleCanvasOverlay = new ImageCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WIND_ROSE_ZINDEX, resources.windRoseNeedle());
+                windNeedleCanvasOverlay.setOffset(offsetLeft, offsetTop);                
+                windNeedleCanvasOverlay.setBearing(180.0);
+                windNeedleCanvasOverlay.addToMap();
             }
         }
     	
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX);
+        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay(map, SimulatorMapOverlaysZIndexes.RACE_COURSE_ZINDEX, mode);
 
         if (mode == SailingSimulatorConstants.ModeEvent) {
             regattaAreaCanvasOverlay.setRaceCourseCanvas(raceCourseCanvasOverlay);
-            regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         }
 
         if (windParams.isShowArrows()) {
             windFieldCanvasOverlay = new WindFieldCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDFIELD_ZINDEX, timer, windParams);
         }
         if (windParams.isShowStreamlets()) {
-            windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes, yRes);
+            windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDSTREAMLETS_ZINDEX, timer, xRes);
         }
         if (windParams.isShowGrid()) {
             windGridCanvasOverlay = new WindGridCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDGRID_ZINDEX, timer, xRes, yRes);
@@ -460,6 +477,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         busyIndicator.setBusy(true);
+        timer.setTime(windParams.getStartTime().getTime());
+
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
@@ -526,7 +545,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
         }
 
-        this.timer.setTime(this.windParams.getStartTime().getTime());
         if (this.windParams.isShowArrows()) {
             this.windFieldCanvasOverlay.draw();
         }
@@ -563,6 +581,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setyRes(yRes);
 
         busyIndicator.setBusy(true);
+        timer.setTime(windParams.getStartTime().getTime());
 
         simulatorService.getSimulatorResults(mode, raceCourseDirection, windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
 
@@ -848,9 +867,27 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     	raceCourseCanvasOverlay.raceCourseDirection = raceCourseDirection;
     	regattaAreaCanvasOverlay.updateRaceCourse(0, 0);
         raceCourseCanvasOverlay.draw();
+        windNeedleCanvasOverlay.draw();
     }
 
     public WindFieldGenParamsDTO getWindParams() {
         return windParams;
     }
+    
+    public RegattaAreaCanvasOverlay getRegattaAreaCanvasOverlay() {
+    	return regattaAreaCanvasOverlay;
+    }
+
+    public ImageCanvasOverlay getWindRoseCanvasOverlay() {
+    	return windRoseCanvasOverlay;
+    }
+
+    public ImageCanvasOverlay getWindNeedleCanvasOverlay() {
+    	return windNeedleCanvasOverlay;
+    }
+    
+    public RaceCourseCanvasOverlay getRaceCourseCanvasOverlay() {
+    	return raceCourseCanvasOverlay;
+    }
+    
 }

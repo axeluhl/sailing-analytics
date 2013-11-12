@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -74,13 +75,14 @@ public class SimulatorUtils {
         return prependedBundlePath;
     }
 
-    public static RacesHandle loadRace(RacingEventServiceImpl service, URL paramURL, URI liveURI, URI storedURI,
-            RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+    public static RacesHandle loadRace(RacingEventServiceImpl service, TracTracAdapterFactory tracTracAdapterFactory, URL paramURL, URI liveURI,
+            URI storedURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         //TODO: TracTrac Username / Password
         String tractracUsername = "";
         String tractracPassword = "";
-        RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, null, raceLogStore, windStore,
-                timeoutInMilliseconds, tractracUsername, tractracPassword);
+        RacesHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
+                .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore, windStore,
+                        timeoutInMilliseconds, tractracUsername, tractracPassword);
         return raceHandle;
     }
 
