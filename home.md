@@ -26,7 +26,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
 * Information for Webdesigners
-  * [[Webdesign repository|wiki/webdesign]]
+  * [[Layout repository|wiki/webdesign]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
