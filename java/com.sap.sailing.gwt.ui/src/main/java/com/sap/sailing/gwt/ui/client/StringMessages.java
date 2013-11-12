@@ -156,7 +156,6 @@ public interface StringMessages extends Messages {
     String in();
     String secondsUnit();
     String metersUnit();
-    String failedToLoadRaceData();
     String close();
     String compareCompetitors();
     String description();
@@ -436,13 +435,15 @@ public interface StringMessages extends Messages {
     String legend();
     String live();
     String swissTimingArchiveConnector();
-    String errorFetchingRankingChartData(String message);
+    String errorFetchingChartData(String message);
     String loadingCompetitorData();
-    String rankNAfterRace(long l, String string);
-    String afterRace();
+    String competitorRegattaDataAfterRaceN(String detailType, String raceColumnName);
     String showRankChart();
+    String rankChart();
+    String totalPoints();
+    String raceTotalPointsTooltip();
+    String regattaTotalPointsTooltip();
     String overallLeaderboardSelection();
-    String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
     String passedTo(String name);
@@ -688,8 +689,6 @@ public interface StringMessages extends Messages {
     String addReplicationMaster();
     String connect();
     String connectToMaster();
-    String exchangeHost();
-    String explainExchangeHostName();
     String explainReplicationHostname();
     String explainReplicationExchangeName();
     String explainReplicationExchangePort();
@@ -774,6 +773,8 @@ public interface StringMessages extends Messages {
     String timeSinceLastPositionFix();
     String timeSinceLastPositionFixTooltip();
     String trackingQuality();
+    String seriesLeaderboard();
+    String regattaLeaderboards();
     String polars();
     String distanceToLineFiveSecondsBeforeStart();
     String speedOverGroundFiveSecondsBeforeStart();
@@ -820,6 +821,11 @@ public interface StringMessages extends Messages {
     String raceTimeUpwindTooltip();
     String line();
     String offset();
+    String hideToolbar();
+    String showSeriesLeaderboards();
+    String showOverallLeaderboard();
+    String exchangeHost();
+    String explainExchangeHostName();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);

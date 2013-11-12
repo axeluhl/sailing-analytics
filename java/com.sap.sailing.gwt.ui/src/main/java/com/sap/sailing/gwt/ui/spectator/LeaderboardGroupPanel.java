@@ -311,7 +311,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
-        if (leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
+        if (leaderboard.type.isRegattaLeaderboard()) {
             RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
             if (regatta != null) {
                 boolean renderSeriesName = Util.size(regatta.series) > 1;
