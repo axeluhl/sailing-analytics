@@ -18,7 +18,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
     private AggregatorType aggregatorType;
     private DataTypes dataType;
 
-    private String customGrouperScriptText;
+//    private String customGrouperScriptText;
     private List<SharedDimension> dimensionsToGroupBy;
     private Map<SharedDimension, Iterable<?>> selectionMappedByDimension;
     
@@ -34,7 +34,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
         this.aggregatorType = aggregatorType;
         this.dataType = dataType;
 
-        customGrouperScriptText = "";
+//        customGrouperScriptText = "";
         dimensionsToGroupBy = new ArrayList<SharedDimension>();
         selectionMappedByDimension = new HashMap<SharedDimension, Iterable<?>>();
     }
@@ -61,7 +61,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
 
     @Override
     public String getCustomGrouperScriptText() {
-        return customGrouperScriptText;
+//        return customGrouperScriptText;
+        return "";
     }
 
     @Override
@@ -83,7 +84,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
     }
 
     public void setCustomGrouperScriptText(String scriptText) {
-        customGrouperScriptText = scriptText;
+//        customGrouperScriptText = scriptText;
     }
 
 }
