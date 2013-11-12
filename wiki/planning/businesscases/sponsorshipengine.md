@@ -50,3 +50,7 @@ There are no risks that could make this project fail, as the steps and the impli
 ## Prototype
 
 There is currently no prototype.
+
+## Estimation
+
+It will take 2-4 weeks to come to a point where other sponsorship projects could start being build on top of it. It will take 3-6 weeks on top of the initial work amount to come to a version that is well documented and can be shared with developers that have no knowledge about the underlying details.
