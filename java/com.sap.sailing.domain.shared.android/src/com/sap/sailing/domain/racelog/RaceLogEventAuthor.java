@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RaceLogEventAuthor extends Named {
+public interface RaceLogEventAuthor extends Named, Comparable<RaceLogEventAuthor> {
     
     /**
      * A lesser number represents a higher priority. Suggested priority levels:

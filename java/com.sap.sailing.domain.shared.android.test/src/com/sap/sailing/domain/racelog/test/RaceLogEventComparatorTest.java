@@ -99,9 +99,9 @@ public class RaceLogEventComparatorTest {
     @Test
     public void testSamePassButLowerHigherAuthor() {
         RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        when(minorAuthor.getPriority()).thenReturn(2);
         RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
-        when(majorAuthor.getPriority()).thenReturn(1);
+        when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
+        when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(minorAuthor);
@@ -115,9 +115,9 @@ public class RaceLogEventComparatorTest {
     @Test
     public void testSamePassButHigherLowerAuthor() {
         RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        when(minorAuthor.getPriority()).thenReturn(2);
         RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
-        when(majorAuthor.getPriority()).thenReturn(1);
+        when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
+        when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(eventOne.getPassId()).thenReturn(0);
         when(eventOne.getAuthor()).thenReturn(majorAuthor);

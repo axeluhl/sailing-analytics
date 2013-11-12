@@ -161,9 +161,9 @@ public class RaceLogTest {
         RaceLogEvent event2 = mock(RaceLogEvent.class);
         RaceLogEvent event3 = mock(RaceLogEvent.class);
         RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        when(minorAuthor.getPriority()).thenReturn(3);
         RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
-        when(majorAuthor.getPriority()).thenReturn(1);
+        when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
+        when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(event1.getAuthor()).thenReturn(majorAuthor);
         when(event1.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
@@ -190,9 +190,9 @@ public class RaceLogTest {
         RaceLogEvent event3 = mock(RaceLogEvent.class);
         RaceLogEvent event4 = mock(RaceLogEvent.class);
         RaceLogEventAuthor minorAuthor = mock(RaceLogEventAuthor.class);
-        when(minorAuthor.getPriority()).thenReturn(3);
         RaceLogEventAuthor majorAuthor = mock(RaceLogEventAuthor.class);
-        when(majorAuthor.getPriority()).thenReturn(1);
+        when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
+        when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
         
         when(event1.getPassId()).thenReturn(1);
         when(event1.getAuthor()).thenReturn(majorAuthor);

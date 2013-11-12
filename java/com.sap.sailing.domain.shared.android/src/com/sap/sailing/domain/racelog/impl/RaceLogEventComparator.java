@@ -20,15 +20,15 @@ public enum RaceLogEventComparator implements Comparator<Timed>, Serializable {
 
     private int compareEvents(RaceLogEvent e1, RaceLogEvent e2) {
         int result = comparePasses(e1, e2);
-        return result == 0 ? comparePriorities(e1, e2) : result;
+        return result == 0 ? compareAuthorPriorities(e1, e2) : result;
     }
 
     private int comparePasses(RaceLogEvent e1, RaceLogEvent e2) {
         return e1.getPassId() - e2.getPassId();
     }
     
-    private int comparePriorities(RaceLogEvent e1, RaceLogEvent e2) {
-        int result =  new Integer(e2.getAuthor().getPriority()).compareTo(e1.getAuthor().getPriority());
+    private int compareAuthorPriorities(RaceLogEvent e1, RaceLogEvent e2) {
+        int result =  e1.getAuthor().compareTo(e2.getAuthor());
         return result == 0 ? compareCreatedAtTimes(e1, e2) : result;
     }
 

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.ConfirmedFinishPositioningListFinder;
 
@@ -27,11 +29,10 @@ public class ConfirmedFinishPositioningListFinderTest extends
     }
 
     @Override
-    protected List<Triple<Serializable, String, MaxPointsReason>> setupTargetEventsForPassAwareTests(int passId) {
-        RaceLogFinishPositioningConfirmedEvent event = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1, passId);
+    protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
+        RaceLogFinishPositioningConfirmedEvent event = createEvent(RaceLogFinishPositioningConfirmedEvent.class, 1, passId, author);
         when(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()).thenReturn(mock(List.class));
-        raceLog.add(event);
-        return event.getPositionedCompetitorsIDsNamesMaxPointsReasons();
+        return new TargetPair(Arrays.asList(event), event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
     }
 
     @Test
