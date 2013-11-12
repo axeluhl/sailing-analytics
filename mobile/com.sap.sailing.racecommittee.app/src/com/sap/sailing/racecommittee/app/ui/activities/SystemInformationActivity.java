@@ -6,9 +6,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,6 +25,7 @@ public class SystemInformationActivity extends BaseActivity {
         setContentView(R.layout.system_information_view);
         setupVersionView();
         setupInstalledView();
+        setupPersistenceView();
     }
 
     @Override
@@ -39,6 +44,21 @@ public class SystemInformationActivity extends BaseActivity {
             statusView.setText(getString(R.string.generic_error));
         }
         
+    }
+
+    private void setupPersistenceView() {
+        // status and list view is updated by updateSendingServiceInformation
+        Button clearButton = (Button) findViewById(R.id.system_information_persistence_clear);
+        clearButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (boundSendingService) {
+                    sendingService.clearDelayedIntents();
+                } else {
+                    Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void setupVersionView() {

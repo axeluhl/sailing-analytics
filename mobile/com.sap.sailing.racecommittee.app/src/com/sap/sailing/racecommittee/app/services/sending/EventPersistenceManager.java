@@ -91,6 +91,14 @@ public class EventPersistenceManager {
             removePersistedEvent(eventLine);
         }
     }
+    
+    /**
+     * Removes all pending events and clears the persistence file.
+     */
+    public synchronized void removeAllEvents() {
+        persistedEvents.clear();
+        writePersistedEventsToFile();
+    }
 
     /**
      * @param eventLine

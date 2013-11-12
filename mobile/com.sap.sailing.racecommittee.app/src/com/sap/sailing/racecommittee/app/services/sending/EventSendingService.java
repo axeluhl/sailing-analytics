@@ -40,6 +40,11 @@ public class EventSendingService extends Service implements EventSendingListener
 
     protected final static String TAG = EventSendingService.class.getName();
 
+    /**
+     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
+     */
+    public final static UUID uuid = UUID.randomUUID();
+
     private ConnectivityManager connectivityManager;
     private Handler handler;
     private final IBinder mBinder = new EventSendingBinder();
@@ -83,17 +88,18 @@ public class EventSendingService extends Service implements EventSendingListener
         return persistenceManager.getContent();
     }
 
-    /**
-     * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
-     */
-    public final static UUID uuid = UUID.randomUUID();
-
     public int getDelayedIntentsCount() {
         return persistenceManager.getEventCount();
     }
 
     public Date getLastSuccessfulSend() {
         return lastSuccessfulSend;
+    }
+    
+    public void clearDelayedIntents() {
+        persistenceManager.removeAllEvents();
+        // let's fake a successful send!
+        serviceLogger.onEventSentSuccessful();
     }
 
     /**
