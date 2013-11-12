@@ -30,7 +30,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     public void onReply(Intent originalIntent, Context context, InputStream inputStream) {
         ReadonlyDataManager dataManager = DataManager.create(context);
         final List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
-        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        SharedDomainFactory domainFactory = DataManager.create(context).getDataStore().getDomainFactory();
         
         JSONParser parser = new JSONParser();
         try {
@@ -45,6 +45,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             }
         } catch (Exception e) {
             ExLog.e(TAG, "Error parsing server response");
+            ExLog.ex(TAG, e);
         }
         
         String raceId = originalIntent.getStringExtra(AppConstants.RACE_ID_KEY);

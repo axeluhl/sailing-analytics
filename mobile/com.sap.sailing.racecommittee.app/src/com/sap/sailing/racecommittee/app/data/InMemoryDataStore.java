@@ -8,7 +8,9 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
@@ -20,6 +22,7 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
     private DeviceConfiguration configuration;
+    private SharedDomainFactory domainFactory;
 
     private InMemoryDataStore() {
         reset();
@@ -30,6 +33,14 @@ public enum InMemoryDataStore implements DataStore {
         this.eventsById = new HashMap<Serializable, EventBase>();
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
+        this.courseData = null;
+        this.configuration = null;
+        this.domainFactory = new SharedDomainFactoryImpl();
+    }
+
+    @Override
+    public SharedDomainFactory getDomainFactory() {
+        return domainFactory;
     }
 
     /*

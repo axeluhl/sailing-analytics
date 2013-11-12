@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
@@ -174,5 +175,9 @@ public abstract class BaseActivity extends LoggableActivity {
     protected void fadeActivity(Intent intent) {
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+    
+    public RaceApplication getRaceApplication() {
+        return (RaceApplication) getApplication();
     }
 }

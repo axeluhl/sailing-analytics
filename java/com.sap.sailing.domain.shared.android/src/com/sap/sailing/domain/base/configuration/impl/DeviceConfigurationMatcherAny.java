@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
 import java.io.Serializable;
-import java.util.Collections;
 
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -38,7 +37,7 @@ public enum DeviceConfigurationMatcherAny implements DeviceConfigurationMatcher 
 
     @Override
     public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
-        return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), Collections.<String>emptyList());
+        return DeviceConfigurationMatcherAny.INSTANCE;
     }
 
 }

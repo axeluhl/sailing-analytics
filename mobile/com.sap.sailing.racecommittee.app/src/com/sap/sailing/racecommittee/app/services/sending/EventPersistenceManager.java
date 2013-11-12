@@ -151,7 +151,7 @@ public class EventPersistenceManager {
             return;
         }
         try {
-            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DomainFactoryImpl.INSTANCE);
+            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DataManager.create(context).getDataStore().getDomainFactory());
             RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEventAsJson));
             boolean added = store.getRace(raceId).getRaceLog().add(event);
             if (added) {
