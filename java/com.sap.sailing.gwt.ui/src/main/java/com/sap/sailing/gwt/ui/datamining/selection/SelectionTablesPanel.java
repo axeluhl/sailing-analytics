@@ -12,9 +12,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -33,6 +36,11 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class SelectionTablesPanel extends SimplePanel {
     
+    private static final int resizeDelay = 100;
+    private static final double relativeWidthInPercent = 1;
+    private static final int widthMargin = 17;
+    private static final double relativeHeightInPercent = 0.35;
+    
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
@@ -44,11 +52,39 @@ public class SelectionTablesPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+
+        Window.addResizeHandler(new ResizeHandler() {
+            private final Timer timer = new Timer() {
+                @Override
+                public void run() {
+                    doLayout(Window.getClientWidth(), Window.getClientHeight());
+                }
+            };
+            @Override
+            public void onResize(ResizeEvent event) {
+                timer.schedule(resizeDelay);
+            }
+        });
         
         tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?,?>>();
-        
         setWidget(createTables());
         fillTables();
+        
+        doLayout(Window.getClientWidth(), Window.getClientHeight());
+    }
+    
+    private void doLayout(int newWindowWidth, int newWindowHeight) {
+        int absoluteWidth = (int) ((newWindowWidth - widthMargin) * relativeWidthInPercent);
+        int absoluteHeight = (int) (newWindowHeight * relativeHeightInPercent);
+        
+        setWidth(absoluteWidth + "px");
+        setHeight(absoluteHeight + "px");
+        
+        Collection<SelectionTable<?, ?>> tables = tablesMappedByDimension.values();
+        for (SelectionTable<?, ?> table : tables) {
+            table.setWidth((absoluteWidth / tables.size()) + "px");
+            table.setHeight(absoluteHeight + "px");
+        }
     }
 
     public void addSelectionChangeHandler(Handler handler) {
@@ -186,8 +222,6 @@ public class SelectionTablesPanel extends SimplePanel {
 
     private Widget createTables() {
         HorizontalPanel tablesPanel = new HorizontalPanel();
-        ScrollPanel tablesScrollPanel = new ScrollPanel(tablesPanel);
-        tablesScrollPanel.setHeight("21em");
         tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?, ?>>();
 
         SelectionTable<RegattaDTO, String> regattaNameTable = new SelectionTable<RegattaDTO, String>(stringMessages
@@ -255,7 +289,7 @@ public class SelectionTablesPanel extends SimplePanel {
         tablesPanel.add(nationalityTable);
         tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
         
-        return tablesScrollPanel;
+        return tablesPanel;
     }
 
 }

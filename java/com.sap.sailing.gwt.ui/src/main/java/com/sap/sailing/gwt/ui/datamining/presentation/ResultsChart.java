@@ -216,14 +216,14 @@ public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
     }
     
     @Override
-    public void onResize() {
-        chart.setSizeToMatchContainer();
-        chart.redraw();
+    public Widget getWidget() {
+        return mainPanel;
     }
     
     @Override
-    public Widget getWidget() {
-        return mainPanel;
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+        chart.redraw();
     }
 
 }
