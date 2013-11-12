@@ -845,6 +845,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
+    
+    final StringBuilder startLineAdvantageText = new StringBuilder();
+    final StringBuilder finishLineAdvantageText = new StringBuilder();
 
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
@@ -856,6 +859,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions.size() == 2) {
                 LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
                 LatLng startLinePoint2 = LatLng.newInstance(courseDTO.startMarkPositions.get(1).latDeg, courseDTO.startMarkPositions.get(1).lngDeg); 
+                if (courseDTO.startLineAngleToCombinedWind != null) {
+                    startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                            NumberFormat.getFormat("0.0").format(courseDTO.startLineLengthInMeters),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.startLineAngleToCombinedWind)),
+                            courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
+                            NumberFormat.getFormat("0.0").format(courseDTO.startLineAdvantageInMeters)));
+                } else {
+                    startLineAdvantageText.delete(0, startLineAdvantageText.length());
+                }
                 if (startLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
@@ -874,8 +886,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            // TODO bug 1026: add start line bias to tool tip; requires wind data to be available at this point
-                            map.setTitle(stringMessages.startLine());
+                            map.setTitle(stringMessages.startLine()+startLineAdvantageText);
                         }
                     });
                     startLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -903,7 +914,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishMarkPositions.size() == 2) {
                 LatLng finishLinePoint1 = LatLng.newInstance(courseDTO.finishMarkPositions.get(0).latDeg, courseDTO.finishMarkPositions.get(0).lngDeg); 
                 LatLng finishLinePoint2 = LatLng.newInstance(courseDTO.finishMarkPositions.get(1).latDeg, courseDTO.finishMarkPositions.get(1).lngDeg); 
-                if(finishLine == null) {
+                if (courseDTO.startLineAngleToCombinedWind != null) {
+                    finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
+                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineLengthInMeters),
+                            NumberFormat.getFormat("0.0").format(Math.abs(courseDTO.finishLineAngleToCombinedWind)),
+                            courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
+                            NumberFormat.getFormat("0.0").format(courseDTO.finishLineAdvantageInMeters)));
+                } else {
+                    finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
+                }
+                if (finishLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance();
                     options.setClickable(true);
                     options.setGeodesic(true);
@@ -921,7 +941,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLine.addMouseOverHandler(new MouseOverMapHandler() {
                         @Override
                         public void onEvent(MouseOverMapEvent event) {
-                            map.setTitle(stringMessages.finishLine());
+                            map.setTitle(stringMessages.finishLine()+finishLineAdvantageText);
                         }
                     });
                     finishLine.addMouseOutMoveHandler(new MouseOutMapHandler() {

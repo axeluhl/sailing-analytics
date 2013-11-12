@@ -27,6 +27,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -40,6 +42,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     private static final WindStore DEFAULT_WINDSTORE = EmptyWindStore.INSTANCE;
 
     private RacingEventServiceImpl service = null;
+    private TracTracAdapterFactory tracTracAdapterFactory;
     private RacesHandle raceHandle = null;
     private URL raceURL = null;
     private URI liveURI = null;
@@ -53,9 +56,14 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         this.parameters = parameters;
         this.service = new RacingEventServiceImpl();
+        this.tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
 
         this.legIndex = 0;
         this.competitorIndex = 0;
+    }
+    
+    protected TracTracAdapterFactory getTracTracAdapterFactory() {
+        return tracTracAdapterFactory;
     }
 
     private void intializeRaceHandle() {
@@ -67,7 +75,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         LOGGER.info("Calling service.addTracTracRace");
 
         try {
-            this.raceHandle = SimulatorUtils.loadRace(service, raceURL, liveURI, storedURI, null, DEFAULT_WINDSTORE, DEFAULT_TIMEOUT_MILLISECONDS);
+            this.raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, raceURL, liveURI, storedURI, null, DEFAULT_WINDSTORE, DEFAULT_TIMEOUT_MILLISECONDS);
 
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());

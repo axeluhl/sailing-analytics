@@ -43,8 +43,6 @@ public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader
     
     void storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration);
 
-    void storeSailMasterMessage(SailMasterMessage message);
-
     void storeRace(Race race);
     
     void dropAllRaceMasterData();

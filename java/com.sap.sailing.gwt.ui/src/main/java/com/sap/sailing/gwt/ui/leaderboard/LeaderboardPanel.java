@@ -29,18 +29,17 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -73,7 +72,6 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -89,12 +87,12 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 /**
@@ -103,7 +101,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener,
+public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
     private static final int RANK_COLUMN_INDEX = 0;
 
@@ -139,8 +137,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
-    
-    private String leaderboardGroupName;
 
     private final ErrorReporter errorReporter;
 
@@ -192,8 +188,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     protected final String TOTAL_COLUMN_STYLE;
 
-    public static final String LEADERBOARD_MARGIN_STYLE = "leaderboardMargin";
-
     private final Timer timer;
     
     /**
@@ -208,8 +202,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean autoExpandPreSelectedRace;
     
     private boolean autoExpandLastRaceColumn;
-    
-    private boolean showOverallLeaderboardsOnSamePage;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
@@ -234,18 +226,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final RaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
-    
-    /**
-     * Used to display one or more overall leaderboards if selected. See also
-     * {@link LeaderboardSettings#isShowOverallLeaderboardsOnSamePage()}. Always contained by the {@link #contentPanel} at the
-     * right position, but may be empty.
-     */
-    private final VerticalPanel overallLeaderboardsPanel;
-
-    /**
-     * The leaderboard panels displayed in {@link #overallLeaderboardsPanel}.
-     */
-    private final List<LeaderboardPanel> overallLeaderboardPanels;
     
     private final HorizontalPanel refreshAndSettingsPanel;
 
@@ -303,22 +283,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * attribute when required the first time.
      */
     private RaceTimesInfoProvider raceTimesInfoProvider;
-
-    private final UserAgentDetails userAgent;
-
-    private class SettingsClickHandler implements ClickHandler {
-        private final StringMessages stringMessages;
-
-        private SettingsClickHandler(StringMessages stringMessages) {
-            this.stringMessages = stringMessages;
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
-        }
-    }
-
+    private RaceTimesInfoProviderListener raceTimesInfoProviderListener;
+    
     protected StringMessages getStringMessages() {
         return stringMessages;
     }
@@ -358,7 +324,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
-        if (!newSettings.updateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
+        if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
@@ -453,79 +419,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
             }
         }
-        if (newSettings.isShowOverallLeaderboardsOnSamePage() != showOverallLeaderboardsOnSamePage) {
-            showOverallLeaderboardsOnSamePage = newSettings.isShowOverallLeaderboardsOnSamePage();
-            if (showOverallLeaderboardsOnSamePage) {
-                showOverallLeaderboards();
-            } else {
-                hideOverallLeaderboards();
-            }
-        }
-    }
-
-    private void showOverallLeaderboards() {
-        overallLeaderboardsPanel.clear();
-        final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
-        overallStandingsLabel.setStyleName("leaderboardHeading");
-        overallLeaderboardsPanel.add(overallStandingsLabel);
-        updateOverallLeaderboardsAndAddToPanel();
-    }
-
-    /**
-     * Fetches from the server the list of overall ("meta") leaderboard descriptions in which this main leaderboard occurs and
-     * creates one {@link LeaderboardPanel} for each such overall leaderboard. Those panels are then added to
-     * {@link #overallLeaderboardPanels}, registered with the {@link #timer} for common timing with the main leaderboard panel,
-     * and the panels are made visible by adding them to the {@link #overallLeaderboardsPanel} panel.
-     */
-    private void updateOverallLeaderboardsAndAddToPanel() {
-        getSailingService().getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                getErrorReporter().reportError(
-                        stringMessages.errorTryingToObtainOverallLeaderboards(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(List<String> overallLeaderboardNames) {
-                for (String overallLeaderboardName : overallLeaderboardNames) {
-                    LeaderboardPanel overallLeaderboardPanel = new LeaderboardPanel(
-                            getSailingService(), asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                                  /* namesOfRaceColumnsToShow */ null, /* namesOfRacesToShow */ null, /* nameOfRaceToSort */ null,
-                                  /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
-                                  /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                            timer, leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
-                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true);
-                    overallLeaderboardPanels.add(overallLeaderboardPanel);
-                    overallLeaderboardsPanel.add(overallLeaderboardPanel);
-                }
-            }
-        });
-        
-    }
-
-    /**
-     * Clears the panel used to display the overall leaderboards, removes all overall leaderboard panels from their listener
-     * relationship with the {@link #timer} and then clears the {@link #overallLeaderboardPanels} list.
-     */
-    private void hideOverallLeaderboards() {
-        overallLeaderboardsPanel.clear();
-        for (LeaderboardPanel overallLeaderboardPanel : overallLeaderboardPanels) {
-            timer.removeTimeListener(overallLeaderboardPanel);
-            timer.removePlayStateListener(overallLeaderboardPanel);
-        }
-        overallLeaderboardPanels.clear();
     }
 
     private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
         if (timer.getPlayState() != Timer.PlayStates.Playing) {
             // wait for the first update and adjust leaderboard once the race times have been received
-            final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
+            raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
                 @Override
                 public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+                    // remove 
                     timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-                    updateLeaderboard(getLeaderboard());
-                    getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
+                    // remove the listener only in case a leaderboard has already been loaded
+                    if(getLeaderboard() != null) {
+                        updateLeaderboard(getLeaderboard());
+                        getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
+                        raceTimesInfoProviderListener = null;
+                    }
                 }
             };
             getRaceTimesInfoProvider().addRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
@@ -794,6 +704,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, 
+                DetailType.RACE_TIME_TRAVELED,
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
@@ -808,11 +719,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.TOTAL_DISTANCE_TRAVELED,
-                DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
-                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+                                  DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                                  DetailType.TOTAL_TIME_SAILED_IN_SECONDS,
+                                  DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -911,8 +820,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_TIME_TRAVELED, getTimeTraveledRaceColumn());
 
             return result;
+        }
+
+        private TimeTraveledRaceColumn getTimeTraveledRaceColumn() {
+            return new TimeTraveledRaceColumn(getLeaderboardPanel(), this, stringMessages, LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                    LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
         }
 
         private ManeuverCountRaceColumn getManeuverCountRaceColumn() {
@@ -1435,7 +1350,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        this.leaderboardGroupName = leaderboardGroupName;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -1444,10 +1358,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedOverallDetailColumns = new ArrayList<DetailType>();
         this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
-        this.showOverallLeaderboardsOnSamePage = settings.isShowOverallLeaderboardsOnSamePage();
         this.adjustTimerDelay = adjustTimerDelay;
         overallDetailColumnMap = createOverallDetailColumnMap();
-        settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
+        settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
         }
@@ -1503,7 +1416,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 updateLeaderboard(getLeaderboard());
             }
         });
-        this.userAgent = userAgent;
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             //Setting up the toggle selection
             leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
@@ -1521,8 +1433,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
-        overallLeaderboardsPanel = new VerticalPanel();
-        overallLeaderboardPanels = new ArrayList<LeaderboardPanel>();
         
         // the information panel
         informationPanel = new FlowPanel();
@@ -1560,16 +1470,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         };
-        ImageResource chartIcon = resources.chartIcon();
-        ImageResource rankChartIcon = resources.rankChartIcon();
-        ImageResource leaderboardSettingsIcon = resources.leaderboardSettingsIcon();
-        pauseIcon = resources.pauseIcon();
-        playIcon = resources.playIcon();
+        pauseIcon = resources.autoRefreshEnabledIcon();
+        playIcon = resources.autoRefreshDisabledIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
         refreshAndSettingsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        HorizontalPanel refreshPanel = new HorizontalPanel();
-        refreshPanel.setSpacing(5);
-        refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        FlowPanel refreshPanel = new FlowPanel();
         refreshPanel.addStyleName("refreshPanel");
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
@@ -1577,35 +1482,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
-        Anchor rankChartsAnchor = new Anchor(AbstractImagePrototype.create(rankChartIcon).getSafeHtml());
-        rankChartsAnchor.setTitle(stringMessages.showRankChart());
-        rankChartsAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showRankChartDialog();
-            }
-        });
-        Anchor chartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
-        chartsAnchor.setTitle(stringMessages.showCharts());
-        chartsAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showCompareCompetitorsDialog();
-            }
-        });
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
-        settingsAnchor.setTitle(stringMessages.settings());
-        settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
-        refreshAndSettingsPanel.add(rankChartsAnchor);
-        refreshAndSettingsPanel.add(chartsAnchor);
+
         refreshAndSettingsPanel.add(refreshPanel);
-        refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
-        contentPanel.add(overallLeaderboardsPanel);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
@@ -1629,34 +1512,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return result;
         }
     }
-    
-    private static class KingOfTheDownwindField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedDownwindInSeconds;
-        }
-    }
-    
-    private static class KingOfTheReachingField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedReachingInSeconds;
-        }
-    }
-
-    private static class KingOfTheUpwindField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedUpwindInSeconds;
-        }
-    }
-    
-    private static class TotalTimeSailedField implements LegDetailField<Double> {
-        @Override
-        public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedInSeconds;
-        }
-    }
 
     private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
@@ -1671,22 +1526,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeColumn(
-                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedField(),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, createOverallTimeTraveledColumn());
         return result;
+    }
+
+    private OverallTimeTraveledColumn createOverallTimeTraveledColumn() {
+        return new OverallTimeTraveledColumn(this, stringMessages, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE,
+                LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE);
     }
 
     /**
@@ -2521,7 +2367,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection(), showOverallLeaderboardsOnSamePage));
+                            .getRaceName(), getRaceColumnSelection()));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -2530,25 +2376,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public void playSpeedFactorChanged(double newPlaySpeedFactor) {
         // nothing to do
-    }
-    
-    private void showCompareCompetitorsDialog() {
-        int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
-        if (selectedCompetitorsCount < 1) {
-            Window.alert(stringMessages.selectAtLeastOneCompetitor());
-        } else {
-            List<RegattaAndRaceIdentifier> races = getTrackedRacesIdentifiers();
-            RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, races, 5000l /* requestInterval*/);
-            CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races, raceTimesInfoProvider,
-                    competitorSelectionProvider, timer, stringMessages, errorReporter, leaderboardGroupName, leaderboardName);
-            chartDialog.show();
-        }
-    }
-
-    private void showRankChartDialog() {
-        RankChartDialog chartDialog = new RankChartDialog(sailingService, leaderboardName, competitorSelectionProvider,
-                timer, stringMessages, errorReporter, /* compactChart */ false);
-        chartDialog.show();
     }
 
     private List<RegattaAndRaceIdentifier> getTrackedRacesIdentifiers() {
@@ -2579,7 +2406,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), stringMessages);
+                timer.getRefreshInterval(), stringMessages);
     }
 
     @Override
@@ -2644,5 +2471,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     public RaceColumnSelection getRaceColumnSelection() {
         return raceColumnSelection;
+    }
+    
+    public void removeAllListeners() {
+        if(raceTimesInfoProviderListener != null) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
+        }
+        if(raceColumnSelection != null && raceColumnSelection.getType() == RaceColumnSelectionStrategies.LAST_N) {
+            getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener((LastNRacesColumnSelection) raceColumnSelection);
+        }
+        if(timer != null) {
+            timer.removeTimeListener(this);
+        }
     }
 }

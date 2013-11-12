@@ -44,7 +44,6 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     private String name;
 
     private String pathColor = "Green";
-    private String textFont = "normal 10pt UbuntuRegular";
 
     /**
      * Whether or not to display the wind directions for the points on the optimal path.

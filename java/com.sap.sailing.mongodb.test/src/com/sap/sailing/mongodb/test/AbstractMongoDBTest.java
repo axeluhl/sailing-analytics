@@ -31,7 +31,7 @@ public abstract class AbstractMongoDBTest {
     }
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new Mongo(System.getProperty("mongo.host", "127.0.0.1"), dbConfiguration.getPort());
+        return new Mongo(dbConfiguration.getHostName(), dbConfiguration.getPort());
     }
     
     @Before

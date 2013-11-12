@@ -12,8 +12,8 @@ find_project_home ()
         PARENT_DIR=`cd $1/..;pwd`
         OUTPUT=$(find_project_home $PARENT_DIR)
 
-        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/code" ] && [ -d "$PARENT_DIR/code/.git" ]; then
-            OUTPUT="$PARENT_DIR/code"
+        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
+            OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
         fi
         echo $OUTPUT
         return 0
@@ -56,6 +56,7 @@ active_branch=`basename $active_branch`
 HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
 VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
+SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
@@ -75,7 +76,7 @@ suppress_confirmation=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy]"
+    echo "buildAndUpdateProduct [-b -u -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
@@ -86,14 +87,21 @@ if [ $# -eq 0 ]; then
     echo "-m <path to file> Specify alternate maven configuration (possibly has side effect on proxy setting)"
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
+    echo "                  This parameter can also hold the name of the release if you are using the release command."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
-    echo "-w <ssh target> Target for remote-deploy. Must comply with the following format: user@server."
+    echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
+    echo ""
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
+    echo ""
     echo "all: invokes build and then install"
+    echo ""
+    echo "release: Releases a server package to the location specified by -w parameter. The release is named using the branch name and the date."
+    echo "You can overwrite the generated release name by specifying a name with the parameter -n. Do not use spaces or other special characters!"
+    echo "Example: $0 -w trac@sapsailing.com -n release-ess-brazil-2013 release"
     echo ""
     echo "hot-deploy: performs hot deployment of named bundle into OSGi server"
     echo "Example: $0 -n com.sap.sailing.www -l 14888 hot-deploy"
@@ -119,7 +127,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	    b) onegwtpermutationonly=1;;
+	b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -141,8 +149,109 @@ echo INSTALL goes to $ACDIR
 shift $((OPTIND-1))
 
 if [[ $@ == "" ]]; then
-	echo "You need to specify an action [build|install|all|hot-deploy|remote-deploy]"
+	echo "You need to specify an action [build|install|all|hot-deploy|remote-deploy|release]"
 	exit 2
+fi
+
+
+if [[ "$@" == "release" ]]; then
+    if [ ! -d $p2PluginRepository/plugins ]; then
+        echo "Could not find source directory $p2PluginRepository!"
+        exit
+    fi
+
+    RELEASE_NOTES=""
+    echo ""
+    echo "Please provide me with some notes about this release. You can add more than"
+    echo "one line. Please include major changes or new features. After your notes I will"
+    echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
+    while read -e -p "> " line; do
+        RELEASE_NOTES="$RELEASE_NOTES\n$line"
+    done
+
+    if [[ $RELEASE_NOTES == "" ]]; then
+        echo -e "\nCome on - I can not release without at least some notes about this release!"
+        exit
+    fi
+    echo -e "\nThank you! One last thing..."
+
+    echo "How many weeks of commits do you want to include (0=No commits)?"
+    read -p "> " -e COMMIT_WEEK_COUNT
+
+    mkdir -p $PROJECT_HOME/dist
+    mkdir -p $PROJECT_HOME/build
+
+    RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
+    echo -e $RELEASE_NOTES > $PROJECT_HOME/build/release-notes.txt
+    echo "" >> $PROJECT_HOME/build/release-notes.txt
+    echo "Commits for the last $COMMIT_WEEK_COUNT weeks:" >> $PROJECT_HOME/build/release-notes.txt
+    echo "" >> $PROJECT_HOME/build/release-notes.txt
+    cd $PROJECT_HOME
+    git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
+
+    cd $PROJECT_HOME/build
+    ACDIR=$PROJECT_HOME/build
+
+    mkdir -p configuration/jetty/etc
+    mkdir plugins
+
+    cp -v $PROJECT_HOME/java/target/start $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stop $ACDIR/
+    cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
+
+    cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
+    cp -v $p2PluginRepository/configuration/config.ini configuration/
+
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
+    cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
+    cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
+    cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+    cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
+    cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
+    cp -vr $p2PluginRepository/plugins $ACDIR/
+    cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
+    cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
+
+    # make sure to save the information from env.sh
+    . $ACDIR/env.sh
+
+    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
+
+    sed -i "/mongo.host/d" "$ACDIR/configuration/config.ini"
+    sed -i "/mongo.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
+    sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
+
+    if [[ $OSGI_BUNDLE_NAME != "" ]]; then
+        SIMPLE_VERSION_INFO=$OSGI_BUNDLE_NAME
+    fi
+     
+    mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
+    `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
+    cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
+    cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
+    
+    cd $PROJECT_HOME
+    rm -rf build/*
+
+    SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
+    SCP_CMD="scp -r"
+
+    echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to  $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
+
+    echo "Checking the remote connection..."
+    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
+    echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
+    
+    `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
+    echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
 fi
 
 if [[ "$@" == "hot-deploy" ]]; then
@@ -291,7 +400,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
                 mv $i.sed $i
             done
         else
@@ -299,7 +408,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
                 mv $i.sed $i
             done
         fi
@@ -329,8 +438,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
-	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+    # make sure to honour the service configuration
+    # needed to make sure that tests use the right servers
+    APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
@@ -393,6 +506,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/

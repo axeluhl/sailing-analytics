@@ -28,7 +28,6 @@
   <extend-property name="locale" values="de"/>
   <source path='client'/>
   <source path='leaderboard'/>
-  <source path='raceboard'/>
   <source path='adminconsole'/>
   <source path='masterdataimport'/>
   <source path='usermanagement'/>

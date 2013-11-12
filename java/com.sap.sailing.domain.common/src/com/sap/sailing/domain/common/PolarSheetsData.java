@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public interface PolarSheetsData extends Serializable {
     
@@ -12,6 +13,8 @@ public interface PolarSheetsData extends Serializable {
 
     Integer[] getDataCountPerAngleForWindspeed(int beaufort);
 
-    Integer[] getStepping();
+    WindStepping getStepping();
+
+    Map<Integer, Map<Integer,PolarSheetsHistogramData>> getHistogramDataMap();
 
 }

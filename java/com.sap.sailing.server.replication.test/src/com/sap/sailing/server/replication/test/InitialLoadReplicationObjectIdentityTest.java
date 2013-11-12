@@ -31,6 +31,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -50,8 +52,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     public void setUp() throws Exception {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().dropDatabase();
-        this.master = new RacingEventServiceImpl(mongoDBService);
-        this.replica = new RacingEventServiceImpl(mongoDBService);
+        this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
+        this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
     }
     
     public void performReplicationSetup() throws Exception {
