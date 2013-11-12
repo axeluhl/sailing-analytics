@@ -49,15 +49,19 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         }
         
         String raceId = originalIntent.getStringExtra(AppConstants.RACE_ID_KEY);
-        RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
-        if (raceLog != null) {
-            ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
-            for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
-                raceLog.add(eventToAddToRaceLog);
-                ExLog.i(TAG, "added event " + eventToAddToRaceLog.toString() + " to client's race log");
+        if (dataManager.getDataStore().hasRace(raceId)) {
+            RaceLog raceLog = dataManager.getDataStore().getRace(raceId).getRaceLog();
+            if (raceLog != null) {
+                ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
+                for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
+                    raceLog.add(eventToAddToRaceLog);
+                    ExLog.i(TAG, "added event " + eventToAddToRaceLog.toString() + " to client's race log");
+                }
+            } else {
+                ExLog.w(TAG, "Couldn't retrieve race log for race ID " + raceId);
             }
         } else {
-            ExLog.w(TAG, "Couldn't retrieve race log for race ID " + raceId);
+            ExLog.w(TAG, "There is no race with id " + raceId);
         }
     }
 
