@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
@@ -28,10 +29,9 @@ import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
-import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -215,6 +215,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         return getStatus();
     }
 
+    @Override
     public void eventAdded(RaceLogEvent event) {
         updateStatus();
     }

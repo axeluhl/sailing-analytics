@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -33,7 +35,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
-public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener, RaceState2ChangedListener {
 
     public enum FilterMode {
         ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);
@@ -91,7 +93,8 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : managedRacesById.values()) {
-            onRaceStateStatusChanged(race.getState());
+            //onRaceStateStatusChanged(race.getState());
+            onStatusChanged(race.getState2());
         }
     }
 
@@ -129,13 +132,15 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
 
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().registerStateChangeListener(this);
+            //managedRace.getState().registerStateChangeListener(this);
+            managedRace.getState2().addChangedListener(this);
         }
     }
 
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
-            managedRace.getState().unregisterStateChangeListener(this);
+            //managedRace.getState().unregisterStateChangeListener(this);
+            managedRace.getState2().removeChangedListener(this);
         }
     }
 
@@ -236,6 +241,78 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     @Override
     public void onRaceStateProtestStartTimeChanged(RaceState state) {
         // TODO: show protest time changes in status bar oder show update indicator!
+    }
+
+    @Override
+    public void onRacingProcedureChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onStatusChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onStartTimeChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onFinishingTimeChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onFinishedTimeChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProtestTimeChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onAborted(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onGeneralRecall(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onFinishingPositioningsChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onFinishingPositionsConfirmed(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onCourseDesignChanged(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onWindFixAdded(RaceState2 state) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

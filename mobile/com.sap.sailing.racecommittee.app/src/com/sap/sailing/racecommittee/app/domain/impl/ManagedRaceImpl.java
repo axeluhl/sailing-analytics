@@ -14,6 +14,10 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.impl.RaceState2Impl;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -24,6 +28,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     // private static final String TAG = ManagedRace.class.getName();
 
+    private RaceState2 state2;
     private ManagedRaceIdentifier identifier;
     private RaceState state;
     private Collection<Competitor> competitors;
@@ -32,6 +37,8 @@ public class ManagedRaceImpl implements ManagedRace {
     public ManagedRaceImpl(Context context, ManagedRaceIdentifier identifier,
             RacingProcedureType defaultStartProcedureType, RaceLog raceLog) {
         this(identifier, new RaceStateImpl(context, defaultStartProcedureType, raceLog));
+        this.state2 = new RaceState2Impl(raceLog, AppPreferences.getAuthor(context), 
+                RaceLogEventFactory.INSTANCE, defaultStartProcedureType);
     }
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
@@ -39,6 +46,11 @@ public class ManagedRaceImpl implements ManagedRace {
         this.state = state;
         this.competitors = new ArrayList<Competitor>();
         this.courseOnServer = null;
+    }
+
+    @Override
+    public RaceState2 getState2() {
+        return state2;
     }
 
     public Serializable getId() {

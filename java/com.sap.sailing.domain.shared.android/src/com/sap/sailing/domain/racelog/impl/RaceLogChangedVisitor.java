@@ -1,5 +1,6 @@
-package com.sap.sailing.racecommittee.app.domain.racelog.impl;
+package com.sap.sailing.domain.racelog.impl;
 
+import com.sap.sailing.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
@@ -14,7 +15,6 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 
 public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 
