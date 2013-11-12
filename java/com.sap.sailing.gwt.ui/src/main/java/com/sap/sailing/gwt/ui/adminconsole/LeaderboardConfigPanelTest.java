@@ -32,7 +32,6 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -104,7 +103,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
     private final CaptionPanel trackedRacesCaptionPanel;
     private final List<RegattaDTO> allRegattas;
 
-    private FilterableTable<StrippedLeaderboardDTO> filterLeaderboardTextbox;
+    private FilterableTable<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
     final SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
@@ -193,16 +192,10 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
         HorizontalPanel leaderboardConfigControlsPanel = new HorizontalPanel();
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
         leaderboardConfigControlsPanel.setSpacing(5);
-        leaderboardConfigControlsPanel.add(lblFilterEvents);
-        leaderboardConfigControlsPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        List<String> sortingCriteria = new ArrayList<String>();
-        sortingCriteria.add("name");
-        sortingCriteria.add("displayName");
-        //TODO initiate filterLeadoerboardTextbox
-        leaderboardConfigControlsPanel.add(filterLeaderboardTextbox);
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.setEnabled(false);
@@ -365,6 +358,13 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
                 leaderboardSelectionChanged();
             }
         });
+        
+        List<String> sortingCriteria = new ArrayList<String>();
+        sortingCriteria.add("name");
+        sortingCriteria.add("displayName");
+        filterLeaderboardPanel = new FilterableTable<StrippedLeaderboardDTO>(lblFilterEvents, availableLeaderboardList, leaderboardTable, sortingCriteria, leaderboardList);
+        leaderboardConfigControlsPanel.add(filterLeaderboardPanel);
+        
         leaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
@@ -624,7 +624,7 @@ public class LeaderboardConfigPanelTest extends FormPanel implements SelectedLea
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
                 availableLeaderboardList.addAll(leaderboards);
-                filterLeaderboardTextbox.filter();
+                filterLeaderboardPanel.applyFilter();
                 leaderboardSelectionChanged();
                 leaderboardRaceColumnSelectionChanged();
             }
