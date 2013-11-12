@@ -91,7 +91,7 @@ public class CompetitorPanel extends SimplePanel {
         buttonPanel.add(allowReloadButton);
         competitorsPanel.add(buttonPanel);
 
-        // sailing events table
+        // competitors table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -162,6 +162,20 @@ public class CompetitorPanel extends SimplePanel {
 
         });
 
+        TextColumn<CompetitorDTO> competitorIdColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getIdAsString();
+            }
+        };
+        competitorIdColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorIdColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getIdAsString().compareTo(o2.getIdAsString());
+            }
+        });
+
         HorizontalPanel filterBoxWithLabel = new HorizontalPanel();
         filterBoxWithLabel.setSpacing(5);
         filterBoxWithLabel.add(new Label(stringMessages.filterCompetitors()));
@@ -180,6 +194,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
         competitorTable.addColumn(competitorNameColumn, stringMessages.name());
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
+        competitorTable.addColumn(competitorIdColumn, "ID");
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorTable.setSelectionModel(competitorSelectionModel);
