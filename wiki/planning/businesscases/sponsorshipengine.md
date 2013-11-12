@@ -45,7 +45,7 @@ This project will leverage many synergies at least between all developers workin
 
 ## Risks
 
-There are no risks that could make this project fail, as the steps and the implications are understood quite well. The biggest risk is to underestimate the time needed to extract all the components and to provide users with a good documentation. But this risk is mitigated by the fact that other projects can make use of it at an early stage even if not everything is yet extracted and documented.
+There are no risks that could make this project fail, as the steps and the implications are known. The biggest risk is to underestimate the time needed to extract all the components and to provide users with a good documentation. But this risk is mitigated by the fact that other projects can make use of it at an early stage even if not everything is yet extracted and documented.
 
 ## Prototype
 
