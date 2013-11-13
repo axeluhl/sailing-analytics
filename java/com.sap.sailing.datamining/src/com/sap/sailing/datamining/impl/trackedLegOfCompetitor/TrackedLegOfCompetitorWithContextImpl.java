@@ -3,7 +3,9 @@ package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
 import com.sap.sailing.datamining.WindStrengthCluster;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
 public class TrackedLegOfCompetitorWithContextImpl implements TrackedLegOfCompetitorWithContext {
@@ -75,6 +77,12 @@ public class TrackedLegOfCompetitorWithContextImpl implements TrackedLegOfCompet
     public WindStrengthCluster getWindStrength() {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    @Override
+    public Distance getDistanceTraveled() {
+        TimePoint finishTime = trackedLegOfCompetitor.getFinishTime();
+        return finishTime != null ? trackedLegOfCompetitor.getDistanceTraveled(finishTime) : null;
     }
 
 }

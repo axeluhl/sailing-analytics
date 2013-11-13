@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.factories;
 import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.datamining.impl.DataAmountExtractor;
 import com.sap.sailing.datamining.impl.SpeedInKnotsExtractor;
+import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.DistanceTraveledExtractor;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.domain.base.Moving;
 
@@ -17,6 +18,8 @@ public final class ExtractorFactory {
             return (Extractor<DataType, ExtractedType>) createDataAmountExtractor();
         case Speed:
             return (Extractor<DataType, ExtractedType>) createSpeedExtractor();
+        case Distance_TrackedLegOfCompetitor:
+            return (Extractor<DataType, ExtractedType>) new DistanceTraveledExtractor();
         }
         throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
                 + statisticType.toString());

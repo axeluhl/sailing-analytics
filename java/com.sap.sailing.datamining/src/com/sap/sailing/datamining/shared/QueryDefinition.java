@@ -16,6 +16,8 @@ public interface QueryDefinition extends Serializable {
 
     public AggregatorType getAggregatorType();
 
+    public DataTypes getDataType();
+
     public String getCustomGrouperScriptText();
 
     public List<SharedDimension> getDimensionsToGroupBy();

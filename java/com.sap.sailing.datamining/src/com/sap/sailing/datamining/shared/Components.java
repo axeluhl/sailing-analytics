@@ -12,7 +12,7 @@ public final class Components {
 
     public enum StatisticType {
 
-        DataAmount(ValueType.Integer), Speed(ValueType.Double);
+        DataAmount(ValueType.Integer), Speed(ValueType.Double), Distance_TrackedLegOfCompetitor(ValueType.Double);
 
         public static enum ValueType {
             Integer, Double

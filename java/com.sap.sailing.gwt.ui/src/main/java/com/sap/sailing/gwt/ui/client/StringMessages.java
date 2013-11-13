@@ -845,5 +845,7 @@ public interface StringMessages extends Messages {
     String raceTimeUpwindTooltip();
     String queryNotValidBecause();
     String dataMining();
+    String exchangeHost();
+    String explainExchangeHostName();
     String errorRunningDataMiningQuery();
 }

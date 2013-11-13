@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -15,14 +15,17 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
     
     private SharedDimension dimension;
     
-    private CellTable<ContentType> table;
+    private DataGrid<ContentType> table;
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
     public SelectionTable(String title, SharedDimension dimension) {
         this.dimension = dimension;
         
-        table = new CellTable<ContentType>(500);
+        table = new DataGrid<ContentType>();
+        table.setAutoHeaderRefreshDisabled(true);
+        table.setAutoFooterRefreshDisabled(true);
+        
         table.addColumn(new TextColumn<ContentType>() {
             @Override
             public String getValue(ContentType content) {
@@ -78,6 +81,18 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
     
     public void addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         selectionModel.addSelectionChangeHandler(handler);
+    }
+    
+    @Override
+    public void setWidth(String width) {
+        super.setWidth(width);
+        table.setWidth(width);
+    }
+    
+    @Override
+    public void setHeight(String height) {
+        super.setHeight(height);
+        table.setHeight(height);
     }
 
 }
