@@ -14,12 +14,12 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel implements FilteringRule<T> {
 
-    List<T> all;
+    Iterable<T> all;
     CellTable<T> display;
     ListDataProvider<T> filtered;
-    TextBox textBox = new TextBox();
+    public TextBox textBox = new TextBox();
 
-    public AbstractFilterablePanel(Label label, List<T> all, CellTable<T> display, ListDataProvider<T> filtered) {
+    public AbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, ListDataProvider<T> filtered) {
         setSpacing(5);
         this.all = all;
         this.display = display;
@@ -34,7 +34,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         });
     }
 
-    public void updateAll(List<T> all) {
+    public void updateAll(Iterable<T> all) {
         this.all = all;
     }
 
@@ -43,13 +43,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         List<String> inputText = Arrays.asList(text.split(" "));
         filtered.getList().clear();
         if (text != null && !text.isEmpty()) {
-            for (int i = 0; i < all.size(); i++) {
-                if (filter(all.get(i), inputText)) {
-                    filtered.getList().add(all.get(i));
+            for (T t : all) {
+                if (filter(t, inputText)) {
+                    filtered.getList().add(t);
                 }
             }
         } else {
-            filtered.getList().addAll(all);
+            for (T t : all) {
+                filtered.getList().add(t);
+            }
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(display, display.getColumnSortList());
@@ -78,8 +80,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
     }
 
 }
+
 abstract interface FilteringRule<T> {
-    
-    List<String> getStrings(T t);
+
+    Iterable<String> getStrings(T t);
 
 }

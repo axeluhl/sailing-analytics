@@ -10,8 +10,6 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -21,11 +19,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -40,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -60,7 +56,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
 
-    private final TextBox filterRegattasTextbox;
+    private final AbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -84,21 +80,10 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
 
-        HorizontalPanel filterPanel = new HorizontalPanel();
-        panel.add(filterPanel);
         Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
-        filterPanel.setSpacing(5);
-        filterPanel.add(filterRegattasLabel);
-        filterPanel.setCellVerticalAlignment(filterRegattasLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        filterRegattasTextbox = new TextBox();
-        filterRegattasTextbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                updateFilteredRegattasList();
-            }
-        });
-        filterPanel.add(filterRegattasTextbox);
+
+
 
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
         noRegattasLabel.setWordWrap(false);
@@ -107,6 +92,18 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.setVisible(false);
+        
+        filterablePanelRegattas = new AbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
+                regattaTable, regattaListDataProvider) {
+            @Override
+            public Iterable<String> getStrings(RegattaDTO t) {
+                List<String> string = new ArrayList<String>();
+                string.add(t.getName());
+                string.add(t.boatClass.getName());
+                return string;
+            }
+        };
+        panel.add(filterablePanelRegattas);
 
         regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -186,7 +183,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     }
 
     private void updateFilteredRegattasList() {
-        String text = filterRegattasTextbox.getText();
+        String text = filterablePanelRegattas.textBox.getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         regattaListDataProvider.getList().clear();
         if (text != null && !text.isEmpty()) {

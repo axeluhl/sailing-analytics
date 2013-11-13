@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +11,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -41,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -56,7 +53,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
-    private final TextBox filterEventsTextbox;
+    private final AbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
     private final CellTable<SwissTimingRaceRecordDTO> raceTable;
     private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
@@ -228,15 +225,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        filterEventsTextbox = new TextBox();
-        filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                fillRaceListFromAvailableRacesApplyingFilter(SwissTimingEventManagementPanel.this.filterEventsTextbox.getText());
-            }
-        });
-        filterPanel.add(filterEventsTextbox);
-
         raceNameColumn.setSortable(true);
         raceStartTimeColumn.setSortable(true);
         
@@ -258,6 +246,20 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumnSortHandler(columnSortHandler);
         
         trackedRacesPanel.add(trackedRacesListComposite);
+        
+        filterablePanelEvents = new AbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
+                availableSwissTimingRaces, raceTable, raceList) {
+
+            @Override
+            public Iterable<String> getStrings(SwissTimingRaceRecordDTO t) {
+
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.ID);
+                return strings;
+            }
+        };
+
+        filterPanel.add(filterablePanelEvents);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);
@@ -337,7 +339,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
 
-                filterEventsTextbox.setText(null);
+                filterablePanelEvents.textBox.setText(null);
 
                 // store a successful configuration in the database for later retrieval
                 final String configName = hostname+":"+port;
@@ -406,20 +408,4 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         }
     }
 
-    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
-        List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        raceList.getList().clear();
-        if (text != null && !text.isEmpty()) {
-            for (SwissTimingRaceRecordDTO triple : availableSwissTimingRaces) {
-                boolean found = textContainsStringsToCheck(wordsToFilter, triple.ID);
-                if (found) {
-                    raceList.getList().add(triple);
-                }
-            }
-        } else {
-            raceList.getList().addAll(availableSwissTimingRaces);
-        }
-        // now sort again according to selected criterion
-        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
-    }
 }
