@@ -2,8 +2,10 @@ package com.sap.sailing.datamining.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +54,7 @@ public class ParallelDataRetriever<DataType> implements DataRetriever<DataType>,
         while (!isDone()) {
             Thread.sleep(100);
         }
-        return data;
+        return getDataAsUnmodifiableConcurrentCollection();
     }
 
     @Override
@@ -67,7 +69,11 @@ public class ParallelDataRetriever<DataType> implements DataRetriever<DataType>,
         if (timeRun >= timeoutInMillis) {
             throw new TimeoutException();
         }
-        return data;
+        return getDataAsUnmodifiableConcurrentCollection();
+    }
+
+    private Collection<DataType> getDataAsUnmodifiableConcurrentCollection() {
+        return Collections.unmodifiableCollection(new CopyOnWriteArrayList<DataType>(data));
     }
 
     @Override
@@ -81,7 +87,7 @@ public class ParallelDataRetriever<DataType> implements DataRetriever<DataType>,
     }
 
     @Override
-    public void addData(Collection<DataType> data) {
+    public synchronized void addData(Collection<DataType> data) {
         this.data.addAll(data);
     }
 
