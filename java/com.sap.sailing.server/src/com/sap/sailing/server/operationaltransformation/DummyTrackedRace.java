@@ -45,9 +45,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private Iterable<? extends Competitor> competitors;
     private Regatta regatta;
 
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta,
-            final WindStore windStore, final TrackedRegatta trackedRegatta) {
-        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta, windStore, -1);
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final WindStore windStore, final TrackedRegatta trackedRegatta) {
+        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta,windStore, -1);
         this.competitors = competitors;
         this.regatta = regatta;
     }

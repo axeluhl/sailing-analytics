@@ -228,6 +228,7 @@ public class ImportMasterDataOperation extends
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
+                //WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
                 DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta, null, null);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
