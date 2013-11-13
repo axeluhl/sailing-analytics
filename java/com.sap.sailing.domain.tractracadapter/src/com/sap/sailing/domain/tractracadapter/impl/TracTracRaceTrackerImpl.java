@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -435,7 +436,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return newCourseControlPointsWithPassingSide;
     }
 
-    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
+    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) throws ParseException {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
         RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
@@ -458,6 +459,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
+                }
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(raceStartTime);
                 }
             }
         }
