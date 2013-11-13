@@ -681,6 +681,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             try {
                 logger.severe("I got a loading progress that is smaller than the one already received. This is an unrecoverable error! Stopping trackers for "+ getRaces());
                 stop();
+                throw new RuntimeException("Got a loading progress that is smaller than the one already received!");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
