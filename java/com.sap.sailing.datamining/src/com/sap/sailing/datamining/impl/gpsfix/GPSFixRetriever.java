@@ -8,7 +8,7 @@ import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.GPSFixContextImpl;
-import com.sap.sailing.datamining.impl.AbstractDataRetriever;
+import com.sap.sailing.datamining.impl.AbstractSingleThreadedDataRetriever;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -16,7 +16,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.server.RacingEventService;
 
-public class GPSFixRetriever extends AbstractDataRetriever<GPSFixWithContext> {
+public class GPSFixRetriever extends AbstractSingleThreadedDataRetriever<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {

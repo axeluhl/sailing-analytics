@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public abstract class AbstractDataRetriever<DataType> implements DataRetriever<DataType> {
+public abstract class AbstractSingleThreadedDataRetriever<DataType> implements DataRetriever<DataType> {
 
     private static Collection<Pair<TrackedLeg, TrackedLegContext>> retrieveDataTillTrackedLeg(RacingEventService racingEventService) {
         Collection<Pair<TrackedLeg, TrackedLegContext>> data = new ArrayList<Pair<TrackedLeg, TrackedLegContext>>();

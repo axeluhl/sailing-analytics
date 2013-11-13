@@ -5,12 +5,12 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.impl.AbstractDataRetriever;
+import com.sap.sailing.datamining.impl.AbstractSingleThreadedDataRetriever;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.server.RacingEventService;
 
-public class TrackedLegOfCompetitorRetriever extends AbstractDataRetriever<TrackedLegOfCompetitorWithContext> {
+public class TrackedLegOfCompetitorRetriever extends AbstractSingleThreadedDataRetriever<TrackedLegOfCompetitorWithContext> {
 
     @Override
     public Collection<TrackedLegOfCompetitorWithContext> retrieveData(RacingEventService racingEventService) {
