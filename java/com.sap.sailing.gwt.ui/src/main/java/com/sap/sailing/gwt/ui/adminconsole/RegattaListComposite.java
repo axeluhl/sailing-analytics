@@ -92,7 +92,6 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.setVisible(false);
-        
         filterablePanelRegattas = new AbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
                 regattaTable, regattaListDataProvider) {
             @Override
@@ -104,7 +103,6 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             }
         };
         panel.add(filterablePanelRegattas);
-
         regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override

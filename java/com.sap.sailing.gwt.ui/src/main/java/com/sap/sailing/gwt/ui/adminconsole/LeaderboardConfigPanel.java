@@ -198,7 +198,6 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
                 availableLeaderboardList, leaderboardTable, leaderboardList) {
-
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -206,7 +205,6 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 strings.add(t.displayName);
                 return strings;
             }
-
         };
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.setEnabled(false);

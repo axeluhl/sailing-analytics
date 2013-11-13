@@ -175,7 +175,7 @@ public class CompetitorPanel extends SimplePanel {
                 return o1.getIdAsString().compareTo(o2.getIdAsString());
             }
         });
-
+        competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
         filterField = new AbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
                 allCompetitors, competitorTable, competitorProvider) {
 
@@ -190,7 +190,6 @@ public class CompetitorPanel extends SimplePanel {
         };
 
         mainPanel.add(filterField);
-        competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
         competitorProvider.addDataDisplay(competitorTable);
         competitorTable.addColumnSortHandler(competitorColumnListHandler);
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());

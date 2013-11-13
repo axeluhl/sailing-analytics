@@ -285,9 +285,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
-
+        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
         this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
-
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -296,8 +296,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return strings;
             }
         };
-
-
         layoutTable.setWidget(4, 0, racesFilterLabel);
         layoutTable.setWidget(4, 1, racesFilterablePanel);
 
@@ -339,8 +337,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         };
         raceStatusColumn.setSortable(true);
         
-        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("RacesTable");
         racesTable.addColumn(regattaNameColumn, stringMessages.event());
         racesTable.addColumn(raceNameColumn, stringMessages.race());

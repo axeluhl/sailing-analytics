@@ -171,6 +171,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         // Create leaderboards table
         leaderboardsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
+        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsFilterablePanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
@@ -219,7 +220,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         };
 
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.setWidth("100%");
         leaderboardsTable.addColumnSortHandler(leaderboardsListHandler);
         leaderboardsTable.addColumn(leaderboardsNameColumn, stringMessages.leaderboardName());
@@ -392,6 +392,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         //Create table for leaderboard groups
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
+        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsFilterablePanel = new AbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
@@ -490,7 +491,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
 
-        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.setWidth("100%");
         groupsTable.addColumn(groupNameColumn, stringMessages.name());
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());

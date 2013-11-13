@@ -13,11 +13,14 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 
 /**
- * This Panel contains a label and a text box. Text entered into the text box filters the given CellTable. To be
- * initiated the method {@link #getSearchableStrings(Object)} has to be defined, which gets those Strings from a
- * <code>T</code> that should be considered when filtering, e.g. name or boatClass. The method {@link #applyFilter()}
- * can be called outside of this Panel (e.g. after loading), but then the method {@link #updateAll(Iterable)} should be
- * called to ensure the correct selection is filtered.
+ * This Panel contains a label and a text box. Text entered into the text box filters the {@link CellTable} passed to
+ * the constructor by adjusting the cell table's {@link ListDataProvider}'s contents and then sorting the table again
+ * according the the sorting criteria currently active (the sorting is the only reason why the {@link CellTable}
+ * actually needs to be known to an instance of this class). To be initiated the method
+ * {@link #getSearchableStrings(Object)} has to be defined, which gets those Strings from a <code>T</code> that should
+ * be considered when filtering, e.g. name or boatClass. The method {@link #applyFilter()} can be called outside of this
+ * Panel (e.g. after loading), but then the method {@link #updateAll(Iterable)} should be called to ensure the correct
+ * selection is filtered.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
@@ -72,19 +75,21 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         String text = getTextBox().getText();
         List<String> inputText = Arrays.asList(text.split(" "));
         filtered.getList().clear();
-        if (text != null && !text.isEmpty()) {
-            for (T t : all) {
-                if (filter(t, inputText)) {
+        if (all != null) {
+            if (text != null && !text.isEmpty()) {
+                for (T t : all) {
+                    if (filter(t, inputText)) {
+                        filtered.getList().add(t);
+                    }
+                }
+            } else {
+                for (T t : all) {
                     filtered.getList().add(t);
                 }
             }
-        } else {
-            for (T t : all) {
-                filtered.getList().add(t);
-            }
+            // now sort again according to selected criterion
+            ColumnSortEvent.fire(display, display.getColumnSortList());
         }
-        // now sort again according to selected criterion
-        ColumnSortEvent.fire(display, display.getColumnSortList());
     }
 
     /**
