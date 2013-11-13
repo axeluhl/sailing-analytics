@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,11 +62,6 @@ import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 public class EndToEndListeningStoreAndFowardTest {
     private static final Logger logger = Logger.getLogger(EndToEndListeningStoreAndFowardTest.class.getName());
 
@@ -77,7 +77,6 @@ public class EndToEndListeningStoreAndFowardTest {
     private SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     private SwissTimingFactory swissTimingFactory;
 
-    private EmptyWindStore emptyWindStore;
     private EmptyRaceLogStore emptyRaceLogStore;
     private RacingEventService racingEventService;
     private SwissTimingAdapter swissTimingAdapter;
@@ -111,7 +110,7 @@ public class EndToEndListeningStoreAndFowardTest {
         sendingSocket = new Socket("localhost", RECEIVE_PORT);
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
-        emptyWindStore = EmptyWindStore.INSTANCE;
+        EmptyWindStore emptyWindStore = EmptyWindStore.INSTANCE;
         emptyRaceLogStore = EmptyRaceLogStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
@@ -122,7 +121,7 @@ public class EndToEndListeningStoreAndFowardTest {
         final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         swissTimingAdapter = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
         racingEventService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(
-                mongoDBService, baseDomainFactory), PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDB.TEST_STUB);
+                mongoDBService, baseDomainFactory), PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDB.TEST_STUB, emptyWindStore);
         raceHandles = new ArrayList<RacesHandle>();
     }
 
@@ -371,7 +370,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (String raceToTrack : racesToTrack) {
             RacesHandle raceHandle = swissTimingAdapter.addSwissTimingRace(racingEventService,
                     /* regattaToAddTo */ null /* use a default regatta */, raceToTrack, /* canSendRequests */
-                    "localhost", CLIENT_PORT, false, emptyWindStore, emptyRaceLogStore, -1);
+                    "localhost", CLIENT_PORT, false, emptyRaceLogStore, -1);
             raceHandles.add(raceHandle);
             if (connector == null) {
                 connector = swissTimingAdapter.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",

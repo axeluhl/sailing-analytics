@@ -63,6 +63,7 @@ import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
@@ -465,7 +466,7 @@ public class MasterDataImportTest {
         // Setup source service
         DomainFactory sourceDomainFactory = new DomainFactoryImpl();
         RacingEventService sourceService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getDefaultMediaDB());
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE);
         Event event = sourceService.addEvent(TEST_EVENT_NAME, "testVenue", "", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
         CourseArea courseArea = new CourseAreaImpl("testArea", courseAreaUUID);
