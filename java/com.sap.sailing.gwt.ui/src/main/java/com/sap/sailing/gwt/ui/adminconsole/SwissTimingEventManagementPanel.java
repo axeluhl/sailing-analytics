@@ -251,7 +251,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 availableSwissTimingRaces, raceTable, raceList) {
 
             @Override
-            public Iterable<String> getStrings(SwissTimingRaceRecordDTO t) {
+            public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
 
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.ID);
@@ -339,7 +339,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
 
-                filterablePanelEvents.textBox.setText(null);
+                filterablePanelEvents.getTextBox().setText(null);
 
                 // store a successful configuration in the database for later retrieval
                 final String configName = hostname+":"+port;

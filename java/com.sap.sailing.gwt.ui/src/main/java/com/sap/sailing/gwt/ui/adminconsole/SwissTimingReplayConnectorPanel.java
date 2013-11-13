@@ -203,7 +203,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         filterablePanelEvents = new AbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
             
             @Override
-            public List<String> getStrings(SwissTimingReplayRaceDTO t) {
+            public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.name, t.race_id, t.rsc));
                 return strings;
@@ -314,7 +314,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 availableSwissTimingRaces.addAll(races);
                 raceList.getList().clear();
                 raceList.getList().addAll(availableSwissTimingRaces);
-                filterablePanelEvents.textBox.setText(null);
+                filterablePanelEvents.getTextBox().setText(null);
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeSwissTimingArchiveConfiguration(swissTimingJsonUrl,
                         new AsyncCallback<Void>() {

@@ -180,7 +180,7 @@ public class CompetitorPanel extends SimplePanel {
                 allCompetitors, competitorTable, competitorProvider) {
 
             @Override
-            public Iterable<String> getStrings(CompetitorDTO t) {
+            public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 string.add(t.getSailID());

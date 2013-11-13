@@ -173,7 +173,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsFilterablePanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             
             @Override
-            public Iterable<String> getStrings(StrippedLeaderboardDTO t) {
+            public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.displayName);
@@ -399,7 +399,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsFilterablePanel = new AbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
 
             @Override
-            public Iterable<String> getStrings(LeaderboardGroupDTO t) {
+            public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 return string;
@@ -591,7 +591,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     leaderboardsProvider.getList().clear();
                     leaderboardsProvider.getList().addAll(availableLeaderboards);
                     leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
-                    leaderboardsFilterablePanel.textBox.setText("");
+                    leaderboardsFilterablePanel.getTextBox().setText("");
                     leaderboardsSelectionModel.clear();
                     for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
                         leaderboardsSelectionModel.setSelected(leaderboard, true);
@@ -755,7 +755,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
             //Reload available leaderboards and remove leaderboards of the group from the list
             leaderboardsSelectionModel.clear();
-            leaderboardsFilterablePanel.textBox.setText("");
+            leaderboardsFilterablePanel.getTextBox().setText("");
             leaderboardsProvider.getList().clear();
             leaderboardsProvider.getList().addAll(availableLeaderboards);
             leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);

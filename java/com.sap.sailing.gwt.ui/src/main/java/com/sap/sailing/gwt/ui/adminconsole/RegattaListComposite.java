@@ -96,7 +96,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         filterablePanelRegattas = new AbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
                 regattaTable, regattaListDataProvider) {
             @Override
-            public Iterable<String> getStrings(RegattaDTO t) {
+            public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 string.add(t.boatClass.getName());
@@ -183,7 +183,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     }
 
     private void updateFilteredRegattasList() {
-        String text = filterablePanelRegattas.textBox.getText();
+        String text = filterablePanelRegattas.getTextBox().getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         regattaListDataProvider.getList().clear();
         if (text != null && !text.isEmpty()) {

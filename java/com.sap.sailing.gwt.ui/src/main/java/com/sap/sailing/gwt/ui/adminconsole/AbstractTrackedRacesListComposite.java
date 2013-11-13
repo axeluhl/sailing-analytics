@@ -161,8 +161,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
 
             @Override
-            public List<String> getStrings(RaceDTO t) {
-                
+            public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.boatClass);

@@ -289,7 +289,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList ) {
 
             @Override
-            public List<String> getStrings(TracTracRaceRecordDTO t) {
+            public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.regattaName);
@@ -489,7 +489,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 races.clear();
                 races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
                 
-                TracTracEventManagementPanel.this.racesFilterablePanel.textBox.setText("");
+                TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                 loadingMessageLabel.setText("");
                 

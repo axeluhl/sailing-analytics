@@ -13,22 +13,21 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 
 /**
- * This Panel contains a label and a textbox. Text entered into the TextBox filters the given CellTable<T>. To be
- * initiated the method <code>getStrings(T t)</code> has to be defined, which gets those Strings from <code>T</code>
- * that should be considered when filtering, e.g. name or boatClass. The method <code>applyFilter()</code> can be called
- * outside of this Panel (e.g. after loading), but then the method <code>updateAll(List<T> all)</code> should be called
- * to ensure the correct selection is filtered.
+ * This Panel contains a label and a text box. Text entered into the text box filters the given CellTable. To be
+ * initiated the method {@link #getSearchableStrings(Object)} has to be defined, which gets those Strings from a
+ * <code>T</code> that should be considered when filtering, e.g. name or boatClass. The method {@link #applyFilter()}
+ * can be called outside of this Panel (e.g. after loading), but then the method {@link #updateAll(Iterable)} should be
+ * called to ensure the correct selection is filtered.
  * 
  * @param <T>
- * @author Nicolas Klose
+ * @author Nicolas Klose, Axel Uhl
  * 
  */
-public abstract class AbstractFilterablePanel<T> extends HorizontalPanel implements FilteringRule<T> {
-
-    Iterable<T> all;
-    CellTable<T> display;
-    ListDataProvider<T> filtered;
-    public TextBox textBox = new TextBox();
+public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
+    private Iterable<T> all;
+    private final CellTable<T> display;
+    private final ListDataProvider<T> filtered;
+    private final TextBox textBox = new TextBox();
 
     public AbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, ListDataProvider<T> filtered) {
         setSpacing(5);
@@ -36,8 +35,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         this.display = display;
         this.filtered = filtered;
         add(label);
-        add(textBox);
-        textBox.addKeyUpHandler(new KeyUpHandler() {
+        add(getTextBox());
+        getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 applyFilter();
@@ -45,12 +44,22 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         });
     }
 
+    /**
+     * Subclasses must implement this to extract the strings from an object of type <code>T</code> based on which the
+     * search box performs its filtering
+     * 
+     * @param t
+     *            the object from which to extract the searchable strings
+     * @return the searchable strings
+     */
+    protected abstract Iterable<String> getSearchableStrings(T t);
+
     public void updateAll(Iterable<T> all) {
         this.all = all;
     }
 
     public void applyFilter() {
-        String text = textBox.getText();
+        String text = getTextBox().getText();
         List<String> inputText = Arrays.asList(text.split(" "));
         filtered.getList().clear();
         if (text != null && !text.isEmpty()) {
@@ -79,7 +88,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
      *         <code>false</code> if not
      */
     private boolean filter(T obj, List<String> wordsToFilter) {
-        for (String s : getStrings(obj)) {
+        for (String s : getSearchableStrings(obj)) {
             boolean failed = false;
             if (s == null) {
                 failed = true;
@@ -100,10 +109,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         return false;
     }
 
-}
-
-abstract interface FilteringRule<T> {
-
-    Iterable<String> getStrings(T t);
-
+    public TextBox getTextBox() {
+        return textBox;
+    }
 }

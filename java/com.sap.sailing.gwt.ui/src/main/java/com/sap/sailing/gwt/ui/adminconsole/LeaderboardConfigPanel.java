@@ -200,7 +200,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 availableLeaderboardList, leaderboardTable, leaderboardList) {
 
             @Override
-            public List<String> getStrings(StrippedLeaderboardDTO t) {
+            public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.displayName);
