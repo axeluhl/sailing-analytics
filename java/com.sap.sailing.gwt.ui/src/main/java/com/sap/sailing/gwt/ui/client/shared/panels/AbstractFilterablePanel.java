@@ -54,10 +54,20 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     protected abstract Iterable<String> getSearchableStrings(T t);
 
+    /**
+     * Updates the set of all objects to be shown in the table and applies the search filter to update the
+     * table view.
+     */
     public void updateAll(Iterable<T> all) {
         this.all = all;
+        applyFilter();
     }
 
+    /**
+     * Reconstructs the {@link #filtered} list contents based on the contents of {@link #all} as provided through
+     * {@link #updateAll(Iterable)} and the current search phrase entered in the search {@link #textBox text box}. After
+     * filtering, the original sort order is restored.
+     */
     public void applyFilter() {
         String text = getTextBox().getText();
         List<String> inputText = Arrays.asList(text.split(" "));

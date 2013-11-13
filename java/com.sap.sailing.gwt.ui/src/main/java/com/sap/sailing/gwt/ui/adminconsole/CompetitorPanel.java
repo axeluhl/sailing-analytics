@@ -241,7 +241,6 @@ public class CompetitorPanel extends SimplePanel {
                             if (allCompetitors.get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
                                 allCompetitors.set(i, updatedCompetitor);
                                 filterField.updateAll(allCompetitors);
-                                filterField.applyFilter();
                                 break;
                             }
                         }
@@ -269,7 +268,6 @@ public class CompetitorPanel extends SimplePanel {
                     allCompetitors.add(c);
                 }
                 filterField.updateAll(allCompetitors);
-                filterField.applyFilter();
             }
         });
     }

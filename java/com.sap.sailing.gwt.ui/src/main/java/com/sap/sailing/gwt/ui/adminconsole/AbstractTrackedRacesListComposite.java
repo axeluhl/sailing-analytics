@@ -503,7 +503,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         }
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
-        filterablePanelRaces.applyFilter();
         raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers
                                                                   // onRaceSelectionChange
     }
