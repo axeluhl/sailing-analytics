@@ -126,15 +126,15 @@ public class AbstractPosition implements Position {
     }
 
     @Override
-    public Distance alongTrackDistance(Position pos2, Bearing bearing) {
-        double direction = Math.signum(Math.cos(pos2.getBearingGreatCircle(this).getRadians() - bearing.getRadians()));
+    public Distance alongTrackDistance(Position from, Bearing bearing) {
+        double direction = Math.signum(Math.cos(from.getBearingGreatCircle(this).getRadians() - bearing.getRadians()));
         // Test if denominator gets ridiculously small; if so, the cross-track error is about 90� central angle.
         // This means that the cross-track error is maximized, and that there is no way to determine how far along
         // the great circle described by pos2 and bearing we should travel. This is an exception which will
         // surface as a division-by-zero exception or a NaN result
         return new CentralAngleDistance(direction
-                * Math.acos(Math.cos(pos2.getCentralAngleRad(this))
-                        / Math.cos(crossTrackError(pos2, bearing).getCentralAngleRad())));
+                * Math.acos(Math.cos(from.getCentralAngleRad(this))
+                        / Math.cos(crossTrackError(from, bearing).getCentralAngleRad())));
     }
 
     @Override

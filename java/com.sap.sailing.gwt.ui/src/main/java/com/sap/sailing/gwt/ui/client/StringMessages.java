@@ -819,6 +819,11 @@ public interface StringMessages extends Messages {
     String raceTimeDownwindTooltip();
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
+    String hideToolbar();
+    String showSeriesLeaderboards();
+    String showOverallLeaderboard();
+    String exchangeHost();
+    String explainExchangeHostName();
     String line();
     String offset();
     String hideToolbar();
