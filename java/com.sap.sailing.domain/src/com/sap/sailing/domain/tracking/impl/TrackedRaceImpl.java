@@ -2259,14 +2259,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     break;
                 }
                 if (lastFix != null) {
-                    Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
-                    Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
-                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix)
-                            .getDegrees())
-                            / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
-                    if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
-                        maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
-                        result = lastFix.getTimePoint();
+                    final SpeedWithBearing lastEstimatedSpeed = track.getEstimatedSpeed(lastFix.getTimePoint());
+                    if (lastEstimatedSpeed != null) {
+                        Bearing courseAtLastFix = lastEstimatedSpeed.getBearing();
+                        final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
+                        if (estimatedSpeed != null) {
+                            Bearing courseAtFix = estimatedSpeed.getBearing();
+                            double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix
+                                    .getDifferenceTo(courseAtLastFix).getDegrees())
+                                    / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
+                            if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
+                                maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
+                                result = lastFix.getTimePoint();
+                            }
+                        }
                     }
                 }
                 lastFix = fix;
