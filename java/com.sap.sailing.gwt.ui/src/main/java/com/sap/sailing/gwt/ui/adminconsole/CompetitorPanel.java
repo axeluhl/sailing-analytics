@@ -166,11 +166,8 @@ public class CompetitorPanel extends SimplePanel {
                 return competitor.getIdAsString();
             }
 
-  
-
-        filterField = new AbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()), allCompetitors, competitorTable, competitorProvider) {
-            
         };
+
         competitorIdColumn.setSortable(true);
         competitorColumnListHandler.setComparator(competitorIdColumn, new Comparator<CompetitorDTO>() {
             @Override
@@ -178,6 +175,9 @@ public class CompetitorPanel extends SimplePanel {
                 return o1.getIdAsString().compareTo(o2.getIdAsString());
             }
         });
+
+        filterField = new AbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
+                allCompetitors, competitorTable, competitorProvider) {
 
             @Override
             public Iterable<String> getStrings(CompetitorDTO t) {
@@ -188,7 +188,6 @@ public class CompetitorPanel extends SimplePanel {
                 return string;
             }
         };
-
 
         mainPanel.add(filterField);
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);

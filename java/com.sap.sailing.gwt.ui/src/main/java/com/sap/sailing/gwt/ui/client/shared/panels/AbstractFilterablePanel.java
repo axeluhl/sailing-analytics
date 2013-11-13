@@ -12,6 +12,18 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 
+/**
+ * @author Nicolas Klose
+ * 
+ *   This Panel contains a label and a textbox. Text entered into the TextBox filters the given CellTable<T>. To be 
+ *   initiated the method <code>getStrings(T t)<code> has to be defined, which gets those Strings from T that should 
+ *   be considered when filtering, e.g. name or boatClass.
+ *   The method <code>applyFilter()<code> can be called outside of this Panel (e.g. after loading), but then the 
+ *   method <code>updateAll(List<T> all)<code> should be called to ensure the correct selection is filtered.
+ * 
+ * @param <T>
+ */
+
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel implements FilteringRule<T> {
 
     Iterable<T> all;
