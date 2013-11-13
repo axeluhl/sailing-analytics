@@ -411,7 +411,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     @Override
     public String getLocalizedShortName() {
-        return "Tracked races";
+        return stringMessages.trackedRaces();
     }
 
     @Override
