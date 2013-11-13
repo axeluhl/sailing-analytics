@@ -17,11 +17,11 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.StartModeChoosableStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.RRS26StartPhaseEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -108,16 +108,16 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
 
         setupUi();
 
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(this);
-        ExLog.i(RRS26StartPhaseFragment.class.getName(),
-                String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
+        RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+        procedure.addChangedListener(changeListener);
+        ExLog.i(RRS26StartPhaseFragment.class.getName(), String.format("Fragment %s is now shown", RRS26StartPhaseFragment.class.getName()));
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        getRace().getState().getStartProcedure().setStartPhaseEventListener(null);
+        RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+        procedure.removeChangedListener(changeListener);
     }
 
     @Override
@@ -129,7 +129,8 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
     }
 
     private void setupUi() {
-        StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
+        setStartModeFlags(getRaceState().<RRS26RacingProcedure>getTypedRacingProcedure().getStartModeFlag());
+        /*StartModeChoosableStartProcedure startProcedure = (StartModeChoosableStartProcedure) this.getRace().getState().getStartProcedure();
         this.onStartModeFlagChosen(startProcedure.getCurrentStartModeFlag());
         LastFlagsFinder lastFlagFinder = new LastFlagsFinder(this.getRace().getRaceLog());
         RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
@@ -164,7 +165,7 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
                 onClassDown();
             } 
             
-        }
+        }*/
     }
 
     private void setCountdownLabels(long millisecondsTillStart) {
@@ -275,4 +276,30 @@ public class RRS26StartPhaseFragment extends RaceFragment implements RRS26StartP
     public void onStartModeFlagChosen(Flags startModeFlag) {
         setStartModeFlags(startModeFlag);
     }
+    
+    private RRS26ChangedListener changeListener = new RRS26ChangedListener() {
+
+        @Override
+        public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
+            ExLog.i("WUHU", "Active flags changed!");
+        }
+        
+        @Override
+        public void onIndividualRecallDisplayed(RacingProcedure2 racingProcedure) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void onIndividualRecallRemoved(RacingProcedure2 racingProcedure) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
+            setStartModeFlags(racingProcedure.getStartModeFlag());
+        }
+        
+    };
 }

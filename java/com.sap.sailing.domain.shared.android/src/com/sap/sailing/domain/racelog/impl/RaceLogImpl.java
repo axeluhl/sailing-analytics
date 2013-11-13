@@ -148,15 +148,17 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
     
     protected void notifyListenersAboutReceive(RaceLogEvent event) {
+        Set<RaceLogEventVisitor> workingListeners = new HashSet<RaceLogEventVisitor>();
         synchronized (listeners) {
-            for (RaceLogEventVisitor listener : listeners) {
-                try {
-                    event.accept(listener);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
-                    t.printStackTrace();
-                }
+            workingListeners.addAll(listeners);
+        }
+        for (RaceLogEventVisitor listener : workingListeners) {
+            try {
+                event.accept(listener);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
+                logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
+                t.printStackTrace();
             }
         }
     }

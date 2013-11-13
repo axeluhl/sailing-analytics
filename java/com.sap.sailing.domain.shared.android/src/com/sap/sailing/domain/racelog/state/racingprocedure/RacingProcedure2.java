@@ -16,11 +16,15 @@ public interface RacingProcedure2 extends RaceStateEventProcessor, RaceState2Cha
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     void triggerStateEventScheduling(RaceState2 state);
     
-    RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime);
+    RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now);
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
     
     boolean isIndividualRecallDisplayed();
     void displayIndividualRecall(TimePoint timePoint);
     void removeIndividualRecall(TimePoint timePoint);
+    
+    FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now);
+    
+    void detachFromRaceLog();
 
 }

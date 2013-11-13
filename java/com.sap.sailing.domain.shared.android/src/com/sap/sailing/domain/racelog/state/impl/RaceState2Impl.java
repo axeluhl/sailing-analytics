@@ -29,7 +29,7 @@ import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RRS26RacingProcedureImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
@@ -91,6 +91,7 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
         
         this.raceLog.addListener(new RaceLogChangedVisitor(this));
         
+        recreateRacingProcedure();
         update();
     }
 
@@ -115,6 +116,12 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     public RacingProcedure2 getRacingProcedure() {
         return racingProcedure;
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends RacingProcedure2> T getTypedRacingProcedure() {
+        return (T) getRacingProcedure();
+    }
 
     @Override
     public void setStateEventScheduler(RaceStateEventScheduler scheduler) {
@@ -132,11 +139,12 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
 
     @Override
     public RacingProcedurePrerequisite setStartTime(TimePoint startTime) {
-        RacingProcedurePrerequisite pre = racingProcedure.checkPrerequisitesForStart(startTime);
+        TimePoint now = MillisecondsTimePoint.now();
+        RacingProcedurePrerequisite pre = racingProcedure.checkPrerequisitesForStart(startTime, now);
         if (pre != null) {
             return pre;
         } else {
-            raceLog.add(factory.createStartTimeEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), startTime));
+            raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
             return null;
         }
     }
@@ -258,10 +266,8 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
 
     private void update() {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedRacingProcedureType, type)) {
-            if (!type.equals(RacingProcedureType.UNKNOWN)) {
-                cachedRacingProcedureType = type;
-            }
+        if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
+            cachedRacingProcedureType = type;
             recreateRacingProcedure();
             changedListeners.onRacingProcedureChanged(this);
         }
@@ -324,12 +330,11 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     }
 
     private void recreateRacingProcedure() {
-        cachedRacingProcedureType = racingProcedureAnalyzer.analyze();
-        
         if (racingProcedure != null) {
             removeChangedListener(racingProcedure);
+            racingProcedure.detachFromRaceLog();
         }
-        racingProcedure = new RRS26RacingProcedureImpl(raceLog, author, factory);
+        racingProcedure = RacingProcedureFactoryImpl.create(cachedRacingProcedureType, raceLog, author, factory);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
         

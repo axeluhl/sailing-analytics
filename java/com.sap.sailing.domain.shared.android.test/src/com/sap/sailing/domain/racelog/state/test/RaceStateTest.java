@@ -26,6 +26,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.state.RaceState2;
 import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceState2Impl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
 
 public class RaceStateTest {
     
@@ -127,6 +128,20 @@ public class RaceStateTest {
         verify(listener, times(3)).onStatusChanged(state);
         verify(listener, times(1)).onCourseDesignChanged(state);
         verifyNoMoreInteractions(listener);
+    }
+    
+    @Test
+    public void testNewRacingProcedure() throws InterruptedException {
+        state.addChangedListener(listener);
+        
+        RacingProcedure2 oldProcedure = state.getRacingProcedure();
+        assertEquals(defaultRacingProcedureType, oldProcedure.getType());
+        
+        state.setRacingProcedure(RacingProcedureType.ESS);
+        
+        RacingProcedure2 newProcedure = state.getRacingProcedure();
+        assertEquals(RacingProcedureType.ESS, newProcedure.getType());
+        assertFalse(oldProcedure.equals(newProcedure));
     }
 
 }

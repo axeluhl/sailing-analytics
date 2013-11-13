@@ -239,10 +239,11 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().createNewStartProcedure(selectedStartProcedureType);
+        /*getRace().getState().createNewStartProcedure(selectedStartProcedureType);
         Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
-                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
-        getRace().getState2().setStartTime(new MillisecondsTimePoint(newStartTime));
+                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);*/
+        getRaceState().setRacingProcedure(selectedStartProcedureType);
+        getRaceState().setStartTime(new MillisecondsTimePoint(newStartTime));
         /*if (action == null) {
             getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
         } else {

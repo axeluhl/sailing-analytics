@@ -19,6 +19,7 @@ public interface RaceState2 extends RaceStateEventProcessor {
     
     void setRacingProcedure(RacingProcedureType racingProcedureType);
     RacingProcedure2 getRacingProcedure();
+    <T extends RacingProcedure2> T getTypedRacingProcedure();
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     
     RaceLogRaceStatus getStatus();

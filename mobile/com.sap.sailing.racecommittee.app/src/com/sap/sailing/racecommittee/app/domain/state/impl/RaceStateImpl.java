@@ -70,7 +70,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.stateEventListeners = new HashSet<RaceStateEventListener>();
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
-        this.raceLog.addListener(raceLogListener);
+        //this.raceLog.addListener(raceLogListener);
 
         this.startTimeFinder = new StartTimeFinder(raceLog);
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);

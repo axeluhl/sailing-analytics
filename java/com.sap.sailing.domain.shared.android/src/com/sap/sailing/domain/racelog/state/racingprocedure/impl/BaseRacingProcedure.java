@@ -10,6 +10,7 @@ import com.sap.sailing.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
@@ -41,6 +42,7 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
 
     private final RacingProcedureChangedListeners<?> changedListeners;
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
+    private final RaceLogEventVisitor raceLogListener;
 
     private boolean cachedIsIndividualRecallDisplayed;
 
@@ -52,9 +54,15 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
 
-        this.raceLog.addListener(new RaceLogChangedVisitor(this));
+        this.raceLogListener = new RaceLogChangedVisitor(this);
+        this.raceLog.addListener(raceLogListener);
 
         this.cachedIsIndividualRecallDisplayed = false;
+    }
+    
+    @Override
+    public void detachFromRaceLog() {
+        raceLog.removeListener(raceLogListener);
     }
 
     protected RacingProcedureChangedListeners<?> getChangedListeners() {
@@ -103,11 +111,10 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     @Override
     public void removeIndividualRecall(TimePoint timePoint) {
         if (scheduler != null) {
-            scheduler
-                    .unscheduleStateEvent(new RaceStateEventImpl(timePoint, RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
+            scheduler.unscheduleStateEvent(new RaceStateEventImpl(timePoint, RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
         }
-        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE,
-                false));
+        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), 
+                Flags.XRAY, Flags.NONE, false));
     }
 
     @Override

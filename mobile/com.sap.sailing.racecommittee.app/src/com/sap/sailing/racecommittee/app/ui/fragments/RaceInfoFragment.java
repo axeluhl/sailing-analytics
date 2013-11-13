@@ -65,8 +65,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // decide on start procedure...
-        this.infoFragmentChooser = new RaceInfoFragmentChooser();
+        this.infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
         this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
@@ -258,6 +257,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
     
     private RaceState2ChangedListener stateChangedListener = new BaseRaceState2ChangedListener() {
+        
+        @Override
+        public void onRacingProcedureChanged(RaceState2 state) {
+            infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
+        };
+        
         @Override
         public void onStatusChanged(RaceState2 state) {
             switchToInfoFragment();

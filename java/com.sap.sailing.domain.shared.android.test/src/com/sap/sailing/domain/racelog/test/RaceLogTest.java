@@ -156,6 +156,29 @@ public class RaceLogTest {
     }
     
     @Test
+    public void testAddListenerWhileNotifying() {
+        RaceLogFlagEvent event = mock(RaceLogFlagEvent.class);
+        RaceLogEventVisitor listener = mock(RaceLogEventVisitor.class);
+        final RaceLogEventVisitor dynamicListener = mock(RaceLogEventVisitor.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                raceLog.addListener(dynamicListener);
+                return null;
+            }
+        }).when(event).accept(listener);
+        
+        raceLog.addListener(listener);
+        raceLog.add(event);
+        
+        assertEquals(2, Util.size(raceLog.getAllListeners()));
+        assertTrue(Util.contains(raceLog.getAllListeners(), listener));
+        assertTrue(Util.contains(raceLog.getAllListeners(), dynamicListener));
+        verify(event).accept(listener);
+        verify(event, never()).accept(dynamicListener);
+    }
+    
+    @Test
     public void testRawFixesDescending() {
         RaceLogEvent event1 = mock(RaceLogEvent.class);
         RaceLogEvent event2 = mock(RaceLogEvent.class);

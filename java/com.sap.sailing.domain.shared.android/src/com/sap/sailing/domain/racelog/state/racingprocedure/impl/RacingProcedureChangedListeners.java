@@ -11,6 +11,13 @@ public class RacingProcedureChangedListeners<T extends RacingProcedureChangedLis
     private static final long serialVersionUID = 3518707638312002482L;
 
     @Override
+    public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
+        for (RacingProcedureChangedListener listener : this) {
+            listener.onActiveFlagsChanged(racingProcedure);
+        }
+    }
+    
+    @Override
     public void onIndividualRecallDisplayed(RacingProcedure2 racingProcedure) {
         for (RacingProcedureChangedListener listener : this) {
             listener.onIndividualRecallDisplayed(racingProcedure);
