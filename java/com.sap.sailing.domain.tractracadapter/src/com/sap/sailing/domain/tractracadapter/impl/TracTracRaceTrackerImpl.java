@@ -1,12 +1,17 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -202,6 +207,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
         
+        // check if there is a directory configured where stored data files can be cached
+        storedURI = checkForCachedStoredData(storedURI);
+        
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
@@ -234,6 +242,53 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         addListenersForStoredDataAndStartController(typeControllers);
         // Read event data from configuration file
         controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+    }
+
+    private URI checkForCachedStoredData(URI storedURI){
+        if (System.getProperty("cache.dir") != null) {
+            final String directory = System.getProperty("cache.dir");
+            if (new File(directory).exists()) {
+                final String[] pathFragments = storedURI.getPath().split("\\/");
+                final String mtbFileName = pathFragments[pathFragments.length-1];
+                final String directoryAndFileName = directory+"/"+mtbFileName;
+                if (!new File(directoryAndFileName).exists()) {
+                    FileOutputStream mtbOutStream = null;
+                    try {
+                        logger.info("Starting to download " + storedURI + " to cache dir " + directoryAndFileName);
+                        InputStream in = storedURI.toURL().openStream();
+                        mtbOutStream = new FileOutputStream(new File(directoryAndFileName));
+                        byte data[] = new byte[1024];
+                        int count;
+                        while ((count = in.read(data, 0, 1024)) != -1)
+                        {
+                            mtbOutStream.write(data, 0, count);
+                        }
+                        logger.info("Finished downloading file to cache!");
+                    } catch (Exception ex) {
+                        // never throw but display
+                        ex.printStackTrace();
+                    } finally {
+                        if (mtbOutStream != null) {
+                            try {
+                                mtbOutStream.close();
+                            } catch (IOException e) {
+                                // ignore
+                            }   
+                        }
+                    }
+                } else {
+                    logger.info("Found file " + directoryAndFileName + "! Reusing it for this race!");
+                }
+                
+                try {
+                    return new URI("file:///" + directoryAndFileName);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return storedURI;
     }
 
     @Override
@@ -435,7 +490,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return newCourseControlPointsWithPassingSide;
     }
 
-    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
+    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) throws ParseException {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
         RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
@@ -458,6 +513,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
+                }
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(raceStartTime);
                 }
             }
         }
