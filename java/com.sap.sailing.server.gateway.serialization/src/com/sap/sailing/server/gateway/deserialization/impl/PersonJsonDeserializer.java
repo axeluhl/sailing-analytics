@@ -5,13 +5,13 @@ import java.util.Date;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 
-public class PersonJsonDeserializer implements JsonDeserializer<Person> {
+public class PersonJsonDeserializer implements JsonDeserializer<DynamicPerson> {
 
     private final JsonDeserializer<Nationality> nationalityDeserializer;
     
@@ -20,7 +20,7 @@ public class PersonJsonDeserializer implements JsonDeserializer<Person> {
     }
 
     @Override
-    public Person deserialize(JSONObject object) throws JsonDeserializationException {
+    public DynamicPerson deserialize(JSONObject object) throws JsonDeserializationException {
         if (object == null) {
             // Coach is often null
             return null;

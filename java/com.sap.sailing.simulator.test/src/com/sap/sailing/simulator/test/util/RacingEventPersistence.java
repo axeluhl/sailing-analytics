@@ -19,7 +19,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.impl.SimulatorUtils;
 
@@ -27,6 +28,7 @@ import com.sap.sailing.simulator.impl.SimulatorUtils;
 public class RacingEventPersistence {
 
     static RacingEventServiceImpl service;
+    static TracTracAdapterFactory tracTracAdapterFactory;
     static RacesHandle raceHandle;
     static String paramURLStr = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
     // proxy
@@ -46,11 +48,12 @@ public class RacingEventPersistence {
         System.setProperty("http.proxyPort", "8080");
 
         service = new RacingEventServiceImpl();
+        tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         URL paramURL = new URL(paramURLStr);
         URI liveURI = new URI(liveURIStr);
         URI storedURI = new URI(storedURIStr);
 
-        raceHandle = SimulatorUtils.loadRace(service, paramURL, liveURI, storedURI, null, EmptyWindStore.INSTANCE,
+        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null,
                 60000);
 
         System.out.println("Done loading race.");

@@ -33,6 +33,15 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 # whenever the server has been started
 SERVER_STARTUP_NOTIFY=
 
+# Specify filename that is usually located at
+# http://release.sapsailing.com/ that should
+# be used as a base for the server
+INSTALL_FROM_RELEASE=
+
+# Specify name of file that can usually be found
+# at http://release.sapsailing.com/environments
+USE_ENVIRONMENT=
+
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
 ADDITIONAL_JAVA_ARGS="-XX:+UseMembar"
 

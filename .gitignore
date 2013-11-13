@@ -8,6 +8,8 @@ manifest.txt
 java/com.sap.sailing.gwt.ui/gwt-unitCache/*
 java/com.sap.sailing.gwt.ui/war/WEB-INF/deploy/*
 sailing_debug0*
+dist
+build
 /java/.settings/org.eclipse.jdt.core.prefs
 /mobile/com.sap.sailing.racecommittee.app/.settings/org.eclipse.jdt.core.prefs
 /mobile/com.sap.sailing.racecommittee.app/bin/*

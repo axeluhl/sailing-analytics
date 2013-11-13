@@ -82,9 +82,18 @@ The architecture is divided into logical tiers. These are represented by firewal
 
 ### Create a new Analytics application instance ready for production
 
-Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. If you want to bring the code to a defined level then make sure to specify the BUILD_FROM and BUILD_COMPLETE_NOTIFY variables. If you leave them empty the instance will start using a very old build.
+Create a new Analytics instance as described in detail here [[wiki/amazon-ec2-create-new-app-instance]]. You should use a configuration like the following. You have two possibilities of making sure that the server uses code from a specific branch.
 
-Attention: You can not start the building process on t1.micro instances having less than 1.5 GB of RAM!
+- First you can use a release file. These files can be usually found at http://releases.sapsailing.com/ and represent a certain point in time. These files can be built by using the buildAndUpdateProduct.sh with the parameter release. In addition to the release file you can specify an environment configuration. These usually can be found here http://releases.sapsailing.com/environments. A configuration then could look like this:
+
+<pre>
+INSTALL_FROM_RELEASE=master-201311062138
+USE_ENVIRONMENT=live-server
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+</pre>
+
+- The second option is to let the instance build itself from a specified branch. It is currently not supported to then specify an environment file. Attention: You can not start the building process on t1.micro instances having less than 1.5 GB of RAM! The configuration then looks like this:
 
 <pre>
 BUILD_BEFORE_START=True
@@ -92,8 +101,9 @@ BUILD_FROM=master
 RUN_TESTS=False
 COMPILE_GWT=True
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=
 SERVER_NAME=LIVE1
-MEMORY=1024m
+MEMORY=2048m
 REPLICATION_HOST=172.31.25.253
 REPLICATION_CHANNEL=sapsailinganalytics-live
 TELNET_PORT=14888
@@ -106,7 +116,8 @@ REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
-SERVER_STARTUP_NOTIFY=
+INSTALL_FROM_RELEASE=
+USE_ENVIRONMENT=
 </pre>
 
 After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
@@ -121,6 +132,12 @@ or
 
 <pre>
 ssh -i .ssh/SailingUser.pem sailing@ec2-54-246-247-194.eu-west-1.compute.amazonaws.com
+</pre>
+
+If you want to connect your instance to a subdomain then log onto the main webserver with the Administrator key as root, open the file `/etc/httpd/conf.d/001-events.conf` and put something like this there. As you can see you have to specify the IP address and the port the java server is running on. Make sure to always use the internal IP.
+
+<pre>
+Use Spectator idm.sapsailing.com "505 IDM 2013" 172.31.22.12 8888
 </pre>
 
 ### Testing code on a server

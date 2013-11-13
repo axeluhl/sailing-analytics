@@ -22,7 +22,11 @@ import org.junit.Before;
 
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -87,12 +91,16 @@ public abstract class AbstractServerReplicationTest {
         if (master != null) {
             this.master = master;
         } else {
-            this.master = new RacingEventServiceImpl(mongoDBService);
+            this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         if (replica != null) {
             this.replica = replica;
         } else {
-            this.replica = new RacingEventServiceImpl(mongoDBService);
+            this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                    // replica gets its own base DomainFactory:
+                    new DomainFactoryImpl()), PersistenceFactory.INSTANCE
+                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -214,7 +222,7 @@ public abstract class AbstractServerReplicationTest {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer);
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer, DomainFactory.INSTANCE);
             new Thread(replicator).start();
             return replicator;
         }

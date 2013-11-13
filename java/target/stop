@@ -14,6 +14,11 @@ fi
 NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
 echo -n exit | $NC_CMD > /dev/null
 
+# make really sure to kill server
+kill `cat server.pid`
+sleep 5
+rm server.pid
+
 echo "Stopped server $SERVER_NAME"
 if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
     echo "OK" | `which mail` -s "Server $SERVER_NAME stopped successfully!" $SERVER_STARTUP_NOTIFY

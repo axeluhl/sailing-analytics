@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
@@ -33,6 +34,8 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     private static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+
+    private ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tracTracAdapterFactoryTracker;
     
     protected SailingServerHttpServlet() {
     }
@@ -44,19 +47,24 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
        BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);  
        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
        racingEventServiceTracker.open();
+       tracTracAdapterFactoryTracker = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(context, TracTracAdapterFactory.class.getName(), null);
+       tracTracAdapterFactoryTracker.open();
    }
 
     @Override
     public void destroy() {
         super.destroy();
-        
-        if(racingEventServiceTracker != null) {
+        if (racingEventServiceTracker != null) {
             racingEventServiceTracker.close();
         }
     }
     
     public RacingEventService getService() {
         return racingEventServiceTracker.getService();
+    }
+    
+    public TracTracAdapterFactory getTracTracAdapterFactory() {
+        return tracTracAdapterFactoryTracker.getService();
     }
 
     protected Regatta getRegatta(HttpServletRequest req) {
