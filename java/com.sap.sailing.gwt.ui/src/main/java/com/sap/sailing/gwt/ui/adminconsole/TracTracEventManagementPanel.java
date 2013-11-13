@@ -286,7 +286,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
 
-        this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList ) {
+        this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
 
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {

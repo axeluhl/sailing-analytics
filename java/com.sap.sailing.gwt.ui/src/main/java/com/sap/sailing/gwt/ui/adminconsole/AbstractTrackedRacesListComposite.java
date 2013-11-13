@@ -184,9 +184,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
-
         addControlButtons(trackedRacesButtonPanel);
-
     }
 
     abstract protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces);

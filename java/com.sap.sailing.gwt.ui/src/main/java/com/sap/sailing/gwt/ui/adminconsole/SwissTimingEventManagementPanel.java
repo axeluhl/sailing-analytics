@@ -249,18 +249,14 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         filterablePanelEvents = new AbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
                 availableSwissTimingRaces, raceTable, raceList) {
-
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
-
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.ID);
                 return strings;
             }
         };
-
         filterPanel.add(filterablePanelEvents);
-
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);
 
