@@ -353,6 +353,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
+                    updateEventTimePoints(loadedWindTracks);
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -387,7 +388,25 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             
         }
     }
-    
+
+    /**
+     * Assuming that the wind tracks <code>loadedWindTracks</code> were loaded from the persistent store, this method updates
+     * the time stamps that frame the data held by this tracked race. See {@link #timePointOfLastEvent}, {@link #timePointOfNewestEvent}
+     * and {@link #timePointOfOldestEvent}.
+     */
+    private void updateEventTimePoints(Map<? extends WindSource, ? extends WindTrack> loadedWindTracks) {
+        for (WindTrack windTrack : loadedWindTracks.values()) {
+            windTrack.lockForRead();
+            try {
+                for (Wind wind : windTrack.getRawFixes()) {
+                    updated(wind.getTimePoint());
+                }
+            } finally {
+                windTrack.unlockAfterRead();
+            }
+        }
+    }
+
     /**
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
      */
