@@ -13,17 +13,16 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 
 /**
- * @author Nicolas Klose
- * 
- *   This Panel contains a label and a textbox. Text entered into the TextBox filters the given CellTable<T>. To be 
- *   initiated the method <code>getStrings(T t)<code> has to be defined, which gets those Strings from T that should 
- *   be considered when filtering, e.g. name or boatClass.
- *   The method <code>applyFilter()<code> can be called outside of this Panel (e.g. after loading), but then the 
- *   method <code>updateAll(List<T> all)<code> should be called to ensure the correct selection is filtered.
+ * This Panel contains a label and a textbox. Text entered into the TextBox filters the given CellTable<T>. To be
+ * initiated the method <code>getStrings(T t)</code> has to be defined, which gets those Strings from <code>T</code>
+ * that should be considered when filtering, e.g. name or boatClass. The method <code>applyFilter()</code> can be called
+ * outside of this Panel (e.g. after loading), but then the method <code>updateAll(List<T> all)</code> should be called
+ * to ensure the correct selection is filtered.
  * 
  * @param <T>
+ * @author Nicolas Klose
+ * 
  */
-
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel implements FilteringRule<T> {
 
     Iterable<T> all;
@@ -69,6 +68,16 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel impleme
         ColumnSortEvent.fire(display, display.getColumnSortList());
     }
 
+    /**
+     * Returns <code>true</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>
+     * 
+     * @param wordsToFilter
+     *            the words to filter on
+     * @param valuesToCheck
+     *            the values to check for. These values contain the values of the current rows.
+     * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
+     *         <code>false</code> if not
+     */
     private boolean filter(T obj, List<String> wordsToFilter) {
         for (String s : getStrings(obj)) {
             boolean failed = false;
