@@ -37,7 +37,7 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
         final long startTime = System.nanoTime();
         
         Collection<DataType> retrievedData = retriever.startRetrieval().get();
-        Collection<DataType> filteredData = filter.filter(retrievedData);
+        Collection<DataType> filteredData = filter.startFiltering(retrievedData).get();
         QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);
         for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {

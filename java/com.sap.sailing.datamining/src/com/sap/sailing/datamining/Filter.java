@@ -1,9 +1,10 @@
 package com.sap.sailing.datamining;
 
 import java.util.Collection;
+import java.util.concurrent.Future;
 
-public interface Filter<DataType> {
+public interface Filter<DataType> extends Future<Collection<DataType>> {
     
-    public Collection<DataType> filter(Collection<DataType> data);
+    public Filter<DataType> startFiltering(Collection<DataType> data);
 
 }

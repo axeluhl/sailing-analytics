@@ -3,13 +3,17 @@ package com.sap.sailing.datamining.factories;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.data.impl.NoFilter;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
+import com.sap.sailing.datamining.impl.ParallelFilter;
+import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
@@ -19,25 +23,22 @@ import com.sap.sailing.datamining.shared.SharedDimension;
 public final class FilterFactory {
 
     private FilterFactory() { }
+    
+    public static <DataType> Filter<DataType> createParallelFilter(SingleThreadedFilter<DataType> workerBase, ThreadPoolExecutor executor) {
+        return new ParallelFilter<DataType>(workerBase, executor);
+    }
 
-    @SuppressWarnings("unchecked")
-    public static <DataType> Filter<DataType> createDimensionFilter(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
-        if (selection.isEmpty()) {
-            return createNoFilter();
-        }
-        return (Filter<DataType>) createCriteriaFilter(createAndCompoundDimensionFilterCritera(dataType, selection));
+    public static <DataType> SingleThreadedFilter<DataType> createDimensionFilter(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+        FilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
+        SingleThreadedFilter<DataType> filter = createCriteriaFilter(criteria); 
+        return filter;
     }
 
     /**
      * @return A filter that filters nothing. So the returning collection is the same as the given one.
      */
     public static <DataType> Filter<DataType> createNoFilter() {
-        return new Filter<DataType>() {
-            @Override
-            public Collection<DataType> filter(Collection<DataType> data) {
-                return data;
-            }
-        };
+        return new NoFilter<DataType>();
     }
 
     private static <DataType> FilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
@@ -54,7 +55,7 @@ public final class FilterFactory {
         return compoundCriteria;
     }
 
-    public static <DataType> Filter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
+    public static <DataType> SingleThreadedFilter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
         return new FilterByCriteria<DataType>(criteria);
     }
     

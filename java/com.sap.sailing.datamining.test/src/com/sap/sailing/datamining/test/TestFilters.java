@@ -25,7 +25,7 @@ public class TestFilters {
         FilterCriteria<Integer> criteria = new SimpleRangeFilterCriteria<Integer>(cluster);
         Filter<Integer> filter = new FilterByCriteria<Integer>(criteria);
         Collection<Integer> expectedFilteredData = Arrays.asList(1, 2, 3, 4, 5);
-        assertEquals(expectedFilteredData, filter.filter(data));
+        assertEquals(expectedFilteredData, filter.startFiltering(data));
     }
 
 }
