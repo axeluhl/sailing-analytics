@@ -674,6 +674,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
+        if (progress < lastStatus.getLoadingProgress()) {
+            // this should never happen - but it does (supposedly due to a problem in the TracTrac API)
+            // if we find such an error we stop tracking for these races completely instead of keeping the
+            // tracker running
+            try {
+                logger.severe("I got a loading progress that is smaller than the one already received. This is an unrecoverable error! Stopping trackers for "+ getRaces());
+                stop();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
         updateStatusOfTrackedRaces();
     }
