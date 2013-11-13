@@ -322,9 +322,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             }
         };
         // now run the command once immediately and synchronously; see also bug 1345
-        command.run();
+        // as we are no longer automatically putting races in state FINISHED we do not
+        // have to execute the scheduler synchronously anymore. This speeds up loading of races a lot.
+        
         // then schedule for periodic execution in background
-        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 5000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
 
