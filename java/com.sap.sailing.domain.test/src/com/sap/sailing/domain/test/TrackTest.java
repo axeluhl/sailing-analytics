@@ -336,6 +336,22 @@ public class TrackTest {
     }
     
     @Test
+    public void testFixInvalidBecauseProvidedSpeedIsTooDifferent() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
+        TimePoint t1 = new MillisecondsTimePoint(1000);
+        TimePoint t2 = new MillisecondsTimePoint(2000);
+        TimePoint t3 = new MillisecondsTimePoint(3000);
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        track.addGPSFix(f1);
+        track.addGPSFix(f2);
+        track.addGPSFix(f3);
+        // expect the f2 fix to be invalid because provided speed is too different
+        assertEquals(0, f3.getPosition().getDistance(track.getFirstFixAtOrAfter(f2.getTimePoint()).getPosition()).getMeters(), 0.001);
+    }
+    
+    @Test
     public void testIgnoringFixProvidedSpeedIfItIsOutrageous() {
         DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
         TimePoint t1 = new MillisecondsTimePoint(1000);

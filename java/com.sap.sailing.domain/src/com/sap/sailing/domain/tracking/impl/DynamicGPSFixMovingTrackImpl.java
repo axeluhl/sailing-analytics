@@ -117,8 +117,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         if (e.isValidityCached()) {
             isValid = e.isValid();
         } else {
-            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0 &&
-                    (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0));
+            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 || e.getSpeed().getBearing().getDegrees() != 0.0) &&
+                    (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0);
 
             GPSFixMoving previous = rawFixes.lower(e);
             final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
