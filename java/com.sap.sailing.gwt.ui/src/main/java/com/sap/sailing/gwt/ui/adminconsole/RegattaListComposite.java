@@ -75,20 +75,14 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
-
         Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
-
-
-
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
-
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.setVisible(false);

@@ -30,13 +30,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     private Iterable<T> all;
     private final CellTable<T> display;
     private final ListDataProvider<T> filtered;
-    private final TextBox textBox = new TextBox();
+    private final TextBox textBox;
 
     public AbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, ListDataProvider<T> filtered) {
         setSpacing(5);
         this.all = all;
         this.display = display;
         this.filtered = filtered;
+        this.textBox = new TextBox();
         add(label);
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {

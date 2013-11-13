@@ -296,6 +296,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return strings;
             }
         };
+        racesFilterablePanel.getTextBox().ensureDebugId("FilterRaces");
         layoutTable.setWidget(4, 0, racesFilterLabel);
         layoutTable.setWidget(4, 1, racesFilterablePanel);
 
