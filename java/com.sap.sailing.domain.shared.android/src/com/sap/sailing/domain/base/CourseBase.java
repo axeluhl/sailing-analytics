@@ -43,7 +43,5 @@ public interface CourseBase extends Named {
 
     void removeWaypoint(int zeroBasedPosition);
 
-    Iterable<Leg> getLegsAdjacentTo(Mark mark);
-
     Leg getFirstLeg();
 }

@@ -76,7 +76,8 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
         JSONArray result = new JSONArray();
         
         if (trackedRace != null) {
-            CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(new PersonJsonSerializer(new NationalityJsonSerializer())));
+            CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+            		new PersonJsonSerializer(new NationalityJsonSerializer())), null);
 
             for (Competitor competitor : raceColumn.getRaceDefinition(fleet).getCompetitors()) {
                 result.add(serializer.serialize(competitor));
