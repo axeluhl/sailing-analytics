@@ -2586,9 +2586,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Position> markPositions = new ArrayList<Position>();
         int numberOfMarks = 0;
         boolean allMarksHavePositions = true;
-        for (Mark startMark : waypoint.getMarks()) {
+        for (Mark lineMark : waypoint.getMarks()) {
             numberOfMarks++;
-            final Position estimatedMarkPosition = getOrCreateTrack(startMark).getEstimatedPosition(timePoint, /* extrapolate */false);
+            final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(timePoint, /* extrapolate */false);
             if (estimatedMarkPosition != null) {
                 markPositions.add(estimatedMarkPosition);
             } else {
@@ -2612,12 +2612,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if ((isStartLine && distanceFromFirstToSecondMark.getMeters() > 0) ||
                         (!isStartLine && distanceFromFirstToSecondMark.getMeters() < 0)) {
                     // first mark is worse than second mark
-                    worseMark = markPositions.get(1);
-                    betterMark = markPositions.get(0);
-                } else {
-                    // first mark is worse than second mark
                     worseMark = markPositions.get(0);
                     betterMark = markPositions.get(1);
+                } else {
+                    // second mark is worse than first mark
+                    worseMark = markPositions.get(1);
+                    betterMark = markPositions.get(0);
                 }
                 if (distanceFromFirstToSecondMark.getMeters() >= 0) {
                     distanceAdvantage = distanceFromFirstToSecondMark;
