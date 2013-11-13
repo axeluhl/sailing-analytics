@@ -675,16 +675,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
         if (progress != 0.0 && progress < lastStatus.getLoadingProgress()) {
-            // this should never happen - but it does (supposedly due to a problem in the TracTrac API)
-            // if we find such an error we stop tracking for these races completely instead of keeping the
-            // tracker running
-            try {
-                logger.severe("I got a loading progress "+progress+" that is smaller than the one already received "+lastStatus.getLoadingProgress()+". This is an unrecoverable error! Stopping trackers for "+ getRaces());
-                stop();
-                throw new RuntimeException("Got a loading progress that is smaller than the one already received!");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            // this should never happen but it happens - let's at least write some log about this problem
+            logger.severe("I got a loading progress "+progress+" that is smaller than the one already received "+lastStatus.getLoadingProgress());
         }
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
         updateStatusOfTrackedRaces();
