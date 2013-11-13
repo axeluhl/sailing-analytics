@@ -54,15 +54,22 @@ public class CompetitorPanel extends SimplePanel {
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
     private List<CompetitorDTO> allCompetitors;
+    private final String leaderboardName;
     private TextBox filterField;
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
+        this(sailingService, null, stringMessages, errorReporter);
+    }
+
+    public CompetitorPanel(final SailingServiceAsync sailingService, String leaderboardName, final StringMessages stringMessages,
+            final ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.leaderboardName = leaderboardName;
         competitorProvider = new ListDataProvider<CompetitorDTO>();
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(competitorProvider.getList());
         VerticalPanel mainPanel = new VerticalPanel();
@@ -253,21 +260,39 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     void refreshCompetitorList() {
-        sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                allCompetitors = new ArrayList<CompetitorDTO>();
-                for (CompetitorDTO c : result) {
-                    allCompetitors.add(c);
+        if(leaderboardName != null) {
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
                 }
-                applyFilter();
-            }
-        });
+
+                @Override
+                public void onSuccess(Iterable<CompetitorDTO> result) {
+                    getFilteredCompetitors(result);
+                }
+            });
+        } else {
+            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Iterable<CompetitorDTO> result) {
+                    getFilteredCompetitors(result);
+                }
+            });
+        }
+    }
+
+    private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
+        allCompetitors = new ArrayList<CompetitorDTO>();
+        for (CompetitorDTO c : result) {
+            allCompetitors.add(c);
+        }
+        applyFilter();
     }
 
     private void applyFilter() {

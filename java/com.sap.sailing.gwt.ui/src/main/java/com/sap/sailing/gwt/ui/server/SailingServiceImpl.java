@@ -3333,7 +3333,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Iterable<CompetitorDTO> getCompetitors() {
         return convertToCompetitorDTOs(getService().getBaseDomainFactory().getCompetitorStore().getCompetitors());
     }
-    
+
+    @Override
+    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
+    }
+
     @Override
     public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
         return getBaseDomainFactory().convertToCompetitorDTO(
