@@ -242,7 +242,8 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         getRace().getState().createNewStartProcedure(selectedStartProcedureType);
         Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
                 .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);
-        if (action == null) {
+        getRace().getState2().setStartTime(new MillisecondsTimePoint(newStartTime));
+        /*if (action == null) {
             getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
         } else {
             FragmentManager fragmentManager = getFragmentManager();
@@ -260,7 +261,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
                 e.printStackTrace();
             }
 
-        }
+        }*/
 
     }
 

@@ -7,13 +7,12 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -112,28 +111,28 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(TimePoint timePoint,
             RaceLogEventAuthor author, Serializable id, List<Competitor> competitors,
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+            int passId, CompetitorResults positionedCompetitors) {
         return new RaceLogFinishPositioningListChangedEventImpl(MillisecondsTimePoint.now(), author, timePoint,
                 id, competitors, passId, positionedCompetitors);
     }
 
     @Override
     public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(TimePoint timePoint,
-            RaceLogEventAuthor author, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+            RaceLogEventAuthor author, int passId, CompetitorResults positionedCompetitors) {
         return createFinishPositioningListChangedEvent(timePoint, author, UUID.randomUUID(),
                 new ArrayList<Competitor>(), passId, positionedCompetitors);
     }
 
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint,
-            RaceLogEventAuthor author, Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+            RaceLogEventAuthor author, Serializable id, List<Competitor> competitors, int passId, CompetitorResults positionedCompetitors) {
         return new RaceLogFinishPositioningConfirmedEventImpl(MillisecondsTimePoint.now(), author, timePoint, id,
                 competitors, passId, positionedCompetitors);
     }
 
     @Override
     public RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+            int passId, CompetitorResults positionedCompetitors) {
         return createFinishPositioningConfirmedEvent(timePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, positionedCompetitors);
     }
 

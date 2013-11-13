@@ -93,9 +93,11 @@ public class AbortModeSelectionDialog extends RaceDialogFragment {
 
     private void signalAbort(Flags additionalFlag) {
         if (this.abortFlag.equals(Flags.AP)) {
-            getRace().getState().getStartProcedure().setPostponed(MillisecondsTimePoint.now(), additionalFlag);
+            //getRace().getState().getStartProcedure().setPostponed(MillisecondsTimePoint.now(), additionalFlag);
+            getRace().getState2().setAborted(MillisecondsTimePoint.now(), true, additionalFlag);
         } else if (this.abortFlag.equals(Flags.NOVEMBER)) {
-            getRace().getState().getStartProcedure().setAbandoned(MillisecondsTimePoint.now(), additionalFlag);
+            //getRace().getState().getStartProcedure().setAbandoned(MillisecondsTimePoint.now(), additionalFlag);
+            getRace().getState2().setAborted(MillisecondsTimePoint.now(), false, additionalFlag);
         }
         this.dismiss();
     }

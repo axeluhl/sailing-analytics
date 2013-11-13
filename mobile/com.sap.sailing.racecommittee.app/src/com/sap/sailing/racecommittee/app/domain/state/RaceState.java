@@ -1,14 +1,10 @@
 package com.sap.sailing.racecommittee.app.domain.state;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
@@ -96,7 +92,7 @@ public interface RaceState extends StartProcedureListener {
      * 
      * @return the positioning list for the finish or <code>null</code>.
      */
-    List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList();
+    CompetitorResults getFinishPositioningList();
 
     /**
      * Sets the current race's start time
@@ -119,7 +115,7 @@ public interface RaceState extends StartProcedureListener {
      * 
      * @param positionedCompetitors the current finishing list
      */
-    void setFinishPositioningListChanged(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+    void setFinishPositioningListChanged(CompetitorResults positionedCompetitors);
     
     /**
      * Sets a confirmation event for the finish positionings

@@ -1,15 +1,13 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -27,8 +25,11 @@ import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceState2;
 import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
-import com.sap.sailing.domain.racelog.state.RacingProcedure2;
-import com.sap.sailing.domain.racelog.state.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.RaceStateEvent;
+import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RRS26RacingProcedureImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
@@ -36,11 +37,13 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     private final RaceLog raceLog;
     private final RaceLogEventAuthor author;
     private final RaceLogEventFactory factory;
+    
     private final RaceState2ChangedListeners changedListeners;
     
     private RacingProcedure2 racingProcedure;
+    private RaceStateEventScheduler scheduler;
     
-    private RacingProcedureTypeAnalyzer racingProcedureAnalyer;
+    private RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
     private RaceStatusAnalyzer statusAnalyzer;
     
     private StartTimeFinder startTimeAnalyzer;
@@ -55,6 +58,14 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     
     private RacingProcedureType cachedRacingProcedureType;
     private RaceLogRaceStatus cachedRaceStatus;
+    private int cachedPassId;
+    private TimePoint cachedStartTime;
+    private TimePoint cachedFinishingTime;
+    private TimePoint cachedFinishedTime;
+    private TimePoint cachedProtestTime;
+    private CompetitorResults cachedPositionedCompetitors;
+    private boolean cachedIsPositionedCompetitorsConfirmed;
+    private CourseBase cachedCourseDesign;
     
     public RaceState2Impl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureType defaultRacingProcedureType) {
@@ -62,11 +73,25 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
         this.author = author;
         this.factory = eventFactory;
         this.changedListeners = new RaceState2ChangedListeners();
+        
+        this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
+        this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+        this.startTimeAnalyzer = new StartTimeFinder(raceLog);
+        this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
+        this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
+        this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
+        this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
+        this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
+        this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
      
         this.cachedRacingProcedureType = defaultRacingProcedureType;
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
+        this.cachedPassId = raceLog.getCurrentPassId();
+        this.cachedIsPositionedCompetitorsConfirmed = false;
         
         this.raceLog.addListener(new RaceLogChangedVisitor(this));
+        
+        update();
     }
 
     @Override
@@ -81,7 +106,7 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
 
     @Override
     public void setRacingProcedure(RacingProcedureType newType) {
-        if (racingProcedure == null || !newType.equals(racingProcedureAnalyer.analyze())) {
+        if (racingProcedure == null || !newType.equals(racingProcedureAnalyzer.analyze())) {
             raceLog.add(factory.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), newType));
         }
     }
@@ -89,6 +114,15 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     @Override
     public RacingProcedure2 getRacingProcedure() {
         return racingProcedure;
+    }
+
+    @Override
+    public void setStateEventScheduler(RaceStateEventScheduler scheduler) {
+        this.scheduler = scheduler;
+        if (racingProcedure != null) {
+            racingProcedure.setStateEventScheduler(scheduler);
+            racingProcedure.triggerStateEventScheduling(this);
+        }
     }
 
     @Override
@@ -109,84 +143,93 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
 
     @Override
     public TimePoint getStartTime() {
-        return startTimeAnalyzer.analyze();
+        return cachedStartTime;
     }
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {
-        // set finishing time
+        raceLog.add(factory.createRaceStatusEvent(timePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING));
     }
 
     @Override
     public TimePoint getFinishingTime() {
-        return finishingTimeAnalyzer.analyze();
+        return cachedFinishingTime;
     }
 
     @Override
     public void setFinishedTime(TimePoint timePoint) {
-        // set finished time
+        raceLog.add(factory.createRaceStatusEvent(timePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
     }
 
     @Override
     public TimePoint getFinishedTime() {
-        return finishedTimeAnalyzer.analyze();
+        return cachedFinishedTime;
     }
 
     @Override
     public void setProtestTime(TimePoint timePoint) {
-        // set protest time
+        raceLog.add(factory.createProtestStartTimeEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), timePoint));
     }
 
     @Override
     public TimePoint getProtestTime() {
-        return protestTimeAnalyzer.analyze();
+        return cachedProtestTime;
+    }
+    
+    @Override
+    public void setAdvancePass(TimePoint timePoint) {
+        raceLog.add(factory.createPassChangeEvent(timePoint, author, raceLog.getCurrentPassId() + 1));
     }
 
     @Override
-    public void setAborted(TimePoint timePoint, boolean isPostponed) {
-        // set aborted
+    public void setAborted(TimePoint timePoint, boolean isPostponed, Flags reasonFlag) {
+        Flags markerFlag = isPostponed ? Flags.AP : Flags.NOVEMBER;
+        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), markerFlag, reasonFlag, true));
+        setAdvancePass(timePoint.plus(1));
     }
 
     @Override
     public void setGeneralRecall(TimePoint timePoint) {
-        // set general recall
+        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, true));
+        setAdvancePass(timePoint.plus(1));
     }
 
     @Override
-    public void setFinishPositioningListChanged(
-            List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
-        // set finishing positions
+    public void setFinishPositioningListChanged(CompetitorResults positionedCompetitors) {
+        raceLog.add(factory.createFinishPositioningListChangedEvent(
+                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), positionedCompetitors));
     }
 
     @Override
-    public List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList() {
-        return finishPositioningListAnalyzer.analyze();
+    public CompetitorResults getFinishPositioningList() {
+        return cachedPositionedCompetitors;
     }
 
     @Override
     public void setFinishPositioningConfirmed() {
-        // set confirmed event
+        raceLog.add(factory.createFinishPositioningConfirmedEvent(
+                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), getFinishPositioningList()));
     }
 
     @Override
     public boolean isFinishPositioningConfirmed() {
-        return confirmedFinishPositioningListAnalyzer.analyze() != null;
+        return cachedIsPositionedCompetitorsConfirmed;
     }
 
     @Override
     public void setCourseDesign(CourseBase courseDesign) {
-        // set course design
-
+        raceLog.add(factory.createCourseDesignChangedEvent(
+                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), courseDesign));
     }
 
     @Override
     public CourseBase getCourseDesign() {
-        return courseDesignerAnalyzer.analyze();
+        return cachedCourseDesign;
     }
 
     @Override
     public void setWindFix(Wind wind) {
-        // set wind fix
+        raceLog.add(factory.createWindFixEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), wind));
     }
 
     @Override
@@ -201,22 +244,98 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
 
     @Override
     public void eventAdded(RaceLogEvent event) {
-        RacingProcedureType type = racingProcedureAnalyer.analyze();
-        if (!cachedRacingProcedureType.equals(type)) {
-            cachedRacingProcedureType = type;
-            createRacingProcedure();
+        update();
+    }
+
+    @Override
+    public boolean processStateEvent(RaceStateEvent event) {
+        if (racingProcedure.processStateEvent(event)) {
+            update();
+            return true;
+        }
+        return false;
+    }
+
+    private void update() {
+        RacingProcedureType type = racingProcedureAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedRacingProcedureType, type)) {
+            if (!type.equals(RacingProcedureType.UNKNOWN)) {
+                cachedRacingProcedureType = type;
+            }
+            recreateRacingProcedure();
             changedListeners.onRacingProcedureChanged(this);
         }
         
         RaceLogRaceStatus status = statusAnalyzer.analyze();
-        if (!cachedRaceStatus.equals(status)) {
+        if (!Util.equalsWithNull(cachedRaceStatus, status)) {
             cachedRaceStatus = status;
             changedListeners.onStatusChanged(this);
         }
+        
+        int passId = raceLog.getCurrentPassId();
+        if (cachedPassId != passId) {
+            cachedPassId = passId;
+            changedListeners.onAdvancePass(this);
+        }
+        
+        TimePoint startTime = startTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedStartTime, startTime)) {
+            cachedStartTime = startTime;
+            changedListeners.onStartTimeChanged(this);
+        }
+        
+        TimePoint finishingTime = finishingTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
+            cachedFinishingTime = finishingTime;
+            changedListeners.onFinishingTimeChanged(this);
+        }
+        
+        TimePoint finishedTime = finishedTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedFinishedTime, finishedTime)) {
+            cachedFinishedTime = finishedTime;
+            changedListeners.onFinishedTimeChanged(this);
+        }
+        
+        TimePoint protestTime = protestTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedProtestTime, protestTime)) {
+            cachedProtestTime = protestTime;
+            changedListeners.onProtestTimeChanged(this);
+        }
+        
+        CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
+            cachedPositionedCompetitors = positionedCompetitors;
+            changedListeners.onFinishingPositioningsChanged(this);
+        }
+        
+        boolean isPositionedCompetitorsConfirmed = confirmedFinishPositioningListAnalyzer.analyze() != null;
+        if (cachedIsPositionedCompetitorsConfirmed != isPositionedCompetitorsConfirmed) {
+            cachedIsPositionedCompetitorsConfirmed = isPositionedCompetitorsConfirmed;
+            if (cachedIsPositionedCompetitorsConfirmed) {
+                changedListeners.onFinishingPositionsConfirmed(this);
+            }
+        }
+        
+        CourseBase courseDesign = courseDesignerAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedCourseDesign, courseDesign)) {
+            cachedCourseDesign = courseDesign;
+            changedListeners.onCourseDesignChanged(this);
+        }
     }
 
-    private void createRacingProcedure() {
-        this.racingProcedure = new RRS26RacingProcedure(raceLog);
+    private void recreateRacingProcedure() {
+        cachedRacingProcedureType = racingProcedureAnalyzer.analyze();
+        
+        if (racingProcedure != null) {
+            removeChangedListener(racingProcedure);
+        }
+        racingProcedure = new RRS26RacingProcedureImpl(raceLog, author, factory);
+        racingProcedure.setStateEventScheduler(scheduler);
+        addChangedListener(racingProcedure);
+        
+        statusAnalyzer = new RaceStatusAnalyzer(raceLog, racingProcedure);
+        // let's do another update because status might have changed
+        update();
     }
 
 }

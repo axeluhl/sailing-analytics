@@ -5,9 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -37,11 +35,11 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt,
             RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors,
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint createdAt,
             RaceLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, 
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId, String pathfinderId);

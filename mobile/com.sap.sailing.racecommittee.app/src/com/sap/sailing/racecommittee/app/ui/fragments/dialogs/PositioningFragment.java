@@ -30,6 +30,8 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.CompetitorResults;
+import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
@@ -50,7 +52,7 @@ public class PositioningFragment extends RaceDialogFragment {
     private CompetitorPositioningListAdapter positioningAdapter;
 
     protected List<Competitor> competitors;
-    protected List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors;
+    protected CompetitorResults positionedCompetitors;
     protected Comparator<Named> competitorComparator;
 
     private int dragStartMode = DragSortController.ON_DRAG;
@@ -218,12 +220,12 @@ public class PositioningFragment extends RaceDialogFragment {
         }
     }
 
-    private List<Triple<Serializable, String, MaxPointsReason>> initializeFinishPositioningList() {
-        List<Triple<Serializable, String, MaxPointsReason>> positionings;
+    private CompetitorResults initializeFinishPositioningList() {
+        CompetitorResults positionings;
         if (getRace().getState().getFinishPositioningList() != null) {
             positionings = getRace().getState().getFinishPositioningList();
         } else {
-            positionings = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
+            positionings = new CompetitorResultsImpl();
         }
         return positionings;
     }

@@ -17,7 +17,8 @@ public class StartProcedureFactory {
         case RRS26:
             return new RRS26StartProcedure(context, raceLog);
         default:
-            throw new UnsupportedOperationException("Not yet implemented start procedure.");
+            return new RRS26StartProcedure(context, raceLog);
+            //throw new UnsupportedOperationException("Not yet implemented start procedure.");
         }
     }
 }

@@ -90,7 +90,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     public RaceLogRaceStatus getStatus() {
-        return state.getStatus();
+        return state2.getStatus();
     }
 
     @Override

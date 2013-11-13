@@ -5,9 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -52,16 +50,16 @@ public interface RaceLogEventFactory {
 
     RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint,
             RaceLogEventAuthor author, Serializable id, List<Competitor> competitors,
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, RaceLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            Serializable id, List<Competitor> competitors, int passId, CompetitorResults positionedCompetitors);
 
     RaceLogFinishPositioningConfirmedEvent createFinishPositioningConfirmedEvent(TimePoint timePoint, RaceLogEventAuthor author, 
-            int passId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
+            int passId, CompetitorResults positionedCompetitors);
 
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint timePoint, RaceLogEventAuthor author, Serializable id,
             List<Competitor> competitors, int passId, String pathfinderId);

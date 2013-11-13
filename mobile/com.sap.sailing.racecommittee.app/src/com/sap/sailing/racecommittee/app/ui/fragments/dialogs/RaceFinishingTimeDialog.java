@@ -35,7 +35,8 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
         StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
         if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (stf.analyze().before(finishingTime)) {
-                getRace().getState().getStartProcedure().setFinishing(finishingTime);
+                getRace().getState2().setFinishingTime(finishingTime);
+                //getRace().getState().getStartProcedure().setFinishing(finishingTime);
                 dismiss();
             }else{
                 Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();

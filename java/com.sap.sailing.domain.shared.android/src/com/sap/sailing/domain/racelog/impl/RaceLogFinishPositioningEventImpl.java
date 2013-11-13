@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningEvent;
 
@@ -14,16 +13,16 @@ public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl
 
     private static final long serialVersionUID = -8168584588697908309L;
     
-    private final List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors;
+    private final CompetitorResults positionedCompetitors;
 
     public RaceLogFinishPositioningEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CompetitorResults positionedCompetitors) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.positionedCompetitors = positionedCompetitors;
     }
     
     @Override
-    public List<Triple<Serializable, String, MaxPointsReason>> getPositionedCompetitorsIDsNamesMaxPointsReasons() {
+    public CompetitorResults getPositionedCompetitorsIDsNamesMaxPointsReasons() {
         return positionedCompetitors;
     }
 

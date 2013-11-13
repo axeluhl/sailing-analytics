@@ -232,7 +232,7 @@ public class GateStartProcedure implements StartProcedure {
 
     private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime,
-                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
+                AppPreferences.getAuthor(context), UUID.randomUUID(), Collections.<Competitor>emptyList(), raceLog.getCurrentPassId(), /* isDisplayed */
                 Flags.AP, lowerFlag, true);
         raceLog.add(event);
 

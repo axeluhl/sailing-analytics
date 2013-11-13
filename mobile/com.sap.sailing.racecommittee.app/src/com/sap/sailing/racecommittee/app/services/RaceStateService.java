@@ -19,19 +19,17 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
+import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceStateEvent;
+import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
@@ -66,8 +64,7 @@ public class RaceStateService extends Service {
     private ReadonlyDataManager dataManager;
     
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
-    private Map<ManagedRace, RaceStateChangedListener> registeredStateChangeListeners;
-    private Map<ManagedRace, RaceStateEventListener> registeredStateEventListeners;
+    private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
     
     private Map<Serializable, List<PendingIntent>> managedIntents;
     
@@ -81,8 +78,7 @@ public class RaceStateService extends Service {
         this.dataManager = DataManager.create(this);
         
         this.registeredLogListeners = new HashMap<ManagedRace, RaceLogEventVisitor>();
-        this.registeredStateChangeListeners = new HashMap<ManagedRace, RaceStateChangedListener>();
-        this.registeredStateEventListeners = new HashMap<ManagedRace, RaceStateEventListener>();
+        this.registeredStateEventSchedulers = new HashMap<ManagedRace, RaceStateEventScheduler>();
         this.managedIntents = new HashMap<Serializable, List<PendingIntent>>();
         
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -136,14 +132,11 @@ public class RaceStateService extends Service {
 
     private void unregisterAllRaces() {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
-            entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
-        }
-        for (Entry<ManagedRace, RaceStateChangedListener> entry : registeredStateChangeListeners.entrySet()) {
-            entry.getKey().getState().unregisterStateChangeListener(entry.getValue());
+            entry.getKey().getState2().getRaceLog().removeListener(entry.getValue());
         }
         
-        for (Entry<ManagedRace, RaceStateEventListener> entry : registeredStateEventListeners.entrySet()) {
-            entry.getKey().getState().unregisterStateEventListener(entry.getValue());
+        for (Entry<ManagedRace, RaceStateEventScheduler> entry : registeredStateEventSchedulers.entrySet()) {
+            entry.getKey().getState2().setStateEventScheduler(null);
         }
         
         for (List<PendingIntent> intents : managedIntents.values()) {
@@ -182,18 +175,11 @@ public class RaceStateService extends Service {
             return;
         }
         
-        TimePoint eventTime = new MillisecondsTimePoint(intent.getExtras().getLong(AppConstants.RACING_EVENT_TIME));
-
         if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
-            if (race.getState().getStartTime() != null) {
-                race.getState().getStartProcedure()
-                        .dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
-            }
+            RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
+            race.getState2().processStateEvent(stateEvent);
             managedIntents.get(race.getId()).remove(intent);
             return;
-        } else if (AppConstants.INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION.equals(action)) {
-            Integer eventId = intent.getExtras().getInt(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID);
-            race.getState().getStartProcedure().handleStartProcedureSpecificEvent(eventTime, eventId);
         }
     }
 
@@ -236,13 +222,12 @@ public class RaceStateService extends Service {
         return dataManager.getDataStore().getRace(raceId);
     }
 
-    private void registerRace(ManagedRace race) {
+    private void registerRace(final ManagedRace race) {
         ExLog.i(TAG, "Trying to register race " + race.getId());
         
         if (!managedIntents.containsKey(race.getId())) {
-            RaceState state = race.getState();
+            RaceState2 state = race.getState2();
             managedIntents.put(race.getId(), new ArrayList<PendingIntent>());
-            registerAlarms(race, state);
 
             // Register on event additions...
             JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
@@ -251,11 +236,11 @@ public class RaceStateService extends Service {
             state.getRaceLog().addListener(logListener);
 
             // ... register on state changes!
-            RaceStateEventListener eventListener = new RaceStateServiceListener(this, race);
-            state.registerStateEventListener(eventListener);
+            RaceStateEventScheduler stateEventScheduler = new RaceStateEventSchedulerOnService(this, race);
+            state.setStateEventScheduler(stateEventScheduler);
 
             this.registeredLogListeners.put(race, logListener);
-            this.registeredStateEventListeners.put(race, eventListener);
+            this.registeredStateEventSchedulers.put(race, stateEventScheduler);
             
             ExLog.i(TAG, "Race " + race.getId() + " registered.");
         } else {
@@ -263,71 +248,30 @@ public class RaceStateService extends Service {
         }
     }
 
-    public void registerAlarms(ManagedRace race, RaceState state) {
-        switch (state.getStatus()) {
-        case SCHEDULED:
-        case STARTPHASE:
-            handleNewStartTime(race, state.getStartTime());
-            break;
-        case RUNNING:
-            //TODO check for individual recall removal event
-        default:
-            break;
-        }
-    }
-
-    public void handleNewStartTime(ManagedRace race, TimePoint startTime) {
-        clearAlarms(race.getId());
-        
-        //formerly state.getStartTime().plus(1) don't know why
-        
-        List<TimePoint> fireTimePoints = race.getState().getStartProcedure().getAutomaticEventFireTimePoints(startTime);
-        String action = AppConstants.INTENT_ACTION_ALARM_ACTION;
-        for (TimePoint eventFireTimePoint : fireTimePoints) {
-            scheduleEventTime(action, race, eventFireTimePoint);
-        }
-        ExLog.i(TAG, "Race " + race.getId() + " is scheduled now.");
-    }
-
-    private void scheduleEventTime(String action, ManagedRace race, TimePoint eventFireTimePoint) {
-        addIntentToAlarmManager(action, race, eventFireTimePoint);
-    }
-
-    private void addIntentToAlarmManager(String action, ManagedRace managedRace, TimePoint eventFireTimePoint) {
-        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint, null);
-        managedIntents.get(managedRace.getId()).add(pendingIntent);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, eventFireTimePoint.asMillis(), pendingIntent);
-        ExLog.i(TAG, "The alarm " + action + " will be fired at " + eventFireTimePoint);
-    }
-    
-    private void addIntentWithEventIdToAlarmManager(String action, ManagedRace managedRace, TimePoint eventFireTimePoint, Integer eventId) {
-        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint, eventId);
-        managedIntents.get(managedRace.getId()).add(pendingIntent);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, eventFireTimePoint.asMillis(), pendingIntent);
-        ExLog.i(TAG, "The alarm " + action + " will be fired at " + eventFireTimePoint);
-    }
-
-    private PendingIntent createPendingIntent(String action, ManagedRace managedRace, TimePoint eventFireTimePoint,
-            Integer eventId) {
-        Intent intent = new Intent(action);
+    private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_ALARM_ACTION);
         intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
-        intent.putExtra(AppConstants.RACING_EVENT_TIME, eventFireTimePoint.asMillis());
-        if (eventId != null) {
-            intent.putExtra(AppConstants.STARTPROCEDURE_SPECIFIC_EVENT_ID, eventId);
-        }
-        PendingIntent pendingIntent = PendingIntent.getService(this, alarmManagerRequestCode++, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        return pendingIntent;
+        intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);
+        return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
     
-    /**
-     * removes already set alarm times for a given managed race
-     * 
-     * @param managedRace
-     *            the race whose alarms shall be removed from alarmManager
-     */
-    public void clearAlarms(Serializable raceId) {
+    public void setAlarm(ManagedRace race, RaceStateEvent event) {
+        PendingIntent intent = createAlarmPendingIntent(race, event);
+        managedIntents.get(race.getId()).add(intent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+        ExLog.i(TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+    }
+
+    public void clearAlarm(ManagedRace race, RaceStateEvent event) {
+        PendingIntent intent = createAlarmPendingIntent(race, event);
+        List<PendingIntent> intents = managedIntents.get(race.getId());
+        intents.remove(intent);
+        alarmManager.cancel(intent);
+    }
+    
+    public void clearAllAlarms(ManagedRace race) {
+        Serializable raceId = race.getId();
         List<PendingIntent> intents = managedIntents.get(raceId);
         
         if (intents == null) {
@@ -340,14 +284,6 @@ public class RaceStateService extends Service {
         }
         
         intents.clear();
-    }
-
-    public void handleRaceAborted(ManagedRace race) {
-        clearAlarms(race.getId());
-    }
-
-    public void handleStartProcedureSpecificEvent(ManagedRace race, TimePoint startProcedureSpecificEventTimePoint, Integer eventId) {
-        String action = AppConstants.INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION;
-        addIntentWithEventIdToAlarmManager(action, race, startProcedureSpecificEventTimePoint, eventId);
+        ExLog.w(TAG, "All intents cleared for race " + raceId);
     }
 }

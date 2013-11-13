@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -20,9 +18,11 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
@@ -39,7 +39,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
     private RaceLogFinishPositioningConfirmedEventDeserializer deserializer;
     private RaceLogFinishPositioningConfirmedEvent event;
     private TimePoint now;
-    private List<Triple<Serializable, String, MaxPointsReason>> positioningList;
+    private CompetitorResults positioningList;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Before
@@ -50,7 +50,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
         deserializer = new RaceLogFinishPositioningConfirmedEventDeserializer(new CompetitorJsonDeserializer(factory.getCompetitorStore(), null, /* boatDeserializer */ null));
 
         now = MillisecondsTimePoint.now();
-        positioningList = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
+        positioningList = new CompetitorResultsImpl();
     }
 
     @Test

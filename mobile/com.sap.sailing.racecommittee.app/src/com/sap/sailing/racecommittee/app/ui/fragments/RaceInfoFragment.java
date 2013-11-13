@@ -18,13 +18,17 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
@@ -32,7 +36,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
-public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener, RaceInfoListener {
+public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
     
     private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
@@ -79,7 +83,19 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
             @Override
             public void onClick(View v) {
-                showCourseDesignDialog();
+                getRace().getRaceLog().add(
+                        /*RaceLogEventFactory.INSTANCE.createStartTimeEvent(
+                                MillisecondsTimePoint.now(), 
+                                new RaceLogEventAuthorImpl("Magic", -1), 
+                                getRace().getRaceLog().getCurrentPassId(),
+                                MillisecondsTimePoint.now().plus(30000)));*/
+                        RaceLogEventFactory.INSTANCE.createFlagEvent(MillisecondsTimePoint.now(),
+                                new RaceLogEventAuthorImpl("Magic", 0),
+                                getRace().getRaceLog().getCurrentPassId(),
+                                Flags.AP,
+                                Flags.NONE,
+                                true));
+                //showCourseDesignDialog();
             }
         });
         
@@ -111,13 +127,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onStart() {
         super.onStart();
-        getRace().getState().registerStateChangeListener(this);
+        getRace().getState2().addChangedListener(stateChangedListener);
         switchToInfoFragment();
     }
 
     @Override
     public void onStop() {
-        getRace().getState().unregisterStateChangeListener(this);
+        getRace().getState2().removeChangedListener(stateChangedListener);
         super.onStop();
     }
 
@@ -175,7 +191,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
                         ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
-                        getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
+                        getRace().getState2().setAdvancePass(MillisecondsTimePoint.now());
+                        //getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -239,20 +256,22 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onResetTime() {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
-
-    @Override
-    public void onRaceStateStatusChanged(RaceState state) {
-        switchToInfoFragment();
-    }
-
-    @Override
-    public void onRaceStateCourseDesignChanged(RaceState state) {
-        updateCourseDesignLabel();
-    }
-
-    @Override
-    public void onRaceStateProtestStartTimeChanged(RaceState state) {
-        // not interested...
-    }
+    
+    private RaceState2ChangedListener stateChangedListener = new BaseRaceState2ChangedListener() {
+        @Override
+        public void onStatusChanged(RaceState2 state) {
+            switchToInfoFragment();
+        };
+        
+        @Override
+        public void onStartTimeChanged(RaceState2 state) {
+            switchToInfoFragment();
+        };
+        
+        @Override
+        public void onCourseDesignChanged(RaceState2 state) {
+            updateCourseDesignLabel();
+        };
+    };
 
 }

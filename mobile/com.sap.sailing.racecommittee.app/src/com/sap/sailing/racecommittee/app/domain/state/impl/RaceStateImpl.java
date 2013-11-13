@@ -1,9 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.state.impl;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,12 +9,11 @@ import android.content.Context;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -226,7 +223,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setFinishPositioningListChanged(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+    public void setFinishPositioningListChanged(CompetitorResults positionedCompetitors) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, AppPreferences.getAuthor(context), raceLog.getCurrentPassId(), positionedCompetitors);
@@ -234,7 +231,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     @Override
-    public List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList() {
+    public CompetitorResults getFinishPositioningList() {
         return finishPositioningListFinder.analyze();
     }
     
@@ -242,7 +239,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void setFinishPositioningConfirmed() {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
-        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = getFinishPositioningList();
+        CompetitorResults positionedCompetitors = getFinishPositioningList();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, AppPreferences.getAuthor(context), raceLog.getCurrentPassId(), positionedCompetitors);
         this.raceLog.add(event);

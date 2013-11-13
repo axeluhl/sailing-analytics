@@ -19,7 +19,7 @@ public class RacingProcedureTypeAnalyzer extends RaceLogAnalyzer<RacingProcedure
                 return startProcedureEvent.getStartProcedureType();
             }
         }
-        return null;
+        return RacingProcedureType.UNKNOWN;
     }
 
 }

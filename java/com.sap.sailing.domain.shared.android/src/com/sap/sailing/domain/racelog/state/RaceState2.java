@@ -1,25 +1,25 @@
 package com.sap.sailing.domain.racelog.state;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.tracking.Wind;
 
-public interface RaceState2 {
+public interface RaceState2 extends RaceStateEventProcessor {
     
     RaceLog getRaceLog();
     RaceLogEventAuthor getAuthor();
     
     void setRacingProcedure(RacingProcedureType racingProcedureType);
     RacingProcedure2 getRacingProcedure();
+    void setStateEventScheduler(RaceStateEventScheduler scheduler);
     
     RaceLogRaceStatus getStatus();
     
@@ -31,11 +31,12 @@ public interface RaceState2 {
     TimePoint getFinishedTime();
     void setProtestTime(TimePoint timePoint);
     TimePoint getProtestTime();
-    void setAborted(TimePoint timePoint, boolean isPostponed);
+    void setAdvancePass(TimePoint timePoint);
+    void setAborted(TimePoint timePoint, boolean isPostponed, Flags abortFlag);
     void setGeneralRecall(TimePoint timePoint);
     
-    void setFinishPositioningListChanged(List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors);
-    List<Triple<Serializable, String, MaxPointsReason>> getFinishPositioningList();
+    void setFinishPositioningListChanged(CompetitorResults positionedCompetitors);
+    CompetitorResults getFinishPositioningList();
     
     void setFinishPositioningConfirmed();
     boolean isFinishPositioningConfirmed();
