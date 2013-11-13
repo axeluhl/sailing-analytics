@@ -56,23 +56,30 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             if (!relevantFixes.isEmpty()) {
                 int i=0;
                 GPSFixMoving last = relevantFixes.get(i);
-                // add fix's own speed/bearing; this also works if only one "relevant" fix is found
-                SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
-                        last.getSpeed(),
-                        /* original confidence */0.9, last.getTimePoint());
-                speeds.add(speedWithConfidence);
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */
-                        0.9, last.getTimePoint()));
+                // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
+                // "relevant" fix is found
+                if (maxSpeedForSmoothing == null || last.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                    SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
+                            last.getSpeed(),
+                            /* original confidence */0.9, last.getTimePoint());
+                    speeds.add(speedWithConfidence);
+                    bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */
+                    0.9, last.getTimePoint()));
+                }
                 while (i<relevantFixes.size()-1) {
                     // add to average the position and time difference
                     GPSFixMoving next = relevantFixes.get(++i);
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
-                    SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
-                            next.getSpeed(), /* original confidence */0.9, next.getTimePoint());
-                    speeds.add(computedSpeedWithConfidence);
-                    bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(next.getSpeed().getBearing(), /* confidence */
-                            0.9, next.getTimePoint()));
+                    // if speed is within reasonable bounds, add fix's own speed/bearing; this also works if only one
+                    // "relevant" fix is found
+                    if (maxSpeedForSmoothing == null || next.getSpeed().compareTo(maxSpeedForSmoothing) <= 0) {
+                        SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
+                                next.getSpeed(), /* original confidence */0.9, next.getTimePoint());
+                        speeds.add(computedSpeedWithConfidence);
+                        bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(next.getSpeed().getBearing(), /* confidence */
+                        0.9, next.getTimePoint()));
+                    }
                     last = next;
                 }
             }
@@ -96,10 +103,11 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     
     /**
      * In addition to the base class implementation, we may have the speed and bearing as measured by the device (the
-     * special speed/bearing combination 0.0/0.0 is simply ignored). If the adjacent fixes are within the averaging
-     * interval defined by {@link GPSFixTrackImpl#getMillisecondsOverWhichToAverageSpeed()}, we use the device-measured
-     * speed and compare it with the speed computed based on the time stamp and distance between previous and next fix.
-     * If the ratio between the higher and the lower of the two speeds exceeds
+     * special speed/bearing combination 0.0/0.0 is simply ignored, as are fix-provided speed values that exceed
+     * {@link #maxSpeedForSmoothing}). If the adjacent fixes are within the averaging interval defined by
+     * {@link GPSFixTrackImpl#getMillisecondsOverWhichToAverageSpeed()}, we use the device-measured speed and compare it
+     * with the speed computed based on the time stamp and distance between previous and next fix. If the ratio between
+     * the higher and the lower of the two speeds exceeds
      * {@link #MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING}, the fix is considered invalid.
      */
     @Override
@@ -109,7 +117,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         if (e.isValidityCached()) {
             isValid = e.isValid();
         } else {
-            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0);
+            boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 && e.getSpeed().getBearing().getDegrees() != 0.0 &&
+                    (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0));
 
             GPSFixMoving previous = rawFixes.lower(e);
             final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
