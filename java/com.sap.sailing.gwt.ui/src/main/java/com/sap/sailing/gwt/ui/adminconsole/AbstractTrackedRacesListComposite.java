@@ -88,7 +88,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     protected final TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
-
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
@@ -120,8 +119,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterPanel.setSpacing(5);
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-
-
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);

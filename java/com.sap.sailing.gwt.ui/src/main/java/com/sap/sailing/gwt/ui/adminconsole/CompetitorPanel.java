@@ -195,7 +195,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
         competitorTable.addColumn(competitorNameColumn, stringMessages.name());
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
-        competitorTable.addColumn(competitorIdColumn, "ID");
+        competitorTable.addColumn(competitorIdColumn, stringMessages.id());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorTable.setSelectionModel(competitorSelectionModel);
