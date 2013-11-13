@@ -12,6 +12,7 @@ import com.sap.sailing.datamining.factories.FilterFactory;
 import com.sap.sailing.datamining.factories.GrouperFactory;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.server.RacingEventService;
 
 public final class DataMiningFactory {
     
@@ -20,8 +21,8 @@ public final class DataMiningFactory {
     
     private DataMiningFactory() { }
 
-    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition) {
-        DataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), executor);
+    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
+        DataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), executor, racingService);
         Filter<DataType> filter = FilterFactory.createDimensionFilter(queryDefinition.getDataType(), queryDefinition.getSelection());
         Grouper<DataType> grouper = GrouperFactory.createGrouper(queryDefinition);
         Extractor<DataType, AggregatedType> extractor = ExtractorFactory.createExtractor(queryDefinition.getStatisticType());
