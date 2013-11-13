@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
