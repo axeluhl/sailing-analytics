@@ -185,6 +185,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         distanceCache = new DistanceCache(trackedItem.toString());
         maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" for "+getTrackedItem();
+    }
 
     @Override
     public void addListener(GPSTrackListener<ItemType, FixType> listener) {
