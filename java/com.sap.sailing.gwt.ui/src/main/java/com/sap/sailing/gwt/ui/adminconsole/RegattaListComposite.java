@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,7 +12,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -174,35 +172,6 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         return table;
     }
 
-    private void updateFilteredRegattasList() {
-        String text = filterablePanelRegattas.getTextBox().getText();
-        List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        regattaListDataProvider.getList().clear();
-        if (text != null && !text.isEmpty()) {
-            for (RegattaDTO regattaDTO : allRegattas) {
-                boolean failed = false;
-                for (String word : wordsToFilter) {
-                    String textAsUppercase = word.toUpperCase().trim();
-                    if (!regattaDTO.getName().toUpperCase().contains(textAsUppercase)
-                            && (regattaDTO.boatClass == null || !regattaDTO.boatClass.getName().toUpperCase().contains(
-                                    textAsUppercase)) && !regattaDTO.getName().toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
-                    }
-                }
-                if (!failed) {
-                    regattaListDataProvider.getList().add(regattaDTO);
-                }
-            }
-        } else {
-            for (RegattaDTO regatta : allRegattas) {
-                regattaListDataProvider.getList().add(regatta);
-            }
-        }
-        // now sort again according to selected criterion
-        ColumnSortEvent.fire(regattaTable, regattaTable.getColumnSortList());
-    }
-
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
@@ -291,7 +260,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
         }
         allRegattas = newAllRegattas;
-        updateFilteredRegattasList();
+        filterablePanelRegattas.updateAll(allRegattas);
         regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
     }
 
