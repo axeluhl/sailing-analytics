@@ -684,19 +684,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         Integer counter = 0;
-        if (lastProgressPerID.get(getID()) != null) {
-            Float lastProgress = lastProgressPerID.get(getID()).getB();
-            counter = lastProgressPerID.get(getID()).getA();
+        final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
+        if (lastProgressPair != null) {
+            Float lastProgress = lastProgressPair.getB();
+            counter = lastProgressPair.getA();
             if (progress < lastProgress.floatValue()) {
                 if (counter.intValue() > MAX_STORED_PACKET_HOP_ALLOWANCE) {
                     try {
                         logger.severe("Got " + MAX_STORED_PACKET_HOP_ALLOWANCE + " times a value for progress " + progress + " that is lower than one already received " + lastProgress + "! This is a severe error - stopping receivers for " + getID() + " now!");
                         stop(/* stopReceiversPreemptively */ true);
-                        
                         /* make sure to indicate that this race is erroneous */
                         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
                         updateStatusOfTrackedRaces();
-                        throw new InterruptedException("Interrupted");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
