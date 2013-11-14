@@ -26,11 +26,6 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
         super.onStop();
     }
     
-    @Override
-    protected void setupUi() {
-        // TODO: display all the flags!
-    }
-    
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override

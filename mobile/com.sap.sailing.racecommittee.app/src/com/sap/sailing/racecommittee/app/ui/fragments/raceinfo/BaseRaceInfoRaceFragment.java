@@ -1,8 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
@@ -46,13 +44,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected ProcedureType getRacingProcedure() {
         return getRaceState().getTypedRacingProcedure();
-    }
-    
-    protected ImageView createFlagImageView(int flagDrawableId) {
-        ImageView flagView = new ImageView(getActivity());
-        flagView.setLayoutParams(new LinearLayout.LayoutParams(200, 130));
-        flagView.setImageResource(flagDrawableId);
-        return flagView;
     }
     
     protected abstract void setupUi();

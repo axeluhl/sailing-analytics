@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -20,6 +21,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
@@ -29,8 +31,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     private Button resetTimeButton;
     private TextView nextCountdownTextView;
     
-    protected ViewGroup upperFlagsViewGroup;
-    protected ViewGroup lowerFlagsViewGroup;
+    private FlagPoleStateRenderer flagRenderer;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,8 +71,9 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             }
         });
         
-        upperFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_startphase_base_up_flags);
-        lowerFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_startphase_base_down_flags);
+        flagRenderer = new FlagPoleStateRenderer(getActivity(),
+                (LinearLayout) getView().findViewById(R.id.race_startphase_base_up_flags), 
+                (LinearLayout) getView().findViewById(R.id.race_startphase_base_down_flags));
     }
 
     @Override
@@ -97,6 +99,14 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
     protected int getActionsLayoutId() {
         return 0;
+    }
+    
+    @Override
+    protected void setupUi() {
+        TimePoint startTime = getRaceState().getStartTime();
+        if (startTime != null) {
+            flagRenderer.render(getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now()));
+        }
     }
 
 }

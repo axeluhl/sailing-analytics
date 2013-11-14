@@ -7,6 +7,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -17,6 +18,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
@@ -28,8 +30,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     private TextView startCountUpTextView;
     private TextView nextCountdownTextView;
     
-    protected ViewGroup upperFlagsViewGroup;
-    protected ViewGroup lowerFlagsViewGroup;
+    private FlagPoleStateRenderer flagRenderer;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,9 +47,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
-        upperFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_up_flags);
-        lowerFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_down_flags);
         
         startCountUpTextView = (TextView) getView().findViewById(R.id.race_running_base_start_countup);
         nextCountdownTextView = (TextView) getView().findViewById(R.id.race_running_base_next_countdown);
@@ -98,6 +96,10 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                 fragment.show(getFragmentManager(), "dialogAPNovemberMode");
             }
         });
+        
+        flagRenderer = new FlagPoleStateRenderer(getActivity(),
+                (LinearLayout) getView().findViewById(R.id.race_running_base_up_flags), 
+                (LinearLayout) getView().findViewById(R.id.race_running_base_down_flags));
     }
 
     @Override
@@ -136,6 +138,14 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
 
     protected int getActionsLayoutId() {
         return 0;
+    }
+    
+    @Override
+    protected void setupUi() {
+        TimePoint startTime = getRaceState().getStartTime();
+        if (startTime != null) {
+            flagRenderer.render(getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now()));
+        }
     }
 
 }

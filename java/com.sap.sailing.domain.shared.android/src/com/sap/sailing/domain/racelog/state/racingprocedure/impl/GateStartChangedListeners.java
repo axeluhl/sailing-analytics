@@ -6,18 +6,16 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProce
 public class GateStartChangedListeners extends RacingProcedureChangedListeners<GateStartChangedListener> implements
         GateStartChangedListener {
 
-    private static final long serialVersionUID = 9128555669971858138L;
-
     @Override
     public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
-        for (GateStartChangedListener listener : this) {
+        for (GateStartChangedListener listener : getListeners()) {
             listener.onGateLineOpeningTimeChanged(gateStartRacingProcedure);
         }
     }
 
     @Override
     public void onPathfinderChanged(GateStartRacingProcedure procedure) {
-        for (GateStartChangedListener listener : this) {
+        for (GateStartChangedListener listener : getListeners()) {
             listener.onPathfinderChanged(procedure);
         }
     }

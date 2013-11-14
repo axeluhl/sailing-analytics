@@ -70,7 +70,7 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     
     @Override
     public void addChangedListener(RacingProcedureChangedListener listener) {
-        changedListeners.addListener(listener);
+        changedListeners.addBaseListener(listener);
     }
     
     public void removeChangedListener(RacingProcedureChangedListener listener) {

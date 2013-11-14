@@ -57,10 +57,8 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
 
     @Override
     protected void setupUi() {
-        lowerFlagsViewGroup.removeAllViews();
-        upperFlagsViewGroup.removeAllViews();
-        
-        // TODO: work to dooo!
+        // TODO: gate time and pathfinder ui update
+        super.setupUi();
     }
     
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {

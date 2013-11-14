@@ -6,11 +6,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure
 public class RRS26ChangedListeners extends RacingProcedureChangedListeners<RRS26ChangedListener> implements
         RRS26ChangedListener {
 
-    private static final long serialVersionUID = -2809742244111393186L;
-
     @Override
     public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
-        for (RRS26ChangedListener listener : this) {
+        for (RRS26ChangedListener listener : getListeners()) {
             listener.onStartmodeChanged(racingProcedure);
         }
     }
