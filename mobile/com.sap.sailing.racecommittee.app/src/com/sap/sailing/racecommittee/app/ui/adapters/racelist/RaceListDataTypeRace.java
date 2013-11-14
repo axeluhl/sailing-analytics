@@ -93,7 +93,7 @@ public class RaceListDataTypeRace implements RaceListDataType {
     }
 
     private String formatStartTime() {
-        TimePoint startTime = race.getState2().getStartTime(); 
+        TimePoint startTime = race.getState().getStartTime(); 
         if (startTime == null) 
         {
             return unknownTemplate;

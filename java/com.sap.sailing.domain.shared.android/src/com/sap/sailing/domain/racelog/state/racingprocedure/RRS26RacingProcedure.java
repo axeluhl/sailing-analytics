@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 
-public interface RRS26RacingProcedure extends RacingProcedure2 {
+public interface RRS26RacingProcedure extends RacingProcedure {
     
     void addChangedListener(RRS26ChangedListener listener);
     

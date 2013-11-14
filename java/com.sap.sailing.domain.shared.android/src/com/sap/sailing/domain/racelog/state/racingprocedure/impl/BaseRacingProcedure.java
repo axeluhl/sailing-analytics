@@ -14,23 +14,23 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
-import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 
 /**
- * Base class for all your {@link RacingProcedure2}s.
+ * Base class for all your {@link RacingProcedure}s.
  * 
  * It is a good idea to call {@link BaseRacingProcedure#update()} in your constructor to ensure your procedure is
  * correctly initialized.
  * 
  */
-public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener implements RacingProcedure2,
+public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener implements RacingProcedure,
         RaceLogChangedListener {
 
     private final static long individualRecallRemovalTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds
@@ -94,7 +94,7 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     }
 
     @Override
-    public void triggerStateEventScheduling(RaceState2 state) {
+    public void triggerStateEventScheduling(RaceState state) {
         switch (state.getStatus()) {
         case SCHEDULED:
         case STARTPHASE:
@@ -193,14 +193,14 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     protected abstract Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime);
 
     @Override
-    public void onStartTimeChanged(RaceState2 state) {
+    public void onStartTimeChanged(RaceState state) {
         if (scheduler != null && state.getStartTime() != null) {
             scheduler.scheduleStateEvents(createStartStateEvents(state.getStartTime()));
         }
     }
     
     @Override
-    public void onAdvancePass(RaceState2 state) {
+    public void onAdvancePass(RaceState state) {
         unscheduleAllEvents();
     }
 

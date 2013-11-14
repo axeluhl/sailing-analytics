@@ -19,8 +19,8 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.racelog.state.RaceState2;
-import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -124,13 +124,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     @Override
     public void onStart() {
         super.onStart();
-        getRace().getState2().addChangedListener(stateChangedListener);
+        getRace().getState().addChangedListener(stateChangedListener);
         switchToInfoFragment();
     }
 
     @Override
     public void onStop() {
-        getRace().getState2().removeChangedListener(stateChangedListener);
+        getRace().getState().removeChangedListener(stateChangedListener);
         super.onStop();
     }
 
@@ -180,7 +180,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                         ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
-                        getRace().getState2().setAdvancePass(MillisecondsTimePoint.now());
+                        getRace().getState().setAdvancePass(MillisecondsTimePoint.now());
                         //getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -245,26 +245,26 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
     
-    private RaceState2ChangedListener stateChangedListener = new BaseRaceState2ChangedListener() {
+    private RaceStateChangedListener stateChangedListener = new BaseRaceState2ChangedListener() {
         
         @Override
-        public void onRacingProcedureChanged(RaceState2 state) {
+        public void onRacingProcedureChanged(RaceState state) {
             infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
             switchToInfoFragment();
         };
         
         @Override
-        public void onStatusChanged(RaceState2 state) {
+        public void onStatusChanged(RaceState state) {
             switchToInfoFragment();
         };
         
         @Override
-        public void onStartTimeChanged(RaceState2 state) {
+        public void onStartTimeChanged(RaceState state) {
             switchToInfoFragment();
         };
         
         @Override
-        public void onCourseDesignChanged(RaceState2 state) {
+        public void onCourseDesignChanged(RaceState state) {
             updateCourseDesignLabel();
         };
     };

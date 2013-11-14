@@ -23,10 +23,10 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.state.RaceState2;
-import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceState2Impl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStateTest {
     
@@ -34,9 +34,9 @@ public class RaceStateTest {
     private RaceLogEventAuthor author;
     private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
-    private RaceState2ChangedListener listener;
+    private RaceStateChangedListener listener;
     
-    private RaceState2 state;
+    private RaceState state;
     
     @Before
     public void setUp() {
@@ -44,7 +44,7 @@ public class RaceStateTest {
         author = new RaceLogEventAuthorImpl("Test", 1);
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
-        listener = mock(RaceState2ChangedListener.class);
+        listener = mock(RaceStateChangedListener.class);
         
         state = new RaceState2Impl(raceLog, author, factory, defaultRacingProcedureType);
     }
@@ -134,12 +134,12 @@ public class RaceStateTest {
     public void testNewRacingProcedure() throws InterruptedException {
         state.addChangedListener(listener);
         
-        RacingProcedure2 oldProcedure = state.getRacingProcedure();
+        RacingProcedure oldProcedure = state.getRacingProcedure();
         assertEquals(defaultRacingProcedureType, oldProcedure.getType());
         
         state.setRacingProcedure(RacingProcedureType.ESS);
         
-        RacingProcedure2 newProcedure = state.getRacingProcedure();
+        RacingProcedure newProcedure = state.getRacingProcedure();
         assertEquals(RacingProcedureType.ESS, newProcedure.getType());
         assertFalse(oldProcedure.equals(newProcedure));
     }

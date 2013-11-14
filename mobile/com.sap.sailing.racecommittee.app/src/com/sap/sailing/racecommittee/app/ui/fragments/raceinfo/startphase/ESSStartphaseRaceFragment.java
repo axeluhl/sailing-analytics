@@ -11,7 +11,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.racecommittee.app.R;
 
-public class ESSStartphaseRaceFragment2 extends BaseStartphaseRaceFragment<ESSRacingProcedure> {
+public class ESSStartphaseRaceFragment extends BaseStartphaseRaceFragment<ESSRacingProcedure> {
     
     private ImageView apFlagImageView;
     private ImageView threeFlagImageView;

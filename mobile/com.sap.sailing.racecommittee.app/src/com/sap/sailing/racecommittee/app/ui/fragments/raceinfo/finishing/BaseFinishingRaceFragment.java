@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
@@ -20,7 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishedTimeDi
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProcedure2> extends BaseRaceInfoRaceFragment<ProcedureType> {   
+public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {   
     
     private TextView startCountUpTextView;
     protected TextView additionalInfoTextView;

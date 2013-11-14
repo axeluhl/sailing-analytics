@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
@@ -34,12 +34,12 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override
-        public void onIndividualRecallDisplayed(RacingProcedure2 racingProcedure) {
+        public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
             ExLog.i("NY", "XRAY up");
         }
         
         @Override
-        public void onIndividualRecallRemoved(RacingProcedure2 racingProcedure) {
+        public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
             ExLog.i("NY", "XRAY down");
         }
         

@@ -14,7 +14,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
@@ -69,7 +69,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
     
     @Override
-    public void triggerStateEventScheduling(RaceState2 state) {
+    public void triggerStateEventScheduling(RaceState state) {
         switch (state.getStatus()) {
         case SCHEDULED:
         case STARTPHASE:

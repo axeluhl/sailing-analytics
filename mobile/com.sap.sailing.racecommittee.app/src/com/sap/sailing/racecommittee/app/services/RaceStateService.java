@@ -23,7 +23,7 @@ import android.util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
-import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
@@ -134,11 +134,11 @@ public class RaceStateService extends Service {
 
     private void unregisterAllRaces() {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
-            entry.getKey().getState2().getRaceLog().removeListener(entry.getValue());
+            entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
         
         for (Entry<ManagedRace, RaceStateEventScheduler> entry : registeredStateEventSchedulers.entrySet()) {
-            entry.getKey().getState2().setStateEventScheduler(null);
+            entry.getKey().getState().setStateEventScheduler(null);
         }
         
         for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
@@ -180,7 +180,7 @@ public class RaceStateService extends Service {
         if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
             RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
             ExLog.i(TAG, String.format("Processing %s", stateEvent.toString()));
-            race.getState2().processStateEvent(stateEvent);
+            race.getState().processStateEvent(stateEvent);
             clearAlarmByName(race, stateEvent.getEventName());
             return;
         }
@@ -229,7 +229,7 @@ public class RaceStateService extends Service {
         ExLog.i(TAG, "Trying to register race " + race.getId());
         
         if (!managedIntents.containsKey(race.getId())) {
-            RaceState2 state = race.getState2();
+            RaceState state = race.getState();
             managedIntents.put(race.getId(), new ArrayList<Pair<PendingIntent, RaceStateEvents>>());
 
             // Register on event additions...

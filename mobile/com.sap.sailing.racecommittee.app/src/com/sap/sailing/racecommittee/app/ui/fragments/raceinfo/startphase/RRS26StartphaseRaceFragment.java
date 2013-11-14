@@ -21,7 +21,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class RRS26StartphaseRaceFragment2 extends BaseStartphaseRaceFragment<RRS26RacingProcedure> {
+public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS26RacingProcedure> {
     
     private ImageButton startModeButton;
     private final ChangeListener changeListener;
@@ -29,7 +29,7 @@ public class RRS26StartphaseRaceFragment2 extends BaseStartphaseRaceFragment<RRS
     private ImageView classFlagImageView;
     private ImageView startModeFlagImageView;
     
-    public RRS26StartphaseRaceFragment2() {
+    public RRS26StartphaseRaceFragment() {
         this.changeListener = new ChangeListener();
     }
 

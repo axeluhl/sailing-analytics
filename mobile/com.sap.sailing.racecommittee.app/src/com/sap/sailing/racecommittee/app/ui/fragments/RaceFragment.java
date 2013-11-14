@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import android.os.Bundle;
 
-import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -63,8 +63,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return managedRace;
     }
     
-    public RaceState2 getRaceState() {
-        return getRace().getState2();
+    public RaceState getRaceState() {
+        return getRace().getState();
     }
     
     @Override

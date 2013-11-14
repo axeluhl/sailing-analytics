@@ -2,7 +2,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import java.util.HashSet;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 
 public class RacingProcedureChangedListeners<T extends RacingProcedureChangedListener> extends HashSet<T> implements
@@ -23,21 +23,21 @@ public class RacingProcedureChangedListeners<T extends RacingProcedureChangedLis
     }
 
     @Override
-    public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
+    public void onActiveFlagsChanged(RacingProcedure racingProcedure) {
         for (RacingProcedureChangedListener listener : this) {
             listener.onActiveFlagsChanged(racingProcedure);
         }
     }
     
     @Override
-    public void onIndividualRecallDisplayed(RacingProcedure2 racingProcedure) {
+    public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
         for (RacingProcedureChangedListener listener : this) {
             listener.onIndividualRecallDisplayed(racingProcedure);
         }
     }
 
     @Override
-    public void onIndividualRecallRemoved(RacingProcedure2 racingProcedure) {
+    public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
         for (RacingProcedureChangedListener listener : this) {
             listener.onIndividualRecallRemoved(racingProcedure);
         }

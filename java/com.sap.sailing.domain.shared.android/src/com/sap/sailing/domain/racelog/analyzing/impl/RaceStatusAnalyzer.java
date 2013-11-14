@@ -8,13 +8,13 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     private final EventDispatcher eventDispatcher;
     
-    public RaceStatusAnalyzer(RaceLog raceLog, RacingProcedure2 racingProcedure) {
+    public RaceStatusAnalyzer(RaceLog raceLog, RacingProcedure racingProcedure) {
         super(raceLog);
         this.eventDispatcher = new EventDispatcher(racingProcedure);
     }
@@ -38,10 +38,10 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     
     private class EventDispatcher extends BaseRaceLogEventVisitor {
         
-        private final RacingProcedure2 racingProcedure;
+        private final RacingProcedure racingProcedure;
         public RaceLogRaceStatus nextStatus;
         
-        public EventDispatcher(RacingProcedure2 racingProcedure) {
+        public EventDispatcher(RacingProcedure racingProcedure) {
             this.racingProcedure = racingProcedure;
             this.nextStatus = RaceLogRaceStatus.UNKNOWN;
         }

@@ -12,14 +12,14 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
-public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure2> extends BaseRaceInfoRaceFragment<ProcedureType> {
+public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     private ImageButton abortButton;
     private View finishingButton;
@@ -55,7 +55,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             individualRecallButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    RacingProcedure2 procedure = getRacingProcedure();
+                    RacingProcedure procedure = getRacingProcedure();
                     if (procedure.isIndividualRecallDisplayed()) {
                         procedure.removeIndividualRecall(MillisecondsTimePoint.now());
                     } else {

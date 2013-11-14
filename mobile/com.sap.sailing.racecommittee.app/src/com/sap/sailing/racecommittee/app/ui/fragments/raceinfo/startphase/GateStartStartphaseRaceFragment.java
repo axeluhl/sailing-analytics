@@ -13,11 +13,11 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLineOpeningTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class GateStartStartphaseRaceFragment2 extends BaseStartphaseRaceFragment<GateStartRacingProcedure> {
+public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<GateStartRacingProcedure> {
     
     private final ChangeListener changeListener;
     
-    public GateStartStartphaseRaceFragment2() {
+    public GateStartStartphaseRaceFragment() {
         this.changeListener = new ChangeListener();
     }
 

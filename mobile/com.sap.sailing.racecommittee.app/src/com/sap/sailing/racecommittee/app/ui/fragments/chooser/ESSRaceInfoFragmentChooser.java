@@ -4,13 +4,13 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finished.ESSFinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finishing.ESSFinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running.ESSRunningRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.ESSStartphaseRaceFragment2;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.ESSStartphaseRaceFragment;
 
 public class ESSRaceInfoFragmentChooser extends RaceInfoFragmentChooser {
 
     @Override
     protected Class<? extends RaceFragment> getStartphaseFragment() {
-        return ESSStartphaseRaceFragment2.class;
+        return ESSStartphaseRaceFragment.class;
     }
 
     @Override

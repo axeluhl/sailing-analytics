@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
@@ -92,7 +92,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         registerOnAllRaces();
         for (ManagedRace race : managedRacesById.values()) {
             //onRaceStateStatusChanged(race.getState());
-            stateListener.onStatusChanged(race.getState2());
+            stateListener.onStatusChanged(race.getState());
         }
     }
 
@@ -131,14 +131,14 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             //managedRace.getState().registerStateChangeListener(this);
-            managedRace.getState2().addChangedListener(stateListener);
+            managedRace.getState().addChangedListener(stateListener);
         }
     }
 
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : managedRacesById.values()) {
             //managedRace.getState().unregisterStateChangeListener(this);
-            managedRace.getState2().removeChangedListener(stateListener);
+            managedRace.getState().removeChangedListener(stateListener);
         }
     }
 
@@ -180,13 +180,13 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         adapter.notifyDataSetChanged();
     }
 
-    private void dataChanged(RaceState2 changedState) {
+    private void dataChanged(RaceState changedState) {
         List<RaceListDataType> adapterItems = adapter.getItems();
         for (int i = 0; i < adapterItems.size(); ++i) {
             if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
                 RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
                 ManagedRace race = raceView.getRace();
-                if (changedState != null && race.getState2().equals(changedState)) {
+                if (changedState != null && race.getState().equals(changedState)) {
                     boolean allowUpdateIndicator = !raceView.getRace().equals(this.selectedRace);
                     raceView.onStatusChanged(changedState.getStatus(), allowUpdateIndicator);
                 }
@@ -226,23 +226,23 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     }
     
     private BaseRaceState2ChangedListener stateListener = new BaseRaceState2ChangedListener() {
-        public void update(RaceState2 state) {
+        public void update(RaceState state) {
             dataChanged(state); 
             filterChanged();
         }
         
         @Override
-        public void onStatusChanged(RaceState2 state) {
+        public void onStatusChanged(RaceState state) {
             update(state);
         };
         
         @Override
-        public void onStartTimeChanged(RaceState2 state) {
+        public void onStartTimeChanged(RaceState state) {
             update(state);
         };
         
         @Override
-        public void onAdvancePass(RaceState2 state) {
+        public void onAdvancePass(RaceState state) {
             ExLog.e(TAG, "Aborted!");
         };
     };

@@ -4,11 +4,11 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RacingProcedureFactoryImpl {
     
-    public static RacingProcedure2 create(RacingProcedureType type, RaceLog raceLog,
+    public static RacingProcedure create(RacingProcedureType type, RaceLog raceLog,
             RaceLogEventAuthor author, RaceLogEventFactory factory) {
         switch (type) {
         case ESS:

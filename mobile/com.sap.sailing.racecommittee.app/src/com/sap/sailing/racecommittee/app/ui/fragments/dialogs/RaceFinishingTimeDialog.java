@@ -35,7 +35,7 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
         StartTimeFinder stf = new StartTimeFinder(getRace().getRaceLog());
         if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (stf.analyze().before(finishingTime)) {
-                getRace().getState2().setFinishingTime(finishingTime);
+                getRace().getState().setFinishingTime(finishingTime);
                 //getRace().getState().getStartProcedure().setFinishing(finishingTime);
                 dismiss();
             }else{

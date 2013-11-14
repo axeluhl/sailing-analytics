@@ -8,18 +8,18 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.tracking.Wind;
 
-public interface RaceState2 extends RaceStateEventProcessor {
+public interface RaceState extends RaceStateEventProcessor {
     
     RaceLog getRaceLog();
     RaceLogEventAuthor getAuthor();
     
     void setRacingProcedure(RacingProcedureType racingProcedureType);
-    RacingProcedure2 getRacingProcedure();
-    <T extends RacingProcedure2> T getTypedRacingProcedure();
+    RacingProcedure getRacingProcedure();
+    <T extends RacingProcedure> T getTypedRacingProcedure();
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     
     RaceLogRaceStatus getStatus();
@@ -47,7 +47,7 @@ public interface RaceState2 extends RaceStateEventProcessor {
     
     void setWindFix(Wind wind);
     
-    void addChangedListener(RaceState2ChangedListener listener);
-    void removeChangedListener(RaceState2ChangedListener listener);
+    void addChangedListener(RaceStateChangedListener listener);
+    void removeChangedListener(RaceStateChangedListener listener);
 
 }

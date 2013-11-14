@@ -27,14 +27,13 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.UserRequiredActionPerformedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class SetStartTimeRaceFragment extends RaceFragment implements UserRequiredActionPerformedListener {
+public class SetStartTimeRaceFragment extends RaceFragment {
 
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
@@ -275,11 +274,6 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPMode");
-    }
-
-    @Override
-    public void onUserRequiredActionPerformed() {
-        setStartTime();
     }
 
 }

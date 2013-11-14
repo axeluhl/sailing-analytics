@@ -81,7 +81,7 @@ public class RaceChooseStartModeDialog extends RaceDialogFragment {
     }
 
     private void process(Flags flag) {
-        RRS26RacingProcedure procedure = (RRS26RacingProcedure) getRace().getState2().getRacingProcedure();
+        RRS26RacingProcedure procedure = (RRS26RacingProcedure) getRace().getState().getRacingProcedure();
         procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         this.dismiss();
     }

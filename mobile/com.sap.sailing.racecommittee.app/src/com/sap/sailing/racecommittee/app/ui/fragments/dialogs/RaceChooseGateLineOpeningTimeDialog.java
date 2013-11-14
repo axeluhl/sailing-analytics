@@ -48,7 +48,7 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
     protected void onChooseClicked(View view) {
         try {
             Long lineOpeningTime = convertToLong(lineOpeningTimeEditText.getText().toString());
-            GateStartRacingProcedure procedure = getRace().getState2().getTypedRacingProcedure();
+            GateStartRacingProcedure procedure = getRace().getState().getTypedRacingProcedure();
             procedure.setGateLineOpeningTime(MillisecondsTimePoint.now(), Long.valueOf(60 * 1000 * lineOpeningTime));
             Log.i("RACE_SET_GATELINE_OPENING_TIME", String.valueOf(lineOpeningTime));
             dismiss();

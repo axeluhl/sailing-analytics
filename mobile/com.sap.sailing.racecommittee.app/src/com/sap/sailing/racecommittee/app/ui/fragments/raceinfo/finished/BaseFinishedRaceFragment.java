@@ -14,17 +14,17 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.state.RaceState2;
-import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.ResultsCapturingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 
-public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure2> extends BaseRaceInfoRaceFragment<ProcedureType> {
+public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     private static String getFullRaceName(ManagedRace race) {
         return String.format("%s - %s", new BoatClassSeriesFleet(race).getDisplayName(), race.getRaceName());
@@ -138,24 +138,24 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
         return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
     }
     
-    private RaceState2ChangedListener changeListener = new BaseRaceState2ChangedListener() {
+    private RaceStateChangedListener changeListener = new BaseRaceState2ChangedListener() {
         @Override
-        public void onStartTimeChanged(RaceState2 state) {
+        public void onStartTimeChanged(RaceState state) {
             setupUi();
         }
         
         @Override
-        public void onFinishingTimeChanged(RaceState2 state) {
+        public void onFinishingTimeChanged(RaceState state) {
             setupUi();
         };
         
         @Override
-        public void onFinishedTimeChanged(RaceState2 state) {
+        public void onFinishedTimeChanged(RaceState state) {
             setupUi();
         };
         
         @Override
-        public void onProtestTimeChanged(RaceState2 state) {
+        public void onProtestTimeChanged(RaceState state) {
             setupUi();
         }
     };

@@ -23,16 +23,16 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
-import com.sap.sailing.domain.racelog.state.RaceState2;
-import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
+public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     
     private final RaceLog raceLog;
     private final RaceLogEventAuthor author;
@@ -40,7 +40,7 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     
     private final RaceState2ChangedListeners changedListeners;
     
-    private RacingProcedure2 racingProcedure;
+    private RacingProcedure racingProcedure;
     private RaceStateEventScheduler scheduler;
     
     private RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
@@ -113,13 +113,13 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     }
 
     @Override
-    public RacingProcedure2 getRacingProcedure() {
+    public RacingProcedure getRacingProcedure() {
         return racingProcedure;
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends RacingProcedure2> T getTypedRacingProcedure() {
+    public <T extends RacingProcedure> T getTypedRacingProcedure() {
         return (T) getRacingProcedure();
     }
 
@@ -241,12 +241,12 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     }
 
     @Override
-    public void addChangedListener(RaceState2ChangedListener listener) {
+    public void addChangedListener(RaceStateChangedListener listener) {
         changedListeners.add(listener);
     }
 
     @Override
-    public void removeChangedListener(RaceState2ChangedListener listener) {
+    public void removeChangedListener(RaceStateChangedListener listener) {
         changedListeners.remove(listener);
     }
 

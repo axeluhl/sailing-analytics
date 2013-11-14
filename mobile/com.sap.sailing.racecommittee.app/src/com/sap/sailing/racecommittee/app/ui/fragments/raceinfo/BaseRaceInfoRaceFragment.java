@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure2> extends RaceFragment {
+public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
     private final ChangeListener changeListener;
     protected RaceInfoListener infoListener;
@@ -59,7 +59,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     private class ChangeListener extends BaseRacingProcedureChangedListener {
         @Override
-        public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
+        public void onActiveFlagsChanged(RacingProcedure racingProcedure) {
             setupUi();
         }
     }

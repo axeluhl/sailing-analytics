@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure;
 import com.sap.sailing.domain.common.TimePoint;
 
 
-public interface GateStartRacingProcedure extends RacingProcedure2 {
+public interface GateStartRacingProcedure extends RacingProcedure {
     
     public final static long GolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     

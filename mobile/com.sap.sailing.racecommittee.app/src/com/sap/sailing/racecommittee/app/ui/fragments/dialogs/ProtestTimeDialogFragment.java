@@ -160,7 +160,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
         TimePoint recentFinishedTime = null;
         for (ManagedRace race : races) {
-            TimePoint currentFinishedTime = race.getState2().getFinishedTime();
+            TimePoint currentFinishedTime = race.getState().getFinishedTime();
             if (currentFinishedTime != null
                     && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
                 recentFinishedTime = currentFinishedTime;
@@ -198,7 +198,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         List<ManagedRace> selectedRaces = getSelectedRaces();
         TimePoint protestTime = getProtestTime();
         for (ManagedRace race : selectedRaces) {
-            race.getState2().setProtestTime(protestTime);
+            race.getState().setProtestTime(protestTime);
         }
     }
 
