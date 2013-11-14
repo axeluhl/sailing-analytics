@@ -63,8 +63,13 @@ public class UpdateHandler {
     }
 
     protected URL buildUpdateURL(HashMap<String, String> additionalParameters) throws MalformedURLException, UnsupportedEncodingException {
+        String serverUpdateURI = this.updateURI.toString();
+        // make sure that the update URI always ends with a slash
+        if (!serverUpdateURI.endsWith("/")) {
+            serverUpdateURI = serverUpdateURI + "/";
+        }
         String url = String.format(UpdateUrlTemplate, 
-                this.updateURI.toString(),
+                serverUpdateURI.toString(),
                 this.action,
                 URLEncoder.encode(this.tracTracEventId.toString(), EncodingUtf8), 
                 URLEncoder.encode(this.raceId.toString(), EncodingUtf8),
