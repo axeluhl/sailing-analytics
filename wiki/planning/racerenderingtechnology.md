@@ -22,7 +22,7 @@ OpenLayers is a JavaScript library for displaying map data in web browsers. It p
 * Licence: BSD
 
 ## Lienzo Framework
-
+Lienzo allows you to build scalable graphics applications (in Java) that will run in any browser or device that supports the HTML5 Canvas API, including smart phones and tablets.
 * Product Owner: Emitrom
 * Web: http://emitrom.com/lienzo
 * Demos: http://emitrom-lienzo.appspot.com/
@@ -38,6 +38,8 @@ OpenLayers is a JavaScript library for displaying map data in web browsers. It p
 Google Maps based on WebGL
 
 ## CAAT: Canvas Advanced Animation Tookit
+CAAT is a director-based Scene graph manager.
+It is able to render using Canvas, WebGL and CSS without making changes to the applications that sit on top of it.
 * Product Owner
 * Web: https://github.com/hyperandroid/caat
 * Demos: http://hyperandroid.github.io/CAAT/documentation/demos/
@@ -46,6 +48,7 @@ Google Maps based on WebGL
 * Technology: Javascript
 
 ## D3
+D3 is a JavaScript library for manipulating documents based on data. D3 helps you bring data to life using HTML, SVG and CSS. D3’s emphasis on web standards gives you the full capabilities of modern browsers without tying yourself to a proprietary framework, combining powerful visualization components and a data-driven approach to DOM manipulation.
 * Product Owner: OpenSource
 * Web: http://d3js.org/
 * Demos: https://github.com/mbostock/d3/wiki/Gallery
