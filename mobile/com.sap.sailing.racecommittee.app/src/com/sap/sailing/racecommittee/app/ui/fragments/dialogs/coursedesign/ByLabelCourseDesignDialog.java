@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
+package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -15,8 +15,9 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
+public class ByLabelCourseDesignDialog extends RaceDialogFragment {
 
     public interface CourseByLabelSelectionListener {
         public void onCourseSelected();
@@ -69,7 +70,7 @@ public class RaceChooseCourseByLabelDialog extends RaceDialogFragment {
         
         CourseBase courseLayout = new CourseDataImpl(internalCourseName);
         
-        getRace().getState().setCourseDesign(courseLayout);
+        getRaceState().setCourseDesign(courseLayout);
         dismiss();
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
+package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,9 +45,10 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListData
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.ESSMarkImageHelper;
 
-public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
+public class ESSCourseDesignDialog extends RaceDialogFragment {
     // private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
     
     private static int MarksLoaderId = 0;
@@ -297,7 +298,8 @@ public class ESSCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRace().getState().setCourseDesign(courseDesign);
+        
+        getRaceState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         dismiss();
     }

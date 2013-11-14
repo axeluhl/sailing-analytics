@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
+package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign;
 
 import java.text.DecimalFormat;
 
@@ -49,8 +49,9 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.PositionedMark;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
+public class ClassicCourseDesignDialog extends RaceDialogFragment {
 
     private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
 
@@ -58,7 +59,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private GoogleMap courseAreaMap;
     private Bundle mBundle;
     @SuppressWarnings("unused")
-    private final static String TAG = ClassicCourseDesignDialogFragment.class.getName();
+    private final static String TAG = ClassicCourseDesignDialog.class.getName();
 
     private Button publishButton;
     private Button unpublishButton;
@@ -74,7 +75,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
 
-    public ClassicCourseDesignDialogFragment() {
+    public ClassicCourseDesignDialog() {
         super();
         // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
         // https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865
@@ -98,7 +99,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRace().getState().setCourseDesign(courseDesign);
+        getRaceState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         dismiss();
     }
@@ -185,7 +186,7 @@ public class ClassicCourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void onWindEntered(Wind windFix) {
-        getRace().getState().setWindFix(windFix);
+        getRaceState().setWindFix(windFix);
         courseDesignComputer.setStartBoatPosition(windFix.getPosition());
         courseDesignComputer.setWindDirection(windFix.getBearing());
         courseDesignComputer.setWindSpeed(windFix.getKnots());
