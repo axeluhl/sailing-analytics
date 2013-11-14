@@ -586,21 +586,25 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (speedWhenSpeedStartedToDrop != null) {
             TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
-            // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
-            // extrapolated positions onto it:
-            Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
-            // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project resulting position
-            // onto the average maneuver course; compare to the projected position actually reached at the time point of maximum speed after
-            // maneuver:
-            Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */ false);
-            Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = 
-                    speedWhenSpeedStartedToDrop.travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop, timePointWhenSpeedLevelledOffAfterManeuver);
-            Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track.getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
-            Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver =
-                    extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-            Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver =
-                    actualPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
-            result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver.getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
+            if (speedAfterManeuver != null) {
+                // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
+                // extrapolated positions onto it:
+                Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+                // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project resulting position
+                // onto the average maneuver course; compare to the projected position actually reached at the time point of maximum speed after
+                // maneuver:
+                Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */ false);
+                Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = 
+                        speedWhenSpeedStartedToDrop.travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop, timePointWhenSpeedLevelledOffAfterManeuver);
+                Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track.getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
+                Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver =
+                        extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+                Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver =
+                        actualPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+                result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver.getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
+            } else {
+                result = null;
+            }
         } else {
             result = null;
         }
@@ -641,7 +645,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             while (fixIter.hasNext()) {
                 fix = fixIter.next();
                 final SpeedWithBearing estimatedSpeedAtFix = track.getEstimatedSpeed(fix.getTimePoint());
-                if (lastFix != null) {
+                if (lastFix != null && lastSpeed != null && lastLastSpeed != null && estimatedSpeedAtFix != null) {
                     if (lastSpeed.compareTo(lastLastSpeed) > 0 && lastSpeed.compareTo(estimatedSpeedAtFix) > 0) {
                         maxima.add(lastFix);
                     } else if (lastSpeed.compareTo(lastLastSpeed) < 0 && lastSpeed.compareTo(estimatedSpeedAtFix) < 0) {
