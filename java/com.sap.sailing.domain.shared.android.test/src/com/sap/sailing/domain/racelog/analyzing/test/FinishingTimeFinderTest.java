@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.analyzing.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getTimePoint(), analyzer.analyze());
+        assertSame(event2.getTimePoint(), analyzer.analyze());
     }
     
     @Test
@@ -60,6 +60,6 @@ public class FinishingTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finish
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event1.getTimePoint(), analyzer.analyze());
+        assertSame(event1.getTimePoint(), analyzer.analyze());
     }
 }

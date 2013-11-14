@@ -16,21 +16,24 @@ public interface RaceState extends RaceStateEventProcessor {
     
     RaceLog getRaceLog();
     RaceLogEventAuthor getAuthor();
-    
-    void setRacingProcedure(RacingProcedureType racingProcedureType);
-    RacingProcedure getRacingProcedure();
     <T extends RacingProcedure> T getTypedRacingProcedure();
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     
+    void addChangedListener(RaceStateChangedListener listener);
+    void removeChangedListener(RaceStateChangedListener listener);
+    
     RaceLogRaceStatus getStatus();
     
-    RacingProcedurePrerequisite setStartTime(TimePoint timePoint);
+    void setRacingProcedure(TimePoint timePoint, RacingProcedureType racingProcedureType);
+    RacingProcedure getRacingProcedure();
+    
+    RacingProcedurePrerequisite setStartTime(TimePoint now, TimePoint timePoint);
     TimePoint getStartTime();
     void setFinishingTime(TimePoint timePoint);
     TimePoint getFinishingTime();
     void setFinishedTime(TimePoint timePoint);
     TimePoint getFinishedTime();
-    void setProtestTime(TimePoint timePoint);
+    void setProtestTime(TimePoint now, TimePoint timePoint);
     TimePoint getProtestTime();
     void setAdvancePass(TimePoint timePoint);
     void setAborted(TimePoint timePoint, boolean isPostponed, Flags abortFlag);
@@ -42,12 +45,9 @@ public interface RaceState extends RaceStateEventProcessor {
     void setFinishPositioningConfirmed(TimePoint timePoint);
     boolean isFinishPositioningConfirmed();
     
-    void setCourseDesign(CourseBase courseDesign);
+    void setCourseDesign(TimePoint timePoint, CourseBase courseDesign);
     CourseBase getCourseDesign();
     
-    void setWindFix(Wind wind);
-    
-    void addChangedListener(RaceStateChangedListener listener);
-    void removeChangedListener(RaceStateChangedListener listener);
+    void setWindFix(TimePoint timePoint, Wind wind);
 
 }

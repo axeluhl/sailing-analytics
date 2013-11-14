@@ -39,7 +39,6 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
         
         startCountUpTextView = (TextView) getView().findViewById(R.id.race_finishing_race_countup);
         additionalInfoTextView = (TextView) getView().findViewById(R.id.race_finishing_additional_info);
-        
         finishedButton = (ImageButton) getView().findViewById(R.id.race_finishing_finished);
         abortButton = (ImageButton) getView().findViewById(R.id.race_finishing_abort);
         
@@ -74,7 +73,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
             
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
-                    getRace().getName(), TimeUtils.prettyString(millisecondsSinceStart)));
+                    getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
         }
         
         String info = updateAdditionalInfoText();
@@ -92,7 +91,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
     protected String updateAdditionalInfoText() {
         TimePoint finishingStartedAt = getRaceState().getFinishingTime();
         if (finishingStartedAt != null) {
-            return String.format(getString(R.string.race_first_finisher), TimeUtils.prettyString(finishingStartedAt));
+            return String.format(getString(R.string.race_first_finisher), TimeUtils.formatTime(finishingStartedAt));
         }
         return null;
     }

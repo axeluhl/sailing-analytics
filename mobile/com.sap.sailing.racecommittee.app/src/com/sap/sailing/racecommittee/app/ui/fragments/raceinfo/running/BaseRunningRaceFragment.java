@@ -22,8 +22,8 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     private ImageButton abortButton;
-    private View finishingButton;
-    private View generalRecallButton;
+    private ImageButton finishingButton;
+    private ImageButton generalRecallButton;
     private ImageButton individualRecallButton;
     private TextView startCountUpTextView;
     private TextView nextCountdownTextView;
@@ -47,10 +47,16 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        upperFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_up_flags);
+        lowerFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_down_flags);
+        
         startCountUpTextView = (TextView) getView().findViewById(R.id.race_running_base_start_countup);
         nextCountdownTextView = (TextView) getView().findViewById(R.id.race_running_base_next_countdown);
-        
+        abortButton = (ImageButton) getView().findViewById(R.id.race_running_base_abort);
+        finishingButton = (ImageButton) getView().findViewById(R.id.race_running_base_finishing);
+        generalRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_general_recall);
         individualRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_individual_recall);
+        
         if (getRacingProcedure().hasIndividualRecall()) {
             individualRecallButton.setOnClickListener(new OnClickListener() {
                 @Override
@@ -77,7 +83,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             }
         });
         
-        finishingButton = (ImageButton) getView().findViewById(R.id.race_running_base_finishing);
         finishingButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,7 +90,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             }
         });
         
-        abortButton = (ImageButton) getView().findViewById(R.id.race_startphase_base_abort_button);
         abortButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,9 +98,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                 fragment.show(getFragmentManager(), "dialogAPNovemberMode");
             }
         });
-        
-        upperFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_up_flags);
-        lowerFlagsViewGroup = (ViewGroup) getView().findViewById(R.id.race_running_base_down_flags);
     }
 
     @Override
@@ -108,21 +109,23 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
-                    getRace().getName(), TimeUtils.prettyString(millisecondsSinceStart)));
+                    getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
             
             ProcedureType procedure = getRacingProcedure();
             FlagPoleState flagState = procedure.getActiveFlags(startTime, now);
             if (flagState.hasNextState()) {
                 // TODO: get changing flag and display on nextCountdownTextView
                 long millisecondsTillChange = flagState.getNextStateValidFrom().minus(now.asMillis()).asMillis();
-                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.prettyString(millisecondsTillChange)));
+                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.formatDuration(millisecondsTillChange)));
             } else if (procedure.hasIndividualRecall()) {
                 if (procedure.isIndividualRecallDisplayed()) {
                     TimePoint removalAt = procedure.getIndividualRecallRemovalTime();
                     if (removalAt != null) {
                         nextCountdownTextView.setText(String.format("%s until recall ends...", 
-                                TimeUtils.prettyString(TimeUtils.timeUntil(removalAt))));
+                                TimeUtils.formatDuration(TimeUtils.timeUntil(removalAt))));
                     }
+                } else {
+                    nextCountdownTextView.setText("");
                 }
             } else {
                 nextCountdownTextView.setText("");

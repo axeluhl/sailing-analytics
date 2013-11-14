@@ -26,7 +26,6 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static Flags defaultStartMode = Flags.PAPA;
 
     private final RRS26StartModeFlagFinder startmodeFlagAnalyzer;
     private Flags cachedStartmodeFlag;
@@ -34,7 +33,8 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
         super(raceLog, author, factory);
         this.startmodeFlagAnalyzer = new RRS26StartModeFlagFinder(new RacingProcedureTypeAnalyzer(raceLog), raceLog);
-        this.cachedStartmodeFlag = defaultStartMode;
+        
+        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
         
         update();
     }

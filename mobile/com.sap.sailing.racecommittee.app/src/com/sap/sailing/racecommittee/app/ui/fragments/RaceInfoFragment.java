@@ -181,7 +181,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
                         getRace().getState().setAdvancePass(MillisecondsTimePoint.now());
-                        //getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -233,7 +232,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
             if (resultCode == Activity.RESULT_OK) {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    getRaceState().setWindFix(windFix);
+                    getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
                     updateWindLabel();
                 }
             }

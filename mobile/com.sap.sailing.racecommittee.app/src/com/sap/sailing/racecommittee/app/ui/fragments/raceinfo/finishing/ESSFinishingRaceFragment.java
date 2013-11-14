@@ -26,8 +26,8 @@ public class ESSFinishingRaceFragment extends BaseFinishingRaceFragment<ESSRacin
         if (timeLimitAt != null) {
             TimePoint finishingStartedAt = getRaceState().getFinishingTime();
             return String.format(getString(R.string.race_first_finisher_and_time_limit), 
-                    TimeUtils.prettyString(finishingStartedAt),
-                    TimeUtils.prettyString(timeLimitAt));
+                    TimeUtils.formatTime(finishingStartedAt),
+                    TimeUtils.formatTime(timeLimitAt));
         }
         return super.updateAdditionalInfoText();
     }

@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.TimePoint;
 
 public interface GateStartRacingProcedure extends RacingProcedure {
     
-    public final static long GolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    public final static long DefaultGolfDownTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds
     
     void addChangedListener(GateStartChangedListener listener);
 

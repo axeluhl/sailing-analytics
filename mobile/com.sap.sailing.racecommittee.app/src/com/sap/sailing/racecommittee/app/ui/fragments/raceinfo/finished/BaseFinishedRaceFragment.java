@@ -3,8 +3,6 @@
  */
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finished;
 
-import java.util.Date;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +21,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.activities.ResultsCapturingActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
@@ -89,7 +88,7 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     private CharSequence getProtestStartTimeText() {
         TimePoint protestStartTime = getRaceState().getProtestTime();
         if (protestStartTime != null) {
-            return String.format(getString(R.string.protest_start_time), getFormattedTime(protestStartTime.asDate()));
+            return String.format(getString(R.string.protest_start_time), TimeUtils.formatTime(protestStartTime));
         }
         return getString(R.string.empty);
     }
@@ -101,8 +100,7 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     private CharSequence getFinishTimeText() {
         TimePoint finishTime = getRaceState().getFinishedTime();
         if (finishTime != null) {
-            return String.format("%s %s", getString(R.string.race_finished_end_time),
-                    getFormattedTime(finishTime.asDate()));
+            return String.format("%s %s", getString(R.string.race_finished_end_time), TimeUtils.formatTime(finishTime));
         }
         return getString(R.string.empty);
     }
@@ -110,8 +108,7 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     private CharSequence getFirstBoatFinishedTimeText() {
         TimePoint firstBoatTime = getRaceState().getFinishingTime();
         if (firstBoatTime != null) {
-            return String.format("%s %s", getString(R.string.race_first_boat_finished),
-                    getFormattedTime(firstBoatTime.asDate()));
+            return String.format("%s %s", getString(R.string.race_first_boat_finished), TimeUtils.formatTime(firstBoatTime));
         }
         return getString(R.string.empty);
     }
@@ -119,23 +116,13 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     private CharSequence getStartTimeText() {
         TimePoint startTime = getRaceState().getStartTime();
         if (startTime != null) {
-            return String.format("%s %s", getString(R.string.race_finished_start_time),
-                    getFormattedTime(startTime.asDate()));
+            return String.format("%s %s", getString(R.string.race_finished_start_time), TimeUtils.formatTime(startTime));
         }
         return getString(R.string.empty);
     }
 
     private String getHeaderText() {
         return String.format(String.valueOf(getText(R.string.race_finished_template)), getRace().getName());
-    }
-
-    protected String getFormattedTime(Date time) {
-        return getFormattedTimePart(time.getHours()) + ":" + getFormattedTimePart(time.getMinutes()) + ":"
-                + getFormattedTimePart(time.getSeconds());
-    }
-
-    private String getFormattedTimePart(int timePart) {
-        return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
     }
     
     private RaceStateChangedListener changeListener = new BaseRaceState2ChangedListener() {

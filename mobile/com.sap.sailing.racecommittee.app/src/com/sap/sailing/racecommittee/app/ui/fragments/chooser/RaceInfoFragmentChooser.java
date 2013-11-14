@@ -49,7 +49,6 @@ public abstract class RaceInfoFragmentChooser {
 
     protected RaceFragment createInfoFragment(Class<? extends RaceFragment> fragmentClass, ManagedRace managedRace) {
         try {
-            ExLog.i(TAG, String.format("Fragment %s is chosen.", fragmentClass.getName()));
             RaceFragment fragment = fragmentClass.newInstance();
             fragment.setArguments(RaceFragment.createArguments(managedRace));
             return fragment;

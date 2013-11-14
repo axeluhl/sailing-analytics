@@ -35,6 +35,7 @@ public class RaceStateTest {
     private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
     private RaceStateChangedListener listener;
+    private TimePoint nowMock;
     
     private RaceState state;
     
@@ -45,6 +46,7 @@ public class RaceStateTest {
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
         listener = mock(RaceStateChangedListener.class);
+        nowMock = mock(TimePoint.class);
         
         state = new RaceState2Impl(raceLog, author, factory, defaultRacingProcedureType);
     }
@@ -68,7 +70,7 @@ public class RaceStateTest {
         state.addChangedListener(listener);
         
         TimePoint startTime = MillisecondsTimePoint.now().plus(60 * 60 * 1000);
-        state.setStartTime(startTime);
+        state.setStartTime(nowMock, startTime);
         
         assertEquals(startTime, state.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, state.getStatus());
@@ -113,10 +115,10 @@ public class RaceStateTest {
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
         
-        state.setStartTime(new MillisecondsTimePoint(1));
+        state.setStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
-        state.setCourseDesign(mock(CourseBase.class));
+        state.setCourseDesign(nowMock, mock(CourseBase.class));
         
         state.setAdvancePass(mock(TimePoint.class));
         
@@ -137,7 +139,7 @@ public class RaceStateTest {
         RacingProcedure oldProcedure = state.getRacingProcedure();
         assertEquals(defaultRacingProcedureType, oldProcedure.getType());
         
-        state.setRacingProcedure(RacingProcedureType.ESS);
+        state.setRacingProcedure(nowMock, RacingProcedureType.ESS);
         
         RacingProcedure newProcedure = state.getRacingProcedure();
         assertEquals(RacingProcedureType.ESS, newProcedure.getType());

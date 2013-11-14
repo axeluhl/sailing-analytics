@@ -13,7 +13,6 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
@@ -41,6 +40,9 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         super(raceLog, author, factory);
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
         this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
+        
+        this.cachedGateLineOpeningTime = GateStartRacingProcedure.DefaultGolfDownTimeout;
+        
         update();
     }
 
@@ -73,9 +75,8 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         switch (state.getStatus()) {
         case SCHEDULED:
         case STARTPHASE:
-            if (getGateLineOpeningTime() != null) {
-                rescheduleGateShutdownTime(state.getStartTime());
-            }
+        case RUNNING:
+            rescheduleGateShutdownTime(state.getStartTime());
             break;
         default:
             break;
@@ -95,10 +96,11 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     @Override
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
+        case START:
+            rescheduleGateShutdownTime(event.getTimePoint());
         case GATE_CLASS_OVER_GOLF_UP:
         case GATE_PAPA_UP:
         case GATE_PAPA_DOWN:
-        case START:
         case GATE_SHUTDOWN:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
@@ -182,10 +184,9 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     @Override
     protected void update() {
         Long gateLineOpeningTime = gateLineOpeningTimeAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedGateLineOpeningTime, gateLineOpeningTime)) {
+        if (gateLineOpeningTime != null && !gateLineOpeningTime.equals(cachedGateLineOpeningTime)) {
             cachedGateLineOpeningTime = gateLineOpeningTime;
             getChangedListeners().onGateLineOpeningTimeChanged(this);
-            rescheduleGateShutdownTime(new StartTimeFinder(raceLog).analyze());
         }
         
         String pathfinder = pathfinderAnalyzer.analyze();

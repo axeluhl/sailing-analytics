@@ -34,6 +34,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.tracking.Wind;
@@ -99,7 +100,7 @@ public class ClassicCourseDesignDialog extends RaceDialogFragment {
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRaceState().setCourseDesign(courseDesign);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         dismiss();
     }
@@ -186,7 +187,7 @@ public class ClassicCourseDesignDialog extends RaceDialogFragment {
     }
 
     private void onWindEntered(Wind windFix) {
-        getRaceState().setWindFix(windFix);
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
         courseDesignComputer.setStartBoatPosition(windFix.getPosition());
         courseDesignComputer.setWindDirection(windFix.getBearing());
         courseDesignComputer.setWindSpeed(windFix.getKnots());

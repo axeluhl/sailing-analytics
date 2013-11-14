@@ -2,7 +2,6 @@ package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -106,9 +105,9 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setRacingProcedure(RacingProcedureType newType) {
+    public void setRacingProcedure(TimePoint timePoint, RacingProcedureType newType) {
         if (racingProcedure == null || !newType.equals(racingProcedureAnalyzer.analyze())) {
-            raceLog.add(factory.createStartProcedureChangedEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), newType));
+            raceLog.add(factory.createStartProcedureChangedEvent(timePoint, author, raceLog.getCurrentPassId(), newType));
         }
     }
 
@@ -138,8 +137,7 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public RacingProcedurePrerequisite setStartTime(TimePoint startTime) {
-        TimePoint now = MillisecondsTimePoint.now();
+    public RacingProcedurePrerequisite setStartTime(TimePoint now, TimePoint startTime) {
         RacingProcedurePrerequisite pre = racingProcedure.checkPrerequisitesForStart(startTime, now);
         if (pre != null) {
             return pre;
@@ -175,8 +173,8 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setProtestTime(TimePoint timePoint) {
-        raceLog.add(factory.createProtestStartTimeEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), timePoint));
+    public void setProtestTime(TimePoint now, TimePoint timePoint) {
+        raceLog.add(factory.createProtestStartTimeEvent(now, author, raceLog.getCurrentPassId(), timePoint));
     }
 
     @Override
@@ -225,9 +223,8 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setCourseDesign(CourseBase courseDesign) {
-        raceLog.add(factory.createCourseDesignChangedEvent(
-                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), courseDesign));
+    public void setCourseDesign(TimePoint timePoint, CourseBase courseDesign) {
+        raceLog.add(factory.createCourseDesignChangedEvent(timePoint, author, raceLog.getCurrentPassId(), courseDesign));
     }
 
     @Override
@@ -236,8 +233,8 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setWindFix(Wind wind) {
-        raceLog.add(factory.createWindFixEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), wind));
+    public void setWindFix(TimePoint timePoint, Wind wind) {
+        raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind));
     }
 
     @Override

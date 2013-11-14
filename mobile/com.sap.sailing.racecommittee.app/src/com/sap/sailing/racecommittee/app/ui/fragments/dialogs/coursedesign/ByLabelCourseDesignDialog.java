@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
@@ -70,7 +71,7 @@ public class ByLabelCourseDesignDialog extends RaceDialogFragment {
         
         CourseBase courseLayout = new CourseDataImpl(internalCourseName);
         
-        getRaceState().setCourseDesign(courseLayout);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
         dismiss();
     }
 

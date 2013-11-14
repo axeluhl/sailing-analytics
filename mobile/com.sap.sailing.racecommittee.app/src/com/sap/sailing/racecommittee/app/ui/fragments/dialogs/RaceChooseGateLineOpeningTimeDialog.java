@@ -35,7 +35,8 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
         getDialog().setTitle(getString(R.string.set_gate_line_opening_time_title));
 
         lineOpeningTimeEditText = (EditText) getView().findViewById(R.id.lineOpeningTimeText);
-        lineOpeningTimeEditText.setText(String.valueOf((GateStartRacingProcedure.GolfDownStandardInterval / (60 * 1000))));
+        GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+        lineOpeningTimeEditText.setText(String.valueOf((procedure.getGateLineOpeningTime() / (60 * 1000))));
         chooseButton = (Button) getDialog().findViewById(R.id.chooseLineOpeningTimeButton);
 
         chooseButton.setOnClickListener(new OnClickListener() {

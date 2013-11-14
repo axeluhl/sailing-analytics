@@ -83,13 +83,13 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             
             startCountdownTextView.setText(String.format(
                     getString(R.string.race_startphase_countdown_start),
-                    TimeUtils.prettyString(millisecondsTillStart), getRace().getName()));
+                    TimeUtils.formatDuration(millisecondsTillStart), getRace().getName()));
             
             FlagPoleState flagState = getRaceState().getRacingProcedure().getActiveFlags(startTime, now);
             if (flagState.hasNextState()) {
                 // TODO: get changing flag and display on nextCountdownTextView
                 long millisecondsTillChange = flagState.getNextStateValidFrom().minus(now.asMillis()).asMillis();
-                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.prettyString(millisecondsTillChange)));
+                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.formatDuration(millisecondsTillChange)));
             }
         }
         super.notifyTick();

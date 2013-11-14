@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -237,11 +238,18 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(Date newStartTime) {
+        
+        // We do not have to worry about the ordering of the following three RaceLogEvents
+        // because "setAdvancePass" will opens a new pass and ProcedureChangedEvents and
+        // SetStartTimeEvents don't have to be ordered!
+        TimePoint now = MillisecondsTimePoint.now();
+        getRaceState().setAdvancePass(now);
+        getRaceState().setRacingProcedure(now, selectedStartProcedureType);
+        getRaceState().setStartTime(now, new MillisecondsTimePoint(newStartTime));
+        
         /*getRace().getState().createNewStartProcedure(selectedStartProcedureType);
         Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
                 .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);*/
-        getRaceState().setRacingProcedure(selectedStartProcedureType);
-        getRaceState().setStartTime(new MillisecondsTimePoint(newStartTime));
         /*if (action == null) {
             getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
         } else {

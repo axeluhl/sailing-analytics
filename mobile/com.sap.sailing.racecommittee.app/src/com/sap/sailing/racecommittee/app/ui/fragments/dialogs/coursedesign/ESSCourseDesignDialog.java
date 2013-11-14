@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -299,7 +300,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         
-        getRaceState().setCourseDesign(courseDesign);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         dismiss();
     }

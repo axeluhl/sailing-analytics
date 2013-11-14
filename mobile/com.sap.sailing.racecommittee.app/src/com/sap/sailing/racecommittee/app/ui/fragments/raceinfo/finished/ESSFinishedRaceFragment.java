@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public class ESSFinishedRaceFragment extends BaseFinishedRaceFragment<ESSRacingProcedure> {
     @Override
@@ -39,7 +40,7 @@ public class ESSFinishedRaceFragment extends BaseFinishedRaceFragment<ESSRacingP
     protected CharSequence getTimeLimitText() {
         TimePoint timeLimit = getTimeLimit();
         if (timeLimit != null) {
-            return String.format(getString(R.string.race_time_limit), getFormattedTime(timeLimit.asDate()));
+            return String.format(getString(R.string.race_time_limit), TimeUtils.formatTime(timeLimit));
         }
         return getString(R.string.empty);
     }
