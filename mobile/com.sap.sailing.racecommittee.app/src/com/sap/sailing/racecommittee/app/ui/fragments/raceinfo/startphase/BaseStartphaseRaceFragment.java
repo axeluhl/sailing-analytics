@@ -71,7 +71,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             }
         });
         
-        flagRenderer = new FlagPoleStateRenderer(getActivity(),
+        flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
                 (LinearLayout) getView().findViewById(R.id.race_startphase_base_up_flags), 
                 (LinearLayout) getView().findViewById(R.id.race_startphase_base_down_flags));
     }

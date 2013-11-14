@@ -97,7 +97,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             }
         });
         
-        flagRenderer = new FlagPoleStateRenderer(getActivity(),
+        flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
                 (LinearLayout) getView().findViewById(R.id.race_running_base_up_flags), 
                 (LinearLayout) getView().findViewById(R.id.race_running_base_down_flags));
     }

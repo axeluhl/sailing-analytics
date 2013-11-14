@@ -33,12 +33,6 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
                 fragment.show(getFragmentManager(), "dialogStartMode");
             }
         });
-        
-        /*classFlagImageView = new ImageView(getActivity());
-        classFlagImageView.setLayoutParams(new LinearLayout.LayoutParams(200, 130));
-        classFlagImageView.setImageResource(getClassmageResourceId());
-        classFlagImageView.setPadding(6, 6, 6, 6);
-        classFlagImageView.setBackgroundColor(getFleetColorId());*/
     }
     
     @Override
