@@ -47,6 +47,11 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
         public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
             // not interested - handled by active flags
         }
+
+        @Override
+        public void onPathfinderChanged(GateStartRacingProcedure procedure) {
+            // we do not display changes of the pathfinder this late
+        }
         
     }
 

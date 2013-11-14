@@ -203,9 +203,9 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     }
 
     @Override
-    public void setFinishPositioningListChanged(CompetitorResults positionedCompetitors) {
+    public void setFinishPositioningListChanged(TimePoint timePoint, CompetitorResults positionedCompetitors) {
         raceLog.add(factory.createFinishPositioningListChangedEvent(
-                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), positionedCompetitors));
+                timePoint, author, raceLog.getCurrentPassId(), positionedCompetitors));
     }
 
     @Override
@@ -214,9 +214,9 @@ public class RaceState2Impl implements RaceState2, RaceLogChangedListener {
     }
 
     @Override
-    public void setFinishPositioningConfirmed() {
+    public void setFinishPositioningConfirmed(TimePoint timePoint) {
         raceLog.add(factory.createFinishPositioningConfirmedEvent(
-                MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), getFinishPositioningList()));
+                timePoint, author, raceLog.getCurrentPassId(), getFinishPositioningList()));
     }
 
     @Override

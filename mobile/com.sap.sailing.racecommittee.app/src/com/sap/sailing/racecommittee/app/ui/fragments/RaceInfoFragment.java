@@ -18,10 +18,7 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState2;
 import com.sap.sailing.domain.racelog.state.RaceState2ChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
@@ -33,6 +30,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ByLabelCourseDesignDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
@@ -82,19 +80,19 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
             @Override
             public void onClick(View v) {
-                getRace().getRaceLog().add(
-                        /*RaceLogEventFactory.INSTANCE.createStartTimeEvent(
+                /*getRace().getRaceLog().add(
+                        RaceLogEventFactory.INSTANCE.createStartTimeEvent(
                                 MillisecondsTimePoint.now(), 
                                 new RaceLogEventAuthorImpl("Magic", -1), 
                                 getRace().getRaceLog().getCurrentPassId(),
-                                MillisecondsTimePoint.now().plus(30000)));*/
+                                MillisecondsTimePoint.now().plus(30000)));
                         RaceLogEventFactory.INSTANCE.createFlagEvent(MillisecondsTimePoint.now(),
                                 new RaceLogEventAuthorImpl("Magic", 0),
                                 getRace().getRaceLog().getCurrentPassId(),
                                 Flags.AP,
                                 Flags.NONE,
-                                true));
-                //showCourseDesignDialog();
+                                true));*/
+                showCourseDesignDialog();
             }
         });
         
@@ -166,18 +164,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private void showCourseDesignDialog() {
         FragmentManager fragmentManager = getFragmentManager();
 
-        RaceDialogFragment fragment;
-        try {
-            fragment = getRace().getState().getStartProcedure().getCourseDesignDialog().newInstance();
-            Bundle args = getRecentArguments();
-            fragment.setArguments(args);
-
-            fragment.show(fragmentManager, "courseDesignDialogFragment");
-        } catch (java.lang.InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        // TODO: select course designer per race
+        RaceDialogFragment fragment = new ByLabelCourseDesignDialog();
+        fragment.setArguments(getRecentArguments());
+        fragment.show(fragmentManager, "courseDesignDialogFragment");
     }
 
     private void showRaceResetConfirmationDialog() {

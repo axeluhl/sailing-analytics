@@ -69,6 +69,11 @@ public class GateStartStartphaseRaceFragment2 extends BaseStartphaseRaceFragment
         public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
             setupUi();
         }
+
+        @Override
+        public void onPathfinderChanged(GateStartRacingProcedure procedure) {
+            setupUi();
+        }
         
     }
 

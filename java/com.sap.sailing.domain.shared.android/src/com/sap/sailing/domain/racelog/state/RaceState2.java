@@ -36,10 +36,10 @@ public interface RaceState2 extends RaceStateEventProcessor {
     void setAborted(TimePoint timePoint, boolean isPostponed, Flags abortFlag);
     void setGeneralRecall(TimePoint timePoint);
     
-    void setFinishPositioningListChanged(CompetitorResults positionedCompetitors);
+    void setFinishPositioningListChanged(TimePoint timePoint, CompetitorResults positionedCompetitors);
     CompetitorResults getFinishPositioningList();
     
-    void setFinishPositioningConfirmed();
+    void setFinishPositioningConfirmed(TimePoint timePoint);
     boolean isFinishPositioningConfirmed();
     
     void setCourseDesign(CourseBase courseDesign);

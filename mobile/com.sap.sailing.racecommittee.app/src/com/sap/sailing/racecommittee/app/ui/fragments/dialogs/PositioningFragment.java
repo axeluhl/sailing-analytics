@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.CompetitorResults;
@@ -83,7 +84,7 @@ public class PositioningFragment extends RaceDialogFragment {
             okButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getRace().getState().setFinishPositioningConfirmed();
+                    getRaceState().setFinishPositioningConfirmed(MillisecondsTimePoint.now());
                     dismiss();
                 }
             });
@@ -111,7 +112,7 @@ public class PositioningFragment extends RaceDialogFragment {
                 if (from != to) {
                     Triple<Serializable, String, MaxPointsReason> item = positioningAdapter.getItem(from);
                     setItemToNewPositioning(from, to, item);
-                    getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+                    getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), positionedCompetitors);
                 }
             }
         });
@@ -221,13 +222,8 @@ public class PositioningFragment extends RaceDialogFragment {
     }
 
     private CompetitorResults initializeFinishPositioningList() {
-        CompetitorResults positionings;
-        if (getRace().getState().getFinishPositioningList() != null) {
-            positionings = getRace().getState().getFinishPositioningList();
-        } else {
-            positionings = new CompetitorResultsImpl();
-        }
-        return positionings;
+        CompetitorResults positionings = getRaceState().getFinishPositioningList();
+        return positionings == null ? new CompetitorResultsImpl() : positionings;
     }
 
     private void setItemToNewPositioning(int from, int to, Triple<Serializable, String, MaxPointsReason> item) {
@@ -267,7 +263,7 @@ public class PositioningFragment extends RaceDialogFragment {
         if (!maxPointsReason.equals(MaxPointsReason.NONE)) {
             setCompetitorToBottomOfPositioningList(newItem);
         }
-        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), positionedCompetitors);
     }
 
     private void replaceItemInPositioningList(int currentIndexOfItem,
@@ -285,7 +281,7 @@ public class PositioningFragment extends RaceDialogFragment {
     protected void onCompetitorClickedOnGrid(Competitor competitor) {
         addNewCompetitorToPositioningList(competitor);
         removeCompetitorFromGrid(competitor);
-        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), positionedCompetitors);
     }
 
     protected void removeCompetitorFromGrid(Competitor competitor) {
@@ -305,7 +301,7 @@ public class PositioningFragment extends RaceDialogFragment {
         Competitor competitor = getCompetitorStore().getExistingCompetitorById(item.getA());
         addNewCompetitorToCompetitorList(competitor);
         removeCompetitorFromPositionings(item);
-        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), positionedCompetitors);
     }
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {

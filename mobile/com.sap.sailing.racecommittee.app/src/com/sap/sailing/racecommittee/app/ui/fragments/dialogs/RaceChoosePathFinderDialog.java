@@ -13,8 +13,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 
 public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 	
@@ -78,9 +79,8 @@ public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 	        Toast.makeText(getActivity(), "Please enter a valid pathfinder", Toast.LENGTH_LONG).show();
 	    }else{
 		String sailingId = sailingNationalityEditText.getText().toString() + " " + sailingNumberEditText.getText().toString();
-		if(getRace().getState().getStartProcedure() instanceof GateStartProcedure){
-	            ((GateStartProcedure) getRace().getState().getStartProcedure()).setPathfinder(sailingId);
-	        }
+		GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+		procedure.setPathfinder(MillisecondsTimePoint.now(), sailingId);
 		Log.i("RACE_SET_PATHFINDER", sailingId);
 		dismiss();
 	    }

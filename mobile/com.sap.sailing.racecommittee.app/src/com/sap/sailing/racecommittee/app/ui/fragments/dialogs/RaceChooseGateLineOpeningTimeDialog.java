@@ -10,9 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 
 public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
 
@@ -35,8 +35,7 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
         getDialog().setTitle(getString(R.string.set_gate_line_opening_time_title));
 
         lineOpeningTimeEditText = (EditText) getView().findViewById(R.id.lineOpeningTimeText);
-        lineOpeningTimeEditText.setText(String
-                .valueOf((GateStartProcedure.startPhaseGolfDownStandardInterval / (60 * 1000))));
+        lineOpeningTimeEditText.setText(String.valueOf((GateStartRacingProcedure.GolfDownStandardInterval / (60 * 1000))));
         chooseButton = (Button) getDialog().findViewById(R.id.chooseLineOpeningTimeButton);
 
         chooseButton.setOnClickListener(new OnClickListener() {
@@ -50,7 +49,7 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
         try {
             Long lineOpeningTime = convertToLong(lineOpeningTimeEditText.getText().toString());
             GateStartRacingProcedure procedure = getRace().getState2().getTypedRacingProcedure();
-            procedure.setGateLineOpeningTime(Long.valueOf(60 * 1000 * lineOpeningTime));
+            procedure.setGateLineOpeningTime(MillisecondsTimePoint.now(), Long.valueOf(60 * 1000 * lineOpeningTime));
             Log.i("RACE_SET_GATELINE_OPENING_TIME", String.valueOf(lineOpeningTime));
             dismiss();
         } catch (NumberFormatException nfe) {

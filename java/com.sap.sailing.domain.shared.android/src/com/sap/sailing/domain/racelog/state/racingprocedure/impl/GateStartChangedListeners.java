@@ -15,5 +15,12 @@ public class GateStartChangedListeners extends RacingProcedureChangedListeners<G
         }
     }
 
+    @Override
+    public void onPathfinderChanged(GateStartRacingProcedure procedure) {
+        for (GateStartChangedListener listener : this) {
+            listener.onPathfinderChanged(procedure);
+        }
+    }
+
 
 }

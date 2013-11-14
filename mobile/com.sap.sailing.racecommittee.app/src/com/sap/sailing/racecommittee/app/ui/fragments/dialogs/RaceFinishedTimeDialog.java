@@ -35,7 +35,7 @@ public class RaceFinishedTimeDialog extends RaceDialogFragment {
         FinishingTimeFinder ftf = new FinishingTimeFinder(getRace().getRaceLog());
         if (ftf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.FINISHING)) {
             if (ftf.analyze().before(finishedTime)) {
-                getRace().getState().getStartProcedure().setFinished(finishedTime);
+                getRaceState().setFinishedTime(finishedTime);
                 dismiss();
             }else{
                 Toast.makeText(getActivity(), "The given finish time is earlier than than the first finisher time. Please recheck the time.", Toast.LENGTH_LONG).show();

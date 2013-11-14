@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.state.RaceState2;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
@@ -25,8 +25,6 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChang
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 
 public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {
-
-    public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     
     private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
@@ -34,12 +32,15 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
     private final GateLineOpeningTimeFinder gateLineOpeningTimeAnalyzer;
+    private final PathfinderFinder pathfinderAnalyzer;;
     
     private Long cachedGateLineOpeningTime;
+    private String cachedPathfinder;
     
     public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
         super(raceLog, author, factory);
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
+        this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
         update();
     }
 
@@ -148,8 +149,19 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     @Override
-    public void setGateLineOpeningTime(long milliseconds) {
-        raceLog.add(factory.createGateLineOpeningTimeEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), milliseconds));
+    public void setGateLineOpeningTime(TimePoint timePoint, long milliseconds) {
+        raceLog.add(factory.createGateLineOpeningTimeEvent(timePoint, author, raceLog.getCurrentPassId(), milliseconds));
+    }
+
+    @Override
+    public String getPathfinder() {
+        return cachedPathfinder;
+    }
+
+    @Override
+    public void setPathfinder(TimePoint timePoint, String sailingId) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -175,6 +187,13 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
             getChangedListeners().onGateLineOpeningTimeChanged(this);
             rescheduleGateShutdownTime(new StartTimeFinder(raceLog).analyze());
         }
+        
+        String pathfinder = pathfinderAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedPathfinder, pathfinder)) {
+            cachedPathfinder = pathfinder;
+            getChangedListeners().onPathfinderChanged(this);
+        }
+        
         super.update();
     }
 
