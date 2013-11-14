@@ -30,7 +30,7 @@ public class TimeUtils {
     }
 
     public static String formatDuration(long milliseconds) {
-        int secondsTillStart = (int) (milliseconds / 1000);
+        int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
