@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
@@ -109,8 +110,14 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
                     Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(cachedStartmodeFlag, false)), 
                     startTime);
         } else {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(cachedStartmodeFlag, false)));
+            if (isIndividualRecallDisplayed()) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        Arrays.asList(new FlagPole(Flags.XRAY, false)),
+                        getIndividualRecallRemovalTime());
+            } else {
+                return new FlagPoleState(Collections.<FlagPole>emptyList());
+            }
         }
     }
     

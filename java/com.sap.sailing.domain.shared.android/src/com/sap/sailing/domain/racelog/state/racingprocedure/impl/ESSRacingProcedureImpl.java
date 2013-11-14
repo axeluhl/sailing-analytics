@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
@@ -109,8 +110,14 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
                     Arrays.asList(new FlagPole(Flags.ESSONE, false)), 
                     startTime);
         } else {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSONE, false)));
+            if (isIndividualRecallDisplayed()) {
+                return new FlagPoleState(
+                        Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        Arrays.asList(new FlagPole(Flags.XRAY, false)),
+                        getIndividualRecallRemovalTime());
+            } else {
+                return new FlagPoleState(Collections.<FlagPole>emptyList());
+            }
         }
     }
     

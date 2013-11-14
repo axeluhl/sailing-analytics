@@ -161,9 +161,11 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
             if (cachedIsIndividualRecallDisplayed) {
                 changedListeners.onIndividualRecallDisplayed(this);
+                changedListeners.onActiveFlagsChanged(this);
                 rescheduleIndividualRecallTimeout(recallDisplayedFinder.analyze());
             } else {
                 changedListeners.onIndividualRecallRemoved(this);
+                changedListeners.onActiveFlagsChanged(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
         }

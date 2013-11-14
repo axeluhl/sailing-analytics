@@ -38,24 +38,24 @@ public class FlagPoleStateRenderer {
         
         for (FlagPole pole : state.getCurrentState()) {
             if (pole.isDisplayed()) {
-                displayedFlagsViewGroup.addView(createFlagImageView(pole.getUpperFlag()));
+                displayedFlagsViewGroup.addView(createFlagImageView(pole.getUpperFlag(), pole.getLowerFlag()));
             } else {
-                removedFlagsViewGroup.addView(createFlagImageView(pole.getUpperFlag()));
+                removedFlagsViewGroup.addView(createFlagImageView(pole.getUpperFlag(), pole.getLowerFlag()));
             }
         }
     }
     
-    private ImageView createFlagImageView(final Flags flag) {
+    private ImageView createFlagImageView(final Flags upperFlag, final Flags lowerFlag) {
         ImageView flagView = new ImageView(context);
         flagView.setLayoutParams(new LinearLayout.LayoutParams(200, 130));
-        flagView.setImageBitmap(getFlagBitmap(flag));
+        flagView.setImageBitmap(getFlagBitmap(upperFlag));
         flagView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), flag.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), upperFlag.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        if (flag == Flags.CLASS) {
+        if (upperFlag == Flags.CLASS) {
             flagView.setPadding(6, 6, 6, 6);
             flagView.setBackgroundColor(getFleetColorId());
         }
