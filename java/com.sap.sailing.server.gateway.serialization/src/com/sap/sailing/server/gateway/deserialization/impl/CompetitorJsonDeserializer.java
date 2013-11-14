@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
-import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -20,7 +20,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
 
-    public static CompetitorJsonDeserializer create(DomainFactory baseDomainFactory) {
+    public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(baseDomainFactory)));
     }

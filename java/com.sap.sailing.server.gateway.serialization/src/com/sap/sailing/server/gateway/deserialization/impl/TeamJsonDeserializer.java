@@ -6,8 +6,8 @@ import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Person;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -19,7 +19,7 @@ public class TeamJsonDeserializer implements JsonDeserializer<DynamicTeam> {
 
 	private final JsonDeserializer<DynamicPerson> personDeserializer;
 
-	public static TeamJsonDeserializer create(DomainFactory baseDomainFactory) {
+	public static TeamJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
 		return new TeamJsonDeserializer(new PersonJsonDeserializer(
 				new NationalityJsonDeserializer(baseDomainFactory)));
 	}
