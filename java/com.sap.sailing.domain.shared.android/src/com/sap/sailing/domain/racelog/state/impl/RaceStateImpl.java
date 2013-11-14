@@ -31,7 +31,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrere
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class RaceState2Impl implements RaceState, RaceLogChangedListener {
+public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
     private final RaceLog raceLog;
     private final RaceLogEventAuthor author;
@@ -66,7 +66,7 @@ public class RaceState2Impl implements RaceState, RaceLogChangedListener {
     private boolean cachedIsPositionedCompetitorsConfirmed;
     private CourseBase cachedCourseDesign;
     
-    public RaceState2Impl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
+    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureType defaultRacingProcedureType) {
         this.raceLog = raceLog;
         this.author = author;

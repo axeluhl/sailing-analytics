@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.impl.RaceState2Impl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -33,7 +33,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     public ManagedRaceImpl(Context context, ManagedRaceIdentifier identifier,
             RacingProcedureType defaultStartProcedureType, RaceLog raceLog) {
-        this(identifier, new RaceState2Impl(raceLog, AppPreferences.getAuthor(context), 
+        this(identifier, new RaceStateImpl(raceLog, AppPreferences.getAuthor(context), 
                 RaceLogEventFactory.INSTANCE, defaultStartProcedureType));
     }
 

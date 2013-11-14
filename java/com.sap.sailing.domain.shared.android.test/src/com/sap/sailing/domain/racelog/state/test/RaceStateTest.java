@@ -25,7 +25,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.impl.RaceState2Impl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStateTest {
@@ -48,7 +48,7 @@ public class RaceStateTest {
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceState2Impl(raceLog, author, factory, defaultRacingProcedureType);
+        state = new RaceStateImpl(raceLog, author, factory, defaultRacingProcedureType);
     }
     
     @Test
