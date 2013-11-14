@@ -5,3 +5,5 @@ Bundle-SymbolicName: com.sap.sailing.domain.igtimiadapter.persistence
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sun.jersey;bundle-version="1.17.0",
+ org.objectweb.asm;bundle-version="3.3.1"
