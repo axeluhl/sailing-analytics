@@ -17,7 +17,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
@@ -30,7 +30,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChang
  * correctly initialized.
  * 
  */
-public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener implements RacingProcedure,
+public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener implements RacingProcedure,
         RaceLogChangedListener {
 
     private final static long individualRecallRemovalTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds

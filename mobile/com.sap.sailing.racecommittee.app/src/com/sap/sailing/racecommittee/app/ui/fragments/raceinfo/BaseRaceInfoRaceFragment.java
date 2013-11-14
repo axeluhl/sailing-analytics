@@ -2,17 +2,20 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.Activity;
 
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
-    private final ChangeListener changeListener;
+    private final ProcedureChangedListener procedureListener;
+    private final StateChangedListener stateListener;
     protected RaceInfoListener infoListener;
     
     public BaseRaceInfoRaceFragment() {
-        this.changeListener = new ChangeListener();
+        this.procedureListener = new ProcedureChangedListener();
+        this.stateListener = new StateChangedListener();
     }
     
     @Override
@@ -33,12 +36,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     public void onStart() {
         super.onStart();
         setupUi();
-        getRacingProcedure().addChangedListener(changeListener);
+        getRacingProcedure().addChangedListener(procedureListener);
+        getRaceState().addChangedListener(stateListener);
     }
     
     @Override
     public void onStop() {
-        getRacingProcedure().removeChangedListener(changeListener);
+        getRacingProcedure().removeChangedListener(procedureListener);
+        getRaceState().removeChangedListener(stateListener);
         super.onStop();
     }
     
@@ -48,10 +53,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     protected abstract void setupUi();
     
-    private class ChangeListener extends BaseRacingProcedureChangedListener {
+    private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {
         @Override
         public void onActiveFlagsChanged(RacingProcedure racingProcedure) {
             setupUi();
         }
+    }
+    
+    private class StateChangedListener extends BaseRaceStateChangedListener {
+        
     }
 }

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -244,7 +244,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
     
-    private RaceStateChangedListener stateChangedListener = new BaseRaceState2ChangedListener() {
+    private RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         
         @Override
         public void onRacingProcedureChanged(RaceState state) {

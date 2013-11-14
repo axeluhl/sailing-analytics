@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -125,7 +125,7 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
         return String.format(String.valueOf(getText(R.string.race_finished_template)), getRace().getName());
     }
     
-    private RaceStateChangedListener changeListener = new BaseRaceState2ChangedListener() {
+    private RaceStateChangedListener changeListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStartTimeChanged(RaceState state) {
             setupUi();

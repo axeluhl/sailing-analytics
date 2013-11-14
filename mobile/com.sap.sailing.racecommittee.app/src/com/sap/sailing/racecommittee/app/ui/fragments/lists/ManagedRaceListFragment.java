@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -225,7 +225,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         }
     }
     
-    private BaseRaceState2ChangedListener stateListener = new BaseRaceState2ChangedListener() {
+    private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         public void update(RaceState state) {
             dataChanged(state); 
             filterChanged();

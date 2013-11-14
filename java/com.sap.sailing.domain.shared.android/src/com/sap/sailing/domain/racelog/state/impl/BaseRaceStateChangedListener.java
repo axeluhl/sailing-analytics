@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.state.impl;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 
-public abstract class BaseRaceState2ChangedListener implements RaceStateChangedListener {
+public abstract class BaseRaceStateChangedListener implements RaceStateChangedListener {
 
     @Override
     public void onRacingProcedureChanged(RaceState state) {
