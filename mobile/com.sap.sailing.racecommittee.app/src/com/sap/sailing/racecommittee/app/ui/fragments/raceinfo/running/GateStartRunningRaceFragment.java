@@ -4,7 +4,6 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedList
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateStartRacingProcedure> {
 
@@ -30,12 +29,12 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
 
         @Override
         public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
-            ExLog.i("NY", "XRAY up");
+            
         }
         
         @Override
         public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
-            ExLog.i("NY", "XRAY down");
+            
         }
         
         @Override

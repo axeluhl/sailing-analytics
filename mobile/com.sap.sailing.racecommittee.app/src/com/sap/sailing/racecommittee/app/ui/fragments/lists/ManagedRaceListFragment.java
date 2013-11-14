@@ -240,11 +240,6 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         public void onStartTimeChanged(RaceState state) {
             update(state);
         };
-        
-        @Override
-        public void onAdvancePass(RaceState state) {
-            ExLog.e(TAG, "Aborted!");
-        };
     };
 
 }

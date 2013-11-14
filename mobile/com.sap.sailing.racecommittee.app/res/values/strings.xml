@@ -121,7 +121,7 @@
     <string name="lr_course_2">Course 2</string>
     <string name="no_pathfinder_selected">No pathfinder selected</string>
     <string name="set_line_opening_time">Set gate time</string>
-    <string name="no_line_opening_time_selected">no time selected</string>
+    <string name="no_line_opening_time_selected">No time selected</string>
     <string name="set_gate_line_opening_time_title">Set the gate line opening time</string>
     <string name="choose_line_open_min">min</string>
     <string name="previous_course">Previous course</string>

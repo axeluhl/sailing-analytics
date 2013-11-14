@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class FlagPoleStateRenderer {
     
@@ -24,15 +25,24 @@ public class FlagPoleStateRenderer {
     private final LinearLayout displayedFlagsViewGroup;
     private final LinearLayout removedFlagsViewGroup;
     
+    private FlagPoleState previousState;
+    
     public FlagPoleStateRenderer(Context context, ManagedRace race,
             LinearLayout upperFlagsViewGroup, LinearLayout lowerFlagsViewGroup) {
         this.context = context;
         this.race = race;
         this.displayedFlagsViewGroup = upperFlagsViewGroup;
         this.removedFlagsViewGroup = lowerFlagsViewGroup;
+        this.previousState = null;
     }
     
     public void render(FlagPoleState state) {
+        if (previousState != null && FlagPoleState.describesSameState(previousState, state)) {
+            return;
+        }
+        ExLog.i(FlagPoleStateRenderer.class.getSimpleName(), "Rendering flags.");
+        previousState = state;
+        
         displayedFlagsViewGroup.removeAllViews();
         removedFlagsViewGroup.removeAllViews();
         

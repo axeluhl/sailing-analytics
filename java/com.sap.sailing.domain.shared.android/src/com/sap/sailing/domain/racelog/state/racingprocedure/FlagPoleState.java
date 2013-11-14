@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure;
 import java.util.Collection;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 
 public class FlagPoleState {
@@ -40,6 +41,39 @@ public class FlagPoleState {
 
     public boolean hasNextState() {
         return hasNextState;
+    }
+
+    public static boolean describesSameState(FlagPoleState left, FlagPoleState right) {
+        if (left.hasNextState() != right.hasNextState()) {
+            return false;
+        }
+        
+        if (left.getCurrentState().size() != right.getCurrentState().size()) {
+            return false;
+        }
+        
+        if (describesSamePoles(left.getCurrentState(), right.getCurrentState())) {
+            if (left.hasNextState()) {
+                
+                return left.getNextStateValidFrom().compareTo(right.getNextStateValidFrom()) == 0 &&
+                        describesSamePoles(left.getNextState(), right.getNextState());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean describesSamePoles(Collection<FlagPole> leftPoles, Collection<FlagPole> rightPoles) {
+        for (int i = 0; i < leftPoles.size(); i++) {
+            FlagPole leftPole = Util.get(leftPoles, i);
+            FlagPole rightPole = Util.get(rightPoles, i);
+            if (leftPole.getUpperFlag() != rightPole.getUpperFlag() ||
+                    leftPole.getLowerFlag() != rightPole.getLowerFlag() ||
+                    leftPole.isDisplayed() != rightPole.isDisplayed()) {
+                return false;
+            }
+        }
+        return true;
     }
     
 

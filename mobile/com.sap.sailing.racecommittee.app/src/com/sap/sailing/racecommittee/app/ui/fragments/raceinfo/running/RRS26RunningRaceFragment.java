@@ -1,10 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 
+import android.widget.Toast;
+
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26RacingProcedure> {
 
@@ -31,17 +32,17 @@ public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26Racin
 
         @Override
         public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
-            ExLog.i("NY", "XRAY up");
         }
         
         @Override
         public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
-            ExLog.i("NY", "XRAY down");
         }
 
         @Override
         public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
-            // not my interest
+            // that's a little bit late, isn't it?
+            Toast.makeText(getActivity(), 
+                    String.format("Start mode flag changed to %s", racingProcedure.getStartModeFlag()), Toast.LENGTH_SHORT).show();
         }
         
     }

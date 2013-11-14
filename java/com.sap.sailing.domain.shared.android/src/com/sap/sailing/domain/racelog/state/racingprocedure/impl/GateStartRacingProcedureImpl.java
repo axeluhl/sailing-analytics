@@ -165,8 +165,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
 
     @Override
     public void setPathfinder(TimePoint timePoint, String sailingId) {
-        // TODO Auto-generated method stub
-        
+        raceLog.add(factory.createPathfinderEvent(timePoint, author, raceLog.getCurrentPassId(), sailingId));
     }
 
     @Override
