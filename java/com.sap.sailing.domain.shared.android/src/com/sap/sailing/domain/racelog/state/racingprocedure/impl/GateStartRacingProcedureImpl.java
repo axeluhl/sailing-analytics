@@ -111,6 +111,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
 
     @Override
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
+        TimePoint gateShutdownTime = getGateShutdownTime(startTime);
         if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false), new FlagPole(Flags.PAPA, false)), 
@@ -131,9 +132,11 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
                     Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
                     Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(Flags.GOLF, true)),
                     startTime);
-        } else if (now.before(getGateShutdownTime(startTime))) {
+        } else if (now.before(gateShutdownTime)) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(Flags.GOLF, true)));
+                    Arrays.asList(new FlagPole(Flags.GOLF, true)),
+                    Arrays.asList(new FlagPole(Flags.GOLF, false)),
+                    gateShutdownTime);
         } else {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false)));
