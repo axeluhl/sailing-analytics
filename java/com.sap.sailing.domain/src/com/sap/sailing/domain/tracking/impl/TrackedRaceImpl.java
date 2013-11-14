@@ -1626,12 +1626,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             clearDirectionFromStartToNextMarkCache();
             stopAndRemoveStartToNextMarkCacheInvalidationListener(waypointThatGotRemoved);
             Iterator<Waypoint> waypointsIter = getRace().getCourse().getWaypoints().iterator();
-            waypointsIter.next(); // skip first
-            if (waypointsIter.hasNext()) {
-                waypointsIter.next(); // skip second
+            if (waypointsIter.hasNext()) { // catches the case of a course being empty
+                waypointsIter.next(); // skip first
                 if (waypointsIter.hasNext()) {
-                    Waypoint newSecond = waypointsIter.next();
-                    addStartToNextMarkCacheInvalidationListener(newSecond);
+                    waypointsIter.next(); // skip second
+                    if (waypointsIter.hasNext()) {
+                        Waypoint newSecond = waypointsIter.next();
+                        addStartToNextMarkCacheInvalidationListener(newSecond);
+                    }
                 }
             }
         }
