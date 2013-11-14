@@ -123,7 +123,8 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
             }
         });
         grouperTypeListBox.setValue(GrouperType.Dimensions, false);
-        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
+        //TODO Enable this, after custom groupers are safe
+//        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
         selectGroupByPanel.add(grouperTypeListBox);
         
         grouperTypeListBox.addValueChangeHandler(new ValueChangeHandler<GrouperType>() {
