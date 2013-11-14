@@ -9,10 +9,8 @@ import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.state.RaceState2;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
-    public RaceState2 getState2();
     
     /**
      * @return the identifier of the race.
@@ -22,7 +20,7 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
     /**
      * @return the state of the race.
      */
-    public RaceState getState();
+    public RaceState2 getState2();
 
     /**
      * Shortcut to {@link RaceState#getRaceLog()} of {@link ManagedRace#getState()}.

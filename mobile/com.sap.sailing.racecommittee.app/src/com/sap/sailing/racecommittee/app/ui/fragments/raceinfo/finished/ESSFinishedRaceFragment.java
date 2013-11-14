@@ -28,8 +28,8 @@ public class ESSFinishedRaceFragment extends BaseFinishedRaceFragment<ESSRacingP
     }
     
     private TimePoint getTimeLimit() {
-        TimePoint startTime = getRace().getState().getStartTime();
-        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
+        TimePoint startTime = getRaceState().getStartTime();
+        TimePoint firstBoatTime = getRaceState().getFinishingTime();
         if (startTime == null || firstBoatTime == null) {
             return null;
         }

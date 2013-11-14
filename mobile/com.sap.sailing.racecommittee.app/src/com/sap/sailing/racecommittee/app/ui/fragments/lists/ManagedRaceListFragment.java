@@ -22,8 +22,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
@@ -35,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.comparators.BoatClassSeriesDataFleet
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 
-public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
+public class ManagedRaceListFragment extends LoggableListFragment implements JuryFlagClickedListener {
 
     public enum FilterMode {
         ALL(R.string.race_list_filter_show_all), ACTIVE(R.string.race_list_filter_show_active);
@@ -182,13 +180,13 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         adapter.notifyDataSetChanged();
     }
 
-    private void dataChanged(RaceState changedState) {
+    private void dataChanged(RaceState2 changedState) {
         List<RaceListDataType> adapterItems = adapter.getItems();
         for (int i = 0; i < adapterItems.size(); ++i) {
             if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
                 RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
                 ManagedRace race = raceView.getRace();
-                if (changedState != null && race.getState().equals(changedState)) {
+                if (changedState != null && race.getState2().equals(changedState)) {
                     boolean allowUpdateIndicator = !raceView.getRace().equals(this.selectedRace);
                     raceView.onStatusChanged(changedState.getStatus(), allowUpdateIndicator);
                 }
@@ -225,37 +223,6 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstace(races);
             fragment.show(getFragmentManager(), null);
         }
-    }
-
-    @Override
-    public void onRaceStateStatusChanged(RaceState state) {
-        dataChanged(state);
-        filterChanged();
-    }
-
-    @Override
-    public void onRaceStateCourseDesignChanged(RaceState state) {
-        // not interested
-    }
-
-    @Override
-    public void onRaceStateProtestStartTimeChanged(RaceState state) {
-        // TODO: show protest time changes in status bar oder show update indicator!
-    }
-
-    private void dataChanged(RaceState2 changedState) {
-        List<RaceListDataType> adapterItems = adapter.getItems();
-        for (int i = 0; i < adapterItems.size(); ++i) {
-            if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
-                RaceListDataTypeRace raceView = (RaceListDataTypeRace) adapterItems.get(i);
-                ManagedRace race = raceView.getRace();
-                if (changedState != null && race.getState2().equals(changedState)) {
-                    boolean allowUpdateIndicator = !raceView.getRace().equals(this.selectedRace);
-                    raceView.onStatusChanged(changedState.getStatus(), allowUpdateIndicator);
-                }
-            }
-        }
-        adapter.notifyDataSetChanged();
     }
     
     private BaseRaceState2ChangedListener stateListener = new BaseRaceState2ChangedListener() {

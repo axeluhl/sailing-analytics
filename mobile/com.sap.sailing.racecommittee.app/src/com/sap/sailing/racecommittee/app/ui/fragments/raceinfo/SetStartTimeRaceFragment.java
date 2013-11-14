@@ -163,7 +163,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
             type = RacingProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
                     "defaultStartProcedureType", RacingProcedureType.ESS.name()));
         } else {
-            type = getRace().getState().getStartProcedureType();
+            type = getRaceState().getRacingProcedure().getType();
         }
         spinnerStartProcedure.setSelection(adapter.getPosition(type));
     }

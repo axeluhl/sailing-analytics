@@ -215,9 +215,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
 
     private void updateCourseDesignLabel() {
-        if (getRace().getState().getCourseDesign() != null) {
-
-            CourseBase courseDesign = getRace().getState().getCourseDesign();
+        CourseBase courseDesign = getRaceState().getCourseDesign();
+        if (courseDesign != null) {
             if (Util.isEmpty(courseDesign.getWaypoints())) {
                 String courseName = courseDesign.getName();
                 courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
@@ -231,7 +230,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
     
     private void updateWindLabel() {
-        LastWindFixFinder windFinder = new LastWindFixFinder(getRace().getState().getRaceLog());
+        LastWindFixFinder windFinder = new LastWindFixFinder(getRaceState().getRaceLog());
         if (windFinder.analyze()!=null){
             Wind wind = windFinder.analyze();
             windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
@@ -244,7 +243,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
             if (resultCode == Activity.RESULT_OK) {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    getRace().getState().setWindFix(windFix);
+                    getRaceState().setWindFix(windFix);
                     updateWindLabel();
                 }
             }
