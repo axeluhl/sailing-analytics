@@ -2,6 +2,14 @@
 
 Here we want to collect technology options to build a new innovative race viewer.
 
+## Usage scenarios
+* TV + data overlays
+* Deep analytics
+* Casual user race viewer
+* Big screen / public viewing
+* Raw data viewer (jury support)
+* Moderator cockpit
+
 ## Unity Gaming Engine
 Unity is a cross-platform game engine with a built-in IDE developed by Unity Technologies. It is used to develop video games for web plugins, desktop platforms, consoles and mobile devices. It grew from an OS X supported game development tool in 2005 to a multi-platform game engine.
 
