@@ -16,13 +16,12 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class RRS26StartphaseRaceFragment2 extends BaseStartphaseRaceFragment {
+public class RRS26StartphaseRaceFragment2 extends BaseStartphaseRaceFragment<RRS26RacingProcedure> {
     
     private ImageButton startModeButton;
     private final ChangeListener changeListener;
@@ -141,19 +140,10 @@ public class RRS26StartphaseRaceFragment2 extends BaseStartphaseRaceFragment {
         return color;
     }
     
-    private RRS26RacingProcedure getRacingProcedure() {
-        return getRaceState().getTypedRacingProcedure();
-    }
-    
     private class ChangeListener extends BaseRacingProcedureChangedListener implements RRS26ChangedListener {
 
         @Override
         public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
-            setupUi();
-        }
-        
-        @Override
-        public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
             setupUi();
         }
         

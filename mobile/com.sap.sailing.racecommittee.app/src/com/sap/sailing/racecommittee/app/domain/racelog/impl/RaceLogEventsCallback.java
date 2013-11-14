@@ -45,7 +45,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             }
         } catch (Exception e) {
             ExLog.e(TAG, "Error parsing server response");
-            ExLog.ex(TAG, e);
+            //ExLog.ex(TAG, e);
         }
         
         String raceId = originalIntent.getStringExtra(AppConstants.RACE_ID_KEY);

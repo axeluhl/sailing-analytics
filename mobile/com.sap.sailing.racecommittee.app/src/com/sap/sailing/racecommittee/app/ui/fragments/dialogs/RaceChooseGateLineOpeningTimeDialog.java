@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.GateStartProcedure;
 
@@ -47,11 +48,9 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
 
     protected void onChooseClicked(View view) {
         try {
-            Integer lineOpeningTime = convertToInteger(lineOpeningTimeEditText.getText().toString());
-            if (getRace().getState().getStartProcedure() instanceof GateStartProcedure) {
-                ((GateStartProcedure) getRace().getState().getStartProcedure()).setGateLineOpeningTime(Long
-                        .valueOf(60 * 1000 * lineOpeningTime));
-            }
+            Long lineOpeningTime = convertToLong(lineOpeningTimeEditText.getText().toString());
+            GateStartRacingProcedure procedure = getRace().getState2().getTypedRacingProcedure();
+            procedure.setGateLineOpeningTime(Long.valueOf(60 * 1000 * lineOpeningTime));
             Log.i("RACE_SET_GATELINE_OPENING_TIME", String.valueOf(lineOpeningTime));
             dismiss();
         } catch (NumberFormatException nfe) {
@@ -59,7 +58,7 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
         }
     }
 
-    protected Integer convertToInteger(String text) throws NumberFormatException {
-        return Integer.parseInt(text);
+    protected Long convertToLong(String text) throws NumberFormatException {
+        return Long.parseLong(text);
     }
 }

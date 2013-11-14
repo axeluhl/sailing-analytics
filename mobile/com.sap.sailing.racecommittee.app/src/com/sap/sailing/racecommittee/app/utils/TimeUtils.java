@@ -9,6 +9,10 @@ public class TimeUtils {
     public static long timeUntil(TimePoint targetTime) {
         return targetTime.asMillis() - new Date().getTime();
     }
+    
+    public static CharSequence prettyString(TimePoint timePoint) {
+        return prettyString(timePoint.asMillis());
+    }
 
     public static CharSequence prettyString(long milliseconds) {
         int secondsTillStart = (int) (milliseconds / 1000);

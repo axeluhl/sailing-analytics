@@ -261,6 +261,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         @Override
         public void onRacingProcedureChanged(RaceState2 state) {
             infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
+            switchToInfoFragment();
         };
         
         @Override

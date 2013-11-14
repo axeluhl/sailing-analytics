@@ -7,25 +7,16 @@ import android.widget.ImageView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
-import com.sap.sailing.domain.racelog.state.racingprocedure.ESSChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 
-public class ESSStartphaseRaceFragment2 extends BaseStartphaseRaceFragment {
-    
-    private final ChangeListener changeListener;
+public class ESSStartphaseRaceFragment2 extends BaseStartphaseRaceFragment<ESSRacingProcedure> {
     
     private ImageView apFlagImageView;
     private ImageView threeFlagImageView;
     private ImageView twoFlagImageView;
     private ImageView oneFlagImageView;
-    
-    public ESSStartphaseRaceFragment2() {
-        this.changeListener = new ChangeListener();
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -35,18 +26,6 @@ public class ESSStartphaseRaceFragment2 extends BaseStartphaseRaceFragment {
         threeFlagImageView = createFlagImageView(R.drawable.three_min_flag);
         twoFlagImageView = createFlagImageView(R.drawable.two_min_flag);
         oneFlagImageView = createFlagImageView(R.drawable.one_min_flag);
-    }
-    
-    @Override
-    public void onStart() {
-        super.onStart();
-        getRacingProcedure().addChangedListener(changeListener);
-    }
-    
-    @Override
-    public void onStop() {
-        getRacingProcedure().removeChangedListener(changeListener);
-        super.onStop();
     }
 
     @Override
@@ -72,26 +51,16 @@ public class ESSStartphaseRaceFragment2 extends BaseStartphaseRaceFragment {
             break;
         case ESSTHREE:
             container.addView(threeFlagImageView);
+            break;
         case ESSTWO:
             container.addView(twoFlagImageView);
+            break;
         case ESSONE:
             container.addView(oneFlagImageView);
+            break;
         default:
             break;
         }
-    }
-    
-    private ESSRacingProcedure getRacingProcedure() {
-        return getRaceState().getTypedRacingProcedure();
-    }
-    
-    private class ChangeListener extends BaseRacingProcedureChangedListener implements ESSChangedListener {
-
-        @Override
-        public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {
-            setupUi();
-        }
-        
     }
 
 }

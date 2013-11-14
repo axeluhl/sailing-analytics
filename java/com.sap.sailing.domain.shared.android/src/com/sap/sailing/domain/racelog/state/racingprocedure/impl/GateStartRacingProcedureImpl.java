@@ -1,0 +1,188 @@
+package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.state.RaceState2;
+import com.sap.sailing.domain.racelog.state.RaceStateEvent;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
+import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+
+public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {
+
+    public final static long startPhaseGolfDownStandardInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    
+    private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
+    
+    private final GateLineOpeningTimeFinder gateLineOpeningTimeAnalyzer;
+    
+    private Long cachedGateLineOpeningTime;
+    
+    public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
+        super(raceLog, author, factory);
+        this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
+        update();
+    }
+
+    @Override
+    public RacingProcedureType getType() {
+        return RacingProcedureType.GateStart;
+    }
+    
+    @Override
+    public boolean hasIndividualRecall() {
+        return false;
+    }
+
+    @Override
+    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now) {
+        return null;
+    }
+
+    @Override
+    public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
+        if (now.before(startTime)) {
+            long timeTillStart = startTime.minus(now.asMillis()).asMillis();
+            return timeTillStart < startPhaseClassOverGolfUpIntervall;
+        }
+        return false;
+    }
+    
+    @Override
+    public void triggerStateEventScheduling(RaceState2 state) {
+        switch (state.getStatus()) {
+        case SCHEDULED:
+        case STARTPHASE:
+            if (getGateLineOpeningTime() != null) {
+                rescheduleGateShutdownTime(state.getStartTime());
+            }
+            break;
+        default:
+            break;
+        }
+        super.triggerStateEventScheduling(state);
+    }
+
+    @Override
+    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+        return Arrays.<RaceStateEvent> asList(
+                new RaceStateEventImpl(startTime.minus(startPhaseClassOverGolfUpIntervall), RaceStateEvents.GATE_CLASS_OVER_GOLF_UP),
+                new RaceStateEventImpl(startTime.minus(startPhasePapaUpInterval), RaceStateEvents.GATE_PAPA_UP),
+                new RaceStateEventImpl(startTime.minus(startPhasePapaDownInterval), RaceStateEvents.GATE_PAPA_DOWN),
+                new RaceStateEventImpl(startTime, RaceStateEvents.START));
+    }
+
+    @Override
+    public boolean processStateEvent(RaceStateEvent event) {
+        switch (event.getEventName()) {
+        case GATE_CLASS_OVER_GOLF_UP:
+        case GATE_PAPA_UP:
+        case GATE_PAPA_DOWN:
+        case START:
+        case GATE_SHUTDOWN:
+            getChangedListeners().onActiveFlagsChanged(this);
+            return true;
+        default:
+            return super.processStateEvent(event);
+        }
+    }
+
+    @Override
+    public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
+        if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),  
+                    startTime.minus(startPhaseClassOverGolfUpIntervall));
+        } else if (now.before(startTime.minus(startPhasePapaUpInterval))) {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
+                    startTime.minus(startPhasePapaUpInterval));
+        } else if (now.before(startTime.minus(startPhasePapaDownInterval))) {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
+                    startTime.minus(startPhasePapaDownInterval));
+        } else if (now.before(startTime)) {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(Flags.GOLF, true)),
+                    startTime);
+        } else if (now.before(getGateShutdownTime(startTime))) {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(Flags.GOLF, true)));
+        } else {
+            return new FlagPoleState(
+                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false)));
+        }
+    }
+    
+    @Override
+    public TimePoint getGateShutdownTime(TimePoint startTime) {
+        return startTime.plus(startPhaseGolfDownStandardIntervalConstantSummand).plus(getGateLineOpeningTime());
+    }
+
+    @Override
+    public Long getGateLineOpeningTime() {
+        return cachedGateLineOpeningTime;
+    }
+
+    @Override
+    public void setGateLineOpeningTime(long milliseconds) {
+        raceLog.add(factory.createGateLineOpeningTimeEvent(MillisecondsTimePoint.now(), author, raceLog.getCurrentPassId(), milliseconds));
+    }
+
+    @Override
+    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
+        return new GateStartChangedListeners();
+    }
+    
+    @Override
+    protected GateStartChangedListeners getChangedListeners() {
+        return (GateStartChangedListeners) super.getChangedListeners();
+    }
+
+    @Override
+    public void addChangedListener(GateStartChangedListener listener) {
+        getChangedListeners().add(listener);
+    }
+    
+    @Override
+    protected void update() {
+        Long gateLineOpeningTime = gateLineOpeningTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedGateLineOpeningTime, gateLineOpeningTime)) {
+            cachedGateLineOpeningTime = gateLineOpeningTime;
+            getChangedListeners().onGateLineOpeningTimeChanged(this);
+            rescheduleGateShutdownTime(new StartTimeFinder(raceLog).analyze());
+        }
+        super.update();
+    }
+
+    private void rescheduleGateShutdownTime(TimePoint startTime) {
+        unscheduleStateEvent(RaceStateEvents.GATE_SHUTDOWN);
+        if (startTime != null) {
+            scheduleStateEvents(new RaceStateEventImpl(getGateShutdownTime(startTime), RaceStateEvents.GATE_SHUTDOWN));
+        }
+    }
+
+}

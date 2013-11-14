@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 
 public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS26RacingProcedure {
@@ -41,6 +42,11 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     @Override
     public RacingProcedureType getType() {
         return RacingProcedureType.RRS26;
+    }
+    
+    @Override
+    public boolean hasIndividualRecall() {
+        return true;
     }
 
     @Override
@@ -109,7 +115,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     }
     
     @Override
-    protected RacingProcedureChangedListeners<?> createChangedListenerContainer() {
+    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
         return new RRS26ChangedListeners();
     }
     
@@ -124,13 +130,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     }
 
     @Override
-    public void removeChangedListener(RRS26ChangedListener listener) {
-        getChangedListeners().remove(listener);
-    }
-
-    @Override
     public void setStartModeFlag(TimePoint timePoint, Flags startMode) {
-        // TODO: create new event with start mode flag!
         raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
     }
 

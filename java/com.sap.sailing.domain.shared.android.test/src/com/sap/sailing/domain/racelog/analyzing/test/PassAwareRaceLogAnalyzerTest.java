@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.analyzing.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,7 +74,7 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         pair.addAll(raceLog);
         raceLog.add(minorEvent);
 
-        assertSame(expectedResult, analyzer.analyze());
+        assertEquals(expectedResult, analyzer.analyze());
     }
     
     @Test
@@ -91,7 +91,7 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         majorPair.addAll(raceLog);
         
         assertNotSame(minorPair.getB(), analyzer.analyze());
-        assertSame(majorPair.getB(), analyzer.analyze());
+        assertEquals(majorPair.getB(), analyzer.analyze());
     }
     
     @Test
@@ -107,7 +107,7 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         TargetPair minorPair = getBlockingEventsAndResultForPassAwareTests(0, minorAuthor);
         minorPair.addAll(raceLog);
 
-        assertSame(majorPair.getB(), analyzer.analyze());
+        assertEquals(majorPair.getB(), analyzer.analyze());
         assertNotSame(minorPair.getB(), analyzer.analyze());
     }
 }

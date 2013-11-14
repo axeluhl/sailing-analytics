@@ -10,12 +10,14 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ESSChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 
 public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRacingProcedure {
@@ -33,6 +35,11 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     @Override
     public RacingProcedureType getType() {
         return RacingProcedureType.ESS;
+    }
+    
+    @Override
+    public boolean hasIndividualRecall() {
+        return true;
     }
 
     @Override
@@ -78,29 +85,29 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         if (now.before(startTime.minus(startPhaseAPDownInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, true)), 
-                    Arrays.asList(new FlagPole(Flags.AP, false)), 
+                    Arrays.asList(new FlagPole(Flags.AP, true), new FlagPole(Flags.ESSTHREE, false)), 
+                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)), 
                     startTime.minus(startPhaseAPDownInterval));
         } else if (now.before(startTime.minus(startPhaseESSThreeUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, false)), 
-                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true)), 
+                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)), 
                     startTime.minus(startPhaseESSThreeUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSTwoUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true)), 
-                    Arrays.asList(new FlagPole(Flags.ESSTWO, true)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)), 
                     startTime.minus(startPhaseESSTwoUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSOneUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSTWO, true)), 
+                    Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)), 
                     Arrays.asList(new FlagPole(Flags.ESSONE, true)), 
                     startTime.minus(startPhaseESSOneUpInterval));
         } if (now.before(startTime)) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(Flags.ESSONE, true)), 
                     Arrays.asList(new FlagPole(Flags.ESSONE, false)), 
-                    startTime.minus(startPhaseESSOneUpInterval));
+                    startTime);
         } else {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(Flags.ESSONE, false)));
@@ -108,7 +115,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     }
     
     @Override
-    protected RacingProcedureChangedListeners<?> createChangedListenerContainer() {
+    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
         return new ESSChangedListeners();
     }
     
@@ -121,10 +128,14 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     public void addChangedListener(ESSChangedListener listener) {
         getChangedListeners().add(listener);
     }
-
+    
     @Override
-    public void removeChangedListener(ESSChangedListener listener) {
-        getChangedListeners().remove(listener);
+    public TimePoint getTimeLimit(TimePoint startTime) {
+        TimePoint firstBoatTime = new FinishingTimeFinder(raceLog).analyze();
+        if (firstBoatTime != null) {
+            return firstBoatTime.plus((long) ((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+        }
+        return null;
     }
 
 }

@@ -18,6 +18,7 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Pair;
 
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceState2;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -66,7 +68,7 @@ public class RaceStateService extends Service {
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
     private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
     
-    private Map<Serializable, List<PendingIntent>> managedIntents;
+    private Map<Serializable, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
     
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -79,7 +81,7 @@ public class RaceStateService extends Service {
         
         this.registeredLogListeners = new HashMap<ManagedRace, RaceLogEventVisitor>();
         this.registeredStateEventSchedulers = new HashMap<ManagedRace, RaceStateEventScheduler>();
-        this.managedIntents = new HashMap<Serializable, List<PendingIntent>>();
+        this.managedIntents = new HashMap<Serializable, List<Pair<PendingIntent, RaceStateEvents>>>();
         
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         setupNotificationBuilder();
@@ -139,9 +141,9 @@ public class RaceStateService extends Service {
             entry.getKey().getState2().setStateEventScheduler(null);
         }
         
-        for (List<PendingIntent> intents : managedIntents.values()) {
-            for (PendingIntent intent : intents) {
-                alarmManager.cancel(intent);
+        for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
+            for (Pair<PendingIntent,RaceStateEvents> intentPair : intents) {
+                alarmManager.cancel(intentPair.first);
             }
         }
         managedIntents.clear();
@@ -177,8 +179,9 @@ public class RaceStateService extends Service {
         
         if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
             RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
+            ExLog.i(TAG, String.format("Processing %s", stateEvent.toString()));
             race.getState2().processStateEvent(stateEvent);
-            managedIntents.get(race.getId()).remove(intent);
+            clearAlarmByName(race, stateEvent.getEventName());
             return;
         }
     }
@@ -227,7 +230,7 @@ public class RaceStateService extends Service {
         
         if (!managedIntents.containsKey(race.getId())) {
             RaceState2 state = race.getState2();
-            managedIntents.put(race.getId(), new ArrayList<PendingIntent>());
+            managedIntents.put(race.getId(), new ArrayList<Pair<PendingIntent, RaceStateEvents>>());
 
             // Register on event additions...
             JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
@@ -258,29 +261,39 @@ public class RaceStateService extends Service {
     
     public void setAlarm(ManagedRace race, RaceStateEvent event) {
         PendingIntent intent = createAlarmPendingIntent(race, event);
-        managedIntents.get(race.getId()).add(intent);
+        managedIntents.get(race.getId()).add(Pair.create(intent, event.getEventName()));
         alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
         ExLog.i(TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
     }
 
-    public void clearAlarm(ManagedRace race, RaceStateEvent event) {
-        PendingIntent intent = createAlarmPendingIntent(race, event);
-        List<PendingIntent> intents = managedIntents.get(race.getId());
-        intents.remove(intent);
-        alarmManager.cancel(intent);
+    public void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
+        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
+        Pair<PendingIntent, RaceStateEvents> toBeRemoved = null;
+        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+            if (intentPair.second.equals(stateEventName)) {
+                toBeRemoved = intentPair;
+            }
+        }
+        if (toBeRemoved != null) {
+            alarmManager.cancel(toBeRemoved.first);
+            intents.remove(toBeRemoved);
+            ExLog.i(TAG, String.format("Removed alarm for event named %s.", stateEventName));
+        } else {
+            ExLog.i(TAG, String.format("Unable to remove alarm for event named %s (not found).", stateEventName));
+        }
     }
     
     public void clearAllAlarms(ManagedRace race) {
         Serializable raceId = race.getId();
-        List<PendingIntent> intents = managedIntents.get(raceId);
+        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(raceId);
         
         if (intents == null) {
             ExLog.w(TAG, "There are no intents for race " + raceId);
             return;
         }
         
-        for (PendingIntent pendingIntent : intents) {
-            alarmManager.cancel(pendingIntent);
+        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+            alarmManager.cancel(intentPair.first);
         }
         
         intents.clear();

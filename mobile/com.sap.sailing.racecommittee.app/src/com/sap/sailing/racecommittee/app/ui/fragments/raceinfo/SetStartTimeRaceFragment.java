@@ -143,7 +143,7 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
 
     private void setupStartProcedureSpinner() {
         ArrayAdapter<RacingProcedureType> adapter = new ArrayAdapter<RacingProcedureType>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, RacingProcedureType.values());
+                android.R.layout.simple_spinner_dropdown_item, RacingProcedureType.validValues());
         spinnerStartProcedure.setAdapter(adapter);
         spinnerStartProcedure.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -156,7 +156,6 @@ public class SetStartTimeRaceFragment extends RaceFragment implements UserRequir
             }
         });
 
-        //TODO read the preferences from AppPreferences
         RacingProcedureType type = RacingProcedureType.ESS;
         boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
                 "overrideDefaultStartProcedureType", false);

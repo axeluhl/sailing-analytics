@@ -9,6 +9,18 @@ public class RacingProcedureChangedListeners<T extends RacingProcedureChangedLis
         RacingProcedureChangedListener {
 
     private static final long serialVersionUID = 3518707638312002482L;
+    
+    /**
+     * Adds a {@link RacingProcedureChangedListener} to this set. The type is checked on runtime!
+     */
+    @SuppressWarnings("unchecked")
+    public boolean addListener(Object listener) {
+        if (listener instanceof RacingProcedureChangedListener) {
+            return super.add((T)listener);
+        } else {
+            throw new IllegalArgumentException("listener");
+        }
+    }
 
     @Override
     public void onActiveFlagsChanged(RacingProcedure2 racingProcedure) {

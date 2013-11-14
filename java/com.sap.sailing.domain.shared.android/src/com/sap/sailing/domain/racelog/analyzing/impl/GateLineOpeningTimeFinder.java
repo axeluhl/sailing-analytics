@@ -12,7 +12,7 @@ public class GateLineOpeningTimeFinder extends RaceLogAnalyzer<Long> {
 
     @Override
     protected Long performAnalysis() {
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogGateLineOpeningTimeEvent) {
                 return ((RaceLogGateLineOpeningTimeEvent) event).getGateLineOpeningTime();
 

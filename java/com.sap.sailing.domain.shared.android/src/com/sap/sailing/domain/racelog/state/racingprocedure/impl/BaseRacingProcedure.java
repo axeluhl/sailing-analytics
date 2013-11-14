@@ -21,6 +21,7 @@ import com.sap.sailing.domain.racelog.state.impl.BaseRaceState2ChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure2;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 
 /**
  * Base class for all your {@link RacingProcedure2}s.
@@ -34,14 +35,15 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
 
     private final static long individualRecallRemovalTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds
 
-    protected RaceStateEventScheduler scheduler;
+    private RaceStateEventScheduler scheduler;
 
     protected final RaceLog raceLog;
     protected final RaceLogEventAuthor author;
     protected final RaceLogEventFactory factory;
 
-    private final RacingProcedureChangedListeners<?> changedListeners;
+    private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
+    private final IndividualRecallDisplayedFinder recallDisplayedFinder;
     private final RaceLogEventVisitor raceLogListener;
 
     private boolean cachedIsIndividualRecallDisplayed;
@@ -53,6 +55,7 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
 
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
+        this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -64,12 +67,21 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     public void detachFromRaceLog() {
         raceLog.removeListener(raceLogListener);
     }
+    
+    @Override
+    public void addChangedListener(RacingProcedureChangedListener listener) {
+        changedListeners.addListener(listener);
+    }
+    
+    public void removeChangedListener(RacingProcedureChangedListener listener) {
+        changedListeners.remove(listener);
+    };
 
-    protected RacingProcedureChangedListeners<?> getChangedListeners() {
+    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> getChangedListeners() {
         return changedListeners;
     }
 
-    protected abstract RacingProcedureChangedListeners<?> createChangedListenerContainer();
+    protected abstract RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer();
 
     @Override
     public RaceLog getRaceLog() {
@@ -90,8 +102,9 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
             break;
         case RUNNING:
             if (isIndividualRecallDisplayed()) {
-                scheduleIndividualRecallTimeout(new IndividualRecallDisplayedFinder(raceLog).analyze());
+                rescheduleIndividualRecallTimeout(recallDisplayedFinder.analyze());
             }
+            break;
         default:
             break;
         }
@@ -101,20 +114,29 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     public boolean isIndividualRecallDisplayed() {
         return cachedIsIndividualRecallDisplayed;
     }
+    
+    @Override
+    public TimePoint getIndividualRecallRemovalTime() {
+        if (hasIndividualRecall()) {
+            if (isIndividualRecallDisplayed()) {
+                TimePoint displayTime = recallDisplayedFinder.analyze();
+                if (displayTime != null) {
+                    return displayTime.plus(individualRecallRemovalTimeout);
+                }
+            }
+
+        }
+        return null;
+    }
 
     @Override
     public void displayIndividualRecall(TimePoint displayTime) {
         raceLog.add(factory.createFlagEvent(displayTime, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, true));
-        scheduleIndividualRecallTimeout(displayTime);
     }
 
     @Override
     public void removeIndividualRecall(TimePoint timePoint) {
-        if (scheduler != null) {
-            scheduler.unscheduleStateEvent(new RaceStateEventImpl(timePoint, RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
-        }
-        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), 
-                Flags.XRAY, Flags.NONE, false));
+        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, false));
     }
 
     @Override
@@ -139,11 +161,33 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
             if (cachedIsIndividualRecallDisplayed) {
                 changedListeners.onIndividualRecallDisplayed(this);
+                rescheduleIndividualRecallTimeout(recallDisplayedFinder.analyze());
             } else {
                 changedListeners.onIndividualRecallRemoved(this);
+                unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
         }
-        
+    }
+
+    private void rescheduleIndividualRecallTimeout(TimePoint displayTime) {
+        unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
+        scheduleStateEvents(new RaceStateEventImpl(displayTime.plus(individualRecallRemovalTimeout), RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
+    }
+    
+    protected void scheduleStateEvents(RaceStateEvent stateEvent) {
+        scheduleStateEvents(Arrays.asList(stateEvent));
+    }
+    
+    protected void scheduleStateEvents(Collection<RaceStateEvent> stateEvents) {
+        if (scheduler != null) {
+            scheduler.scheduleStateEvents(stateEvents);
+        }
+    }
+    
+    protected void unscheduleStateEvent(RaceStateEvents raceStateEventName) {
+        if (scheduler != null) {
+            scheduler.unscheduleStateEvent(raceStateEventName);
+        }
     }
 
     protected abstract Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime);
@@ -163,13 +207,6 @@ public abstract class BaseRacingProcedure extends BaseRaceState2ChangedListener 
     private void unscheduleAllEvents() {
         if (scheduler != null) {
             scheduler.unscheduleAllEvents();
-        }
-    }
-
-    private void scheduleIndividualRecallTimeout(TimePoint displayTime) {
-        if (scheduler != null) {
-            scheduler.scheduleStateEvents(Arrays.<RaceStateEvent> asList(new RaceStateEventImpl(displayTime
-                    .plus(individualRecallRemovalTimeout), RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT)));
         }
     }
 }

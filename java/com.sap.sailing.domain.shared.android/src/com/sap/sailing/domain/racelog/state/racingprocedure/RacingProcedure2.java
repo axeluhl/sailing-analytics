@@ -13,13 +13,18 @@ public interface RacingProcedure2 extends RaceStateEventProcessor, RaceState2Cha
     RaceLog getRaceLog();
     RacingProcedureType getType();
     
+    void addChangedListener(RacingProcedureChangedListener listener);
+    void removeChangedListener(RacingProcedureChangedListener listener);
+    
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     void triggerStateEventScheduling(RaceState2 state);
     
     RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now);
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
     
+    boolean hasIndividualRecall();
     boolean isIndividualRecallDisplayed();
+    TimePoint getIndividualRecallRemovalTime();
     void displayIndividualRecall(TimePoint timePoint);
     void removeIndividualRecall(TimePoint timePoint);
     

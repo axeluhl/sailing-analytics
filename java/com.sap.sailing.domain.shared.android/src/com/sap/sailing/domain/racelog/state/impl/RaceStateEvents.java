@@ -12,5 +12,11 @@ public enum RaceStateEvents {
     ESS_AP_DOWN,
     ESS_THREE_UP,
     ESS_TWO_UP,
-    ESS_ONE_UP
+    ESS_ONE_UP,
+    
+    GATE_CLASS_OVER_GOLF_UP,
+    GATE_PAPA_UP,
+    GATE_PAPA_DOWN,
+    GATE_GOLF_DOWM, 
+    GATE_SHUTDOWN
 }

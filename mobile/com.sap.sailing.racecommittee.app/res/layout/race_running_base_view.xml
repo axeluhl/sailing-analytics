@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/race_startphase_base_start_countdown"
+        android:id="@+id/race_running_base_start_countup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/currentlyLoading"
         android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" />
 
     <TextView
-        android:id="@+id/race_startphase_base_next_countdown"
+        android:id="@+id/race_running_base_next_countdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
@@ -22,9 +22,9 @@
         android:layout_width="500dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:contentDescription="@string/empty"
         android:paddingBottom="2dp"
         android:scaleType="fitXY"
+        android:contentDescription="@string/app_name"
         android:src="@android:drawable/divider_horizontal_textfield" />
 
     <LinearLayout
@@ -36,6 +36,8 @@
         android:layout_marginTop="10dip"
         android:baselineAligned="false"
         android:orientation="horizontal" >
+
+        <!-- DISPLAY SECTION -->
 
         <RelativeLayout
             android:id="@+id/flagDisplaySpaceLayout"
@@ -53,7 +55,7 @@
                 android:orientation="horizontal" >
                 
                 <LinearLayout 
-                    android:id="@+id/race_startphase_base_up_flags"
+                    android:id="@+id/race_running_base_up_flags"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:orientation="horizontal">
@@ -78,7 +80,7 @@
                 android:orientation="horizontal" >
                 
                 <LinearLayout 
-                    android:id="@+id/race_startphase_base_down_flags"
+                    android:id="@+id/race_running_base_down_flags"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:orientation="horizontal">
@@ -96,12 +98,15 @@
             </RelativeLayout>
         </RelativeLayout>
 
+
         <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:background="#DADADA" />
+
+        <!-- SELECTION SECTION -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -110,34 +115,82 @@
             android:gravity="center_horizontal"
             android:orientation="vertical" >
 
-            <ViewStub
-                android:id="@+id/race_startphase_base_actions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+		            <ViewStub
+		                android:id="@+id/race_running_base_actions"
+		                android:layout_width="match_parent"
+		                android:layout_height="wrap_content" />
 
-            <ImageButton
-                android:id="@+id/race_startphase_base_abort_button"
-                android:layout_width="200dp"
-                android:layout_height="110dp"
-                android:contentDescription="@string/flag_ap"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ap_flag" />
+                    <ImageButton
+                        android:id="@+id/race_running_base_individual_recall"
+                        android:layout_width="140dp"
+                		android:layout_height="80dp"
+                        android:contentDescription="@string/choose_xray_flag_up"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/xray_flag"/>
 
-            <TextView
-                android:id="@+id/abortingFlagButtonLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="2dp"
-                android:text="@string/abort_starting_phase"
-                android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+                    <TextView
+                        android:id="@+id/race_running_base_individual_recall_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/choose_xray_flag_up"
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel"/>
+                    
+                    <ImageButton
+                        android:id="@+id/race_running_base_general_recall"
+                        android:layout_width="140dp"
+                		android:layout_height="80dp"
+                        android:contentDescription="@string/choose_first_substitute_flag"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/first_substitute_flag" />
 
-            <Button
-                android:id="@+id/race_startphase_base_reset_time_button"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:text="@string/reset_time" />
+                    <TextView
+                        android:id="@+id/ChooseFirstSubstituteLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/choose_first_substitute_flag"
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+
+                    <ImageButton
+                        android:id="@+id/race_running_base_finishing"
+                        android:layout_width="140dp"
+                		android:layout_height="80dp"
+                        android:contentDescription="@string/choose_blue_flag"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/blue_flag" />
+
+                    <TextView
+                        android:id="@+id/ChooseBlueFlagLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/choose_blue_flag"
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+
+                    <ImageButton
+                        android:id="@+id/race_running_base_abort"
+                        android:layout_width="140dp"
+                		android:layout_height="80dp"
+                        android:contentDescription="@string/abort_running_race"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ap_november_flag" />
+
+                    <TextView
+                        android:id="@+id/abortingFlagButtonLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/abort_running_race"
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
         </LinearLayout>
+        
+        <!-- END SELECTION SECTION -->
+        
     </LinearLayout>
 
 </LinearLayout>

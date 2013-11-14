@@ -25,4 +25,9 @@ public class RaceStateEventImpl implements RaceStateEvent {
         return eventName;
     }
 
+    @Override
+    public String toString() {
+        return "RaceStateEventImpl [timePoint=" + timePoint + ", eventName=" + eventName + "]";
+    }
+
 }

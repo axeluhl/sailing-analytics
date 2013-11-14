@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:dslv="http://schemas.android.com/apk**/res-auto"
+    xmlns:dslv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/raceCountUp"
+        android:id="@+id/race_finishing_race_countup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/currentlyLoading"
         android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" />
 
     <TextView
-        android:id="@+id/nextFlagCountdown"
+        android:id="@+id/race_finishing_additional_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
@@ -40,80 +40,12 @@
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:id="@+id/innerFragmentHolder"
+            android:id="@+id/race_finishing_inner_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.618"
             android:gravity="fill_horizontal"
-            android:orientation="vertical" >
-
-            <!-- DISPLAY SECTION -->
-
-			<!-- 
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|center_horizontal"
-                android:orientation="horizontal" >
-
-                <TextView
-                    android:id="@+id/textPositioning"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="@string/positionings"
-                    android:textSize="12pt"
-                    android:textStyle="bold"
-                    android:layout_marginRight="30dp"
-                    android:layout_marginLeft="10dp" />
-
-                <TextView
-                    android:id="@+id/textCompetitors"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:text="@string/availableFinishingCompetitors"
-                    android:textSize="12pt"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical|center_horizontal"
-                android:orientation="horizontal" >
-
-                <com.mobeta.android.dslv.DragSortListView
-                    android:id="@+id/listViewPositioningList"
-                    android:layout_width="350dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="left"
-                    android:verticalSpacing="5dp"
-                    android:layout_marginRight="30dp" 
-                    android:layout_marginLeft="10dp"
-                    dslv:drag_enabled="true"
-                    dslv:collapsed_height="2dp"    
-                    dslv:drag_scroll_start="0.33"    
-                    dslv:max_drag_scroll_speed="0.5"    
-                    dslv:float_alpha="0.6"    
-                    dslv:slide_shuffle_speed="0.3"    
-                    dslv:track_drag_sort="false"
-                    dslv:use_default_controller="false" />
-
-                <ListView
-                    android:id="@+id/gridViewCompetitors"
-                    android:layout_width="250dp"
-                    android:layout_height="match_parent"
-                    android:verticalSpacing="5dp"
-                    android:layout_gravity="left"
-                     />
-            </LinearLayout> -->
-
-            <!-- END DISPLAY SECTION -->
-
-        </LinearLayout>
+            android:orientation="vertical" />
 
         <TextView
             android:layout_width="1dp"
@@ -121,7 +53,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:background="#DADADA" />
-        <!-- SELECTION SECTION -->
+        <!-- ACTION SECTION -->
 
         <LinearLayout
             android:layout_width="225dp"
@@ -130,7 +62,7 @@
             android:orientation="vertical" >
 
             <ImageButton
-                android:id="@+id/blueFlagButton"
+                android:id="@+id/race_finishing_finished"
                 android:layout_width="140dp"
                 android:layout_height="80dp"
                 android:contentDescription="@string/choose_blue_flag"
@@ -147,7 +79,7 @@
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
             <ImageButton
-                android:id="@+id/abortingFlagButton"
+                android:id="@+id/race_finishing_abort"
                 android:layout_width="140dp"
                 android:layout_height="80dp"
                 android:contentDescription="@string/abort_running_race"
@@ -164,7 +96,7 @@
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
         </LinearLayout>
 
-        <!-- END SELECTION SECTION -->
+        <!-- END ACTION SECTION -->
 
     </LinearLayout>
 

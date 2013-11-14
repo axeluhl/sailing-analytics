@@ -14,7 +14,7 @@ public class RacingProcedureFactoryImpl {
         case ESS:
             return new ESSRacingProcedureImpl(raceLog, author, factory);
         case GateStart:
-            throw new UnsupportedOperationException("Not yet implemented racing procedure " + type.toString());
+            return new GateStartRacingProcedureImpl(raceLog, author, factory);
         case RRS26:
             return new RRS26RacingProcedureImpl(raceLog, author, factory);
         default:

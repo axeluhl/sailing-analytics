@@ -15,7 +15,7 @@ public abstract class RaceInfoFragmentChooser {
         case RRS26:
             return new RRS26RaceInfoFragmentChooser();
         case GateStart:
-            throw new UnsupportedOperationException("");
+            return new GateStartRaceInfoFragmentChooser();
         case ESS:
             return new ESSRaceInfoFragmentChooser();
         default:

@@ -30,7 +30,6 @@ import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
-import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.StartProcedureFactory;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateEventListener;
@@ -111,7 +110,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             startProcedure.setStartProcedureListener(null);
         }
         RacingProcedureType type = getStartProcedureType();
-        startProcedure = StartProcedureFactory.create(context, type, raceLog);
+        startProcedure = null;//StartProcedureFactory.create(context, type, raceLog);
         startProcedure.setStartProcedureListener(this);
     }
 

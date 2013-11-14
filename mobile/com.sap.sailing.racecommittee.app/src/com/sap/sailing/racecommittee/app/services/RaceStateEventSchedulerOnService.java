@@ -4,11 +4,10 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class RaceStateEventSchedulerOnService implements RaceStateEventScheduler {
-    @SuppressWarnings("unused")
-    private final static String TAG = RaceStateEventSchedulerOnService.class.getName();
 
     private final RaceStateService service;
     private final ManagedRace race;
@@ -26,8 +25,8 @@ public class RaceStateEventSchedulerOnService implements RaceStateEventScheduler
     }
 
     @Override
-    public void unscheduleStateEvent(RaceStateEvent stateEvent) {
-        service.clearAlarm(race, stateEvent);
+    public void unscheduleStateEvent(RaceStateEvents stateEventName) {
+        service.clearAlarmByName(race, stateEventName);
     }
 
     @Override
