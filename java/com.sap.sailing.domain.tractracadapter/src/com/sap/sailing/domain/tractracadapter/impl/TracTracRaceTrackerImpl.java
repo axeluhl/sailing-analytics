@@ -14,6 +14,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    /**
+     * This value indicated how many stored data packets we allow that are not in the right sequence
+     * Background: It can happen that the progress for storedData hops around and delivers a progress
+     * that is lower than one received before. This can happen but only at a maximum of times this constant describes.
+     */
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 3;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;
@@ -92,6 +100,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
+    private HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>> lastProgressPerID;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -192,6 +201,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
+        this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
@@ -673,11 +683,30 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
-        if (progress != 0.0 && progress < lastStatus.getLoadingProgress()) {
-            // this should never happen but it happens - let's at least write some log about this problem
-            logger.severe("I got a loading progress "+progress+" that is smaller than the one already received "+lastStatus.getLoadingProgress());
+        Integer counter = 0;
+        if (lastProgressPerID.get(getID()) != null) {
+            Float lastProgress = lastProgressPerID.get(getID()).getB();
+            counter = lastProgressPerID.get(getID()).getA();
+            if (progress < lastProgress.floatValue()) {
+                if (counter.intValue() > MAX_STORED_PACKET_HOP_ALLOWANCE) {
+                    try {
+                        logger.severe("Got " + MAX_STORED_PACKET_HOP_ALLOWANCE + " times a value for progress " + progress + " that is lower than one already received " + lastProgress + "! This is a severe error - stopping receivers for " + getID() + " now!");
+                        stop(/* stopReceiversPreemptively */ true);
+                        
+                        /* make sure to indicate that this race is erroneous */
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
+                        updateStatusOfTrackedRaces();
+                        throw new InterruptedException("Interrupted");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    counter += 1;
+                }
+            } 
         }
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
+        lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
 
