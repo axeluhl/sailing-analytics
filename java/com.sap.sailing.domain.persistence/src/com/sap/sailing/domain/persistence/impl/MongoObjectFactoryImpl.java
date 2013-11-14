@@ -6,12 +6,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
+import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
@@ -66,14 +68,21 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
+    private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
 
     public MongoObjectFactoryImpl(DB database) {
         super();
         this.database = database;
+    }
+    
+    @Override
+    public DB getDatabase() {
+        return database;
     }
 
     public DBObject storeWind(Wind wind) {
@@ -858,4 +867,27 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return passing;
     }
 
+    @Override
+    public void storeCompetitor(Competitor competitor) {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        JSONObject json = competitorSerializer.serialize(competitor);
+        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId());
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        collection.update(query, entry, /* upsrt */true, /* multi */false);
+    }
+    
+    @Override
+    public void removeAllCompetitors() {
+        logger.info("Removing all persistent competitor info");
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        collection.drop();
+    }
+
+    @Override
+    public void removeCompetitor(Competitor competitor) {
+        logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
+        collection.remove(query);
+    }
 }

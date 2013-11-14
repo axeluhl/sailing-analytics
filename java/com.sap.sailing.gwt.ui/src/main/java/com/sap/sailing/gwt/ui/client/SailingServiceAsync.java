@@ -12,6 +12,7 @@ import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -404,9 +405,6 @@ public interface SailingServiceAsync {
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
 
-    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
-            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
-
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback);
 
@@ -427,6 +425,14 @@ public interface SailingServiceAsync {
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
+
+    void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
+            AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
+
+    void getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName,
+            AsyncCallback<List<Pair<String, String>>> callback);
+
+    void checkLeaderboardName(String leaderboardName, AsyncCallback<Pair<String, LeaderboardType>> callback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
 
@@ -457,6 +463,11 @@ public interface SailingServiceAsync {
      * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
      */
     void pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy(AsyncCallback<GenericGroupKey<String>> asyncCallback);
-    
+
+    void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+
+    void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 }
 

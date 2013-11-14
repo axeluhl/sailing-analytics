@@ -4,24 +4,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.datamining.SingleThreadedDataRetriever;
 import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.GPSFixContextImpl;
-import com.sap.sailing.datamining.impl.AbstractDataRetriever;
+import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetriever;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.server.RacingEventService;
 
-public class GPSFixRetriever extends AbstractDataRetriever<GPSFixWithContext> {
+public class GPSFixRetriever extends AbstractLeaderboardGroupDataRetriever<GPSFixWithContext> {
     
     @Override
-    public Collection<GPSFixWithContext> retrieveData(RacingEventService racingEventService) {
+    public Collection<GPSFixWithContext> retrieveData() {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
-        Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(racingEventService);
+        Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
         for (Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext> baseDataEntry : baseData) {
             GPSFixContext context = new GPSFixContextImpl(baseDataEntry.getB());
             data.addAll(retrieveDataFor(context));
@@ -44,6 +44,11 @@ public class GPSFixRetriever extends AbstractDataRetriever<GPSFixWithContext> {
             competitorTrack.unlockAfterRead();
         }
         return data;
+    }
+
+    @Override
+    public SingleThreadedDataRetriever<GPSFixWithContext> clone() {
+        return new GPSFixRetriever();
     }
 
 }

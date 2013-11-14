@@ -13,6 +13,7 @@ import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -118,7 +119,7 @@ public interface SailingService extends RemoteService {
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
-    public List<String> getLeaderboardNames() throws Exception;
+    public List<String> getLeaderboardNames();
     
     IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, String previousLeaderboardId) throws Exception;
@@ -294,7 +295,8 @@ public interface SailingService extends RemoteService {
 
     List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl);
 
-    List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
+    List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName,
+            Date date, DetailType detailType) throws Exception;
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
 
@@ -311,6 +313,10 @@ public interface SailingService extends RemoteService {
     
     EventDTO getEventByIdAsString(String eventIdAsString);
     
+    List<Pair<String, String>> getLeaderboardsNamesOfMetaleaderboard(String metaLeaderboardName);
+
+    Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
+
     List<RaceGroupDTO> getRegattaStructureForEvent(String eventIdAsString);
     
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
@@ -328,7 +334,13 @@ public interface SailingService extends RemoteService {
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override);
     
-    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition);
+    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
+
+    Iterable<CompetitorDTO> getCompetitors();
 
     GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy();
+    
+    CompetitorDTO updateCompetitor(CompetitorDTO competitor);
+
+    void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
 }

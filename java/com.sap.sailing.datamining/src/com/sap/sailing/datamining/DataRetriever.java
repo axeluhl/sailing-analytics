@@ -1,11 +1,10 @@
 package com.sap.sailing.datamining;
 
 import java.util.Collection;
+import java.util.concurrent.Future;
 
-import com.sap.sailing.server.RacingEventService;
+public interface DataRetriever<DataType> extends Future<Collection<DataType>> {
 
-public interface DataRetriever<DataType> {
-
-    public Collection<DataType> retrieveData(RacingEventService racingEventService);
+    public DataRetriever<DataType> startRetrieval();
     
 }

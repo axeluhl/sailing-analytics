@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.impl;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.datamining.Aggregator;
 import com.sap.sailing.datamining.DataRetriever;
@@ -13,7 +14,6 @@ import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.QueryResultImpl;
-import com.sap.sailing.server.RacingEventService;
 
 public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
 
@@ -33,10 +33,10 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     }
 
     @Override
-    public QueryResult<AggregatedType> run(RacingEventService racingEventService) {
+    public QueryResult<AggregatedType> run() throws InterruptedException, ExecutionException {
         final long startTime = System.nanoTime();
         
-        Collection<DataType> retrievedData = retriever.retrieveData(racingEventService);
+        Collection<DataType> retrievedData = retriever.startRetrieval().get();
         Collection<DataType> filteredData = filter.filter(retrievedData);
         QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals());
         Map<GroupKey, Collection<DataType>> groupedFixes = grouper.group(filteredData);

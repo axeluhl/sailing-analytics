@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -115,7 +115,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
-    private MultiChartPanel competitorChart;
+    private MultiCompetitorRaceChart competitorChart;
     
     private CheckBox competitorsFilterCheckBox;
     private FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> lastActiveCompetitorFilterSet;
@@ -167,17 +167,10 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         viewControlsPanel.addStyleName("raceBoardControls");
         toolbarPanel.add(viewControlsPanel);
         
-        switch (getConfiguration().getViewMode()) {
-            case ONESCREEN:
-                leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-                leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
-                createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
-                getElement().getStyle().setMarginLeft(12, Unit.PX);
-                getElement().getStyle().setMarginRight(12, Unit.PX);
-                break;
-            default:
-                leaderboardPanel = null;
-        }
+        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
+        getElement().getStyle().setMarginLeft(12, Unit.PX);
+        getElement().getStyle().setMarginRight(12, Unit.PX);
         
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
@@ -216,7 +209,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
+        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
@@ -302,8 +295,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier),
-                        /* showOverallLeaderboardsOnSamePage */ false);
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,

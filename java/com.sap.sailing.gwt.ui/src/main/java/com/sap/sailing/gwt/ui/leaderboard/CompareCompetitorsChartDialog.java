@@ -31,13 +31,13 @@ import com.sap.sailing.gwt.ui.client.TimeRangeChangeListener;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartPanel;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbar;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 /**
- * A dialog box that holds a {@link MultiChartPanel} for comparing a list of preselected competitors.
+ * A dialog box that holds a {@link MultiCompetitorRaceChart} for comparing a list of preselected competitors.
  * 
  * @author Benjamin Ebling, Axel Uhl (d043530)
  *
@@ -49,7 +49,7 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
     private final Timer timer;
     private final ErrorReporter errorReporter;
     
-    private final MultiChartPanel multiChartPanel;
+    private final MultiCompetitorRaceChart multiChartPanel;
 
     private final ListBox racesListBox;
     
@@ -70,14 +70,14 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
         raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         
-        multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
+        multiChartPanel = new MultiCompetitorRaceChart(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
                 timer, timeRangeWithZoomProvider, stringMessages, errorReporter, false, false, leaderboardGroupName, leaderboardName);
         multiChartPanel.setSize("100%", "100%");
         
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSize("100%", "100%");
         
-        ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringMessages);
+        ComponentToolbar<MultiCompetitorRaceChartSettings> toolbar = new ComponentToolbar<MultiCompetitorRaceChartSettings>(multiChartPanel, stringMessages);
         toolbar.addSettingsButton();
 
         FlowPanel flowPanel = new FlowPanel();
