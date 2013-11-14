@@ -588,9 +588,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {
             ioThread.stop();
-            logger.warning("Tractrac IO thread for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
+            logger.warning("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
         } else {
-            logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
+            logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
         }
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
         updateStatusOfTrackedRaces();
@@ -602,17 +602,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void liveDataConnected() {
-        logger.info("Live data connected for race(s) "+getRaces());
+        logger.info("Live data connected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void liveDataDisconnected() {
-        logger.info("Live data disconnected for race(s) "+getRaces());
+        logger.info("Live data disconnected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void stopped() {
-        logger.info("stopped TracTrac tracking for "+getRaces());
+        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
         updateStatusOfTrackedRaces();
         // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
@@ -656,14 +656,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataBegin() {
-        logger.info("Stored data begin for race(s) "+getRaces());
+        logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
         updateStatusOfTrackedRaces();
     }
 
     @Override
     public void storedDataEnd() {
-        logger.info("Stored data end for race(s) "+getRaces());
+        logger.info("Stored data end in tracker "+getID()+" for race(s) "+getRaces());
         if (isLiveTracking) {
             lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
             updateStatusOfTrackedRaces();
@@ -672,7 +672,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
+        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         if (progress != 0.0 && progress < lastStatus.getLoadingProgress()) {
             // this should never happen but it happens - let's at least write some log about this problem
             logger.severe("I got a loading progress "+progress+" that is smaller than the one already received "+lastStatus.getLoadingProgress());
@@ -683,12 +683,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataError(String arg0) {
-        logger.warning("Error with stored data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with stored data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        logger.warning("Error with live data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with live data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override
