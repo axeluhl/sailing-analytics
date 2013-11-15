@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.util.List;
 
 import android.app.Activity;
-import android.util.Pair;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -19,15 +18,36 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
+    
+    private class FlagPoleCache {
+        public final FlagPole flagPole;
+        public final TimePoint timePoint;
+        public final boolean hasNextFlag;
+        
+        public FlagPoleCache() {
+            this(null, null, false);
+        }
+        
+        public FlagPoleCache(FlagPole flagPole, TimePoint timePoint) {
+            this(flagPole, timePoint, true);
+        }
+
+        private FlagPoleCache(FlagPole flagPole, TimePoint timePoint, boolean hasNextFlag) {
+            this.flagPole = flagPole;
+            this.timePoint = timePoint;
+            this.hasNextFlag = hasNextFlag;
+        }
+    }
+
+    private FlagPoleCache flagPoleCache;
 
     private final ProcedureChangedListener procedureListener;
-
-    private Pair<FlagPole, TimePoint> cachedNextFlag;
     
     protected RaceInfoListener infoListener;
     
     public BaseRaceInfoRaceFragment() {
         this.procedureListener = new ProcedureChangedListener();
+        this.flagPoleCache = null;
     }
     
     @Override
@@ -65,8 +85,8 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     
     protected boolean updateFlagChangesCountdown(TextView targetView) {
-        if (cachedNextFlag == null) {
-            ExLog.i(BaseRaceInfoRaceFragment.class.getName(), "Refilling next-flag cache.");
+        if (flagPoleCache == null) {
+            ExLog.i(BaseRaceInfoRaceFragment.class.getSimpleName(), "Refilling next-flag cache.");
             TimePoint now = MillisecondsTimePoint.now();
             TimePoint startTime = getRaceState().getStartTime();
             FlagPoleState flagState = getRaceState().getRacingProcedure().getActiveFlags(startTime, now);
@@ -76,17 +96,20 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 FlagPole changePole = getMostInterestingFlagPole(flagChanges);
                 
                 renderFlagChangesCountdown(targetView, changeAt, changePole);
-                cachedNextFlag = new Pair<FlagPole, TimePoint>(changePole, changeAt);
+                flagPoleCache = new FlagPoleCache(changePole, changeAt);
                 return true;
+            } else {
+                flagPoleCache = new FlagPoleCache();
             }
             return false;
-        } else {
-            TimePoint changeAt = cachedNextFlag.second;
-            FlagPole changePole = cachedNextFlag.first;
+        } else if(flagPoleCache.hasNextFlag) {
+            TimePoint changeAt = flagPoleCache.timePoint;
+            FlagPole changePole = flagPoleCache.flagPole;
             
             renderFlagChangesCountdown(targetView, changeAt, changePole);
             return true;
         }
+        return false;
     }
 
     private FlagPole getMostInterestingFlagPole(List<FlagPole> poles) {
@@ -115,7 +138,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         @Override
         public void onActiveFlagsChanged(RacingProcedure racingProcedure) {
             setupUi();
-            cachedNextFlag = null;
+            flagPoleCache = null;
         }
     }
 }

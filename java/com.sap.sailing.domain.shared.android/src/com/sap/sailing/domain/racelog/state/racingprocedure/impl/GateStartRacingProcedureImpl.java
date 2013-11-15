@@ -140,7 +140,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
                     gateShutdownTime);
         } else {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false)));
+                    Arrays.asList(new FlagPole(Flags.GOLF, false)));
         }
     }
 

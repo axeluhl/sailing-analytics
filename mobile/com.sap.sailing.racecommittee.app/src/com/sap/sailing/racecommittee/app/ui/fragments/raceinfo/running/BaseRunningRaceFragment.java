@@ -18,7 +18,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelection
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FlagPoleStateRenderer;
+import com.sap.sailing.racecommittee.app.utils.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
