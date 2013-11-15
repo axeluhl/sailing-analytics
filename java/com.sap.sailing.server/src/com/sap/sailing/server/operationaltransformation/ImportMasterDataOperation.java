@@ -159,9 +159,11 @@ public class ImportMasterDataOperation extends
             leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
             toState.addLeaderboard(overallLeaderboard);
             Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
-            for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
-                Double explicitFactor = factorsForMetaColumns.get(column.getName());
-                column.setFactor(explicitFactor);
+            if (factorsForMetaColumns != null) {
+                for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
+                    Double explicitFactor = factorsForMetaColumns.get(column.getName());
+                    column.setFactor(explicitFactor);
+                }
             }
         }
     }

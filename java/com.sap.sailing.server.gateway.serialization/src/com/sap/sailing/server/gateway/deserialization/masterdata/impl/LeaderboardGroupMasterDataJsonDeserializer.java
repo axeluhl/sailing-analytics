@@ -110,11 +110,14 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
 
     private Map<String, Double> deserializeMetaColumnsWithFactor(JSONArray jsonArray) {
         Map<String, Double> metaColumnsWithFactors = new HashMap<String, Double>();
-        for (Object obj : jsonArray) {
-            JSONObject jsonObj = (JSONObject) obj;
-            String name = (String) jsonObj.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
-            Double explicitFactor = (Double) jsonObj.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_EXPLICIT_FACTOR);
-            metaColumnsWithFactors.put(name, explicitFactor);
+        if (jsonArray != null) {
+            for (Object obj : jsonArray) {
+                JSONObject jsonObj = (JSONObject) obj;
+                String name = (String) jsonObj.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
+                Double explicitFactor = (Double) jsonObj
+                        .get(LeaderboardGroupMasterDataJsonSerializer.FIELD_EXPLICIT_FACTOR);
+                metaColumnsWithFactors.put(name, explicitFactor);
+            }
         }
         return metaColumnsWithFactors;
     }
