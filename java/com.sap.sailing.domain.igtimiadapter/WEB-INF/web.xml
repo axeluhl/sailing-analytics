@@ -7,14 +7,13 @@
 
 	<servlet>
 		<servlet-name>Igtimi Oauth Callback REST API</servlet-name>
-		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer
-		</servlet-class>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.sap.sailing.domain.igtimiadapter.oauth.RestApiApplication
-			</param-value>
+			<param-value>com.sap.sailing.domain.igtimiadapter.oauth.RestApiApplication</param-value>
 		</init-param>
-	</servlet>
+    	<load-on-startup>1</load-on-startup>
+   	</servlet>
 	<servlet-mapping>
     	<servlet-name>Igtimi Oauth Callback REST API</servlet-name>
     	<url-pattern>/oauth/*</url-pattern>
