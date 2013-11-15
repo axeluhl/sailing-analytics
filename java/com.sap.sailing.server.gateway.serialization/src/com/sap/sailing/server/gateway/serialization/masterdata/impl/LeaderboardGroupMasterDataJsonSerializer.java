@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -38,6 +39,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
     public static final String FIELD_EVENTS = "events";
     public static final String FIELD_REGATTAS = "regattas";
     public static final String FIELD_OVERALL_LEADERBOARD_META_COLUMNS = "overallLeaderboardMetaColumns";
+    public static final String FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS = "overallLeaderboardSuppressedCompetitors";
     public static final String FIELD_EXPLICIT_FACTOR = "explicitFactor";
     private final LeaderboardMasterDataJsonSerializer leadboardSerializer;
     private final Iterable<Event> allEvents;
@@ -82,15 +84,22 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
             jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME,
                     LeaderboardMasterDataJsonSerializer.createJsonForScoringScheme(metaLeader.getScoringScheme()));
             jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_META_COLUMNS, createJsonArrayForMetaColumns(metaLeader));
+            jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS, createJsonArrayForSuppressedCompetitors(metaLeader.getSuppressedCompetitors()));
         }
         jsonLeaderboardGroup.put(FIELD_LEADERBOARDS, createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
         jsonLeaderboardGroup.put(FIELD_DISPLAY_GROUPS_REVERSE, leaderboardGroup.isDisplayGroupsInReverseOrder());
-        
-        //Important to call this after serializing leaderboards, as the leaderboard serializer has state
+        // Important to call this after serializing leaderboards, as the leaderboard serializer has state
         jsonLeaderboardGroup.put(FIELD_EVENTS, createJsonArrayForEvents());
         jsonLeaderboardGroup.put(FIELD_REGATTAS, createJsonArrayForRegattas());
-        
         return jsonLeaderboardGroup;
+    }
+
+    private JSONArray createJsonArrayForSuppressedCompetitors(Iterable<Competitor> suppressedCompetitors) {
+        JSONArray array = new JSONArray();
+        for (Competitor competitor : suppressedCompetitors) {
+            array.add(competitor.getId().toString());
+        }
+        return array;
     }
 
     private JSONArray createJsonArrayForMetaColumns(LeaderboardGroupMetaLeaderboard metaLeader) {

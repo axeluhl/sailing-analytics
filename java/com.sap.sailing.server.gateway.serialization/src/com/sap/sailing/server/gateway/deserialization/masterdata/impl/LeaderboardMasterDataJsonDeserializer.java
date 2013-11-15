@@ -142,7 +142,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         return result;
     }
 
-    private List<String> deserializeSuppressedCompetitors(JSONArray jsonArray) {
+    public static List<String> deserializeSuppressedCompetitors(JSONArray jsonArray) {
         List<String> ids = new ArrayList<String>();
         for (Object obj : jsonArray) {
             ids.add((String) obj);
