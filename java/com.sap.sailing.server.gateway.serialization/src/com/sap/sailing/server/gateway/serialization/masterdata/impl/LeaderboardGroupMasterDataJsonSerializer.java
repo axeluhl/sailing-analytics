@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -36,6 +37,8 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
     public static final String FIELD_DISPLAY_GROUPS_REVERSE = "displayGroupsReverse";
     public static final String FIELD_EVENTS = "events";
     public static final String FIELD_REGATTAS = "regattas";
+    public static final String FIELD_OVERALL_LEADERBOARD_META_COLUMNS = "overallLeaderboardMetaColumns";
+    public static final String FIELD_EXPLICIT_FACTOR = "explicitFactor";
     private final LeaderboardMasterDataJsonSerializer leadboardSerializer;
     private final Iterable<Event> allEvents;
     private final JsonSerializer<Event> eventSerializer;
@@ -71,13 +74,14 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         jsonLeaderboardGroup.put(FIELD_DESCRIPTION, leaderboardGroup.getDescription());
         jsonLeaderboardGroup.put(FIELD_HAS_OVERALL_LEADERBOARD, leaderboardGroup.getOverallLeaderboard() != null);
         if (leaderboardGroup.getOverallLeaderboard() != null) {
-            // TODO see bug 1605; the overall leaderboard's column factors also need to be serialized
+            LeaderboardGroupMetaLeaderboard metaLeader = (LeaderboardGroupMetaLeaderboard) leaderboardGroup
+                    .getOverallLeaderboard();
             jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS,
-                    LeaderboardMasterDataJsonSerializer.createJsonForResultDiscardingRule(leaderboardGroup
-                            .getOverallLeaderboard().getResultDiscardingRule()));
+                    LeaderboardMasterDataJsonSerializer.createJsonForResultDiscardingRule(metaLeader
+                            .getResultDiscardingRule()));
             jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME,
-                    LeaderboardMasterDataJsonSerializer.createJsonForScoringScheme(leaderboardGroup
-                            .getOverallLeaderboard().getScoringScheme()));
+                    LeaderboardMasterDataJsonSerializer.createJsonForScoringScheme(metaLeader.getScoringScheme()));
+            jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_META_COLUMNS, createJsonArrayForMetaColumns(metaLeader));
         }
         jsonLeaderboardGroup.put(FIELD_LEADERBOARDS, createJsonArrayForLeaderboards(leaderboardGroup.getLeaderboards()));
         jsonLeaderboardGroup.put(FIELD_DISPLAY_GROUPS_REVERSE, leaderboardGroup.isDisplayGroupsInReverseOrder());
@@ -87,6 +91,17 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         jsonLeaderboardGroup.put(FIELD_REGATTAS, createJsonArrayForRegattas());
         
         return jsonLeaderboardGroup;
+    }
+
+    private JSONArray createJsonArrayForMetaColumns(LeaderboardGroupMetaLeaderboard metaLeader) {
+        JSONArray array = new JSONArray();
+        for (RaceColumn column : metaLeader.getRaceColumns()) {
+            JSONObject metaColumn = new JSONObject();
+            metaColumn.put(FIELD_NAME, column.getName());
+            metaColumn.put(FIELD_EXPLICIT_FACTOR, column.getExplicitFactor());
+            array.add(metaColumn);
+        }
+        return array;
     }
 
     private JSONArray createJsonArrayForRegattas() {
