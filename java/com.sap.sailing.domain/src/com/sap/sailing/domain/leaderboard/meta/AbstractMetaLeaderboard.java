@@ -48,7 +48,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
-    private transient WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
+    private transient WeakHashMap<Leaderboard, MetaLeaderboardColumn> columnsForLeaderboards;
     private transient WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
     
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
@@ -134,7 +134,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
-        RaceColumn result = columnsForLeaderboards.get(leaderboard);
+        MetaLeaderboardColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
             result.addRaceColumnListener(this);

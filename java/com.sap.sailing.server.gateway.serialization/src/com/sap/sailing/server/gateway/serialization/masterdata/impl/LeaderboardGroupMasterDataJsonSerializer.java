@@ -71,6 +71,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         jsonLeaderboardGroup.put(FIELD_DESCRIPTION, leaderboardGroup.getDescription());
         jsonLeaderboardGroup.put(FIELD_HAS_OVERALL_LEADERBOARD, leaderboardGroup.getOverallLeaderboard() != null);
         if (leaderboardGroup.getOverallLeaderboard() != null) {
+            // TODO see bug 1605; the overall leaderboard's column factors also need to be serialized
             jsonLeaderboardGroup.put(FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS,
                     LeaderboardMasterDataJsonSerializer.createJsonForResultDiscardingRule(leaderboardGroup
                             .getOverallLeaderboard().getResultDiscardingRule()));
