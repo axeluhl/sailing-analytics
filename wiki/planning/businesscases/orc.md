@@ -7,7 +7,7 @@ However, as the typical boats in this regatta category are rather big boats the 
 
 ## Purpose
 
-Provide solutions to help organisations operating ORC/IRC/Yardstick based regattas to manage them and to enable  live moderation of such regattas to make them more attractive for the media, spectators and sailors.
+Provide solutions to help organizations operating ORC/IRC/Yardstick based regattas to manage them and to enable  live moderation of such regattas to make them more attractive for the media, spectators and sailors.
 
 ## Features
 
@@ -16,7 +16,8 @@ Provide solutions to help organisations operating ORC/IRC/Yardstick based regatt
     * Time On Distance
     * Performance Curve
     * Performance Line
-* 
+* Support for satellite trackers for long distance races
+* Optional: Access on board sensors of racing boats
 
 ## Description
 
