@@ -11,13 +11,14 @@ Provide solutions to help organizations operating ORC/IRC/Yardstick based regatt
 
 ## Features
 
-* Support for different handicap scoring systems
+* Support for different handicap scoring systems (live calculation, live leaderboard)
     * Time On Time
     * Time On Distance
     * Performance Curve
     * Performance Line
-* Support for satellite trackers for long distance races
-* Optional: Access on board sensors of racing boats
+* Visualization of live boat positions/ranking incorporating the handicap
+* Support of satellite trackers for long distance races
+* Optional: Access on board sensors of racing boats (e.g. for wind)
 
 ## Description
 
