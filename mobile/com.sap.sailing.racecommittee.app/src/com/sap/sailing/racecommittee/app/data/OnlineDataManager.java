@@ -18,11 +18,11 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.deserialization.impl.ApplyableDeviceConfigurationJsonDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
@@ -44,6 +44,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -56,7 +57,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
@@ -232,17 +232,17 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback) {
-        return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
+    public LoaderCallbacks<DataLoaderResult<ApplyableDeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
+            LoadClient<ApplyableDeviceConfiguration> callback) {
+        return new DataLoaderCallbacks<ApplyableDeviceConfiguration>(callback, new LoaderCreator<ApplyableDeviceConfiguration>() {
             @Override
-            public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<ApplyableDeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<DeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
-                DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(new DeviceConfigurationJsonDeserializer());
+                DataHandler<ApplyableDeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
+                DataParser<ApplyableDeviceConfiguration> parser = new DeviceConfigurationParser(new ApplyableDeviceConfigurationJsonDeserializer());
                 
-                return new OnlineDataLoader<DeviceConfiguration>(
+                return new OnlineDataLoader<ApplyableDeviceConfiguration>(
                         context, 
                         new URL(AppPreferences.getServerBaseURL(context) + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);

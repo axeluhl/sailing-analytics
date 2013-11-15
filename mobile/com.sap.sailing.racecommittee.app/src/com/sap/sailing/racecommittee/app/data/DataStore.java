@@ -8,8 +8,8 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
 
 public interface DataStore {
     
@@ -40,6 +40,6 @@ public interface DataStore {
     public CourseBase getLastPublishedCourseDesign();
     public void setLastPublishedCourseDesign(CourseBase courseData);
     
-    public DeviceConfiguration getTabletConfiguration();
-    public void setTabletConfiguration(DeviceConfiguration configuration);
+    public ApplyableDeviceConfiguration getTabletConfiguration();
+    public void setTabletConfiguration(ApplyableDeviceConfiguration configuration);
 }

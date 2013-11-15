@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -21,6 +20,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -30,7 +30,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
-import com.sap.sailing.racecommittee.app.utils.DeviceConfigurationHelper;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         DialogListenerHost {
@@ -111,16 +110,15 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
                     AppPreferences.getAndroidIdentifier(getApplicationContext()));
             getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<ApplyableDeviceConfiguration>() {
 
                         @Override
-                        public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
+                        public void onLoadSucceded(ApplyableDeviceConfiguration configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 
-                            DeviceConfigurationHelper.apply(getApplicationContext(), configuration);
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
-                                    Toast.LENGTH_LONG).show();
+                            configuration.apply(getApplicationContext());
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);
                         }
 

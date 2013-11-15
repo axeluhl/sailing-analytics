@@ -16,7 +16,7 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
 
     @Override
     public DeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        DeviceConfigurationImpl configuration = createDeviceConfiguration();
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES)) {
             JSONArray courseAreaNames = Helpers.getNestedArraySafe(object, DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES);
@@ -43,6 +43,10 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         }
 
         return configuration;
+    }
+    
+    protected DeviceConfigurationImpl createDeviceConfiguration() {
+        return new DeviceConfigurationImpl();
     }
 
 }

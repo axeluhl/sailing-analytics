@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -44,6 +43,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 
@@ -203,11 +203,11 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback) {
-        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback, new Callable<DeviceConfiguration>() {
+    public LoaderCallbacks<DataLoaderResult<ApplyableDeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<ApplyableDeviceConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<ApplyableDeviceConfiguration>(context, callback, new Callable<ApplyableDeviceConfiguration>() {
             @Override
-            public DeviceConfiguration call() throws Exception {
+            public ApplyableDeviceConfiguration call() throws Exception {
                 throw new IllegalStateException("No remote configuration in offline mode.");
             }
         });
