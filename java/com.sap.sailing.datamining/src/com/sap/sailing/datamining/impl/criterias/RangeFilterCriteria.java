@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.impl.criterias;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
-import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 
-public abstract class RangeFilterCriteria<DataType, ValueType extends Comparable<ValueType>> implements FilterCriteria<DataType> {
+public abstract class RangeFilterCriteria<DataType, ValueType extends Comparable<ValueType>> implements ConcurrentFilterCriteria<DataType> {
     
     private ClusterOfComparable<ValueType> cluster;
 

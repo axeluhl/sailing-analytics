@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining;
 
-public interface FilterCriteria<DataType> {
+public interface ConcurrentFilterCriteria<DataType> {
     
     public boolean matches(DataType dataEntry);
 

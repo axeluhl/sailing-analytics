@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
-import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
@@ -18,7 +18,7 @@ public class TestFilterCriterias {
 
     @Test
     public void testRegexFilterCriteria() {
-        FilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
+        ConcurrentFilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
         assertTrue(regexFilterCriteria.matches("some Random stuff"));
         assertFalse(regexFilterCriteria.matches(null));
         
@@ -40,7 +40,7 @@ public class TestFilterCriterias {
     @Test
     public void testRangeFilterCriteria() {
         ClusterOfComparable<Integer> cluster = new ClusterOfComparableImpl<Integer>("Test", 3, 1);
-        FilterCriteria<Integer> rangeFilterCriteria = new SimpleRangeFilterCriteria<Integer>(cluster);
+        ConcurrentFilterCriteria<Integer> rangeFilterCriteria = new SimpleRangeFilterCriteria<Integer>(cluster);
 
         assertTrue(rangeFilterCriteria.matches(1));
         assertTrue(rangeFilterCriteria.matches(2));

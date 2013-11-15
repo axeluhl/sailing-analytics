@@ -3,10 +3,10 @@ package com.sap.sailing.datamining.impl.criterias;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.FilterCriteria;
 
-public class DimensionValuesFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
+public class DimensionValuesFilterCriteria<DataType, ValueType> implements ConcurrentFilterCriteria<DataType> {
     
     private Dimension<DataType, ValueType> dimension;
     private Collection<ValueType> values;

@@ -3,13 +3,13 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 
 public class FilterByCriteria<DataType> extends AbstractSingleThreadedFilter<DataType> {
     
-    private FilterCriteria<DataType> criteria;
+    private ConcurrentFilterCriteria<DataType> criteria;
 
-    public FilterByCriteria(FilterCriteria<DataType> criteria) {
+    public FilterByCriteria(ConcurrentFilterCriteria<DataType> criteria) {
         this.criteria = criteria;
     }
 
