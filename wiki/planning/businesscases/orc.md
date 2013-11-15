@@ -6,7 +6,7 @@ Beside the One-Design racing (where all boats have identical or very similar des
 
 ## Purpose
 
-Providing...
+Provide solutions to help organisations operating ORC/IRC/Yardstick based regattas to manage them and to enable  live moderation of such regattas to make them more attractive for the media, spectators and sailors.
 
 ## Features
 
