@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/settings_category_general" >
+        
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_is_overridden_default"
+            android:key="@string/preference_racing_procedure_is_overridden_key"
+            android:summary="@string/override_default_start_procedure_type_description"
+            android:title="@string/override_default_start_procedure_type_header" />
+
+        <ListPreference
+            android:defaultValue="@string/preference_racing_procedure_override_default"
+            android:key="@string/preference_racing_procedure_override_key"
+            android:summary="@string/override_default_start_procedure_type_select_description"
+            android:title="@string/override_default_start_procedure_type_select_header" />
+        
+    </PreferenceCategory>
+    
+    <!-- <PreferenceCategory android:title="RRS26" >
+        
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+        
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="Gate Start" >
+        
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+        
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="ESS Start" >
+        
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+        
+    </PreferenceCategory> -->
+
+</PreferenceScreen>

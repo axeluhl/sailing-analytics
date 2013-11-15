@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
-import android.util.Log;
 
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -19,218 +18,178 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayo
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
 public class AppPreferences {
-    
-    private static String TAG = AppPreferences.class.getName();
 
-    private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
+    //private static String TAG = AppPreferences.class.getSimpleName();
+
+    public static AppPreferences on(Context context) {
+        return new AppPreferences(context);
+    }
+
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
+
     private final static String PREFERENCE_AUTHOR_NAME = "authorName";
     private final static String PREFERENCE_AUTHOR_PRIORITY = "authorPriority";
+
     private final static String PREFERENCE_WIND_BEARING = "windBearingPref";
     private final static String PREFERENCE_WIND_SPEED = "windSpeedPref";
-    
+
     private final static String PREFERENCE_BOAT_CLASS = "boatClassPref";
     private final static String PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
     private final static String PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
-    //private final static String PREFERENCE_TARGET_TIME = "targetTimePref";
-    
-    private final static String PREFERENCE_MAIL_RECIPIENT = "mailRecipientPreference";
-    private final static String PREFERENCE_MANAGED_COURSE_AREAS = "courseAreasPref";
-    private final static String PREFERENCE_MIN_ROUNDS = "minRoundsPreference";
-    private final static String PREFERENCE_MAX_ROUNDS = "maxRoundsPreference";
-    private final static String PREFERENCE_DEFAULT_START_PROCEDURE_TYPE = "defaultStartProcedureType";
-    
-    public static BoatClassType getBoatClass(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String boatClass = sp.getString(PREFERENCE_BOAT_CLASS,  null);
-        if(boatClass==null)
+
+    private final SharedPreferences preferences;
+    private final Context context;
+
+    public AppPreferences(Context context) {
+        this.context = context;
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public boolean isSendingActive() {
+        return preferences.getBoolean(PREFERENCE_SENDING_ACTIVE, false);
+    }
+
+    public void setSendingActive(boolean activate) {
+        preferences.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).apply();
+    }
+
+    public void setAuthor(RaceLogEventAuthor author) {
+        preferences.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).apply();
+        preferences.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).apply();
+    }
+
+    public RaceLogEventAuthor getAuthor() {
+        String authorName = preferences.getString(PREFERENCE_AUTHOR_NAME, "<anonymous>");
+        int authorPriority = preferences.getInt(PREFERENCE_AUTHOR_PRIORITY, 0);
+        return new RaceLogEventAuthorImpl(authorName, authorPriority);
+    }
+
+    public BoatClassType getBoatClass() {
+        String boatClass = preferences.getString(PREFERENCE_BOAT_CLASS, null);
+        if (boatClass == null) {
             return null;
+        }
         return BoatClassType.valueOf(boatClass);
     }
-    
-    public static void setBoatClass(Context context, BoatClassType boatClass) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+    public void setBoatClass(BoatClassType boatClass) {
         String boatClassString = boatClass.name();
-        sp.edit().putString(PREFERENCE_BOAT_CLASS, boatClassString).apply();
+        preferences.edit().putString(PREFERENCE_BOAT_CLASS, boatClassString).apply();
     }
-    
-    public static CourseLayouts getCourseLayout(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String courseLayout = sp.getString(PREFERENCE_COURSE_LAYOUT, null);
-        if(courseLayout==null)
+
+    public CourseLayouts getCourseLayout() {
+        String courseLayout = preferences.getString(PREFERENCE_COURSE_LAYOUT, null);
+        if (courseLayout == null)
             return null;
         CourseLayouts storedCourseLayout;
-        //FIXME this is not nice
-        try{
+        // FIXME this is not nice
+        try {
             storedCourseLayout = TrapezoidCourseLayouts.valueOf(courseLayout);
-        } catch (IllegalArgumentException iae){
+        } catch (IllegalArgumentException iae) {
             storedCourseLayout = WindWardLeeWardCourseLayouts.valueOf(courseLayout);
         }
-        
+
         return storedCourseLayout;
     }
-    
-    public static void setCourseLayout(Context context, CourseLayouts courseLayout) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+    public void setCourseLayout(CourseLayouts courseLayout) {
         String courseLayoutString = courseLayout.name();
-        sp.edit().putString(PREFERENCE_COURSE_LAYOUT, courseLayoutString).apply();
+        preferences.edit().putString(PREFERENCE_COURSE_LAYOUT, courseLayoutString).apply();
     }
-    
-    public static NumberOfRounds getNumberOfRounds(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String numberOfRounds = sp.getString(PREFERENCE_NUMBER_OF_ROUNDS, null);
-        if(numberOfRounds==null)
+
+    public NumberOfRounds getNumberOfRounds() {
+        String numberOfRounds = preferences.getString(PREFERENCE_NUMBER_OF_ROUNDS, null);
+        if (numberOfRounds == null)
             return null;
         return NumberOfRounds.valueOf(numberOfRounds);
     }
-    
-    public static void setNumberOfRounds(Context context, NumberOfRounds numberOfRounds) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+    public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
         String numberOfRoundsString = numberOfRounds.name();
-        sp.edit().putString(PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).apply();
+        preferences.edit().putString(PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).apply();
     }
-    
-    /*public static TargetTime getTargetTime(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String targetTime = sp.getString(PREFERENCE_TARGET_TIME, null);
-        if(targetTime==null)
-            return null;
-        return TargetTime.valueOf(targetTime);
+
+    public double getWindBearingFromDirection() {
+        long windBearingAsLong = preferences.getLong(PREFERENCE_WIND_BEARING, 0);
+        return Double.longBitsToDouble(windBearingAsLong);
     }
-    
-    public static void setTargetTime(Context context, TargetTime targetTime) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String targetTimeString = targetTime.name();
-        sp.edit().putString(PREFERENCE_TARGET_TIME, targetTimeString).apply();
-    }*/
-    
-    public static List<String> getManagedCourseAreaNames(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String value = sp.getString(PREFERENCE_MANAGED_COURSE_AREAS, "");
+
+    public void setWindBearingFromDirection(double enteredWindBearing) {
+        long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
+        preferences.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).apply();
+    }
+
+    public double getWindSpeed() {
+        long windSpeedAsLong = preferences.getLong(PREFERENCE_WIND_SPEED, 0);
+        return Double.longBitsToDouble(windSpeedAsLong);
+    }
+
+    public void setWindSpeed(double enteredWindSpeed) {
+        long windSpeedAsLong = Double.doubleToLongBits(enteredWindSpeed);
+        preferences.edit().putLong(PREFERENCE_WIND_SPEED, windSpeedAsLong).apply();
+    }
+
+    public List<String> getManagedCourseAreaNames() {
+        String value = preferences.getString(context.getString(R.string.preference_course_areas_key), "");
         String[] managedCourseAreas = value.split(",");
         for (int i = 0; i < managedCourseAreas.length; i++) {
             managedCourseAreas[i] = managedCourseAreas[i].trim();
         }
         return Arrays.asList(managedCourseAreas);
     }
-    
-    public static void setManagedCourseAreaNames(Context context, List<String> courseAreaNames) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+
+    public void setManagedCourseAreaNames(List<String> courseAreaNames) {
         StringBuilder builder = new StringBuilder();
         for (String name : courseAreaNames) {
             builder.append(name);
             builder.append(",");
         }
-        sp.edit().putString(PREFERENCE_MANAGED_COURSE_AREAS, builder.substring(0, builder.length() - 1)).commit();
-    }
-    
-    public static double getWindBearingFromDirection(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        long windBearingAsLong = sp.getLong(PREFERENCE_WIND_BEARING, 0);
-        return Double.longBitsToDouble(windBearingAsLong);
-    }
-    
-    public static void setWindBearingFromDirection(Context context, double enteredWindBearing) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
-        sp.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).apply();
-    }
-    
-    public static double getWindSpeed(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        long windSpeedAsLong = sp.getLong(PREFERENCE_WIND_SPEED, 0);
-        return Double.longBitsToDouble(windSpeedAsLong);
-    }
-    
-    public static void setWindSpeed(Context context, double enteredWindSpeed) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        long windSpeedAsLong = Double.doubleToLongBits(enteredWindSpeed);
-        sp.edit().putLong(PREFERENCE_WIND_SPEED, windSpeedAsLong).apply();
+        preferences
+                .edit()
+                .putString(context.getString(R.string.preference_course_areas_key),
+                        builder.substring(0, builder.length() - 1)).commit();
     }
 
-    public static String getServerBaseURL(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        if(sp.getString(PREFERENCE_SERVICE_URL, "").equals(""))
+    public String getServerBaseURL() {
+        String value = preferences.getString(context.getString(R.string.preference_server_url_key), "");
+        if (value.equals("")) {
             return "http://localhost:8889";
-        return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.56.1:8888");
+        }
+        return value;
     }
 
-    public static boolean isSendingActive(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREFERENCE_SENDING_ACTIVE, false);
+    public String getMailRecipient() {
+        return preferences.getString(context.getString(R.string.preference_mail_key), "");
     }
 
-    public static void setSendingActive(Context context, boolean activate) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).apply();
+    public void setMailRecipient(String mail) {
+        preferences.edit().putString(context.getString(R.string.preference_mail_key), mail).commit();
     }
     
-    public static String getMailRecipient(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(PREFERENCE_MAIL_RECIPIENT, context.getString(R.string.settings_advanced_mail_default));
+    public int getMinRounds() {
+        return preferences.getInt(context.getString(R.string.preference_course_designer_by_name_min_rounds_key), 0);
     }
-    
-    public static void setMailRecipient(Context context, String mail) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREFERENCE_MAIL_RECIPIENT, mail).commit();
+
+    public void setMinRounds(int minRounds) {
+        preferences.edit().putInt(context.getString(R.string.preference_course_designer_by_name_min_rounds_key), minRounds).commit();
     }
-    
-    public static void setAuthor(Context context, RaceLogEventAuthor author) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).apply();
-        sp.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).apply();
+
+    public int getMaxRounds() {
+        return preferences.getInt(context.getString(R.string.preference_course_designer_by_name_max_rounds_key), 0);
     }
-    
-    public static RaceLogEventAuthor getAuthor(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String authorName = sp.getString(PREFERENCE_AUTHOR_NAME, "<anonymous>");
-        int authorPriority = sp.getInt(PREFERENCE_AUTHOR_PRIORITY, 0);
-        return new RaceLogEventAuthorImpl(authorName, authorPriority);
+
+    public void setMaxRounds(int maxRounds) {
+        preferences.edit().putInt(context.getString(R.string.preference_course_designer_by_name_max_rounds_key), maxRounds).commit();
     }
-    
-    public static int getMaxRounds(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String maxRoundsStr = sp.getString(PREFERENCE_MAX_ROUNDS, "3");
-        int maxRounds = 3;
-        try {
-             maxRounds = Integer.valueOf(maxRoundsStr);
-        } catch (NumberFormatException e){
-            Log.e(TAG, "Unable to parse maximum rounds setting to integer");
-        }
-        return maxRounds; 
+
+    public RacingProcedureType getDefaultStartProcedureType() {
+        String defaultStartProcedureType = preferences.getString(
+                context.getString(R.string.preference_racing_procedure_override_key), "");
+        return RacingProcedureType.valueOf(defaultStartProcedureType);
     }
-    
-    public static void setMaxRounds(Context context, int maxRounds) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREFERENCE_MAX_ROUNDS, String.valueOf(maxRounds)).commit();
-    }
-    
-    public static int getMinRounds(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String minRoundsStr = sp.getString(PREFERENCE_MIN_ROUNDS, "2");
-        int minRounds = 2;
-        try {
-             minRounds = Integer.valueOf(minRoundsStr);
-        } catch (NumberFormatException e){
-            Log.e(TAG, "Unable to parse minimum rounds setting to integer");
-        }
-        return minRounds; 
-    }
-    
-    public static void setMinRounds(Context context, int minRounds) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREFERENCE_MIN_ROUNDS, String.valueOf(minRounds)).commit();
-    }
-    
-    public static RacingProcedureType getDefaultStartProcedureType(Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String defaultStartProcedureType = sp.getString(PREFERENCE_DEFAULT_START_PROCEDURE_TYPE, "RRS26");
-        RacingProcedureType type = RacingProcedureType.valueOf(defaultStartProcedureType);
-        return type;
-    }
-    
-    public static String getAndroidIdentifier(Context context) {
+
+    public String getAndroidIdentifier() {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
-    
+
 }

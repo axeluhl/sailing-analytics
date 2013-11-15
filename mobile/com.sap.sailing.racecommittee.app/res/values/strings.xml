@@ -187,7 +187,7 @@
     <string name="store_wind">Store wind</string>
     
 	<!-- SETTINGS -->
-    <string name="settings_category_general">General Settings</string>    
+    <string name="settings_category_general">General</string>    
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
     <string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
     <string name="settings_general_language_header">Select Language</string>
@@ -279,5 +279,11 @@
 	<string name="loading_configuration_succeded">Remote configuration applied.</string>
 	
 	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>
+	
+	<string name="settings_category_racing_procedure">Racing Procedure</string>
+	<string name="settings_category_course_designer">Course Designer</string>
+	<string name="override_default_course_designer_type_header">Override Course Designer type</string>
+	<string name="override_default_course_designer_type_description">Use configured Course Designer instead of race\'s.</string>
+	<string name="override_default_course_designer_type_select_header">Course Designer type</string>
 	
 </resources>

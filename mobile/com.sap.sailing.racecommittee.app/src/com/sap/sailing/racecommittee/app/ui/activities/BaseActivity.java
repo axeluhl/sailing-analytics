@@ -160,7 +160,7 @@ public abstract class BaseActivity extends LoggableActivity {
     }
 
     private String getLiveIconText() {
-        return String.format("Connected to: %s\n%s", AppPreferences.getServerBaseURL(this), sendingServiceStatus);
+        return String.format("Connected to: %s\n%s", AppPreferences.on(this).getServerBaseURL(), sendingServiceStatus);
     }
 
     protected void fadeActivity(Class<?> activity, boolean newTopTask) {

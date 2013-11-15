@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preference_language_key">languagePref</string>
+    <string name="preference_server_url_key">webserviceUrlPref</string>
+    <string name="preference_server_url_default">http://192.168.56.1:8880</string>
+    <string name="preference_course_areas_key">courseAreasPref</string>
+    <string name="preference_course_areas_default">Alpha,Bravo</string>
+    <string name="preference_mail_key">mailRecipientPreference</string>
+    <string name="preference_mail_default">lukas.niemeier@sap.com</string>
+    
+    <string name="preference_racing_procedure_is_overridden_key">overrideDefaultRacingProcedureType</string>
+    <bool name="preference_racing_procedure_is_overridden_default">false</bool>
+    <string name="preference_racing_procedure_override_key">defaultRacingProcedureType</string>
+    <string name="preference_racing_procedure_override_default">RRS26</string>
+    
+    <string name="preference_course_designer_is_overridden_key">overrideDefaultCourseDesignerType</string>
+    <bool name="preference_course_designer_is_overridden_default">false</bool>
+    <string name="preference_course_designer_override_key">defaultCourseDesignerType</string>
+    <string name="preference_course_designer_override_default">BY_NAME</string>
+    
+    <string name="preference_course_designer_by_name_min_rounds_key">courseDesignerByNameMinRoundsPref</string>
+    <string name="preference_course_designer_by_name_min_rounds_default">2</string>
+    <string name="preference_course_designer_by_name_max_rounds_key">courseDesignerByNameMaxRoundsPref</string>
+    <string name="preference_course_designer_by_name_max_rounds_default">3</string>
+</resources>

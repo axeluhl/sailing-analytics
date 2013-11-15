@@ -161,7 +161,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
                 PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("overrideDefaultStartProcedureType", false);
         RacingProcedureType type = RacingProcedureType.UNKNOWN;
         if (overrideStartProcedureType) {
-            type = AppPreferences.getDefaultStartProcedureType(getActivity());
+            type = AppPreferences.on(getActivity()).getDefaultStartProcedureType();
         } else {
             type = getRaceState().getRacingProcedure().getType();
         }

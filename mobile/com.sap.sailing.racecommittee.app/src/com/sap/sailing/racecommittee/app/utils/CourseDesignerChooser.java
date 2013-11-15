@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.sap.sailing.domain.base.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ByLabelCourseDesignDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ByNameCourseDesignDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ByMapCourseDesignDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ESSCourseDesignDialog;
 
@@ -19,7 +19,7 @@ public class CourseDesignerChooser {
             return new ESSCourseDesignDialog();
         case BY_NAME:
         default:
-            return new ByLabelCourseDesignDialog();
+            return new ByNameCourseDesignDialog();
         }
     }
 

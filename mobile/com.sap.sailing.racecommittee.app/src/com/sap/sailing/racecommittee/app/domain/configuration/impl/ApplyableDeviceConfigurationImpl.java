@@ -12,22 +12,28 @@ public class ApplyableDeviceConfigurationImpl extends DeviceConfigurationImpl im
     private static final long serialVersionUID = 9146162601389924219L;
     private static final String TAG = ApplyableDeviceConfigurationImpl.class.getName();
 
+    private final AppPreferences preferences;
+    
+    public ApplyableDeviceConfigurationImpl(AppPreferences preferences) {
+        this.preferences = preferences;
+    }
+    
     @Override
     public void apply(Context context) {
         if (getAllowedCourseAreaNames() != null) {
-            AppPreferences.setManagedCourseAreaNames(context, getAllowedCourseAreaNames());
+            preferences.setManagedCourseAreaNames(getAllowedCourseAreaNames());
             logApply("course areas", getAllowedCourseAreaNames());
         }
         if (getMinimumRoundsForCourse() != null) {
-            AppPreferences.setMinRounds(context, getMinimumRoundsForCourse());
+            preferences.setMinRounds(getMinimumRoundsForCourse());
             logApply("minimum rounds", getMinimumRoundsForCourse());
         }
         if (getMaximumRoundsForCourse() != null) {
-            AppPreferences.setMaxRounds(context, getMaximumRoundsForCourse());
+            preferences.setMaxRounds(getMaximumRoundsForCourse());
             logApply("maximum rounds", getMaximumRoundsForCourse());
         }
         if (getResultsMailRecipient() != null) {
-            AppPreferences.setMailRecipient(context, getResultsMailRecipient());
+            preferences.setMailRecipient(getResultsMailRecipient());
             logApply("mail recipient", getResultsMailRecipient());
         }
     }

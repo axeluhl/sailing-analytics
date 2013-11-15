@@ -18,7 +18,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class ByLabelCourseDesignDialog extends RaceDialogFragment {
+public class ByNameCourseDesignDialog extends RaceDialogFragment {
 
     public interface CourseByLabelSelectionListener {
         public void onCourseSelected();
@@ -33,8 +33,9 @@ public class ByLabelCourseDesignDialog extends RaceDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         TableLayout holder = new TableLayout(getActivity());
         String[] courseLayouts = getActivity().getResources().getStringArray(R.array.course_routes);
-        int maxNumberOfRounds = AppPreferences.getMaxRounds(getActivity());
-        int minNumberOfRounds = AppPreferences.getMinRounds(getActivity());
+        AppPreferences preferences = AppPreferences.on(getActivity());
+        int maxNumberOfRounds = preferences.getMaxRounds();
+        int minNumberOfRounds = preferences.getMinRounds();
         
         for (int layout = 0; layout < courseLayouts.length; layout++) {
             String[] courseNumberAndName = courseLayouts[layout].split(",");

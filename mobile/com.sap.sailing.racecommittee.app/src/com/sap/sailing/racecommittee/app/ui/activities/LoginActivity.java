@@ -108,7 +108,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                    AppPreferences.getAndroidIdentifier(getApplicationContext()));
+                    AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
             getLoaderManager().restartLoader(0, null,
                     dataManager.createConfigurationLoader(identifier, new LoadClient<ApplyableDeviceConfiguration>() {
 
@@ -169,15 +169,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             @Override
             public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-                AppPreferences.setAuthor(LoginActivity.this, loginDialog.getAuthor());
+                AppPreferences preferences = AppPreferences.on(dialog.getActivity());
+                preferences.setAuthor(loginDialog.getAuthor());
                 switch (loginDialog.getSelectedLoginType()) {
                 case OFFICER:
                     ExLog.i(TAG, "Communication with backend is active.");
-                    AppPreferences.setSendingActive(LoginActivity.this, true);
+                    preferences.setSendingActive(true);
                     break;
                 case VIEWER:
                     ExLog.i(TAG, "Communication with backend is inactive.");
-                    AppPreferences.setSendingActive(LoginActivity.this, false);
+                    preferences.setSendingActive(false);
                     break;
                 default:
                     ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");

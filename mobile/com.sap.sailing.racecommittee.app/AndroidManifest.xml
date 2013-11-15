@@ -44,7 +44,7 @@
 
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             android:launchMode="standard"
             android:finishOnTaskLaunch="true" >
             <intent-filter>
@@ -54,23 +54,23 @@
         </activity>
         <activity
             android:name=".ui.activities.RacingActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensorLandscape" >
         </activity>
         <activity
             android:name=".ui.activities.ResultsCapturingActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensorLandscape" >
         </activity>
         <activity
             android:name=".ui.activities.WindActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensorLandscape" >
         </activity>
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensorLandscape" >
         </activity>
         <activity
             android:name=".ui.activities.SystemInformationActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensorLandscape" >
         </activity>
 
         <service

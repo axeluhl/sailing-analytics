@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/settings_category_general" >
+        
+	    <CheckBoxPreference
+	        android:key="@string/preference_course_designer_is_overridden_key"
+	        android:defaultValue="@bool/preference_course_designer_is_overridden_default"
+	        android:title="@string/override_default_course_designer_type_header"
+	        android:summary="@string/override_default_course_designer_type_description" />
+	
+	    <ListPreference
+	        android:key="@string/preference_course_designer_override_key"
+	        android:defaultValue="@string/preference_course_designer_override_default"
+	        android:summary="@string/empty"
+	        android:title="@string/override_default_course_designer_type_select_header" />
+    
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="By-Name Course Designer" >
+        
+		<com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
+		    android:key="@string/preference_course_designer_by_name_min_rounds_key"
+		    android:defaultValue="@string/preference_course_designer_by_name_min_rounds_default"
+		    android:title="Min Rounds"
+		    android:summary="@string/empty"
+		    android:numeric="integer"
+		    android:maxLength="2"/>
+		
+		<com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
+		    android:key="@string/preference_course_designer_by_name_max_rounds_key"
+		    android:defaultValue="@string/preference_course_designer_by_name_max_rounds_default"
+		    android:title="Max Rounds"
+		    android:summary="@string/empty"
+		    android:numeric="integer"
+		    android:maxLength="2"/>
+		
+    </PreferenceCategory>
+    
+    <!--<PreferenceCategory android:title="By-Map Course Designer" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+    </PreferenceCategory>
+    
+    <PreferenceCategory android:title="By-Marks Course Designer (ESS)" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noOperationPreference"
+            android:summary="@string/empty"
+            android:title="@string/empty" />
+    </PreferenceCategory> -->
+
+</PreferenceScreen>

@@ -408,30 +408,33 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     }
 
     public BoatClassType getSelectedBoatClass() {
-        if (AppPreferences.getBoatClass(getActivity()) != null) {
-            return AppPreferences.getBoatClass(getActivity());
+        AppPreferences preferences = AppPreferences.on(getActivity());
+        if (preferences.getBoatClass() != null) {
+            return preferences.getBoatClass();
         } else {
             setSelectedBoatClass(BoatClassType.boatClass470erMen);
-            return AppPreferences.getBoatClass(getActivity());
+            return preferences.getBoatClass();
         }
     }
 
     public CourseLayouts getSelectedCourseLayout() {
-        if (AppPreferences.getCourseLayout(getActivity()) != null) {
-            return AppPreferences.getCourseLayout(getActivity());
+        AppPreferences preferences = AppPreferences.on(getActivity());
+        if (preferences.getCourseLayout() != null) {
+            return preferences.getCourseLayout();
         } else {
             setSelectedCourseLayout((CourseLayouts) getSelectedBoatClass().getPossibleCourseLayoutsWithTargetTime()
                     .keySet().toArray().clone()[0]);
-            return AppPreferences.getCourseLayout(getActivity());
+            return preferences.getCourseLayout();
         }
     }
 
     public NumberOfRounds getSelectedNumberOfRounds() {
-        if (AppPreferences.getNumberOfRounds(getActivity()) != null) {
-            return AppPreferences.getNumberOfRounds(getActivity());
+        AppPreferences preferences = AppPreferences.on(getActivity());
+        if (preferences.getNumberOfRounds() != null) {
+            return preferences.getNumberOfRounds();
         } else {
             setSelectedNumberOfRounds(NumberOfRounds.TWO);
-            return AppPreferences.getNumberOfRounds(getActivity());
+            return preferences.getNumberOfRounds();
         }
     }
 
@@ -447,17 +450,17 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
     }
 
     public void setSelectedBoatClass(BoatClassType selectedBoatClass) {
-        AppPreferences.setBoatClass(getActivity(), selectedBoatClass);
+        AppPreferences.on(getActivity()).setBoatClass(selectedBoatClass);
         courseDesignComputer.setBoatClass(getSelectedBoatClass());
     }
 
     public void setSelectedCourseLayout(CourseLayouts selectedCourseLayout) {
-        AppPreferences.setCourseLayout(getActivity(), selectedCourseLayout);
+        AppPreferences.on(getActivity()).setCourseLayout(selectedCourseLayout);
         courseDesignComputer.setCourseLayout(getSelectedCourseLayout());
     }
 
     public void setSelectedNumberOfRounds(NumberOfRounds selectedNumberOfRounds) {
-        AppPreferences.setNumberOfRounds(getActivity(), selectedNumberOfRounds);
+        AppPreferences.on(getActivity()).setNumberOfRounds(selectedNumberOfRounds);
         courseDesignComputer.setNumberOfRounds(getSelectedNumberOfRounds());
     }
 

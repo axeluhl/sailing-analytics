@@ -123,7 +123,7 @@ public class EventSendingService extends Service implements EventSendingListener
                 RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
-                AppPreferences.getServerBaseURL(context), URLEncoder.encode(race.getRaceGroup().getName()),
+                AppPreferences.on(context).getServerBaseURL(), URLEncoder.encode(race.getRaceGroup().getName()),
                 URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
         return createEventIntent(context, url, race.getId(), serializedEventAsJson, callbackClass);
     }
@@ -210,7 +210,7 @@ public class EventSendingService extends Service implements EventSendingListener
     }
 
     private void sendEvent(Intent intent) {
-        if (!AppPreferences.isSendingActive(this)) {
+        if (!AppPreferences.on(this).isSendingActive()) {
             ExLog.i(TAG, "Sending deactivated. Event will not be sent to server.");
         } else {
             EventSenderTask task = new EventSenderTask(this);

@@ -3,6 +3,11 @@ package com.sap.sailing.domain.common.racelog;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Used to identify a RacingProcedure's type.
+ * 
+ * When modifying these values also check res/preferences.xml of racecommittee.app!
+ */
 public enum RacingProcedureType {
     UNKNOWN("Unknown"),
     RRS26("Fix Line Start (RRS26)"),

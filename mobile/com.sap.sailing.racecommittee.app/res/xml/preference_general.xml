@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <Preference
+        android:key="languagePref"
+        android:title="@string/settings_general_language_header"
+        android:summary="@string/settings_general_language_description" />
+
+    <EditTextPreference
+        android:key="@string/preference_server_url_key"
+        android:defaultValue="@string/preference_server_url_default"
+        android:title="@string/settings_advanced_service_header"
+        android:summary="@string/empty" />
+    
+    <EditTextPreference
+        android:key="@string/preference_course_areas_key"
+        android:defaultValue="@string/preference_course_areas_default"
+        android:title="@string/settings_general_manageareas_header"
+        android:summary="@string/empty" />
+    
+    <EditTextPreference
+        android:key="@string/preference_mail_key"
+        android:defaultValue="@string/preference_mail_default"
+        android:title="@string/settings_advanced_mail_header"
+        android:summary="@string/empty" />
+
+</PreferenceScreen>

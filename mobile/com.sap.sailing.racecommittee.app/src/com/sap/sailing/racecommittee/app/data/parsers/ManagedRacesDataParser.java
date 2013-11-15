@@ -74,7 +74,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         RacingProcedureType startType = raceGroup.getDefaultRacingProcedureType();
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        RaceState state = new RaceStateImpl(raceLog, AppPreferences.getAuthor(context), 
+        RaceState state = new RaceStateImpl(raceLog, AppPreferences.on(context).getAuthor(), 
                 RaceLogEventFactory.INSTANCE, startType); 
         return new ManagedRaceImpl(identifier, state);
 

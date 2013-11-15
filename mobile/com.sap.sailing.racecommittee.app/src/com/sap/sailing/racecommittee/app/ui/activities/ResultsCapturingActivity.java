@@ -96,7 +96,7 @@ public class ResultsCapturingActivity extends SessionActivity {
         sendButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-				String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
+				String recipient = AppPreferences.on(ResultsCapturingActivity.this).getMailRecipient();
                 MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), photoList.getItems(),
                         ResultsCapturingActivity.this);
                 finish();
