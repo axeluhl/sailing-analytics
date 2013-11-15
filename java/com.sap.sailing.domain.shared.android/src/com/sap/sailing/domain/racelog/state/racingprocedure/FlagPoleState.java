@@ -1,41 +1,38 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
-import com.sap.sailing.domain.common.racelog.Flags;
 
 public class FlagPoleState {
     
-    private final Collection<FlagPole> currentState;
-    private final Collection<FlagPole> nextState;
+    private final List<FlagPole> currentState;
+    private final List<FlagPole> nextState;
     private final TimePoint nextStateValidFrom;
     private final boolean hasNextState;
     
-    public FlagPoleState(Collection<FlagPole> currentState) {
+    public FlagPoleState(List<FlagPole> currentState) {
         this(currentState, null, null, false);
     }
     
-    public FlagPoleState(Collection<FlagPole> currentState, Collection<FlagPole> nextState, TimePoint nextStateValidFrom) {
+    public FlagPoleState(List<FlagPole> currentState, List<FlagPole> nextState, TimePoint nextStateValidFrom) {
         this(currentState, nextState, nextStateValidFrom, true);
     }
     
-    private FlagPoleState(Collection<FlagPole> currentState, Collection<FlagPole> nextState, TimePoint nextStateValidFrom, boolean hasNextState) {
+    private FlagPoleState(List<FlagPole> currentState, List<FlagPole> nextState, TimePoint nextStateValidFrom, boolean hasNextState) {
         this.currentState = currentState;
         this.nextState = nextState;
         this.nextStateValidFrom = nextStateValidFrom;
         this.hasNextState = hasNextState;
     }
     
-    public Collection<FlagPole> getCurrentState() {
+    public List<FlagPole> getCurrentState() {
         return currentState;
     }
-    public Collection<FlagPole> getNextState() {
+    public List<FlagPole> getNextState() {
         return nextState;
     }
 
@@ -48,13 +45,23 @@ public class FlagPoleState {
     }
     
     public List<FlagPole> computeUpcomingChanges() {
-        if (!hasNextState()) {
+        if (!hasNextState) {
             return Collections.emptyList();
         }
         
         List<FlagPole> changes = new ArrayList<FlagPole>();
-        // TODO: compute upcoming changes
-        changes.add(new FlagPole(Flags.NOVEMBER, false));
+        for (FlagPole nextPole : nextState) {
+            boolean hasSamePoleInCurrentState = false;
+            for (FlagPole currentPole : currentState) {
+                if (nextPole.describesSame(currentPole)) {
+                    hasSamePoleInCurrentState = true;
+                    break;
+                }
+            }
+            if (!hasSamePoleInCurrentState) {
+                changes.add(nextPole);
+            }
+        }
         return changes;
     }
 
@@ -78,13 +85,11 @@ public class FlagPoleState {
         return false;
     }
 
-    private static boolean describesSamePoles(Collection<FlagPole> leftPoles, Collection<FlagPole> rightPoles) {
+    private static boolean describesSamePoles(List<FlagPole> leftPoles, List<FlagPole> rightPoles) {
         for (int i = 0; i < leftPoles.size(); i++) {
-            FlagPole leftPole = Util.get(leftPoles, i);
-            FlagPole rightPole = Util.get(rightPoles, i);
-            if (leftPole.getUpperFlag() != rightPole.getUpperFlag() ||
-                    leftPole.getLowerFlag() != rightPole.getLowerFlag() ||
-                    leftPole.isDisplayed() != rightPole.isDisplayed()) {
+            FlagPole leftPole = leftPoles.get(i);
+            FlagPole rightPole = rightPoles.get(i);
+            if (!leftPole.describesSame(rightPole)) {
                 return false;
             }
         }

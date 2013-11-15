@@ -2,9 +2,7 @@ package com.sap.sailing.racecommittee.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import android.app.Application;
 import android.content.Context;

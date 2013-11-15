@@ -85,7 +85,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             startCountdownTextView.setText(String.format(
                     getString(R.string.race_startphase_countdown_start),
                     TimeUtils.formatDuration(millisecondsTillStart), getRace().getName()));
-            setFlagChangesCountdown(nextCountdownTextView);
+            updateFlagChangesCountdown(nextCountdownTextView);
             
         }
         super.notifyTick();

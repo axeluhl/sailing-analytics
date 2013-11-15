@@ -119,32 +119,34 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public Iterable<RaceLogEvent> add(RaceLogEvent event, UUID clientId) {
+        boolean isAdded = false;
         lockForWrite();
         try {
-            final boolean isAdded = getInternalRawFixes().add(event);
-            if (isAdded) {
-                logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
-                // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time point
-                setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-                notifyListenersAboutReceive(event);
-            } else {
-                logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
-            }
-            LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
-            stillToDeliverToClient.remove(event);
-            Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
-            if (deliveredToClient != null) {
-                stillToDeliverToClient.removeAll(deliveredToClient);
-            } else {
-                deliveredToClient = new HashSet<RaceLogEvent>();
-                eventsDeliveredToClient.put(clientId, deliveredToClient);
-            }
-            deliveredToClient.addAll(stillToDeliverToClient);
-            deliveredToClient.add(event);
-            return stillToDeliverToClient;
+            isAdded = getInternalRawFixes().add(event);
         } finally {
             unlockAfterWrite();
         }
+        if (isAdded) {
+            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time point
+            setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            notifyListenersAboutReceive(event);
+        } else {
+            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+        }
+        // FIXME lock for read getInternalRawFixes?
+        LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
+        stillToDeliverToClient.remove(event);
+        Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
+        if (deliveredToClient != null) {
+            stillToDeliverToClient.removeAll(deliveredToClient);
+        } else {
+            deliveredToClient = new HashSet<RaceLogEvent>();
+            eventsDeliveredToClient.put(clientId, deliveredToClient);
+        }
+        deliveredToClient.addAll(stillToDeliverToClient);
+        deliveredToClient.add(event);
+        return stillToDeliverToClient;
     }
     
     protected void notifyListenersAboutReceive(RaceLogEvent event) {

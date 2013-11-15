@@ -28,4 +28,10 @@ public class FlagPole {
         return isDisplayed;
     }
 
+    public boolean describesSame(FlagPole otherPole) {
+        return this.upperFlag == otherPole.upperFlag &&
+                this.lowerFlag == otherPole.lowerFlag &&
+                this.isDisplayed == otherPole.isDisplayed;
+    }
+
 }

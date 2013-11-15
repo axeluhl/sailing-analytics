@@ -94,8 +94,8 @@
     <string name="race_finished_end_time">Race finished at:</string>
     <string name="race_startphase_flagdown">Flag is going down&#8230;</string>
     <string name="race_startphase_flagup">Flag is going up&#8230;</string>
-    <string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>
-    <string name="race_startphase_countdown_mode_display">%1$s until %2$s flag is displayed</string>
+    <string name="race_startphase_countdown_mode_remove">%1$s until %2$s is removed</string>
+    <string name="race_startphase_countdown_mode_display">%1$s until %2$s is displayed</string>
     <string name="race_startphase_ess_countdown_ap_flag_removed">%1$s until AP flag is removed</string>
     <string name="race_startphase_ess_countdown_one_flag_display">%1$s until One flag is displayed</string>
     <string name="race_startphase_ess_countdown_two_flag_display">%1$s until Two flag is displayed</string>

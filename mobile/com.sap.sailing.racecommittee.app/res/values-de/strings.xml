@@ -91,8 +91,8 @@
     <string name="race_finished_end_time">Rennende um:</string>
     <string name="race_startphase_flagdown">Flagge wird eingeholt&#8230;</string>
     <string name="race_startphase_flagup">Flagge wird angezeigt&#8230;</string>
-    <string name="race_startphase_countdown_mode_remove">%1$s bis Flagge %2$s eingeholt wird</string>
-    <string name="race_startphase_countdown_mode_display">%1$s bis Flagge %2$s angezeigt wird</string>
+    <string name="race_startphase_countdown_mode_remove">%1$s bis %2$s eingeholt wird</string>
+    <string name="race_startphase_countdown_mode_display">%1$s bis %2$s angezeigt wird</string>
     <string name="race_startphase_ess_countdown_ap_flag_removed">%1$s bis Flagge AP eingeholt wird</string>
     <string name="race_startphase_ess_countdown_one_flag_display">%1$s bis Flagge Eins eingeholt wird</string>
     <string name="race_startphase_ess_countdown_two_flag_display">%1$s bis Flagge Zwei eingeholt wird</string>

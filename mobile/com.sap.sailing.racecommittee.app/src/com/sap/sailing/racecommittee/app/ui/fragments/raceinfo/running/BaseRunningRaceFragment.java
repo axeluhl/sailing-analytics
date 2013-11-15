@@ -113,7 +113,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                     getString(R.string.race_running_since_template),
                     getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
             
-            if (!setFlagChangesCountdown(nextCountdownTextView)) {
+            if (!updateFlagChangesCountdown(nextCountdownTextView)) {
                 nextCountdownTextView.setText("");
             }
         }
