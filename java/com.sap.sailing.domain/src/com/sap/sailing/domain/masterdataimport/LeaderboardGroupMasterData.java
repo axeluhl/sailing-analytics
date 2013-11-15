@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.LeaderboardMasterData;
@@ -23,19 +24,20 @@ public class LeaderboardGroupMasterData {
     private final boolean displayGroupsRevese;
     private final Set<EventMasterData> events;
     private final Set<RegattaMasterData> regattas;
+    private final Map<String, Double> metaColumnsWithFactors;
 
 
     public LeaderboardGroupMasterData(String name, String description, boolean displayGroupsRevese,
-            boolean hasOverallLeaderboard,
-            ScoringScheme overallLeaderboardScoringScheme,
-            int[] overallLeaderboardDiscardingRule, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events,
-            Set<RegattaMasterData> regattas) {
+            boolean hasOverallLeaderboard, ScoringScheme overallLeaderboardScoringScheme,
+            int[] overallLeaderboardDiscardingRule, Map<String, Double> metaColumnsWithFactors,
+            Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
         super();
         this.name = name;
         this.description = description;
         this.hasOverallLeaderboard = hasOverallLeaderboard;
         this.overallLeaderboardScoringScheme = overallLeaderboardScoringScheme;
         this.overallLeaderboardDiscardingRule = overallLeaderboardDiscardingRule;
+        this.metaColumnsWithFactors = metaColumnsWithFactors;
         this.leaderboards = leaderboards;
         this.displayGroupsRevese = displayGroupsRevese;
         this.events = events;
@@ -77,6 +79,10 @@ public class LeaderboardGroupMasterData {
 
     public Set<RegattaMasterData> getRegattas() {
         return regattas;
+    }
+
+    public Map<String, Double> getMetaColumnsWithFactors() {
+        return metaColumnsWithFactors;
     }
     
 
