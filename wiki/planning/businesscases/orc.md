@@ -3,7 +3,7 @@
 ## Rationale
 
 Beside the One-Design racing (where all boats have identical or very similar designs or models) there is another huge category of regattas called 'handicap sailing' where the boats are not identical and therefore have different race conditions. In order to make the boats nevertheless comparable several organisations (ORC/IRC/YardStick) introduced complex rule systems to calculate individual 'handicaps' for the boats. As a result it's even more difficult to follow these regattas and to present them in an attractive way to the audience.
-However, as the typical boats in this regatta category are rather big boats the audience and the owner of the boats are an interesting target group.
+However, as the typical boats in this regatta category are rather big boats the audience and the owner of the boats might be an interesting target group.
 
 ## Purpose
 
@@ -22,9 +22,14 @@ Provide solutions to help organizations operating ORC/IRC/Yardstick based regatt
 
 ## Description
 
+It seems to be natural that there are many sailors who want to compete against each other even if they sail different boat models. The reason is often simply that they can't find enough other sailors having exactly the same boat as so many different boat models does exist (think of a club where sailors want to have a club regatta each week or owners of real big expensive boats which are unique). The main difficulty is to create rules which makes the boats somehow comparable but keep the effort low to ensure the right application of these rules. Over time several rule systems have been created which are managed by internationally accepted organizations (ORC, IRC).
+All these rule systems calculate a 'handicap' for each boat which is applied to boat during the racing.
+
+
+
 ## Synergies
 There are synergies with the Smartphone Tracking project as well as the Sailing Analytics in general.
-Many core functions of the existing Sailing Analytics can be reused (e.g race viewer, live leaderboard calculation, etc.), but must be adapted to the specifics of the handicap sailing.
+Many core functions of the existing Sailing Analytics can be reused (e.g GPS and wind tracking, race viewer, live leaderboard calculation, etc.), but must be adapted to the specifics of the handicap sailing.
 The Smartphone Tracking would also benefit from the project as many small regattas are handicap races.
 
 ## Risks
