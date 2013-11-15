@@ -2,13 +2,13 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 
 public class CandidateChooser {
-
 
     public LinkedHashMap<Integer, TimePoint> getMarkPasses(ArrayList<Candidate> candidates, Candidate start,
             Candidate end, LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions,
@@ -18,15 +18,19 @@ public class CandidateChooser {
         ArrayList<Edge> edges = new ArrayList<>();
         for (Candidate c1 : candidates) {
             for (Candidate c2 : candidates) {
-                if (c1.getID() < c2.getID() && c2.getTimePoint().after(c1.getTimePoint())) {
-                    edges.add(new Edge(c1, c2, getEstimatedTimeBetweenWaypoint(c1, c2, markPositions, legs)));
+                if (c1.getID() == markPositions.size() + 1 || c2.getID() == markPositions.size() + 1) {
+                    edges.add(new Edge(c1, c2));
+                } else {
+                    if (c1.getID() < c2.getID() && c2.getTimePoint().after(c1.getTimePoint())&& averageSpeed(c1, c2, markPositions, legs)) {
+                        edges.add(new Edge(c1, c2));
+                    }
                 }
             }
         }
 
         // Find cheapest Edges
         LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
-        Edge startingEdge = new Edge(start, start, 0);
+        Edge startingEdge = new Edge(start, start);
 
         while (!candidateWithParent.keySet().contains(end)) {
             Edge newCheapestEdge = startingEdge;
@@ -52,46 +56,37 @@ public class CandidateChooser {
         return markPasses;
     }
 
-    private double getEstimatedTimeBetweenWaypoint(Candidate c1, Candidate c2,
-            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, ArrayList<String> legs) {
-        double time = 0;
-        TimePoint tp = null;
+    private boolean averageSpeed(Candidate c1, Candidate c2,
+            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, List<String> legs) {
 
+        double distance = 0;
+        TimePoint tp = c2.getTimePoint();
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         for (Waypoint w : markPositions.keySet()) {
             waypoints.add(w);
         }
-        //TODO Get real average speeds!!
-        for (int i = c1.getID(); i < c2.getID()-1; i++) {
-                if (!(i == waypoints.size()-1||i == 0)) {
-                    double averageSpeed = 7;
-                    String lt;
-                    lt = legs.get(i - 1).toString();
-                    if (lt.equals("UPWIND")) {
-                        averageSpeed = 5;
-                    }
-                    if (lt.equals("DOWNWIND")) {
-                        averageSpeed = 9;
-                    }
-                    if (markPositions.get(waypoints.get(0)).get(0).containsKey(c1.getTimePoint())) {
-                        tp = c1.getTimePoint();
-                    } else {
-                        if (markPositions.get(waypoints.get(0)).get(0).containsKey(c2.getTimePoint())) {
-                            tp = c2.getTimePoint();
-                        }
-                        double distance = 0;
-                        try {
-                            distance = markPositions.get(waypoints.get(i - 1)).get(0).get(tp)
-                                    .getDistance(markPositions.get(waypoints.get(i)).get(0).get(tp)).getNauticalMiles();
-                            time = time + distance / averageSpeed;
-                        } catch (NullPointerException e) {
-                            time = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
-                            break;
-                        }
-                    
-                }
-            } else {time = time + 12000;}
+
+        // TODO Get real speeds!!
+        double minimumSpeed = 5;
+        double maximumSpeed = 9;
+        double averageSpeed = 7;
+        double delta = maximumSpeed-minimumSpeed;
+        
+        if(c1.getID() == 0 && c2.getID() == 1 && c2.getTimePoint().asMillis()-c1.getTimePoint().asMillis() < 300000){
+           return true;
         }
-        return time;
+        for (int i = c1.getID(); i < c2.getID(); i++) {
+            if (!(i == 0)) {
+                distance = distance
+                        + markPositions.get(waypoints.get(i - 1)).get(0).get(tp)
+                                .getDistance(markPositions.get(waypoints.get(i)).get(0).get(tp)).getNauticalMiles();
+            }
+        }
+        double time = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
+        double speed = distance / (time / 3600000);
+        if(Math.abs(speed-averageSpeed)<delta){
+            return true;
+        }
+        return false;
     }
 }

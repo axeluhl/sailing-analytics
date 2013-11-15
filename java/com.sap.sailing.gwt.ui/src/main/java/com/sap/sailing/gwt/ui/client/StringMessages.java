@@ -826,11 +826,6 @@ public interface StringMessages extends Messages {
     String explainExchangeHostName();
     String line();
     String offset();
-    String hideToolbar();
-    String showSeriesLeaderboards();
-    String showOverallLeaderboard();
-    String exchangeHost();
-    String explainExchangeHostName();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);

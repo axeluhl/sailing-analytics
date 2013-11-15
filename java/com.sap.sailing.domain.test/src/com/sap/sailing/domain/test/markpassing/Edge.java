@@ -5,18 +5,15 @@ public class Edge {
     private Candidate end;
     private int numberOfLegs;
     private final int penaltyForSkipped;
-    double timeDifference;
 
-    public Edge(Candidate start, Candidate end, double estimatedTimeBetweenWaypoints) {
+    public Edge(Candidate start, Candidate end) {
         this.start = start;
         this.end = end;
         numberOfLegs = end.getID() - start.getID();
-        timeDifference = Math.abs(estimatedTimeBetweenWaypoints
-                - end.getTimePoint().minus(start.getTimePoint().asMillis()).asMillis());
         penaltyForSkipped = 1000;
     }
     public double getCost() {
-        return start.getCost() + end.getCost() + timeDifference/1000 + (numberOfLegs-1)*penaltyForSkipped;
+        return start.getCost() + end.getCost() + (numberOfLegs-1)*penaltyForSkipped;
         //TODO Weight
        
     }

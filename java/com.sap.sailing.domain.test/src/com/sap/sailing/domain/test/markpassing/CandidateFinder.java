@@ -34,7 +34,7 @@ public class CandidateFinder {
 
             // Calculate Distances
             LinkedHashMap<GPSFixMoving, Double> distances = new LinkedHashMap<>();
-            LinkedHashMap<GPSFixMoving, Double> costRelativToHotzoneAndCourseSize = new LinkedHashMap<>();
+            LinkedHashMap<GPSFixMoving, Double> costRelativCourseSize = new LinkedHashMap<>();
             ArrayList<Position> pos0 = new ArrayList<>();
             for (int i = 0; i < markPositions.get(wp).size(); i++) {
                 pos0.add(markPositions.get(wp).get(i).get(gpsFixes.get(0).getTimePoint()));
@@ -61,15 +61,14 @@ public class CandidateFinder {
                 cost = costPlus;
             }
             for (GPSFixMoving gps : distances.keySet()) {
-                //TODO LegLength defines hotzone!!!!!
                 if (distances.get(gps) < legLength.get(wp)/100) {
-                    costRelativToHotzoneAndCourseSize.put(gps, distances.get(gps) / legLength.get(wp));
+                    costRelativCourseSize.put(gps, distances.get(gps) / legLength.get(wp));
                 } else {
                     //TODO is 10000  way to high? would is skip automatically? so wouldnt work on faraway passes?                  
-                    costRelativToHotzoneAndCourseSize.put(gps, distances.get(gps)/legLength.get(wp) *10000);
+                    costRelativCourseSize.put(gps, distances.get(gps)/legLength.get(wp) *10000);
                 }
             }
-            allCandidates.put(wp, costRelativToHotzoneAndCourseSize);
+            allCandidates.put(wp, costRelativCourseSize);
             // TODO Factor in if the candidate is behind the mark (Splining?)
         }
         return allCandidates;

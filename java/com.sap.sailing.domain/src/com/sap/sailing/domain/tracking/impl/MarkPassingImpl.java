@@ -47,7 +47,7 @@ public class MarkPassingImpl implements MarkPassing {
     
     @Override
     public String toString() {
-        return ""+getTimePoint()+": "+getCompetitor()+" passed "+getWaypoint();
+        return ""+getTimePoint()+": "+getCompetitor().getName()+" passed "+getWaypoint();
     }
 
 }

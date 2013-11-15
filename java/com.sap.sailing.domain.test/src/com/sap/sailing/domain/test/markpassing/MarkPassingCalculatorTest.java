@@ -183,7 +183,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         int missingGivenMarkPassings = 0;
         int missingMarkPasses = 0;
         int numberOfCompetitors = 0;
-        TimePoint start = getTrackedRace().getStartOfRace();
+        TimePoint start = getTrackedRace().getStartOfRace().minus(85000);
         TimePoint end = getTrackedRace().getEndOfRace();
         TimePoint middle = start.plus(end.minus(start.asMillis()).asMillis() / 2);
         ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -320,16 +320,18 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                 while (GPSFixes.hasNext()) {
                     fixes.add(GPSFixes.next());
                 }
+                
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
+
             competitorTracks.put(c, fixes);
         }
         System.out.println(numberOfCompetitors + " Competitors");
 
         // Calculate MarkPasses!!
         long n = System.currentTimeMillis();
-        computedPasses = markPassCreator.calculateMarkpasses(wayPointTracks, competitorTracks, start, end, legs,
+        computedPasses = markPassCreator.calculateMarkpasses(wayPointTracks, competitorTracks, start, legs,
                 averageLegLength, getRace().getBoatClass().getHullLength().getMeters(), waypoints);
         System.out.println("Computation time: " + (System.currentTimeMillis() - n));
 
