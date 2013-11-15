@@ -435,6 +435,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     @Override
@@ -2445,10 +2446,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        if (this.attachedRaceLogs == null) {
-            this.attachedRaceLogs = new HashMap<Serializable, RaceLog>();
+        if (raceLog != null) {
+            this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        } else {
+            logger.severe("Got a request to attach race log for an empty race log!");
         }
-        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
     }
 
     @Override
