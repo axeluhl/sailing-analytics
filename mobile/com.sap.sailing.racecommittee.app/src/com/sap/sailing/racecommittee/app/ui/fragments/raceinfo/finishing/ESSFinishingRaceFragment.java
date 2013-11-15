@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.finishing;
 import android.os.Bundle;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
@@ -39,5 +40,9 @@ public class ESSFinishingRaceFragment extends BaseFinishingRaceFragment<ESSRacin
         }
         return null;
     }
-
+    
+    @Override
+    protected void setFinishedTime() {
+        getRaceState().setFinishedTime(MillisecondsTimePoint.now());
+    }
 }

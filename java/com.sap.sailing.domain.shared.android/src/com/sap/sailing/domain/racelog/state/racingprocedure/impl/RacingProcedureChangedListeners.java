@@ -54,4 +54,9 @@ public class RacingProcedureChangedListeners<T extends RacingProcedureChangedLis
         }
     }
 
+    public void removeAll() {
+        allListeners.clear();
+        specificListeners.clear();
+    }
+
 }

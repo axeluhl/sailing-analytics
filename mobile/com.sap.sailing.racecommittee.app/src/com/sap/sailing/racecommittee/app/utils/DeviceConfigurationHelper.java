@@ -30,7 +30,7 @@ public class DeviceConfigurationHelper {
     }
     
     private static void logApply(String configurationName, Object value) {
-        ExLog.i(TAG, String.format("Applied %s configuration: %s", configurationName, value.toString()));
+        ExLog.i(TAG, String.format("Applied '%s' configuration: %s", configurationName, value.toString()));
     }
 
 }

@@ -64,8 +64,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     }
     
     @Override
-    public void detachFromRaceLog() {
+    public void detach() {
         raceLog.removeListener(raceLogListener);
+        changedListeners.removeAll();
     }
     
     @Override
@@ -196,7 +197,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     @Override
     public void onStartTimeChanged(RaceState state) {
+        getChangedListeners().onActiveFlagsChanged(this);
         if (scheduler != null && state.getStartTime() != null) {
+            scheduler.unscheduleAllEvents();
             scheduler.scheduleStateEvents(createStartStateEvents(state.getStartTime()));
         }
     }

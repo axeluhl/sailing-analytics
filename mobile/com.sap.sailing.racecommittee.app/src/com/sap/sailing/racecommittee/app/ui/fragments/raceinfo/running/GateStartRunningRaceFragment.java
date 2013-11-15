@@ -38,7 +38,7 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
         }
         
         @Override
-        public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
+        public void onGateLaunchTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
             // not interested - handled by active flags
         }
 

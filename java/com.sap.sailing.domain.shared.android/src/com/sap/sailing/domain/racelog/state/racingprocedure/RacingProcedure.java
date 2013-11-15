@@ -30,6 +30,6 @@ public interface RacingProcedure extends RaceStateEventProcessor, RaceStateChang
     
     FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now);
     
-    void detachFromRaceLog();
+    void detach();
 
 }

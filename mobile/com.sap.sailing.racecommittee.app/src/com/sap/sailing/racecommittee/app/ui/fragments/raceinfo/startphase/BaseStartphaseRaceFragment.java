@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -72,8 +71,8 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         });
         
         flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
-                (LinearLayout) getView().findViewById(R.id.race_startphase_base_up_flags), 
-                (LinearLayout) getView().findViewById(R.id.race_startphase_base_down_flags));
+                (LinearLayout) getView().findViewById(R.id.race_flag_space_up_flags), 
+                (LinearLayout) getView().findViewById(R.id.race_flag_space_down_flags));
     }
 
     @Override
@@ -86,13 +85,8 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             startCountdownTextView.setText(String.format(
                     getString(R.string.race_startphase_countdown_start),
                     TimeUtils.formatDuration(millisecondsTillStart), getRace().getName()));
+            setFlagChangesCountdown(nextCountdownTextView);
             
-            FlagPoleState flagState = getRaceState().getRacingProcedure().getActiveFlags(startTime, now);
-            if (flagState.hasNextState()) {
-                // TODO: get changing flag and display on nextCountdownTextView
-                long millisecondsTillChange = flagState.getNextStateValidFrom().minus(now.asMillis()).asMillis();
-                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.formatDuration(millisecondsTillChange)));
-            }
         }
         super.notifyTick();
     }

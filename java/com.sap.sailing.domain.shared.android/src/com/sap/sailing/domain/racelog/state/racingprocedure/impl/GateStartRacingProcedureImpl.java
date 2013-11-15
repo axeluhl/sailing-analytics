@@ -98,6 +98,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         switch (event.getEventName()) {
         case START:
             rescheduleGateShutdownTime(event.getTimePoint());
+            return true;
         case GATE_CLASS_OVER_GOLF_UP:
         case GATE_PAPA_UP:
         case GATE_PAPA_DOWN:
@@ -142,19 +143,24 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
                     Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false)));
         }
     }
+
+    @Override
+    public TimePoint getGateLaunchStopTime(TimePoint startTime) {
+        return startTime.plus(getGateLaunchTime());
+    }
     
     @Override
     public TimePoint getGateShutdownTime(TimePoint startTime) {
-        return startTime.plus(startPhaseGolfDownStandardIntervalConstantSummand).plus(getGateLineOpeningTime());
+        return getGateLaunchStopTime(startTime).plus(startPhaseGolfDownStandardIntervalConstantSummand);
     }
 
     @Override
-    public Long getGateLineOpeningTime() {
+    public Long getGateLaunchTime() {
         return cachedGateLineOpeningTime;
     }
 
     @Override
-    public void setGateLineOpeningTime(TimePoint timePoint, long milliseconds) {
+    public void setGateLaunchTime(TimePoint timePoint, long milliseconds) {
         raceLog.add(factory.createGateLineOpeningTimeEvent(timePoint, author, raceLog.getCurrentPassId(), milliseconds));
     }
 
@@ -188,7 +194,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         Long gateLineOpeningTime = gateLineOpeningTimeAnalyzer.analyze();
         if (gateLineOpeningTime != null && !gateLineOpeningTime.equals(cachedGateLineOpeningTime)) {
             cachedGateLineOpeningTime = gateLineOpeningTime;
-            getChangedListeners().onGateLineOpeningTimeChanged(this);
+            getChangedListeners().onGateLaunchTimeChanged(this);
         }
         
         String pathfinder = pathfinderAnalyzer.analyze();

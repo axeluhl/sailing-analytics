@@ -4,20 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 
@@ -30,12 +24,6 @@ public class ManagedRaceImpl implements ManagedRace {
     private final ManagedRaceIdentifier identifier;
     private Collection<Competitor> competitors;
     private CourseBase courseOnServer;
-
-    public ManagedRaceImpl(Context context, ManagedRaceIdentifier identifier,
-            RacingProcedureType defaultStartProcedureType, RaceLog raceLog) {
-        this(identifier, new RaceStateImpl(raceLog, AppPreferences.getAuthor(context), 
-                RaceLogEventFactory.INSTANCE, defaultStartProcedureType));
-    }
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.state = state;

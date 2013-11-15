@@ -11,7 +11,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedList
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLineOpeningTimeDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLaunchTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
@@ -20,7 +20,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
     private final ChangeListener changeListener;
     
     private TextView pathfinderTextView;
-    private TextView gateOpeningTimeTextView;
+    private TextView gateLaunchTimeTextView;
     
     public GateStartStartphaseRaceFragment() {
         this.changeListener = new ChangeListener();
@@ -31,7 +31,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
         super.onActivityCreated(savedInstanceState);
         
         pathfinderTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_text);
-        gateOpeningTimeTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_opening_text);
+        gateLaunchTimeTextView = (TextView) getView().findViewById(R.id.race_startphase_gate_actions_opening_text);
         
         Button pathfinderButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_pathfinder_button);
         pathfinderButton.setOnClickListener(new OnClickListener() {
@@ -45,12 +45,12 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
             }
         });
         
-        Button gateTimeButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_opening_button);
-        gateTimeButton.setOnClickListener(new OnClickListener() {
+        Button gateLaunchTimeButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_opening_button);
+        gateLaunchTimeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getFragmentManager();
-                RaceDialogFragment fragment = new RaceChooseGateLineOpeningTimeDialog();
+                RaceDialogFragment fragment = new RaceChooseGateLaunchTimeDialog();
                 Bundle args = getRecentArguments();
                 fragment.setArguments(args);
                 fragment.show(fragmentManager, null);
@@ -87,11 +87,11 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
             pathfinderTextView.setText(R.string.no_pathfinder_selected);
         }
         
-        Long gateOpeningTime = procedure.getGateLineOpeningTime();
-        if (gateOpeningTime != null) {
-            gateOpeningTimeTextView.setText(String.format("%d", gateOpeningTime / 1000 / 60));
+        Long gateLaunchTime = procedure.getGateLaunchTime();
+        if (gateLaunchTime != null) {
+            gateLaunchTimeTextView.setText(getString(R.string.gate_launch_stops_after, gateLaunchTime / 1000 / 60));
         } else {
-            gateOpeningTimeTextView.setText(R.string.no_line_opening_time_selected);
+            gateLaunchTimeTextView.setText(R.string.no_line_opening_time_selected);
         }
         super.setupUi();
     }
@@ -99,7 +99,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override
-        public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
+        public void onGateLaunchTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
             setupUi();
         }
 

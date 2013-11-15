@@ -52,7 +52,7 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.TargetTime;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class ClassicCourseDesignDialog extends RaceDialogFragment {
+public class ByMapCourseDesignDialog extends RaceDialogFragment {
 
     private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
 
@@ -60,7 +60,7 @@ public class ClassicCourseDesignDialog extends RaceDialogFragment {
     private GoogleMap courseAreaMap;
     private Bundle mBundle;
     @SuppressWarnings("unused")
-    private final static String TAG = ClassicCourseDesignDialog.class.getName();
+    private final static String TAG = ByMapCourseDesignDialog.class.getName();
 
     private Button publishButton;
     private Button unpublishButton;
@@ -76,7 +76,7 @@ public class ClassicCourseDesignDialog extends RaceDialogFragment {
     private ArrayAdapter<CourseLayouts> courseLayoutAdapter;
     private ArrayAdapter<TargetTime> targetTimeAdapter;
 
-    public ClassicCourseDesignDialog() {
+    public ByMapCourseDesignDialog() {
         super();
         // handle bug "Dark overlay of MapFragment in Activity with Dialog theme" -
         // https://code.google.com/p/gmaps-api-issues/issues/detail?id=4865

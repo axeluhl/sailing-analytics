@@ -67,7 +67,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private CourseBase cachedCourseDesign;
     
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
-            RacingProcedureType defaultRacingProcedureType) {
+            RacingProcedureType initalRacingProcedureType) {
         this.raceLog = raceLog;
         this.author = author;
         this.factory = eventFactory;
@@ -83,7 +83,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
      
-        this.cachedRacingProcedureType = defaultRacingProcedureType;
+        this.cachedRacingProcedureType = initalRacingProcedureType;
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
         this.cachedIsPositionedCompetitorsConfirmed = false;
@@ -106,9 +106,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public void setRacingProcedure(TimePoint timePoint, RacingProcedureType newType) {
-        if (racingProcedure == null || !newType.equals(racingProcedureAnalyzer.analyze())) {
-            raceLog.add(factory.createStartProcedureChangedEvent(timePoint, author, raceLog.getCurrentPassId(), newType));
-        }
+        raceLog.add(factory.createStartProcedureChangedEvent(timePoint, author, raceLog.getCurrentPassId(), newType));
     }
 
     @Override
@@ -254,7 +252,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     @Override
     public boolean processStateEvent(RaceStateEvent event) {
-        if (racingProcedure.processStateEvent(event)) {
+        // Always ask the procedure (might be interested in START too)!
+        if (racingProcedure.processStateEvent(event) || event.getEventName() == RaceStateEvents.START) {
             update();
             return true;
         }
@@ -329,7 +328,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private void recreateRacingProcedure() {
         if (racingProcedure != null) {
             removeChangedListener(racingProcedure);
-            racingProcedure.detachFromRaceLog();
+            racingProcedure.detach();
         }
         racingProcedure = RacingProcedureFactoryImpl.create(cachedRacingProcedureType, raceLog, author, factory);
         racingProcedure.setStateEventScheduler(scheduler);

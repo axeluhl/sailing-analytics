@@ -45,9 +45,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
         finishedButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                RaceDialogFragment fragment = new RaceFinishedTimeDialog();
-                fragment.setArguments(getRecentArguments());
-                fragment.show(getFragmentManager(), "dialogFinishedTime");
+                setFinishedTime();
             }
         });
 
@@ -94,5 +92,11 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
             return String.format(getString(R.string.race_first_finisher), TimeUtils.formatTime(finishingStartedAt));
         }
         return null;
+    }
+
+    protected void setFinishedTime() {
+        RaceDialogFragment fragment = new RaceFinishedTimeDialog();
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "dialogFinishedTime");
     }
 }

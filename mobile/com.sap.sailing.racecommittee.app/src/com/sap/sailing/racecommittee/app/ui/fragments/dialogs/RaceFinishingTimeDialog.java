@@ -36,7 +36,6 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
         if (stf.analyze() != null && getRace().getStatus().equals(RaceLogRaceStatus.RUNNING)) {
             if (stf.analyze().before(finishingTime)) {
                 getRace().getState().setFinishingTime(finishingTime);
-                //getRace().getState().getStartProcedure().setFinishing(finishingTime);
                 dismiss();
             }else{
                 Toast.makeText(getActivity(), "The selected time is before the race start.", Toast.LENGTH_LONG).show();
@@ -62,7 +61,6 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
         getDialog().setTitle(getText(R.string.finished_dialog_title));
         Button chooseButton = (Button) view.findViewById(R.id.chooseFinishedTimeButton);
         chooseButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 setAndAnnounceFinishedTime();
@@ -70,12 +68,6 @@ public class RaceFinishingTimeDialog extends RaceDialogFragment {
         });
 
         return view;
-
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
 
     }
 }

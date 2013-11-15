@@ -56,8 +56,11 @@ public class FlagPoleStateRenderer {
     }
     
     private ImageView createFlagImageView(final Flags upperFlag, final Flags lowerFlag) {
+        LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(200, 130);
+        layout.setMargins(20, 0, 20, 0);
+        
         ImageView flagView = new ImageView(context);
-        flagView.setLayoutParams(new LinearLayout.LayoutParams(200, 130));
+        flagView.setLayoutParams(layout);
         flagView.setImageBitmap(getFlagBitmap(upperFlag));
         flagView.setOnClickListener(new OnClickListener() {
             @Override

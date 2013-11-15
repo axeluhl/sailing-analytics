@@ -38,6 +38,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
@@ -91,8 +92,9 @@ public class OfflineDataManager extends DataManager {
                 AppPreferences.getAuthor(context),
                 1, RaceLogRaceStatus.FINISHING));
 
-        ManagedRace q1 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying,
-                raceGroup), RacingProcedureType.ESS, log);
+        ManagedRace q1 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
+                new RaceStateImpl(log, AppPreferences.getAuthor(context), RaceLogEventFactory.INSTANCE, RacingProcedureType.ESS));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -100,16 +102,18 @@ public class OfflineDataManager extends DataManager {
          * new MillisecondsTimePoint(new Date().getTime() + 100000)));
          */
 
-        ManagedRace q2 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying,
-                raceGroup), RacingProcedureType.ESS, log);
+        ManagedRace q2 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
+                new RaceStateImpl(log, AppPreferences.getAuthor(context), RaceLogEventFactory.INSTANCE, RacingProcedureType.ESS));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
          * log.add(factory.createRaceStatusEvent( new MillisecondsTimePoint(new Date()), 5,
          * RaceLogRaceStatus.FINISHED));
          */
-        ManagedRace q3 = new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying,
-                raceGroup), RacingProcedureType.ESS, log);
+        ManagedRace q3 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
+                new RaceStateImpl(log, AppPreferences.getAuthor(context), RaceLogEventFactory.INSTANCE, RacingProcedureType.ESS));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);

@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 
-public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
+public class RaceChooseGateLaunchTimeDialog extends RaceDialogFragment {
 
     public interface GateLineOpeningTimeSelectionListener {
         public void onLineOpeningTimeSelected();
@@ -36,7 +36,7 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
 
         lineOpeningTimeEditText = (EditText) getView().findViewById(R.id.lineOpeningTimeText);
         GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-        lineOpeningTimeEditText.setText(String.valueOf((procedure.getGateLineOpeningTime() / (60 * 1000))));
+        lineOpeningTimeEditText.setText(String.valueOf((procedure.getGateLaunchTime() / (60 * 1000))));
         chooseButton = (Button) getDialog().findViewById(R.id.chooseLineOpeningTimeButton);
 
         chooseButton.setOnClickListener(new OnClickListener() {
@@ -48,17 +48,13 @@ public class RaceChooseGateLineOpeningTimeDialog extends RaceDialogFragment {
 
     protected void onChooseClicked(View view) {
         try {
-            Long lineOpeningTime = convertToLong(lineOpeningTimeEditText.getText().toString());
+            Long lineOpeningTime = Long.parseLong(lineOpeningTimeEditText.getText().toString());
             GateStartRacingProcedure procedure = getRace().getState().getTypedRacingProcedure();
-            procedure.setGateLineOpeningTime(MillisecondsTimePoint.now(), Long.valueOf(60 * 1000 * lineOpeningTime));
+            procedure.setGateLaunchTime(MillisecondsTimePoint.now(), Long.valueOf(60 * 1000 * lineOpeningTime));
             Log.i("RACE_SET_GATELINE_OPENING_TIME", String.valueOf(lineOpeningTime));
             dismiss();
         } catch (NumberFormatException nfe) {
             Toast.makeText(getActivity(), "Please enter a valid number of minutes", Toast.LENGTH_LONG).show();
         }
-    }
-
-    protected Long convertToLong(String text) throws NumberFormatException {
-        return Long.parseLong(text);
     }
 }

@@ -12,11 +12,11 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -84,7 +84,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         finishingButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                getRaceState().setFinishingTime(MillisecondsTimePoint.now());
+                setFinishingTime();
             }
         });
         
@@ -98,8 +98,8 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         });
         
         flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
-                (LinearLayout) getView().findViewById(R.id.race_running_base_up_flags), 
-                (LinearLayout) getView().findViewById(R.id.race_running_base_down_flags));
+                (LinearLayout) getView().findViewById(R.id.race_flag_space_up_flags), 
+                (LinearLayout) getView().findViewById(R.id.race_flag_space_down_flags));
     }
 
     @Override
@@ -113,23 +113,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                     getString(R.string.race_running_since_template),
                     getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
             
-            ProcedureType procedure = getRacingProcedure();
-            FlagPoleState flagState = procedure.getActiveFlags(startTime, now);
-            if (flagState.hasNextState()) {
-                // TODO: get changing flag and display on nextCountdownTextView
-                long millisecondsTillChange = flagState.getNextStateValidFrom().minus(now.asMillis()).asMillis();
-                nextCountdownTextView.setText(String.format("%s until next flag...", TimeUtils.formatDuration(millisecondsTillChange)));
-            } else if (procedure.hasIndividualRecall()) {
-                if (procedure.isIndividualRecallDisplayed()) {
-                    TimePoint removalAt = procedure.getIndividualRecallRemovalTime();
-                    if (removalAt != null) {
-                        nextCountdownTextView.setText(String.format("%s until recall ends...", 
-                                TimeUtils.formatDuration(TimeUtils.timeUntil(removalAt))));
-                    }
-                } else {
-                    nextCountdownTextView.setText("");
-                }
-            } else {
+            if (!setFlagChangesCountdown(nextCountdownTextView)) {
                 nextCountdownTextView.setText("");
             }
         }
@@ -146,6 +130,12 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         if (startTime != null) {
             flagRenderer.render(getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now()));
         }
+    }
+
+    protected void setFinishingTime() {
+        RaceDialogFragment fragment = new RaceFinishingTimeDialog();
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "dialogFinishingTime");
     }
 
 }

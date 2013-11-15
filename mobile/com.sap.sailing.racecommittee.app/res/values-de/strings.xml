@@ -105,7 +105,7 @@
     <string name="race_startphase_gate_class_removed">%1$s bis die Klassenflagge eingeholt wird (Rennstart)</string>
     <string name="race_startphase_gate_papa_display">%1$s bis Flagge Papa angezeigt wird</string>
     <string name="race_startphase_gate_papa_removed">%1$s bis Flagge Papa eingeholt wird</string>
-    <string name="set_pathfinder">Pathfinder setzen</string>
+    <string name="set_pathfinder">Pathfinder</string>
     <string name="set_pathfinder_title">Pathfinder setzen</string>
     <string name="protest_dialog_title">Beginn der Protestzeit setzen</string>
     <string name="finishing_dialog_title">Erstes Boot im Ziel setzen</string>
@@ -117,9 +117,9 @@
     <string name="lr_course_1">Kurs 1</string>
     <string name="lr_course_2">Kurs 2</string>
     <string name="no_pathfinder_selected">Kein Pathfinder gesetzt</string>
-    <string name="set_line_opening_time">Gate-Zeit setzen</string>
-    <string name="no_line_opening_time_selected">keine Zeit gesetzt</string>
-    <string name="set_gate_line_opening_time_title">Gate-Zeit setzen</string>
+    <string name="set_line_opening_time">Gate Launch</string>
+    <string name="no_line_opening_time_selected">Keine Zeit gesetzt</string>
+    <string name="set_gate_line_opening_time_title">Gate Launch Zeit setzen</string>
     <string name="choose_line_open_min">min</string>
     <string name="previous_course">Vorherigen Kurs</string>
     <string name="make_new_course">Kurs erstellen</string>

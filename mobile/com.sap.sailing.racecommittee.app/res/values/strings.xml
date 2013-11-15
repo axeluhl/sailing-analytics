@@ -108,7 +108,7 @@
     <string name="race_startphase_gate_class_removed">%1$s until Class flag is removed and race starts</string>
     <string name="race_startphase_gate_papa_display">%1$s until Papa flag is displayed</string>
     <string name="race_startphase_gate_papa_removed">%1$s until Papa flag is removed</string>
-    <string name="set_pathfinder">Set Pathfinder</string>
+    <string name="set_pathfinder">Pathfinder</string>
     <string name="set_pathfinder_title">Choose the pathfinder</string>
     <string name="protest_dialog_title">Set the protest start time</string>
     <string name="finishing_dialog_title">Set the time when the first finisher crossed the finish line</string>
@@ -119,10 +119,10 @@
     <string name="running_course_selection">Course selection</string>
     <string name="lr_course_1">Course 1</string>
     <string name="lr_course_2">Course 2</string>
-    <string name="no_pathfinder_selected">No pathfinder selected</string>
-    <string name="set_line_opening_time">Set gate time</string>
+    <string name="no_pathfinder_selected">No Pathfinder selected</string>
+    <string name="set_line_opening_time">Gate Launch</string>
     <string name="no_line_opening_time_selected">No time selected</string>
-    <string name="set_gate_line_opening_time_title">Set the gate line opening time</string>
+    <string name="set_gate_line_opening_time_title">Set the Gate Launch time</string>
     <string name="choose_line_open_min">min</string>
     <string name="previous_course">Previous course</string>
     <string name="make_new_course">Create a course</string>
@@ -277,5 +277,7 @@
 	<string name="loading_configuration">Loading configuration...</string>
 	<string name="loading_configuration_failed">There was an error loading the configuration.</string>
 	<string name="loading_configuration_succeded">Remote configuration applied.</string>
+	
+	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>
 	
 </resources>

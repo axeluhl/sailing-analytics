@@ -37,64 +37,10 @@
         android:baselineAligned="false"
         android:orientation="horizontal" >
 
-        <RelativeLayout
-            android:id="@+id/flagDisplaySpaceLayout"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.618"
-            android:gravity="fill_horizontal"
-            android:orientation="vertical" >
-
-            <RelativeLayout
-                android:id="@+id/topFlagsSpace"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:orientation="horizontal" >
-                
-                <LinearLayout 
-                    android:id="@+id/race_startphase_base_up_flags"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:orientation="horizontal">
-                </LinearLayout>
-
-                <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
-                    android:id="@+id/flagsUpLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginBottom="20dp"
-                    android:layout_marginRight="10dp"
-                    android:text="@string/flags_up"
-                    android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/downFlagsSpace"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal" >
-                
-                <LinearLayout 
-                    android:id="@+id/race_startphase_base_down_flags"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:orientation="horizontal">
-                </LinearLayout>
-
-                <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
-                    android:id="@+id/flagsDownLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginBottom="20dp"
-                    android:layout_marginRight="10dp"
-                    android:text="@string/flags_down"
-                    android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
-            </RelativeLayout>
-        </RelativeLayout>
+        <include layout="@layout/race_flag_space"
+		    android:layout_width="match_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="0.618" />
 
         <TextView
             android:layout_width="1dp"

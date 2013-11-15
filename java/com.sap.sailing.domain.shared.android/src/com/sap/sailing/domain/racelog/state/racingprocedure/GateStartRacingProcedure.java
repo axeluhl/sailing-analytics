@@ -9,9 +9,10 @@ public interface GateStartRacingProcedure extends RacingProcedure {
     
     void addChangedListener(GateStartChangedListener listener);
 
+    TimePoint getGateLaunchStopTime(TimePoint startTime);
     TimePoint getGateShutdownTime(TimePoint startTime);
-    Long getGateLineOpeningTime();
-    void setGateLineOpeningTime(TimePoint timePoint, long milliseconds);
+    Long getGateLaunchTime();
+    void setGateLaunchTime(TimePoint timePoint, long milliseconds);
 
     String getPathfinder();
     void setPathfinder(TimePoint timePoint, String sailingId);

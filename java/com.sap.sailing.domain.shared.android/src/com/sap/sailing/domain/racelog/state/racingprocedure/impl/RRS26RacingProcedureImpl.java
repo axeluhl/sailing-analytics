@@ -79,7 +79,6 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
         case RRS26_CLASS_UP:
         case RRS26_STARTMODE_UP:
         case RRS26_STARTMODE_DOWN:
-        case START:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
         default:

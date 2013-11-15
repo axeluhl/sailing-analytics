@@ -74,7 +74,6 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
         case ESS_THREE_UP:
         case ESS_TWO_UP:
         case ESS_ONE_UP:
-        case START:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
         default:

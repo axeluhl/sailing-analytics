@@ -18,8 +18,13 @@ import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
@@ -66,9 +71,12 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        RacingProcedureType startType = AppPreferences.getDefaultStartProcedureType(context);
-        return new ManagedRaceImpl(context, new ManagedRaceIdentifierImpl(name,
-               new FleetIdentifierImpl(fleet, series, raceGroup)), startType, raceLog);
+        RacingProcedureType startType = raceGroup.getDefaultRacingProcedureType();
+        FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
+        ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
+        RaceState state = new RaceStateImpl(raceLog, AppPreferences.getAuthor(context), 
+                RaceLogEventFactory.INSTANCE, startType); 
+        return new ManagedRaceImpl(identifier, state);
 
     }
 

@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
+import com.sap.sailing.domain.common.racelog.Flags;
 
 public class FlagPoleState {
     
@@ -41,6 +45,17 @@ public class FlagPoleState {
 
     public boolean hasNextState() {
         return hasNextState;
+    }
+    
+    public List<FlagPole> computeUpcomingChanges() {
+        if (!hasNextState()) {
+            return Collections.emptyList();
+        }
+        
+        List<FlagPole> changes = new ArrayList<FlagPole>();
+        // TODO: compute upcoming changes
+        changes.add(new FlagPole(Flags.NOVEMBER, false));
+        return changes;
     }
 
     public static boolean describesSameState(FlagPoleState left, FlagPoleState right) {

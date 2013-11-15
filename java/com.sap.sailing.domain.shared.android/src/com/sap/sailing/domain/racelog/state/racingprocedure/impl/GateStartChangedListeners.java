@@ -7,9 +7,9 @@ public class GateStartChangedListeners extends RacingProcedureChangedListeners<G
         GateStartChangedListener {
 
     @Override
-    public void onGateLineOpeningTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
+    public void onGateLaunchTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
         for (GateStartChangedListener listener : getListeners()) {
-            listener.onGateLineOpeningTimeChanged(gateStartRacingProcedure);
+            listener.onGateLaunchTimeChanged(gateStartRacingProcedure);
         }
     }
 

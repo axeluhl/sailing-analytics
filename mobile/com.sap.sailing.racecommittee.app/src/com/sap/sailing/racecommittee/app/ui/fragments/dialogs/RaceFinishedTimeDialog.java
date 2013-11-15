@@ -61,7 +61,6 @@ public class RaceFinishedTimeDialog extends RaceDialogFragment {
         getDialog().setTitle(getText(R.string.finished_dialog_title));
         Button chooseButton = (Button) view.findViewById(R.id.chooseFinishedTimeButton);
         chooseButton.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 setAndAnnounceFinishedTime();
@@ -69,12 +68,6 @@ public class RaceFinishedTimeDialog extends RaceDialogFragment {
         });
 
         return view;
-
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
 
     }
 }

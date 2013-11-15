@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -156,12 +157,11 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
 
-        RacingProcedureType type = RacingProcedureType.ESS;
-        boolean overrideStartProcedureType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(
-                "overrideDefaultStartProcedureType", false);
+        boolean overrideStartProcedureType = 
+                PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("overrideDefaultStartProcedureType", false);
+        RacingProcedureType type = RacingProcedureType.UNKNOWN;
         if (overrideStartProcedureType) {
-            type = RacingProcedureType.valueOf(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(
-                    "defaultStartProcedureType", RacingProcedureType.ESS.name()));
+            type = AppPreferences.getDefaultStartProcedureType(getActivity());
         } else {
             type = getRaceState().getRacingProcedure().getType();
         }

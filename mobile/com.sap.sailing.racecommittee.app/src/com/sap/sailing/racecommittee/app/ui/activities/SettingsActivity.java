@@ -34,7 +34,7 @@ public class SettingsActivity extends PreferenceActivity {
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
         List<CharSequence> entryValues = new ArrayList<CharSequence>();
-        for (RacingProcedureType type : RacingProcedureType.values()) {
+        for (RacingProcedureType type : RacingProcedureType.validValues()) {
             entries.add(type.toString());
             entryValues.add(type.name());
         }
