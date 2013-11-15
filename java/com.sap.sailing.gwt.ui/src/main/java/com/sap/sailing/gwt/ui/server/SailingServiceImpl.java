@@ -1490,24 +1490,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
-                if (firstWaypoint != null) {
+                if (firstWaypoint != null && Util.size(firstWaypoint.getMarks())==2) {
                     final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
-                    final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
-                    result.startMarkPositions = startMarkPositionDTOs;
-                    result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
-                    result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                    result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    if (markPositionDTOsAndLineAdvantage != null) {
+                        final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
+                        result.startMarkPositions = startMarkPositionDTOs;
+                        result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                        result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                        result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    }
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
-                if (lastWaypoint != null) {
+                if (lastWaypoint != null && Util.size(lastWaypoint.getMarks())==2) {
                     final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
-                    final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
-                    result.finishMarkPositions = finishMarkPositionDTOs;
-                    result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
-                    result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                    result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    if (markPositionDTOsAndLineAdvantage != null) {
+                        final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
+                        result.finishMarkPositions = finishMarkPositionDTOs;
+                        result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                        result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                        result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    }
                 }
             }
         }

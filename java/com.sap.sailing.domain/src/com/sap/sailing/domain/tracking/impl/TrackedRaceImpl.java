@@ -353,6 +353,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
+                    updateEventTimePoints(loadedWindTracks);
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -387,7 +388,25 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             
         }
     }
-    
+
+    /**
+     * Assuming that the wind tracks <code>loadedWindTracks</code> were loaded from the persistent store, this method updates
+     * the time stamps that frame the data held by this tracked race. See {@link #timePointOfLastEvent}, {@link #timePointOfNewestEvent}
+     * and {@link #timePointOfOldestEvent}.
+     */
+    private void updateEventTimePoints(Map<? extends WindSource, ? extends WindTrack> loadedWindTracks) {
+        for (WindTrack windTrack : loadedWindTracks.values()) {
+            windTrack.lockForRead();
+            try {
+                for (Wind wind : windTrack.getRawFixes()) {
+                    updated(wind.getTimePoint());
+                }
+            } finally {
+                windTrack.unlockAfterRead();
+            }
+        }
+    }
+
     /**
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
      */
@@ -1607,12 +1626,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             clearDirectionFromStartToNextMarkCache();
             stopAndRemoveStartToNextMarkCacheInvalidationListener(waypointThatGotRemoved);
             Iterator<Waypoint> waypointsIter = getRace().getCourse().getWaypoints().iterator();
-            waypointsIter.next(); // skip first
-            if (waypointsIter.hasNext()) {
-                waypointsIter.next(); // skip second
+            if (waypointsIter.hasNext()) { // catches the case of a course being empty
+                waypointsIter.next(); // skip first
                 if (waypointsIter.hasNext()) {
-                    Waypoint newSecond = waypointsIter.next();
-                    addStartToNextMarkCacheInvalidationListener(newSecond);
+                    waypointsIter.next(); // skip second
+                    if (waypointsIter.hasNext()) {
+                        Waypoint newSecond = waypointsIter.next();
+                        addStartToNextMarkCacheInvalidationListener(newSecond);
+                    }
                 }
             }
         }
@@ -2240,14 +2261,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     break;
                 }
                 if (lastFix != null) {
-                    Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
-                    Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
-                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix)
-                            .getDegrees())
-                            / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
-                    if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
-                        maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
-                        result = lastFix.getTimePoint();
+                    final SpeedWithBearing lastEstimatedSpeed = track.getEstimatedSpeed(lastFix.getTimePoint());
+                    if (lastEstimatedSpeed != null) {
+                        Bearing courseAtLastFix = lastEstimatedSpeed.getBearing();
+                        final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
+                        if (estimatedSpeed != null) {
+                            Bearing courseAtFix = estimatedSpeed.getBearing();
+                            double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix
+                                    .getDifferenceTo(courseAtLastFix).getDegrees())
+                                    / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
+                            if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
+                                maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
+                                result = lastFix.getTimePoint();
+                            }
+                        }
                     }
                 }
                 lastFix = fix;
@@ -2418,7 +2445,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        if (raceLog != null) {
+            this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        } else {
+            logger.severe("Got a request to attach race log for an empty race log!");
+        }
     }
 
     @Override
