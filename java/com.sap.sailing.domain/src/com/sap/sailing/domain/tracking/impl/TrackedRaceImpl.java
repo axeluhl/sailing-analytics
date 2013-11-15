@@ -2445,6 +2445,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
+        if (this.attachedRaceLogs == null) {
+            this.attachedRaceLogs = new HashMap<Serializable, RaceLog>();
+        }
         this.attachedRaceLogs.put(raceLog.getId(), raceLog);
     }
 
