@@ -45,20 +45,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
-    private final boolean showOverallLeaderboardOnSamePage;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
-    private CheckBox showOverallLeaderboardOnSamePageCheckbox;
     
     protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
-            boolean autoExpandPreSelectedRace, boolean showOverallLeaderboardOnSamePage,
+            boolean autoExpandPreSelectedRace, 
             long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
@@ -76,14 +74,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.showOverallLeaderboardOnSamePage = showOverallLeaderboardOnSamePage;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.add(createSelectedRacesPanel(dialog));
-        dialogPanel.add(createOverallLeaderboardSelectionPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
@@ -278,19 +274,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return selectedRacesPanel;
     }
 
-    private FlowPanel createOverallLeaderboardSelectionPanel(DataEntryDialog<?> dialog) {
-        FlowPanel overallLeaderboardSelectionPanel = new FlowPanel();
-        overallLeaderboardSelectionPanel.addStyleName("SettingsDialogComponent");
-        overallLeaderboardSelectionPanel.add(dialog.createHeadline(stringMessages.overallLeaderboardSelection(), true));
-        FlowPanel overallLeaderboardSelectionContent = new FlowPanel();
-        overallLeaderboardSelectionContent.addStyleName("dialogInnerContent");
-        overallLeaderboardSelectionPanel.add(overallLeaderboardSelectionContent);
-        showOverallLeaderboardOnSamePageCheckbox = dialog.createCheckbox(stringMessages.showOverallLeaderboardOnSamePage());
-        showOverallLeaderboardOnSamePageCheckbox.setValue(showOverallLeaderboardOnSamePage);
-        overallLeaderboardSelectionContent.add(showOverallLeaderboardOnSamePageCheckbox);
-        return overallLeaderboardSelectionPanel;
-    }
-
     @Override
     public LeaderboardSettings getResult() {
         List<DetailType> maneuverDetailsToShow = new ArrayList<DetailType>();
@@ -334,7 +317,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy, showOverallLeaderboardOnSamePageCheckbox.getValue());
+                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy);
     }
 
     @Override

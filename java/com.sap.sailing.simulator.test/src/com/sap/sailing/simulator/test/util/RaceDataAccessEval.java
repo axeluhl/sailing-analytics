@@ -17,6 +17,8 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.impl.SimulatorUtils;
 
@@ -30,6 +32,7 @@ public class RaceDataAccessEval {
     private static URI liveUri;
     private static URI storedUri;
     private static RacingEventServiceImpl service;
+    private static TracTracAdapterFactory tracTracAdapterFactory;
     private static RacesHandle raceHandle;
     public boolean storedend = false;
 
@@ -99,10 +102,10 @@ public class RaceDataAccessEval {
         // storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
 
         service = new RacingEventServiceImpl();
+        tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         logger.info("Calling service.addTracTracRace");
-
-        raceHandle = SimulatorUtils.loadRace(service, paramUrl, liveUri, storedUri, null, EmptyWindStore.INSTANCE,
-                60000);
+        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null,
+                EmptyWindStore.INSTANCE, 60000);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
 
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta

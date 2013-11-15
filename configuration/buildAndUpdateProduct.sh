@@ -127,7 +127,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	    b) onegwtpermutationonly=1;;
+	b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -160,8 +160,34 @@ if [[ "$@" == "release" ]]; then
         exit
     fi
 
+    RELEASE_NOTES=""
+    echo ""
+    echo "Please provide me with some notes about this release. You can add more than"
+    echo "one line. Please include major changes or new features. After your notes I will"
+    echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
+    while read -e -p "> " line; do
+        RELEASE_NOTES="$RELEASE_NOTES\n$line"
+    done
+
+    if [[ $RELEASE_NOTES == "" ]]; then
+        echo -e "\nCome on - I can not release without at least some notes about this release!"
+        exit
+    fi
+    echo -e "\nThank you! One last thing..."
+
+    echo "How many weeks of commits do you want to include (0=No commits)?"
+    read -p "> " -e COMMIT_WEEK_COUNT
+
     mkdir -p $PROJECT_HOME/dist
     mkdir -p $PROJECT_HOME/build
+
+    RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
+    echo -e $RELEASE_NOTES > $PROJECT_HOME/build/release-notes.txt
+    echo "" >> $PROJECT_HOME/build/release-notes.txt
+    echo "Commits for the last $COMMIT_WEEK_COUNT weeks:" >> $PROJECT_HOME/build/release-notes.txt
+    echo "" >> $PROJECT_HOME/build/release-notes.txt
+    cd $PROJECT_HOME
+    git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
     cd $PROJECT_HOME/build
     ACDIR=$PROJECT_HOME/build
@@ -210,6 +236,7 @@ if [[ "$@" == "release" ]]; then
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
+    cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     
     cd $PROJECT_HOME
     rm -rf build/*
@@ -373,7 +400,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="safari" \/>/' >$i.sed
+                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
                 mv $i.sed $i
             done
         else
@@ -381,7 +408,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="safari" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
                 mv $i.sed $i
             done
         fi

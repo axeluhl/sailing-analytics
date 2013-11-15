@@ -1,14 +1,20 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +82,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    /**
+     * This value indicated how many stored data packets we allow that are not in the right sequence
+     * Background: It can happen that the progress for storedData hops around and delivers a progress
+     * that is lower than one received before. This can happen but only at a maximum of times this constant describes.
+     */
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 3;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;
@@ -87,6 +100,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
+    private HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>> lastProgressPerID;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -187,6 +201,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
+        this.lastProgressPerID = new HashMap<Triple<URL, URI, URI>, Pair<Integer, Float>>();
         final Simulator simulator;
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
@@ -201,6 +216,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         
         logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
+        
+        // check if there is a directory configured where stored data files can be cached
+        storedURI = checkForCachedStoredData(storedURI);
         
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
@@ -236,6 +254,53 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
     }
 
+    private URI checkForCachedStoredData(URI storedURI){
+        if (System.getProperty("cache.dir") != null) {
+            final String directory = System.getProperty("cache.dir");
+            if (new File(directory).exists()) {
+                final String[] pathFragments = storedURI.getPath().split("\\/");
+                final String mtbFileName = pathFragments[pathFragments.length-1];
+                final String directoryAndFileName = directory+"/"+mtbFileName;
+                if (!new File(directoryAndFileName).exists()) {
+                    FileOutputStream mtbOutStream = null;
+                    try {
+                        logger.info("Starting to download " + storedURI + " to cache dir " + directoryAndFileName);
+                        InputStream in = storedURI.toURL().openStream();
+                        mtbOutStream = new FileOutputStream(new File(directoryAndFileName));
+                        byte data[] = new byte[1024];
+                        int count;
+                        while ((count = in.read(data, 0, 1024)) != -1)
+                        {
+                            mtbOutStream.write(data, 0, count);
+                        }
+                        logger.info("Finished downloading file to cache!");
+                    } catch (Exception ex) {
+                        // never throw but display
+                        ex.printStackTrace();
+                    } finally {
+                        if (mtbOutStream != null) {
+                            try {
+                                mtbOutStream.close();
+                            } catch (IOException e) {
+                                // ignore
+                            }   
+                        }
+                    }
+                } else {
+                    logger.info("Found file " + directoryAndFileName + "! Reusing it for this race!");
+                }
+                
+                try {
+                    return new URI("file:///" + directoryAndFileName);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return storedURI;
+    }
+
     @Override
     public DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
@@ -268,6 +333,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         };
         // now run the command once immediately and synchronously; see also bug 1345
         command.run();
+        
         // then schedule for periodic execution in background
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
@@ -435,7 +501,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return newCourseControlPointsWithPassingSide;
     }
 
-    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
+    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) throws ParseException {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
         RaceDefinition race = getRegatta().getRaceByName(clientParams.getRace().getName());
@@ -458,6 +524,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
+                }
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(raceStartTime);
                 }
             }
         }
@@ -528,9 +598,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         ioThread.join(3000); // wait no more than three seconds
         if (ioThread.isAlive()) {
             ioThread.stop();
-            logger.warning("Tractrac IO thread for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
+            logger.warning("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
         } else {
-            logger.info("Joined TracTrac IO thread for race(s) "+getRaces());
+            logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
         }
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
         updateStatusOfTrackedRaces();
@@ -542,17 +612,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void liveDataConnected() {
-        logger.info("Live data connected for race(s) "+getRaces());
+        logger.info("Live data connected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void liveDataDisconnected() {
-        logger.info("Live data disconnected for race(s) "+getRaces());
+        logger.info("Live data disconnected in tracker "+getID()+" for race(s) "+getRaces());
     }
 
     @Override
     public void stopped() {
-        logger.info("stopped TracTrac tracking for "+getRaces());
+        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
         updateStatusOfTrackedRaces();
         // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and
@@ -596,14 +666,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataBegin() {
-        logger.info("Stored data begin for race(s) "+getRaces());
+        logger.info("Stored data begin in tracker "+getID()+" for race(s) "+getRaces());
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
         updateStatusOfTrackedRaces();
     }
 
     @Override
     public void storedDataEnd() {
-        logger.info("Stored data end for race(s) "+getRaces());
+        logger.info("Stored data end in tracker "+getID()+" for race(s) "+getRaces());
         if (isLiveTracking) {
             lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
             updateStatusOfTrackedRaces();
@@ -612,19 +682,41 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
+        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
+        Integer counter = 0;
+        final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
+        if (lastProgressPair != null) {
+            Float lastProgress = lastProgressPair.getB();
+            counter = lastProgressPair.getA();
+            if (progress < lastProgress.floatValue()) {
+                if (counter.intValue() > MAX_STORED_PACKET_HOP_ALLOWANCE) {
+                    try {
+                        logger.severe("Got " + MAX_STORED_PACKET_HOP_ALLOWANCE + " times a value for progress " + progress + " that is lower than one already received " + lastProgress + "! This is a severe error - stopping receivers for " + getID() + " now!");
+                        stop(/* stopReceiversPreemptively */ true);
+                        /* make sure to indicate that this race is erroneous */
+                        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
+                        updateStatusOfTrackedRaces();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    counter += 1;
+                }
+            } 
+        }
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
+        lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
     }
 
     @Override
     public void storedDataError(String arg0) {
-        logger.warning("Error with stored data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with stored data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override
     public void liveDataConnectError(String arg0) {
-        logger.warning("Error with live data for race(s) "+getRaces()+": "+arg0);
+        logger.warning("Error with live data in tracker "+getID()+" for race(s) "+getRaces()+": "+arg0);
     }
 
     @Override

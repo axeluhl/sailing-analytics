@@ -84,7 +84,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
         createEventBtn.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 openCreateEventDialog();
@@ -97,7 +96,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm("Do you really want to remove the events?")) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
                     removeEvents(eventSelectionModel.getSelectedSet());
                 }
             }
@@ -161,7 +160,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void update(int index, EventDTO event, String value) {
                 if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm("Do you really want to remove the event: '" + event.getName() + "' ?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                         removeEvent(event);
                     }
                 } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -194,7 +193,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         fillEvents();
     }
 
-    protected void removeEvents(Collection<EventDTO> events) {
+    private void removeEvents(Collection<EventDTO> events) {
         if (!events.isEmpty()) {
             Collection<String> eventIds = new HashSet<String>();
             for (EventDTO event : events) {

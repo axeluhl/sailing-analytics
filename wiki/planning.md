@@ -8,6 +8,10 @@ During our workshop of 2013-09-30, three major areas of development were identif
 
 * [[Smartphone Tracking|wiki/planning/businesscases/SmartphoneTracking]]
 
+* [[Sponsorship Engine|wiki/planning/businesscases/SponsorshipEngine]]
+
+* [[Race Committee App|wiki/planning/businesscases/RaceCommitteeApp]]
+
 The links above lead to short write-ups of the respective business case behind the topic, listing the pros and cons and discussing the risks.
 
 ## Project Candidates

@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.TimePoint;
@@ -52,6 +51,11 @@ import com.tractrac.clientmodule.data.Position;
 import difflib.PatchFailedException;
 
 public interface DomainFactory {
+    /**
+     * A default domain factory for test purposes only. In a server environment, ensure NOT to use this. Use what can be
+     * reached from <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance
+     * used by all other services linked to the <code>RacingEventService</code>.
+     */
     static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
@@ -78,12 +82,6 @@ public interface DomainFactory {
     GPSFixMoving createGPSFixMoving(Position position);
 
     Person getOrCreatePerson(String name, Nationality nationality, UUID id);
-
-    /**
-     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
-     * is split along "+" signs with one {@link Person} object created for each part.
-     */
-    Team getOrCreateTeam(String name, Nationality nationality, UUID competitorId);
 
     /**
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such

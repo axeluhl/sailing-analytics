@@ -20,8 +20,10 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -182,6 +184,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public RegattaIdentifier getRegattaIdentifier() {
         return new RegattaName(getName());
+    }
+    
+    @Override
+    public RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race) {
+        return new RegattaNameAndRaceName(getName(), race.getName());
     }
 
     @Override
