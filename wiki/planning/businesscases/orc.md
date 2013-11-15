@@ -23,6 +23,15 @@ Provide solutions to help organizations operating ORC/IRC/Yardstick based regatt
 ## Description
 
 ## Synergies
+There are synergies with the Smartphone Tracking project as well as the Sailing Analytics in general.
+Many core functions of the existing Sailing Analytics can be reused (e.g race viewer, live leaderboard calculation, etc.), but must be adapted to the specifics of the handicap sailing.
+The Smartphone Tracking would also benefit from the project as many small regattas are handicap races.
 
 ## Risks
+One risk is the lack of understanding the real world problems of handicap regattas. So we can't prove that the listed features address the right problem spaces. To minimize that risk we should attend some handicap regattas.
+
+
+## Information Sources
+ORC: http://orc.org/
+IRC: http://www.ircrating.org/
 
