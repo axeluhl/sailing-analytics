@@ -29,7 +29,7 @@ The Smartphone Tracking would also benefit from the project as many small regatt
 
 ## Risks
 One risk is the lack of understanding the real world problems of handicap regattas. So we can't prove that the listed features address the right problem spaces. To minimize that risk we should attend some handicap regattas.
-
+Another risk is the that we don't know how big the investment must be to reach a point where we can really change the way handicap regattas are presented.
 
 ## Information Sources
 ORC: http://orc.org/
