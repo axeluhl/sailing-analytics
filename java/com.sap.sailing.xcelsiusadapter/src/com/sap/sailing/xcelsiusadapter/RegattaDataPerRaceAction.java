@@ -170,7 +170,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                 final Element competitors_node = addNamedElement(race_node, "competitors"); // add node that contains all competitors
                 
                 int rank = 0;
-                List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(trackedRace.getEndOfTracking());
+                List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(r, trackedRace.getEndOfTracking());
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     rank += 1;
                     final Element competitor_node = addNamedElement(competitors_node, "competitor"); // add competitor node
