@@ -37,7 +37,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -462,10 +461,9 @@ public interface SailingServiceAsync {
 
     void getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher, AsyncCallback<DeviceConfigurationDTO> callback);
 
-    void addDeviceConfiguration(Type type, List<String> clientIds, List<String> allowedCourseAreaNames, 
-            Integer minRounds, Integer maxRounds, String mailRecipient, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
 
-    void removeDeviceConfiguration(Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+    void removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
     
 }
 

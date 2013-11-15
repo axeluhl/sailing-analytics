@@ -174,9 +174,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             errorReporter.reportError("Invalid state.");
             return;
         }
-        sailingService.addDeviceConfiguration(matcher.type, matcher.clients, 
-                configuration.allowedCourseAreaNames, configuration.minRoundsForCourse, 
-                configuration.maxRoundsForCourse, configuration.resultsMailRecipient, 
+        sailingService.createOrUpdateDeviceConfiguration(matcher, configuration, 
                 new AsyncCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void onSuccess(DeviceConfigurationMatcherDTO matcher) {

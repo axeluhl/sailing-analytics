@@ -37,7 +37,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -338,7 +337,7 @@ public interface SailingService extends RemoteService {
     
     DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher);
     
-    DeviceConfigurationMatcherDTO addDeviceConfiguration(Type type, List<String> clientIds, List<String> allowedCourseAreaNames, Integer minRounds, Integer maxRounds, String mailRecipient);
+    DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
 
-    boolean removeDeviceConfiguration(Type type, List<String> clientIds);
+    boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds);
 }

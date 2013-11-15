@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SelectionProvider;
 import com.sap.sailing.gwt.ui.client.SelectionProviderImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 
 public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO> {
@@ -115,8 +116,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
                         new DialogCallback<DeviceConfigurationMatcherDTO>() {
                     @Override
                     public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
-                        sailingService.addDeviceConfiguration(createdMatcher.type, createdMatcher.clients, 
-                                null, null, null, null, new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                        sailingService.createOrUpdateDeviceConfiguration(createdMatcher, new DeviceConfigurationDTO(), 
+                                new AsyncCallback<DeviceConfigurationMatcherDTO>() {
                             @Override
                             public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
                                 listComposite.refreshTable();

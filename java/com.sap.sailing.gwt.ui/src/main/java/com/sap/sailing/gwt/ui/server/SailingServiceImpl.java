@@ -3313,19 +3313,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public DeviceConfigurationMatcherDTO addDeviceConfiguration(Type type, List<String> clientIds, List<String> allowedCourseAreaNames, Integer minRounds, Integer maxRounds, String mailRecipient) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
-        configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
-        configuration.setMinimumRoundsForCourse(minRounds);
-        configuration.setMaximumRoundsForCourse(maxRounds);
-        configuration.setResultsMailRecipient(mailRecipient);
+    public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.type, matcherDTO.clients);
+        DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
         getService().createOrUpdateDeviceConfiguration(matcher, configuration);
         return convertToDeviceConfigurationMatcherDTO(matcher);
     }
 
     @Override
-    public boolean removeDeviceConfiguration(Type type, List<String> clientIds) {
+    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds) {
         DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
         getService().removeDeviceConfiguration(matcher);
         return true;
@@ -3352,7 +3348,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return dto;
     }
 
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(Type type, List<String> clientIds) {
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds) {
         switch (type) {
         case SINGLE:
             return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.SINGLE, clientIds);
@@ -3372,6 +3368,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.maxRoundsForCourse = configuration.getMaximumRoundsForCourse();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         return dto;
+    }
+
+    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        configuration.setAllowedCourseAreaNames(configurationDTO.allowedCourseAreaNames);
+        configuration.setMinimumRoundsForCourse(configurationDTO.minRoundsForCourse);
+        configuration.setMaximumRoundsForCourse(configurationDTO.maxRoundsForCourse);
+        configuration.setResultsMailRecipient(configurationDTO.resultsMailRecipient);
+        return configuration;
     }
 
 }
