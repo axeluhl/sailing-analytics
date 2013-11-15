@@ -8,10 +8,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.Filter;
 import com.sap.sailing.datamining.FilterCriteria;
+import com.sap.sailing.datamining.WorkerBuilder;
+import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.data.impl.NoFilter;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
-import com.sap.sailing.datamining.impl.FilterByCriteria;
 import com.sap.sailing.datamining.impl.ParallelFilter;
 import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
@@ -24,14 +25,14 @@ public final class FilterFactory {
 
     private FilterFactory() { }
     
-    public static <DataType> Filter<DataType> createParallelFilter(SingleThreadedFilter<DataType> workerBase, ThreadPoolExecutor executor) {
-        return new ParallelFilter<DataType>(workerBase, executor);
+    public static <DataType> Filter<DataType> createParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+        return new ParallelFilter<DataType>(workerBuilder, executor);
     }
 
-    public static <DataType> SingleThreadedFilter<DataType> createDimensionFilter(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+    public static <DataType> WorkerBuilder<SingleThreadedFilter<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
         FilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
-        SingleThreadedFilter<DataType> filter = createCriteriaFilter(criteria); 
-        return filter;
+        WorkerBuilder<SingleThreadedFilter<DataType>> builder = createCriteriaFilterBuilder(criteria); 
+        return builder;
     }
 
     /**
@@ -39,6 +40,10 @@ public final class FilterFactory {
      */
     public static <DataType> Filter<DataType> createNoFilter() {
         return new NoFilter<DataType>();
+    }
+
+    public static <DataType> WorkerBuilder<SingleThreadedFilter<DataType>> createCriteriaFilterBuilder(FilterCriteria<DataType> criteria) {
+        return new FilterByCriteriaBuilder<DataType>(criteria);
     }
 
     private static <DataType> FilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
@@ -54,13 +59,9 @@ public final class FilterFactory {
         }
         return compoundCriteria;
     }
-
-    public static <DataType> SingleThreadedFilter<DataType> createCriteriaFilter(FilterCriteria<DataType> criteria) {
-        return new FilterByCriteria<DataType>(criteria);
-    }
     
     @SuppressWarnings("unchecked")
-    public static <DataType, ValueType> FilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Iterable<?> values) {
+    private static <DataType, ValueType> FilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Iterable<?> values) {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, (Collection<ValueType>) values);
     }
 

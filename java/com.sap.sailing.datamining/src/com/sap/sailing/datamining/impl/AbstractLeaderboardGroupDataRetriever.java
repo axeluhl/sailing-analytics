@@ -51,14 +51,9 @@ public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements
     }
 
     @Override
-    public void startRetrieval() {
+    public void run() {
         receiver.addData(retrieveData());
         isDone = true;
-    }
-
-    @Override
-    public void run() {
-        startRetrieval();
     }
 
     protected abstract Collection<DataType> retrieveData();

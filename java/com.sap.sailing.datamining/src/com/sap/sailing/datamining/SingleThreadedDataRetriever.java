@@ -6,8 +6,6 @@ public interface SingleThreadedDataRetriever<DataType> extends Cloneable, Runnab
 
     public SingleThreadedDataRetriever<DataType> clone();
 
-    public void startRetrieval();
-
     public boolean isDone();
 
     public void setGroup(LeaderboardGroup group);

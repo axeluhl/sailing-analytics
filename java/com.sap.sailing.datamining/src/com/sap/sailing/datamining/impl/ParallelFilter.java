@@ -12,16 +12,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.datamining.Filter;
+import com.sap.sailing.datamining.FilterReceiver;
+import com.sap.sailing.datamining.WorkerBuilder;
 
-public class ParallelFilter<DataType> implements Filter<DataType> {
-    
+public class ParallelFilter<DataType> implements Filter<DataType>, FilterReceiver<DataType> {
+
     private ThreadPoolExecutor executor;
-    private SingleThreadedFilter<DataType> workerBase;
+    private final WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder;
     private HashSet<SingleThreadedFilter<DataType>> workers;
     private Collection<DataType> data;
 
-    public ParallelFilter(SingleThreadedFilter<DataType> workerBase, ThreadPoolExecutor executor) {
-        this.workerBase = workerBase;
+    public ParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+        this.workerBuilder = workerBuilder;
         this.executor = executor;
         workers = new HashSet<SingleThreadedFilter<DataType>>();
         data = new ArrayList<DataType>();
@@ -39,7 +41,15 @@ public class ParallelFilter<DataType> implements Filter<DataType> {
     private void setUpWorkersFor(Collection<DataType> data) {
         List<DataType> dataAsList = new ArrayList<DataType>(data);
         final int workerAmount = (int) (executor.getCorePoolSize() * 0.5);
-        //TODO Split list into equal chunks and create a worker for each
+        final int partitionSize = (int) Math.ceil((double) dataAsList.size() / workerAmount);
+        for (int i = 0; i < dataAsList.size(); i += partitionSize) {
+            List<DataType> partition = dataAsList.subList(i, i + Math.min(partitionSize, dataAsList.size() - i));
+            
+            SingleThreadedFilter<DataType> worker = workerBuilder.build();
+            worker.setReceiver(this);
+            worker.setDataToFilter(partition);
+            workers.add(worker);
+        }
     }
 
     @Override
@@ -60,6 +70,11 @@ public class ParallelFilter<DataType> implements Filter<DataType> {
             }
         }
         return true;
+    }
+
+    @Override
+    public void addFilteredData(Collection<DataType> data) {
+        this.data.addAll(data);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.sap.sailing.datamining.factories.ExtractorFactory;
 import com.sap.sailing.datamining.factories.FilterFactory;
 import com.sap.sailing.datamining.factories.GrouperFactory;
 import com.sap.sailing.datamining.impl.QueryImpl;
+import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.server.RacingEventService;
 
@@ -37,7 +38,8 @@ public final class DataMiningFactory {
             return FilterFactory.createNoFilter();
         }
         
-        return FilterFactory.createParallelFilter(FilterFactory.<DataType>createDimensionFilter(queryDefinition.getDataType(), queryDefinition.getSelection()), executor);
+        WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder = FilterFactory.createDimensionFilterBuilder(queryDefinition.getDataType(), queryDefinition.getSelection());
+        return FilterFactory.createParallelFilter(workerBuilder, executor);
     }
 
 }
