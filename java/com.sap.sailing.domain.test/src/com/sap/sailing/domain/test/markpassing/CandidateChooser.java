@@ -69,7 +69,7 @@ public class CandidateChooser {
         // TODO Get real speeds!!
         double minimumSpeed = 5;
         double maximumSpeed = 9;
-        double averageSpeed = 7;
+        double averageSpeed = (maximumSpeed+minimumSpeed)/2;
         double delta = maximumSpeed-minimumSpeed;
         
         if(c1.getID() == 0 && c2.getID() == 1 && c2.getTimePoint().asMillis()-c1.getTimePoint().asMillis() < 300000){

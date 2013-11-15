@@ -2,9 +2,7 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
@@ -13,28 +11,18 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class CandidateFinder {
 
-    @SuppressWarnings("serial")
     public LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> findCandidates(
             ArrayList<GPSFixMoving> gpsFixes,
             LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, Double boatLength,
             LinkedHashMap<Waypoint, Double> legLength) {
         LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> allCandidates = new LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>>();
 
-        // Get Waypoint Positions
-        List<Timed> timeds = new ArrayList<>();
-        for (GPSFixMoving gps : gpsFixes) {
-            final TimePoint finalT = gps.getTimePoint();
-            timeds.add(new Timed() {
-                public TimePoint getTimePoint() {
-                    return finalT;
-                }
-            });
-        }
         for (Waypoint wp : markPositions.keySet()) {
 
             // Calculate Distances
             LinkedHashMap<GPSFixMoving, Double> distances = new LinkedHashMap<>();
             LinkedHashMap<GPSFixMoving, Double> costRelativCourseSize = new LinkedHashMap<>();
+            
             ArrayList<Position> pos0 = new ArrayList<>();
             for (int i = 0; i < markPositions.get(wp).size(); i++) {
                 pos0.add(markPositions.get(wp).get(i).get(gpsFixes.get(0).getTimePoint()));
