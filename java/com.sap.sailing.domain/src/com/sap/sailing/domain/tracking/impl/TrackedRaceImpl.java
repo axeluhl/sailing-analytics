@@ -435,6 +435,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     @Override
@@ -1626,12 +1627,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             clearDirectionFromStartToNextMarkCache();
             stopAndRemoveStartToNextMarkCacheInvalidationListener(waypointThatGotRemoved);
             Iterator<Waypoint> waypointsIter = getRace().getCourse().getWaypoints().iterator();
-            waypointsIter.next(); // skip first
-            if (waypointsIter.hasNext()) {
-                waypointsIter.next(); // skip second
+            if (waypointsIter.hasNext()) { // catches the case of a course being empty
+                waypointsIter.next(); // skip first
                 if (waypointsIter.hasNext()) {
-                    Waypoint newSecond = waypointsIter.next();
-                    addStartToNextMarkCacheInvalidationListener(newSecond);
+                    waypointsIter.next(); // skip second
+                    if (waypointsIter.hasNext()) {
+                        Waypoint newSecond = waypointsIter.next();
+                        addStartToNextMarkCacheInvalidationListener(newSecond);
+                    }
                 }
             }
         }
@@ -2443,7 +2446,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        if (raceLog != null) {
+            this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        } else {
+            logger.severe("Got a request to attach race log for an empty race log!");
+        }
     }
 
     @Override

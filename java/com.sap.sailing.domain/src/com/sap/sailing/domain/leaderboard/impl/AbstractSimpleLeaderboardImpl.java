@@ -134,7 +134,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private final Set<Competitor> suppressedCompetitors;
     private final NamedReentrantReadWriteLock suppressedCompetitorsLock;
 
-    private final Map<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
+    private transient Map<Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
 
     /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
@@ -369,6 +369,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private void initTransientFields() {
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
         this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
