@@ -1632,7 +1632,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorStore);
         logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
-        logger.fine(logoutput.toString());
+        logger.info(logoutput.toString());
     }
 
     @SuppressWarnings("unchecked")
