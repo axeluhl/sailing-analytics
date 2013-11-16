@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -20,7 +21,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -110,14 +110,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
                     AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
             getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<ApplyableDeviceConfiguration>() {
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<StoredDeviceConfiguration>() {
 
                         @Override
-                        public void onLoadSucceded(ApplyableDeviceConfiguration configuration, boolean isCached) {
+                        public void onLoadSucceded(StoredDeviceConfiguration configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 
-                            configuration.apply(getApplicationContext());
+                            configuration.store();
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);
                         }

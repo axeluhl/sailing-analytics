@@ -19,10 +19,11 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.data.deserialization.impl.ApplyableDeviceConfigurationJsonDeserializer;
+import com.sap.sailing.racecommittee.app.data.deserialization.impl.StoredDeviceConfigurationJsonDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
@@ -44,7 +45,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.ApplyableDeviceConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.StoredDeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -107,8 +108,8 @@ public class OnlineDataManager extends DataManager {
 
                 ExLog.i(TAG, "getEventsLoader created new loader...");
 
-                return new OnlineDataLoader<Collection<EventBase>>(context, new URL(AppPreferences
-                        .on(context).getServerBaseURL() + "/sailingserver/events"), parser, handler);
+                return new OnlineDataLoader<Collection<EventBase>>(context, 
+                        new URL(preferences.getServerBaseURL() + "/sailingserver/events"), parser, handler);
             }
         });
     }
@@ -137,15 +138,18 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
+                StoredRacingProceduresConfiguration configuration = 
+                        new StoredDeviceConfigurationImpl(preferences).load().getRacingProceduresConfiguration();
+                
                 JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
-                DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(context,
+                DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
+                        configuration,
                         new RaceGroupDeserializer(boatClassDeserializer, new SeriesWithRowsDeserializer(
                                 new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()),
                                         new RaceCellDeserializer(new RaceLogDeserializer(
                                                 RaceLogEventDeserializer.create(domainFactory)))))));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(AppPreferences
-                        .on(context).getServerBaseURL()
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/racegroups?"+
                     RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
                     RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + EventSendingService.uuid), parser, handler);
@@ -169,11 +173,10 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<Collection<Mark>>(context, new URL(AppPreferences
-                        .on(context).getServerBaseURL()
-                    + "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
-                    "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName 
-                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
+                return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL() + 
+                        "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
+                        "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName + 
+                        "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
             }
         });
     }
@@ -196,7 +199,7 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName());
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
-                return new OnlineDataLoader<CourseBase>(context, new URL(AppPreferences.on(context).getServerBaseURL()
+                return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
                     + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
                     + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
@@ -223,7 +226,7 @@ public class OnlineDataManager extends DataManager {
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName());
 
                 return new OnlineDataLoader<Collection<Competitor>>(context, new URL(
-                        AppPreferences.on(context).getServerBaseURL() + "/sailingserver/rc/competitors?"
+                        preferences.getServerBaseURL() + "/sailingserver/rc/competitors?"
                                 + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&"
                                 + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
                                 + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
@@ -232,20 +235,20 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<ApplyableDeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
-            LoadClient<ApplyableDeviceConfiguration> callback) {
-        return new DataLoaderCallbacks<ApplyableDeviceConfiguration>(callback, new LoaderCreator<ApplyableDeviceConfiguration>() {
+    public LoaderCallbacks<DataLoaderResult<StoredDeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
+            LoadClient<StoredDeviceConfiguration> callback) {
+        return new DataLoaderCallbacks<StoredDeviceConfiguration>(callback, new LoaderCreator<StoredDeviceConfiguration>() {
             @Override
-            public Loader<DataLoaderResult<ApplyableDeviceConfiguration>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<StoredDeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<ApplyableDeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
-                DataParser<ApplyableDeviceConfiguration> parser = new DeviceConfigurationParser(
-                        new ApplyableDeviceConfigurationJsonDeserializer(AppPreferences.on(context)));
+                DataHandler<StoredDeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
+                DataParser<StoredDeviceConfiguration> parser = new DeviceConfigurationParser(
+                        StoredDeviceConfigurationJsonDeserializer.create(preferences));
                 
-                return new OnlineDataLoader<ApplyableDeviceConfiguration>(
+                return new OnlineDataLoader<StoredDeviceConfiguration>(
                         context, 
-                        new URL(AppPreferences.on(context).getServerBaseURL() + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
+                        new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);
             }
         });

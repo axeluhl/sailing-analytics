@@ -8,20 +8,19 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import android.content.Context;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -34,11 +33,14 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
     // private static final String TAG = ManagedRacesDataParser.class.getName();
 
-    private JsonDeserializer<RaceGroup> deserializer;
-    private final Context context;
+    private final JsonDeserializer<RaceGroup> deserializer;
+    private final StoredRacingProceduresConfiguration configuration;
+    private final RaceLogEventAuthor author;
 
-    public ManagedRacesDataParser(Context context, JsonDeserializer<RaceGroup> deserializer) {
-        this.context = context;
+    public ManagedRacesDataParser(RaceLogEventAuthor author, StoredRacingProceduresConfiguration configuration,
+            JsonDeserializer<RaceGroup> deserializer) {
+        this.author = author;
+        this.configuration = configuration;
         this.deserializer = deserializer;
     }
 
@@ -74,8 +76,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         RacingProcedureType startType = raceGroup.getDefaultRacingProcedureType();
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        RaceState state = new RaceStateImpl(raceLog, AppPreferences.on(context).getAuthor(), 
-                RaceLogEventFactory.INSTANCE, startType); 
+        RaceState state = new RaceStateImpl(raceLog, author, RaceLogEventFactory.INSTANCE, startType, configuration);
         return new ManagedRaceImpl(identifier, state);
 
     }

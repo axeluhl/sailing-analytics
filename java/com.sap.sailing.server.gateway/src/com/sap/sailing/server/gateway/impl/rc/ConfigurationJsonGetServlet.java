@@ -38,7 +38,7 @@ public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
         
         DeviceConfiguration configuration = getService().getDeviceConfiguration(identifier);
         if (configuration != null) {
-            JsonSerializer<DeviceConfiguration> serializer = new DeviceConfigurationJsonSerializer();
+            JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
             JSONObject json = serializer.serialize(configuration);
             json.writeJSONString(response.getWriter());
         } else {

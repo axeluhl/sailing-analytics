@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -123,7 +124,10 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -1326,7 +1330,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(DBObject dbObject) {
         DBObject matcherObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_MATCHER.name());
         DBObject configObject = (DBObject) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
-        return new Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), loadConfiguration(configObject));
+        return new Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject), 
+                loadConfiguration(configObject));
     }
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(DBObject matcherObject) {
@@ -1342,29 +1347,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private DeviceConfiguration loadConfiguration(DBObject configObject) {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
-        
-        Object allowedCourseAreaObjects = configObject.get(FieldNames.CONFIGURATION_CONFIG_ALLOWED_COURSE_AREA_NAMES.name());
-        if (allowedCourseAreaObjects != null) {
-            List<String> allowedCourseAreas = new ArrayList<String>();
-            for (Object allowedCourseAreaObject : (BasicDBList)allowedCourseAreaObjects) {
-                allowedCourseAreas.add(allowedCourseAreaObject.toString());
-            }
-            configuration.setAllowedCourseAreaNames(allowedCourseAreas);
+        DeviceConfiguration configuration = null;
+        try {
+            JsonDeserializer<DeviceConfiguration> deserializer = DeviceConfigurationJsonDeserializer.create();
+            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(configObject)));
+            configuration = deserializer.deserialize(json);
+        } catch (JsonDeserializationException | ParseException e) {
+            logger.log(Level.SEVERE, "Error parsing configuration object from MongoDB, falling back to empty configuration.");
+            logger.log(Level.SEVERE, "loadConfiguration", e);
+            configuration = new DeviceConfigurationImpl();
         }
-        Object minRounds = configObject.get(FieldNames.CONFIGURATION_CONFIG_MIN_ROUNDS.name());
-        if (minRounds != null) {
-            configuration.setMinimumRoundsForCourse(((Number)minRounds).intValue());
-        }
-        Object maxRounds = configObject.get(FieldNames.CONFIGURATION_CONFIG_MAX_ROUNDS.name());
-        if (maxRounds != null) {
-            configuration.setMaximumRoundsForCourse(((Number)maxRounds).intValue());
-        }
-        Object mail = configObject.get(FieldNames.CONFIGURATION_CONFIG_RESULTS_MAIL.name());
-        if (mail != null) {
-            configuration.setResultsMailRecipient(mail.toString());
-        }
-        
         return configuration;
     }
 }

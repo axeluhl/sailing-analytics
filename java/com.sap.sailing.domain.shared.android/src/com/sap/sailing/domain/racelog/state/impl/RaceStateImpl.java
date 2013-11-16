@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -36,6 +38,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private final RaceLog raceLog;
     private final RaceLogEventAuthor author;
     private final RaceLogEventFactory factory;
+    private final StoredRacingProceduresConfiguration configuration;
     
     private final RaceState2ChangedListeners changedListeners;
     
@@ -67,10 +70,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private CourseBase cachedCourseDesign;
     
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
-            RacingProcedureType initalRacingProcedureType) {
+            RacingProcedureType initalRacingProcedureType, StoredRacingProceduresConfiguration configuration) {
         this.raceLog = raceLog;
         this.author = author;
         this.factory = eventFactory;
+        this.configuration = configuration;
         this.changedListeners = new RaceState2ChangedListeners();
         
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
@@ -330,7 +334,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
         }
-        racingProcedure = RacingProcedureFactoryImpl.create(cachedRacingProcedureType, raceLog, author, factory);
+        RacingProceduresConfiguration loadedConfiguration = configuration.load();
+        racingProcedure = RacingProcedureFactoryImpl.create(cachedRacingProcedureType, raceLog, 
+                author, factory, loadedConfiguration);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
         

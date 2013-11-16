@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -28,11 +29,14 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
+    private final RRS26Configuration configuration;
     private final RRS26StartModeFlagFinder startmodeFlagAnalyzer;
     private Flags cachedStartmodeFlag;
     
-    public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
+    public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
+            RaceLogEventFactory factory, RRS26Configuration configuration) {
         super(raceLog, author, factory);
+        this.configuration = configuration;
         this.startmodeFlagAnalyzer = new RRS26StartModeFlagFinder(new RacingProcedureTypeAnalyzer(raceLog), raceLog);
         
         this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;

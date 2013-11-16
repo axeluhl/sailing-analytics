@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -28,8 +29,12 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     private final static long startPhaseESSTwoUpInterval = 2 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseESSOneUpInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     
-    public ESSRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
+    private final ESSConfiguration configuration;
+    
+    public ESSRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
+            RaceLogEventFactory factory, ESSConfiguration configuration) {
         super(raceLog, author, factory);
+        this.configuration = configuration;
         update();
     }
 

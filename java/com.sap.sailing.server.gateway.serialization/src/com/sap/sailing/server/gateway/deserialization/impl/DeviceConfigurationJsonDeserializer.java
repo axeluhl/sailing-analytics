@@ -7,16 +7,32 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 
 public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<DeviceConfiguration> {
+    
+    public static DeviceConfigurationJsonDeserializer create() {
+        return new DeviceConfigurationJsonDeserializer(new RacingProceduresConfigurationJsonDeserializer());
+    }
 
+    private final JsonDeserializer<? extends RacingProceduresConfiguration> proceduresDeserializer;
+    
+    public DeviceConfigurationJsonDeserializer(JsonDeserializer<? extends RacingProceduresConfiguration> proceduresDeserializer) {
+        this.proceduresDeserializer = proceduresDeserializer;
+    }
+    
     @Override
     public DeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
-        DeviceConfigurationImpl configuration = createDeviceConfiguration();
+        
+        JSONObject proceduresObject = 
+                Helpers.getNestedObjectSafe(object, DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION);
+        RacingProceduresConfiguration proceduresConfiguration = proceduresDeserializer.deserialize(proceduresObject);
+        
+        DeviceConfigurationImpl configuration = createConfiguration(proceduresConfiguration);
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES)) {
             JSONArray courseAreaNames = Helpers.getNestedArraySafe(object, DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES);
@@ -45,8 +61,8 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         return configuration;
     }
     
-    protected DeviceConfigurationImpl createDeviceConfiguration() {
-        return new DeviceConfigurationImpl();
+    protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
+        return new DeviceConfigurationImpl(proceduresConfiguration);
     }
 
 }

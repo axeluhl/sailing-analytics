@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -34,6 +35,7 @@ public class RaceStateTest {
     private RaceLogEventAuthor author;
     private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
+    private StoredRacingProceduresConfiguration configuration;
     private RaceStateChangedListener listener;
     private TimePoint nowMock;
     
@@ -45,10 +47,11 @@ public class RaceStateTest {
         author = new RaceLogEventAuthorImpl("Test", 1);
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
+        configuration = mock(StoredRacingProceduresConfiguration.class);
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceStateImpl(raceLog, author, factory, defaultRacingProcedureType);
+        state = new RaceStateImpl(raceLog, author, factory, defaultRacingProcedureType, configuration);
     }
     
     @Test

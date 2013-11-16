@@ -42,8 +42,8 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -74,7 +74,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -913,13 +915,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         
         DBObject entryObject = new BasicDBObject();
         entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), storeDeviceConfigurationMatcher(matcher));
-        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), storeDeviceConfigurationObject(configuration));
+        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
+        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
         
         configurationsCollections.update(query, entryObject, /* upsrt */ true, /* multi */ false);
     }
 
-    private DBObject storeDeviceConfigurationMatcher(DeviceConfigurationMatcher matcher) {
+    private DBObject createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
         DBObject matcherObject = new BasicDBObject();
         matcherObject.put(FieldNames.CONFIGURATION_MATCHER_TYPE.name(), matcher.getMatcherType().name());
         if (matcher instanceof DeviceConfigurationMatcherSingle) {
@@ -934,23 +936,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return matcherObject;
     }
 
-    private DBObject storeDeviceConfigurationObject(DeviceConfiguration configuration) {
-        DBObject configurationObject = new BasicDBObject();
-        if (configuration.getAllowedCourseAreaNames() != null) {
-            BasicDBList clients = new BasicDBList();
-            clients.addAll(configuration.getAllowedCourseAreaNames());
-            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_ALLOWED_COURSE_AREA_NAMES.name(), clients);
-        }
-        if (configuration.getMinimumRoundsForCourse() != null) {
-            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_MIN_ROUNDS.name(), configuration.getMinimumRoundsForCourse());
-        }
-        if (configuration.getMaximumRoundsForCourse() != null) {
-            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_MAX_ROUNDS.name(), configuration.getMaximumRoundsForCourse());
-        }
-        if (configuration.getResultsMailRecipient() != null) {
-            configurationObject.put(FieldNames.CONFIGURATION_CONFIG_RESULTS_MAIL.name(), configuration.getResultsMailRecipient());
-        }
-        return configurationObject;
+    private DBObject createDeviceConfigurationObject(DeviceConfiguration configuration) {
+        JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
+        JSONObject json = serializer.serialize(configuration);
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        return entry;
     }
 
     @Override

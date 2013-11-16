@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.FlagPole;
@@ -30,14 +31,17 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
+    private final GateStartConfiguration configuration;
     private final GateLineOpeningTimeFinder gateLineOpeningTimeAnalyzer;
     private final PathfinderFinder pathfinderAnalyzer;;
     
     private Long cachedGateLineOpeningTime;
     private String cachedPathfinder;
     
-    public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
+    public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
+            RaceLogEventFactory factory, GateStartConfiguration configuration) {
         super(raceLog, author, factory);
+        this.configuration = configuration;
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
         this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
         

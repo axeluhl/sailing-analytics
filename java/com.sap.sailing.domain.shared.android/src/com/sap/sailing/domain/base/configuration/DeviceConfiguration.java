@@ -11,4 +11,6 @@ public interface DeviceConfiguration extends Serializable {
     Integer getMinimumRoundsForCourse();
     Integer getMaximumRoundsForCourse();
     String getResultsMailRecipient();
+    
+    RacingProceduresConfiguration getRacingProceduresConfiguration();
 }
