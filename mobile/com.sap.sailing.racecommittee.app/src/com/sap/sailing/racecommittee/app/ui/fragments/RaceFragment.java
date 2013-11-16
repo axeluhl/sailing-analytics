@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import java.io.Serializable;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -35,11 +36,16 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     private ManagedRace managedRace;
     protected AppPreferences preferences;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        preferences = AppPreferences.on(activity);
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        preferences = AppPreferences.on(getActivity());
 
         Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
         managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);

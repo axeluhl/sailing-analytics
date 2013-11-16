@@ -217,12 +217,33 @@ public class AppPreferences {
         preferences.edit().putString(key(R.string.preference_course_designer_override_key), mode.name()).commit();
     }
 
-    public String getAndroidIdentifier() {
-        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    public List<String> getByNameCourseDesignerCourseNames() {
+        String value = preferences.getString(key(R.string.preference_course_designer_by_name_course_names_key), "");
+        String[] courseNames = value.split(",");
+        for (int i = 0; i < courseNames.length; i++) {
+            courseNames[i] = courseNames[i].trim();
+        }
+        return Arrays.asList(courseNames);
+    }
+
+    public void setByNameCourseDesignerCourseNames(List<String> courseNames) {
+        StringBuilder builder = new StringBuilder();
+        for (String name : courseNames) {
+            builder.append(name);
+            builder.append(",");
+        }
+        preferences
+                .edit()
+                .putString(key(R.string.preference_course_designer_by_name_course_names_key),
+                        builder.substring(0, builder.length() - 1)).commit();
     }
     
     private String key(int keyId) {
         return context.getString(keyId);
+    }
+
+    public String getAndroidIdentifier() {
+        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
 }

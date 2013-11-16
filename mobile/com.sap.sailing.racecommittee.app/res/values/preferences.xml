@@ -22,4 +22,6 @@
     <string name="preference_course_designer_by_name_min_rounds_default">2</string>
     <string name="preference_course_designer_by_name_max_rounds_key">courseDesignerByNameMaxRoundsPref</string>
     <string name="preference_course_designer_by_name_max_rounds_default">3</string>
+    <string name="preference_course_designer_by_name_course_names_key">courseDesignerByNameCourseNames</string>
+    <string name="preference_course_designer_by_name_course_names_default">O2,I2,O3</string>
 </resources>

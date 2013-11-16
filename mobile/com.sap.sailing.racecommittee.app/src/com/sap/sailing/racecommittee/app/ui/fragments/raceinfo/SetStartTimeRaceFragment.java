@@ -6,7 +6,6 @@ import java.util.Date;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -156,12 +154,10 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-
-        boolean overrideStartProcedureType = 
-                PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("overrideDefaultStartProcedureType", false);
-        RacingProcedureType type = RacingProcedureType.UNKNOWN;
-        if (overrideStartProcedureType) {
-            type = AppPreferences.on(getActivity()).getDefaultStartProcedureType();
+        
+        RacingProcedureType type;
+        if (preferences.isDefaultRacingProcedureTypeOverridden()) {
+            type = preferences.getDefaultRacingProcedureType();
         } else {
             type = getRaceState().getRacingProcedure().getType();
         }

@@ -36,6 +36,14 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
         setMinimumRoundsForCourse(preferences.getMinRounds());
         setMaximumRoundsForCourse(preferences.getMaxRounds());
         setResultsMailRecipient(preferences.getMailRecipient());
+        
+        if (preferences.isDefaultRacingProcedureTypeOverridden()) {
+            setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
+        }
+        if (preferences.isDefaultCourseDesignerModeOverridden()) {
+            setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
+        }
+        setByNameDesignerCourseNames(preferences.getByNameCourseDesignerCourseNames());
         return this;
     }
     
@@ -58,6 +66,17 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
         if (getResultsMailRecipient() != null) {
             preferences.setMailRecipient(getResultsMailRecipient());
             logApply("mail recipient", getResultsMailRecipient());
+        }
+        if (getDefaultRacingProcedureType() != null) {
+            preferences.setDefaultRacingProcedureTypeOverridden(true);
+            preferences.setDefaultRacingProcedureType(getDefaultRacingProcedureType());
+        }
+        if (getDefaultCourseDesignerMode() != null) {
+            preferences.setDefaultCourseDesignerModeOverridden(true);
+            preferences.setDefaultCourseDesignerMode(getDefaultCourseDesignerMode());
+        }
+        if (getByNameCourseDesignerCourseNames() != null) {
+            preferences.setByNameCourseDesignerCourseNames(getByNameCourseDesignerCourseNames());
         }
         return this;
     }

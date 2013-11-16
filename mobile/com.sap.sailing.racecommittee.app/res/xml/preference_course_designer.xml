@@ -35,6 +35,12 @@
 		    android:numeric="integer"
 		    android:maxLength="2"/>
 		
+	    <EditTextPreference
+	        android:key="@string/preference_course_designer_by_name_course_names_key"
+	        android:defaultValue="@string/preference_course_designer_by_name_course_names_default"
+	        android:title="Course Names"
+	        android:summary="@string/empty" />
+		
     </PreferenceCategory>
     
     <!--<PreferenceCategory android:title="By-Map Course Designer" >

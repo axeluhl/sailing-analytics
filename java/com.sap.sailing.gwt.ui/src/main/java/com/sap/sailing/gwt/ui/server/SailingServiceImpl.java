@@ -3372,15 +3372,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         dto.minRoundsForCourse = configuration.getMinimumRoundsForCourse();
         dto.maxRoundsForCourse = configuration.getMaximumRoundsForCourse();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
+        dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
+        dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
         return dto;
     }
 
-    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
+    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
-        configuration.setAllowedCourseAreaNames(configurationDTO.allowedCourseAreaNames);
-        configuration.setMinimumRoundsForCourse(configurationDTO.minRoundsForCourse);
-        configuration.setMaximumRoundsForCourse(configurationDTO.maxRoundsForCourse);
-        configuration.setResultsMailRecipient(configurationDTO.resultsMailRecipient);
+        configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
+        configuration.setMinimumRoundsForCourse(dto.minRoundsForCourse);
+        configuration.setMaximumRoundsForCourse(dto.maxRoundsForCourse);
+        configuration.setResultsMailRecipient(dto.resultsMailRecipient);
+        configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
+        configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
+        configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
         return configuration;
     }
 

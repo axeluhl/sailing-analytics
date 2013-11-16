@@ -3,6 +3,8 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class DeviceConfigurationImpl implements DeviceConfiguration {
 
@@ -14,6 +16,9 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     private Integer minRounds;
     private Integer maxRounds;
     private String resultsMailRecipient;
+    private RacingProcedureType defaultRacingProcedureType;
+    private CourseDesignerMode defaultCourseDesignerMode;
+    private List<String> byNameDesignerCourseNames;
     
     public DeviceConfigurationImpl() {
         this.proceduresConfiguration = null;
@@ -62,6 +67,33 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
 
     public void setResultsMailRecipient(String resultsMailRecipient) {
         this.resultsMailRecipient = resultsMailRecipient;
+    }
+    
+    @Override
+    public RacingProcedureType getDefaultRacingProcedureType() {
+        return defaultRacingProcedureType;
+    }
+
+    public void setDefaultRacingProcedureType(RacingProcedureType type) {
+        this.defaultRacingProcedureType = type;
+    }
+    
+    @Override
+    public CourseDesignerMode getDefaultCourseDesignerMode() {
+        return defaultCourseDesignerMode;
+    }
+
+    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+        this.defaultCourseDesignerMode = mode;
+    }
+    
+    @Override
+    public List<String> getByNameCourseDesignerCourseNames() {
+        return byNameDesignerCourseNames;
+    }
+
+    public void setByNameDesignerCourseNames(List<String> byNameDesignerCourseNames) {
+        this.byNameDesignerCourseNames = byNameDesignerCourseNames;
     }
 
 }

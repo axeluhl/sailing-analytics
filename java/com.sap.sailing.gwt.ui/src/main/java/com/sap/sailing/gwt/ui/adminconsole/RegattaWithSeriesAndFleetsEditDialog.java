@@ -81,7 +81,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     private CourseDesignerMode getSelectedDefaultCourseDesignerModeType() {
         int index = designerModeEntryListBox.getSelectedIndex();
         if (index >= 0) {
-            return CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
+            CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
+            return mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
         return null;
     }
@@ -89,7 +90,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected RacingProcedureType getSelectedDefaultRacingProcedureType() {
         int index = racingProcedureListBox.getSelectedIndex();
         if (index >= 0) {
-            return RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
+            RacingProcedureType type = RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
+            return type == RacingProcedureType.UNKNOWN ? null : type;
         }
         return null;
     }

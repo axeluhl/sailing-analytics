@@ -20,6 +20,7 @@ public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
         setupCourseDesignerTypePreferences();
         bindPreferenceSummaryToInteger(findPreference(getString(R.string.preference_course_designer_by_name_min_rounds_key)));
         bindPreferenceSummaryToInteger(findPreference(getString(R.string.preference_course_designer_by_name_max_rounds_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_course_designer_by_name_course_names_key)));
     }
 
     private void setupCourseDesignerTypePreferences() {

@@ -2,10 +2,12 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import java.io.Serializable;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -20,11 +22,18 @@ public abstract class RaceDialogFragment extends LoggableDialogFragment implemen
     }
 
     private ManagedRace managedRace;
+    protected AppPreferences preferences;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        preferences = AppPreferences.on(activity);
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        
         Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
         managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
         if (managedRace == null) {
