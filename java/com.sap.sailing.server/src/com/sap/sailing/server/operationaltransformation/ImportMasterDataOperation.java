@@ -177,6 +177,7 @@ public class ImportMasterDataOperation extends
                     column.setFactor(explicitFactor);
                 }
             }
+            toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
     }
 
