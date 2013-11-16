@@ -120,7 +120,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        if (track != null) {
+            track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+        }
     }
 
     @Override
