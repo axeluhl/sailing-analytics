@@ -84,7 +84,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     
     private void markAsDrity(boolean dirty) {
         if (dirty) {
-            captionPanel.setCaptionText(stringMessages.configuration() + "*");
+            captionPanel.setCaptionText(stringMessages.configuration() + " (CHANGED)");
         } else {
             captionPanel.setCaptionText(stringMessages.configuration());
         }
@@ -96,7 +96,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.configuration = result;
         
         allowedCourseAreasBox = new TextBox();
-        allowedCourseAreasBox.setText("Alpha,Bravo,Charlie");
         allowedCourseAreasBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -108,19 +107,21 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         allowedCourseAreasBox.addKeyUpHandler(dirtyMarker);
-        if (result.allowedCourseAreaNames != null) {
+        if (configuration.allowedCourseAreaNames != null) {
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < result.allowedCourseAreaNames.size(); i++) {
-                builder.append(result.allowedCourseAreaNames.get(i));
+            for (int i = 0; i < configuration.allowedCourseAreaNames.size(); i++) {
+                builder.append(configuration.allowedCourseAreaNames.get(i));
                 builder.append(',');
             }
             allowedCourseAreasBox.setText(builder.substring(0, builder.length() - 1));
+        } else {
+            allowedCourseAreasBox.setText("Alpha,Bravo,Charlie");
+            markAsDrity(true);
         }
         mainGrid.setWidget(0, 0, new Label(stringMessages.allowedCourseAreas()));
         mainGrid.setWidget(0, 1, allowedCourseAreasBox);
         
         courseNamesBox = new TextBox();
-        courseNamesBox.setText("O2,I2");
         courseNamesBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -132,13 +133,16 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         courseNamesBox.addKeyUpHandler(dirtyMarker);
-        if (result.byNameDesignerCourseNames != null) {
+        if (configuration.byNameDesignerCourseNames != null) {
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < result.byNameDesignerCourseNames.size(); i++) {
-                builder.append(result.byNameDesignerCourseNames.get(i));
+            for (int i = 0; i < configuration.byNameDesignerCourseNames.size(); i++) {
+                builder.append(configuration.byNameDesignerCourseNames.get(i));
                 builder.append(',');
             }
             courseNamesBox.setText(builder.substring(0, builder.length() - 1));
+        } else {
+            courseNamesBox.setText("O2,I2");
+            markAsDrity(true);
         }
         mainGrid.setWidget(1, 0, new Label(stringMessages.courseNames()));
         mainGrid.setWidget(1, 1, courseNamesBox);

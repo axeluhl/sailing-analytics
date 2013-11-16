@@ -61,11 +61,15 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
             preferences.setDefaultRacingProcedureTypeOverridden(true);
             preferences.setDefaultRacingProcedureType(getDefaultRacingProcedureType());
             logApply("overridden racing procedure", getDefaultRacingProcedureType());
+        } else {
+            preferences.setDefaultRacingProcedureTypeOverridden(false);
         }
         if (getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerModeOverridden(true);
             preferences.setDefaultCourseDesignerMode(getDefaultCourseDesignerMode());
             logApply("overridden course designer mode", getDefaultCourseDesignerMode());
+        } else {
+            preferences.setDefaultCourseDesignerModeOverridden(false);
         }
         if (getByNameCourseDesignerCourseNames() != null) {
             preferences.setByNameCourseDesignerCourseNames(getByNameCourseDesignerCourseNames());
