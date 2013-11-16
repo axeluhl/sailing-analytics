@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,6 +54,8 @@ public abstract class BaseActivity extends LoggableActivity {
     }
 
     private static final String TAG = BaseActivity.class.getName();
+    
+    protected AppPreferences preferences;
 
     protected MenuItem menuItemLive;
 
@@ -64,6 +67,12 @@ public abstract class BaseActivity extends LoggableActivity {
     
     public BaseActivity() {
         this.sendingServiceConnection = new EventSendingServiceConnection();
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.preferences = AppPreferences.on(getApplicationContext());
     }
 
     @Override
