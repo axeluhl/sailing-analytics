@@ -276,6 +276,7 @@
 	
 	<string name="loading_configuration">Loading configuration...</string>
 	<string name="loading_configuration_failed">There was an error loading the configuration.</string>
+	<string name="loading_configuration_not_found">There was no remote configuration found for this device.</string>
 	<string name="loading_configuration_succeded">Remote configuration applied.</string>
 	
 	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>

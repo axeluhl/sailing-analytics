@@ -50,6 +50,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -67,6 +68,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -1191,17 +1193,32 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId) {
+    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
+           RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         synchronized (regatta) {
+            boolean isDirty = false;
             CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
             if (newCourseArea != regatta.getDefaultCourseArea()) {
                 regatta.setDefaultCourseArea(newCourseArea);
+                isDirty = true;
+            }
+            if (newDefaultRacingProcedureType != regatta.getDefaultRacingProcedureType()) {
+                regatta.setDefaultRacingProcedureType(newDefaultRacingProcedureType);
+                isDirty = true;
+            }
+            if (newDefaultCourseDesignerMode != regatta.getDefaultCourseDesignerMode()) {
+                regatta.setDefaultCourseDesignerMode(newDefaultCourseDesignerMode);
+                isDirty = true;
+            }
+            
+            if (isDirty) {
                 mongoObjectFactory.storeRegatta(regatta);
             }
 
-            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId));
+            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId,
+                    newDefaultRacingProcedureType, newDefaultCourseDesignerMode));
         }
         return regatta;
     }

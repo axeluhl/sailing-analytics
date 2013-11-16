@@ -55,6 +55,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -903,7 +904,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
             
+            // Let's set these values to something other then null, this way old regattas will gain this field.
+            RacingProcedureType procedureType = RacingProcedureType.UNKNOWN;
+            CourseDesignerMode designerMode = CourseDesignerMode.UNKNOWN;
+            
+            if (dbRegatta.containsField(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name())) {
+                procedureType = RacingProcedureType.valueOf(
+                        dbRegatta.get(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name()).toString());
+            }
+            
+            if (dbRegatta.containsField(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name())) {
+                designerMode = CourseDesignerMode.valueOf(
+                        dbRegatta.get(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name()).toString());
+            }
+
+            
             result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
+            result.setDefaultRacingProcedureType(procedureType);
+            result.setDefaultCourseDesignerMode(designerMode);
         }
         return result;
     }

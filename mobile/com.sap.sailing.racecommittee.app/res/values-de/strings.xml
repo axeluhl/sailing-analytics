@@ -244,6 +244,7 @@
 	
 	<string name="loading_configuration">Lade Konfiguration...</string>
 	<string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
+<string name="loading_configuration_not_found">Für dieses Gerät existiert keine Konfiguration auf dem Server.</string>
 	<string name="loading_configuration_succeded">Konfiguration vom Server übernommen.</string>
 	
 </resources>

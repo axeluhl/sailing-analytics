@@ -2,8 +2,8 @@ package com.sap.sailing.domain.base.racegroup;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseDesignerMode;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 

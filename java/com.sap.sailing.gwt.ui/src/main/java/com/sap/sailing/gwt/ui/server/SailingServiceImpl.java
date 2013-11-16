@@ -75,6 +75,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -626,6 +627,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.defaultCourseAreaIdAsString = regatta.getDefaultCourseArea().getId().toString();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
+        regattaDTO.defaultRacingProcedureType = regatta.getDefaultRacingProcedureType();
+        regattaDTO.defaultCourseDesignerMode = regatta.getDefaultCourseDesignerMode();
         return regattaDTO;
     }
 
@@ -2789,9 +2792,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId) {
+    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId, 
+            RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode) {
         UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
-        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid));
+        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, 
+                defaultRacingProcedureType, defaultCourseDesignerMode));
     }
 
     @Override

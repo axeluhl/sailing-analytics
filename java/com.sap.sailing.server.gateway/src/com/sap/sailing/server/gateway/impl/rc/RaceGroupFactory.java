@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
@@ -22,7 +23,9 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceCellImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
@@ -40,15 +43,21 @@ public class RaceGroupFactory {
         String name = leaderboard.getName();
 
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
-
         BoatClass boatClass = null;
+        RacingProcedureType defaultProcedureType = RacingProcedureType.UNKNOWN;
+        CourseDesignerMode defaultCourseDesignerMode = CourseDesignerMode.UNKNOWN;
+        
         if (leaderboard instanceof RegattaLeaderboard) {
-            boatClass = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass();
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            boatClass = regatta.getBoatClass();
+            defaultProcedureType = regatta.getDefaultRacingProcedureType();
+            defaultCourseDesignerMode = regatta.getDefaultCourseDesignerMode();
         }
 
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
 
-        return new RaceGroupImpl(name, boatClass, courseArea, series);
+        return new RaceGroupImpl(name, boatClass, courseArea, series,
+                defaultProcedureType, defaultCourseDesignerMode);
     }
 
     public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {

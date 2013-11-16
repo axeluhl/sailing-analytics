@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 
-import com.sap.sailing.domain.base.CourseDesignerMode;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.R;
 
 public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
@@ -30,7 +30,7 @@ public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
         List<CharSequence> entryValues = new ArrayList<CharSequence>();
-        for (CourseDesignerMode type : CourseDesignerMode.values()) {
+        for (CourseDesignerMode type : CourseDesignerMode.validValues()) {
             entries.add(type.toString());
             entryValues.add(type.name());
         }

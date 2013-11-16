@@ -28,7 +28,7 @@ public enum RacingProcedureType {
     public static RacingProcedureType[] validValues() {
         List<RacingProcedureType> validValues = new ArrayList<RacingProcedureType>();
         for (RacingProcedureType type : values()) {
-            if (type != RacingProcedureType.UNKNOWN) {
+            if (type != UNKNOWN) {
                 validValues.add(type);
             }
         }

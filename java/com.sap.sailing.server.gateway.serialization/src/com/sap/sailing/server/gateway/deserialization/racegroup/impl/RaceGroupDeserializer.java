@@ -10,6 +10,8 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -17,38 +19,47 @@ import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJson
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
 
 public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
-	
-	private JsonDeserializer<BoatClass> boatClassDeserializer;
-	private JsonDeserializer<SeriesWithRows> seriesDeserializer;
 
-	public RaceGroupDeserializer(
-			JsonDeserializer<BoatClass> boatClassDeserializer,
-			JsonDeserializer<SeriesWithRows> seriesDeserializer) {
-		this.boatClassDeserializer = boatClassDeserializer;
-		this.seriesDeserializer = seriesDeserializer;
-	}
+    private JsonDeserializer<BoatClass> boatClassDeserializer;
+    private JsonDeserializer<SeriesWithRows> seriesDeserializer;
 
-	public RaceGroup deserialize(JSONObject object)
-			throws JsonDeserializationException {
-		String name = object.get(RaceGroupJsonSerializer.FIELD_NAME).toString();
-		BoatClass boatClass = null;
-		CourseArea courseArea = null;
-		
-		if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
-			// TODO: deserialize CourseArea ...
-		}
-		if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {
-			boatClass = boatClassDeserializer.deserialize(
-					Helpers.getNestedObjectSafe(object, RaceGroupJsonSerializer.FIELD_BOAT_CLASS));
-		}
-		
-		Collection<SeriesWithRows> series = new ArrayList<SeriesWithRows>();
-		for (Object seriesObject : Helpers.getNestedArraySafe(
-				object, 
-				SeriesWithRowsOfRaceGroupSerializer.FIELD_SERIES)) {
-			JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
-			 series.add(seriesDeserializer.deserialize(seriesJson));
-		}
-		return new RaceGroupImpl(name, boatClass, courseArea, series);
-	}
+    public RaceGroupDeserializer(JsonDeserializer<BoatClass> boatClassDeserializer,
+            JsonDeserializer<SeriesWithRows> seriesDeserializer) {
+        this.boatClassDeserializer = boatClassDeserializer;
+        this.seriesDeserializer = seriesDeserializer;
+    }
+
+    public RaceGroup deserialize(JSONObject object) throws JsonDeserializationException {
+        String name = object.get(RaceGroupJsonSerializer.FIELD_NAME).toString();
+        BoatClass boatClass = null;
+        CourseArea courseArea = null;
+        RacingProcedureType procedure = RacingProcedureType.UNKNOWN;
+        CourseDesignerMode designer = CourseDesignerMode.UNKNOWN;
+
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
+            // TODO: deserialize CourseArea ...
+        }
+        
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {
+            boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
+                    RaceGroupJsonSerializer.FIELD_BOAT_CLASS));
+        }
+        
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE)) {
+            procedure = RacingProcedureType.valueOf(
+                    object.get(RaceGroupJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE).toString());
+        }
+        
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER)) {
+            designer = CourseDesignerMode.valueOf(
+                    object.get(RaceGroupJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER).toString());
+        }
+
+        Collection<SeriesWithRows> series = new ArrayList<SeriesWithRows>();
+        for (Object seriesObject : Helpers.getNestedArraySafe(object, SeriesWithRowsOfRaceGroupSerializer.FIELD_SERIES)) {
+            JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
+            series.add(seriesDeserializer.deserialize(seriesJson));
+        }
+        return new RaceGroupImpl(name, boatClass, courseArea, series, procedure, designer);
+    }
 }

@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.CourseDesignerMode;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
@@ -156,8 +155,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
 
     private void showCourseDesignDialog() {
-        CourseDesignerMode mode = getRace().getRaceGroup().getDefaultCourseDesignerMode();
-        RaceDialogFragment fragment = CourseDesignerChooser.choose(getActivity(), mode);
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
         fragment.setArguments(getRecentArguments());
         fragment.show(getFragmentManager(), "courseDesignDialogFragment");
     }

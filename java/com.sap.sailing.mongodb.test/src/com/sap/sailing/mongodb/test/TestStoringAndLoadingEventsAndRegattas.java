@@ -35,6 +35,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -129,6 +131,27 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertNotNull(loadedRegatta.getDefaultCourseArea());
         assertEquals(loadedRegatta.getDefaultCourseArea().getId(), courseArea.getId());
         assertEquals(loadedRegatta.getDefaultCourseArea().getName(), courseArea.getName());
+    }
+    
+    @Test
+    public void testLoadStoreRegattaDefaultProcedureAndCourseDesigner() {
+        
+        final RacingProcedureType type = RacingProcedureType.GateStart;
+        final CourseDesignerMode mode = CourseDesignerMode.BY_MAP;
+        
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", false);
+        Regatta regatta = createRegattaAndAddRaceColumns(1, 1, "RR", boatClass, false, 
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
+        regatta.setDefaultRacingProcedureType(type);
+        regatta.setDefaultCourseDesignerMode(mode);
+        
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), null);
+        
+        assertEquals(type, loadedRegatta.getDefaultRacingProcedureType());
+        assertEquals(mode, loadedRegatta.getDefaultCourseDesignerMode());
     }
 
     @Test

@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RegattaDTO extends NamedDTO {
     private static final long serialVersionUID = -4594784946348402759L;
@@ -21,6 +23,8 @@ public class RegattaDTO extends NamedDTO {
     public ScoringSchemeType scoringScheme;
     public String defaultCourseAreaIdAsString;
     public String defaultCourseAreaName;
+    public RacingProcedureType defaultRacingProcedureType;
+    public CourseDesignerMode defaultCourseDesignerMode;
 
     public RegattaDTO() {}
 

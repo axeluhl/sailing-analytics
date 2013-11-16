@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
@@ -50,12 +51,12 @@ public class AppPreferences {
     }
 
     public void setSendingActive(boolean activate) {
-        preferences.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).apply();
+        preferences.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).commit();
     }
 
     public void setAuthor(RaceLogEventAuthor author) {
-        preferences.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).apply();
-        preferences.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).apply();
+        preferences.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).commit();
+        preferences.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
     }
 
     public RaceLogEventAuthor getAuthor() {
@@ -74,7 +75,7 @@ public class AppPreferences {
 
     public void setBoatClass(BoatClassType boatClass) {
         String boatClassString = boatClass.name();
-        preferences.edit().putString(PREFERENCE_BOAT_CLASS, boatClassString).apply();
+        preferences.edit().putString(PREFERENCE_BOAT_CLASS, boatClassString).commit();
     }
 
     public CourseLayouts getCourseLayout() {
@@ -94,7 +95,7 @@ public class AppPreferences {
 
     public void setCourseLayout(CourseLayouts courseLayout) {
         String courseLayoutString = courseLayout.name();
-        preferences.edit().putString(PREFERENCE_COURSE_LAYOUT, courseLayoutString).apply();
+        preferences.edit().putString(PREFERENCE_COURSE_LAYOUT, courseLayoutString).commit();
     }
 
     public NumberOfRounds getNumberOfRounds() {
@@ -106,7 +107,7 @@ public class AppPreferences {
 
     public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
         String numberOfRoundsString = numberOfRounds.name();
-        preferences.edit().putString(PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).apply();
+        preferences.edit().putString(PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).commit();
     }
 
     public double getWindBearingFromDirection() {
@@ -116,7 +117,7 @@ public class AppPreferences {
 
     public void setWindBearingFromDirection(double enteredWindBearing) {
         long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
-        preferences.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).apply();
+        preferences.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).commit();
     }
 
     public double getWindSpeed() {
@@ -126,11 +127,11 @@ public class AppPreferences {
 
     public void setWindSpeed(double enteredWindSpeed) {
         long windSpeedAsLong = Double.doubleToLongBits(enteredWindSpeed);
-        preferences.edit().putLong(PREFERENCE_WIND_SPEED, windSpeedAsLong).apply();
+        preferences.edit().putLong(PREFERENCE_WIND_SPEED, windSpeedAsLong).commit();
     }
 
     public List<String> getManagedCourseAreaNames() {
-        String value = preferences.getString(context.getString(R.string.preference_course_areas_key), "");
+        String value = preferences.getString(key(R.string.preference_course_areas_key), "");
         String[] managedCourseAreas = value.split(",");
         for (int i = 0; i < managedCourseAreas.length; i++) {
             managedCourseAreas[i] = managedCourseAreas[i].trim();
@@ -146,12 +147,12 @@ public class AppPreferences {
         }
         preferences
                 .edit()
-                .putString(context.getString(R.string.preference_course_areas_key),
+                .putString(key(R.string.preference_course_areas_key),
                         builder.substring(0, builder.length() - 1)).commit();
     }
 
     public String getServerBaseURL() {
-        String value = preferences.getString(context.getString(R.string.preference_server_url_key), "");
+        String value = preferences.getString(key(R.string.preference_server_url_key), "");
         if (value.equals("")) {
             return "http://localhost:8889";
         }
@@ -159,37 +160,69 @@ public class AppPreferences {
     }
 
     public String getMailRecipient() {
-        return preferences.getString(context.getString(R.string.preference_mail_key), "");
+        return preferences.getString(key(R.string.preference_mail_key), "");
     }
 
     public void setMailRecipient(String mail) {
-        preferences.edit().putString(context.getString(R.string.preference_mail_key), mail).commit();
+        preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
     
     public int getMinRounds() {
-        return preferences.getInt(context.getString(R.string.preference_course_designer_by_name_min_rounds_key), 0);
+        return preferences.getInt(key(R.string.preference_course_designer_by_name_min_rounds_key), 0);
     }
 
     public void setMinRounds(int minRounds) {
-        preferences.edit().putInt(context.getString(R.string.preference_course_designer_by_name_min_rounds_key), minRounds).commit();
+        preferences.edit().putInt(key(R.string.preference_course_designer_by_name_min_rounds_key), minRounds).commit();
     }
 
     public int getMaxRounds() {
-        return preferences.getInt(context.getString(R.string.preference_course_designer_by_name_max_rounds_key), 0);
+        return preferences.getInt(key(R.string.preference_course_designer_by_name_max_rounds_key), 0);
     }
 
     public void setMaxRounds(int maxRounds) {
-        preferences.edit().putInt(context.getString(R.string.preference_course_designer_by_name_max_rounds_key), maxRounds).commit();
+        preferences.edit().putInt(key(R.string.preference_course_designer_by_name_max_rounds_key), maxRounds).commit();
+    }
+    
+    public boolean isDefaultRacingProcedureTypeOverridden() {
+        return preferences.getBoolean(key(R.string.preference_racing_procedure_is_overridden_key), false);
+    }
+    
+    public void setDefaultRacingProcedureTypeOverridden(boolean isOverridden) {
+        preferences.edit().putBoolean(key(R.string.preference_racing_procedure_is_overridden_key), isOverridden).commit();
     }
 
-    public RacingProcedureType getDefaultStartProcedureType() {
-        String defaultStartProcedureType = preferences.getString(
-                context.getString(R.string.preference_racing_procedure_override_key), "");
+    public RacingProcedureType getDefaultRacingProcedureType() {
+        String defaultStartProcedureType = preferences.getString(key(R.string.preference_racing_procedure_override_key), "");
         return RacingProcedureType.valueOf(defaultStartProcedureType);
+    }
+    
+    public void setDefaultRacingProcedureType(RacingProcedureType type) {
+        preferences.edit().putString(key(R.string.preference_racing_procedure_override_key), type.name()).commit();
+    }
+    
+    public boolean isDefaultCourseDesignerModeOverridden() {
+        return preferences.getBoolean(key(R.string.preference_course_designer_is_overridden_key), false);
+    }
+    
+    public void setDefaultCourseDesignerModeOverridden(boolean isOverridden) {
+        preferences.edit().putBoolean(key(R.string.preference_course_designer_is_overridden_key), isOverridden).commit();
+    }
+
+    public CourseDesignerMode getDefaultCourseDesignerMode() {
+        String mode = preferences.getString(key(R.string.preference_course_designer_override_key), "");
+        return CourseDesignerMode.valueOf(mode);
+    }
+    
+    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+        preferences.edit().putString(key(R.string.preference_course_designer_override_key), mode.name()).commit();
     }
 
     public String getAndroidIdentifier() {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    }
+    
+    private String key(int keyId) {
+        return context.getString(keyId);
     }
 
 }

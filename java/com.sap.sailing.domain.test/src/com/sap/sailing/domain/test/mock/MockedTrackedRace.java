@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -429,6 +431,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race) {
                         // TODO Auto-generated method stub
                         return null;
+                    }
+
+                    @Override
+                    public RacingProcedureType getDefaultRacingProcedureType() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setDefaultRacingProcedureType(RacingProcedureType type) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public CourseDesignerMode getDefaultCourseDesignerMode() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+                        // TODO Auto-generated method stub
+                        
                     }
                 };
             }

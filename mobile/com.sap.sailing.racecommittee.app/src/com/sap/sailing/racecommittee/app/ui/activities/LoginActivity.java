@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 
 import android.app.Fragment;
@@ -126,10 +127,17 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         public void onLoadFailed(Exception reason) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
-
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
-                                    Toast.LENGTH_LONG).show();
-                            ExLog.ex(TAG, reason);
+                            
+                            if (reason instanceof FileNotFoundException) {
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
+                                        Toast.LENGTH_LONG).show();
+                                ExLog.w(TAG, String.format("There seems to be no configuration for this device: %s", 
+                                        reason.toString()));
+                            } else {
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
+                                        Toast.LENGTH_LONG).show();
+                                ExLog.ex(TAG, reason);
+                            }
 
                             showCourseAreaListFragment(eventId);
                         }

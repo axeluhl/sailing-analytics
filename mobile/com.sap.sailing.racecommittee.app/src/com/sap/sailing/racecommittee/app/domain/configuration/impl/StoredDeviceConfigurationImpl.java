@@ -32,7 +32,10 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
     public StoredDeviceConfiguration load() {
         getRacingProceduresConfiguration().load();
         
-        // TODO implement loading from AppPreferences
+        setAllowedCourseAreaNames(preferences.getManagedCourseAreaNames());
+        setMinimumRoundsForCourse(preferences.getMinRounds());
+        setMaximumRoundsForCourse(preferences.getMaxRounds());
+        setResultsMailRecipient(preferences.getMailRecipient());
         return this;
     }
     

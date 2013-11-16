@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -30,6 +32,28 @@ public interface Regatta extends Named, WithID {
      * @param newCourseArea {@link CourseArea} to be set.
      */
     void setDefaultCourseArea(CourseArea newCourseArea);
+    
+    /**
+     * Gets the default {@link RacingProcedureType} of this {@link Regatta}'s races.
+     */
+    public RacingProcedureType getDefaultRacingProcedureType();
+    
+    /**
+     * Sets the default {@link RacingProcedureType} for this {@link Regatta}'s races.
+     * @param mode the {@link RacingProcedureType}
+     */
+    public void setDefaultRacingProcedureType(RacingProcedureType type);
+    
+    /**
+     * Gets the default {@link CourseDesignerMode} of this {@link Regatta}'s races.
+     */
+    public CourseDesignerMode getDefaultCourseDesignerMode();
+    
+    /**
+     * Sets the default {@link CourseDesignerMode} for this {@link Regatta}'s races.
+     * @param mode the {@link CourseDesignerMode}
+     */
+    public void setDefaultCourseDesignerMode(CourseDesignerMode mode);
     
     /**
      * A regatta consists of one or more series.

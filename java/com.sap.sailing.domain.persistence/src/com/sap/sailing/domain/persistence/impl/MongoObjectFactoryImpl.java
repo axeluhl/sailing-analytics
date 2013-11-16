@@ -475,6 +475,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } else {
             dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
         }
+        if (regatta.getDefaultRacingProcedureType() != null) {
+            dbRegatta.put(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name(), regatta.getDefaultRacingProcedureType().name());
+        }
+        if (regatta.getDefaultCourseDesignerMode() != null) {
+            dbRegatta.put(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name(), regatta.getDefaultCourseDesignerMode().name());
+        }
 
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
     }

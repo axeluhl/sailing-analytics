@@ -19,12 +19,14 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -50,8 +52,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
     
-    // Can be changed...
     private CourseArea defaultCourseArea;
+    private RacingProcedureType defaultRacingProcedureType;
+    private CourseDesignerMode defaultCourseDesignerMode;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -108,7 +111,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseArea = courseArea;       
+        this.defaultCourseArea = courseArea;
+        this.defaultRacingProcedureType = RacingProcedureType.UNKNOWN;
+        this.defaultCourseDesignerMode = CourseDesignerMode.UNKNOWN;
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -355,6 +360,26 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void setDefaultCourseArea(CourseArea newCourseArea) {
         this.defaultCourseArea = newCourseArea;
+    }
+
+    @Override
+    public RacingProcedureType getDefaultRacingProcedureType() {
+        return defaultRacingProcedureType;
+    }
+
+    @Override
+    public void setDefaultRacingProcedureType(RacingProcedureType type) {
+        defaultRacingProcedureType = type;
+    }
+
+    @Override
+    public CourseDesignerMode getDefaultCourseDesignerMode() {
+        return defaultCourseDesignerMode;
+    }
+
+    @Override
+    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+        defaultCourseDesignerMode = mode;
     }
 
     /**

@@ -837,4 +837,8 @@ public interface StringMessages extends Messages {
     String maximumRoundsForCourse();
     String resultsMailRecipient();
     String deviceConfiguration();
+    
+    String none();
+    String courseDesignerMode();
+    String racingProcedure();
 }

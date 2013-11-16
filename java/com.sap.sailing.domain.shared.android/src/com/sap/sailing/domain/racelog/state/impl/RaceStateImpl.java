@@ -35,6 +35,12 @@ import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     
+    /**
+     * When trying to initialize a {@link RaceStateImpl} with an initial {@link RacingProcedureType} 
+     * of {@link RacingProcedureType#UNKNOWN} the value of this field will be used instead. 
+     */
+    private final static RacingProcedureType FallbackInitialProcedureType = RacingProcedureType.RRS26;
+    
     private final RaceLog raceLog;
     private final RaceLogEventAuthor author;
     private final RaceLogEventFactory factory;
@@ -87,7 +93,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
      
-        this.cachedRacingProcedureType = initalRacingProcedureType;
+        if (initalRacingProcedureType == RacingProcedureType.UNKNOWN) {
+            this.cachedRacingProcedureType = FallbackInitialProcedureType;
+        } else {
+            this.cachedRacingProcedureType = initalRacingProcedureType;
+        }
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
         this.cachedIsPositionedCompetitorsConfirmed = false;
