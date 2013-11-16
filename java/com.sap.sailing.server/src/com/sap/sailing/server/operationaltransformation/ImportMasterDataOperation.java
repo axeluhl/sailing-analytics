@@ -159,7 +159,7 @@ public class ImportMasterDataOperation extends
                 toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
             }
             Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-            ImportMasterDataOperation.addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
+            addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
                     new CompetitorByIdGetter() {
                         @Override
                         public Competitor getCompetitorById(String id) {
@@ -170,7 +170,7 @@ public class ImportMasterDataOperation extends
             if (factorsForMetaColumns != null) {
                 for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
                     Double explicitFactor = factorsForMetaColumns.get(column.getName());
-                toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
+                    toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
                 }
             }
             toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
