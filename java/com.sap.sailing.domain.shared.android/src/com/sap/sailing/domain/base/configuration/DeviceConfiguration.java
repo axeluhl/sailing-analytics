@@ -19,8 +19,6 @@ public interface DeviceConfiguration extends Serializable {
     CourseDesignerMode getDefaultCourseDesignerMode();
     
     // Course Designer Configurations
-    Integer getMinimumRoundsForCourse();
-    Integer getMaximumRoundsForCourse();
     List<String> getByNameCourseDesignerCourseNames();
     
     // Racing Procedure Configurations

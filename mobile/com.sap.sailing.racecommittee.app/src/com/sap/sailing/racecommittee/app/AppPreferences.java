@@ -167,22 +167,6 @@ public class AppPreferences {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
     
-    public int getMinRounds() {
-        return preferences.getInt(key(R.string.preference_course_designer_by_name_min_rounds_key), 0);
-    }
-
-    public void setMinRounds(int minRounds) {
-        preferences.edit().putInt(key(R.string.preference_course_designer_by_name_min_rounds_key), minRounds).commit();
-    }
-
-    public int getMaxRounds() {
-        return preferences.getInt(key(R.string.preference_course_designer_by_name_max_rounds_key), 0);
-    }
-
-    public void setMaxRounds(int maxRounds) {
-        preferences.edit().putInt(key(R.string.preference_course_designer_by_name_max_rounds_key), maxRounds).commit();
-    }
-    
     public boolean isDefaultRacingProcedureTypeOverridden() {
         return preferences.getBoolean(key(R.string.preference_racing_procedure_is_overridden_key), false);
     }

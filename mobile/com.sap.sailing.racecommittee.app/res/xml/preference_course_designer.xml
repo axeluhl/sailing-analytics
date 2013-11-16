@@ -18,22 +18,6 @@
     </PreferenceCategory>
     
     <PreferenceCategory android:title="By-Name Course Designer" >
-        
-		<com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
-		    android:key="@string/preference_course_designer_by_name_min_rounds_key"
-		    android:defaultValue="@string/preference_course_designer_by_name_min_rounds_default"
-		    android:title="Min Rounds"
-		    android:summary="@string/empty"
-		    android:numeric="integer"
-		    android:maxLength="2"/>
-		
-		<com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
-		    android:key="@string/preference_course_designer_by_name_max_rounds_key"
-		    android:defaultValue="@string/preference_course_designer_by_name_max_rounds_default"
-		    android:title="Max Rounds"
-		    android:summary="@string/empty"
-		    android:numeric="integer"
-		    android:maxLength="2"/>
 		
 	    <EditTextPreference
 	        android:key="@string/preference_course_designer_by_name_course_names_key"

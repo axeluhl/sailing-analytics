@@ -36,9 +36,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private DeviceConfigurationDTO configuration;
     
     private TextBox allowedCourseAreasBox;
-    private TextBox minRoundsBox;
-    private TextBox maxRoundsBox;
     private TextBox mailRecipientBox;
+    private TextBox courseNamesBox;
     
     public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
@@ -120,33 +119,29 @@ public class DeviceConfigurationDetailComposite extends Composite {
         mainGrid.setWidget(0, 0, new Label(stringMessages.allowedCourseAreas()));
         mainGrid.setWidget(0, 1, allowedCourseAreasBox);
         
-        minRoundsBox = new TextBox();
-        minRoundsBox.addChangeHandler(new ChangeHandler() {
+        courseNamesBox = new TextBox();
+        courseNamesBox.setText("O2,I2");
+        courseNamesBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                configuration.minRoundsForCourse = minRoundsBox.getText().isEmpty() ? null : Integer.valueOf(minRoundsBox.getText());
+                if (courseNamesBox.getText().isEmpty()) {
+                    configuration.byNameDesignerCourseNames = null;
+                } else {
+                    configuration.byNameDesignerCourseNames = Arrays.asList(courseNamesBox.getText().split(","));
+                }
             }
         });
-        minRoundsBox.addKeyUpHandler(dirtyMarker);
-        if (result.minRoundsForCourse != null) {
-            minRoundsBox.setText(result.minRoundsForCourse.toString());
-        }
-        mainGrid.setWidget(1, 0, new Label(stringMessages.minimumRoundsForCourse()));
-        mainGrid.setWidget(1, 1, minRoundsBox);
-        
-        maxRoundsBox = new TextBox();
-        maxRoundsBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                configuration.maxRoundsForCourse = maxRoundsBox.getText().isEmpty() ? null : Integer.valueOf(maxRoundsBox.getText());
+        courseNamesBox.addKeyUpHandler(dirtyMarker);
+        if (result.byNameDesignerCourseNames != null) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < result.byNameDesignerCourseNames.size(); i++) {
+                builder.append(result.byNameDesignerCourseNames.get(i));
+                builder.append(',');
             }
-        });
-        maxRoundsBox.addKeyUpHandler(dirtyMarker);
-        if (result.maxRoundsForCourse != null) {
-            maxRoundsBox.setText(result.maxRoundsForCourse.toString());
+            courseNamesBox.setText(builder.substring(0, builder.length() - 1));
         }
-        mainGrid.setWidget(2, 0, new Label(stringMessages.maximumRoundsForCourse()));
-        mainGrid.setWidget(2, 1, maxRoundsBox);
+        mainGrid.setWidget(1, 0, new Label(stringMessages.courseNames()));
+        mainGrid.setWidget(1, 1, courseNamesBox);
         
         mailRecipientBox = new TextBox();
         mailRecipientBox.addChangeHandler(new ChangeHandler() {

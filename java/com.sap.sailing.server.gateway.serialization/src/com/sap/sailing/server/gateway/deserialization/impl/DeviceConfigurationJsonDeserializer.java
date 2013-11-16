@@ -43,14 +43,15 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
             configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         }
 
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_MIN_ROUNDS)) {
-            Number minRounds = (Number) object.get(DeviceConfigurationJsonSerializer.FIELD_MIN_ROUNDS);
-            configuration.setMinimumRoundsForCourse(minRounds.intValue());
-        }
-
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_MAX_ROUNDS)) {
-            Number maxRounds = (Number) object.get(DeviceConfigurationJsonSerializer.FIELD_MAX_ROUNDS);
-            configuration.setMaximumRoundsForCourse(maxRounds.intValue());
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES)) {
+            JSONArray namesArray = Helpers.getNestedArraySafe(object, 
+                    DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES);
+            
+            List<String> names = new ArrayList<String>();
+            for (Object name : namesArray) {
+                names.add(name.toString());
+            }
+            configuration.setByNameDesignerCourseNames(names);
         }
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {

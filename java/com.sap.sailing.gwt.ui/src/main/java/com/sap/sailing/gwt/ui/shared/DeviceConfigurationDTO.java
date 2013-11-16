@@ -9,8 +9,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 public class DeviceConfigurationDTO implements IsSerializable {
 
     public List<String> allowedCourseAreaNames;
-    public Integer minRoundsForCourse;
-    public Integer maxRoundsForCourse;
     public String resultsMailRecipient;
     public RacingProcedureType defaultRacingProcedureType;
     public CourseDesignerMode defaultCourseDesignerMode;

@@ -2,6 +2,7 @@ package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Test;
@@ -32,15 +33,18 @@ public class DeviceConfigurationReplicationTest extends AbstractServerReplicatio
         DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("23");
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
         
-        configuration.setMinimumRoundsForCourse(2);
+        configuration.setAllowedCourseAreaNames(Arrays.asList("hallo"));
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
-        configuration.setMinimumRoundsForCourse(42);
+        configuration.setAllowedCourseAreaNames(Arrays.asList("hallo", "welt"));
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
         Thread.sleep(1000);
         
         Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
         assertEquals(1, configurationMap.size());
-        assertEquals(configuration.getMinimumRoundsForCourse(), configurationMap.values().iterator().next().getMinimumRoundsForCourse());
+        
+        DeviceConfiguration replicatedConfiguration = configurationMap.values().iterator().next();
+        assertEquals(configuration.getByNameCourseDesignerCourseNames(), 
+                replicatedConfiguration.getByNameCourseDesignerCourseNames());
     }
     
     @Test

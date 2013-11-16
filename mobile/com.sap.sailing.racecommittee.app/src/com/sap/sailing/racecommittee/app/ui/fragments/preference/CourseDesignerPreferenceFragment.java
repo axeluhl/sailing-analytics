@@ -18,8 +18,6 @@ public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
         addPreferencesFromResource(R.xml.preference_course_designer);
         
         setupCourseDesignerTypePreferences();
-        bindPreferenceSummaryToInteger(findPreference(getString(R.string.preference_course_designer_by_name_min_rounds_key)));
-        bindPreferenceSummaryToInteger(findPreference(getString(R.string.preference_course_designer_by_name_max_rounds_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_course_designer_by_name_course_names_key)));
     }
 

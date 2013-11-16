@@ -33,8 +33,6 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
         getRacingProceduresConfiguration().load();
         
         setAllowedCourseAreaNames(preferences.getManagedCourseAreaNames());
-        setMinimumRoundsForCourse(preferences.getMinRounds());
-        setMaximumRoundsForCourse(preferences.getMaxRounds());
         setResultsMailRecipient(preferences.getMailRecipient());
         
         if (preferences.isDefaultRacingProcedureTypeOverridden()) {
@@ -55,14 +53,6 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
             preferences.setManagedCourseAreaNames(getAllowedCourseAreaNames());
             logApply("course areas", getAllowedCourseAreaNames());
         }
-        if (getMinimumRoundsForCourse() != null) {
-            preferences.setMinRounds(getMinimumRoundsForCourse());
-            logApply("minimum rounds", getMinimumRoundsForCourse());
-        }
-        if (getMaximumRoundsForCourse() != null) {
-            preferences.setMaxRounds(getMaximumRoundsForCourse());
-            logApply("maximum rounds", getMaximumRoundsForCourse());
-        }
         if (getResultsMailRecipient() != null) {
             preferences.setMailRecipient(getResultsMailRecipient());
             logApply("mail recipient", getResultsMailRecipient());
@@ -70,13 +60,16 @@ public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl imple
         if (getDefaultRacingProcedureType() != null) {
             preferences.setDefaultRacingProcedureTypeOverridden(true);
             preferences.setDefaultRacingProcedureType(getDefaultRacingProcedureType());
+            logApply("overridden racing procedure", getDefaultRacingProcedureType());
         }
         if (getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerModeOverridden(true);
             preferences.setDefaultCourseDesignerMode(getDefaultCourseDesignerMode());
+            logApply("overridden course designer mode", getDefaultCourseDesignerMode());
         }
         if (getByNameCourseDesignerCourseNames() != null) {
             preferences.setByNameCourseDesignerCourseNames(getByNameCourseDesignerCourseNames());
+            logApply("by name course designer course names", getByNameCourseDesignerCourseNames());
         }
         return this;
     }

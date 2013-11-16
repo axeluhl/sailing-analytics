@@ -45,8 +45,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
         Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry = configurations.iterator().next();
         assertEquals(matcher, entry.getKey());
         assertNull(entry.getValue().getAllowedCourseAreaNames());
-        assertNull(entry.getValue().getMinimumRoundsForCourse());
-        assertNull(entry.getValue().getMaximumRoundsForCourse());
+        assertNull(entry.getValue().getByNameCourseDesignerCourseNames());
         assertNull(entry.getValue().getResultsMailRecipient());
     }
     
@@ -55,8 +54,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
         DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
         configuration.setAllowedCourseAreaNames(Arrays.asList("a","b"));
-        configuration.setMinimumRoundsForCourse(4);
-        configuration.setMaximumRoundsForCourse(5);
+        configuration.setByNameDesignerCourseNames(Arrays.asList("a", "c"));
         configuration.setResultsMailRecipient("abc");
         mongoFactory.storeDeviceConfiguration(matcher, configuration);
 
@@ -68,8 +66,9 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
         assertEquals(matcher, entry.getKey());
         assertNotNull(entry.getValue().getAllowedCourseAreaNames());
         assertEquals(2, entry.getValue().getAllowedCourseAreaNames().size());
-        assertEquals(new Integer(4), entry.getValue().getMinimumRoundsForCourse());
-        assertEquals(new Integer(5), entry.getValue().getMaximumRoundsForCourse());
+        assertEquals(2, entry.getValue().getByNameCourseDesignerCourseNames().size());
+        assertEquals(configuration.getByNameCourseDesignerCourseNames(), 
+                entry.getValue().getByNameCourseDesignerCourseNames());
         assertEquals("abc", entry.getValue().getResultsMailRecipient());
     }
     

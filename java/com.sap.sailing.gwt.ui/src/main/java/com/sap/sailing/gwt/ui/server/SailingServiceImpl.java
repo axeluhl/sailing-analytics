@@ -3369,8 +3369,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
         DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
-        dto.minRoundsForCourse = configuration.getMinimumRoundsForCourse();
-        dto.maxRoundsForCourse = configuration.getMaximumRoundsForCourse();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
@@ -3381,8 +3379,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
-        configuration.setMinimumRoundsForCourse(dto.minRoundsForCourse);
-        configuration.setMaximumRoundsForCourse(dto.maxRoundsForCourse);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
         configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
