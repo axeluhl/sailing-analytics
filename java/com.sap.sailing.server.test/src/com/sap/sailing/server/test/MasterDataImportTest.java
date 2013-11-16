@@ -1407,6 +1407,29 @@ public class MasterDataImportTest {
         RaceColumn metaColumn = metaColumns.iterator().next();
         Assert.assertNotNull(metaColumn);
         Assert.assertEquals(factor, metaColumn.getFactor());
+        
+        
+        //Verify that overall leaderboard data has been persisted
+        RacingEventService persistenceVerifier = new RacingEventServiceImplMock();
+        LeaderboardGroup lg = persistenceVerifier.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(lg);
+        overallLeaderboard = (LeaderboardGroupMetaLeaderboard) lg.getOverallLeaderboard();
+        Assert.assertNotNull(overallLeaderboard);
+        
+        Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
+        
+        Assert.assertNotNull(overallLeaderboard.getScoringScheme());
+        
+        Assert.assertEquals(scheme.getType(), overallLeaderboard.getScoringScheme().getType());
+
+        Assert.assertEquals(3, ((ThresholdBasedResultDiscardingRule) overallLeaderboard.getResultDiscardingRule())
+                .getDiscardIndexResultsStartingWithHowManyRaces()[2]);
+        
+        metaColumns = overallLeaderboard.getRaceColumns();
+        
+        metaColumn = metaColumns.iterator().next();
+        Assert.assertNotNull(metaColumn);
+        Assert.assertEquals(factor, metaColumn.getFactor());
 
     }
 }

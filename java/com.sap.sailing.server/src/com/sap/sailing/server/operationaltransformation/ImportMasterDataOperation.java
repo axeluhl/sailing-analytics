@@ -33,7 +33,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
@@ -129,8 +128,8 @@ public class ImportMasterDataOperation extends
 
             }
         }
-        int[] overallLeaderboardDiscardThresholds = null;
-        ScoringSchemeType overallLeaderboardScoringSchemeType = null;
+        int[] overallLeaderboardDiscardThresholds = masterData.getOverallLeaderboardDiscardingRule() != null ? masterData.getOverallLeaderboardDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces() : null;
+        ScoringSchemeType overallLeaderboardScoringSchemeType = masterData.getOverallLeaderboardScoringScheme() != null ? masterData.getOverallLeaderboardScoringScheme().getType() : null;
         final LeaderboardGroup leaderboardGroup;
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(masterData.getName());
         if (existingLeaderboardGroup != null && override) {
@@ -154,14 +153,11 @@ public class ImportMasterDataOperation extends
                 // remove old overall leaderboard if it existed
                 toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
             }
-            LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(
-                    leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(), masterData.getOverallLeaderboardDiscardingRule());
-            leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-            toState.addLeaderboard(overallLeaderboard);
+            Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
             Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
             for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
                 Double explicitFactor = factorsForMetaColumns.get(column.getName());
-                column.setFactor(explicitFactor);
+                toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
             }
         }
     }
