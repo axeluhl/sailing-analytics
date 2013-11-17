@@ -11,6 +11,8 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
 
     public static final String FIELD_COURSE_AREA_NAMES = "courseAreaNames";
     public static final String FIELD_RESULTS_RECIPIENT = "resultsRecipient";
+    public static final Object FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
+    public static final Object FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
     public static final String FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES = "byValueCourseNames";
     public static final String FIELD_PROCEDURES_CONFIGURATION = "procedures";
     
@@ -39,6 +41,14 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
         
         if (object.getResultsMailRecipient() != null) {
             result.put(FIELD_RESULTS_RECIPIENT, object.getResultsMailRecipient());
+        }
+        
+        if (object.getDefaultRacingProcedureType() != null) {
+            result.put(FIELD_DEFAULT_RACING_PROCEDURE_TYPE, object.getDefaultRacingProcedureType().name());
+        }
+        
+        if (object.getDefaultCourseDesignerMode() != null) {
+            result.put(FIELD_DEFAULT_COURSE_DESIGNER_MODE, object.getDefaultCourseDesignerMode().name());
         }
         
         if (object.getByNameCourseDesignerCourseNames() != null) {
