@@ -227,18 +227,6 @@
     <string name="generic_load_failure">There was an error loading the requested data:\n\"%s\"\nDo you want to retry?</string>
     <string name="set_course_layout">Set the course layout</string>
     
-    <string-array name="course_routes">
-        <item>0,Windward/Leeward</item>
-        <item>1,Windward/Leeward</item>
-        <item>2,Windward/Leeward</item>
-        <item>3,Windward/Leeward</item>
-        <item>4,Trapezoid</item>
-        <item>5,Trapezoid</item>
-        <item>6,Triangle</item>
-        <item>7,Triangle</item>
-        <item>8,Windward/Leeward</item>
-    </string-array>
-    
     <string name="loading_failure">Load failure</string>
 	<string name="wind_unknown">(click to set wind)</string>
 	<string name="wind_info" formatted="false">(%s kn, %s)</string>
