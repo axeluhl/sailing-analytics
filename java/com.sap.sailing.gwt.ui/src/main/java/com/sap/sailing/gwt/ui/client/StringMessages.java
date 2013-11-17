@@ -842,4 +842,5 @@ public interface StringMessages extends Messages {
     String courseDesignerMode();
     String racingProcedure();
     String courseNames();
+    String generate();
 }

@@ -44,6 +44,11 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
             }
             configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         }
+
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {
+            String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
+            configuration.setResultsMailRecipient(resultsRecipient);
+        }
         
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE)) {
             RacingProcedureType type = RacingProcedureType.valueOf(
@@ -55,11 +60,6 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
             CourseDesignerMode mode = CourseDesignerMode.valueOf(
                     object.get(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
             configuration.setDefaultCourseDesignerMode(mode);
-        }
-
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {
-            String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
-            configuration.setResultsMailRecipient(resultsRecipient);
         }
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES)) {
