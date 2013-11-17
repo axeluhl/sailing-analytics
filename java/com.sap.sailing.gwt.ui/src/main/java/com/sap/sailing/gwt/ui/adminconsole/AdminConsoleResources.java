@@ -40,4 +40,10 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
     ImageResource reddotIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/arrow_left.png")
+    ImageResource arrowLeft();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/arrow_right.png")
+    ImageResource arrowRight();
 }
