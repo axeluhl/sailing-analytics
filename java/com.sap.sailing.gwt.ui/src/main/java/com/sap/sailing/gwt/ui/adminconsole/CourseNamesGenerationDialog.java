@@ -25,7 +25,7 @@ public class CourseNamesGenerationDialog extends DataEntryDialog<List<String>> {
 
     public CourseNamesGenerationDialog(final StringMessages stringMessages,
             DataEntryDialog.DialogCallback<List<String>> callback) {
-        super(stringMessages.courseNames(), "Yeah do it!", stringMessages.generate(), stringMessages.cancel(), 
+        super(stringMessages.courseNames(), stringMessages.generate(), stringMessages.generate(), stringMessages.cancel(), 
                 new NamesValidator(stringMessages), callback);
         minRoundsBox = new IntegerBox();
         minRoundsBox.setValue(2);
