@@ -21,15 +21,15 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 
-public class MongoRaceLogListener implements RaceLogEventVisitor {
+public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
 
     private final RaceLogIdentifier raceLogIdentifier;
     private final MongoObjectFactoryImpl mongoObjectFactory;
     private final DBCollection raceLogsCollection;
     
-    private final static Logger logger = Logger.getLogger(MongoRaceLogListener.class.getName());
+    private final static Logger logger = Logger.getLogger(MongoRaceLogStoreVisitor.class.getName());
 
-    public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory) {
+    public MongoRaceLogStoreVisitor(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory) {
         super();
         this.raceLogIdentifier = identifier;
         this.mongoObjectFactory = (MongoObjectFactoryImpl) mongoObjectFactory;

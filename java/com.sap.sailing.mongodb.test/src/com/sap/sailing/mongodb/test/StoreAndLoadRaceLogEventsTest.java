@@ -1,8 +1,6 @@
 package com.sap.sailing.mongodb.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -73,6 +71,20 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertEquals(expectedEvent.getId(), actualEvent.getId());
         assertEquals(expectedEvent.getInvolvedBoats().size(), Util.size(actualEvent.getInvolvedBoats()));
         assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
+    }
+    
+    @Test 
+    public void testStoreEventWithoutAuthorLoadsCompatibilityAuthor() {
+        RaceLogFlagEvent expectedEvent = eventFactory.createFlagEvent(expectedEventTime, 
+                null, expectedId, expectedInvolvedBoats, expectedPassId, Flags.NONE, Flags.NONE, true);
+
+        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        RaceLogFlagEvent actualEvent = loadEvent(dbObject);
+        
+        assertNull(expectedEvent.getAuthor());
+        assertNotNull(actualEvent.getAuthor());
+        assertEquals(RaceLogEventAuthor.PRIORITY_COMPATIBILITY, actualEvent.getAuthor().getPriority());
+        assertEquals(RaceLogEventAuthor.NAME_COMPATIBILITY, actualEvent.getAuthor().getName());
     }
 
     @Test

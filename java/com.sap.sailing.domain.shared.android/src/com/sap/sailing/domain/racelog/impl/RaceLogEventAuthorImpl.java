@@ -7,6 +7,10 @@ public class RaceLogEventAuthorImpl extends NamedImpl implements RaceLogEventAut
     private static final long serialVersionUID = -5602802911563685812L;
     private final int priority;
     
+    public static RaceLogEventAuthor createCompatibilityAuthor() {
+        return new RaceLogEventAuthorImpl(NAME_COMPATIBILITY, PRIORITY_COMPATIBILITY);
+    }
+    
     public RaceLogEventAuthorImpl(String name, int priority) {
         super(name);
         this.priority = priority;

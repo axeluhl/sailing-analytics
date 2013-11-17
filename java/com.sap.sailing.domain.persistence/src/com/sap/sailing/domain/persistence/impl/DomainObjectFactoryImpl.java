@@ -1053,9 +1053,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(identifier.getIdentifier()));
             loadRaceLogEvents(result, query);
             
-            // query for events with deprecated identifier format
+            // query for events with deprecated identifier format...
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getDeprecatedIdentifier()));
-            loadRaceLogEvents(result, query);
+            
+            List<RaceLogEvent> eventsToMigrate = loadRaceLogEvents(result, query);
+            if (!eventsToMigrate.isEmpty()) {
+                // ... migrate them...
+                MongoRaceLogStoreVisitor storeVisitor = new MongoRaceLogStoreVisitor(identifier, new MongoObjectFactoryImpl(database));
+                for (RaceLogEvent event : eventsToMigrate) {
+                    event.accept(storeVisitor);
+                }
+                // ... and delete the old ones...
+                database.getCollection(CollectionNames.RACE_LOGS.name()).remove(query);
+            }
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
@@ -1064,14 +1074,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadRaceLogEvents(RaceLog result, BasicDBObject query) {
+    private List<RaceLogEvent> loadRaceLogEvents(RaceLog targetRaceLog, BasicDBObject query) {
+        List<RaceLogEvent> result = new ArrayList<>();
         DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (DBObject o : raceLog.find(query)) {
             RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
             if (raceLogEvent != null) {
-                result.load(raceLogEvent);
+                targetRaceLog.load(raceLogEvent);
+                result.add(raceLogEvent);
             }
         }
+        return result;
     }
 
     public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
@@ -1087,7 +1100,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (authorName != null && authorPriority != null) {
             author = new RaceLogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = null;
+            author = RaceLogEventAuthorImpl.createCompatibilityAuthor();
         }
 
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
