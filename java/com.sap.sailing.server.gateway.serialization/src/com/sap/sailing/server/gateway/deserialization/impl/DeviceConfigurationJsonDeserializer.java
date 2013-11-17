@@ -43,6 +43,11 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
             configuration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         }
 
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {
+            String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
+            configuration.setResultsMailRecipient(resultsRecipient);
+        }
+
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES)) {
             JSONArray namesArray = Helpers.getNestedArraySafe(object, 
                     DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES);
@@ -52,11 +57,6 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
                 names.add(name.toString());
             }
             configuration.setByNameDesignerCourseNames(names);
-        }
-
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {
-            String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
-            configuration.setResultsMailRecipient(resultsRecipient);
         }
 
         return configuration;

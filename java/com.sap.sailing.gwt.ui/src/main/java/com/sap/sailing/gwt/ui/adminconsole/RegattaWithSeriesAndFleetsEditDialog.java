@@ -29,27 +29,11 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         courseAreaListBox.setEnabled(true);
         
         racingProcedureListBox = createListBox(false);
-        for (RacingProcedureType type : RacingProcedureType.values()) {
-            if (type == RacingProcedureType.UNKNOWN) {
-                racingProcedureListBox.addItem(stringMessages.none(), type.name());
-            } else {
-                racingProcedureListBox.addItem(type.name(), type.name());
-            }
-            if (type == regatta.defaultRacingProcedureType) {
-                racingProcedureListBox.setSelectedIndex(racingProcedureListBox.getItemCount() - 1);
-            }
-        }
+        RacingProcedureType selectedRacingProcedureType = regatta.defaultRacingProcedureType;
+        ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, selectedRacingProcedureType, stringMessages);
         designerModeEntryListBox = createListBox(false);
-        for (CourseDesignerMode mode : CourseDesignerMode.values()) {
-            if (mode == CourseDesignerMode.UNKNOWN) {
-                designerModeEntryListBox.addItem(stringMessages.none(), mode.name());
-            } else {
-                designerModeEntryListBox.addItem(mode.name(), mode.name());
-            }
-            if (mode == regatta.defaultCourseDesignerMode) {
-                designerModeEntryListBox.setSelectedIndex(designerModeEntryListBox.getItemCount() - 1);
-            }
-        }
+        CourseDesignerMode selectedCourseDesignerMode = regatta.defaultCourseDesignerMode;
+        ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox, selectedCourseDesignerMode, stringMessages);
         
     }
 
