@@ -13,12 +13,16 @@ import com.sap.sailing.domain.common.Named;
  */
 public interface RaceLogEventAuthor extends Named {
     
+    public static final int PRIORITY_COMPATIBILITY = 16;
+    public static final String NAME_COMPATIBILITY = "Compatibility";
+    
     /**
      * A lesser number represents a higher priority. Suggested priority levels:
      * <ol>
      * <li>Start Vessel</li>
      * <li>Finish Vessel</li>
-     * <li>Short Control</li>
+     * <li>Shore Control</li>
+     * <li>Compatibility priority for old events</li>
      * </ol>
      */
     int getPriority();

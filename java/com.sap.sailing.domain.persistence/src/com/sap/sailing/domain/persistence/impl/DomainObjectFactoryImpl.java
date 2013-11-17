@@ -1063,7 +1063,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (authorName != null && authorPriority != null) {
             author = new RaceLogEventAuthorImpl(authorName, authorPriority.intValue());
         } else {
-            author = null;
+            author = RaceLogEventAuthorImpl.createCompatibilityAuthor();
         }
 
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
