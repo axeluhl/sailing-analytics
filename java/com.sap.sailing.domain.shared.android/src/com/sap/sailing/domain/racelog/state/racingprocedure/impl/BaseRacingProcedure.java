@@ -14,9 +14,9 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallDisplayedFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
@@ -48,6 +48,9 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     private boolean cachedIsIndividualRecallDisplayed;
 
+    /**
+     * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
+     */
     public BaseRacingProcedure(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
         this.raceLog = raceLog;
         this.author = author;
@@ -95,7 +98,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     }
 
     @Override
-    public void triggerStateEventScheduling(RaceState state) {
+    public void triggerStateEventScheduling(ReadonlyRaceState state) {
         switch (state.getStatus()) {
         case SCHEDULED:
         case STARTPHASE:
@@ -196,7 +199,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     protected abstract Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime);
 
     @Override
-    public void onStartTimeChanged(RaceState state) {
+    public void onStartTimeChanged(ReadonlyRaceState state) {
         getChangedListeners().onActiveFlagsChanged(this);
         if (scheduler != null && state.getStartTime() != null) {
             scheduler.unscheduleAllEvents();
@@ -205,7 +208,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     }
     
     @Override
-    public void onAdvancePass(RaceState state) {
+    public void onAdvancePass(ReadonlyRaceState state) {
         unscheduleAllEvents();
     }
 

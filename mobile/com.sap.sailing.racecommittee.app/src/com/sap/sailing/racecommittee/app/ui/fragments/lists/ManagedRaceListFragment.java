@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
@@ -180,7 +180,7 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
         adapter.notifyDataSetChanged();
     }
 
-    private void dataChanged(RaceState changedState) {
+    private void dataChanged(ReadonlyRaceState changedState) {
         List<RaceListDataType> adapterItems = adapter.getItems();
         for (int i = 0; i < adapterItems.size(); ++i) {
             if (adapterItems.get(i) instanceof RaceListDataTypeRace) {
@@ -226,18 +226,18 @@ public class ManagedRaceListFragment extends LoggableListFragment implements Jur
     }
     
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
-        public void update(RaceState state) {
+        public void update(ReadonlyRaceState state) {
             dataChanged(state); 
             filterChanged();
         }
         
         @Override
-        public void onStatusChanged(RaceState state) {
+        public void onStatusChanged(ReadonlyRaceState state) {
             update(state);
         };
         
         @Override
-        public void onStartTimeChanged(RaceState state) {
+        public void onStartTimeChanged(ReadonlyRaceState state) {
             update(state);
         };
     };

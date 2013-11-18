@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
+package com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,10 +18,13 @@ import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 
 public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS26RacingProcedure {
 
@@ -29,6 +32,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
+    @SuppressWarnings("unused")
     private final RRS26Configuration configuration;
     private final RRS26StartModeFlagFinder startmodeFlagAnalyzer;
     private Flags cachedStartmodeFlag;
@@ -39,7 +43,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
         this.configuration = configuration;
         this.startmodeFlagAnalyzer = new RRS26StartModeFlagFinder(new RacingProcedureTypeAnalyzer(raceLog), raceLog);
         
-        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
+        this.cachedStartmodeFlag = ReadonlyRRS26RacingProcedure.DefaultStartMode;
         
         update();
     }

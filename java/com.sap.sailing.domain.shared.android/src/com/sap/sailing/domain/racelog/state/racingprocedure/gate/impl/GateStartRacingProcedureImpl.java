@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
+package com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,15 +14,17 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
 
 public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {
     
@@ -31,6 +33,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseGolfDownStandardIntervalConstantSummand = 3 * 60 * 1000; // minutes * seconds * milliseconds
     
+    @SuppressWarnings("unused")
     private final GateStartConfiguration configuration;
     private final GateLineOpeningTimeFinder gateLineOpeningTimeAnalyzer;
     private final PathfinderFinder pathfinderAnalyzer;;
@@ -75,7 +78,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
     
     @Override
-    public void triggerStateEventScheduling(RaceState state) {
+    public void triggerStateEventScheduling(ReadonlyRaceState state) {
         switch (state.getStatus()) {
         case SCHEDULED:
         case STARTPHASE:

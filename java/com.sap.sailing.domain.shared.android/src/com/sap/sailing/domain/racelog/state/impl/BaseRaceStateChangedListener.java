@@ -1,57 +1,57 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 
 public abstract class BaseRaceStateChangedListener implements RaceStateChangedListener {
 
     @Override
-    public void onRacingProcedureChanged(RaceState state) {
+    public void onRacingProcedureChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onStatusChanged(RaceState state) {
+    public void onStatusChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onStartTimeChanged(RaceState state) {
+    public void onStartTimeChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onFinishingTimeChanged(RaceState state) {
+    public void onFinishingTimeChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onFinishedTimeChanged(RaceState state) {
+    public void onFinishedTimeChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onProtestTimeChanged(RaceState state) {
+    public void onProtestTimeChanged(ReadonlyRaceState state) {
 
     }
     
     @Override
-    public void onAdvancePass(RaceState state) {
+    public void onAdvancePass(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onFinishingPositioningsChanged(RaceState state) {
+    public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onFinishingPositionsConfirmed(RaceState state) {
+    public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
 
     }
 
     @Override
-    public void onCourseDesignChanged(RaceState state) {
+    public void onCourseDesignChanged(ReadonlyRaceState state) {
 
     }
 

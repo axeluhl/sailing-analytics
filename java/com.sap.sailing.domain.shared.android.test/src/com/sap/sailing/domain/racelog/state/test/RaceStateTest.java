@@ -28,6 +28,7 @@ import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 
 public class RaceStateTest {
     
@@ -147,6 +148,15 @@ public class RaceStateTest {
         RacingProcedure newProcedure = state.getRacingProcedure();
         assertEquals(RacingProcedureType.ESS, newProcedure.getType());
         assertFalse(oldProcedure.equals(newProcedure));
+    }
+    
+    @Test
+    public void testGetRacingProcedure() throws InterruptedException {
+        
+        state.setRacingProcedure(nowMock, RacingProcedureType.RRS26);
+        
+        GateStartRacingProcedure procedure = state.getTypedRacingProcedure(GateStartRacingProcedure.class);
+        assertNull(procedure);
     }
 
 }

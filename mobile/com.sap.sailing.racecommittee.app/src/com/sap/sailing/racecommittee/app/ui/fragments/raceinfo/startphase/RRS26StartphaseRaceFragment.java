@@ -5,9 +5,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseStartModeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
@@ -62,7 +63,7 @@ public class RRS26StartphaseRaceFragment extends BaseStartphaseRaceFragment<RRS2
     private class ChangeListener extends BaseRacingProcedureChangedListener implements RRS26ChangedListener {
 
         @Override
-        public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
+        public void onStartmodeChanged(ReadonlyRRS26RacingProcedure racingProcedure) {
             setupUi();
         }
         

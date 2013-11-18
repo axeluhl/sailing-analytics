@@ -1,35 +1,10 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.state.RaceState;
-import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
-import com.sap.sailing.domain.racelog.state.RaceStateEventProcessor;
-import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 
-public interface RacingProcedure extends RaceStateEventProcessor, RaceStateChangedListener {
+public interface RacingProcedure extends ReadonlyRacingProcedure {
     
-    RaceLog getRaceLog();
-    RacingProcedureType getType();
-    
-    void addChangedListener(RacingProcedureChangedListener listener);
-    void removeChangedListener(RacingProcedureChangedListener listener);
-    
-    void setStateEventScheduler(RaceStateEventScheduler scheduler);
-    void triggerStateEventScheduling(RaceState state);
-    
-    RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now);
-    boolean isStartphaseActive(TimePoint startTime, TimePoint now);
-    
-    boolean hasIndividualRecall();
-    boolean isIndividualRecallDisplayed();
-    TimePoint getIndividualRecallRemovalTime();
     void displayIndividualRecall(TimePoint timePoint);
     void removeIndividualRecall(TimePoint timePoint);
-    
-    FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now);
-    
-    void detach();
 
 }

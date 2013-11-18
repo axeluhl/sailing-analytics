@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -136,7 +137,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     
     private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {
         @Override
-        public void onActiveFlagsChanged(RacingProcedure racingProcedure) {
+        public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             setupUi();
             flagPoleCache = null;
         }

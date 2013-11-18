@@ -3,17 +3,17 @@ package com.sap.sailing.domain.racelog.state;
 
 public interface RaceStateChangedListener {
     
-    void onRacingProcedureChanged(RaceState state);
-    void onStatusChanged(RaceState state);
-    void onStartTimeChanged(RaceState state);
-    void onFinishingTimeChanged(RaceState state);
-    void onFinishedTimeChanged(RaceState state);
-    void onProtestTimeChanged(RaceState state);
-    void onAdvancePass(RaceState state);
+    void onRacingProcedureChanged(ReadonlyRaceState state);
+    void onStatusChanged(ReadonlyRaceState state);
+    void onStartTimeChanged(ReadonlyRaceState state);
+    void onFinishingTimeChanged(ReadonlyRaceState state);
+    void onFinishedTimeChanged(ReadonlyRaceState state);
+    void onProtestTimeChanged(ReadonlyRaceState state);
+    void onAdvancePass(ReadonlyRaceState state);
     /*void onAborted(RaceState2 state);
     void onGeneralRecall(RaceState2 state);*/
-    void onFinishingPositioningsChanged(RaceState state);
-    void onFinishingPositionsConfirmed(RaceState state);
-    void onCourseDesignChanged(RaceState state);
+    void onFinishingPositioningsChanged(ReadonlyRaceState state);
+    void onFinishingPositionsConfirmed(ReadonlyRaceState state);
+    void onCourseDesignChanged(ReadonlyRaceState state);
 
 }

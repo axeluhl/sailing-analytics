@@ -2,78 +2,78 @@ package com.sap.sailing.domain.racelog.state.impl;
 
 import java.util.HashSet;
 
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 
-public class RaceState2ChangedListeners extends HashSet<RaceStateChangedListener> implements RaceStateChangedListener {
+public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener> implements RaceStateChangedListener {
     
     private static final long serialVersionUID = 2028183211903975659L;
 
     @Override
-    public void onRacingProcedureChanged(RaceState state) {
+    public void onRacingProcedureChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onRacingProcedureChanged(state);
         }
     }
 
     @Override
-    public void onStatusChanged(RaceState state) {
+    public void onStatusChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onStatusChanged(state);
         }
     }
 
     @Override
-    public void onStartTimeChanged(RaceState state) {
+    public void onStartTimeChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onStartTimeChanged(state);
         }
     }
 
     @Override
-    public void onFinishingTimeChanged(RaceState state) {
+    public void onFinishingTimeChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onFinishingTimeChanged(state);
         }
     }
 
     @Override
-    public void onFinishedTimeChanged(RaceState state) {
+    public void onFinishedTimeChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onFinishedTimeChanged(state);
         }
     }
 
     @Override
-    public void onProtestTimeChanged(RaceState state) {
+    public void onProtestTimeChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onProtestTimeChanged(state);
         }
     }
 
     @Override
-    public void onAdvancePass(RaceState state) {
+    public void onAdvancePass(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onAdvancePass(state);
         }
     }
 
     @Override
-    public void onFinishingPositioningsChanged(RaceState state) {
+    public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onFinishingPositioningsChanged(state);
         }
     }
 
     @Override
-    public void onFinishingPositionsConfirmed(RaceState state) {
+    public void onFinishingPositionsConfirmed(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onFinishingPositionsConfirmed(state);
         }
     }
 
     @Override
-    public void onCourseDesignChanged(RaceState state) {
+    public void onCourseDesignChanged(ReadonlyRaceState state) {
         for (RaceStateChangedListener listener : this) {
             listener.onCourseDesignChanged(state);
         }

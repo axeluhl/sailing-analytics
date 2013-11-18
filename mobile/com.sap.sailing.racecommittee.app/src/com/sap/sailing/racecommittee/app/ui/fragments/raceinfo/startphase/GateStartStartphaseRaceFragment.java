@@ -7,8 +7,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLaunchTimeDialog;
@@ -99,12 +100,12 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override
-        public void onGateLaunchTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
+        public void onGateLaunchTimeChanged(ReadonlyGateStartRacingProcedure gateStartRacingProcedure) {
             setupUi();
         }
 
         @Override
-        public void onPathfinderChanged(GateStartRacingProcedure procedure) {
+        public void onPathfinderChanged(ReadonlyGateStartRacingProcedure procedure) {
             setupUi();
         }
         

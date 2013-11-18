@@ -18,8 +18,8 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -237,23 +237,23 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
         
         @Override
-        public void onRacingProcedureChanged(RaceState state) {
+        public void onRacingProcedureChanged(ReadonlyRaceState state) {
             infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
             switchToInfoFragment();
         };
         
         @Override
-        public void onStatusChanged(RaceState state) {
+        public void onStatusChanged(ReadonlyRaceState state) {
             switchToInfoFragment();
         };
         
         @Override
-        public void onStartTimeChanged(RaceState state) {
+        public void onStartTimeChanged(ReadonlyRaceState state) {
             switchToInfoFragment();
         };
         
         @Override
-        public void onCourseDesignChanged(RaceState state) {
+        public void onCourseDesignChanged(ReadonlyRaceState state) {
             updateCourseDesignLabel();
         };
     };

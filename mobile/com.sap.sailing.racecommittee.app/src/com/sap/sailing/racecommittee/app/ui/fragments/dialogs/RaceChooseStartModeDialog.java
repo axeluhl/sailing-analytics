@@ -13,7 +13,7 @@ import android.widget.ImageButton;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
 
 public class RaceChooseStartModeDialog extends RaceDialogFragment {
@@ -81,7 +81,7 @@ public class RaceChooseStartModeDialog extends RaceDialogFragment {
     }
 
     private void process(Flags flag) {
-        RRS26RacingProcedure procedure = (RRS26RacingProcedure) getRace().getState().getRacingProcedure();
+        RRS26RacingProcedure procedure = getRace().getState().getTypedRacingProcedure();
         procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         this.dismiss();
     }

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
+package com.sap.sailing.domain.racelog.state.racingprocedure.ess.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,11 +16,13 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
-import com.sap.sailing.domain.racelog.state.racingprocedure.ESSChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.ESSRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ess.ESSChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ess.ESSRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
 
 public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRacingProcedure {
 
@@ -29,6 +31,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     private final static long startPhaseESSTwoUpInterval = 2 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseESSOneUpInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     
+    @SuppressWarnings("unused")
     private final ESSConfiguration configuration;
     
     public ESSRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 

@@ -671,7 +671,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceInfoDTO.startTime = startTime.asDate();
             }
 
-            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
+            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog, null);
             raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
             
             if (raceLog.getLastRawFix() != null) {

@@ -1,8 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.GateStartRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 
 public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateStartRacingProcedure> {
@@ -28,22 +29,22 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override
-        public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
+        public void onIndividualRecallDisplayed(ReadonlyRacingProcedure racingProcedure) {
             
         }
         
         @Override
-        public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
+        public void onIndividualRecallRemoved(ReadonlyRacingProcedure racingProcedure) {
             
         }
         
         @Override
-        public void onGateLaunchTimeChanged(GateStartRacingProcedure gateStartRacingProcedure) {
+        public void onGateLaunchTimeChanged(ReadonlyGateStartRacingProcedure gateStartRacingProcedure) {
             // not interested - handled by active flags
         }
 
         @Override
-        public void onPathfinderChanged(GateStartRacingProcedure procedure) {
+        public void onPathfinderChanged(ReadonlyGateStartRacingProcedure procedure) {
             // we do not display changes of the pathfinder this late
         }
         

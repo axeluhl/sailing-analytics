@@ -1,9 +1,10 @@
-package com.sap.sailing.domain.racelog.state.racingprocedure;
+package com.sap.sailing.domain.racelog.state.racingprocedure.gate;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 
 
-public interface GateStartRacingProcedure extends RacingProcedure {
+public interface ReadonlyGateStartRacingProcedure extends ReadonlyRacingProcedure {
     
     public final static long DefaultGolfDownTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds
     
@@ -12,9 +13,7 @@ public interface GateStartRacingProcedure extends RacingProcedure {
     TimePoint getGateLaunchStopTime(TimePoint startTime);
     TimePoint getGateShutdownTime(TimePoint startTime);
     Long getGateLaunchTime();
-    void setGateLaunchTime(TimePoint timePoint, long milliseconds);
 
     String getPathfinder();
-    void setPathfinder(TimePoint timePoint, String sailingId);
 
 }

@@ -2,10 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running;
 
 import android.widget.Toast;
 
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26ChangedListener;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 
 public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26RacingProcedure> {
 
@@ -31,15 +32,15 @@ public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26Racin
     private class ChangeListener extends BaseRacingProcedureChangedListener implements RRS26ChangedListener {
 
         @Override
-        public void onIndividualRecallDisplayed(RacingProcedure racingProcedure) {
+        public void onIndividualRecallDisplayed(ReadonlyRacingProcedure racingProcedure) {
         }
         
         @Override
-        public void onIndividualRecallRemoved(RacingProcedure racingProcedure) {
+        public void onIndividualRecallRemoved(ReadonlyRacingProcedure racingProcedure) {
         }
 
         @Override
-        public void onStartmodeChanged(RRS26RacingProcedure racingProcedure) {
+        public void onStartmodeChanged(ReadonlyRRS26RacingProcedure racingProcedure) {
             // that's a little bit late, isn't it?
             Toast.makeText(getActivity(), 
                     String.format("Start mode flag changed to %s", racingProcedure.getStartModeFlag()), Toast.LENGTH_SHORT).show();

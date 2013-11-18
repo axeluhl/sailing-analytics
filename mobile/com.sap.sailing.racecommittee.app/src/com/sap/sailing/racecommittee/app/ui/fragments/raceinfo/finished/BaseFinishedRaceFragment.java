@@ -12,8 +12,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
@@ -127,22 +127,22 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
     
     private RaceStateChangedListener changeListener = new BaseRaceStateChangedListener() {
         @Override
-        public void onStartTimeChanged(RaceState state) {
+        public void onStartTimeChanged(ReadonlyRaceState state) {
             setupUi();
         }
         
         @Override
-        public void onFinishingTimeChanged(RaceState state) {
+        public void onFinishingTimeChanged(ReadonlyRaceState state) {
             setupUi();
         };
         
         @Override
-        public void onFinishedTimeChanged(RaceState state) {
+        public void onFinishedTimeChanged(ReadonlyRaceState state) {
             setupUi();
         };
         
         @Override
-        public void onProtestTimeChanged(RaceState state) {
+        public void onProtestTimeChanged(ReadonlyRaceState state) {
             setupUi();
         }
     };
