@@ -723,7 +723,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
-        storeTimed(event, result);
+        // for compatibility reasons we reuse the field name of Timed
+        storeTimePoint(event.getLogicalTimePoint(), result, FieldNames.TIME_AS_MILLIS);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
