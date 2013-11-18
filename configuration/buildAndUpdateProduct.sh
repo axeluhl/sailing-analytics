@@ -72,6 +72,7 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
+reporting=0
 suppress_confirmation=0
 extra=''
 
@@ -84,6 +85,7 @@ if [ $# -eq 0 ]; then
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo "-p Enable proxy mode (overwrites file specified by -m)"
+    echo "-r Enable generating surefire test reports"
     echo "-m <path to file> Specify alternate maven configuration (possibly has side effect on proxy setting)"
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
@@ -121,7 +123,7 @@ echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 
-options=':bgtocpm:n:l:s:w:u'
+options=':bgtocprm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
@@ -131,6 +133,7 @@ do
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
+        r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
@@ -438,13 +441,28 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
+    if [ $reporting -eq 1 ]; then
+        echo "INFO: Activating reporting"
+        extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+    fi
+
     # make sure to honour the service configuration
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+    cd $PROJECT_HOME
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
+    if [ $reporting -eq 1 ]; then
+        echo "INFO: Generating reports"
+        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
+        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+        tar -xzf configuration/surefire-reports-resources.tar.gz
+        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-reports.html"
+    fi
+
+    cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
 		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
