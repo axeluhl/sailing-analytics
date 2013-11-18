@@ -378,14 +378,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         synchronized (this) {
-            while (windLoadingCompleted == WindLoadingState.RUNNING) {
+            while (windLoadingCompleted != WindLoadingState.FINISHED) {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Waiting for wind loading to start was interrupted", e);
                 }
             }
-            
         }
     }
 
