@@ -651,7 +651,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             notifyListeners(wind, windSource);
             return true;
         } else {
-        	return false;
+            return false;
         }
     }
 
