@@ -335,7 +335,7 @@ public class ImportMasterDataOperation extends
                     UUID.fromString(id), series, isPersistent,
                     baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
-            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
+            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIdsAsStrings(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());
         }
 
