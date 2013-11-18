@@ -32,6 +32,11 @@ public class MarkPassingCalculator {
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculatedMarkpasses = new LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>>();
         
         //TODO Start Problem
+        //TODO Start not limited to 5 minutes
+        //TODO Work without Start Time
+        //TODO Finder works with single fixes
+        //TODO Chooser works for single Candidates
+        //TODO Document everything
         
         for (Competitor c : competitorTracks.keySet()) {
             
@@ -74,7 +79,7 @@ public class MarkPassingCalculator {
 
                     }
                     // Find GPSFix-Candidates for each ControlPoint
-                    LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = finder
+                   LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = finder
                             .findCandidates(competitorTracks.get(c), wayPointPositions, boatLength, averageLegLengths);
 
                     // Create "Candidates"
