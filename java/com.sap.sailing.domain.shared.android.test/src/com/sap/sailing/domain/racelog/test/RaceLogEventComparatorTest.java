@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -148,6 +149,17 @@ public class RaceLogEventComparatorTest {
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);
+    }
+    
+    @Test
+    public void testFallbackForTimed() {
+        when(eventOne.getPassId()).thenReturn(1);
+        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(1));
+        Timed timed = mock(Timed.class);
+        when(timed.getTimePoint()).thenReturn(new MillisecondsTimePoint(2));
+        
+        int result = comparator.compare(eventOne, timed);
+        assertTrue(result < 0);
     }
     
 }

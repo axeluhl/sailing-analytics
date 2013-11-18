@@ -2,6 +2,8 @@ package com.sap.sailing.domain.racelog.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -9,18 +11,24 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
 public class RaceLogTest {
@@ -241,6 +249,41 @@ public class RaceLogTest {
         assertEquals(event3, Util.get(raceLog.getFixesDescending(), 1));
         assertEquals(event2, Util.get(raceLog.getFixesDescending(), 2));
         raceLog.unlockAfterRead();
+    }
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
+    @Test
+    public void testAddingEventsFromMultipleClients() {
+        RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
+        UUID client1Id = UUID.randomUUID();
+        UUID client2Id = UUID.randomUUID();
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        RaceLogStartTimeEvent startTimeEvent1 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 1, now.plus(1));
+        Iterable<RaceLogEvent> empty = raceLog.add(startTimeEvent1, client1Id);
+        assertTrue(Util.isEmpty(empty));
+        RaceLogStartTimeEvent startTimeEvent2 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(2), author, 1, now.plus(3));
+        Iterable<RaceLogEvent> nonEmpty = raceLog.add(startTimeEvent2, client2Id);
+        assertEquals(1, Util.size(nonEmpty));
+        assertSame(startTimeEvent1, nonEmpty.iterator().next());
+        RaceLogStartTimeEvent startTimeEvent3 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(4), author, 1, now.plus(5));
+        Iterable<RaceLogEvent> nonEmpty2 = raceLog.add(startTimeEvent3, client1Id);
+        assertEquals(1, Util.size(nonEmpty2));
+        assertSame(startTimeEvent2, nonEmpty2.iterator().next());
+        
+    }
+    
+    @Test
+    public void testGetFirstFixAfter() {
+        TimePoint timePoint = new MillisecondsTimePoint(1);
+        
+        RaceLogEvent eventOne = mock(RaceLogEvent.class);
+        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
+        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(100));
+        when(eventOne.getTimePoint()).thenReturn(timePoint);
+        raceLog.add(eventOne);
+        
+        assertNull(raceLog.getFirstFixAfter(timePoint));
+        assertEquals(eventOne, raceLog.getFirstFixAfter(timePoint.minus(1)));
     }
     
     private class VisitFlagEventAnswer implements Answer<Object> {
