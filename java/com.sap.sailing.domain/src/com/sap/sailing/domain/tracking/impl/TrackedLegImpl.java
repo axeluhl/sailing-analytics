@@ -291,13 +291,14 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     
     @Override
     public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
-        if (isUpOrDownwindLeg(at)) {
+        LegType legType = getLegType(at);
+        if (legType != LegType.REACHING) { // upwind or downwind
             Wind wind = getTrackedRace().getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
                 return pos2.alongTrackDistance(pos1, getLegBearing(at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                return projectionToLineThroughPos2.alongTrackDistance(pos2, wind.getBearing());
+                return pos2.alongTrackDistance(projectionToLineThroughPos2, legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
             }
         } else {
             // reaching leg, return distance projected onto leg's bearing

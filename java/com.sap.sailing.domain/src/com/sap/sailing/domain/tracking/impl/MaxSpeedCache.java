@@ -262,7 +262,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                         break;
                     }
                     Speed averagedSpeedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
-                    if (averagedSpeedAtFixTime.compareTo(max) > 0) {
+                    if (averagedSpeedAtFixTime != null && averagedSpeedAtFixTime.compareTo(max) > 0) {
                         max = averagedSpeedAtFixTime;
                         maxSpeedFix = fix;
                     }

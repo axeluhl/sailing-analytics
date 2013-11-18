@@ -306,6 +306,69 @@ public class TrackTest {
     }
     
     @Test
+    public void testFixValidEvenIfFixProvidedSpeedIsOutrageous() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
+        TimePoint t1 = new MillisecondsTimePoint(1000);
+        TimePoint t2 = new MillisecondsTimePoint(2000);
+        TimePoint t3 = new MillisecondsTimePoint(3000);
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        track.addGPSFix(f1);
+        track.addGPSFix(f2);
+        track.addGPSFix(f3);
+        assertEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the fix to still be valid, but only its provided speed shall be ignored
+    }
+    
+    @Test
+    public void testFixInvalidEvenIfPositionInferredSpeedIsOutrageous() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
+        TimePoint t1 = new MillisecondsTimePoint(1000);
+        TimePoint t2 = new MillisecondsTimePoint(2000);
+        TimePoint t3 = new MillisecondsTimePoint(3000);
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(150./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        track.addGPSFix(f1);
+        track.addGPSFix(f2);
+        track.addGPSFix(f3);
+        assertEquals(f3, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the f2 fix to be invalid
+    }
+    
+    @Test
+    public void testFixInvalidBecauseProvidedSpeedIsTooDifferent() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
+        TimePoint t1 = new MillisecondsTimePoint(1000);
+        TimePoint t2 = new MillisecondsTimePoint(2000);
+        TimePoint t3 = new MillisecondsTimePoint(3000);
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        track.addGPSFix(f1);
+        track.addGPSFix(f2);
+        track.addGPSFix(f3);
+        // expect the f2 fix to be invalid because provided speed is too different
+        assertEquals(0, f3.getPosition().getDistance(track.getFirstFixAtOrAfter(f2.getTimePoint()).getPosition()).getMeters(), 0.001);
+    }
+    
+    @Test
+    public void testIgnoringFixProvidedSpeedIfItIsOutrageous() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000l);
+        TimePoint t1 = new MillisecondsTimePoint(1000);
+        TimePoint t2 = new MillisecondsTimePoint(2000);
+        TimePoint t3 = new MillisecondsTimePoint(3000);
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        track.addGPSFix(f1);
+        track.addGPSFix(f2);
+        track.addGPSFix(f3);
+        assertEquals(f2, track.getFirstFixAtOrAfter(f2.getTimePoint())); // expect the fix to still be valid, but only its provided speed shall be ignored
+        SpeedWithBearing average = track.getEstimatedSpeed(t2);
+        assertEquals(1, average.getKnots(), 0.001);
+    }
+    
+    @Test
     public void testBearingAveragingAcrossZeroDegreesWithGPSFixMoving() {
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(null, /* millisecondsOverWhichToAverage */ 5000);
         TimePoint t1 = new MillisecondsTimePoint(1000);
@@ -352,7 +415,7 @@ public class TrackTest {
     }
     
    private TimePoint addMillisToTimepoint(TimePoint p, long millis) {
-       return new MillisecondsTimePoint(p.asMillis() + millis);
+       return p.plus(millis);
    }
 
     @Test
