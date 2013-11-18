@@ -37,8 +37,8 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         String scoringSchemeType = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_SCORING_SCHEME_TYPE);
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
-        Iterable<String> raceIds = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIds);
+        Iterable<String> raceIdsAsStrings = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIdsAsStrings);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {
