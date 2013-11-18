@@ -204,6 +204,19 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 
 ### Access MongoDB database
 
+## Migration Checklist
+
+- fire up archive server and load it
+- configure 001-events.conf starting with a copy from old sapsailing.com
+- clone entire MongoDB content
+- migrate MySQL for Bugzilla
+- fetch all git branches
+- run test build and deploy
+- fire up a live server and test it
+- check that tmux with UDP mirror and SwissTiming StoreAndForward is running
+- check that we can fire up a live2 / archive2 server and switch transparently
+- check that sapsailing.com is entered everywhere a hostname / domain name is required
+
 ## Glossary
 
 <table>
