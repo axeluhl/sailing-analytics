@@ -30,13 +30,14 @@ As there are many different kind of handicap races we should try to categorize t
 These are rather small weekly or monthly races on club level.
 
 #### 2. International championships
-ORC/IRC championships
+There are international championships of the ORC and IRC organizations (e.g. http://www.orcworlds2013.com/en/).
+These championships typically sail windward/leeward courses and some offshore races, so the race organization is similar to the bigger One-Design class events.
 
 #### 3. Long distance races
-Fastnet
+Fastnet (http://fastnet.rorc.org/)
 
 #### 4. Big boat races
-Rolex Maxi Cup
+Rolex Maxi Cup (http://www.yccsmaxi.com/)
 
 Looking at the typical audience and the owner of the boats we assume that the "big boat races" are an interesting new target group for our solutions. Another good fit are the ORC/IRC championships as the overall setup is similar to the One-Design classes championships (short races close to the land).
 <br/>
