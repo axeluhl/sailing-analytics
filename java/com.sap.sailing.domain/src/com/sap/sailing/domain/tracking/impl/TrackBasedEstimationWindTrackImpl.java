@@ -263,7 +263,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * will not be massively delayed by having to re-calculate the estimation over and over again.
      */
     private void scheduleCacheRefresh(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
-        lockForWrite();
+        LockUtil.lockForWrite(cacheLock);
         try {
             if (!scheduledRefreshInterval.isSet()) {
                 // according to the invariant this implies [1]==null
@@ -275,7 +275,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
             }
         } finally {
-            unlockAfterWrite();
+            LockUtil.unlockAfterWrite(cacheLock);
         }
     }
     
