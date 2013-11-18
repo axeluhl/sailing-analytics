@@ -435,6 +435,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     @Override

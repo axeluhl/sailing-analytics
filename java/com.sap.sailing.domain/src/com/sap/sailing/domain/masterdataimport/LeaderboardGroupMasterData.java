@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -23,23 +26,35 @@ public class LeaderboardGroupMasterData {
     private final boolean displayGroupsRevese;
     private final Set<EventMasterData> events;
     private final Set<RegattaMasterData> regattas;
-
+    private final Map<String, Double> metaColumnsWithFactors;
+    private final List<String> overallLeaderboardSuppressedCompetitorIds;
 
     public LeaderboardGroupMasterData(String name, String description, boolean displayGroupsRevese,
-            boolean hasOverallLeaderboard,
-            ScoringScheme overallLeaderboardScoringScheme,
-            int[] overallLeaderboardDiscardingRule, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events,
-            Set<RegattaMasterData> regattas) {
+            boolean hasOverallLeaderboard, ScoringScheme overallLeaderboardScoringScheme,
+            int[] overallLeaderboardDiscardingRule, List<String> overallLeaderboardAuppressedCompetitorIds,
+            Map<String, Double> metaColumnsWithFactors, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
         super();
         this.name = name;
         this.description = description;
         this.hasOverallLeaderboard = hasOverallLeaderboard;
         this.overallLeaderboardScoringScheme = overallLeaderboardScoringScheme;
+        this.overallLeaderboardSuppressedCompetitorIds = overallLeaderboardAuppressedCompetitorIds;
         this.overallLeaderboardDiscardingRule = overallLeaderboardDiscardingRule;
+        this.metaColumnsWithFactors = metaColumnsWithFactors;
         this.leaderboards = leaderboards;
         this.displayGroupsRevese = displayGroupsRevese;
         this.events = events;
         this.regattas = regattas;
+    }
+    
+    public Competitor getCompetitorById(String competitorId) {
+        for (LeaderboardMasterData leaderboard : leaderboards) {
+            Competitor c = leaderboard.getCompetitorsById().get(competitorId);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
     }
 
     public String getName() {
@@ -56,6 +71,10 @@ public class LeaderboardGroupMasterData {
 
     public ScoringScheme getOverallLeaderboardScoringScheme() {
         return overallLeaderboardScoringScheme;
+    }
+
+    public List<String> getOverallLeaderboardSuppressedCompetitorIds() {
+        return overallLeaderboardSuppressedCompetitorIds;
     }
 
     public ThresholdBasedResultDiscardingRule getOverallLeaderboardDiscardingRule() {
@@ -77,6 +96,10 @@ public class LeaderboardGroupMasterData {
 
     public Set<RegattaMasterData> getRegattas() {
         return regattas;
+    }
+
+    public Map<String, Double> getMetaColumnsWithFactors() {
+        return metaColumnsWithFactors;
     }
     
 

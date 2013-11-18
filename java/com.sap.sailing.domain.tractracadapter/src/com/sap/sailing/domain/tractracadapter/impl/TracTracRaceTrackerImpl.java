@@ -585,7 +585,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
-        controller.stop(/* abortStored */ true);
+        new Thread("TracTrac Controller Stopper for "+getID()) {
+            public void run() {
+                controller.stop(/* abortStored */ true);
+            }
+        }.start();
         for (Receiver receiver : receivers) {
             if (stopReceiversPreemtively) {
                 receiver.stopPreemptively();
