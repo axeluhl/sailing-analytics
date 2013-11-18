@@ -11,6 +11,7 @@ import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
@@ -21,10 +22,17 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     private final RaceLogEventAuthor author;
     private final RaceLogEventFactory factory;
-
+    
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureType initalRacingProcedureType, StoredRacingProceduresConfiguration configuration) {
-        super(raceLog, initalRacingProcedureType, configuration);
+        this(raceLog, author, eventFactory, initalRacingProcedureType, 
+                new RaceStatusAnalyzer.StandardClock(), configuration);
+    }
+
+    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
+            RacingProcedureType initalRacingProcedureType, RaceStatusAnalyzer.Clock analyzersClock,
+            StoredRacingProceduresConfiguration configuration) {
+        super(raceLog, initalRacingProcedureType, analyzersClock, configuration);
         this.author = author;
         this.factory = eventFactory;
     }
@@ -49,11 +57,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         } else {
             return null;
         }
-    }
-    
-    @Override
-    protected RacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RacingProceduresConfiguration configuration) {
-        return RacingProcedureFactoryImpl.create(type, raceLog, author, factory, configuration);
     }
 
     @Override
@@ -130,6 +133,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void setWindFix(TimePoint timePoint, Wind wind) {
         raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind));
+    }
+    
+    @Override
+    protected RacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RacingProceduresConfiguration configuration) {
+        return RacingProcedureFactoryImpl.create(type, raceLog, author, factory, configuration);
     }
 
 }

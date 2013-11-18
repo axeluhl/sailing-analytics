@@ -11,12 +11,29 @@ import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 
 public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
-
+    
+    public interface Clock {
+        TimePoint now();
+    }
+    
+    public final static class StandardClock implements Clock {
+        @Override
+        public TimePoint now() {
+            return MillisecondsTimePoint.now();
+        }
+        
+    }
+    
     private final EventDispatcher eventDispatcher;
     
     public RaceStatusAnalyzer(RaceLog raceLog, ReadonlyRacingProcedure racingProcedure) {
         super(raceLog);
-        this.eventDispatcher = new EventDispatcher(racingProcedure);
+        this.eventDispatcher = new EventDispatcher(new StandardClock(), racingProcedure);
+    }
+    
+    public RaceStatusAnalyzer(RaceLog raceLog, Clock clock, ReadonlyRacingProcedure racingProcedure) {
+        super(raceLog);
+        this.eventDispatcher = new EventDispatcher(clock, racingProcedure);
     }
 
     @Override
@@ -33,18 +50,20 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     }
     
     private class EventDispatcher extends BaseRaceLogEventVisitor {
-        
+
+        private final Clock clock;
         private final ReadonlyRacingProcedure racingProcedure;
         public RaceLogRaceStatus nextStatus;
         
-        public EventDispatcher(ReadonlyRacingProcedure racingProcedure) {
+        public EventDispatcher(Clock clock, ReadonlyRacingProcedure racingProcedure) {
+            this.clock = clock;
             this.racingProcedure = racingProcedure;
             this.nextStatus = RaceLogRaceStatus.UNKNOWN;
         }
 
         @Override
         public void visit(RaceLogStartTimeEvent event) {
-            TimePoint now = MillisecondsTimePoint.now();
+            TimePoint now = clock.now();
             if (racingProcedure.isStartphaseActive(event.getStartTime(), now)) {
                 nextStatus = RaceLogRaceStatus.STARTPHASE;
             } else if (now.before(event.getStartTime())) {

@@ -26,11 +26,10 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
 
-    private RacingProcedure racingProcedure;
+    private RacingProcedure racingProcedure = mock(RacingProcedure.class);
     
     @Override
     protected RaceStatusAnalyzer createAnalyzer(RaceLog raceLog) {
-        racingProcedure = mock(RacingProcedure.class);
         return new RaceStatusAnalyzer(raceLog, racingProcedure);
     }
 
@@ -101,11 +100,36 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         
         assertEquals(RaceLogRaceStatus.RUNNING, analyzer.analyze());
     }
+    
+    @Test
+    public void testClock() {
+        final TimePoint startTime = MillisecondsTimePoint.now(); 
+        analyzer = new RaceStatusAnalyzer(raceLog, new RaceStatusAnalyzer.Clock() {
+            @Override
+            public TimePoint now() {
+                return startTime.minus(1);
+            }
+        }, racingProcedure);
+        
+        when(racingProcedure.isStartphaseActive(any(TimePoint.class), any(TimePoint.class))).thenReturn(false);
+        
+        RaceLogStartTimeEvent event = createStartTimeEvent(startTime);
+        raceLog.add(event);
+        
+        assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze());
+    }
 
     private static RaceLogStartTimeEvent createStartTimeEvent(long startTimeAsMillis, boolean isGreater) {
         TimePoint startTime = mock(TimePoint.class);
         when(startTime.asMillis()).thenReturn(startTimeAsMillis);
         when(startTime.compareTo(any(TimePoint.class))).thenReturn(isGreater ? 1 : -1);
+        RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1);
+        when(event.getStartTime()).thenReturn(startTime);
+        doAnswer(new StartTimeVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
+        return event;
+    }
+    
+    private static RaceLogStartTimeEvent createStartTimeEvent(TimePoint startTime) {
         RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1);
         when(event.getStartTime()).thenReturn(startTime);
         doAnswer(new StartTimeVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));

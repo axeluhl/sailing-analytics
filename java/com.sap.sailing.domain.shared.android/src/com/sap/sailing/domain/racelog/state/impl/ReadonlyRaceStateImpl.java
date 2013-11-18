@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
@@ -38,6 +39,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     
     protected final RaceLog raceLog;
 
+    private final Clock statusAnalyzerClock;
     private final StoredRacingProceduresConfiguration configuration;
     private final RaceStateChangedListeners changedListeners;
     
@@ -70,15 +72,17 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CourseBase cachedCourseDesign;
     
     public ReadonlyRaceStateImpl(RaceLog raceLog, StoredRacingProceduresConfiguration configuration) {
-        this(raceLog, RacingProcedureType.UNKNOWN, configuration);
+        this(raceLog, RacingProcedureType.UNKNOWN, new RaceStatusAnalyzer.StandardClock(), configuration);
     }
     
-    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, StoredRacingProceduresConfiguration configuration) {
+    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, Clock analyzersClock, 
+            StoredRacingProceduresConfiguration configuration) {
         this.raceLog = raceLog;
         this.configuration = configuration;
         this.changedListeners = new RaceStateChangedListeners();
         
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
+        this.statusAnalyzerClock = analyzersClock;
         // status analyzer will get initialized when racing procedure is ready
         this.startTimeAnalyzer = new StartTimeFinder(raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
@@ -88,6 +92,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
      
+        // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
+        // RacingProcedure we need to have a fallback
         if (initalRacingProcedureType == null || initalRacingProcedureType == RacingProcedureType.UNKNOWN) {
             this.cachedRacingProcedureType = FallbackInitialProcedureType;
         } else {
@@ -99,8 +105,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         
         this.raceLog.addListener(new RaceLogChangedVisitor(this));
         
+        // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
+        // will be fully initialized after this line
         recreateRacingProcedure();
-        update();
     }
 
     @Override
@@ -279,7 +286,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
         
-        statusAnalyzer = new RaceStatusAnalyzer(raceLog, racingProcedure);
+        statusAnalyzer = new RaceStatusAnalyzer(raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update();
     }
