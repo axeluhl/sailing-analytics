@@ -131,6 +131,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -150,17 +151,13 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -665,32 +662,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
             
-            StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            TimePoint startTime = startTimeFinder.analyze();
+            ReadonlyRaceState state = new ReadonlyRaceStateImpl(raceLog, null);
+            
+            TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
             }
 
-            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog, null);
-            raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
+            raceInfoDTO.lastStatus = state.getStatus();
             
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
             
-            FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            TimePoint finishedTime = finishedTimeFinder.analyze();
+            TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
             }
 
-            LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);
-
-            RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
-            if (lastFlagEvent != null) {
-                raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
-                raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
-                raceInfoDTO.isLastFlagDisplayed = lastFlagEvent.isDisplayed();
+            if (startTime != null) {
+                FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now());
+                List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+                if (!activeFlags.isEmpty()) {
+                    raceInfoDTO.lastUpperFlag = activeFlags.get(0).getUpperFlag();
+                    raceInfoDTO.lastLowerFlag = activeFlags.get(0).getLowerFlag();
+                    raceInfoDTO.isLastFlagDisplayed = activeFlags.get(0).isDisplayed();
+                }
             }
             
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
@@ -706,17 +703,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             
-            LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            CourseBase lastCourse = courseDesignFinder.analyze();
-            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
+            CourseBase lastCourse = state.getCourseDesign();
             if (lastCourse != null) {
+                raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
                 raceInfoDTO.lastCourseName = lastCourse.getName();
             }
             
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                ProtestStartTimeFinder protestStartTimeFinder = new ProtestStartTimeFinder(raceLog);
-                
-                TimePoint protestStartTime = protestStartTimeFinder.analyze();
+                TimePoint protestStartTime = state.getProtestTime();
                 if (protestStartTime != null) {
                     long protestDuration = 90 * 60 * 1000; // 90 min protest duration
                     raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
@@ -726,8 +720,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             
-            LastWindFixFinder windFinder = new LastWindFixFinder(raceLog);
-            Wind wind = windFinder.analyze();
+            Wind wind = state.getWindFix();
             if (wind != null) {
                 raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, MillisecondsTimePoint.now());
             }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer.Clock;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sailing.domain.tracking.Wind;
 
 public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedListener {
     
@@ -46,19 +48,23 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     
     private ReadonlyRacingProcedure racingProcedure;
     private RaceStateEventScheduler scheduler;
-    
-    private RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
+
+    /**
+     * We need one for each change in {@link RacingProcedureType}.
+     */
     private RaceStatusAnalyzer statusAnalyzer;
+    private final RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
     
-    private StartTimeFinder startTimeAnalyzer;
-    private FinishingTimeFinder finishingTimeAnalyzer;
-    private FinishedTimeFinder finishedTimeAnalyzer;
-    private ProtestStartTimeFinder protestTimeAnalyzer;
+    private final StartTimeFinder startTimeAnalyzer;
+    private final FinishingTimeFinder finishingTimeAnalyzer;
+    private final FinishedTimeFinder finishedTimeAnalyzer;
+    private final ProtestStartTimeFinder protestTimeAnalyzer;
     
-    private FinishPositioningListFinder finishPositioningListAnalyzer;
-    private ConfirmedFinishPositioningListFinder confirmedFinishPositioningListAnalyzer;
+    private final FinishPositioningListFinder finishPositioningListAnalyzer;
+    private final ConfirmedFinishPositioningListFinder confirmedFinishPositioningListAnalyzer;
     
-    private LastPublishedCourseDesignFinder courseDesignerAnalyzer;
+    private final LastPublishedCourseDesignFinder courseDesignerAnalyzer;
+    private final LastWindFixFinder lastWindFixAnalyzer;
     
     private RacingProcedureType cachedRacingProcedureType;
     private RaceLogRaceStatus cachedRaceStatus;
@@ -70,6 +76,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CompetitorResults cachedPositionedCompetitors;
     private boolean cachedIsPositionedCompetitorsConfirmed;
     private CourseBase cachedCourseDesign;
+    private Wind cachedWindFix;
     
     public ReadonlyRaceStateImpl(RaceLog raceLog, StoredRacingProceduresConfiguration configuration) {
         this(raceLog, RacingProcedureType.UNKNOWN, new RaceStatusAnalyzer.StandardClock(), configuration);
@@ -91,6 +98,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
+        this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
      
         // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
         // RacingProcedure we need to have a fallback
@@ -187,6 +195,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
+    public Wind getWindFix() {
+        return cachedWindFix;
+    }
+
+    @Override
     public void addChangedListener(RaceStateChangedListener listener) {
         changedListeners.add(listener);
     }
@@ -273,6 +286,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         if (!Util.equalsWithNull(cachedCourseDesign, courseDesign)) {
             cachedCourseDesign = courseDesign;
             changedListeners.onCourseDesignChanged(this);
+        }
+        
+        Wind windFix = lastWindFixAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedWindFix, windFix)) {
+            cachedWindFix = windFix;
+            changedListeners.onWindFixChanged(this);
         }
     }
 

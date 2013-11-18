@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.tracking.Wind;
 
 public interface ReadonlyRaceState extends RaceStateEventProcessor{
 
@@ -29,4 +30,5 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor{
     CompetitorResults getFinishPositioningList();
     boolean isFinishPositioningConfirmed();
     CourseBase getCourseDesign();
+    Wind getWindFix();
 }

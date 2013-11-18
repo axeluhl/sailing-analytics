@@ -85,10 +85,4 @@ public class RaceChooseStartModeDialog extends RaceDialogFragment {
         procedure.setStartModeFlag(MillisecondsTimePoint.now(), flag);
         this.dismiss();
     }
-
-    @Override
-    public void notifyTick() {
-        // TODO Auto-generated method stub
-
-    }
 }

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
@@ -209,9 +208,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     }
     
     private void updateWindLabel() {
-        LastWindFixFinder windFinder = new LastWindFixFinder(getRaceState().getRaceLog());
-        if (windFinder.analyze()!=null){
-            Wind wind = windFinder.analyze();
+        Wind wind = getRaceState().getWindFix();
+        if (wind != null){
             windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
         }
     }
@@ -223,7 +221,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
                     getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
-                    updateWindLabel();
                 }
             }
         }
@@ -255,6 +252,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
         @Override
         public void onCourseDesignChanged(ReadonlyRaceState state) {
             updateCourseDesignLabel();
+        };
+        
+        @Override
+        public void onWindFixChanged(ReadonlyRaceState state) {
+            updateWindLabel();
         };
     };
 

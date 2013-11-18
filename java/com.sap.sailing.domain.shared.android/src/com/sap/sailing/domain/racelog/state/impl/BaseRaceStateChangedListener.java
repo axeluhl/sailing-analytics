@@ -3,6 +3,9 @@ package com.sap.sailing.domain.racelog.state.impl;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 
+/**
+ * Providing an empty implementation of {@link RaceStateChangedListener}.
+ */
 public abstract class BaseRaceStateChangedListener implements RaceStateChangedListener {
 
     @Override
@@ -53,6 +56,11 @@ public abstract class BaseRaceStateChangedListener implements RaceStateChangedLi
     @Override
     public void onCourseDesignChanged(ReadonlyRaceState state) {
 
+    }
+    
+    @Override
+    public void onWindFixChanged(ReadonlyRaceState state) {
+        
     }
 
 }

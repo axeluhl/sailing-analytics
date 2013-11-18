@@ -78,6 +78,12 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
             listener.onCourseDesignChanged(state);
         }
     }
+
+    @Override
+    public void onWindFixChanged(ReadonlyRaceState state) {
+        // TODO Auto-generated method stub
+        
+    }
     
     
 

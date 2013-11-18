@@ -86,11 +86,5 @@ public class RaceChoosePathFinderDialog extends RaceDialogFragment {
 	    }
 		
 	}
-
-    @Override
-    public void notifyTick() {
-        // TODO Auto-generated method stub
-        
-    }
 	
 }
