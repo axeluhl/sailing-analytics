@@ -2,26 +2,58 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.GPSFix;
 
 public class CandidateChooser {
+    
+    ArrayList<Edge> current;
+    ArrayList<Edge> all;
+    ArrayList<Candidate> candidates;
+    LinkedHashMap<Waypoint, DynamicGPSFixTrack<Mark, GPSFix>> waypointTracks;
+    TimePoint startOfRace;
+    
+    public CandidateChooser(TimePoint startOfRace, LinkedHashMap<Waypoint, DynamicGPSFixTrack<Mark, GPSFix>> waypointTracks){
+        this.startOfRace = startOfRace;
+        this.waypointTracks = waypointTracks;
+        candidates.add(new Candidate(0, startOfRace, 0));
+        candidates.add(new Candidate(waypointTracks.size(), null, 0));
+    }
+    
+    public void changeStartOfRace(){
+        //TODO!!
+    }
+    
+    public void addCandidate(){
+        //TODO
+    }
+    public void removeCandidate(){
+        //TODO
+    }
+    public void addMarkFix(){
+        //TODO
+    }
+    
+    
+    
+    ////////////////////////////
 
     public LinkedHashMap<Integer, TimePoint> getMarkPasses(ArrayList<Candidate> candidates, Candidate start,
-            Candidate end, LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions,
-            ArrayList<String> legs) {
+            Candidate end, LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions) {
 
         // Create Edges
         ArrayList<Edge> edges = new ArrayList<>();
         for (Candidate c1 : candidates) {
             for (Candidate c2 : candidates) {
-                if (c1.getID() == markPositions.size() + 1 || c2.getID() == markPositions.size() + 1) {
+                if (c1.getID() == end.getID() || c2.getID() == end.getID()) {
                     edges.add(new Edge(c1, c2));
                 } else {
-                    if (c1.getID() < c2.getID() && c2.getTimePoint().after(c1.getTimePoint())&& averageSpeed(c1, c2, markPositions, legs)) {
+                    if (c1.getID() < c2.getID() && c2.getTimePoint().after(c1.getTimePoint())&& averageSpeed(c1, c2, markPositions)) {
                         edges.add(new Edge(c1, c2));
                     }
                 }
@@ -57,7 +89,7 @@ public class CandidateChooser {
     }
 
     private boolean averageSpeed(Candidate c1, Candidate c2,
-            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions, List<String> legs) {
+            LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> markPositions) {
 
         double distance = 0;
         TimePoint tp = c2.getTimePoint();

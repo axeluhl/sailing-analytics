@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
@@ -15,13 +16,67 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
-public class MarkPassingCalculator {
-    CandidateFinder finder = new CandidateFinder();
-    CandidateChooser chooser = new CandidateChooser();
+public class MarkPassingCalculator extends AbstractRaceChangeListener implements CourseListener {
+    CandidateFinder finder;
+    CandidateChooser chooser;
+    ArrayList<Waypoint> waypoints;
+    ArrayList<String> legsTypes;
+    LinkedHashMap<Waypoint, Double> averageLegLengths;
+    
+    
+    
+    public MarkPassingCalculator(TrackedRace race){
+        
+        for(Waypoint w : race.getRace().getCourse().getWaypoints()){
+            waypoints.add(w);
+        }
+        for (Waypoint wp : waypoints) {
+            int index = waypoints.indexOf(wp);
+
+            // Get Leg Lengths
+            double legBefore = 0;
+            double legAfter = 0;
+            int number = 0;
+            if (index != 0) {
+                legBefore = race.getTrackedLegFinishingAt(wp).getGreatCircleDistance(race.getStartOfTracking()).getMeters();
+                number++;
+            }
+            if (index != (waypoints.size() - 1)) {
+                legAfter = race.getTrackedLegStartingAt(wp).getGreatCircleDistance(race.getStartOfTracking()).getMeters();
+                number++;
+            }
+            double averageLength = (legBefore + legAfter) / number;
+            averageLegLengths.put(wp, averageLength);
+        }
+        
+        finder = new CandidateFinder(waypoints, averageLegLengths);
+    }
+    
+   
+    @Override
+    public void markPositionChanged(GPSFix fix, Mark mark) {
+        finder.newMarkFix(mark, fix);
+    }
+    @Override
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+        finder.newCompetitorFix(fix, item);
+    }
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        // TODO Auto-generated method stub
+    }
 
 
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // TODO Auto-generated method stub
+    }
+
+///////////////////////////////            Old                  /////////////////////////
     @SuppressWarnings("serial")
     public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculateMarkpasses(
 
@@ -31,10 +86,9 @@ public class MarkPassingCalculator {
             ArrayList<Waypoint> waypoints) {
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> calculatedMarkpasses = new LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>>();
         
-        //TODO Start Problem
-        //TODO Start not limited to 5 minutes
-        //TODO Work without Start Time
-        //TODO Finder works with single fixes
+
+        //TODO Work without Start Time => evaluate possible start times by number of people crossing
+        //TODO Add reload all method (Specifically for waypoint changes)
         //TODO Chooser works for single Candidates
         //TODO Document everything
         
@@ -44,6 +98,8 @@ public class MarkPassingCalculator {
             if (!c.getName().contains("Feldmann")) {
 
                 // System.out.println(c.getName());
+                
+                //Get Waypoint Positions
                 LinkedHashMap<Waypoint, MarkPassing> computedPasses = new LinkedHashMap<Waypoint, MarkPassing>();
                 LinkedHashMap<Waypoint, ArrayList<LinkedHashMap<TimePoint, Position>>> wayPointPositions = new LinkedHashMap<>();
                 if (!(competitorTracks.get(c).size() == 0)) {
@@ -79,8 +135,9 @@ public class MarkPassingCalculator {
 
                     }
                     // Find GPSFix-Candidates for each ControlPoint
-                   LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = finder
-                            .findCandidates(competitorTracks.get(c), wayPointPositions, boatLength, averageLegLengths);
+                    LinkedHashMap<Waypoint, LinkedHashMap<GPSFixMoving, Double>> waypointCandidates = new LinkedHashMap<>();
+
+                //    finder.findCandidates(competitorTracks.get(c), wayPointPositions, boatLength, averageLegLengths);
 
                     // Create "Candidates"
                     ArrayList<Candidate> candidates = new ArrayList<Candidate>();
@@ -100,7 +157,7 @@ public class MarkPassingCalculator {
 
                     // Find shortest Path and create calculated MarkPasses
                     LinkedHashMap<Integer, TimePoint> markPasses = chooser.getMarkPasses(candidates, start, end,
-                            wayPointPositions, legs);
+                            wayPointPositions);
                     for (Waypoint w : wayPointTracks.keySet()) {
                         computedPasses.put(w, new MarkPassingImpl(markPasses.get(waypoints.indexOf(w) + 1), w, c));
                     }
@@ -110,4 +167,7 @@ public class MarkPassingCalculator {
         }
         return calculatedMarkpasses;
     }
+
+
+
 }

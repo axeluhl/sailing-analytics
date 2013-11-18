@@ -23,6 +23,11 @@ public class CandidateFinder {
     LinkedHashMap<Competitor, LinkedHashMap<GPSFix, ArrayList<Double>>> distances;
     LinkedHashMap<Competitor, ArrayList<GPSFix>> candidates;
     
+    public CandidateFinder(ArrayList<Waypoint> waypoints, LinkedHashMap<Waypoint, Double> legLengths) {
+        this.waypoints = waypoints;
+        this.legLengths = legLengths;
+    }
+    
 
     public void newCompetitorFix(GPSFix fix, Competitor c) {
         competitorTracks.get(c).addGPSFix(fix);
@@ -36,7 +41,7 @@ public class CandidateFinder {
         fixesToBeReevaluated.add(competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint()));
         fixesToBeReevaluated.add(fix);
         for(Waypoint w : waypoints){
-        reevaluateFixes(fixesToBeReevaluated, c, w);
+        reEvaluateFixes(fixesToBeReevaluated, c, w);
         }
     }
     
@@ -68,7 +73,7 @@ public class CandidateFinder {
                         if(!fixesAffected.contains(competitorTracks.get(c).getLastFixBefore(start))){
                             fixesAffected.add(competitorTracks.get(c).getLastFixBefore(start));
                         }
-                        reevaluateFixes(fixesAffected, c, w);
+                        reEvaluateFixes(fixesAffected, c, w);
                     }
                     break;
                 }
@@ -76,7 +81,7 @@ public class CandidateFinder {
         }
     }
 
-    private void reevaluateFixes(ArrayList<GPSFix> fixes, Competitor c, Waypoint w) {
+    private void reEvaluateFixes(ArrayList<GPSFix> fixes, Competitor c, Waypoint w) {
         // TODO Notify Chooser
         for (GPSFix gps : fixes) {
                 if (fixIsACandidate(gps, w, c) && !candidates.get(c).contains(gps)) {
