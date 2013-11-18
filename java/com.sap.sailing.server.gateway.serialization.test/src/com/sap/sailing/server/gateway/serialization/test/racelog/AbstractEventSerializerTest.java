@@ -52,7 +52,7 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
 
         when(event.getId()).thenReturn(expectedId);
         when(event.getCreatedAt()).thenReturn(createdAtTimePoint);
-        when(event.getTimePoint()).thenReturn(logicalTimePoint);
+        when(event.getLogicalTimePoint()).thenReturn(logicalTimePoint);
         when(event.getPassId()).thenReturn(expectedPassId);
         when(event.getInvolvedBoats()).thenReturn(Collections.<Competitor> emptyList());
         when(event.getAuthor()).thenReturn(author);

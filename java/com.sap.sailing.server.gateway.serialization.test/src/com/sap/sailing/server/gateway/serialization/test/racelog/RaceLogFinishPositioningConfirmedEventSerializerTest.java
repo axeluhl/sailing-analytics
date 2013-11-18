@@ -64,7 +64,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
         assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
@@ -89,7 +89,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
         assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());
@@ -107,7 +107,7 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
         assertNotNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons());

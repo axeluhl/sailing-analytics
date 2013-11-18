@@ -48,11 +48,11 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTime);
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type);
     
     RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
 
-    RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+    RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, Integer passId, Wind wind);
 }

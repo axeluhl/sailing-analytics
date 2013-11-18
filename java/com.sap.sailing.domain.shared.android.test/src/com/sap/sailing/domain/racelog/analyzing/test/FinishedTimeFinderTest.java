@@ -27,7 +27,7 @@ public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finishe
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
-        return new TargetPair(Arrays.asList(event), event.getTimePoint());
+        return new TargetPair(Arrays.asList(event), event.getLogicalTimePoint());
     }
     
     @Test
@@ -47,7 +47,7 @@ public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finishe
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getTimePoint(), analyzer.analyze());
+        assertEquals(event2.getLogicalTimePoint(), analyzer.analyze());
     }
     
     @Test
@@ -60,6 +60,6 @@ public class FinishedTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Finishe
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event1.getTimePoint(), analyzer.analyze());
+        assertEquals(event1.getLogicalTimePoint(), analyzer.analyze());
     }
 }

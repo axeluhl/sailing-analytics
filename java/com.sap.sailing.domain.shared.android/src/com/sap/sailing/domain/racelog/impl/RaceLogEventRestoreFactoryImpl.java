@@ -91,20 +91,20 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type) {
-        return new RaceLogStartProcedureChangedEventImpl(createdAt, author, timePoint, id, competitors, passId, type);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type) {
+        return new RaceLogStartProcedureChangedEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, type);
     }
 
     @Override
     public RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime) {
-        return new RaceLogProtestStartTimeEventImpl(createdAt, author, timePoint, id, competitors, passId, protestStartTime);
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime) {
+        return new RaceLogProtestStartTimeEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, protestStartTime);
     }
 
     @Override
-    public RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+    public RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, Integer passId, Wind wind) {
-        return new RaceLogWindFixEventImpl(createdAt, author, timePoint, id, competitors, passId, wind);
+        return new RaceLogWindFixEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, wind);
     }
 
 

@@ -19,11 +19,11 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
     private final int passId;
     private final RaceLogEventAuthor author;
 
-    public RaceLogEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
         this.createdAt = createdAt;
         this.author = author;
-        this.logicalTimePoint = pTimePoint;
+        this.logicalTimePoint = logicalTimePoint;
         this.id = pId;
         this.involvedBoats = pInvolvedBoats;
         this.passId = pPassId;
@@ -34,8 +34,16 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
         return createdAt;
     }
 
+    /*
+     * Redirects to getCreatedAt()
+     */
     @Override
     public TimePoint getTimePoint() {
+        return getCreatedAt();
+    }
+    
+    @Override
+    public TimePoint getLogicalTimePoint() {
         return logicalTimePoint;
     }
 
@@ -61,8 +69,8 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
 
     @Override
     public String toString() {
-        return getClass().getName() + ": createdAt: " + getCreatedAt() + ", logicalTimePoint: " + getTimePoint()
+        return getClass().getName() + ": createdAt: " + getCreatedAt() + ", logicalTimePoint: " + getLogicalTimePoint()
                 + ", id: " + getId() + ", involvedBoats: " + getInvolvedBoats() + ", passId: " + getPassId() +
-                ", author: "+getAuthor();
+                ", author: "+ getAuthor();
     }
 }

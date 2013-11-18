@@ -66,7 +66,7 @@ public class RaceLogWindFixEventSerializerTest {
 
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
-        assertEquals(event.getTimePoint(), deserializedEvent.getTimePoint());
+        assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
 

@@ -53,7 +53,7 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?
         when(event.getAuthor()).thenReturn(author);
         when(event.getPassId()).thenReturn(passId);
         when(event.getCreatedAt()).thenReturn(new MillisecondsTimePoint(milliseconds));
-        when(event.getTimePoint()).thenReturn(new MillisecondsTimePoint(milliseconds));
+        when(event.getLogicalTimePoint()).thenReturn(new MillisecondsTimePoint(milliseconds));
         when(event.getId()).thenReturn(id);
         return event;
     }

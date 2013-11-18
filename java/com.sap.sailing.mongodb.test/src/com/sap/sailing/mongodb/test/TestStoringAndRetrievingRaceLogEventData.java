@@ -84,7 +84,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             assertNotNull(coll);
             DBObject object = coll.findOne();
             RaceLogFlagEvent readRcEvent = (RaceLogFlagEvent) ((DomainObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()).loadRaceLogEvent(object);
-            assertEquals(rcEvent.getTimePoint(), readRcEvent.getTimePoint());
+            assertEquals(rcEvent.getLogicalTimePoint(), readRcEvent.getLogicalTimePoint());
             assertEquals(rcEvent.getId(), readRcEvent.getId());
             assertEquals(rcEvent.getPassId(), readRcEvent.getPassId());
             assertEquals(rcEvent.getUpperFlag(), readRcEvent.getUpperFlag());

@@ -67,7 +67,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void assertBaseFields(RaceLogEvent expectedEvent, RaceLogEvent actualEvent) {
         assertNotNull(actualEvent);
         assertEquals(expectedEvent.getCreatedAt(), actualEvent.getCreatedAt());
-        assertEquals(expectedEvent.getTimePoint(), actualEvent.getTimePoint());
+        assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
         assertEquals(expectedEvent.getId(), actualEvent.getId());
         assertEquals(expectedEvent.getInvolvedBoats().size(), Util.size(actualEvent.getInvolvedBoats()));
         assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());

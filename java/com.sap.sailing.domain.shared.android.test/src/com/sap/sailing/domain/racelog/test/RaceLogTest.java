@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -272,37 +273,21 @@ public class RaceLogTest {
         
     }
     
-    @Test
-    public void testGetFirstFixAfterOld() {
-        
-        RaceLogEvent eventOne = mock(RaceLogEvent.class);
-        when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
-        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(100));
-        when(eventOne.getTimePoint()).thenReturn(new MillisecondsTimePoint(100));
-        raceLog.add(eventOne);
-        
-        RaceLogEvent eventTwo = mock(RaceLogEvent.class);
-        when(eventTwo.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
-        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(99));
-        when(eventTwo.getTimePoint()).thenReturn(new MillisecondsTimePoint(99));
-        raceLog.add(eventTwo);
-        
-        assertNull(raceLog.getFirstFixAfter(new MillisecondsTimePoint(100)));
-        assertEquals(eventOne, raceLog.getFirstFixAfter(new MillisecondsTimePoint(99)));
-    }
-    
-    @Ignore("CreatedAt timestamp needs to be the one of Timed")
     @Test()
     public void testGetFirstFixAfterNew() {
         
+        TimePoint createdAtEventOne = new MillisecondsTimePoint(100);
         RaceLogEvent eventOne = mock(RaceLogEvent.class);
         when(eventOne.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
-        when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(100));
+        when(eventOne.getCreatedAt()).thenReturn(createdAtEventOne);
+        when(eventOne.getTimePoint()).thenReturn(createdAtEventOne);
         raceLog.add(eventOne);
         
+        TimePoint createdAtEventTwo = new MillisecondsTimePoint(99);
         RaceLogEvent eventTwo = mock(RaceLogEvent.class);
         when(eventTwo.getAuthor()).thenReturn(mock(RaceLogEventAuthor.class));
-        when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(99));
+        when(eventTwo.getCreatedAt()).thenReturn(createdAtEventTwo);
+        when(eventTwo.getTimePoint()).thenReturn(createdAtEventTwo);
         raceLog.add(eventTwo);
         
         assertNull(raceLog.getFirstFixAfter(new MillisecondsTimePoint(100)));

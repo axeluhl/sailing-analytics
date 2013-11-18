@@ -19,7 +19,7 @@ public abstract class IndividualRecallFinder extends RaceLogAnalyzer<TimePoint> 
             if (event instanceof RaceLogFlagEvent) {
                 RaceLogFlagEvent flagEvent = (RaceLogFlagEvent) event;
                 if (isRelevant(flagEvent)) {
-                    return flagEvent.getTimePoint();
+                    return flagEvent.getLogicalTimePoint();
                 }
             }
         }

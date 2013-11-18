@@ -24,7 +24,7 @@ public class IndividualRecallFinderTest extends PassAwareRaceLogAnalyzerTest<Ind
         RaceLogFlagEvent event = createEvent(RaceLogFlagEvent.class, 1, passId, author);
         when(event.getUpperFlag()).thenReturn(Flags.XRAY);
         when(event.isDisplayed()).thenReturn(true);
-        return new TargetPair(Arrays.asList(event), event.getTimePoint());
+        return new TargetPair(Arrays.asList(event), event.getLogicalTimePoint());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class IndividualRecallFinderTest extends PassAwareRaceLogAnalyzerTest<Ind
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getTimePoint(), analyzer.analyze());
+        assertEquals(event2.getLogicalTimePoint(), analyzer.analyze());
     }
 
 }

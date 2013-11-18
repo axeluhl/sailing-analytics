@@ -210,7 +210,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
             RaceLogCourseDesignChangedEvent replicatedEvent = (RaceLogCourseDesignChangedEvent) replicaLog.getLastRawFix();
             assertEquals(courseDesignChangedEvent.getId(), replicatedEvent.getId());
             assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
-            assertEquals(courseDesignChangedEvent.getTimePoint(), replicatedEvent.getTimePoint());
+            assertEquals(courseDesignChangedEvent.getCreatedAt(), replicatedEvent.getCreatedAt());
+            assertEquals(courseDesignChangedEvent.getLogicalTimePoint(), replicatedEvent.getLogicalTimePoint());
             assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
             compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
         } finally {

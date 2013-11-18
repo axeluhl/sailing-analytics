@@ -675,7 +675,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
             
             if (raceLog.getLastRawFix() != null) {
-                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
+                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
             
             FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
