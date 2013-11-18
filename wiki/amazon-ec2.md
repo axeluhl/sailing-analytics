@@ -2,6 +2,43 @@
 
 [[_TOC_]]
 
+## Quickstart
+
+- Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
+- Database and Queue Server: 172.31.25.253
+- Using a release
+<pre>
+INSTALL_FROM_RELEASE=master-201311062138
+USE_ENVIRONMENT=live-server
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+</pre>
+- Building
+<pre>
+BUILD_BEFORE_START=True
+BUILD_FROM=master
+RUN_TESTS=False
+COMPILE_GWT=True
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=
+SERVER_NAME=LIVE1
+MEMORY=2048m
+REPLICATION_HOST=172.31.25.253
+REPLICATION_CHANNEL=sapsailinganalytics-live
+TELNET_PORT=14888
+SERVER_PORT=8888
+MONGODB_HOST=172.31.25.253
+MONGODB_PORT=10202
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
+INSTALL_FROM_RELEASE=
+USE_ENVIRONMENT=
+</pre>
+
 ## General Information and Security
 
 Since XXX 2013 this project is using EC2 as the server provider. Amazon Elastic Compute Cloud (EC2) is a central part of Amazon.com's cloud computing platform, Amazon Web Services (AWS). EC2 allows users to rent virtual computers on which to run their own computer applications. EC2 allows scalable deployment of applications by providing a Web service through which a user can boot an Amazon Machine Image to create a virtual machine, which Amazon calls an "instance", containing any software desired. A user can create, launch, and terminate server instances as needed, paying by the hour for active servers, hence the term "elastic".
