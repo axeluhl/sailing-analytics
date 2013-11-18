@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.impl.CountingOutputStream;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
@@ -68,7 +69,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
-            ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
+            ObjectOutputStream oos = new ObjectOutputStream(new CountingOutputStream(resp.getOutputStream(), /* log every megabyte */ 1024l*1024l, Level.INFO, "HTTP output for initial load for "+req.getRemoteHost()));
             try {
                 getService().serializeForInitialReplication(oos);
             } catch (Exception e) {
