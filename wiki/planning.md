@@ -57,3 +57,5 @@ The links above lead to short write-ups of the respective business case behind t
 [[ISAF-Internal Projects|wiki/planning/ISAFInternalProjects]]
 
 [[Microcopter Integration|wiki/planning/Microcopter]]
+
+[[Race Rendering Technology|wiki/planning/RaceRenderingTechnology]]

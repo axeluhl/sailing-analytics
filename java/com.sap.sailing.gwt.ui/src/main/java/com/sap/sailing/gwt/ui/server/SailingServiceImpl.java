@@ -1490,24 +1490,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
-                if (firstWaypoint != null) {
+                if (firstWaypoint != null && Util.size(firstWaypoint.getMarks())==2) {
                     final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
-                    final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
-                    result.startMarkPositions = startMarkPositionDTOs;
-                    result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
-                    result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                    result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    if (markPositionDTOsAndLineAdvantage != null) {
+                        final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
+                        result.startMarkPositions = startMarkPositionDTOs;
+                        result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                        result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                        result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    }
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
-                if (lastWaypoint != null) {
+                if (lastWaypoint != null && Util.size(lastWaypoint.getMarks())==2) {
                     final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
-                    final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
-                    result.finishMarkPositions = finishMarkPositionDTOs;
-                    result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
-                    result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                    result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    if (markPositionDTOsAndLineAdvantage != null) {
+                        final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
+                        result.finishMarkPositions = finishMarkPositionDTOs;
+                        result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
+                        result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
+                        result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                    }
                 }
             }
         }
@@ -3262,39 +3266,37 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        host = host.split("://")[1];
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
+        String hostname;
+        try {
+            URL url = new URL(urlAsString);
+            hostname = url.getHost();
+        } catch (MalformedURLException e1) {
+            hostname = urlAsString.split("://")[1].split("/")[0]; // also eliminate a trailing slash
+        }
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
         StringBuilder sb = null;
         String line = null;
-      
         URL serverAddress = null;
-      
         try {
-            serverAddress = createUrl(host, query);
+            serverAddress = createUrl(hostname, query);
             //set up out communications stuff
             connection = null;
-          
             //Set up the initial connection
             connection = (HttpURLConnection)serverAddress.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
             connection.setReadTimeout(10000);
-                      
             connection.connect();
-          
             //read the result from the server
             rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             sb = new StringBuilder();
-
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
-
             return importFromHttpResponse(sb.toString(), override);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
