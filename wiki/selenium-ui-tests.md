@@ -85,7 +85,7 @@ The easiest way to execute the tests is to perform a full Maven build. Here you 
             <parameters.integration-tests>
                 -Dselenium.test.environment.configuration=[path-to-your-file]
             </parameters.integration-tests>
-          </properties>
+        </properties>
 
 After the build, Tycho will start a server instance and runs all tests against the deployed application.
 
