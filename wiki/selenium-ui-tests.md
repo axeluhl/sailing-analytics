@@ -48,6 +48,31 @@ Since we use GWT to build the UI, we also provide a specific mechanism to locate
 
 ## Writing new Tests
 
+If you start to write new UI tests, some preparations are needed, depending on what you work on. The first thing you should verify is, that the used entry point extends the provided class _AbstractEntryPoint_, since this class automatically injects the JavaScript code for the counter of pending request into the host page. In addition it configures the attribute used for the debug identifier and marks the GWT bootstrap using the counter. Since the counter is initialized to be 1 and decremented as soon as the bootstrap process has finished, tests as well as page objects are able to wait until the bootstrap process completes.
+
+In the next step you should set a debug identifier for all relevant widgets the user interacts with, by calling _ensureDebugId(String id)_ on the instance of the widget. This will set the _selenium-id_ attribute of the widget to the specified value, so you can easily look up it in the resulting HTML document. You should also consider setting a debug id on logical or self-contained parts, like a form or field sets. By convention we always use the type of the widget as a suffix (e.g. _LoginButton_ or _NameTextField_) to give a hint to the available interactions.
+
+After preparing the UI for testing, you have to implement new page objects or to extend existing ones, if needed. Therefore we provide the two classes _HostPage_ and _PageArea_ which also share common functionality. The class _HostPage_ represents a whole page and in the context of GWT it is used for page objects representing an _EntryPoint_. The second class _PageArea_ in contrast should be used to represent complex widgets (e.g. tables and tab panels) or logical parts like field sets. While implementing your page objects, you should always think in services instead of single widgets. So, for example you should provide a method _login(String name, String password)_ for a simple login form, which sets the username, the password and clicks the login button instead of the 3 methods _setName(String name)_, _setPassword(String password)_ and _login()_.
+
+To get access to the HTML-elements representing the widgets the user interacts with, you should use the provided factory by creating instance fields of the type _WebElement_ or _List<WebElement>_ and annotating them with _FindBy_ or _FindBys_ as well as _CacheLookup_, if the element is static and never changes. Usually you use the annotation _FindBy_ which needs you to provide the mechanism as well as the value to use for locating the element. Since we use the debug identifiers of GWT we also provide the corresponding mechanism with the class _BySeleniumId_ and a typical example would look like following:
+
+public MyPageObject extends PageArea {
+    @FindBy(how = BySeleniumId.class, using = ”NameTextField”)
+    private WebElement nameTextField;
+    
+    ...
+}
+
+Since GWT widgets are usually represented by more complex HTML constructs it is also recommended to implement a page object for the used widgets, if none exists. A _CheckBox_ for example is modeled by the following HTML fragment:
+
+<span class=”gwt-CheckBox” style=”white-space: nowrap”>
+    <input id=”gtw-uid-1” type=”checkbox” value=”on”/>
+    <label for=”gwt-uid-1”>Track Wind</label>
+</span>
+
+The corresponding page object should abstract from this by only providing methods to select and deselect the checkbox as well as to retrieve the selection state. The knowledge about the lookup of the input field should be hidden by the implementation. This allows a reuse in all tests and other page objects and keeps necessary changes in one place for the case GWT modifies the representation in later releases.
+
+To write a test case you should extend the class _AbstractSeleniumTest_ which has all necessary annotations already applied for running the test with the special JUnit-Runner and to have access to the _TestEnvironment_ which provides the _WebDriver_ instance as well as some other configuration settings. The concrete test is then written as usual, using the services of the page objects and making assertions.
 
 
 ## Execution of Tests
