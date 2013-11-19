@@ -46,7 +46,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.StoredDeviceConfigurationImpl;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 
@@ -89,7 +89,7 @@ public class OfflineDataManager extends DataManager {
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
         StoredRacingProceduresConfiguration configuration = 
-                new StoredDeviceConfigurationImpl(preferences).load().getRacingProceduresConfiguration();
+                new PreferencesBasedDeviceConfiguration(preferences).load().getRacingProceduresConfiguration();
         
         log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
                 1, new MillisecondsTimePoint(new Date().getTime() - 1000)));

@@ -26,7 +26,9 @@ import com.sap.sailing.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -181,6 +183,7 @@ public class RaceStateService extends Service {
             RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
             ExLog.i(TAG, String.format("Processing %s", stateEvent.toString()));
             race.getState().processStateEvent(stateEvent);
+            roStates.get(race).processStateEvent(stateEvent);
             clearAlarmByName(race, stateEvent.getEventName());
             return;
         }
@@ -241,6 +244,10 @@ public class RaceStateService extends Service {
             // ... register on state changes!
             RaceStateEventScheduler stateEventScheduler = new RaceStateEventSchedulerOnService(this, race);
             state.setStateEventScheduler(stateEventScheduler);
+            
+            ReadonlyRaceState roState = ReadonlyRaceStateImpl.create(state.getRaceLog());
+            roState.setStateEventScheduler(stateEventScheduler);
+            roStates.put(race, roState);
 
             this.registeredLogListeners.put(race, logListener);
             this.registeredStateEventSchedulers.put(race, stateEventScheduler);
@@ -250,6 +257,8 @@ public class RaceStateService extends Service {
             ExLog.w(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
         }
     }
+    
+    private static Map<ManagedRace, ReadonlyRaceState> roStates = new HashMap<ManagedRace, ReadonlyRaceState>();
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_ALARM_ACTION);

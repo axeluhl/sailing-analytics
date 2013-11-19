@@ -45,7 +45,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.StoredDeviceConfigurationImpl;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -139,7 +139,7 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
                 StoredRacingProceduresConfiguration configuration = 
-                        new StoredDeviceConfigurationImpl(preferences).load().getRacingProceduresConfiguration();
+                        new PreferencesBasedDeviceConfiguration(preferences).load().getRacingProceduresConfiguration();
                 
                 JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),

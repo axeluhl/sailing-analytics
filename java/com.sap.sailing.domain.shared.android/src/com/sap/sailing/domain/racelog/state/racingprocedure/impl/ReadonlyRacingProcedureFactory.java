@@ -6,6 +6,8 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.NoAddingRaceLogWrapper;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ess.impl.ESSRacingProcedureImpl;
@@ -14,24 +16,14 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.RRS26Raci
 
 public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
 
-    private final StoredRacingProceduresConfiguration configuration;
+    protected final StoredRacingProceduresConfiguration configuration;
     
     public ReadonlyRacingProcedureFactory(StoredRacingProceduresConfiguration configuration) {
         this.configuration = configuration;
     }
     
-    protected RaceLogEventAuthor getAuthor() {
-        return null;
-    }
-    
-    protected RaceLogEventFactory getEventFactory() {
-        return null;
-    }
-
-    @Override
-    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
-        RaceLogEventAuthor author = getAuthor();
-        RaceLogEventFactory factory = getEventFactory();
+    protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogEventAuthor author, 
+            RaceLogEventFactory factory) {
         RacingProceduresConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:
@@ -43,6 +35,15 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
         default:
             throw new UnsupportedOperationException("Unknown racing procedure " + type.toString());
         }
+    }
+
+    @Override
+    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
+        // Just a mock author since we will never add anything to the racelog
+        RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Illegal Author", 128);
+        // Wrap the racelog to disable adding...
+        RaceLog wrappedRaceLog = new NoAddingRaceLogWrapper(raceLog);
+        return createProcedure(type, wrappedRaceLog, author, RaceLogEventFactory.INSTANCE);
     }
 
 }

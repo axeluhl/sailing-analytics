@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureFactory;
+import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
 
 public class RacingProcedureFactoryImpl extends ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
 
@@ -18,12 +21,7 @@ public class RacingProcedureFactoryImpl extends ReadonlyRacingProcedureFactory i
     }
     
     @Override
-    protected RaceLogEventAuthor getAuthor() {
-        return author;
-    }
-    
-    @Override
-    protected RaceLogEventFactory getEventFactory() {
-        return factory;
+    public ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog) {
+        return createProcedure(type, raceLog, author, factory);
     }
 }

@@ -6,19 +6,19 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class StoredDeviceConfigurationImpl extends DeviceConfigurationImpl implements StoredDeviceConfiguration {
+public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl implements StoredDeviceConfiguration {
 
     private static final long serialVersionUID = 9146162601389924219L;
-    private static final String TAG = StoredDeviceConfigurationImpl.class.getName();
+    private static final String TAG = PreferencesBasedDeviceConfiguration.class.getName();
 
     private final AppPreferences preferences;
     
-    public StoredDeviceConfigurationImpl(final AppPreferences preferences) {
-        super(new StoredRacingProceduresConfigurationImpl(preferences).load());
+    public PreferencesBasedDeviceConfiguration(final AppPreferences preferences) {
+        super(new PreferencesBasedRacingProceduresConfiguration(preferences).load());
         this.preferences = preferences;
     }
     
-    public StoredDeviceConfigurationImpl(final AppPreferences preferences, StoredRacingProceduresConfiguration proceduresConfiguration) {
+    public PreferencesBasedDeviceConfiguration(final AppPreferences preferences, StoredRacingProceduresConfiguration proceduresConfiguration) {
         super(proceduresConfiguration);
         this.preferences = preferences;
     }

@@ -77,7 +77,6 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
         RaceState state = RaceStateImpl.create(raceLog, author, startType, configuration);
         return new ManagedRaceImpl(identifier, state);
-
     }
 
 }

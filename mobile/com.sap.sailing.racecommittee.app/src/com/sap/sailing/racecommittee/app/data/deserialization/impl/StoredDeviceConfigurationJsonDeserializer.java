@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.StoredDeviceConfigurationImpl;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 
@@ -28,7 +28,7 @@ public class StoredDeviceConfigurationJsonDeserializer extends DeviceConfigurati
 
     @Override
     protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
-        return new StoredDeviceConfigurationImpl(preferences,
+        return new PreferencesBasedDeviceConfiguration(preferences,
                 (StoredRacingProceduresConfiguration) proceduresConfiguration);
     }
     
