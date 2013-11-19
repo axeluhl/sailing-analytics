@@ -9,19 +9,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.ParallelFilter;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.WorkerBuilder;
 
 public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
-                                            implements ParallelFilter<DataType>, WorkReceiver<Collection<DataType>> {
+                                            implements ParallelFilter<DataType> {
 
     private final WorkerBuilder<FiltrationWorker<DataType>> workerBuilder;
-    private Collection<DataType> data;
 
     public SimpleParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
         this.workerBuilder = workerBuilder;
-        data = new ArrayList<DataType>();
     }
 
     @Override
@@ -40,12 +37,11 @@ public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Co
     }
 
     @Override
-    public void receiveWork(Collection<DataType> data) {
-        this.data.addAll(data);
-    }
-
-    @Override
     protected Collection<DataType> finalizeData() {
+        Collection<DataType> data = new ArrayList<DataType>();
+        for (Collection<DataType> results : getResults()) {
+            data.addAll(results);
+        }
         return Collections.unmodifiableCollection(new CopyOnWriteArrayList<DataType>(data));
     }
 

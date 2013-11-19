@@ -1,22 +1,29 @@
 package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.datamining.ComponentWorker;
+import com.sap.sailing.datamining.WorkReceiver;
 
-public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType> implements ParallelComponent<WorkingDataType, ResultDataType> {
+public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType> implements ParallelComponent<WorkingDataType, ResultDataType>,
+                                                                                            WorkReceiver<ResultDataType> {
 
     private ThreadPoolExecutor executor;
     private Collection<ComponentWorker<ResultDataType>> workers;
+    private Set<ResultDataType> results;
     
     public AbstractParallelComponent(ThreadPoolExecutor executor) {
         this.executor = executor;
         workers = new HashSet<ComponentWorker<ResultDataType>>();
+        results = Collections.newSetFromMap(new ConcurrentHashMap<ResultDataType, Boolean>());
     }
 
     @Override
@@ -29,6 +36,15 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
     }
 
     protected abstract void setUpWorkersFor(WorkingDataType data);
+    
+    @Override
+    public void receiveWork(ResultDataType result) {
+        results.add(result);
+    }
+    
+    protected Collection<ResultDataType> getResults() {
+        return results;
+    }
 
     @Override
     public ResultDataType get() throws InterruptedException, ExecutionException {
