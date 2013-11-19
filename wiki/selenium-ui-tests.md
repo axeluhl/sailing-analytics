@@ -65,10 +65,10 @@ To get access to the HTML-elements representing the widgets the user interacts w
 
 Since GWT widgets are usually represented by more complex HTML constructs it is also recommended to implement a page object for the used widgets, if none exists. A _CheckBox_ for example is modeled by the following HTML fragment:
 
-<span class=”gwt-CheckBox” style=”white-space: nowrap”>
-    <input id=”gtw-uid-1” type=”checkbox” value=”on”/>
-    <label for=”gwt-uid-1”>Track Wind</label>
-</span>
+        <span class=”gwt-CheckBox” style=”white-space: nowrap”>
+            <input id=”gtw-uid-1” type=”checkbox” value=”on”/>
+            <label for=”gwt-uid-1”>Track Wind</label>
+        </span>
 
 The corresponding page object should abstract from this by only providing methods to select and deselect the checkbox as well as to retrieve the selection state. The knowledge about the lookup of the input field should be hidden by the implementation. This allows a reuse in all tests and other page objects and keeps necessary changes in one place for the case GWT modifies the representation in later releases.
 
@@ -81,11 +81,11 @@ For the execution of the tests you have several options. In either case you have
 
 The easiest way to execute the tests is to perform a full Maven build. Here you have to provide the configuration file in the property with the name parameters.integration-tests as a command line argument in your user settings.
 
-  `<properties>`
-    `<parameters.integration-tests>`
-        `-Dselenium.test.environment.configuration=[path-to-your-file]`
-    `</parameters.integration-tests>`
-  `</properties>`
+        <properties>
+            <parameters.integration-tests>
+                -Dselenium.test.environment.configuration=[path-to-your-file]
+            </parameters.integration-tests>
+          </properties>
 
 After the build, Tycho will start a server instance and runs all tests against the deployed application.
 
