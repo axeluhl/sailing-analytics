@@ -1947,7 +1947,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (String raceIdAsString : raceIdStrings) {
             if (!override && persistentRegattasForRaceIDs.contains(raceIdAsString)) {
                 logger.info(String.format(
-                        "Persistent regatta wasnt set for race id %1$s, because override was not turned on.",
+                        "Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
                         raceIdAsString));
             } else {
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);

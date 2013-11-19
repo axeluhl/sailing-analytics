@@ -101,7 +101,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public synchronized void releaseTrackedRace(Fleet fleet) {
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
         this.trackedRaces.remove(fleet);
-        if (previouslyLinkedRace != null) {
+        if (previouslyLinkedRace != null && raceLogInformation != null) {
             RaceLogIdentifierImpl identifier = new RaceLogIdentifierImpl(raceLogInformation.getIdentifierTemplate(), getName(), fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);

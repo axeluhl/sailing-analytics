@@ -66,7 +66,8 @@ public interface Position extends Serializable {
 
     Distance alongTrackDistance(Position from, Bearing bearing);
     
-    /**Computes the distance from this position to a line between <code>left<code> and <code>right<code>.
+    /**
+     * Computes the distance from this position to the line between <code>left<code> and <code>right<code>.
      */
     Distance getDistanceToLine(Position left, Position right);
 }
