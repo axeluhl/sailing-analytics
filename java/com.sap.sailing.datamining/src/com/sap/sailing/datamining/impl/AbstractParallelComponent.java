@@ -13,41 +13,41 @@ import java.util.concurrent.TimeoutException;
 import com.sap.sailing.datamining.ComponentWorker;
 import com.sap.sailing.datamining.WorkReceiver;
 
-public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType> implements ParallelComponent<WorkingDataType, ResultDataType>,
-                                                                                            WorkReceiver<ResultDataType> {
+public abstract class AbstractParallelComponent<WorkingType, ResultType> implements ParallelComponent<WorkingType, ResultType>,
+                                                                                    WorkReceiver<ResultType> {
 
     private ThreadPoolExecutor executor;
-    private Collection<ComponentWorker<ResultDataType>> workers;
-    private Set<ResultDataType> results;
+    private Collection<ComponentWorker<ResultType>> workers;
+    private Set<ResultType> results;
     
     public AbstractParallelComponent(ThreadPoolExecutor executor) {
         this.executor = executor;
-        workers = new HashSet<ComponentWorker<ResultDataType>>();
-        results = Collections.newSetFromMap(new ConcurrentHashMap<ResultDataType, Boolean>());
+        workers = new HashSet<ComponentWorker<ResultType>>();
+        results = Collections.newSetFromMap(new ConcurrentHashMap<ResultType, Boolean>());
     }
 
     @Override
-    public ParallelComponent<WorkingDataType, ResultDataType> start(WorkingDataType data) {
+    public ParallelComponent<WorkingType, ResultType> start(WorkingType data) {
         setUpWorkersFor(data);
-        for (ComponentWorker<ResultDataType> worker : workers) {
+        for (ComponentWorker<ResultType> worker : workers) {
             executor.execute(worker);
         }
         return this;
     }
 
-    protected abstract void setUpWorkersFor(WorkingDataType data);
+    protected abstract void setUpWorkersFor(WorkingType data);
     
     @Override
-    public void receiveWork(ResultDataType result) {
+    public void receiveWork(ResultType result) {
         results.add(result);
     }
     
-    protected Collection<ResultDataType> getResults() {
+    protected Collection<ResultType> getResults() {
         return results;
     }
 
     @Override
-    public ResultDataType get() throws InterruptedException, ExecutionException {
+    public ResultType get() throws InterruptedException, ExecutionException {
         while (!isDone()) {
             Thread.sleep(100);
         }
@@ -55,7 +55,7 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
     }
 
     @Override
-    public ResultDataType get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+    public ResultType get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
             TimeoutException {
         long timeRun = 0;
         long timeoutInMillis = unit.toMillis(timeout);
@@ -69,11 +69,11 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
         return finalizeData();
     }
 
-    protected abstract ResultDataType finalizeData();
+    protected abstract ResultType finalizeData();
 
     @Override
     public boolean isDone() {
-        for (ComponentWorker<ResultDataType> worker : workers) {
+        for (ComponentWorker<ResultType> worker : workers) {
             if (!worker.isDone()) {
                 return false;
             }
@@ -85,7 +85,7 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
         return executor;
     }
 
-    protected void addWorker(ComponentWorker<ResultDataType> worker) {
+    protected void addWorker(ComponentWorker<ResultType> worker) {
         workers.add(worker);
     }
 

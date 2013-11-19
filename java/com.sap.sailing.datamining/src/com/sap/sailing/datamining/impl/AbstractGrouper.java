@@ -6,37 +6,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.datamining.GroupingWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public abstract class AbstractGrouper<DataType> implements GroupingWorker<DataType> {
+public abstract class AbstractGrouper<DataType> extends AbstractComponentWorker<Map<GroupKey, Collection<DataType>>>
+                                                implements GroupingWorker<DataType> {
 
-    private WorkReceiver<Map<GroupKey, Collection<DataType>>> receiver;
-    private boolean isDone;
     private Collection<DataType> data;
-
-    @Override
-    public void setReceiver(WorkReceiver<Map<GroupKey, Collection<DataType>>> receiver) {
-        this.receiver = receiver;
-    }
-
-    @Override
-    public boolean isDone() {
-        return isDone;
-    }
-
-    @Override
-    public void run() {
-        receiver.receiveWork(group(data));
-        isDone = true;
-    }
 
     @Override
     public void setDataToGroup(Collection<DataType> data) {
         this.data = data;
     }
     
-    private Map<GroupKey, Collection<DataType>> group(Collection<DataType> data) {
+    @Override
+    protected Map<GroupKey, Collection<DataType>> doWork() {
         Map<GroupKey, Collection<DataType>> groupedData = new HashMap<GroupKey, Collection<DataType>>();
         for (DataType dataEntry : data) {
             GroupKey key = getGroupKeyFor(dataEntry);

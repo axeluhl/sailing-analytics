@@ -12,7 +12,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class TrackedLegOfCompetitorRetriever extends AbstractLeaderboardGroupDataRetriever<TrackedLegOfCompetitorWithContext> {
 
     @Override
-    public Collection<TrackedLegOfCompetitorWithContext> retrieveData() {
+    public Collection<TrackedLegOfCompetitorWithContext> doWork() {
         Collection<TrackedLegOfCompetitorWithContext> data = new ArrayList<TrackedLegOfCompetitorWithContext>();
         Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
         for (Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext> baseDataEntry : baseData) {

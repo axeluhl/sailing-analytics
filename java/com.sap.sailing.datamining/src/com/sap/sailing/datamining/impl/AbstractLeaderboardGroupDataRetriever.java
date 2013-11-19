@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.DataRetrievalWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.data.TrackedLegContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.TrackedLegContextImpl;
@@ -21,42 +20,18 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements DataRetrievalWorker<DataType> {
+public abstract class AbstractLeaderboardGroupDataRetriever<DataType> extends AbstractComponentWorker<Collection<DataType>> implements DataRetrievalWorker<DataType> {
 
-    private WorkReceiver<Collection<DataType>> receiver;
     private LeaderboardGroup group;
-    private boolean isDone;
-
-    @Override
-    public void setReceiver(WorkReceiver<Collection<DataType>> receiver) {
-        this.receiver = receiver;
-    }
 
     @Override
     public void setGroup(LeaderboardGroup group) {
         this.group = group;
     }
 
-    protected WorkReceiver<Collection<DataType>> getReceiver() {
-        return receiver;
-    }
-
     protected LeaderboardGroup getGroup() {
         return group;
     }
-
-    @Override
-    public boolean isDone() {
-        return isDone;
-    }
-
-    @Override
-    public void run() {
-        receiver.receiveWork(retrieveData());
-        isDone = true;
-    }
-
-    protected abstract Collection<DataType> retrieveData();
 
     private static Collection<Pair<TrackedLeg, TrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
         Collection<Pair<TrackedLeg, TrackedLegContext>> data = new ArrayList<Pair<TrackedLeg, TrackedLegContext>>();

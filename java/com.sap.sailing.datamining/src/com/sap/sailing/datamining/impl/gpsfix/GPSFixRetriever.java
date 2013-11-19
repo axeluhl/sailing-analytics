@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class GPSFixRetriever extends AbstractLeaderboardGroupDataRetriever<GPSFixWithContext> {
     
     @Override
-    public Collection<GPSFixWithContext> retrieveData() {
+    public Collection<GPSFixWithContext> doWork() {
         Collection<GPSFixWithContext> data = new ArrayList<GPSFixWithContext>();
         Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> baseData = retrieveDataTillTrackedLegOfCompetitor(getGroup());
         for (Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext> baseDataEntry : baseData) {

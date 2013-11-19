@@ -4,22 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.FiltrationWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 
-public abstract class AbstractFiltrationWorker<DataType> implements FiltrationWorker<DataType> {
+public abstract class AbstractFiltrationWorker<DataType> extends AbstractComponentWorker<Collection<DataType>>
+                                                         implements FiltrationWorker<DataType> {
 
-    //TODO make private if possible
-    private WorkReceiver<Collection<DataType>> receiver;
     private Collection<DataType> data;
-    private boolean isDone;
 
     @Override
-    public void run() {
-        receiver.receiveWork(filterData());
-        isDone = true;
-    }
-
-    private Collection<DataType> filterData() {
+    protected Collection<DataType> doWork() {
         Collection<DataType> filteredData = new ArrayList<DataType>();
         for (DataType dataEntry : data) {
             if (matches(dataEntry)) {
@@ -32,18 +24,8 @@ public abstract class AbstractFiltrationWorker<DataType> implements FiltrationWo
     protected abstract boolean matches(DataType dataEntry);
 
     @Override
-    public void setReceiver(WorkReceiver<Collection<DataType>> receiver) {
-        this.receiver = receiver;
-    }
-
-    @Override
     public void setDataToFilter(Collection<DataType> data) {
         this.data = data;
-    }
-
-    @Override
-    public boolean isDone() {
-        return isDone;
     }
 
 }
