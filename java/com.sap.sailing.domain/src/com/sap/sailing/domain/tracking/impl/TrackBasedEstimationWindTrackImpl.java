@@ -388,7 +388,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     private void startSchedulerForCacheRefresh() {
-        assertWriteLock();
         if (delayForCacheInvalidationInMilliseconds == 0) {
             invalidateCache();
         } else {
