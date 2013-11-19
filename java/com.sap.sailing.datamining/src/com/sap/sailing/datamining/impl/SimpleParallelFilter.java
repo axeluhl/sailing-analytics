@@ -1,0 +1,52 @@
+package com.sap.sailing.datamining.impl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import com.sap.sailing.datamining.FilterReceiver;
+import com.sap.sailing.datamining.ParallelFilter;
+import com.sap.sailing.datamining.SingleThreadedFilter;
+import com.sap.sailing.datamining.WorkerBuilder;
+
+public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
+                                            implements ParallelFilter<DataType>, FilterReceiver<DataType> {
+
+    private final WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder;
+    private Collection<DataType> data;
+
+    public SimpleParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+        super(executor);
+        this.workerBuilder = workerBuilder;
+        data = new ArrayList<DataType>();
+    }
+
+    @Override
+    protected void setUpWorkersFor(Collection<DataType> data) {
+        List<DataType> dataAsList = new ArrayList<DataType>(data);
+        final int workerAmount = (int) (getExecutor().getCorePoolSize() * 0.5);
+        final int partitionSize = (int) Math.ceil((double) dataAsList.size() / workerAmount);
+        for (int i = 0; i < dataAsList.size(); i += partitionSize) {
+            List<DataType> partition = dataAsList.subList(i, i + Math.min(partitionSize, dataAsList.size() - i));
+            
+            SingleThreadedFilter<DataType> worker = workerBuilder.build();
+            worker.setReceiver(this);
+            worker.setDataToFilter(partition);
+            addWorker(worker);
+        }
+    }
+
+    @Override
+    public void addFilteredData(Collection<DataType> data) {
+        this.data.addAll(data);
+    }
+
+    @Override
+    protected Collection<DataType> finalizeData() {
+        return Collections.unmodifiableCollection(new CopyOnWriteArrayList<DataType>(data));
+    }
+
+}

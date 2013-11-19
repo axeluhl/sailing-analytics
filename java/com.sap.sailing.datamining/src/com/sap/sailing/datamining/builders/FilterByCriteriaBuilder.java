@@ -1,9 +1,9 @@
 package com.sap.sailing.datamining.builders;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sailing.datamining.SingleThreadedFilter;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
-import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 
 public class FilterByCriteriaBuilder<DataType> implements WorkerBuilder<SingleThreadedFilter<DataType>> {
 

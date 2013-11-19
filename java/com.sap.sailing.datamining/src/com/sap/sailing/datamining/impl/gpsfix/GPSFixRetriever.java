@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.datamining.SingleThreadedDataRetriever;
 import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
@@ -44,11 +43,6 @@ public class GPSFixRetriever extends AbstractLeaderboardGroupDataRetriever<GPSFi
             competitorTrack.unlockAfterRead();
         }
         return data;
-    }
-
-    @Override
-    public SingleThreadedDataRetriever<GPSFixWithContext> clone() {
-        return new GPSFixRetriever();
     }
 
 }

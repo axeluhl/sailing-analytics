@@ -11,9 +11,9 @@ import org.junit.Test;
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FilterReceiver;
+import com.sap.sailing.datamining.SingleThreadedFilter;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.FilterByCriteria;
-import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 
 public class TestFilters {

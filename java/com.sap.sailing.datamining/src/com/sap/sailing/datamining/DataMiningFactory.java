@@ -10,9 +10,7 @@ import com.sap.sailing.datamining.factories.ExtractorFactory;
 import com.sap.sailing.datamining.factories.FilterFactory;
 import com.sap.sailing.datamining.factories.GrouperFactory;
 import com.sap.sailing.datamining.impl.QueryImpl;
-import com.sap.sailing.datamining.impl.SingleThreadedFilter;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.server.RacingEventService;
 
 public final class DataMiningFactory {
     
@@ -21,10 +19,10 @@ public final class DataMiningFactory {
     
     private DataMiningFactory() { }
 
-    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
-        DataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), executor, racingService);
+    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition) {
+        ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), executor);
         
-        Filter<DataType> filter = createFilter(queryDefinition);
+        ParallelFilter<DataType> filter = createFilter(queryDefinition);
         
         Grouper<DataType> grouper = GrouperFactory.createGrouper(queryDefinition);
         Extractor<DataType, AggregatedType> extractor = ExtractorFactory.createExtractor(queryDefinition.getStatisticType());
@@ -33,7 +31,7 @@ public final class DataMiningFactory {
         return new QueryImpl<DataType, AggregatedType, AggregatedType>(retriever, filter, grouper, extractor, aggregator);
     }
 
-    private static <DataType> Filter<DataType> createFilter(QueryDefinition queryDefinition) {
+    private static <DataType> ParallelFilter<DataType> createFilter(QueryDefinition queryDefinition) {
         if (queryDefinition.getSelection().isEmpty()) {
             return FilterFactory.createNoFilter();
         }

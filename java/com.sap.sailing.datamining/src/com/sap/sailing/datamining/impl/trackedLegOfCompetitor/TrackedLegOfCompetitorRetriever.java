@@ -3,7 +3,6 @@ package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.SingleThreadedDataRetriever;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetriever;
@@ -20,11 +19,6 @@ public class TrackedLegOfCompetitorRetriever extends AbstractLeaderboardGroupDat
             data.add(new TrackedLegOfCompetitorWithContextImpl(baseDataEntry.getA(), baseDataEntry.getB()));
         }
         return data;
-    }
-
-    @Override
-    public SingleThreadedDataRetriever<TrackedLegOfCompetitorWithContext> clone() {
-        return new TrackedLegOfCompetitorRetriever();
     }
 
 }

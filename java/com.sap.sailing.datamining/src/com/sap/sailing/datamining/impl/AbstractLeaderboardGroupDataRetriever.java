@@ -58,9 +58,6 @@ public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements
 
     protected abstract Collection<DataType> retrieveData();
 
-    @Override
-    public abstract SingleThreadedDataRetriever<DataType> clone();
-
     private static Collection<Pair<TrackedLeg, TrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
         Collection<Pair<TrackedLeg, TrackedLegContext>> data = new ArrayList<Pair<TrackedLeg, TrackedLegContext>>();
         for (Leaderboard leaderboard : group.getLeaderboards()) {

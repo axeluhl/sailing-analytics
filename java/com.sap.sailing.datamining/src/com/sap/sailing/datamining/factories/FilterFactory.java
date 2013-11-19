@@ -6,15 +6,15 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.Filter;
+import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sailing.datamining.SingleThreadedFilter;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.data.impl.NoFilter;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
-import com.sap.sailing.datamining.impl.ParallelFilter;
-import com.sap.sailing.datamining.impl.SingleThreadedFilter;
+import com.sap.sailing.datamining.impl.SimpleParallelFilter;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
@@ -25,8 +25,8 @@ public final class FilterFactory {
 
     private FilterFactory() { }
     
-    public static <DataType> Filter<DataType> createParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
-        return new ParallelFilter<DataType>(workerBuilder, executor);
+    public static <DataType> ParallelFilter<DataType> createParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+        return new SimpleParallelFilter<DataType>(workerBuilder, executor);
     }
 
     public static <DataType> WorkerBuilder<SingleThreadedFilter<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
@@ -38,7 +38,7 @@ public final class FilterFactory {
     /**
      * @return A filter that filters nothing. So the returning collection is the same as the given one.
      */
-    public static <DataType> Filter<DataType> createNoFilter() {
+    public static <DataType> ParallelFilter<DataType> createNoFilter() {
         return new NoFilter<DataType>();
     }
 

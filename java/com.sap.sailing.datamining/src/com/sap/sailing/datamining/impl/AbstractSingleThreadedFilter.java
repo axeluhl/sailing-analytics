@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.impl;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.FilterReceiver;
+import com.sap.sailing.datamining.SingleThreadedFilter;
 
 public abstract class AbstractSingleThreadedFilter<DataType> implements SingleThreadedFilter<DataType> {
 

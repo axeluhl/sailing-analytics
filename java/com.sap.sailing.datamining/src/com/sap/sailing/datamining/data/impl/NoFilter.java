@@ -1,16 +1,20 @@
 package com.sap.sailing.datamining.data.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.sap.sailing.datamining.Filter;
+import com.sap.sailing.datamining.ParallelFilter;
 
-public class NoFilter<DataType> implements Filter<DataType> {
+public class NoFilter<DataType> implements ParallelFilter<DataType> {
 
-    private boolean isDone;
     private Collection<DataType> data;
+    
+    public NoFilter() {
+        data = new ArrayList<DataType>();
+    }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -24,14 +28,11 @@ public class NoFilter<DataType> implements Filter<DataType> {
 
     @Override
     public boolean isDone() {
-        return isDone;
+        return true;
     }
 
     @Override
-    public Collection<DataType> get() throws InterruptedException, ExecutionException {
-        while (!isDone()) {
-            Thread.sleep(100);
-        }
+    public Collection<DataType> get() {
         return data;
     }
 
@@ -51,9 +52,8 @@ public class NoFilter<DataType> implements Filter<DataType> {
     }
 
     @Override
-    public Filter<DataType> startFiltering(Collection<DataType> data) {
+    public ParallelFilter<DataType> start(Collection<DataType> data) {
         this.data = data;
-        isDone = true;
         return this;
     }
 
