@@ -46,6 +46,24 @@ To make the development of page objects as simple and easy as possible, we also 
 
 Since we use GWT to build the UI, we also provide a specific mechanism to locate elements by the value of the GWT debug identifier. By convention we use the attribute _selenium-id_ for the debug identifier which is implemented by the class _AbstractEntryPoint_. The class _BySeleniumId_ defines the corresponding mechanism and locates an element or a list of elements by the value of the selenium-id attribute.
 
-## Writing and Execution of Tests
+## Writing new Tests
 
-**TODO by Riccardo**
+
+
+## Execution of Tests
+
+For the execution of the tests you have several options. In either case you have to provide a configuration file according to your environment, since our tests are run by the special JUnit-Runner. You can use the file _ci-test-environment.xml_ as a starting point for your own configuration. Within the configuration file you define the context root to specify the server and the path of the web application. Furthermore you have to list all browsers via _driver-definition_ elements you want to test with.
+
+The easiest way to execute the tests is to perform a full Maven build. Here you have to provide the configuration file in the property with the name parameters.integration-tests as a command line argument in your user settings.
+
+  `<properties>
+    <parameters.integration-tests>
+        -Dselenium.test.environment.configuration=[path-to-your-file]
+    </parameters.integration-tests>
+</properties>`
+
+After the build, Tycho will start a server instance and runs all tests against the deployed application.
+
+Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, Jetty on 8889)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expect the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
+
+For a more practical example of how to write page objects and test you should take a look at the tutorial.
