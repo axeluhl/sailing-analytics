@@ -3,12 +3,14 @@ package com.sap.sailing.domain.igtimiadapter.oauth;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -43,10 +45,13 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnectorFactory;
 
 @Path(Callback.V1_AUTHORIZATIONCALLBACK)
 public class Callback {
+    private static final String CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
+    private static final String CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
     static final String V1_AUTHORIZATIONCALLBACK = "/v1/authorizationcallback";
     private static final String OAUTH_TOKEN_URL = "https://www.igtimi.com/oauth/token";
     private static final String USER_EMAIL = "axel.uhl@gmx.de";
     private static final String USER_PASSWORD = "123456";
+    private static final String baseUrl = "https://www.igtimi.com";
 
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -56,8 +61,8 @@ public class Callback {
         HttpPost post = new HttpPost(OAUTH_TOKEN_URL);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        urlParameters.add(new BasicNameValuePair("client_id", "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4"));
-        urlParameters.add(new BasicNameValuePair("client_secret", "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef"));
+        urlParameters.add(new BasicNameValuePair("client_id", CLIENT_ID));
+        urlParameters.add(new BasicNameValuePair("client_secret", CLIENT_SECRET));
         urlParameters.add(new BasicNameValuePair("code", code));
         urlParameters.add(new BasicNameValuePair("redirect_uri", "http://sapsailing.com"));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -78,7 +83,7 @@ public class Callback {
     
     public boolean signIn() throws ClientProtocolException, IOException, ParserConfigurationException, IllegalStateException, SAXException {
         HttpClient client = new DefaultHttpClient();
-        String url = "https://www.igtimi.com/oauth/authorize?response_type=code&client_id=d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4&redirect_uri=http://sapsailing.com/";
+        String url = baseUrl + "/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri=http://sapsailing.com/";
         HttpGet get = new HttpGet(url);
         HttpResponse response = client.execute(get);
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -109,7 +114,28 @@ public class Callback {
         } catch (SAXParseException e) {
             // swallow; we try to grab what we can; let's hope it was enough...
         }
+        HttpResponse signInResponse = postSignInForm(action[0], inputFieldsToSubmit);
+        Header[] cookies = signInResponse.getHeaders("Set-Cookie");
+        Header igtimiCookie = null;
+        for (Header cookie : cookies) {
+            if (cookie.getValue().startsWith("_igtimi-api_session")) {
+                igtimiCookie = cookie;
+            }
+        }
         return true;
+    }
+
+    private HttpResponse postSignInForm(final String action, final Map<String, String> inputFieldsToSubmit)
+            throws UnsupportedEncodingException, IOException, ClientProtocolException {
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost(baseUrl+action);
+        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+        for (Entry<String, String> nameValue : inputFieldsToSubmit.entrySet()) {
+            urlParameters.add(new BasicNameValuePair(nameValue.getKey(), nameValue.getValue()));
+        }
+        post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        HttpResponse responseForSignIn = client.execute(post);
+        return responseForSignIn;
     }
     
     @GET
