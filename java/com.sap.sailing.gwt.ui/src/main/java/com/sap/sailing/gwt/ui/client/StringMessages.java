@@ -864,4 +864,5 @@ public interface StringMessages extends Messages {
     String pleaseEnterASailNumber();
     String successfullyAllowedCompetitorReset(String names);
     String allowReload();
+    String id();
 }

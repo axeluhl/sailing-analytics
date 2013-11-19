@@ -3271,39 +3271,37 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override) {
-        host = host.split("://")[1];
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
+        String hostname;
+        try {
+            URL url = new URL(urlAsString);
+            hostname = url.getHost();
+        } catch (MalformedURLException e1) {
+            hostname = urlAsString.split("://")[1].split("/")[0]; // also eliminate a trailing slash
+        }
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
         BufferedReader rd  = null;
         StringBuilder sb = null;
         String line = null;
-      
         URL serverAddress = null;
-      
         try {
-            serverAddress = createUrl(host, query);
+            serverAddress = createUrl(hostname, query);
             //set up out communications stuff
             connection = null;
-          
             //Set up the initial connection
             connection = (HttpURLConnection)serverAddress.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
             connection.setReadTimeout(10000);
-                      
             connection.connect();
-          
             //read the result from the server
             rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             sb = new StringBuilder();
-
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
-
             return importFromHttpResponse(sb.toString(), override);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
