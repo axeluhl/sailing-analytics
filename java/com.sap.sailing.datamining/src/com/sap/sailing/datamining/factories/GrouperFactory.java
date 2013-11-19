@@ -3,14 +3,18 @@ package com.sap.sailing.datamining.factories;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.Grouper;
+import com.sap.sailing.datamining.GroupingWorker;
+import com.sap.sailing.datamining.ParallelGrouper;
+import com.sap.sailing.datamining.SimpleParallelGrouper;
+import com.sap.sailing.datamining.WorkerBuilder;
+import com.sap.sailing.datamining.builders.DynamicGrouperBuilder;
+import com.sap.sailing.datamining.builders.GroupByDimensionBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
-import com.sap.sailing.datamining.impl.DynamicGrouper;
-import com.sap.sailing.datamining.impl.GroupByDimension;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
@@ -20,20 +24,25 @@ public final class GrouperFactory {
     
     private GrouperFactory() { }
 
-    public static <DataType> Grouper<DataType> createGrouper(QueryDefinition queryDefinition) {
+    public static <DataType> ParallelGrouper<DataType> createGrouper(QueryDefinition queryDefinition, ThreadPoolExecutor executor) {
+        WorkerBuilder<GroupingWorker<DataType>> workerBuilder = createGroupingWorkerBuilder(queryDefinition);
+        return new SimpleParallelGrouper<DataType>(workerBuilder, executor);
+    }
+
+    private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinition queryDefinition) {
         switch (queryDefinition.getGrouperType()) {
         case Custom:
-            return createDynamicGrouper(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
+            return createDynamicGrouperBuilder(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
         case Dimensions:
-            return createByDimensionGrouper(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
+            return createByDimensionGrouperBuilder(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
         }
         throw new IllegalArgumentException("Not yet implemented for the given grouper type: "
                 + queryDefinition.getGrouperType().toString());
     }
 
-    public static <DataType> Grouper<DataType> createDynamicGrouper(String grouperScriptText, DataTypes dataType) {
+    public static <DataType> WorkerBuilder<GroupingWorker<DataType>> createDynamicGrouperBuilder(String grouperScriptText, DataTypes dataType) {
         BaseBindingProvider<DataType> baseBindingProvider = createBaseBindingProvider(dataType);
-        return new DynamicGrouper<DataType>(grouperScriptText, baseBindingProvider);
+        return new DynamicGrouperBuilder<DataType>(grouperScriptText, baseBindingProvider);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,14 +56,14 @@ public final class GrouperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <DataType, ValueType> Grouper<DataType> createByDimensionGrouper(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
+    private static <DataType, ValueType> WorkerBuilder<GroupingWorker<DataType>> createByDimensionGrouperBuilder(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
         DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         Collection<Dimension<DataType, ValueType>> dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>();
         for (SharedDimension sharedDimension : dimensionsToGroupBy) {
             Dimension<DataType, ValueType> dimension = (Dimension<DataType, ValueType>) dimensionManager.getDimensionFor(sharedDimension);
             dimensions.add(dimension);
         }
-        return new GroupByDimension<DataType, ValueType>(dimensions);
+        return new GroupByDimensionBuilder<DataType, ValueType>(dimensions);
     }
 
 }

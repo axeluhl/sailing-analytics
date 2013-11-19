@@ -1,7 +1,6 @@
 package com.sap.sailing.datamining.test.groupers;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import groovy.lang.Binding;
 
 import java.util.ArrayList;
@@ -13,7 +12,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.BaseBindingProvider;
-import com.sap.sailing.datamining.Grouper;
+import com.sap.sailing.datamining.GroupingWorker;
+import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.DynamicGrouper;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
@@ -22,10 +22,14 @@ public class TestDynamicGrouper {
     
     @Test
     public void testDynamicGrouper() {
-        Collection<Data> data = Arrays.asList(new Data("One", 1), new Data("One", 11), new Data("Two", 2));
         String scriptText = "return data.getKey()";
+        GroupingWorker<Data> dynamicGrouper = new DynamicGrouper<Data>(scriptText, new BaseBindingProviderMock());
         
-        Grouper<Data> dynamicGrouper = new DynamicGrouper<Data>(scriptText, new BaseBindingProviderMock());
+        DataReceiver receiver = new DataReceiver();
+        dynamicGrouper.setReceiver(receiver);
+
+        Collection<Data> data = Arrays.asList(new Data("One", 1), new Data("One", 11), new Data("Two", 2));
+        dynamicGrouper.setDataToGroup(data);
         
         Map<GroupKey, Collection<Data>> expectedGroups = new HashMap<GroupKey, Collection<Data>>();
         Collection<Data> group = new ArrayList<Data>();
@@ -36,7 +40,8 @@ public class TestDynamicGrouper {
         group.add(new Data("One", 11));
         expectedGroups.put(new GenericGroupKey<String>("One"), group);
         
-        assertEquals(expectedGroups, dynamicGrouper.group(data));
+        dynamicGrouper.run();
+        assertEquals(expectedGroups, receiver.groupedData);
     }
     
     private static class Data {
@@ -97,6 +102,17 @@ public class TestDynamicGrouper {
         @Override
         public Binding createBaseBinding() {
             return new Binding();
+        }
+        
+    }
+    
+    private static class DataReceiver implements WorkReceiver<Map<GroupKey, Collection<Data>>> {
+        
+        public Map<GroupKey, Collection<Data>> groupedData;
+
+        @Override
+        public void receiveWork(Map<GroupKey, Collection<Data>> result) {
+            groupedData = result;
         }
         
     }

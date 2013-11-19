@@ -13,7 +13,8 @@ import java.util.Map.Entry;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.Grouper;
+import com.sap.sailing.datamining.GroupingWorker;
+import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.impl.GroupByDimension;
 import com.sap.sailing.datamining.shared.CompoundGroupKey;
@@ -24,11 +25,15 @@ public class TestDimensionGroupers {
 
     @Test
     public void testGroupByDimension() {
-        Collection<Integer> data = Arrays.asList(11, 2, 13, 4, 22, 3, 21, 111);
-        
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         @SuppressWarnings("unchecked")
-        Grouper<Integer> groupByDimension = new OpenGrouper<Integer>(Arrays.asList(crossSum));
+        GroupingWorker<Integer> groupByDimension = new OpenGrouper<Integer>(Arrays.asList(crossSum));
+        
+        DataReceiver receiver = new DataReceiver();
+        groupByDimension.setReceiver(receiver);
+        
+        Collection<Integer> data = Arrays.asList(11, 2, 13, 4, 22, 3, 21, 111);
+        groupByDimension.setDataToGroup(data);
         
         Map<GroupKey, Collection<Integer>> expectedGroups = new HashMap<GroupKey, Collection<Integer>>();
         Collection<Integer> group = new ArrayList<Integer>();
@@ -46,7 +51,8 @@ public class TestDimensionGroupers {
         group.add(22);
         expectedGroups.put(new GenericGroupKey<String>("4"), group);
         
-        assertEquals(expectedGroups, groupByDimension.group(data));
+        groupByDimension.run();
+        assertEquals(expectedGroups, receiver.groupedData);
     }
     
     @Test
@@ -78,12 +84,16 @@ public class TestDimensionGroupers {
     
     @Test
     public void testGroupByMultipleDimensions() {
-        Collection<Integer> data = Arrays.asList(13, -4, 22, -3, 21, -111);
-        
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         Dimension<Integer, String> signum = createSignumDimension();
         @SuppressWarnings("unchecked")
-        Grouper<Integer> groupByDimensions = new OpenGrouper<Integer>(Arrays.asList(crossSum, signum));
+        GroupingWorker<Integer> groupByDimensions = new OpenGrouper<Integer>(Arrays.asList(crossSum, signum));
+        
+        DataReceiver receiver = new DataReceiver();
+        groupByDimensions.setReceiver(receiver);
+        
+        Collection<Integer> data = Arrays.asList(13, -4, 22, -3, 21, -111);
+        groupByDimensions.setDataToGroup(data);
 
         Map<GroupKey, Collection<Integer>> expectedGroups = new HashMap<GroupKey, Collection<Integer>>();
         Collection<Integer> expectedGroup = new ArrayList<Integer>();
@@ -101,7 +111,8 @@ public class TestDimensionGroupers {
         expectedGroup.add(-4);
         expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("4"), new GenericGroupKey<String>("-1")), expectedGroup);
         
-        Map<GroupKey, Collection<Integer>> groups = groupByDimensions.group(data);
+        groupByDimensions.run();
+        Map<GroupKey, Collection<Integer>> groups = receiver.groupedData;
         for (Entry<GroupKey, Collection<Integer>> expectedGroupEntry : expectedGroups.entrySet()) {
             Collection<Integer> group = groups.get(expectedGroupEntry.getKey());
             assertNotNull("No group for key: " + expectedGroupEntry.getKey().asString(), group);
@@ -133,7 +144,7 @@ public class TestDimensionGroupers {
         };
     }
     
-    private class OpenGrouper<DataType> extends GroupByDimension<DataType, String> {
+    private static class OpenGrouper<DataType> extends GroupByDimension<DataType, String> {
 
         public OpenGrouper(Collection<Dimension<DataType, String>> dimensions) {
             super(dimensions);
@@ -146,6 +157,17 @@ public class TestDimensionGroupers {
         
         public GroupKey getGroupKey(DataType dataEntry) {
             return getGroupKeyFor(dataEntry);
+        }
+        
+    }
+    
+    private static class DataReceiver implements WorkReceiver<Map<GroupKey, Collection<Integer>>> {
+        
+        public Map<GroupKey, Collection<Integer>> groupedData;
+
+        @Override
+        public void receiveWork(Map<GroupKey, Collection<Integer>> result) {
+            groupedData = result;
         }
         
     }

@@ -1,14 +1,16 @@
 package com.sap.sailing.datamining.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkReceiver;
 
-public abstract class AbstractSingleThreadedFilter<DataType> implements FiltrationWorker<DataType> {
+public abstract class AbstractFiltrationWorker<DataType> implements FiltrationWorker<DataType> {
 
-    protected WorkReceiver<Collection<DataType>> receiver;
-    protected Collection<DataType> data;
+    //TODO make private if possible
+    private WorkReceiver<Collection<DataType>> receiver;
+    private Collection<DataType> data;
     private boolean isDone;
 
     @Override
@@ -17,7 +19,17 @@ public abstract class AbstractSingleThreadedFilter<DataType> implements Filtrati
         isDone = true;
     }
 
-    protected abstract Collection<DataType> filterData();
+    private Collection<DataType> filterData() {
+        Collection<DataType> filteredData = new ArrayList<DataType>();
+        for (DataType dataEntry : data) {
+            if (matches(dataEntry)) {
+                filteredData.add(dataEntry);
+            }
+        }
+        return filteredData;
+    }
+
+    protected abstract boolean matches(DataType dataEntry);
 
     @Override
     public void setReceiver(WorkReceiver<Collection<DataType>> receiver) {
