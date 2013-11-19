@@ -356,7 +356,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void addLeaderboard(Leaderboard leaderboard) {
         synchronized (leaderboardsByName) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
-
             // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
             if (leaderboard instanceof FlexibleLeaderboard) {
                 leaderboard.addRaceColumnListener(raceLogReplicator);
@@ -1652,7 +1651,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorStore);
         logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
-        logger.fine(logoutput.toString());
+        logger.info(logoutput.toString());
     }
 
     @SuppressWarnings("unchecked")
@@ -1679,6 +1678,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
 
+            logger.info("Clearing all data structures...");
             regattaTrackingCache.clear();
             leaderboardGroupsByName.clear();
             leaderboardsByName.clear();
@@ -1688,12 +1688,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             StringBuffer logoutput = new StringBuffer();
 
+            logger.info("Reading all events...");
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
             logoutput.append("\nReceived " + eventsById.size() + " NEW events\n");
             for (Event event : eventsById.values()) {
                 logoutput.append(String.format("%3s\n", event.toString()));
             }
 
+            logger.info("Reading all regattas...");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             logoutput.append("Received " + regattasByName.size() + " NEW regattas\n");
             for (Regatta regatta : regattasByName.values()) {
@@ -1702,19 +1704,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
             // old leaderboards takes place which then don't match the new ones
+            logger.info("Reading all dynamic tracked regattas...");
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
             }
 
+            logger.info("Reading all of the regatta tracking cache...");
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
             logoutput.append("Received " + regattaTrackingCache.size() + " NEW regatta tracking cache entries\n");
 
+            logger.info("Reading leaderboard groups...");
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             logoutput.append("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups\n");
             for (LeaderboardGroup lg : leaderboardGroupsByName.values()) {
                 logoutput.append(String.format("%3s\n", lg.toString()));
             }
 
+            logger.info("Reading leaderboards by name...");
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
             logoutput.append("Received " + leaderboardsByName.size() + " NEW leaderboards\n");
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
@@ -1729,6 +1735,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
 
+            logger.info("Reading media library...");
             mediaLibrary.deserialize(ois);
             logoutput.append("Received " + mediaLibrary.allTracks().size() + " NEW media tracks\n");
             for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
@@ -1737,14 +1744,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
+            logger.info("Reading competitors...");
             for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
                 DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
                 competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
             logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
 
-            logger.info(logoutput.toString());
             logger.info("Done with initial replication on " + this);
+            logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
@@ -1959,7 +1967,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (String raceIdAsString : raceIdStrings) {
             if (!override && persistentRegattasForRaceIDs.contains(raceIdAsString)) {
                 logger.info(String.format(
-                        "Persistent regatta wasnt set for race id %1$s, because override was not turned on.",
+                        "Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
                         raceIdAsString));
             } else {
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);

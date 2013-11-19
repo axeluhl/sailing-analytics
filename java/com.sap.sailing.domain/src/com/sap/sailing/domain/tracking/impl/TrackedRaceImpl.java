@@ -378,14 +378,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         synchronized (this) {
-            while (windLoadingCompleted == WindLoadingState.RUNNING) {
+            while (windLoadingCompleted != WindLoadingState.FINISHED) {
                 try {
                     this.wait();
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Waiting for wind loading to start was interrupted", e);
                 }
             }
-            
         }
     }
 
@@ -435,6 +434,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     @Override
@@ -1626,12 +1626,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             clearDirectionFromStartToNextMarkCache();
             stopAndRemoveStartToNextMarkCacheInvalidationListener(waypointThatGotRemoved);
             Iterator<Waypoint> waypointsIter = getRace().getCourse().getWaypoints().iterator();
-            waypointsIter.next(); // skip first
-            if (waypointsIter.hasNext()) {
-                waypointsIter.next(); // skip second
+            if (waypointsIter.hasNext()) { // catches the case of a course being empty
+                waypointsIter.next(); // skip first
                 if (waypointsIter.hasNext()) {
-                    Waypoint newSecond = waypointsIter.next();
-                    addStartToNextMarkCacheInvalidationListener(newSecond);
+                    waypointsIter.next(); // skip second
+                    if (waypointsIter.hasNext()) {
+                        Waypoint newSecond = waypointsIter.next();
+                        addStartToNextMarkCacheInvalidationListener(newSecond);
+                    }
                 }
             }
         }
@@ -2259,14 +2261,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     break;
                 }
                 if (lastFix != null) {
-                    Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
-                    Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
-                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix)
-                            .getDegrees())
-                            / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
-                    if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
-                        maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
-                        result = lastFix.getTimePoint();
+                    final SpeedWithBearing lastEstimatedSpeed = track.getEstimatedSpeed(lastFix.getTimePoint());
+                    if (lastEstimatedSpeed != null) {
+                        Bearing courseAtLastFix = lastEstimatedSpeed.getBearing();
+                        final SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(fix.getTimePoint());
+                        if (estimatedSpeed != null) {
+                            Bearing courseAtFix = estimatedSpeed.getBearing();
+                            double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix
+                                    .getDifferenceTo(courseAtLastFix).getDegrees())
+                                    / (double) (fix.getTimePoint().asMillis() - lastFix.getTimePoint().asMillis()));
+                            if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
+                                maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
+                                result = lastFix.getTimePoint();
+                            }
+                        }
                     }
                 }
                 lastFix = fix;
@@ -2437,7 +2445,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        if (raceLog != null) {
+            this.attachedRaceLogs.put(raceLog.getId(), raceLog);
+        } else {
+            logger.severe("Got a request to attach race log for an empty race log!");
+        }
     }
 
     @Override
@@ -2615,46 +2627,52 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         LineLengthAndAdvantage result = null;
-        try {
-            if (allMarksHavePositions && numberOfMarks == 2) {
-                Wind combinedWind = getWind(markPositions.get(0), timePoint);
-                Distance distanceFromFirstToSecondMark;
-                final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
-                final boolean isStartLine = indexOfWaypoint == 0;
-                final TrackedLeg legDeterminingDirection = getTrackedLeg(
-                        getRace().getCourse().getLegs().get(isStartLine?0:indexOfWaypoint-1));
-                distanceFromFirstToSecondMark = legDeterminingDirection
-                        .getWindwardDistance(markPositions.get(0), markPositions.get(1), timePoint);
-                final Position worseMark;
-                final Position betterMark;
-                final Distance distanceAdvantage;
-                if ((isStartLine && distanceFromFirstToSecondMark.getMeters() > 0) ||
-                        (!isStartLine && distanceFromFirstToSecondMark.getMeters() < 0)) {
-                    // first mark is worse than second mark
-                    worseMark = markPositions.get(0);
-                    betterMark = markPositions.get(1);
-                } else {
-                    // second mark is worse than first mark
-                    worseMark = markPositions.get(1);
-                    betterMark = markPositions.get(0);
+        final List<Leg> legs = getRace().getCourse().getLegs();
+        // need at least one leg to make sense of a line
+        if (!legs.isEmpty()) {
+            try {
+                if (allMarksHavePositions && numberOfMarks == 2) {
+                    Wind combinedWind = getWind(markPositions.get(0), timePoint);
+                    Distance distanceFromFirstToSecondMark;
+                    final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
+                    final boolean isStartLine = indexOfWaypoint == 0;
+                    final TrackedLeg legDeterminingDirection = getTrackedLeg(legs.get(isStartLine ? 0
+                            : indexOfWaypoint - 1));
+                    distanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(markPositions.get(0),
+                            markPositions.get(1), timePoint);
+                    final Position worseMark;
+                    final Position betterMark;
+                    final Distance distanceAdvantage;
+                    if ((isStartLine && distanceFromFirstToSecondMark.getMeters() > 0)
+                            || (!isStartLine && distanceFromFirstToSecondMark.getMeters() < 0)) {
+                        // first mark is worse than second mark
+                        worseMark = markPositions.get(0);
+                        betterMark = markPositions.get(1);
+                    } else {
+                        // second mark is worse than first mark
+                        worseMark = markPositions.get(1);
+                        betterMark = markPositions.get(0);
+                    }
+                    if (distanceFromFirstToSecondMark.getMeters() >= 0) {
+                        distanceAdvantage = distanceFromFirstToSecondMark;
+                    } else {
+                        distanceAdvantage = new CentralAngleDistance(
+                                -distanceFromFirstToSecondMark.getCentralAngleRad());
+                    }
+                    final NauticalSide advantageousSide;
+                    if (betterMark.crossTrackError(worseMark, legDeterminingDirection.getLegBearing(timePoint))
+                            .getCentralAngleRad() > 0) {
+                        advantageousSide = NauticalSide.STARBOARD;
+                    } else {
+                        advantageousSide = NauticalSide.PORT;
+                    }
+                    result = new LineLengthAndAdvantageImpl(timePoint, waypoint, worseMark.getDistance(betterMark),
+                            worseMark.getBearingGreatCircle(betterMark).getDifferenceTo(combinedWind.getFrom()),
+                            advantageousSide, distanceAdvantage);
                 }
-                if (distanceFromFirstToSecondMark.getMeters() >= 0) {
-                    distanceAdvantage = distanceFromFirstToSecondMark;
-                } else {
-                    distanceAdvantage = new CentralAngleDistance(-distanceFromFirstToSecondMark.getCentralAngleRad());
-                }
-                final NauticalSide advantageousSide;
-                if (betterMark.crossTrackError(worseMark, legDeterminingDirection.getLegBearing(timePoint)).getCentralAngleRad() > 0) {
-                    advantageousSide = NauticalSide.STARBOARD;
-                } else {
-                    advantageousSide = NauticalSide.PORT;
-                }
-                result = new LineLengthAndAdvantageImpl(timePoint, waypoint, worseMark.getDistance(betterMark),
-                        worseMark.getBearingGreatCircle(betterMark).getDifferenceTo(combinedWind.getFrom()),
-                        advantageousSide, distanceAdvantage);
+            } catch (NoWindException e) {
+                // result remains null;
             }
-        } catch (NoWindException e) {
-            // result remains null;
         }
         return result;
     }

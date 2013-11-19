@@ -51,11 +51,14 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -1352,9 +1355,15 @@ public class MasterDataImportTest {
         int[] discardRule = { 1, 2, 3, 4 };
         ScoringScheme scheme = new LowPoint();
         List<String> leaderboardNames = new ArrayList<String>();
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, 
+        LeaderboardGroup sourceGroup = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, 
                 leaderboardNames, discardRule, scheme.getType());
-
+        FlexibleLeaderboard sourceLeaderboard1 = new FlexibleLeaderboardImpl("Leaderboard1", null, scheme, null);
+        sourceService.addLeaderboard(sourceLeaderboard1);
+        sourceGroup.addLeaderboard(sourceLeaderboard1);
+        
+        LeaderboardGroupMetaLeaderboard metaLeaderboard = (LeaderboardGroupMetaLeaderboard) sourceGroup.getOverallLeaderboard();
+        double factor = 2.6;
+        metaLeaderboard.getRaceColumns().iterator().next().setFactor(factor);
        
         // Serialize
         TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
@@ -1382,7 +1391,7 @@ public class MasterDataImportTest {
         
         LeaderboardGroup leaderboardGroupOnTarget = destService.getLeaderboardGroupByName(TEST_GROUP_NAME);
         Assert.assertNotNull(leaderboardGroupOnTarget);
-        Leaderboard overallLeaderboard = leaderboardGroupOnTarget.getOverallLeaderboard();
+        LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) leaderboardGroupOnTarget.getOverallLeaderboard();
         Assert.assertNotNull(overallLeaderboard);
         
         Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
@@ -1393,6 +1402,35 @@ public class MasterDataImportTest {
 
         Assert.assertEquals(3, ((ThresholdBasedResultDiscardingRule) overallLeaderboard.getResultDiscardingRule())
                 .getDiscardIndexResultsStartingWithHowManyRaces()[2]);
+        
+        Iterable<RaceColumn> metaColumns = overallLeaderboard.getRaceColumns();
+        
+        RaceColumn metaColumn = metaColumns.iterator().next();
+        Assert.assertNotNull(metaColumn);
+        Assert.assertEquals(factor, metaColumn.getFactor());
+        
+        
+        //Verify that overall leaderboard data has been persisted
+        RacingEventService persistenceVerifier = new RacingEventServiceImplMock();
+        LeaderboardGroup lg = persistenceVerifier.getLeaderboardGroupByName(TEST_GROUP_NAME);
+        Assert.assertNotNull(lg);
+        overallLeaderboard = (LeaderboardGroupMetaLeaderboard) lg.getOverallLeaderboard();
+        Assert.assertNotNull(overallLeaderboard);
+        
+        Assert.assertNotNull(overallLeaderboard.getResultDiscardingRule());
+        
+        Assert.assertNotNull(overallLeaderboard.getScoringScheme());
+        
+        Assert.assertEquals(scheme.getType(), overallLeaderboard.getScoringScheme().getType());
+
+        Assert.assertEquals(3, ((ThresholdBasedResultDiscardingRule) overallLeaderboard.getResultDiscardingRule())
+                .getDiscardIndexResultsStartingWithHowManyRaces()[2]);
+        
+        metaColumns = overallLeaderboard.getRaceColumns();
+        
+        metaColumn = metaColumns.iterator().next();
+        Assert.assertNotNull(metaColumn);
+        Assert.assertEquals(factor, metaColumn.getFactor());
 
     }
 }
