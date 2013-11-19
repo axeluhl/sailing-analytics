@@ -152,16 +152,14 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -729,7 +727,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, MillisecondsTimePoint.now());
             }
 
-            fillStartProcedureSpecifics(raceInfoDTO, raceLog);
+            fillStartProcedureSpecifics(raceInfoDTO, state);
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
@@ -741,27 +739,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceInfoDTO;
     }    
     
-    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, RaceLog raceLog) {
-        RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
-        RacingProcedureType type = procedureAnalyzer.analyze();
-        if (type != null) {
-            raceInfoDTO.startProcedure = type;
-            RaceInfoExtensionDTO info = null;
-            switch (type) {
-            case RRS26:
-                RRS26StartModeFlagFinder startModeFinder = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
-                info = new RRS26InfoDTO(startModeFinder.analyze());
-                break;
-            case GateStart:
-                PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-                GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-                info = new GateStartInfoDTO(pathfinderFinder.analyze(), gateLineOpeningTimeFinder.analyze());
-                break;
-            default:
-                break;
-            }
-            raceInfoDTO.startProcedureDTO = info;
+    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, ReadonlyRaceState state) {
+        RaceInfoExtensionDTO info = null;
+        raceInfoDTO.startProcedure = state.getRacingProcedure().getType();
+        switch (raceInfoDTO.startProcedure) {
+        case GateStart:
+            ReadonlyGateStartRacingProcedure gateStart = state.getTypedReadonlyRacingProcedure();
+            info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchTime());
+            break;
+        case RRS26:
+            ReadonlyRRS26RacingProcedure rrs26 = state.getTypedReadonlyRacingProcedure();
+            info = new RRS26InfoDTO(rrs26.getStartModeFlag());
+        case UNKNOWN:
+        default:
+            break;
         }
+        raceInfoDTO.startProcedureDTO = info;
     }
 
     private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
