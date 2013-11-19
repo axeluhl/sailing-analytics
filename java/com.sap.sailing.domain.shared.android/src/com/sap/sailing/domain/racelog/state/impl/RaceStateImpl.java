@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -14,6 +14,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
@@ -23,16 +24,41 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     private final RaceLogEventAuthor author;
     private final RaceLogEventFactory factory;
     
+    /**
+     * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
+     */
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author) {
+        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyConfiguration());
+    }
+    
+    /**
+     * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value.
+     */
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, StoredRacingProceduresConfiguration configuration) {
+        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, configuration);
+    }
+    
+    /**
+     * Creates a {@link RaceState}.
+     */
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, RacingProcedureType initalRacingProcedureType,
+            StoredRacingProceduresConfiguration configuration) {
+        return new RaceStateImpl(raceLog, author, 
+                RaceLogEventFactory.INSTANCE,
+                initalRacingProcedureType, 
+                new RacingProcedureFactoryImpl(author, RaceLogEventFactory.INSTANCE, configuration));
+    }
+    
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
-            RacingProcedureType initalRacingProcedureType, StoredRacingProceduresConfiguration configuration) {
+            RacingProcedureType initalRacingProcedureType, RacingProcedureFactory procedureFactory) {
         this(raceLog, author, eventFactory, initalRacingProcedureType, 
-                new RaceStatusAnalyzer.StandardClock(), configuration);
+                new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
             RacingProcedureType initalRacingProcedureType, RaceStatusAnalyzer.Clock analyzersClock,
-            StoredRacingProceduresConfiguration configuration) {
-        super(raceLog, initalRacingProcedureType, analyzersClock, configuration);
+            RacingProcedureFactory procedureFactory) {
+        super(raceLog, initalRacingProcedureType, analyzersClock, procedureFactory);
         this.author = author;
         this.factory = eventFactory;
     }
@@ -133,11 +159,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void setWindFix(TimePoint timePoint, Wind wind) {
         raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind));
-    }
-    
-    @Override
-    protected RacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RacingProceduresConfiguration configuration) {
-        return RacingProcedureFactoryImpl.create(type, raceLog, author, factory, configuration);
     }
 
 }

@@ -466,6 +466,8 @@ public interface SailingServiceAsync {
     void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+
+    void fakeNewStartTime(RegattaOverviewEntryDTO dto, Date startTime, AsyncCallback<Void> callback);
     
 }
 

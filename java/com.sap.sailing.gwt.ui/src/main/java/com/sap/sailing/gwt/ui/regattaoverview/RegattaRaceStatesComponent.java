@@ -27,6 +27,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -56,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
@@ -415,13 +417,26 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                if (object.raceInfo.lastCourseDesign.waypoints.size() > 0) {
+                /*RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+                if (courseDTO != null && courseDTO.waypoints.size() > 0) {
                     DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
                     courseViewDialogBox.center();
                     courseViewDialogBox.setGlassEnabled(true);
                     courseViewDialogBox.setAnimationEnabled(true);
                     courseViewDialogBox.show();
-                } 
+                } */
+                sailingService.fakeNewStartTime(object, new Date(), new AsyncCallback<Void>() {
+                    
+                    @Override
+                    public void onSuccess(Void result) {
+                        
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        
+                    }
+                });
             }
         });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);

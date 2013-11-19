@@ -200,11 +200,12 @@
     <string name="settings_time_frame_header">Zeitlimitdauer nach Rennende</string>
     <string name="settings_time_frame_description">Zeit in Minuten einstellen, welches Zeitlimit angibt</string>
     
+    <string name="settings_please_reload">Zum Übernehmen der Änderung bitte Aktion \'Neuladen\' durchführen.</string>
     <string name="settings_category_advanced">Erweiterte Einstellungen</string>
-    <string name="settings_advanced_service_header">Wählen sie die Server URL aus. Nach Änderung muss die Option \'Neuladen\' gewählt werden.</string>
+    <string name="settings_advanced_service_header">Server URL</string>
     <string name="settings_advanced_service_description">Webservice URL einstellen.</string>
     <string name="settings_advanced_mail_description">Empfänger für Bilder der Ergebnislisten.</string>
-    <string name="settings_advanced_mail_header">Empfänger Ergebnislisten</string>
+    <string name="settings_advanced_mail_header">Empfänger der Ergebnislisten</string>
     <string name="settings_advanced_max_rounds_description">Wählen Sie die maximale Rundenanzahl aus.</string>
     <string name="settings_advanced_max_rounds_header">Maximale Rundenanzahl pro Kurs</string>
     <string name="settings_advanced_min_rounds_description">Wählen Sie die minimale Rundenanzahl aus.</string>

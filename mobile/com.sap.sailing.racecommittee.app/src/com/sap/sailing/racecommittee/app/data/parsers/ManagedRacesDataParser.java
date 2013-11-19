@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
@@ -76,7 +75,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         RacingProcedureType startType = raceGroup.getDefaultRacingProcedureType();
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        RaceState state = new RaceStateImpl(raceLog, author, RaceLogEventFactory.INSTANCE, startType, configuration);
+        RaceState state = RaceStateImpl.create(raceLog, author, startType, configuration);
         return new ManagedRaceImpl(identifier, state);
 
     }

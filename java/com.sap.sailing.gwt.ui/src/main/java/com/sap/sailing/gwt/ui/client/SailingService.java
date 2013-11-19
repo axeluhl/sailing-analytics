@@ -342,4 +342,6 @@ public interface SailingService extends RemoteService {
     DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds);
+    
+    void fakeNewStartTime(RegattaOverviewEntryDTO dto, Date startTime);
 }

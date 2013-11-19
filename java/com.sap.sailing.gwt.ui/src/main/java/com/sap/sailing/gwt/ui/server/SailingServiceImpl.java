@@ -148,6 +148,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
@@ -155,7 +156,10 @@ import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RacingProcedureTypeAnalyzer;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -662,7 +666,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
             
-            ReadonlyRaceState state = new ReadonlyRaceStateImpl(raceLog, null);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
             
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
@@ -3377,6 +3381,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
         return configuration;
+    }
+
+    @Override
+    public void fakeNewStartTime(RegattaOverviewEntryDTO dto, Date startTime) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(dto.regattaName);
+        RaceColumn column =  leaderboard.getRaceColumnByName(dto.raceInfo.raceName);
+        Fleet fleet = column.getFleetByName(dto.raceInfo.fleetName);
+        RaceLog raceLog = column.getRaceLog(fleet);
+        
+        RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Shore", -1);
+        RaceState state = RaceStateImpl.create(raceLog, author);
+        state.setStartTime(MillisecondsTimePoint.now(), new MillisecondsTimePoint(startTime));
+        
     }
 
 }

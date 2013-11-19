@@ -201,6 +201,7 @@
     <string name="settings_time_frame_header">Race time frame after finish</string>
     <string name="settings_time_frame_description">Time limit in minutes.</string>
     
+    <string name="settings_please_reload">Please execute action \'Reload\' to apply changes.</string>
     <string name="settings_category_advanced">Advanced Settings</string>
     <string name="settings_advanced_service_header">Webservice URL</string>
     <string name="settings_advanced_service_description">Select the JSON Webservice URL</string>

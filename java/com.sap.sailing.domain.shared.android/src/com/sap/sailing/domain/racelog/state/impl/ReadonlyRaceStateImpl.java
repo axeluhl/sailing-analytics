@@ -1,8 +1,7 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -27,8 +26,9 @@ import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.ReadonlyRacingProcedureFactory;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedListener {
@@ -37,12 +37,21 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * When trying to initialize a {@link RaceStateImpl} with an initial {@link RacingProcedureType} 
      * of {@link RacingProcedureType#UNKNOWN} the value of this field will be used instead. 
      */
-    private final static RacingProcedureType FallbackInitialProcedureType = RacingProcedureType.RRS26;
+    protected final static RacingProcedureType FallbackInitialProcedureType = RacingProcedureType.RRS26;
+    
+
+    /**
+     * Creates a {@link ReadonlyRaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
+     */
+    public static ReadonlyRaceState create(RaceLog raceLog) {
+        return new ReadonlyRaceStateImpl(raceLog, ReadonlyRaceStateImpl.FallbackInitialProcedureType,
+                new ReadonlyRacingProcedureFactory(new EmptyConfiguration()));
+    }
     
     protected final RaceLog raceLog;
 
     private final Clock statusAnalyzerClock;
-    private final StoredRacingProceduresConfiguration configuration;
+    private final RacingProcedureFactory procedureFactory;
     private final RaceStateChangedListeners changedListeners;
     
     
@@ -78,14 +87,14 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     
-    public ReadonlyRaceStateImpl(RaceLog raceLog, StoredRacingProceduresConfiguration configuration) {
-        this(raceLog, RacingProcedureType.UNKNOWN, new RaceStatusAnalyzer.StandardClock(), configuration);
+    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, RacingProcedureFactory procedureFactory) {
+        this(raceLog, initalRacingProcedureType, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
     
     public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, Clock analyzersClock, 
-            StoredRacingProceduresConfiguration configuration) {
+            RacingProcedureFactory procedureFactory) {
         this.raceLog = raceLog;
-        this.configuration = configuration;
+        this.procedureFactory = procedureFactory;
         this.changedListeners = new RaceStateChangedListeners();
         
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
@@ -300,18 +309,13 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
         }
-        RacingProceduresConfiguration loadedConfiguration = configuration.load();
-        racingProcedure = createRacingProcedure(cachedRacingProcedureType, raceLog, loadedConfiguration);
+        racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
         
         statusAnalyzer = new RaceStatusAnalyzer(raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update();
-    }
-    
-    protected ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog, RacingProceduresConfiguration configuration) {
-        return RacingProcedureFactoryImpl.createReadonly(cachedRacingProcedureType, raceLog, configuration);
     }
 
 }

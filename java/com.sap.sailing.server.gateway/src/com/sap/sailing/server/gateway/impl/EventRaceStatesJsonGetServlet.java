@@ -129,7 +129,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
             
-            ReadonlyRaceState state = new ReadonlyRaceStateImpl(raceLog, null);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();

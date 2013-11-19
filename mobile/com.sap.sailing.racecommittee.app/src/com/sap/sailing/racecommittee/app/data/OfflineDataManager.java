@@ -100,7 +100,7 @@ public class OfflineDataManager extends DataManager {
 
         ManagedRace q1 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-                new RaceStateImpl(log, AppPreferences.on(context).getAuthor(), RaceLogEventFactory.INSTANCE, RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -110,7 +110,7 @@ public class OfflineDataManager extends DataManager {
 
         ManagedRace q2 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
-                new RaceStateImpl(log, AppPreferences.on(context).getAuthor(), RaceLogEventFactory.INSTANCE, RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -119,7 +119,7 @@ public class OfflineDataManager extends DataManager {
          */
         ManagedRace q3 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
-                new RaceStateImpl(log, AppPreferences.on(context).getAuthor(), RaceLogEventFactory.INSTANCE, RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
