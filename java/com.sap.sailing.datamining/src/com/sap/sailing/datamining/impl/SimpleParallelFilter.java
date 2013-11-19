@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.FilterReceiver;
+import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.ParallelFilter;
-import com.sap.sailing.datamining.SingleThreadedFilter;
+import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.WorkerBuilder;
 
 public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
-                                            implements ParallelFilter<DataType>, FilterReceiver<DataType> {
+                                            implements ParallelFilter<DataType>, WorkReceiver<Collection<DataType>> {
 
-    private final WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder;
+    private final WorkerBuilder<FiltrationWorker<DataType>> workerBuilder;
     private Collection<DataType> data;
 
-    public SimpleParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public SimpleParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
         this.workerBuilder = workerBuilder;
         data = new ArrayList<DataType>();
@@ -32,7 +32,7 @@ public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Co
         for (int i = 0; i < dataAsList.size(); i += partitionSize) {
             List<DataType> partition = dataAsList.subList(i, i + Math.min(partitionSize, dataAsList.size() - i));
             
-            SingleThreadedFilter<DataType> worker = workerBuilder.build();
+            FiltrationWorker<DataType> worker = workerBuilder.build();
             worker.setReceiver(this);
             worker.setDataToFilter(partition);
             addWorker(worker);
@@ -40,7 +40,7 @@ public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Co
     }
 
     @Override
-    public void addFilteredData(Collection<DataType> data) {
+    public void receiveWork(Collection<DataType> data) {
         this.data.addAll(data);
     }
 

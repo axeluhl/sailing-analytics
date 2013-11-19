@@ -1,12 +1,12 @@
 package com.sap.sailing.datamining.builders;
 
-import com.sap.sailing.datamining.SingleThreadedDataRetriever;
+import com.sap.sailing.datamining.DataRetrievalWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixRetriever;
 import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.TrackedLegOfCompetitorRetriever;
 import com.sap.sailing.datamining.shared.DataTypes;
 
-public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<SingleThreadedDataRetriever<DataType>> {
+public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<DataRetrievalWorker<DataType>> {
 
     private final DataTypes dataType;
 
@@ -16,12 +16,12 @@ public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<Singl
 
     @Override
     @SuppressWarnings("unchecked")
-    public SingleThreadedDataRetriever<DataType> build() {
+    public DataRetrievalWorker<DataType> build() {
         switch (dataType) {
         case GPSFix:
-            return (SingleThreadedDataRetriever<DataType>) new GPSFixRetriever();
+            return (DataRetrievalWorker<DataType>) new GPSFixRetriever();
         case TrackedLegOfCompetitor:
-            return (SingleThreadedDataRetriever<DataType>) new TrackedLegOfCompetitorRetriever();
+            return (DataRetrievalWorker<DataType>) new TrackedLegOfCompetitorRetriever();
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: " + dataType.toString());
     }

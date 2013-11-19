@@ -3,8 +3,8 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataReceiver;
-import com.sap.sailing.datamining.SingleThreadedDataRetriever;
+import com.sap.sailing.datamining.DataRetrievalWorker;
+import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.data.TrackedLegContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.TrackedLegContextImpl;
@@ -21,14 +21,14 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements SingleThreadedDataRetriever<DataType> {
+public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements DataRetrievalWorker<DataType> {
 
-    private DataReceiver<DataType> receiver;
+    private WorkReceiver<Collection<DataType>> receiver;
     private LeaderboardGroup group;
     private boolean isDone;
 
     @Override
-    public void setReceiver(DataReceiver<DataType> receiver) {
+    public void setReceiver(WorkReceiver<Collection<DataType>> receiver) {
         this.receiver = receiver;
     }
 
@@ -37,7 +37,7 @@ public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements
         this.group = group;
     }
 
-    protected DataReceiver<DataType> getReceiver() {
+    protected WorkReceiver<Collection<DataType>> getReceiver() {
         return receiver;
     }
 
@@ -52,7 +52,7 @@ public abstract class AbstractLeaderboardGroupDataRetriever<DataType> implements
 
     @Override
     public void run() {
-        receiver.addData(retrieveData());
+        receiver.receiveWork(retrieveData());
         isDone = true;
     }
 

@@ -36,7 +36,7 @@ public final class DataMiningFactory {
             return FilterFactory.createNoFilter();
         }
         
-        WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder = FilterFactory.createDimensionFilterBuilder(queryDefinition.getDataType(), queryDefinition.getSelection());
+        WorkerBuilder<FiltrationWorker<DataType>> workerBuilder = FilterFactory.createDimensionFilterBuilder(queryDefinition.getDataType(), queryDefinition.getSelection());
         return FilterFactory.createParallelFilter(workerBuilder, executor);
     }
 

@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.SingleThreadedFilter;
+import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.data.impl.NoFilter;
@@ -25,13 +25,13 @@ public final class FilterFactory {
 
     private FilterFactory() { }
     
-    public static <DataType> ParallelFilter<DataType> createParallelFilter(WorkerBuilder<SingleThreadedFilter<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public static <DataType> ParallelFilter<DataType> createParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
         return new SimpleParallelFilter<DataType>(workerBuilder, executor);
     }
 
-    public static <DataType> WorkerBuilder<SingleThreadedFilter<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+    public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
         ConcurrentFilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
-        WorkerBuilder<SingleThreadedFilter<DataType>> builder = createCriteriaFilterBuilder(criteria); 
+        WorkerBuilder<FiltrationWorker<DataType>> builder = createCriteriaFilterBuilder(criteria); 
         return builder;
     }
 
@@ -42,7 +42,7 @@ public final class FilterFactory {
         return new NoFilter<DataType>();
     }
 
-    public static <DataType> WorkerBuilder<SingleThreadedFilter<DataType>> createCriteriaFilterBuilder(ConcurrentFilterCriteria<DataType> criteria) {
+    public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createCriteriaFilterBuilder(ConcurrentFilterCriteria<DataType> criteria) {
         return new FilterByCriteriaBuilder<DataType>(criteria);
     }
 

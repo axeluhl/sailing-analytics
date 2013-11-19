@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.factories;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.ParallelDataRetriever;
-import com.sap.sailing.datamining.SingleThreadedDataRetriever;
+import com.sap.sailing.datamining.DataRetrievalWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.DataRetrieverWorkerBuilder;
 import com.sap.sailing.datamining.impl.SimpleParallelDataRetriever;
@@ -20,7 +20,7 @@ public final class DataRetrieverFactory {
      * @param racingService 
      */
     public static <DataType> ParallelDataRetriever<DataType> createDataRetriever(DataTypes dataType, ThreadPoolExecutor executor) {
-        WorkerBuilder<SingleThreadedDataRetriever<DataType>> workerBuilder = new DataRetrieverWorkerBuilder<DataType>(dataType);
+        WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder = new DataRetrieverWorkerBuilder<DataType>(dataType);
         return new SimpleParallelDataRetriever<DataType>(workerBuilder, executor);
     }
 

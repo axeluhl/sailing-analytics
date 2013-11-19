@@ -12,17 +12,17 @@ import com.sap.sailing.datamining.ComponentWorker;
 public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType> implements ParallelComponent<WorkingDataType, ResultDataType> {
 
     private ThreadPoolExecutor executor;
-    private Collection<ComponentWorker> workers;
+    private Collection<ComponentWorker<ResultDataType>> workers;
     
     public AbstractParallelComponent(ThreadPoolExecutor executor) {
         this.executor = executor;
-        workers = new HashSet<ComponentWorker>();
+        workers = new HashSet<ComponentWorker<ResultDataType>>();
     }
 
     @Override
     public ParallelComponent<WorkingDataType, ResultDataType> start(WorkingDataType data) {
         setUpWorkersFor(data);
-        for (ComponentWorker worker : workers) {
+        for (ComponentWorker<ResultDataType> worker : workers) {
             executor.execute(worker);
         }
         return this;
@@ -57,7 +57,7 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
 
     @Override
     public boolean isDone() {
-        for (ComponentWorker worker : workers) {
+        for (ComponentWorker<ResultDataType> worker : workers) {
             if (!worker.isDone()) {
                 return false;
             }
@@ -69,7 +69,7 @@ public abstract class AbstractParallelComponent<WorkingDataType, ResultDataType>
         return executor;
     }
 
-    protected void addWorker(ComponentWorker worker) {
+    protected void addWorker(ComponentWorker<ResultDataType> worker) {
         workers.add(worker);
     }
 
