@@ -56,12 +56,12 @@ After preparing the UI for testing, you have to implement new page objects or to
 
 To get access to the HTML-elements representing the widgets the user interacts with, you should use the provided factory by creating instance fields of the type _WebElement_ or _List<WebElement>_ and annotating them with _FindBy_ or _FindBys_ as well as _CacheLookup_, if the element is static and never changes. Usually you use the annotation _FindBy_ which needs you to provide the mechanism as well as the value to use for locating the element. Since we use the debug identifiers of GWT we also provide the corresponding mechanism with the class _BySeleniumId_ and a typical example would look like following:
 
-public MyPageObject extends PageArea {
-    @FindBy(how = BySeleniumId.class, using = ”NameTextField”)
-    private WebElement nameTextField;
-    
-    ...
-}
+        public MyPageObject extends PageArea {
+            @FindBy(how = BySeleniumId.class, using = ”NameTextField”)
+            private WebElement nameTextField;
+            
+            ...
+        }
 
 Since GWT widgets are usually represented by more complex HTML constructs it is also recommended to implement a page object for the used widgets, if none exists. A _CheckBox_ for example is modeled by the following HTML fragment:
 
