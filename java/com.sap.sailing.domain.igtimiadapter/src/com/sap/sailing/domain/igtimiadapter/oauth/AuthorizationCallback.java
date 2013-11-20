@@ -59,8 +59,6 @@ public class AuthorizationCallback {
     private static final String CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
     static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
     private static final String OAUTH_TOKEN_URL = "https://www.igtimi.com/oauth/token";
-    private static final String USER_EMAIL = "axel.uhl@gmx.de";
-    private static final String USER_PASSWORD = "123456";
     private static final String baseUrl = "https://www.igtimi.com";
     private static final String REDIRECT_URL = "http://sapsailing.com";
 
@@ -95,8 +93,9 @@ public class AuthorizationCallback {
         return result;
     }
     
-    private HttpResponse signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response) throws ParserConfigurationException,
-            SAXException, IOException, UnsupportedEncodingException, ClientProtocolException {
+    private HttpResponse signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
+            final String userEmail, final String userPassword) throws ParserConfigurationException, SAXException, IOException,
+            UnsupportedEncodingException, ClientProtocolException {
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
@@ -112,9 +111,9 @@ public class AuthorizationCallback {
                             inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
                         } else if (attributes.getValue("id") != null) {
                             if (attributes.getValue("id").contains("email")) {
-                                inputFieldsToSubmit.put(attributes.getValue("name"), USER_EMAIL);
+                                inputFieldsToSubmit.put(attributes.getValue("name"), userEmail);
                             } else if (attributes.getValue("id").contains("pass")) {
-                                inputFieldsToSubmit.put(attributes.getValue("name"), USER_PASSWORD);
+                                inputFieldsToSubmit.put(attributes.getValue("name"), userPassword);
                             }
                         }
                     }
@@ -141,7 +140,7 @@ public class AuthorizationCallback {
         client.setCookieStore(cookieStore);
         HttpGet get = new HttpGet(baseUrl+"/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri="+REDIRECT_URL);
         HttpResponse responseForAuthorize = client.execute(get);
-        HttpResponse authorizationForm = signInAndReturnAuthorizationForm(client, responseForAuthorize);
+        HttpResponse authorizationForm = signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
         return authorizeAndGetCode(authorizationForm, client);
     }
 
