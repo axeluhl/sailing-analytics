@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.oauth;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -13,17 +14,23 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
+import com.sap.sailing.domain.igtimiadapter.impl.ClientImpl;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 
 public class SignInTest {
     private static final Logger logger = Logger.getLogger(SignInTest.class.getName());
     
     @Test
     public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException, SAXException {
-        AuthorizationCallback callback = new AuthorizationCallback();
-        final String code = callback.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
+        final ClientImpl testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",
+                "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http://127.0.0.1:8888/igtimi/oauth/v1/authorizationcallback");
+        final String code = new IgtimiConnectionFactoryImpl(testAppClient).authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
     }
@@ -33,5 +40,16 @@ public class SignInTest {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
         assertEquals("axel.uhl@gmx.de", account.getUser().getEmail());
+        assertSame(account, connectionFactory.getAccountByEmail("axel.uhl@gmx.de"));
+    }
+    
+    @Test
+    public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        Iterable<User> users = connection.getUsers();
+        assertEquals(1, Util.size(users));
+        assertEquals(account.getUser().getId(), users.iterator().next().getId());
     }
 }

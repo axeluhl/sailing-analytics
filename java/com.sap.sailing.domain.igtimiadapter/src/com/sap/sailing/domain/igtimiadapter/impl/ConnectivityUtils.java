@@ -4,9 +4,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -34,6 +45,22 @@ public class ConnectivityUtils {
             result.append('\n');
         }
         return result.toString();
+    }
+
+    public static HttpResponse postForm(String baseUrl, final String action, final Map<String, String> inputFieldsToSubmit, DefaultHttpClient client, String referer)
+            throws UnsupportedEncodingException, IOException, ClientProtocolException {
+        HttpPost post = new HttpPost(baseUrl+action);
+        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+        for (Entry<String, String> nameValue : inputFieldsToSubmit.entrySet()) {
+            urlParameters.add(new BasicNameValuePair(nameValue.getKey(), nameValue.getValue()));
+        }
+        post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        // TODO check if this is necessary at all
+        post.setHeader("Origin", "https://www.igtimi.com");
+        post.setHeader("Referer", referer);
+        post.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
+        HttpResponse responseForSignIn = client.execute(post);
+        return responseForSignIn;
     }
 
 }

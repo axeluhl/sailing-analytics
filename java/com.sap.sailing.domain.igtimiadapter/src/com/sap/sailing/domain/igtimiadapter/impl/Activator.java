@@ -24,7 +24,7 @@ public class Activator implements BundleActivator {
     private IgtimiConnectionFactory connectionFactory;
 
     public Activator() {
-        Client client = new ClientImpl(CLIENT_ID, CLIENT_SECRET);
+        Client client = new ClientImpl(CLIENT_ID, CLIENT_SECRET, "http://sapsailing.com");
         connectionFactory = new IgtimiConnectionFactoryImpl(client);
     }
 

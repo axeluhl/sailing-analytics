@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -40,4 +41,18 @@ public interface IgtimiConnectionFactory {
     Account getAccountByEmail(String eMail);
     
     IgtimiConnection connect(Account account);
+    
+    /**
+     * Uses the /oauth/token service to obtain and {@link #registerAccountForWhichClientIsAuthorized(String) register}
+     * an access token for an authorization code which encodes the authorization given by a user to this factory's
+     * client.
+     * 
+     * @return <code>null</code> if everything went OK; some indication as to the error state otherwise
+     */
+    String obtainAccessTokenFromAuthorizationCode(String code) throws UnsupportedEncodingException,
+            ClientProtocolException, IOException, IllegalStateException, ParseException;
+
+    String getAccountUrl(Account account);
+
+    String getUsersUrl(Account account);
 }

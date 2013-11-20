@@ -17,4 +17,6 @@ public interface Client {
     String getId();
     
     String getSecret();
+    
+    String getRedirectUri();
 }

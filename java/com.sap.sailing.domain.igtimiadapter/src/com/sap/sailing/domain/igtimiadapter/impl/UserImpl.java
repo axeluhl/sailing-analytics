@@ -9,7 +9,7 @@ public class UserImpl implements User {
     private final String email;
     
     
-    public UserImpl(long id, String firstName, String surname, String email) {
+    public UserImpl(long id, String firstName, String surname, String email, boolean blob) {
         super();
         this.id = id;
         this.firstName = firstName;
