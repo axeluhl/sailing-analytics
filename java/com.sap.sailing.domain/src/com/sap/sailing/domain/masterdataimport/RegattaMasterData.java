@@ -15,13 +15,11 @@ public class RegattaMasterData {
     private Iterable<SeriesMasterData> series;
     private boolean isPersistent;
     private String regattaName;
-    private Iterable<String> raceIds;
     private Iterable<String> raceIdsAsStrings;
 
     public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
-            Iterable<String> raceIds, Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode) {
-                this.raceIds = raceIds;
+            Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode) {
                 this.raceIdsAsStrings = raceIdsAsStrings;
                 this.defaultRacingProcedureType = procedureType;
                 this.defaultCourseDesignerMode = designerMode;    }

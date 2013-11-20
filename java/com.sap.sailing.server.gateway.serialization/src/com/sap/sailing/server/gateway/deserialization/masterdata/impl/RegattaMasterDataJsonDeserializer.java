@@ -9,6 +9,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
@@ -38,7 +40,20 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
         Iterable<String> raceIdsAsStrings = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIdsAsStrings);
+        
+        RacingProcedureType procedureType = null;
+        String defaultRacingProcedureTypeValue = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE);
+        if (defaultRacingProcedureTypeValue != null) {
+            procedureType = RacingProcedureType.valueOf(defaultRacingProcedureTypeValue);
+        }
+        CourseDesignerMode designerMode = null;
+        String defaultCourseDesignerModeValue = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE);
+        if (defaultCourseDesignerModeValue != null) {
+            designerMode = CourseDesignerMode.valueOf(defaultCourseDesignerModeValue);
+        }
+        
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 
+                series, isPersistent, regattaName, raceIdsAsStrings, procedureType, designerMode);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {

@@ -337,7 +337,7 @@ public class ImportMasterDataOperation extends
                     courseAreaUUID).getA();
             createdRegatta.setDefaultRacingProcedureType(singleRegattaData.getDefaultRacingProcedureType());
             createdRegatta.setDefaultCourseDesignerMode(singleRegattaData.getDefaultCourseDesignerMode());
-            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
+            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIdsAsStrings(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());
         }
 
