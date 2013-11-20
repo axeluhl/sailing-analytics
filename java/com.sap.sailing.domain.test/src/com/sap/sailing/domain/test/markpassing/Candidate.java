@@ -7,7 +7,7 @@ public class Candidate {
     private Waypoint w;
     private TimePoint p;
     private double cost;
-    int id;
+    private int id;
 
     public Candidate(Waypoint w, TimePoint p, double cost, int id) {
         this.w = w;

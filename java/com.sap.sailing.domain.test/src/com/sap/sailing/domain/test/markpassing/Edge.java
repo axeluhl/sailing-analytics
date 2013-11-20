@@ -12,9 +12,11 @@ public class Edge {
         numberOfLegs = end.getID() - start.getID();
         penaltyForSkipped = 1000;
     }
+    public String getIDs(){
+        return start.getID()+"-"+end.getID();
+    }
     public double getCost() {
         return start.getCost() + end.getCost() + (numberOfLegs-1)*penaltyForSkipped;
-       
     }
     public Candidate getStart() {
         return start;
