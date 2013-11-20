@@ -459,7 +459,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
         tar -xzf configuration/surefire-reports-resources.tar.gz
-        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-reports.html"
+        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
+        echo "INFO: Be sure to check the result of the actual BUILD run!"
     fi
 
     cd $PROJECT_HOME/java
