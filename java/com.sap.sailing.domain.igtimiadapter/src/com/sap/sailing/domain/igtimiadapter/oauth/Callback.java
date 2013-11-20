@@ -38,6 +38,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.json.simple.JSONObject;
@@ -130,13 +131,19 @@ public class Callback {
             // swallow; we try to grab what we can; let's hope it was enough...
         }
         response.getEntity().getContent().close();
-        HttpResponse authorizationForm = postSignInForm(action[0], inputFieldsToSubmit, client);
+        HttpResponse authorizationForm = postForm(action[0], inputFieldsToSubmit, client, /* referer */ "https://www.igtimi.com/users/sign_in");
         return authorizationForm;
     }
     
-    public String authorizeAndReturnAuthorizedCode() throws ClientProtocolException, IOException,
+    /**
+     * Tries to authorize our client on behalf of a user identified by e-mail and password.
+     * 
+     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
+     *         to access data owned by the user identified by e-mail and password.
+     */
+    public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword) throws ClientProtocolException, IOException,
             IllegalStateException, ParserConfigurationException, SAXException {
-        DefaultHttpClient client = new DefaultHttpClient();
+        DefaultHttpClient client = new SystemDefaultHttpClient();
         CookieStore cookieStore = new BasicCookieStore();
         client.setCookieStore(cookieStore);
         HttpGet get = new HttpGet(baseUrl+"/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri="+REDIRECT_URL);
@@ -184,13 +191,13 @@ public class Callback {
             // swallow; we try to grab what we can; let's hope it was enough...
         }
         authorizationForm.getEntity().getContent().close();
-        HttpResponse authorizationResponse = postSignInForm(action[0], inputFieldsToSubmit, client);
+        HttpResponse authorizationResponse = postForm(action[0], inputFieldsToSubmit, client, /* referer */ "https://www.igtimi.com/users/sign_in");
         // TODO remove debug output:
         String content = getContent(authorizationResponse);
         return code[0];
     }
 
-    private HttpResponse postSignInForm(final String action, final Map<String, String> inputFieldsToSubmit, DefaultHttpClient client)
+    private HttpResponse postForm(final String action, final Map<String, String> inputFieldsToSubmit, DefaultHttpClient client, String referer)
             throws UnsupportedEncodingException, IOException, ClientProtocolException {
         HttpPost post = new HttpPost(baseUrl+action);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
@@ -198,8 +205,9 @@ public class Callback {
             urlParameters.add(new BasicNameValuePair(nameValue.getKey(), nameValue.getValue()));
         }
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        // TODO check if this is necessary at all
         post.setHeader("Origin", "https://www.igtimi.com");
-        post.setHeader("Referer", "https://www.igtimi.com/users/sign_in");
+        post.setHeader("Referer", referer);
         post.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
         HttpResponse responseForSignIn = client.execute(post);
         return responseForSignIn;
