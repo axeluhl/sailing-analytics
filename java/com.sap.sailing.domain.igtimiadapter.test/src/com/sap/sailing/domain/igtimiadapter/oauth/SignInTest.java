@@ -16,7 +16,7 @@ public class SignInTest {
     
     @Test
     public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException, SAXException {
-        Callback callback = new Callback();
+        AuthorizationCallback callback = new AuthorizationCallback();
         final String code = callback.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);

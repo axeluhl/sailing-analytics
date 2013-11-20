@@ -3,7 +3,6 @@ package com.sap.sailing.domain.igtimiadapter.oauth;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,7 +25,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,17 +42,19 @@ import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectorFactory;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.impl.ConnectivityUtils;
 
-@Path(Callback.V1)
-public class Callback {
+@Path(AuthorizationCallback.V1)
+public class AuthorizationCallback {
+    private static final Logger logger = Logger.getLogger(AuthorizationCallback.class.getName());
+    
     private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
     static final String V1 = "/v1";
     private static final String CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
@@ -79,27 +80,18 @@ public class Callback {
         urlParameters.add(new BasicNameValuePair("redirect_uri", REDIRECT_URL));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
-        JSONParser jsonParser = new JSONParser();
-        final Header contentEncoding = response.getEntity().getContentEncoding();
-        final Reader reader;
-        if (contentEncoding == null) {
-            reader = new InputStreamReader(response.getEntity().getContent());
-        } else {
-            reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
-        }
-        JSONObject accessTokenJson = (JSONObject) jsonParser.parse(reader);
+        JSONObject accessTokenJson = ConnectivityUtils.getJsonFromResponse(response);
         final Response result;
         if (accessTokenJson.get("error") != null) {
             result = Response.status(Status.UNAUTHORIZED).entity(accessTokenJson.toString()).build();
         } else {
             String accessToken = (String) accessTokenJson.get("access_token");
-            IgtimiConnectorFactory.INSTANCE.storeCodeAndAccessToken(code, accessToken);
+            IgtimiConnectionFactory.INSTANCE.registerAccountForWhichClientIsAuthorized(accessToken);
             result = Response.seeOther(new URI("http://www.sap.com")).build();
         }
         return result;
     }
     
-    @SuppressWarnings("unused") // may be needed for further HTTP debugging
     private String getContent(HttpResponse response) throws IOException {
         StringBuilder result = new StringBuilder();
         String line;
@@ -203,6 +195,7 @@ public class Callback {
         HttpResponse authorizationResponse = postForm(action[0], inputFieldsToSubmit, client, /* referer */ "https://www.igtimi.com/users/sign_in");
         // TODO remove debug output:
         String content = getContent(authorizationResponse);
+        logger.info("Authorization response: "+content);
         return code[0];
     }
 

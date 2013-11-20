@@ -7,7 +7,7 @@ import javax.security.auth.callback.Callback;
  * connector of which this interface is a part acts as a client. A client needs to be authorized by a user to
  * be allowed to access the user's data via the Igtimi web services API. Authorization works by directing the
  * user to a URL using his/her user agent (usually a browser) which is constructed by the
- * {@link IgtimiConnectorFactory} and encodes a callback URL that leads to the {@link Callback} servlet.
+ * {@link IgtimiConnectionFactory} and encodes a callback URL that leads to the {@link Callback} servlet.
  * The servlet records the access token that can be used for Igtimi web service API calls that require
  * access to the authenticated user's data.
  * 
