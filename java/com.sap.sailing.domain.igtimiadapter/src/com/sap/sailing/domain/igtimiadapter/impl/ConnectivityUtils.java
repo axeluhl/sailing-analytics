@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -23,4 +24,16 @@ public class ConnectivityUtils {
         JSONObject json = (JSONObject) jsonParser.parse(reader);
         return json;
     }
+    
+    public static String getContent(HttpResponse response) throws IOException {
+        StringBuilder result = new StringBuilder();
+        String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        while ((line=reader.readLine()) != null) {
+            result.append(line);
+            result.append('\n');
+        }
+        return result.toString();
+    }
+
 }

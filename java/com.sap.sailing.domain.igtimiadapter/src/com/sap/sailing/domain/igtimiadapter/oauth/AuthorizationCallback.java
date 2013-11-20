@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.oauth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,7 +46,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.ConnectivityUtils;
 
 @Path(AuthorizationCallback.V1)
@@ -66,6 +64,11 @@ public class AuthorizationCallback {
     private static final String baseUrl = "https://www.igtimi.com";
     private static final String REDIRECT_URL = "http://sapsailing.com";
 
+    public static String getRedirectUrl() {
+        // TODO how to find out the external address of this server?
+        return "http://127.0.0.1:8888/igtimi"+V1_AUTHORIZATIONCALLBACK;
+    }
+    
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path(AUTHORIZATIONCALLBACK)
@@ -86,23 +89,12 @@ public class AuthorizationCallback {
             result = Response.status(Status.UNAUTHORIZED).entity(accessTokenJson.toString()).build();
         } else {
             String accessToken = (String) accessTokenJson.get("access_token");
-            IgtimiConnectionFactory.INSTANCE.registerAccountForWhichClientIsAuthorized(accessToken);
+            Activator.getInstance().getConnectionFactory().registerAccountForWhichClientIsAuthorized(accessToken);
             result = Response.seeOther(new URI("http://www.sap.com")).build();
         }
         return result;
     }
     
-    private String getContent(HttpResponse response) throws IOException {
-        StringBuilder result = new StringBuilder();
-        String line;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        while ((line=reader.readLine()) != null) {
-            result.append(line);
-            result.append('\n');
-        }
-        return result.toString();
-    }
-
     private HttpResponse signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response) throws ParserConfigurationException,
             SAXException, IOException, UnsupportedEncodingException, ClientProtocolException {
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -194,7 +186,7 @@ public class AuthorizationCallback {
         authorizationForm.getEntity().getContent().close();
         HttpResponse authorizationResponse = postForm(action[0], inputFieldsToSubmit, client, /* referer */ "https://www.igtimi.com/users/sign_in");
         // TODO remove debug output:
-        String content = getContent(authorizationResponse);
+        String content = ConnectivityUtils.getContent(authorizationResponse);
         logger.info("Authorization response: "+content);
         return code[0];
     }

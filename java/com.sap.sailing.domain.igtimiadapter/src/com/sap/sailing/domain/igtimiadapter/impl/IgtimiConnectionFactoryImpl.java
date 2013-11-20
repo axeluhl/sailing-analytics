@@ -13,16 +13,19 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private final Map<Account, String> accessTokensByAccount;
     private Map<String, Account> accountsByEmail;
+    private final Client client;
     
-    public IgtimiConnectionFactoryImpl() {
+    public IgtimiConnectionFactoryImpl(Client client) {
         this.accessTokensByAccount = new HashMap<>();
         this.accountsByEmail = new HashMap<>();
+        this.client = client;
     }
     
     @Override
@@ -44,10 +47,16 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return account;
     }
 
+    /**
+     * @return trailing slash
+     */
     private String getApiV1BaseUrl() {
         return getBaseUrl()+"api/v1/";
     }
 
+    /**
+     * @return no trailing slash
+     */
     private String getBaseUrl() {
         return "https://www.igtimi.com";
     }
@@ -59,8 +68,12 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public IgtimiConnection connect(Account account) {
-        // TODO Auto-generated method stub
-        return null;
+        return new IgtimiConnectionImpl(client, account);
+    }
+
+    @Override
+    public String getAuthorizationUrl() {
+        return getBaseUrl()+"/oauth";
     }
 
 }
