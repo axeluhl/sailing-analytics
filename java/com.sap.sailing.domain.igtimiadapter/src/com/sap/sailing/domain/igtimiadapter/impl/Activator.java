@@ -22,12 +22,15 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
     private static final String CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
     private IgtimiConnectionFactory connectionFactory;
-    
+
+    public Activator() {
+        Client client = new ClientImpl(CLIENT_ID, CLIENT_SECRET);
+        connectionFactory = new IgtimiConnectionFactoryImpl(client);
+    }
+
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
-        Client client = new ClientImpl(CLIENT_ID, CLIENT_SECRET);
-        connectionFactory = new IgtimiConnectionFactoryImpl(client);
         context.registerService(IgtimiConnectionFactory.class, connectionFactory, /* properties */ null);
     }
     

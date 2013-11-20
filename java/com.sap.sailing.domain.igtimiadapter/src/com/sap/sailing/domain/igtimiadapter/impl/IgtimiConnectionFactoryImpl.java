@@ -29,10 +29,11 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public void registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+    public Account registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Account account = getAccount(accessToken);
         accountsByEmail.put(account.getUser().getEmail(), account);
         accessTokensByAccount.put(account, accessToken);
+        return account;
     }
 
     private Account getAccount(String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
@@ -40,10 +41,11 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         HttpGet getAccount = new HttpGet(getApiV1BaseUrl()+"account?access_token="+accessToken);
         HttpResponse accountResponse = client.execute(getAccount);
         JSONObject accountJson = ConnectivityUtils.getJsonFromResponse(accountResponse);
-        Account account = new AccountImpl(new UserImpl(Long.valueOf((String) accountJson.get("id")),
-                (String) accountJson.get("first_name"),
-                (String) accountJson.get("surname"),
-                (String) accountJson.get("email")));
+        JSONObject userJson = (JSONObject) accountJson.get("user");
+        Account account = new AccountImpl(new UserImpl((Long) userJson.get("id"),
+                (String) userJson.get("first_name"),
+                (String) userJson.get("surname"),
+                (String) userJson.get("email")));
         return account;
     }
 
@@ -51,7 +53,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return trailing slash
      */
     private String getApiV1BaseUrl() {
-        return getBaseUrl()+"api/v1/";
+        return getBaseUrl()+"/api/v1/";
     }
 
     /**

@@ -28,8 +28,9 @@ public interface IgtimiConnectionFactory {
      * that authorizes this factory's client to access the account together with the {@link Account} data. This information is
      * used when a caller wants to {@link #connect(Account)} to a specific account on behalf of the {@link Client} to
      * which this factory belongs.
+     * @return 
      */
-    void registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException,
+    Account registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException,
             IllegalStateException, IOException, ParseException;
 
     /**
