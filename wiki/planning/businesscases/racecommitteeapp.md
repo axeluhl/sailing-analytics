@@ -17,7 +17,14 @@ The app should exist in two version:
 
 ## Features
 
-* 
+* Display information about
+  * Regattas
+  * Courses
+  * Races
+    * Time
+    * Wind
+    * Competitors
+    * Course
 
 ## Description
 
