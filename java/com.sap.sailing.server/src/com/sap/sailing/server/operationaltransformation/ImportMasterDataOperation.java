@@ -33,7 +33,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
@@ -55,16 +54,18 @@ public class ImportMasterDataOperation extends
 
     private static final Logger logger = Logger.getLogger(ImportMasterDataOperation.class.getName());
 
-    private LeaderboardGroupMasterData masterData;
+    private final LeaderboardGroupMasterData masterData;
 
-    private MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
+    private final MasterDataImportObjectCreationCountImpl creationCount;
 
-    private DomainFactory domainFactory = DomainFactory.INSTANCE;
+    private final DomainFactory baseDomainFactory;
 
     private final boolean override;
 
-    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount) {
+    public ImportMasterDataOperation(LeaderboardGroupMasterData masterData, boolean override, MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
+        this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
+        this.baseDomainFactory = baseDomainFactory;
         this.masterData = masterData;
         this.override = override;
     }
@@ -75,13 +76,13 @@ public class ImportMasterDataOperation extends
         return creationCount;
     }
 
-    private void createLeaderboardGroupWithAllRelatedObjects(LeaderboardGroupMasterData masterData,
+    private void createLeaderboardGroupWithAllRelatedObjects(final LeaderboardGroupMasterData masterData,
             RacingEventService toState) {
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(masterData, toState);
         createRegattas(masterData, toState);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
-        for (LeaderboardMasterData board : masterData.getLeaderboards()) {
+        for (final LeaderboardMasterData board : masterData.getLeaderboards()) {
             leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
                 if (creationCount.alreadyAddedLeaderboardWithName(board.getName())) {
@@ -116,7 +117,12 @@ public class ImportMasterDataOperation extends
                     addedScoreCorrections = true;
                 }
                 addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
-                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
+                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
+                    @Override
+                    public Competitor getCompetitorById(String id) {
+                        return board.getCompetitorsById().get(id);
+                    }
+                });
                 addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                         board.getCompetitorsById());
                 addRaceLogEvents(leaderboard, board.getRaceLogEvents());
@@ -127,8 +133,8 @@ public class ImportMasterDataOperation extends
 
             }
         }
-        int[] overallLeaderboardDiscardThresholds = null;
-        ScoringSchemeType overallLeaderboardScoringSchemeType = null;
+        int[] overallLeaderboardDiscardThresholds = masterData.getOverallLeaderboardDiscardingRule() != null ? masterData.getOverallLeaderboardDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces() : null;
+        ScoringSchemeType overallLeaderboardScoringSchemeType = masterData.getOverallLeaderboardScoringScheme() != null ? masterData.getOverallLeaderboardScoringScheme().getType() : null;
         final LeaderboardGroup leaderboardGroup;
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(masterData.getName());
         if (existingLeaderboardGroup != null && override) {
@@ -152,10 +158,22 @@ public class ImportMasterDataOperation extends
                 // remove old overall leaderboard if it existed
                 toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
             }
-            LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(
-                    leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(), masterData.getOverallLeaderboardDiscardingRule());
-            leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-            toState.addLeaderboard(overallLeaderboard);
+            Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+            addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
+                    new CompetitorByIdGetter() {
+                        @Override
+                        public Competitor getCompetitorById(String id) {
+                            return masterData.getCompetitorById(id);
+                        }
+                    });
+            Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
+            if (factorsForMetaColumns != null) {
+                for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
+                    Double explicitFactor = factorsForMetaColumns.get(column.getName());
+                    toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
+                }
+            }
+            toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
     }
 
@@ -181,11 +199,15 @@ public class ImportMasterDataOperation extends
             leaderboard.setDisplayName(competitorsById.get(entry.getKey()), entry.getValue());
         }
     }
+    
+    interface CompetitorByIdGetter {
+        Competitor getCompetitorById(String id);
+    }
 
-    private void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
-            Map<String, Competitor> competitorsById) {
+    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
+            CompetitorByIdGetter competitorsById) {
         for (String id : suppressedCompetitors) {
-            leaderboard.setSuppressed(competitorsById.get(id), true);
+            leaderboard.setSuppressed(competitorsById.getCompetitorById(id), true);
         }
     }
 
@@ -312,9 +334,9 @@ public class ImportMasterDataOperation extends
             UUID courseAreaUUID = defaultCourseAreaId != null ? UUID.fromString(defaultCourseAreaId) : null;
             Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName,
                     UUID.fromString(id), series, isPersistent,
-                    domainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
+                    baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
-            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIds(), override);
+            toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIdsAsStrings(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());
         }
 

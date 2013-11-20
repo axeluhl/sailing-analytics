@@ -610,5 +610,9 @@ public interface TrackedRace extends Serializable {
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
      */
     TimePoint getStartTimeReceived();
+    
+    LineLengthAndAdvantage getStartLine(TimePoint at);
+    
+    LineLengthAndAdvantage getFinishLine(TimePoint at);
 
 }

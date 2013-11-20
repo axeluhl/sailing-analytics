@@ -508,7 +508,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
         // for this stripping run, remembers the mapping of real CompetitorDTO objects to the compact form that only holds an int as reference to the
         // previous version's competitors list; those will be used to replace the real CompetitorDTO objects where possible and will be replaced the other
-        // way in apply(...).
+        // way in applyThisToPreviousVersionByUpdatingThis(...).
         Map<CompetitorDTO, CompetitorDTO> compactCompetitorMap = new HashMap<CompetitorDTO, CompetitorDTO>();
         int i=0;
         for (CompetitorDTO competitor : competitors) {

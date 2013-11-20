@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -30,11 +31,11 @@ import com.sap.sailing.server.gateway.serialization.masterdata.impl.RaceColumnMa
 
 public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardMasterData> {
 
-    private final JsonDeserializer<Competitor> competitorDeserializer;
+    private final JsonDeserializer<DynamicCompetitor> competitorDeserializer;
     private final DomainFactory domainFactory;
     private final JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer;
 
-    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<Competitor> competitorDeserializer,
+    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
             DomainFactory domainFactory, JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer) {
         this.competitorDeserializer = competitorDeserializer;
         this.domainFactory = domainFactory;
@@ -141,10 +142,12 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         return result;
     }
 
-    private List<String> deserializeSuppressedCompetitors(JSONArray jsonArray) {
+    public static List<String> deserializeSuppressedCompetitors(JSONArray jsonArray) {
         List<String> ids = new ArrayList<String>();
-        for (Object obj : jsonArray) {
-            ids.add((String) obj);
+        if (jsonArray != null) {
+            for (Object obj : jsonArray) {
+                ids.add((String) obj);
+            }
         }
         return ids;
     }

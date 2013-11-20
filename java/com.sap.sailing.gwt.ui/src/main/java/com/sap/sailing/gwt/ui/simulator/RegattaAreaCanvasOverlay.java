@@ -2,74 +2,119 @@ package com.sap.sailing.gwt.ui.simulator;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
-import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
-import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
+import com.google.gwt.maps.client.events.idle.IdleMapEvent;
+import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.google.gwt.maps.client.overlays.Circle;
 import com.google.gwt.maps.client.overlays.CircleOptions;
-import com.sap.sailing.gwt.ui.client.shared.racemap.ImageTransformer;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
-import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
 public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
-    private static SimulatorResources resources = GWT.create(SimulatorResources.class);
-
+    private SimulatorMap simulatorMap;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private VenueDescriptor venue; 
     private CourseAreaDescriptor currentCourseArea = null;
     
-    private boolean pan;
+    private boolean initial;
+    private boolean mapPan = false;
     private double raceBearing = 0.0;
     private double diffBearing = 0.0;
 
-    private ImageTransformer windRoseBackground;
-    private ImageTransformer windRoseNeedle;
-    
-    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event) {
-        super(map, zIndex);
-        this.venue = VenueDescriptorFactory.createVenue(event);
+    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, final SimulatorMap simulatorMap) {
 
-        windRoseBackground = new ImageTransformer(resources.windRoseBackground());
-        windRoseNeedle = new ImageTransformer(resources.windRoseNeedle());
+    	super(map, zIndex);
+
+    	this.simulatorMap = simulatorMap;
+        this.venue = VenueDescriptorFactory.createVenue(event);
+        this.currentCourseArea = this.venue.getDefaultCourseArea();
+        
+        /*getMap().addZoomChangeHandler(new ZoomChangeMapHandler() {
+
+			@Override
+			public void onEvent(ZoomChangeMapEvent event) {
+				// TODO Auto-generated method stub
+				simulatorMap.windRoseCanvasOverlay.removeFromMap();
+				simulatorMap.windNeedleCanvasOverlay.removeFromMap();					
+				mapPan = true;
+			}
+        	
+        });
+        
+        getMap().addDragStartHandler(new DragStartMapHandler() {
+
+			@Override
+			public void onEvent(DragStartMapEvent event) {
+				// TODO Auto-generated method stub
+				simulatorMap.windRoseCanvasOverlay.removeFromMap();
+				simulatorMap.windNeedleCanvasOverlay.removeFromMap();					
+			}
+
+        	
+        });        
+
+        getMap().addDragEndHandler(new DragEndMapHandler() {
+
+			@Override
+			public void onEvent(DragEndMapEvent event) {
+				// TODO Auto-generated method stub
+				simulatorMap.windRoseCanvasOverlay.addToMap();
+				simulatorMap.windNeedleCanvasOverlay.addToMap();									
+			}
+
+        	
+        });*/   
+
+        getMap().addIdleHandler(new IdleMapHandler() {
+
+			@Override
+			public void onEvent(IdleMapEvent event) {
+				// TODO Auto-generated method stub
+				if (mapPan) {
+					//System.out.println("Map Idle Event Handler.");
+					simulatorMap.getWindRoseCanvasOverlay().addToMap();
+					simulatorMap.getWindNeedleCanvasOverlay().addToMap();					
+					mapPan = false;
+				}
+			}
+        	
+        });
+
     }
 
     @Override
     public void addToMap() {
         super.addToMap();
         
-        // TODO MigrationV3: 
-//        getPane().add(windRoseBackground.getCanvas(), getWidgetPosLeft() + windBackgroundOffset, getWidgetPosTop());
-//        getPane().add(windRoseNeedle.getCanvas(), getWidgetPosLeft() + windBackgroundOffset + windNeedleOffset,
-//                getWidgetPosTop() + windNeedleOffset);
-
-        int counter = 1;
+        int counter = 0;
         for (CourseAreaDescriptor courseArea : venue.getCourseAreas()) {
             drawCircleFromRadius(counter++, courseArea);
         }
         
         map.panTo(venue.getCenterPos());
+        this.initial = true;
     }
 
     @Override
     protected void draw() {
+    	
         super.draw();
 
         if(mapProjection != null) {
-            // TODO MigrationV3: 
-//            getPane().setWidgetPosition(windRoseBackground.getCanvas(), getWidgetPosLeft() + windBackgroundOffset,
-//                    getWidgetPosTop());
-//            getPane().setWidgetPosition(windRoseNeedle.getCanvas(),
-//                    getWidgetPosLeft() + windBackgroundOffset + windNeedleOffset, getWidgetPosTop() + windNeedleOffset);
 
             clearCanvas();
             drawRegattaAreas();
+
+            if (this.initial) {
+            	updateRaceCourse(0, 0);
+            	this.initial = false;
+            }
+            
         }
     }
 
@@ -79,8 +124,6 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     }
 
     protected void drawRegattaAreas() {
-        windRoseBackground.drawTransformedImage(0.0, 1.0);
-        windRoseNeedle.drawTransformedImage(raceBearing + 180.0, 1.0);
 
         LatLng cPos = LatLng.newInstance(54.4344, 10.19659167);
         Point centerPoint = mapProjection.fromLatLngToDivPixel(cPos);
@@ -101,6 +144,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
 
     // TODO MigrationV3: This is not the right place to create Circles being not drawn to the canvas -> move to SimulatorMap
     public void drawCircleFromRadius(int regIdx, CourseAreaDescriptor courseArea) {
+    	 
         CircleOptions circleOptions = CircleOptions.newInstance();
         circleOptions.setStrokeColor("white");
         circleOptions.setStrokeWeight(1);
@@ -109,51 +153,47 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
         circleOptions.setFillOpacity(0.0);
         circleOptions.setCenter(courseArea.getCenterPos());
         Circle circle = Circle.newInstance(circleOptions);
-        circle.setRadius(courseArea.getRadius());
+        circle.setRadius(courseArea.getRadiusInMeters());
         
         final int regIdxFinal = regIdx;
 
         circle.addClickHandler(new ClickMapHandler() {
             public void onEvent(ClickMapEvent e) {
-                // System.out.println("Click: "+currentRegArea.name);
+                //System.out.println("Click: "+currentCourseArea.getName());
                 CourseAreaDescriptor newRegArea = venue.getCourseAreas().get(regIdxFinal);
 
                 if (newRegArea != currentCourseArea) {
                     currentCourseArea = newRegArea;
-                    // simulatorMap.clearOverlays();
+                    simulatorMap.clearOverlays();
+                    simulatorMap.getWindRoseCanvasOverlay().removeFromMap();
+                    simulatorMap.getWindNeedleCanvasOverlay().removeFromMap();
                     updateRaceCourse(0, 0);
                     raceCourseCanvasOverlay.draw();
                 }
 
-                pan = true;
                 map.panTo(currentCourseArea.getCenterPos());
+                mapPan = true;
+				if (map.getZoom() < 14) {
+					map.setZoom(14);
+				}
+				
             }
         });
 
         circle.setMap(getMap());
-        getMap().addMouseOutMoveHandler(new MouseOutMapHandler() {
-            public void onEvent(MouseOutMapEvent event) {
-                if (pan) {
-                    pan = false;
-                    if (map.getZoom() < 14) {
-                        map.setZoom(14);
-                    }
-                }
-
-            };
-        });
+                
     }
 
     protected void updateRaceCourse(int type, double bearing) {
 
         if (type == 1) {
             raceBearing = bearing;
-            windRoseNeedle.drawTransformedImage(raceBearing + 180.0, 1.0);
+            simulatorMap.getWindNeedleCanvasOverlay().setBearing(raceBearing + 180.0);
         } else if (type == 2) {
             diffBearing = bearing;
         }
         if (currentCourseArea != null) {
-            // simulatorMap.getMainPanel().setUpdateButtonEnabled(true);
+            simulatorMap.getMainPanel().setUpdateButtonEnabled(true);
             LatLng startPoint;
             LatLng endPoint;
             if (raceCourseCanvasOverlay.raceCourseDirection == SailingSimulatorConstants.LegTypeDownwind) {
@@ -165,7 +205,7 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
             }
             raceCourseCanvasOverlay.setStartEndPoint(startPoint, endPoint);
         } else {
-            // simulatorMap.getMainPanel().setUpdateButtonEnabled(false);
+            simulatorMap.getMainPanel().setUpdateButtonEnabled(false);
         }
     }
 
