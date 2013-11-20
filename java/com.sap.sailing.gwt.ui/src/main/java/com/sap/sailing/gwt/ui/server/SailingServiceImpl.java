@@ -3265,7 +3265,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
         long startTime = System.currentTimeMillis();
         String hostname;
         Integer port = -1;
@@ -3302,10 +3302,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection.setDoOutput(true);
             connection.setReadTimeout(10000);
             connection.connect();
-            gzip = new GZIPInputStream(connection.getInputStream());
-            BufferedReader rd;
+
             //read the result from the server
-            rd  = new BufferedReader(new InputStreamReader(gzip));
+            BufferedReader rd;
+            if (compress) {
+                gzip = new GZIPInputStream(connection.getInputStream());
+                rd  = new BufferedReader(new InputStreamReader(gzip));
+            } else {
+                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            }
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = rd.readLine()) != null) {
