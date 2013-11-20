@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -229,7 +230,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final RacingEventService racingEventService = getRacingEventService();
-        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(new GZIPInputStream(is));
         logger.info("Starting to receive initial load");
         racingEventService.initiallyFillFrom(ois);
         logger.info("Done receiving initial load");
