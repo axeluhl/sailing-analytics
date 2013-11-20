@@ -110,6 +110,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
         // To calculate the display real boat size the scale factor from canvas units to the real   
         double boatSizeScaleFactor = boatLengthInPixel / (boatVectorGraphics.getBoatLengthInMeters() * 100);
 
-        return new Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(boatLengthInPixel * 2 , boatLengthInPixel * 2));
+        return new Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(boatLengthInPixel + boatLengthInPixel / 2.0, boatLengthInPixel + boatLengthInPixel / 2.0));
     }
 }

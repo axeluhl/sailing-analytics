@@ -5,7 +5,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 public class _49erVectorGraphics extends BoatClassVectorGraphics {
     
     public _49erVectorGraphics(String... compatibleBoatClassNames) {
-        super("49ER", 4.90, 2.50, compatibleBoatClassNames);
+        super("49ER", 4.90, 2.50, 2.45, compatibleBoatClassNames);
     }
 
     @Override
