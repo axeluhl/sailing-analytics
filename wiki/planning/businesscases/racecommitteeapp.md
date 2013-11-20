@@ -49,6 +49,11 @@ For each race provide the user with tools to edit
 
 ## Description
 
+As there currently exist an implementation that covers some of the features, the aim of this project is to re-design and re-implement some of the code. This especially holds for the user interface that currently needs some revamp to be also accessible to the average user.
+
+This project can be divided into two major stages:
+
+- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide mock-up like interface. It has been agreed that this step needs to be taken out by an external agency that has the background, the skills and the experience.
 
 ## Synergies
 
