@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.oauth;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -24,15 +25,21 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -52,11 +59,12 @@ public class Callback {
     private static final String USER_EMAIL = "axel.uhl@gmx.de";
     private static final String USER_PASSWORD = "123456";
     private static final String baseUrl = "https://www.igtimi.com";
+    private static final String REDIRECT_URL = "http://sapsailing.com";
 
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("/")
-    public Response getEvent(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
+    public Response obtainAccessToken(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(OAUTH_TOKEN_URL);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
@@ -64,7 +72,7 @@ public class Callback {
         urlParameters.add(new BasicNameValuePair("client_id", CLIENT_ID));
         urlParameters.add(new BasicNameValuePair("client_secret", CLIENT_SECRET));
         urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", "http://sapsailing.com"));
+        urlParameters.add(new BasicNameValuePair("redirect_uri", REDIRECT_URL));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
         JSONParser jsonParser = new JSONParser();
@@ -81,59 +89,118 @@ public class Callback {
         return Response.seeOther(new URI("http://www.sap.com")).build();
     }
     
-    public boolean signIn() throws ClientProtocolException, IOException, ParserConfigurationException, IllegalStateException, SAXException {
-        HttpClient client = new DefaultHttpClient();
-        String url = baseUrl + "/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri=http://sapsailing.com/";
-        HttpGet get = new HttpGet(url);
-        HttpResponse response = client.execute(get);
+    @SuppressWarnings("unused") // may be needed for further HTTP debugging
+    private String getContent(HttpResponse response) throws IOException {
+        StringBuilder result = new StringBuilder();
+        String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        while ((line=reader.readLine()) != null) {
+            result.append(line);
+            result.append('\n');
+        }
+        return result.toString();
+    }
+
+    private HttpResponse signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response) throws ParserConfigurationException,
+            SAXException, IOException, UnsupportedEncodingException, ClientProtocolException {
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
         try {
-        parser.parse(response.getEntity().getContent(), new DefaultHandler() {
-            @Override
-            public void startElement(String uri, String localName, String qName, Attributes attributes)
-                    throws SAXException {
-                if (qName.equals("form")) {
-                    action[0] = attributes.getValue("action");
-                } else if (qName.equals("input")) {
-                    if (attributes.getValue("value") != null) {
-                        inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
-                    } else if (attributes.getValue("id") != null) {
-                        if (attributes.getValue("id").contains("email")) {
-                            inputFieldsToSubmit.put(attributes.getValue("name"), USER_EMAIL);
-                        } else if (attributes.getValue("id").contains("pass")) {
-                            inputFieldsToSubmit.put(attributes.getValue("name"), USER_PASSWORD);
+            parser.parse(response.getEntity().getContent(), new DefaultHandler() {
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes)
+                        throws SAXException {
+                    if (qName.equals("form")) {
+                        action[0] = attributes.getValue("action");
+                    } else if (qName.equals("input")) {
+                        if (attributes.getValue("value") != null && !attributes.getValue("value").isEmpty()) {
+                            inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
+                        } else if (attributes.getValue("id") != null) {
+                            if (attributes.getValue("id").contains("email")) {
+                                inputFieldsToSubmit.put(attributes.getValue("name"), USER_EMAIL);
+                            } else if (attributes.getValue("id").contains("pass")) {
+                                inputFieldsToSubmit.put(attributes.getValue("name"), USER_PASSWORD);
+                            }
                         }
                     }
-                } else {
-                    super.startElement(uri, localName, qName, attributes);
                 }
-            }
-        });
+            });
         } catch (SAXParseException e) {
             // swallow; we try to grab what we can; let's hope it was enough...
         }
-        HttpResponse signInResponse = postSignInForm(action[0], inputFieldsToSubmit);
-        Header[] cookies = signInResponse.getHeaders("Set-Cookie");
-        Header igtimiCookie = null;
-        for (Header cookie : cookies) {
-            if (cookie.getValue().startsWith("_igtimi-api_session")) {
-                igtimiCookie = cookie;
-            }
-        }
-        return true;
+        response.getEntity().getContent().close();
+        HttpResponse authorizationForm = postSignInForm(action[0], inputFieldsToSubmit, client);
+        return authorizationForm;
+    }
+    
+    public String authorizeAndReturnAuthorizedCode() throws ClientProtocolException, IOException,
+            IllegalStateException, ParserConfigurationException, SAXException {
+        DefaultHttpClient client = new DefaultHttpClient();
+        CookieStore cookieStore = new BasicCookieStore();
+        client.setCookieStore(cookieStore);
+        HttpGet get = new HttpGet(baseUrl+"/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri="+REDIRECT_URL);
+        HttpResponse responseForAuthorize = client.execute(get);
+        HttpResponse authorizationForm = signInAndReturnAuthorizationForm(client, responseForAuthorize);
+        return authorizeAndGetCode(authorizationForm, client);
     }
 
-    private HttpResponse postSignInForm(final String action, final Map<String, String> inputFieldsToSubmit)
+    /**
+     * Parses the form in the <code>autorizationForm</code> response and posts it by submitting the form that contains
+     * the commit button with the value "Authorize".
+     * 
+     * @return the code intercepted from the redirect location
+     */
+    private String authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client) throws IllegalStateException, SAXException, IOException, ParserConfigurationException {
+        final String[] code = new String[1];
+        client.setRedirectStrategy(new DefaultRedirectStrategy() {
+            @Override
+            public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)
+                    throws ProtocolException {
+                code[0] = response.getHeaders("Location")[0].getValue().substring(REDIRECT_URL.length() + "?".length());
+                return response.getStatusLine().getStatusCode() >= 300
+                        && response.getStatusLine().getStatusCode() < 400;
+            }
+        });
+        SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        final String[] action = new String[1];
+        final Map<String, String> inputFieldsToSubmit = new HashMap<>();
+        try {
+            parser.parse(authorizationForm.getEntity().getContent(), new DefaultHandler() {
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes)
+                        throws SAXException {
+                    // TODO stop after the Authorization form
+                    if (qName.equals("form")) {
+                        action[0] = attributes.getValue("action");
+                    } else if (qName.equals("input")) {
+                        if (attributes.getValue("value") != null && !attributes.getValue("value").isEmpty()) {
+                            inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
+                        }
+                    }
+                }
+            });
+        } catch (SAXParseException e) {
+            // swallow; we try to grab what we can; let's hope it was enough...
+        }
+        authorizationForm.getEntity().getContent().close();
+        HttpResponse authorizationResponse = postSignInForm(action[0], inputFieldsToSubmit, client);
+        // TODO remove debug output:
+        String content = getContent(authorizationResponse);
+        return code[0];
+    }
+
+    private HttpResponse postSignInForm(final String action, final Map<String, String> inputFieldsToSubmit, DefaultHttpClient client)
             throws UnsupportedEncodingException, IOException, ClientProtocolException {
-        HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(baseUrl+action);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         for (Entry<String, String> nameValue : inputFieldsToSubmit.entrySet()) {
             urlParameters.add(new BasicNameValuePair(nameValue.getKey(), nameValue.getValue()));
         }
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        post.setHeader("Origin", "https://www.igtimi.com");
+        post.setHeader("Referer", "https://www.igtimi.com/users/sign_in");
+        post.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36");
         HttpResponse responseForSignIn = client.execute(post);
         return responseForSignIn;
     }
