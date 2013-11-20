@@ -28,3 +28,5 @@ ctx.fill();<br/>
 ctx.stroke();<br/>
 This is actually javascript code but can almost directly be used as Java code as well.
 
+## Pitfalls
+Sometimes it happens during the editing of the SVG that you accidentally create transformations for the whole graphics...
