@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -51,11 +52,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectorFactory;
 
-@Path(Callback.V1_AUTHORIZATIONCALLBACK)
+@Path(Callback.V1)
 public class Callback {
+    private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
+    static final String V1 = "/v1";
     private static final String CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
     private static final String CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
-    static final String V1_AUTHORIZATIONCALLBACK = "/v1/authorizationcallback";
+    static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
     private static final String OAUTH_TOKEN_URL = "https://www.igtimi.com/oauth/token";
     private static final String USER_EMAIL = "axel.uhl@gmx.de";
     private static final String USER_PASSWORD = "123456";
@@ -64,9 +67,9 @@ public class Callback {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("/")
+    @Path(AUTHORIZATIONCALLBACK)
     public Response obtainAccessToken(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = new SystemDefaultHttpClient();
         HttpPost post = new HttpPost(OAUTH_TOKEN_URL);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
@@ -85,9 +88,15 @@ public class Callback {
             reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
         }
         JSONObject accessTokenJson = (JSONObject) jsonParser.parse(reader);
-        String accessToken = (String) accessTokenJson.get("access_token");
-        IgtimiConnectorFactory.INSTANCE.storeCodeAndAccessToken(code, accessToken);
-        return Response.seeOther(new URI("http://www.sap.com")).build();
+        final Response result;
+        if (accessTokenJson.get("error") != null) {
+            result = Response.status(Status.UNAUTHORIZED).entity(accessTokenJson.toString()).build();
+        } else {
+            String accessToken = (String) accessTokenJson.get("access_token");
+            IgtimiConnectorFactory.INSTANCE.storeCodeAndAccessToken(code, accessToken);
+            result = Response.seeOther(new URI("http://www.sap.com")).build();
+        }
+        return result;
     }
     
     @SuppressWarnings("unused") // may be needed for further HTTP debugging
