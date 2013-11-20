@@ -42,9 +42,13 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
         JSONObject windTrackJson = new JSONObject();
         windTrack.lockForRead();
         windTrackJson.put(FIELD_WIND_SOURCE_TYPE, source.getType().name());
-        windTrackJson.put(FIELD_WIND_SOURCE_ID, source.getId());
+        if (source.getId() != null) {
+            windTrackJson.put(FIELD_WIND_SOURCE_ID, source.getId().toString());
+        }
         windTrackJson.put(FIELD_RACE_NAME, raceName);
-        windTrackJson.put(FIELD_RACE_ID, raceId);
+        if (raceId != null) {
+            windTrackJson.put(FIELD_RACE_ID, raceId.toString());
+        }
         windTrackJson.put(FIELD_REGATTA_NAME, regattaName);
         JSONArray fixes = new JSONArray();
         Iterable<Wind> fixesIterator = windTrack.getFixes();

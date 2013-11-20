@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,11 +17,11 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.WindTrackMasterDataJsonSerializer;
 
-public class WindTrackMasterDataDeserializer implements JsonDeserializer<WindTrackMasterData> {
+public class WindTrackMasterDataJsonDeserializer implements JsonDeserializer<WindTrackMasterData> {
     
     private final JsonDeserializer<Wind> windDeserializer;
     
-    public WindTrackMasterDataDeserializer() {
+    public WindTrackMasterDataJsonDeserializer() {
         JsonDeserializer<Position> positionDeserializer = new PositionJsonDeserializer();
         windDeserializer = new WindJsonDeserializer(positionDeserializer);
     }
@@ -32,7 +33,7 @@ public class WindTrackMasterDataDeserializer implements JsonDeserializer<WindTra
         JSONArray fixesJson = (JSONArray) object.get(WindTrackMasterDataJsonSerializer.FIELD_FIXES);
         String regattaName = (String) object.get(WindTrackMasterDataJsonSerializer.FIELD_REGATTA_NAME);
         String raceName = (String) object.get(WindTrackMasterDataJsonSerializer.FIELD_RACE_NAME);
-        Serializable raceId = (Serializable) object.get(WindTrackMasterDataJsonSerializer.FIELD_RACE_ID);
+        Serializable raceId = UUID.fromString((String) object.get(WindTrackMasterDataJsonSerializer.FIELD_RACE_ID));
         Set<Wind> fixes = new HashSet<Wind>();
         for (Object obj : fixesJson) {
             JSONObject json = (JSONObject) obj;

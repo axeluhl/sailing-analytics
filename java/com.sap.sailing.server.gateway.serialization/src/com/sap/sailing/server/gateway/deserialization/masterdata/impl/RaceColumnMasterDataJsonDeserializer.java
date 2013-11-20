@@ -21,7 +21,7 @@ public class RaceColumnMasterDataJsonDeserializer implements JsonDeserializer<Ra
     private final JsonDeserializer<WindTrackMasterData> windtrackDeserializer;
     
     public RaceColumnMasterDataJsonDeserializer() {
-        windtrackDeserializer = new WindTrackMasterDataDeserializer();
+        windtrackDeserializer = new WindTrackMasterDataJsonDeserializer();
     }
     
     @Override

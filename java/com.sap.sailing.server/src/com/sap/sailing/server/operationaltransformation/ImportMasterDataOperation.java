@@ -293,7 +293,10 @@ public class ImportMasterDataOperation extends
             for (RaceColumnMasterData raceColumnMasterData : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
                 RaceColumn raceColumn = toState.addColumnToLeaderboard(raceColumnMasterData.getName(), board.getName(),
                         raceColumnMasterData.isMedal());
-                createWindTracks(raceColumnMasterData.getWindTrackMasterData(), toState);
+                Set<WindTrackMasterData> windTrackMasterData = raceColumnMasterData.getWindTrackMasterData();
+                if (windTrackMasterData != null) {
+                    createWindTracks(windTrackMasterData, toState);
+                }
                 for (Map.Entry<String, RaceIdentifier> e : raceColumnMasterData.getRaceIdentifiersByFleetName()
                         .entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());

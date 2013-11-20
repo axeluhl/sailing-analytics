@@ -24,7 +24,6 @@ import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMast
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 public class MasterDataImporter {
-    
     private final DomainFactory baseDomainFactory;
     
     private final RacingEventService racingEventService;
@@ -34,12 +33,12 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
     }
 
-    public MasterDataImportObjectCreationCount importMasterData(String response, boolean override) {
+    public MasterDataImportObjectCreationCount importMasterData(String string, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer.create(baseDomainFactory);
         JSONParser parser = new JSONParser();
         try {
-            JSONObject masterDataOverall = (JSONObject) parser.parse(response);
+            JSONObject masterDataOverall = (JSONObject) parser.parse(string);
             JSONArray leaderboardGroupsMasterDataJsonArray = (JSONArray) masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_PER_LG);
             for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
                 JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
