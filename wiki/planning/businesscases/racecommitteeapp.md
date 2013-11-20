@@ -17,12 +17,12 @@ The app should exist in two version:
 
 ## Features
 
-Display general information about
+Display **general** information about
 * Regattas
 * Courses
 * Races
 
-For each race display information about
+For **each race** display information about
 * Time
   * Start
   * Duration
@@ -31,7 +31,7 @@ For each race display information about
 * Current true wind direction and speed
 * Competitors with name and sail number and tracker state
 
-For each race provide the user with tools to edit
+For each race provide the user with **tools to edit**
 * Status
   * Start
   * Recall
@@ -49,21 +49,30 @@ For each race provide the user with tools to edit
 
 ## Description
 
-As there currently exist an implementation that covers some of the features, the aim of this project is to re-design and re-implement some of the code. This especially holds for the user interface that currently needs some revamp to be also accessible to the average user.
+As there currently exist an implementation that covers some of the features, the aim of this project is to re-design and re-implement some of the code of the prototype. This especially holds for the user interface that currently needs some revamp to be also accessible to the average user.
 
-This project can be divided into two major stages:
+This project can be divided into three major stages:
 
-- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide mock-up like interface. It has been agreed that this step needs to be taken out by an external agency that has the background, the skills and the experience.
+- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide a mock-up like interface for both versions. It has been agreed that this step needs to be taken out by an external agency that has a mobile background, the skills and the experience. This step relies on a document that is yet to be built that describes the desired features and the clustering of these features with regards to the two versions.
+
+- The second step is about integrating the design with the Sailing Analytics server. This requires a major effort from the tech team and also team work between the external agency and our developers. Some work from the current prototype can be reused but a major part needs to be rewritten.
+
+- The third stage is about to make sure that the infrastructure is ready to handle the traffic that follows a successful deployment to an app store. We cannot judge exactly how much interest there will be in the sailing community for such a solution but aiming for around 100 active users a day without active advertising feels like the right number at the start. Nevertheless we should be prepared to handle up to 1000 concurrent users a day during the first three months. In addition to that we will need to have some sort of support ready to react to user questions and feedback. This also includes an up to date documentation and FAQ that is linked to the app.
 
 ## Synergies
 
+Providing the public with such an app could quickly raise synergies with other software providers that could want to integrate with our solution.
 
 ## Risks
 
+It is currently unclear how much interest can be expected by the sailor community for the public version of the app. In contrast to that the efforts and risks that need to be taken into account developing such an app are big. Not only that we can't judge how much work such a complex application would require from the external agency, but also that the risks deploying and supporting an app that is downloadable by everyone can't just be numbered. 
+
+In addition to that it is unknown if the feature set a first public version would have then, really would meet the expectations of the target group. In the worst case the community just won't use the app and that could damage the brand.
+
+The development of the professional version has the same risk factors as the public version regarding the development of the interface. As the feature set is known the risks of failure are much lower than for the public version.
 
 ## Prototype
 
-There is currently no prototype.
+A working prototype has been developed and has also been used quite successful in regattas all over the world.
 
 ## Estimation
-
