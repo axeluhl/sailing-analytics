@@ -26,7 +26,8 @@ public final class DataMiningFactory {
         
         ParallelGrouper<DataType> grouper = GrouperFactory.createGrouper(queryDefinition, executor);
         ParallelExtractor<DataType, AggregatedType> extractor = ExtractorFactory.createExtractor(queryDefinition.getStatisticType(), executor);
-        Aggregator<AggregatedType, AggregatedType> aggregator = AggregatorFactory.createAggregator(queryDefinition.getStatisticType(), queryDefinition.getAggregatorType());
+        ParallelAggregator<AggregatedType, AggregatedType> aggregator = AggregatorFactory.createAggregator(queryDefinition.getStatisticType().getValueType(),
+                                                                                                           queryDefinition.getAggregatorType(), executor);
         
         return new QueryImpl<DataType, AggregatedType, AggregatedType>(retriever, filter, grouper, extractor, aggregator);
     }

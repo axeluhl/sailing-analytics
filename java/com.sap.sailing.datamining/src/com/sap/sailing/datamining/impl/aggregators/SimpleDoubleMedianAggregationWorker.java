@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.impl.aggregators;
 
-public class SimpleDoubleMedianAggregator extends SimpleMedianAggregator<Double> {
+public class SimpleDoubleMedianAggregationWorker extends SimpleMedianAggregationWorker<Double> {
 
     @Override
     protected Double add(Double value1, Double value2) {

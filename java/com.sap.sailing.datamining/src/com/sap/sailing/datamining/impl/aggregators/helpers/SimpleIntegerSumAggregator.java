@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sailing.datamining.impl.aggregators.helpers;
 
 public class SimpleIntegerSumAggregator extends SimpleSumAggregator<Integer> {
 

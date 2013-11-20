@@ -5,14 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class MedianAggregator<ExtractedType extends Comparable<? super ExtractedType>, AggregatedType> extends AbstractAggregator<ExtractedType, AggregatedType> {
-
-    public MedianAggregator() {
-        super("Median");
-    }
+public abstract class MedianAggregationWorker<ExtractedType extends Comparable<? super ExtractedType>, AggregatedType>
+                      extends AbstractAggregationWorker<ExtractedType, AggregatedType> {
 
     @Override
-    public AggregatedType aggregate(Collection<ExtractedType> data) {
+    protected AggregatedType aggregate(Collection<ExtractedType> data) {
         List<ExtractedType> dataAsList = new ArrayList<ExtractedType>(data);
         Collections.sort(dataAsList);
         

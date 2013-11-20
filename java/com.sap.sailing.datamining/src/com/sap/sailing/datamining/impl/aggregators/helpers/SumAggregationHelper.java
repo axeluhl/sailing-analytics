@@ -1,25 +1,15 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sailing.datamining.impl.aggregators.helpers;
 
 import java.util.Collection;
 import java.util.Iterator;
 
-public abstract class SumAggregator<ExtractedType, AggregatedType> extends AbstractAggregator<ExtractedType, AggregatedType> {
+public abstract class SumAggregationHelper<ExtractedType, AggregatedType> {
 
-    public SumAggregator() {
-        super("Sum");
-    }
-
-    @Override
     public AggregatedType aggregate(Collection<ExtractedType> data) {
         Iterator<ExtractedType> dataIterator = data.iterator();
-        AggregatedType sum = null;
+        AggregatedType sum = dataIterator.hasNext() ? getValueFor(dataIterator.next()) : null;
 
         while (dataIterator.hasNext()) {
-            if (sum == null) {
-                sum = getValueFor(dataIterator.next());
-                continue;
-            }
-            
             sum = add(sum, getValueFor(dataIterator.next()));
         }
         return sum;
