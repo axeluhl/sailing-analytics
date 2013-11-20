@@ -30,13 +30,16 @@ public class WindTrackMasterDataDeserializer implements JsonDeserializer<WindTra
         String windSourceTypeName = (String) object.get(WindTrackMasterDataJsonSerializer.FIELD_WIND_SOURCE_TYPE);
         Serializable windSourceId = (Serializable) object.get(WindTrackMasterDataJsonSerializer.FIELD_WIND_SOURCE_ID);
         JSONArray fixesJson = (JSONArray) object.get(WindTrackMasterDataJsonSerializer.FIELD_FIXES);
+        String regattaName = (String) object.get(WindTrackMasterDataJsonSerializer.FIELD_REGATTA_NAME);
+        String raceName = (String) object.get(WindTrackMasterDataJsonSerializer.FIELD_RACE_NAME);
+        Serializable raceId = (Serializable) object.get(WindTrackMasterDataJsonSerializer.FIELD_RACE_ID);
         Set<Wind> fixes = new HashSet<Wind>();
         for (Object obj : fixesJson) {
             JSONObject json = (JSONObject) obj;
             Wind wind = windDeserializer.deserialize(json);
             fixes.add(wind);
         }
-        return new WindTrackMasterData(windSourceTypeName, windSourceId, fixes);
+        return new WindTrackMasterData(windSourceTypeName, windSourceId, fixes, regattaName, raceName, raceId);
     }
 
 }

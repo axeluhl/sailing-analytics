@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -50,11 +52,15 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
     private JSONArray serializeWindInformation(TrackedRace trackedRace) {
         JSONArray jsonWindInfo = new JSONArray();
         Iterable<WindSource> windSources = trackedRace.getWindSources();
+        String raceName = trackedRace.getRace().getName();
+        Serializable raceId = trackedRace.getRace().getId();
+        String regattaName = trackedRace.getTrackedRegatta().getRegatta().getName();
         if (windSources != null) {
             for (WindSource source : windSources) {
                 if (source.canBeStored()) {
                     WindTrack track = trackedRace.getOrCreateWindTrack(source);
-                    JsonSerializer<WindTrack> windtrackSerializer = new WindTrackMasterDataJsonSerializer(source);
+                    JsonSerializer<WindTrack> windtrackSerializer = new WindTrackMasterDataJsonSerializer(source,
+                            regattaName, raceName, raceId);
                     jsonWindInfo.add(windtrackSerializer.serialize(track));
                 }
             }

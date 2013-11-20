@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 
@@ -39,22 +40,31 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
-    private Iterable<? extends Competitor> competitors;
     private Regatta regatta;
+    private String raceName = "DummyRace";
+    private Serializable raceId;
+    private Iterable<? extends Competitor> competitors = new HashSet<Competitor>();
 
-    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final WindStore windStore, final TrackedRegatta trackedRegatta) {
-        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta,windStore, -1);
-        this.competitors = competitors;
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta) {
+        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta, EmptyWindStore.INSTANCE, -1);
+        this.competitors  = competitors;
         this.regatta = regatta;
+    }
+    
+    public DummyTrackedRace(final String raceName, final Serializable raceId) {
+        super(new RaceDefinitionImpl(raceName, null, null, new HashSet<Competitor>()), null, EmptyWindStore.INSTANCE, -1);
+        this.raceName = raceName;
+        this.raceId = raceId;
     }
 
     @Override
     public RaceDefinition getRace() {
-        return new RaceDefinitionImpl("dummy", null, null, competitors);
+        return new RaceDefinitionImpl(raceName, null, null, competitors, raceId);
     }
 
     @Override

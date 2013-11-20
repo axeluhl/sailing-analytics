@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -16,12 +18,21 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
     public static final String FIELD_WIND_SOURCE_TYPE = "windSourceType";
     public static final String FIELD_WIND_SOURCE_ID = "windSourceId";
     public static final String FIELD_FIXES = "fixes";
+    public static final String FIELD_RACE_NAME = "raceName";
+    public static final String FIELD_RACE_ID = "raceId";
+    public static final String FIELD_REGATTA_NAME = "regattaName";
     
     private final WindSource source;
     private final JsonSerializer<Wind> windSerializer;
+    private final String regattaName;
+    private final String raceName;
+    private final Serializable raceId;
 
-    public WindTrackMasterDataJsonSerializer(WindSource source) {
+    public WindTrackMasterDataJsonSerializer(WindSource source, String regattaName, String raceName, Serializable raceId) {
         this.source = source;
+        this.regattaName = regattaName;
+        this.raceName = raceName;
+        this.raceId = raceId;
         JsonSerializer<Position> positionSerializer = new PositionJsonSerializer();
         this.windSerializer = new WindJsonSerializer(positionSerializer);
     }
@@ -32,6 +43,9 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
         windTrack.lockForRead();
         windTrackJson.put(FIELD_WIND_SOURCE_TYPE, source.getType().name());
         windTrackJson.put(FIELD_WIND_SOURCE_ID, source.getId());
+        windTrackJson.put(FIELD_RACE_NAME, raceName);
+        windTrackJson.put(FIELD_RACE_ID, raceId);
+        windTrackJson.put(FIELD_REGATTA_NAME, regattaName);
         JSONArray fixes = new JSONArray();
         Iterable<Wind> fixesIterator = windTrack.getFixes();
         for (Wind wind : fixesIterator) {

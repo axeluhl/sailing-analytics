@@ -114,7 +114,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result = windStore.getWindTrack(trackedRegatta, this, windSource, millisecondsOverWhichToAverageWind,
+        WindTrack result = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource, millisecondsOverWhichToAverageWind,
                 delayForWindEstimationCacheInvalidation);
         return result;
     }

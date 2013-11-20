@@ -42,8 +42,11 @@ import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.ScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
+import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -250,8 +253,7 @@ public class ImportMasterDataOperation extends
             Iterator<? extends Fleet> fleetIterator = fleets.iterator();
             if (fleetIterator.hasNext()) {
                 fleet = fleetIterator.next();
-                //WindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
-                DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta, null, null);
+                DummyTrackedRace dummy = new DummyTrackedRace(competitors, regatta, null);
                 raceColumn.setTrackedRace(fleet, dummy);
             }
         }
@@ -291,10 +293,21 @@ public class ImportMasterDataOperation extends
             for (RaceColumnMasterData raceColumnMasterData : ((FlexibleLeaderboardMasterData) board).getRaceColumns()) {
                 RaceColumn raceColumn = toState.addColumnToLeaderboard(raceColumnMasterData.getName(), board.getName(),
                         raceColumnMasterData.isMedal());
+                createWindTracks(raceColumnMasterData.getWindTrackMasterData(), toState);
                 for (Map.Entry<String, RaceIdentifier> e : raceColumnMasterData.getRaceIdentifiersByFleetName()
                         .entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
                 }
+            }
+        }
+    }
+
+    private void createWindTracks(Set<WindTrackMasterData> windTrackMasterData, RacingEventService toState) {
+        for (WindTrackMasterData windMasterData : windTrackMasterData) {
+            DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
+            WindTrack windTrack = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
+            for (Wind fix : windMasterData.getFixes()) {
+                windTrack.add(fix);
             }
         }
     }

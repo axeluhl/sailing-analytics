@@ -206,7 +206,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -276,7 +276,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
         
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
         
@@ -371,7 +371,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -439,7 +439,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
         
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -512,7 +512,7 @@ public class MasterDataImportTest {
         competitors.add(competitor);
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
        
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -557,7 +557,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
         
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -632,7 +632,7 @@ public class MasterDataImportTest {
         Competitor competitor2 = sourceDomainFactory.getOrCreateCompetitor(competitor2UUID, "Froderik", team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -693,7 +693,7 @@ public class MasterDataImportTest {
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
         Fleet fleet1OnTarget = raceColumnOnTarget.getFleetByName(testFleet1.getName());
-        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null, null);
+        TrackedRace trackedRaceForTarget = new DummyTrackedRace(competitorsCreatedOnTarget, regattaOnTarget, null);
         
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
@@ -768,7 +768,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -945,7 +945,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
        
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -1116,7 +1116,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -1242,7 +1242,7 @@ public class MasterDataImportTest {
         CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
        
         raceColumn.setTrackedRace(testFleet1, trackedRace);
@@ -1418,7 +1418,7 @@ public class MasterDataImportTest {
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
 
-        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null, null);
+        TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         
         raceColumn.setTrackedRace(testFleet1, trackedRace);

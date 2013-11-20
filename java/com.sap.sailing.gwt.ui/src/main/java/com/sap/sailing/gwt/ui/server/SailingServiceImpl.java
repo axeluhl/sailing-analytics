@@ -3266,11 +3266,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
         String hostname;
+        Integer port = -1;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
+            port = url.getPort();
         } catch (MalformedURLException e1) {
-            hostname = urlAsString.split("://")[1].split("/")[0]; // also eliminate a trailing slash
+            hostname = urlAsString;
+            if (urlAsString.contains("://")) {
+                hostname = hostname.split("://")[1];
+            }
+            if (hostname.contains("/")) {
+                hostname = hostname.split("/")[0]; // also eliminate a trailing slash
+            }
+            if (hostname.contains(":")) {
+                String[] split = hostname.split(":");
+                hostname = split[0];
+                port = Integer.parseInt(split[1]);
+            }
         }
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
@@ -3279,7 +3292,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         String line = null;
         URL serverAddress = null;
         try {
-            serverAddress = createUrl(hostname, query);
+            serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
             connection = null;
             //Set up the initial connection
@@ -3306,8 +3319,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL createUrl(String host, String query) throws Exception {
-        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    private URL createUrl(String host, Integer port, String query) throws Exception {
+        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
