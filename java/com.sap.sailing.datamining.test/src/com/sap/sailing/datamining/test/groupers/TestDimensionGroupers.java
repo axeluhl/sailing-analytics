@@ -16,7 +16,7 @@ import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.AbstractDimension;
-import com.sap.sailing.datamining.impl.GroupByDimension;
+import com.sap.sailing.datamining.impl.MultiDimensionalGroupingWorker;
 import com.sap.sailing.datamining.shared.CompoundGroupKey;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
@@ -144,7 +144,7 @@ public class TestDimensionGroupers {
         };
     }
     
-    private static class OpenGrouper<DataType> extends GroupByDimension<DataType, String> {
+    private static class OpenGrouper<DataType> extends MultiDimensionalGroupingWorker<DataType, String> {
 
         public OpenGrouper(Collection<Dimension<DataType, String>> dimensions) {
             super(dimensions);

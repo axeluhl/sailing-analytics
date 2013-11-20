@@ -27,15 +27,15 @@ public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements 
     public AggregationWorker<ExtractedType, AggregatedType> build() {
         switch (valueType) {
         case Double:
-            return (AggregationWorker<ExtractedType, AggregatedType>) createDoubleAggregator(aggregatorType);
+            return (AggregationWorker<ExtractedType, AggregatedType>) createDoubleAggregationWorker(aggregatorType);
         case Integer:
-            return (AggregationWorker<ExtractedType, AggregatedType>) createIntegerAggregator(aggregatorType);
+            return (AggregationWorker<ExtractedType, AggregatedType>) createIntegerAggregationWorker(aggregatorType);
         }
         throw new IllegalArgumentException("Not yet implemented for the given statistics value type: "
                 + valueType.toString());
     }
     
-    public static AggregationWorker<Integer, Integer> createIntegerAggregator(AggregatorType aggregatorType) {
+    public static AggregationWorker<Integer, Integer> createIntegerAggregationWorker(AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
             return new SimpleIntegerArithmeticAverageAggregationWorker();
@@ -48,7 +48,7 @@ public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements 
                 + aggregatorType.toString());
     }
     
-    public static AggregationWorker<Double, Double> createDoubleAggregator(AggregatorType aggregatorType) {
+    public static AggregationWorker<Double, Double> createDoubleAggregationWorker(AggregatorType aggregatorType) {
         switch (aggregatorType) {
         case Average:
             return new SimpleDoubleArithmeticAverageAggregationWorker();

@@ -34,7 +34,7 @@ public final class DataMiningFactory {
 
     private static <DataType> ParallelFilter<DataType> createFilter(QueryDefinition queryDefinition) {
         if (queryDefinition.getSelection().isEmpty()) {
-            return FilterFactory.createNoFilter();
+            return FilterFactory.createNonFilteringFilter();
         }
         
         WorkerBuilder<FiltrationWorker<DataType>> workerBuilder = FilterFactory.createDimensionFilterBuilder(queryDefinition.getDataType(), queryDefinition.getSelection());

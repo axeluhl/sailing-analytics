@@ -2,8 +2,8 @@ package com.sap.sailing.datamining.builders;
 
 import com.sap.sailing.datamining.ExtractionWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.impl.SpeedInKnotsExtractor;
-import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.DistanceTraveledExtractor;
+import com.sap.sailing.datamining.impl.SpeedInKnotsExtractionWorker;
+import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.DistanceTraveledExtractionWorker;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 
 public class ExtractionWorkerBuilder<DataType, ExtractedType> implements WorkerBuilder<ExtractionWorker<DataType, ExtractedType>> {
@@ -19,9 +19,9 @@ public class ExtractionWorkerBuilder<DataType, ExtractedType> implements WorkerB
     public ExtractionWorker<DataType, ExtractedType> build() {
         switch (statisticType) {
         case Speed:
-            return (ExtractionWorker<DataType, ExtractedType>) new SpeedInKnotsExtractor();
+            return (ExtractionWorker<DataType, ExtractedType>) new SpeedInKnotsExtractionWorker();
         case Distance_TrackedLegOfCompetitor:
-            return (ExtractionWorker<DataType, ExtractedType>) new DistanceTraveledExtractor();
+            return (ExtractionWorker<DataType, ExtractedType>) new DistanceTraveledExtractionWorker();
         }
         throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
                 + statisticType.toString());

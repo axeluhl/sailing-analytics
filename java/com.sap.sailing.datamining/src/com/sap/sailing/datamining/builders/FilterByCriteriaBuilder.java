@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.builders;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.impl.FilterByCriteria;
+import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 
 public class FilterByCriteriaBuilder<DataType> implements WorkerBuilder<FiltrationWorker<DataType>> {
 
@@ -15,7 +15,7 @@ public class FilterByCriteriaBuilder<DataType> implements WorkerBuilder<Filtrati
 
     @Override
     public FiltrationWorker<DataType> build() {
-        return new FilterByCriteria<DataType>(criteria);
+        return new CriteriaFiltrationWorker<DataType>(criteria);
     }
 
 }

@@ -13,7 +13,7 @@ import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
-import com.sap.sailing.datamining.impl.FilterByCriteria;
+import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 
 public class TestFilters {
@@ -24,7 +24,7 @@ public class TestFilters {
         
         ClusterOfComparable<Integer> cluster = new ClusterOfComparableImpl<Integer>("Test", 5, 1);
         ConcurrentFilterCriteria<Integer> criteria = new SimpleRangeFilterCriteria<Integer>(cluster);
-        FiltrationWorker<Integer> filter = new FilterByCriteria<Integer>(criteria);
+        FiltrationWorker<Integer> filter = new CriteriaFiltrationWorker<Integer>(criteria);
         filter.setDataToFilter(data);
 
         Receiver receiver = new Receiver();

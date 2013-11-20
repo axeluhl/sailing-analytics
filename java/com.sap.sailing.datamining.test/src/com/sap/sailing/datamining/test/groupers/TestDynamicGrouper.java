@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.WorkReceiver;
-import com.sap.sailing.datamining.impl.DynamicGrouper;
+import com.sap.sailing.datamining.impl.DynamicGroupingWorker;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
@@ -23,7 +23,7 @@ public class TestDynamicGrouper {
     @Test
     public void testDynamicGrouper() {
         String scriptText = "return data.getKey()";
-        GroupingWorker<Data> dynamicGrouper = new DynamicGrouper<Data>(scriptText, new BaseBindingProviderMock());
+        GroupingWorker<Data> dynamicGrouper = new DynamicGroupingWorker<Data>(scriptText, new BaseBindingProviderMock());
         
         DataReceiver receiver = new DataReceiver();
         dynamicGrouper.setReceiver(receiver);

@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.data.impl;
+package com.sap.sailing.datamining.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,11 +8,11 @@ import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.datamining.ParallelFilter;
 
-public class NoFilter<DataType> implements ParallelFilter<DataType> {
+public class NonFilteringFilter<DataType> implements ParallelFilter<DataType> {
 
     private Collection<DataType> data;
     
-    public NoFilter() {
+    public NonFilteringFilter() {
         data = new ArrayList<DataType>();
     }
 

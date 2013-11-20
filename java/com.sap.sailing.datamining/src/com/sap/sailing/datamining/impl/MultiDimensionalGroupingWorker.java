@@ -9,11 +9,11 @@ import com.sap.sailing.datamining.shared.CompoundGroupKey;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class GroupByDimension<DataType, ValueType> extends AbstractGroupingWorker<DataType> {
+public class MultiDimensionalGroupingWorker<DataType, ValueType> extends AbstractGroupingWorker<DataType> {
     
     private Collection<Dimension<DataType, ValueType>> dimensions;
 
-    public GroupByDimension(Collection<Dimension<DataType, ValueType>> dimensions) {
+    public MultiDimensionalGroupingWorker(Collection<Dimension<DataType, ValueType>> dimensions) {
         this.dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>(dimensions);
     }
 

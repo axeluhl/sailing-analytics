@@ -8,14 +8,14 @@ import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.impl.GPSFixContextImpl;
-import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetriever;
+import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
-public class GPSFixRetriever extends AbstractLeaderboardGroupDataRetriever<GPSFixWithContext> {
+public class GPSFixLeaderboardGroupDataRetrievalWorker extends AbstractLeaderboardGroupDataRetrievalWorker<GPSFixWithContext> {
     
     @Override
     public Collection<GPSFixWithContext> doWork() {

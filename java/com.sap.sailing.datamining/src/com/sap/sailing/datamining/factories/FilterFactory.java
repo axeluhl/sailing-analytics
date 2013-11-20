@@ -11,9 +11,9 @@ import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
-import com.sap.sailing.datamining.data.impl.NoFilter;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
+import com.sap.sailing.datamining.impl.NonFilteringFilter;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
@@ -31,19 +31,15 @@ public final class FilterFactory {
 
     public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
         ConcurrentFilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
-        WorkerBuilder<FiltrationWorker<DataType>> builder = createCriteriaFilterBuilder(criteria); 
+        WorkerBuilder<FiltrationWorker<DataType>> builder = new FilterByCriteriaBuilder<DataType>(criteria); 
         return builder;
     }
 
     /**
      * @return A filter that filters nothing. So the returning collection is the same as the given one.
      */
-    public static <DataType> ParallelFilter<DataType> createNoFilter() {
-        return new NoFilter<DataType>();
-    }
-
-    public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createCriteriaFilterBuilder(ConcurrentFilterCriteria<DataType> criteria) {
-        return new FilterByCriteriaBuilder<DataType>(criteria);
+    public static <DataType> ParallelFilter<DataType> createNonFilteringFilter() {
+        return new NonFilteringFilter<DataType>();
     }
 
     private static <DataType> ConcurrentFilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {

@@ -5,11 +5,11 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetriever;
+import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
-public class TrackedLegOfCompetitorRetriever extends AbstractLeaderboardGroupDataRetriever<TrackedLegOfCompetitorWithContext> {
+public class TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker extends AbstractLeaderboardGroupDataRetrievalWorker<TrackedLegOfCompetitorWithContext> {
 
     @Override
     public Collection<TrackedLegOfCompetitorWithContext> doWork() {

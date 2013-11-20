@@ -3,21 +3,21 @@ package com.sap.sailing.datamining.builders;
 import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.impl.DynamicGrouper;
+import com.sap.sailing.datamining.impl.DynamicGroupingWorker;
 
-public class DynamicGrouperBuilder<DataType> implements WorkerBuilder<GroupingWorker<DataType>> {
+public class DynamicGroupingWorkerBuilder<DataType> implements WorkerBuilder<GroupingWorker<DataType>> {
 
     private String scriptText;
     private BaseBindingProvider<DataType> baseBindingProvider;
 
-    public DynamicGrouperBuilder(String scriptText, BaseBindingProvider<DataType> baseBindingProvider) {
+    public DynamicGroupingWorkerBuilder(String scriptText, BaseBindingProvider<DataType> baseBindingProvider) {
         this.scriptText = scriptText;
         this.baseBindingProvider = baseBindingProvider;
     }
 
     @Override
     public GroupingWorker<DataType> build() {
-        return new DynamicGrouper<DataType>(scriptText, baseBindingProvider);
+        return new DynamicGroupingWorker<DataType>(scriptText, baseBindingProvider);
     }
 
 }

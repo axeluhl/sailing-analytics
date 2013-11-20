@@ -9,12 +9,12 @@ import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.ParallelGrouper;
-import com.sap.sailing.datamining.PartitioningParallelGrouper;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.builders.DynamicGrouperBuilder;
-import com.sap.sailing.datamining.builders.GroupByDimensionBuilder;
+import com.sap.sailing.datamining.builders.DynamicGroupingWorkerBuilder;
+import com.sap.sailing.datamining.builders.MultiDimensionalGroupingWorkerBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
+import com.sap.sailing.datamining.impl.PartitioningParallelGrouper;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
@@ -32,17 +32,17 @@ public final class GrouperFactory {
     private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinition queryDefinition) {
         switch (queryDefinition.getGrouperType()) {
         case Custom:
-            return createDynamicGrouperBuilder(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
+            return createDynamicGroupingWorkerBuilder(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
         case Dimensions:
-            return createByDimensionGrouperBuilder(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
+            return createMultiDimensionalGroupingWorkerBuilder(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
         }
         throw new IllegalArgumentException("Not yet implemented for the given grouper type: "
                 + queryDefinition.getGrouperType().toString());
     }
 
-    public static <DataType> WorkerBuilder<GroupingWorker<DataType>> createDynamicGrouperBuilder(String grouperScriptText, DataTypes dataType) {
+    private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createDynamicGroupingWorkerBuilder(String grouperScriptText, DataTypes dataType) {
         BaseBindingProvider<DataType> baseBindingProvider = createBaseBindingProvider(dataType);
-        return new DynamicGrouperBuilder<DataType>(grouperScriptText, baseBindingProvider);
+        return new DynamicGroupingWorkerBuilder<DataType>(grouperScriptText, baseBindingProvider);
     }
 
     @SuppressWarnings("unchecked")
@@ -56,14 +56,14 @@ public final class GrouperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <DataType, ValueType> WorkerBuilder<GroupingWorker<DataType>> createByDimensionGrouperBuilder(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
+    private static <DataType, ValueType> WorkerBuilder<GroupingWorker<DataType>> createMultiDimensionalGroupingWorkerBuilder(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
         DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         Collection<Dimension<DataType, ValueType>> dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>();
         for (SharedDimension sharedDimension : dimensionsToGroupBy) {
             Dimension<DataType, ValueType> dimension = (Dimension<DataType, ValueType>) dimensionManager.getDimensionFor(sharedDimension);
             dimensions.add(dimension);
         }
-        return new GroupByDimensionBuilder<DataType, ValueType>(dimensions);
+        return new MultiDimensionalGroupingWorkerBuilder<DataType, ValueType>(dimensions);
     }
 
 }

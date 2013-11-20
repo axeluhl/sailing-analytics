@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.impl.AbstractParallelComponent;
+import com.sap.sailing.datamining.GroupingWorker;
+import com.sap.sailing.datamining.ParallelGrouper;
+import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.shared.GroupKey;
 
 public class PartitioningParallelGrouper<DataType> extends AbstractParallelComponent<Collection<DataType>, Map<GroupKey, Collection<DataType>>>

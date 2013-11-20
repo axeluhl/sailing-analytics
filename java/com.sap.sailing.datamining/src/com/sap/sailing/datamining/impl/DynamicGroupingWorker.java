@@ -8,12 +8,12 @@ import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class DynamicGrouper<DataType> extends AbstractGroupingWorker<DataType> {
+public class DynamicGroupingWorker<DataType> extends AbstractGroupingWorker<DataType> {
     
     private Script script;
     private Binding binding;
 
-    public DynamicGrouper(String scriptText, BaseBindingProvider<DataType> baseBindingProvider) {
+    public DynamicGroupingWorker(String scriptText, BaseBindingProvider<DataType> baseBindingProvider) {
         super();
         script = new GroovyShell().parse(scriptText);
         binding = baseBindingProvider.createBaseBinding();
