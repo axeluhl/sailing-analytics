@@ -17,14 +17,35 @@ The app should exist in two version:
 
 ## Features
 
-* Display information about
-  * Regattas
-  * Courses
-  * Races
-    1 Time
-    2 Wind
-    3 Competitors
-    4 Course
+Display general information about
+* Regattas
+* Courses
+* Races
+
+For each race display information about
+* Time
+  * Start
+  * Duration
+* Flags
+* Marks (including their position) that can be used to create a course
+* Current true wind direction and speed
+* Competitors with name and sail number and tracker state
+
+For each race provide the user with tools to edit
+* Status
+  * Start
+  * Recall
+  * Abort
+  * Special flags
+* Time
+  * Start
+* Course
+  * Mark positions
+  * Layout
+  * Legs
+* Wind
+  * Direction
+  * Speed
 
 ## Description
 
