@@ -1,15 +1,10 @@
 package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.impl.AbstractExtractor;
-import com.sap.sailing.datamining.shared.Unit;
+import com.sap.sailing.datamining.impl.AbstractExtractionWorker;
 import com.sap.sailing.domain.common.Distance;
 
-public class DistanceTraveledExtractor extends AbstractExtractor<TrackedLegOfCompetitorWithContext, Double> {
-
-    public DistanceTraveledExtractor() {
-        super("distance in meters", Unit.Meters, 2);
-    }
+public class DistanceTraveledExtractor extends AbstractExtractionWorker<TrackedLegOfCompetitorWithContext, Double> {
 
     @Override
     public Double extract(TrackedLegOfCompetitorWithContext dataEntry) {

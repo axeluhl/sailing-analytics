@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.shared.CompoundGroupKey;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class GroupByDimension<DataType, ValueType> extends AbstractGrouper<DataType> {
+public class GroupByDimension<DataType, ValueType> extends AbstractGroupingWorker<DataType> {
     
     private Collection<Dimension<DataType, ValueType>> dimensions;
 

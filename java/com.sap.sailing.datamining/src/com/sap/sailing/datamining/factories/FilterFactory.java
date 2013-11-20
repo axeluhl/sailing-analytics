@@ -14,7 +14,7 @@ import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.data.impl.NoFilter;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
-import com.sap.sailing.datamining.impl.SimpleParallelFilter;
+import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
@@ -26,7 +26,7 @@ public final class FilterFactory {
     private FilterFactory() { }
     
     public static <DataType> ParallelFilter<DataType> createParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
-        return new SimpleParallelFilter<DataType>(workerBuilder, executor);
+        return new PartitioningParallelFilter<DataType>(workerBuilder, executor);
     }
 
     public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {

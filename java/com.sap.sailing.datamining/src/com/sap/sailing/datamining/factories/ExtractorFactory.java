@@ -1,36 +1,22 @@
 package com.sap.sailing.datamining.factories;
 
-import com.sap.sailing.datamining.Extractor;
-import com.sap.sailing.datamining.impl.DataAmountExtractor;
-import com.sap.sailing.datamining.impl.SpeedInKnotsExtractor;
-import com.sap.sailing.datamining.impl.trackedLegOfCompetitor.DistanceTraveledExtractor;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import com.sap.sailing.datamining.ExtractionWorker;
+import com.sap.sailing.datamining.ParallelExtractor;
+import com.sap.sailing.datamining.WorkerBuilder;
+import com.sap.sailing.datamining.builders.ExtractionWorkerBuilder;
+import com.sap.sailing.datamining.impl.GroupDividingParallelExtractor;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
-import com.sap.sailing.domain.base.Moving;
 
 public final class ExtractorFactory {
     
     private ExtractorFactory() { }
     
-    @SuppressWarnings("unchecked")
-    public static <DataType, ExtractedType extends Number> Extractor<DataType, ExtractedType> createExtractor(StatisticType statisticType) {
-        switch (statisticType) {
-        case DataAmount:
-            return (Extractor<DataType, ExtractedType>) createDataAmountExtractor();
-        case Speed:
-            return (Extractor<DataType, ExtractedType>) createSpeedExtractor();
-        case Distance_TrackedLegOfCompetitor:
-            return (Extractor<DataType, ExtractedType>) new DistanceTraveledExtractor();
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given statistic type: "
-                + statisticType.toString());
-    }
-    
-    public static Extractor<Moving, Double> createSpeedExtractor() {
-        return new SpeedInKnotsExtractor();
-    }
-
-    public static <DataType> Extractor<DataType, Integer> createDataAmountExtractor() {
-        return new DataAmountExtractor<DataType>();
+    public static <DataType, ExtractedType extends Number> ParallelExtractor<DataType, ExtractedType> createExtractor(StatisticType statisticType, ThreadPoolExecutor executor) {
+        WorkerBuilder<ExtractionWorker<DataType, ExtractedType>> workerBuilder = new ExtractionWorkerBuilder<DataType, ExtractedType>(statisticType);
+        return new GroupDividingParallelExtractor<DataType, ExtractedType>(statisticType.getSignifier(), statisticType.getUnit(), statisticType.getValueDecimals(),
+                                                                           workerBuilder, executor);
     }
 
 }

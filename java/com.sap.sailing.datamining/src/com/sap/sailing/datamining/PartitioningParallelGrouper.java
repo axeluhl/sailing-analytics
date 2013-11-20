@@ -12,12 +12,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.sap.sailing.datamining.impl.AbstractParallelComponent;
 import com.sap.sailing.datamining.shared.GroupKey;
 
-public class SimpleParallelGrouper<DataType> extends AbstractParallelComponent<Collection<DataType>, Map<GroupKey, Collection<DataType>>>
-                                             implements ParallelGrouper<DataType> {
+public class PartitioningParallelGrouper<DataType> extends AbstractParallelComponent<Collection<DataType>, Map<GroupKey, Collection<DataType>>>
+                                                   implements ParallelGrouper<DataType> {
 
     private WorkerBuilder<GroupingWorker<DataType>> workerBuilder;
 
-    public SimpleParallelGrouper(WorkerBuilder<GroupingWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public PartitioningParallelGrouper(WorkerBuilder<GroupingWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
         this.workerBuilder = workerBuilder;
     }

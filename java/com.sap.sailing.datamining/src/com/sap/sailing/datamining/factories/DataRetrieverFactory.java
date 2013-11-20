@@ -6,7 +6,7 @@ import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.DataRetrievalWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.DataRetrieverWorkerBuilder;
-import com.sap.sailing.datamining.impl.SimpleParallelDataRetriever;
+import com.sap.sailing.datamining.impl.GroupDividingParallelDataRetriever;
 import com.sap.sailing.datamining.shared.DataTypes;
 
 public final class DataRetrieverFactory {
@@ -21,7 +21,7 @@ public final class DataRetrieverFactory {
      */
     public static <DataType> ParallelDataRetriever<DataType> createDataRetriever(DataTypes dataType, ThreadPoolExecutor executor) {
         WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder = new DataRetrieverWorkerBuilder<DataType>(dataType);
-        return new SimpleParallelDataRetriever<DataType>(workerBuilder, executor);
+        return new GroupDividingParallelDataRetriever<DataType>(workerBuilder, executor);
     }
 
 }

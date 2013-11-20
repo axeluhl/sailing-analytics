@@ -145,11 +145,10 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
                 notifyQueryDefinitionChanged();
             }
         });
-        statisticsProvider.addStatistic(StatisticType.DataAmount, AggregatorType.Sum, DataTypes.GPSFix);
         statisticsProvider.addStatistic(StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         statisticsProvider.addStatistic(StatisticType.Distance_TrackedLegOfCompetitor, AggregatorType.Sum, DataTypes.TrackedLegOfCompetitor);
         statisticsProvider.addStatistic(StatisticType.Distance_TrackedLegOfCompetitor, AggregatorType.Average, DataTypes.TrackedLegOfCompetitor);
-        statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.DataAmount, AggregatorType.Sum, DataTypes.GPSFix), false);
+        statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix), false);
         statisticsListBox.setAcceptableValues(statisticsProvider.getAllStatistics());
         functionsPanel.add(statisticsListBox);
 

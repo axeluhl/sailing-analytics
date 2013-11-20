@@ -11,12 +11,12 @@ import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.WorkerBuilder;
 
-public class SimpleParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
-                                            implements ParallelFilter<DataType> {
+public class PartitioningParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
+                                                  implements ParallelFilter<DataType> {
 
     private final WorkerBuilder<FiltrationWorker<DataType>> workerBuilder;
 
-    public SimpleParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public PartitioningParallelFilter(WorkerBuilder<FiltrationWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
         this.workerBuilder = workerBuilder;
     }

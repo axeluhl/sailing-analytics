@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.datamining.Aggregator;
-import com.sap.sailing.datamining.Extractor;
 import com.sap.sailing.datamining.ParallelDataRetriever;
+import com.sap.sailing.datamining.ParallelExtractor;
 import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ParallelGrouper;
 import com.sap.sailing.datamining.Query;
@@ -22,10 +22,10 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     private ParallelFilter<DataType> filter;
     private ParallelGrouper<DataType> grouper;
 
-    private Extractor<DataType, ExtractedType> extractor;
+    private ParallelExtractor<DataType, ExtractedType> extractor;
     private Aggregator<ExtractedType, AggregatedType> aggregator;
     
-    public QueryImpl(ParallelDataRetriever<DataType> retriever, ParallelFilter<DataType> filter, ParallelGrouper<DataType> grouper, Extractor<DataType, ExtractedType> extractor, Aggregator<ExtractedType, AggregatedType> aggregator) {
+    public QueryImpl(ParallelDataRetriever<DataType> retriever, ParallelFilter<DataType> filter, ParallelGrouper<DataType> grouper, ParallelExtractor<DataType, ExtractedType> extractor, Aggregator<ExtractedType, AggregatedType> aggregator) {
         this.retriever = retriever;
         this.filter = filter;
         this.grouper = grouper;
@@ -39,12 +39,13 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
         
         Collection<DataType> retrievedData = retriever.start(racingEventService).get();
         Collection<DataType> filteredData = filter.start(retrievedData).get();
+        Map<GroupKey, Collection<DataType>> groupedData = grouper.start(filteredData).get();
+        Map<GroupKey, Collection<ExtractedType>> extractedData = extractor.start(groupedData).get();
+
         QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals());
-        Map<GroupKey, Collection<DataType>> groupedFixes = grouper.start(filteredData).get();
-        for (Entry<GroupKey, Collection<DataType>> groupEntry : groupedFixes.entrySet()) {
-            Collection<ExtractedType> extractedData = extractor.extract(groupEntry.getValue());
-            AggregatedType aggregatedData = aggregator.aggregate(extractedData);
-            result.addResult(groupEntry.getKey(), aggregatedData);
+        for (Entry<GroupKey, Collection<ExtractedType>> extractedEntry : extractedData.entrySet()) {
+            AggregatedType aggregatedData = aggregator.aggregate(extractedEntry.getValue());
+            result.addResult(extractedEntry.getKey(), aggregatedData);
         }
         
         final long endTime = System.nanoTime();

@@ -9,7 +9,7 @@ import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.ParallelGrouper;
-import com.sap.sailing.datamining.SimpleParallelGrouper;
+import com.sap.sailing.datamining.PartitioningParallelGrouper;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.DynamicGrouperBuilder;
 import com.sap.sailing.datamining.builders.GroupByDimensionBuilder;
@@ -26,7 +26,7 @@ public final class GrouperFactory {
 
     public static <DataType> ParallelGrouper<DataType> createGrouper(QueryDefinition queryDefinition, ThreadPoolExecutor executor) {
         WorkerBuilder<GroupingWorker<DataType>> workerBuilder = createGroupingWorkerBuilder(queryDefinition);
-        return new SimpleParallelGrouper<DataType>(workerBuilder, executor);
+        return new PartitioningParallelGrouper<DataType>(workerBuilder, executor);
     }
 
     private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinition queryDefinition) {
