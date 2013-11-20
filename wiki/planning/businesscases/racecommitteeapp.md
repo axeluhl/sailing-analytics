@@ -55,9 +55,9 @@ As there currently exist an implementation that covers some of the features, the
 
 This project can be divided into three major stages:
 
-- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide a mock-up like interface for both versions. It has been agreed that this step needs to be taken out by an external agency that has a mobile background, the skills and the experience. This step relies on a document that is yet to be built that describes the desired features and the clustering of these features with regards to the two versions.
+- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide a mock-up like interface for both versions. It has been agreed that this step needs to be taken out by an external agency that has a mobile background, the skills and the experience. This step relies on a document that is yet to be built that describes the desired features and the clustering of these features with regards to the two versions. In addition to delivering this document, one or two members of our team need to plan for at least 4-6 one day workshops with the agency to make sure that they understand the domain.
 
-- The second step is about integrating the design with the Sailing Analytics server. This requires a major effort from the tech team and also team work between the external agency and our developers. Some work from the current prototype can be reused but a major part needs to be rewritten.
+- The second step is about implementing and integrating the design with the Sailing Analytics server. This requires a major effort from the tech team and also team work between the external agency and our developers. Some work from the current prototype can be reused but a major part needs to be rewritten.
 
 - The third stage is about to make sure that the infrastructure is ready to handle the traffic that follows a successful deployment to an app store. We cannot judge exactly how much interest there will be in the sailing community for such a solution but aiming for around 100 active users a day without active advertising feels like the right number at the start. Nevertheless we should be prepared to handle up to 1000 concurrent users a day during the first three months. In addition to that we will need to have some sort of support ready to react to user questions and feedback. This also includes an up to date documentation and FAQ that is linked to the app.
 
@@ -78,3 +78,18 @@ The development of the professional version has the same risk factors as the pub
 A working prototype has been developed and has also been used quite successful in regattas all over the world.
 
 ## Estimation
+
+The efforts follow the three parts described above:
+
+- First we need to put together a document that describes all the features of the public and professional version in detail. This work has been started and will required about a 5-7 days of work until complete.
+
+- The effort to create a clickable mockup is hard to number. We would estimate that this requires 10 days for a member of our team and about 30-50 days for the agency.
+
+- The implementation of the design for Android devices and integration with our server could take about 30 days for the tech team and around 30 days for the agency.
+
+- The effort needed to implement everything needed for the third stage is the hard to estimate. It could be around 10 days for the infrastructure and 10 days of deployment that needs to be handled by the agency. In addition to that a member of our team needs to support users around the world each day and work closely together with developers in order to update the app.
+
+Summing up all these numbers would lead to the following if we take the upper boundaries:
+
+- 90 days for external agency
+- 50 days for the tech team
