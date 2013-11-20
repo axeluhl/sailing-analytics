@@ -1,5 +1,7 @@
 # RaceCommittee App
 
+Author: Simon Pamies
+
 ## Rationale
 As SAP is aiming to make sailing visible and understandable for everyone and also wants to help series and regattas run better, it is crucial to have a direct connection to the race committee and/or umpires. Every decision they make, must in realtime be reflected into the Sailing Analytics application. This holds not only for time announcements but also for complex events like course changes or rule infringements.
 
