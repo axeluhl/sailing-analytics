@@ -1,9 +1,10 @@
 package com.sap.sailing.racecommittee.app.data.handlers;
 
-import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 
-public class DeviceConfigurationDataHandler extends DataHandler<StoredDeviceConfiguration> {
+public class DeviceConfigurationDataHandler extends DataHandler<StoreableConfiguration<DeviceConfiguration>> {
 
     public DeviceConfigurationDataHandler(OnlineDataManager manager) {
         super(manager);
@@ -15,12 +16,12 @@ public class DeviceConfigurationDataHandler extends DataHandler<StoredDeviceConf
     }
     
     @Override
-    public StoredDeviceConfiguration getCachedResults() {
+    public StoreableConfiguration<DeviceConfiguration> getCachedResults() {
         return manager.getDataStore().getTabletConfiguration();
     }
 
     @Override
-    public void onResult(StoredDeviceConfiguration data) {
+    public void onResult(StoreableConfiguration<DeviceConfiguration> data) {
         manager.getDataStore().setTabletConfiguration(data);
     }
 

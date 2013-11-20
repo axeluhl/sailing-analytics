@@ -18,9 +18,10 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.deserialization.impl.StoredDeviceConfigurationJsonDeserializer;
@@ -45,7 +46,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRacingProceduresConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -138,8 +139,8 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                StoredRacingProceduresConfiguration configuration = 
-                        new PreferencesBasedDeviceConfiguration(preferences).load().getRacingProceduresConfiguration();
+                StoreableConfiguration<RacingProceduresConfiguration> configuration = 
+                        new PreferencesBasedRacingProceduresConfiguration(preferences);
                 
                 JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
@@ -235,18 +236,18 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<StoredDeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
-            LoadClient<StoredDeviceConfiguration> callback) {
-        return new DataLoaderCallbacks<StoredDeviceConfiguration>(callback, new LoaderCreator<StoredDeviceConfiguration>() {
+    public LoaderCallbacks<DataLoaderResult<StoreableConfiguration<DeviceConfiguration>>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
+            LoadClient<StoreableConfiguration<DeviceConfiguration>> callback) {
+        return new DataLoaderCallbacks<StoreableConfiguration<DeviceConfiguration>>(callback, new LoaderCreator<StoreableConfiguration<DeviceConfiguration>>() {
             @Override
-            public Loader<DataLoaderResult<StoredDeviceConfiguration>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<StoreableConfiguration<DeviceConfiguration>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<StoredDeviceConfiguration> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
-                DataParser<StoredDeviceConfiguration> parser = new DeviceConfigurationParser(
+                DataHandler<StoreableConfiguration<DeviceConfiguration>> handler = new DeviceConfigurationDataHandler(OnlineDataManager.this);
+                DataParser<StoreableConfiguration<DeviceConfiguration>> parser = new DeviceConfigurationParser(
                         StoredDeviceConfigurationJsonDeserializer.create(preferences));
                 
-                return new OnlineDataLoader<StoredDeviceConfiguration>(
+                return new OnlineDataLoader<StoreableConfiguration<DeviceConfiguration>>(
                         context, 
                         new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);

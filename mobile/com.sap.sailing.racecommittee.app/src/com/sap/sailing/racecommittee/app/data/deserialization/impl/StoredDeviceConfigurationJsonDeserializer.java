@@ -2,12 +2,13 @@ package com.sap.sailing.racecommittee.app.data.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRacingProceduresConfiguration;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 
@@ -28,13 +29,13 @@ public class StoredDeviceConfigurationJsonDeserializer extends DeviceConfigurati
 
     @Override
     protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
-        return new PreferencesBasedDeviceConfiguration(preferences,
-                (StoredRacingProceduresConfiguration) proceduresConfiguration);
+        return new PreferencesBasedDeviceConfiguration(preferences, 
+                (PreferencesBasedRacingProceduresConfiguration) proceduresConfiguration);
     }
     
-    @Override
-    public StoredDeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
-        return (StoredDeviceConfiguration) super.deserialize(object);
+    @SuppressWarnings("unchecked")
+    public StoreableConfiguration<DeviceConfiguration> deserializeAsStored(JSONObject object) throws JsonDeserializationException {
+        return (StoreableConfiguration<DeviceConfiguration>) super.deserialize(object);
     }
 
 }

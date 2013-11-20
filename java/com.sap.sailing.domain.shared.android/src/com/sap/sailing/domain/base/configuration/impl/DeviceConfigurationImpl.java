@@ -10,7 +10,7 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
 
     private static final long serialVersionUID = 6084215932610324314L;
     
-    private final RacingProceduresConfiguration proceduresConfiguration;
+    private RacingProceduresConfiguration proceduresConfiguration;
     
     private List<String> allowedCourseAreaNames;
     private String resultsMailRecipient;
@@ -23,6 +23,10 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     }
 
     public DeviceConfigurationImpl(RacingProceduresConfiguration proceduresConfiguration) {
+        this.proceduresConfiguration = proceduresConfiguration;
+    }
+    
+    protected void setRacingProceduresConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
         this.proceduresConfiguration = proceduresConfiguration;
     }
 
@@ -74,6 +78,11 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
 
     public void setByNameDesignerCourseNames(List<String> byNameDesignerCourseNames) {
         this.byNameDesignerCourseNames = byNameDesignerCourseNames;
+    }
+    
+    protected static DeviceConfiguration copy(DeviceConfiguration configuration) {
+        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(configuration.getRacingProceduresConfiguration());
+        return copyConfiguration;
     }
 
 }

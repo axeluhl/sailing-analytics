@@ -13,8 +13,9 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.StoredDeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -111,10 +112,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
                     AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
             getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<StoredDeviceConfiguration>() {
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<StoreableConfiguration<DeviceConfiguration>>() {
 
                         @Override
-                        public void onLoadSucceded(StoredDeviceConfiguration configuration, boolean isCached) {
+                        public void onLoadSucceded(StoreableConfiguration<DeviceConfiguration> configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 

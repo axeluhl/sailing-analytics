@@ -1,22 +1,24 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 
+/**
+ * Is empty, does nothing;
+ */
 public class EmptyConfiguration extends RacingProceduresConfigurationImpl implements
-        StoredRacingProceduresConfiguration {
+        StoreableConfiguration<RacingProceduresConfiguration> {
 
     private static final long serialVersionUID = -4187341706420504456L;
 
     @Override
-    public StoredRacingProceduresConfiguration load() {
-        // TODO Auto-generated method stub
-        return this;
+    public RacingProceduresConfiguration load() {
+        return super.copy(this);
     }
 
     @Override
-    public StoredRacingProceduresConfiguration store() {
-        // TODO Auto-generated method stub
-        return this;
+    public void store() {
+        
     }
 
 }

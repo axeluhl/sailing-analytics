@@ -1,14 +1,16 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 
 public class PreferencesBasedRacingProceduresConfiguration extends RacingProceduresConfigurationImpl implements
-        StoredRacingProceduresConfiguration {
+    StoreableConfiguration<RacingProceduresConfiguration> {
 
     private static final long serialVersionUID = -2109422929668306199L;
 
+    @SuppressWarnings("unused")
     private final AppPreferences preferences;
 
     public PreferencesBasedRacingProceduresConfiguration(final AppPreferences preferences) {
@@ -16,14 +18,13 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
     }
 
     @Override
-    public StoredRacingProceduresConfiguration load() {
-        preferences.getAndroidIdentifier();
-        return this;
+    public RacingProceduresConfiguration load() {
+        return super.copy(this);
     }
 
     @Override
-    public StoredRacingProceduresConfiguration store() {
-        return this;
+    public void store() {
+        
     }
 
 }

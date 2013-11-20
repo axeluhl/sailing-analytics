@@ -10,7 +10,8 @@ import org.json.simple.JSONValue;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.domain.base.configuration.StoredRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
@@ -33,10 +34,10 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     // private static final String TAG = ManagedRacesDataParser.class.getName();
 
     private final JsonDeserializer<RaceGroup> deserializer;
-    private final StoredRacingProceduresConfiguration configuration;
+    private final StoreableConfiguration<RacingProceduresConfiguration> configuration;
     private final RaceLogEventAuthor author;
 
-    public ManagedRacesDataParser(RaceLogEventAuthor author, StoredRacingProceduresConfiguration configuration,
+    public ManagedRacesDataParser(RaceLogEventAuthor author, StoreableConfiguration<RacingProceduresConfiguration> configuration,
             JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
         this.configuration = configuration;
