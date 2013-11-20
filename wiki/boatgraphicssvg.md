@@ -13,7 +13,7 @@ In the 'SVG output' section of the Inkscape preference you need to change the nu
 ### Coordinate system origin
 One problem with using Inkscape is that the origin of the drawing area (and the ruler tools) is in the lower left corner whereas the origin of a SVG graphics is the upper left corner. To avoid confusion with the coordinates later on we recommend to put the graphics into the upper left corner. This makes it a little more complicated to work with the ruler, but ensures that the coordinates are correct in the canvas.
 
-### Measurement units
+### Scale
 To draw the boats later on the map with the right scale/size we also have to be clear about the used 'scale' when drawing the graphics. Right now the used scale is 1px = 1cm. So e.g. a 49er boat with the size of 4.90 x 2.50 meters would use a SVG document with the size 490px x 250px.
 
 ## Conversion of SVG graphics into a Canvas drawing commands
