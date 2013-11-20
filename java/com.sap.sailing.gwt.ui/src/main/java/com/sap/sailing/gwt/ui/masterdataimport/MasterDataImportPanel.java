@@ -310,6 +310,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         compressSwitch = new CheckBox(stringMessages.compress());
         compressSwitch.setTitle(stringMessages.compressTooltip());
         compressSwitch.setValue(true);
+        contentPanel.add(compressSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.setEnabled(false);
