@@ -33,7 +33,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
 import com.sap.sailing.domain.masterdataimport.LeaderboardGroupMasterData;
@@ -77,13 +76,13 @@ public class ImportMasterDataOperation extends
         return creationCount;
     }
 
-    private void createLeaderboardGroupWithAllRelatedObjects(LeaderboardGroupMasterData masterData,
+    private void createLeaderboardGroupWithAllRelatedObjects(final LeaderboardGroupMasterData masterData,
             RacingEventService toState) {
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(masterData, toState);
         createRegattas(masterData, toState);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
-        for (LeaderboardMasterData board : masterData.getLeaderboards()) {
+        for (final LeaderboardMasterData board : masterData.getLeaderboards()) {
             leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
                 if (creationCount.alreadyAddedLeaderboardWithName(board.getName())) {
@@ -118,7 +117,12 @@ public class ImportMasterDataOperation extends
                     addedScoreCorrections = true;
                 }
                 addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
-                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), board.getCompetitorsById());
+                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
+                    @Override
+                    public Competitor getCompetitorById(String id) {
+                        return board.getCompetitorsById().get(id);
+                    }
+                });
                 addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                         board.getCompetitorsById());
                 addRaceLogEvents(leaderboard, board.getRaceLogEvents());
@@ -129,8 +133,8 @@ public class ImportMasterDataOperation extends
 
             }
         }
-        int[] overallLeaderboardDiscardThresholds = null;
-        ScoringSchemeType overallLeaderboardScoringSchemeType = null;
+        int[] overallLeaderboardDiscardThresholds = masterData.getOverallLeaderboardDiscardingRule() != null ? masterData.getOverallLeaderboardDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces() : null;
+        ScoringSchemeType overallLeaderboardScoringSchemeType = masterData.getOverallLeaderboardScoringScheme() != null ? masterData.getOverallLeaderboardScoringScheme().getType() : null;
         final LeaderboardGroup leaderboardGroup;
         LeaderboardGroup existingLeaderboardGroup = toState.getLeaderboardGroupByName(masterData.getName());
         if (existingLeaderboardGroup != null && override) {
@@ -154,10 +158,22 @@ public class ImportMasterDataOperation extends
                 // remove old overall leaderboard if it existed
                 toState.removeLeaderboard(existingLeaderboardGroup.getOverallLeaderboard().getName());
             }
-            LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(
-                    leaderboardGroup, masterData.getOverallLeaderboardScoringScheme(), masterData.getOverallLeaderboardDiscardingRule());
-            leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-            toState.addLeaderboard(overallLeaderboard);
+            Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+            addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
+                    new CompetitorByIdGetter() {
+                        @Override
+                        public Competitor getCompetitorById(String id) {
+                            return masterData.getCompetitorById(id);
+                        }
+                    });
+            Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
+            if (factorsForMetaColumns != null) {
+                for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
+                    Double explicitFactor = factorsForMetaColumns.get(column.getName());
+                    toState.updateLeaderboardColumnFactor(overallLeaderboard.getName(), column.getName(), explicitFactor);
+                }
+            }
+            toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
     }
 
@@ -183,11 +199,15 @@ public class ImportMasterDataOperation extends
             leaderboard.setDisplayName(competitorsById.get(entry.getKey()), entry.getValue());
         }
     }
+    
+    interface CompetitorByIdGetter {
+        Competitor getCompetitorById(String id);
+    }
 
-    private void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
-            Map<String, Competitor> competitorsById) {
+    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
+            CompetitorByIdGetter competitorsById) {
         for (String id : suppressedCompetitors) {
-            leaderboard.setSuppressed(competitorsById.get(id), true);
+            leaderboard.setSuppressed(competitorsById.getCompetitorById(id), true);
         }
     }
 

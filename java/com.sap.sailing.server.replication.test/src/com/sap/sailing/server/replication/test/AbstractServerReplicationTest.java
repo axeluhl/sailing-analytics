@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -185,7 +186,10 @@ public abstract class AbstractServerReplicationTest {
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
-                                master.serializeForInitialReplication(new ObjectOutputStream(s.getOutputStream()));
+                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(s.getOutputStream());
+                                final ObjectOutputStream oos = new ObjectOutputStream(gzipOutputStream);
+                                master.serializeForInitialReplication(oos);
+                                gzipOutputStream.finish();
                             } else if (request.contains("STOP")) {
                                 stop = true;
                             }
