@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +11,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -46,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
@@ -82,7 +79,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
 
-    private TextBox racesFilterTextBox;
+    private AbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private CellTable<TracTracRaceRecordDTO> racesTable;
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -288,18 +285,20 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
-
-        this.racesFilterTextBox = new TextBox();
-        this.racesFilterTextBox.ensureDebugId("FilterRaces");
-        this.racesFilterTextBox.addKeyUpHandler(new KeyUpHandler() {
+        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
+        this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
             @Override
-            public void onKeyUp(KeyUpEvent event) {
-                fillRaceListFromAvailableRacesApplyingFilter(TracTracEventManagementPanel.this.racesFilterTextBox.getText());
+            public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.name);
+                strings.add(t.regattaName);
+                return strings;
             }
-        });
-
+        };
+        racesFilterablePanel.getTextBox().ensureDebugId("FilterRaces");
         layoutTable.setWidget(4, 0, racesFilterLabel);
-        layoutTable.setWidget(4, 1, racesFilterTextBox);
+        layoutTable.setWidget(4, 1, racesFilterablePanel);
 
         // Races
         TextColumn<TracTracRaceRecordDTO> regattaNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
@@ -339,8 +338,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         };
         raceStatusColumn.setSortable(true);
         
-        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("RacesTable");
         racesTable.addColumn(regattaNameColumn, stringMessages.event());
         racesTable.addColumn(raceNameColumn, stringMessages.race());
@@ -489,7 +486,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 races.clear();
                 races.addAll(TracTracEventManagementPanel.this.availableTracTracRaces);
                 
-                TracTracEventManagementPanel.this.racesFilterTextBox.setText("");
+                TracTracEventManagementPanel.this.racesFilterablePanel.getTextBox().setText("");
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                 loadingMessageLabel.setText("");
                 
@@ -619,19 +616,4 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         tractracPasswordTextBox.setValue(config.tractracPassword);
     }
 
-    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
-        List<String> wordsToFilter = Arrays.asList(text.split(" "));
-        List<TracTracRaceRecordDTO> races = raceList.getList();
-        
-        races.clear();
-
-        for (TracTracRaceRecordDTO race : availableTracTracRaces) {
-            if (textContainsStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
-                races.add(race);
-            }
-        }
-
-        // now sort again according to selected criterion
-        ColumnSortEvent.fire(racesTable, racesTable.getColumnSortList());
-    }
 }
