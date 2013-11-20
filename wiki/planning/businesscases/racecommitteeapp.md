@@ -21,10 +21,10 @@ The app should exist in two version:
   * Regattas
   * Courses
   * Races
-    * Time
-    * Wind
-    * Competitors
-    * Course
+    1 Time
+    2 Wind
+    3 Competitors
+    4 Course
 
 ## Description
 
