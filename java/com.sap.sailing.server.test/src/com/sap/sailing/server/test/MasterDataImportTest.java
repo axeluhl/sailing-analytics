@@ -500,14 +500,14 @@ public class MasterDataImportTest {
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
-        Set<Person> sailors = new HashSet<Person>();
+        Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
                 "Oberhoschy"));
-        Person coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
+        DynamicPerson coach = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(645487200000L),
                 "Der Lennart halt");
-        Team team = new TeamImpl("Pros", sailors, coach);
+        DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
-        Boat boat = new BoatImpl("Wingy", boatClass, "GER70133");
+        DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
         CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
         competitors.add(competitor);
 
