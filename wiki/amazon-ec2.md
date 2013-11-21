@@ -6,6 +6,9 @@
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
 - Database and Queue Server: 172.31.25.253
+- Which instance type to choose:
+  - Archive: m2.2xlarge
+  - Live: c1.xlarge
 - Using a release
 <pre>
 INSTALL_FROM_RELEASE=master-201311062138
