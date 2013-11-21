@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
@@ -204,6 +205,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         DefaultHttpClient client = new SystemDefaultHttpClient();
         CookieStore cookieStore = new BasicCookieStore();
         client.setCookieStore(cookieStore);
+        client.setRedirectStrategy(new LaxRedirectStrategy());
         HttpGet get = new HttpGet(getOauthAuthorizeUrl());
         HttpResponse responseForAuthorize = client.execute(get);
         HttpResponse authorizationForm = signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
