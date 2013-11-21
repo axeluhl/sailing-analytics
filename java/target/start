@@ -38,7 +38,7 @@ fi
 # enable special environment configuration
 if [[ $USE_ENVIRONMENT != "" ]]; then
     echo "Using environment $USE_ENVIRONMENT"
-    source ./$USE_ENVIRONMENT
+    source ./environment/$USE_ENVIRONMENT
 fi
 
 # make some checks
