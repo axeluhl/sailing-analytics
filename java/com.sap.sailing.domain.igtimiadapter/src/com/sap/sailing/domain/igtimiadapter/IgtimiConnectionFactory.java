@@ -14,7 +14,6 @@ import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
  * {@link #registerAccountForWhichClientIsAuthorized(String) registered} with this factory previously.
  * 
  * @author Axel Uhl (d043530)
- * 
  */
 public interface IgtimiConnectionFactory {
     /**
