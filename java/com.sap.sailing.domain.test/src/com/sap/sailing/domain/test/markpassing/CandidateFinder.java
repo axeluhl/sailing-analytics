@@ -14,27 +14,28 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class CandidateFinder {
 
     private ArrayList<Waypoint> waypoints = new ArrayList<>();
     private LinkedHashMap<Mark, DynamicGPSFixTrack<Mark, GPSFix>> markTracks = new LinkedHashMap<>();
-    private LinkedHashMap<Waypoint, Double> averageLegLengths = new LinkedHashMap<>();
+    private LinkedHashMap<Waypoint, TrackedLeg> averageLegLengths = new LinkedHashMap<>();
     private CandidateChooser chooser;
     
     private LinkedHashMap<Competitor, DynamicGPSFixTrack<Competitor, GPSFix>> competitorTracks = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, ArrayList<GPSFix>>> candidates = new LinkedHashMap<>();
 
-    public CandidateFinder(ArrayList<Waypoint> waypoints, Iterable<Competitor> competitors, CandidateChooser chooser, ArrayList<Double>legLengths) {
+    public CandidateFinder(ArrayList<Waypoint> waypoints, Iterable<Competitor> competitors, CandidateChooser chooser,  ArrayList<TrackedLeg> legs) {
         this.waypoints = waypoints;
+        upDateLegs(legs);
+        this.chooser = chooser;
         for(Competitor c : competitors){
             competitorTracks.put(c, new DynamicTrackImpl<Competitor, GPSFix>(c, 1000));
             distances.put(c, new LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>());
             candidates.put(c, new LinkedHashMap<Waypoint, ArrayList<GPSFix>>());
-            this.chooser = chooser;
-            upDateLegLengths(legLengths);
             for(Waypoint w : waypoints){
                 candidates.get(c).put(w, new ArrayList<GPSFix>());
             }
@@ -51,19 +52,9 @@ public class CandidateFinder {
         }
     }
 
-    public void upDateLegLengths(ArrayList<Double> legLengths) {
-        double length;
-        for (int i = 0; i < waypoints.size(); i++) {
-            if (i == 0) {
-                length = legLengths.get(i);
-            } else {
-                if (i == waypoints.size() - 1) {
-                    length = legLengths.get(i - 1);
-                } else {
-                    length = (legLengths.get(i) + legLengths.get(i - 1)) / 2;
-                }
-            }
-            averageLegLengths.put(waypoints.get(i), length);
+    public void upDateLegs(ArrayList<TrackedLeg> legs) {
+        for (int i = 0; i < waypoints.size()-1; i++) {
+            averageLegLengths.put(waypoints.get(i), legs.get(i));
         }
     }
 
@@ -135,33 +126,38 @@ public class CandidateFinder {
                 if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
                     candidates.get(c).get(w).add(gps);
                     Candidate newCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps)
-                            .get(w), averageLegLengths.get(w)), waypoints.indexOf(w) + 1);
+                            .get(w), getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
                     chooser.addCandidate(newCandidate, c);
                 }
 
                 if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
                     candidates.get(c).get(w).remove(gps);
                     Candidate badCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps)
-                            .get(w), averageLegLengths.get(w)), waypoints.indexOf(w) + 1);
+                            .get(w), getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
                     chooser.removeCandidate(badCandidate, c);
                 }
             
         }
     }
     
-    private double getCost(Double distance, Double legLength) {
-        if (distance < legLength / 10) {
-            return distance/legLength;
-        } else {
-            // Is 1000 way to high? Would these Candidates be skipped automatically?
-            return distance / legLength * 1000;
+    private double getLegLength(TimePoint t, Waypoint w){
+        if(waypoints.indexOf(w)==0){
+            return averageLegLengths.get(w).getGreatCircleDistance(t).getMeters();
+        }else if(waypoints.indexOf(w)==waypoints.size()-1){
+            return averageLegLengths.get(waypoints.get(waypoints.size()-2)).getGreatCircleDistance(t).getMeters();
+        }else{
+            return (averageLegLengths.get(w).getGreatCircleDistance(t).getMeters()
+                    + averageLegLengths.get(waypoints.get(waypoints.indexOf(w)-1)).getGreatCircleDistance(t).getMeters())/2;
         }
+    }
+    
+    private double getCost(Double distance, Double legLength) {
+            return distance/legLength;
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
         GPSFix fixBefore = competitorTracks.get(c).getLastFixBefore(fix.getTimePoint());
         GPSFix fixAfter = competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint());
-        
         if (distances.get(c).containsKey(fix) 
                 && !(fixBefore==null)
                 && distances.get(c).get(fix).get(w) < distances.get(c).get(fixBefore).get(w)

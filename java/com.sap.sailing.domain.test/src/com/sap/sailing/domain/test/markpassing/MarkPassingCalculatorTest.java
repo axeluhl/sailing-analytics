@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,13 +11,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.GregorianCalendar;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -41,27 +41,61 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     public MarkPassingCalculatorTest() throws MalformedURLException, URISyntaxException {
         super();
     }
+    
+    @Test
+    public void test505_2() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado 16");
+        testRace("357c700a-9d9a-11e0-85be-406186cbf87c");
+    }
+    @Test
+    public void test505_7() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado 16");
+        testRace("cb043bb4-9e92-11e0-85be-406186cbf87c");
+    }
+  
+    
+    @Test
+    public void testTornado16() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado 16");
+        testRace("04687b2a-9e68-11e0-85be-406186cbf87c");
+    }
 
-    @Before
-    public void setUp() throws IOException, InterruptedException, URISyntaxException {
+    @Test
+    public void testStar4() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Star 4");
+        testRace("f5f531ec-99ed-11e0-85be-406186cbf87c");
+    }
+
+    /*@Test
+    public void testTornado4() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado Race 4");
+        testRace("5291b3ea-9934-11e0-85be-406186cbf87c");
+    }*/
+
+    @Test
+    public void testStarMedal() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Star Medal");
+        testRace("d591d808-9c48-11e0-85be-406186cbf87c");
+    }
+
+    private void testRace(String raceID) throws IOException, InterruptedException, URISyntaxException {
+        setUp(raceID);
+        compareMarkpasses();
+    }
+
+    private void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
         /*
-         * 505 Race 2: 357c700a-9d9a-11e0-85be-406186cbf87c
+         * Tornado Race 4: 5291b3ea-9934-11e0-85be-406186cbf87c
          * 
-         * 505 Race 7: cb043bb4-9e92-11e0-85be-406186cbf87c
-         * 
-         * 505 Race 10: 357c700a-9d9a-11e0-85be-406186cbf87c
-         * 
-         * To set by hand: Average Speeds
+         * Tornado Race 16: 04687b2a-9e68-11e0-85be-406186cbf87c
          */
-        String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
+
         if (!loadData(raceID) && !forceReload) {
             System.out.println("Downloading new data from the web.");
             this.setUp("event_20110609_KielerWoch",
             /* raceId */raceID, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
                     ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-            OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(),
-                    new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
             getTrackedRace().recordWind(
                     new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                             new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
@@ -168,19 +202,17 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         }
     }
 
-    @Test
-    public void compareMarkpasses() {
-
+    private void compareMarkpasses() {
+        double time = System.currentTimeMillis();
         final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace());
-        final int tolerance = 20000;
-        int correctPasses = 0;
-        int incorrectPasses = 0;
-        int missingGivenMarkPassings = 0;
-        int missingMarkPasses = 0;
-        int numberOfCompetitors = 0;
-        Iterable<Waypoint> waypoints = getRace().getCourse().getWaypoints();
+        ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
+
+        // Get Waypoints
+        for (Waypoint w : getRace().getCourse().getWaypoints()) {
+            waypoints.add(w);
+        }
 
         // Get given Markpasses
         for (Competitor c : getRace().getCompetitors()) {
@@ -188,9 +220,6 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             for (Waypoint wp : waypoints) {
                 MarkPassing markPassing = getTrackedRace().getMarkPassing(c, wp);
                 givenMarkPasses.put(wp, markPassing);
-                if (givenMarkPasses.get(wp) == null) {
-                    missingGivenMarkPassings++;
-                }
             }
             givenPasses.put(c, givenMarkPasses);
         }
@@ -203,6 +232,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                 marks.add(it.next());
             }
         }
+
         // Pass in Mark Fixes
         for (Mark m : marks) {
             try {
@@ -214,9 +244,9 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
                 getTrackedRace().getOrCreateTrack(m).unlockAfterRead();
             }
         }
+
         // Pass in Competitor Fixes
         for (Competitor c : getRace().getCompetitors()) {
-            numberOfCompetitors++;
             try {
                 getTrackedRace().getTrack(c).lockForRead();
                 for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
@@ -227,6 +257,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             }
         }
         // Get results
+        System.out.println("Getting Results");
         for (Competitor c : getRace().getCompetitors()) {
             LinkedHashMap<Waypoint, MarkPassing> passes = new LinkedHashMap<>();
             for (Waypoint w : waypoints) {
@@ -236,56 +267,77 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         }
 
         // Compare computed and calculated MarkPassings
-        boolean printAll = false;
+        final int tolerance = 20000;
+        int numberOfCompetitors = 0;
+        int wronglyComputed = 0;
+        int wronglyNotComputed = 0;
+        int correctlyNotComputed = 0;
+        int correctPasses = 0;
+        int incorrectPasses = 0;
+        
+        boolean printRight = false;
         boolean printWrong = true;
-        boolean printNull = true;
+        
         for (Competitor c : getRace().getCompetitors()) {
+            numberOfCompetitors++;
             System.out.println(c.getName() + "\n");
             for (Waypoint w : waypoints) {
-                try {
+                if (givenPasses.get(c).get(w) == null && !(computedPasses.get(c).get(w) == null)) {
+                    wronglyComputed++;
+                    if (printWrong) {
+                        System.out.println(waypoints.indexOf(w));
+                        System.out.println("Given is null");
+                        System.out.println(computedPasses.get(c).get(w)+ "\n");
+                    }
+                } else if (computedPasses.get(c).get(w) == null && !(givenPasses.get(c).get(w) == null)) {
+                    wronglyNotComputed++;
+                    if (printWrong) {
+                        System.out.println(waypoints.indexOf(w));
+                        System.out.println("Computed is null");
+                        System.out.println(givenPasses.get(c).get(w)+ "\n");
+                    }
+                } else if (givenPasses.get(c).get(w) == null && computedPasses.get(c).get(w) == null) {
+                    correctlyNotComputed++;
+                    if (printRight) {
+                        System.out.println(waypoints.indexOf(w));
+                        System.out.println("Both null"+ "\n");
+                    }
+                } else {
                     long timedelta = givenPasses.get(c).get(w).getTimePoint().asMillis()
                             - computedPasses.get(c).get(w).getTimePoint().asMillis();
                     if ((Math.abs(timedelta) < tolerance)) {
                         correctPasses++;
+                        if(printRight){
+                            System.out.println(waypoints.indexOf(w));
+                            System.out.println("Calculated: " + computedPasses.get(c).get(w));
+                            System.out.println("Given: " + givenPasses.get(c).get(w));
+                            System.out.println(timedelta / 1000 + " s\n");
+                        }
                     } else {
                         if (printWrong) {
-                            System.out.println(getRace().getCourse().getIndexOfWaypoint(w));
+                            System.out.println(waypoints.indexOf(w));
                             System.out.println("Calculated: " + computedPasses.get(c).get(w));
                             System.out.println("Given: " + givenPasses.get(c).get(w));
                             System.out.println(timedelta / 1000 + "\n");
                         }
                         incorrectPasses++;
                     }
-                } catch (NullPointerException e) {
-                    missingMarkPasses++;
-                    if (printNull) {
-                        System.out.println(getRace().getCourse().getIndexOfWaypoint(w));
-                        System.out.println("Calculated: " + computedPasses.get(c).get(w));
-                        System.out.println("Given: " + givenPasses.get(c).get(w));
-                        System.out.println("Null" + "\n");
-                    }
-                } finally {
-                    if (printAll) {
-                        System.out.println(getRace().getCourse().getIndexOfWaypoint(w));
-                        System.out.println("Calculated: " + computedPasses.get(c).get(w));
-                        System.out.println("Given: " + givenPasses.get(c).get(w) + "\n");
-                    }
-
                 }
             }
         }
 
-        double givenMarkPasses = numberOfCompetitors
-                * (getRace().getCourse().getIndexOfWaypoint(getRace().getCourse().getLastWaypoint()) + 1)
-                - missingGivenMarkPassings;
-        double accuracy = (double) correctPasses / givenMarkPasses;
-        System.out.println("Missing Given MarkPass: " + missingGivenMarkPassings);
-        System.out.println("Incorrect comparison: " + incorrectPasses);
+        int totalMarkPasses = numberOfCompetitors*waypoints.size();
+        assertEquals(totalMarkPasses, incorrectPasses+correctPasses+wronglyNotComputed+correctlyNotComputed+wronglyComputed);
+        System.out.println("Total theoretical Passes: " + totalMarkPasses);
+        double accuracy = (double) (correctPasses+correctlyNotComputed) / totalMarkPasses;
         System.out.println("Correct comparison: " + correctPasses);
-        System.out.println("One markpass missing: " + missingMarkPasses);
-        System.out.println("Total given MarkPasses: " + givenMarkPasses);
-        System.out.println(correctPasses + " / " + givenMarkPasses);
+        System.out.println("Incorrect comparison: " + incorrectPasses);
+        System.out.println("Correctly Null: " + correctlyNotComputed);
+        System.out.println("Should be null but arent:" + wronglyComputed);
+        System.out.println("Should not be null but are: " + wronglyNotComputed);
         System.out.println("accuracy: " + accuracy);
+        System.out.println("Computation time: " + (System.currentTimeMillis()-time)/1000 + " s");
         assertTrue(accuracy > 0.8);
+        
     }
 }
