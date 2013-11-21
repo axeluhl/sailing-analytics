@@ -50,9 +50,14 @@ To give you a feeling about the costs you can refer to the following table. To g
 <td>Cost per Month (Reserved instance for 12 months)</td>
 </tr>
 <tr>
-<td>m2.2xlarge</td>
+<td>m2.2xlarge (Archive)</td>
 <td>$800</td>
 <td>$400</td>
+</tr>
+<tr>
+<td>c1.xlarge (Build and Live)</td>
+<td>$500</td>
+<td>$350</td>
 </tr>
 </table>
 
