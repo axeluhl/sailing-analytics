@@ -9,7 +9,6 @@ import org.json.simple.parser.ParseException;
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
  * 
  * @author Axel Uhl (d043530)
- *
  */
 public interface IgtimiConnection {
 
