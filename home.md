@@ -27,6 +27,7 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Mobile Development|wiki/mobile-development]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
+  * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
