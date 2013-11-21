@@ -52,7 +52,7 @@ load_from_release_file ()
     cd $USER_HOME/servers/server
     rm -f ./$USE_ENVIRONMENT
     rm -f ./$INSTALL_FROM_RELEASE.tar.gz*
-    rm -rf plugins start stop status native-libraries org.eclipse.osgi
+    rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
     echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
     `which wget` http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
     `which tar` xvzf $INSTALL_FROM_RELEASE.tar.gz
