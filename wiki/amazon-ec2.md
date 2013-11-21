@@ -2,6 +2,68 @@
 
 [[_TOC_]]
 
+## Quickstart
+
+- Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
+- Database and Queue Server: 172.31.25.253
+- Which instance type to choose:
+  - Archive: m2.2xlarge
+  - Live: c1.xlarge
+- Using a release, set the following in the instance's user data:
+<pre>
+INSTALL_FROM_RELEASE=master-201311062138
+USE_ENVIRONMENT=live-server
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+</pre>
+- To build from git, install and start, set the following in the instance's user data, adjusting the MONGODB_PORT and memory settings according to your needs:
+<pre>
+BUILD_BEFORE_START=True
+BUILD_FROM=master
+RUN_TESTS=False
+COMPILE_GWT=True
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=
+SERVER_NAME=LIVE1
+MEMORY=2048m
+REPLICATION_HOST=172.31.25.253
+REPLICATION_CHANNEL=sapsailinganalytics-live
+TELNET_PORT=14888
+SERVER_PORT=8888
+MONGODB_HOST=172.31.25.253
+MONGODB_PORT=10202
+EXPEDITION_PORT=2010
+REPLICATE_ON_START=False
+REPLICATE_MASTER_SERVLET_HOST=
+REPLICATE_MASTER_SERVLET_PORT=
+REPLICATE_MASTER_QUEUE_HOST=
+REPLICATE_MASTER_QUEUE_PORT=
+INSTALL_FROM_RELEASE=
+USE_ENVIRONMENT=
+</pre>
+
+## Costs per month
+
+To give you a feeling about the costs you can refer to the following table. To get all details go to http://www.awsnow.info/
+
+<table>
+<tr>
+<td>Server Type</td>
+<td>Cost per Month</td>
+<td>Cost per Month (Reserved instance for 12 months)</td>
+</tr>
+<tr>
+<td>m2.2xlarge (Archive)</td>
+<td>$800</td>
+<td>$400</td>
+</tr>
+<tr>
+<td>c1.xlarge (Build and Live)</td>
+<td>$500</td>
+<td>$350</td>
+</tr>
+</table>
+
 ## General Information and Security
 
 Since XXX 2013 this project is using EC2 as the server provider. Amazon Elastic Compute Cloud (EC2) is a central part of Amazon.com's cloud computing platform, Amazon Web Services (AWS). EC2 allows users to rent virtual computers on which to run their own computer applications. EC2 allows scalable deployment of applications by providing a Web service through which a user can boot an Amazon Machine Image to create a virtual machine, which Amazon calls an "instance", containing any software desired. A user can create, launch, and terminate server instances as needed, paying by the hour for active servers, hence the term "elastic".
@@ -166,6 +228,19 @@ Two things are still needed before this setup can be executed:
 Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 ### Access MongoDB database
+
+## Migration Checklist
+
+- fire up archive server and load it
+- configure 001-events.conf starting with a copy from old sapsailing.com
+- clone entire MongoDB content
+- migrate MySQL for Bugzilla
+- fetch all git branches
+- run test build and deploy
+- fire up a live server and test it
+- check that tmux with UDP mirror and SwissTiming StoreAndForward is running
+- check that we can fire up a live2 / archive2 server and switch transparently
+- check that sapsailing.com is entered everywhere a hostname / domain name is required
 
 ## Glossary
 

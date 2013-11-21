@@ -1,5 +1,7 @@
 # Sponsorship Engine
 
+Author: Simon Pamies
+
 ## Rationale
 SAP is getting involved in more and more sponsorship agreements in the sports sector and for each of these pushes to support the partner with technology. SAP puts a strong focus on providing analytics that, not only help people understand the sport and making it visible, but also thrives to help partners run their sport better. 
 

@@ -2,6 +2,12 @@
 
 . `pwd`/env.sh
 
+# enable special environment configuration
+if [[ $USE_ENVIRONMENT != "" ]]; then
+    echo "Using environment $USE_ENVIRONMENT"
+    source ./$USE_ENVIRONMENT
+fi
+
 TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
 if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         echo "Could not find server on telnet port $TELNET_PORT. Perhaps server is not running?"
