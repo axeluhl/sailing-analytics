@@ -39,6 +39,23 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
 
+## Costs per month
+
+To give you a feeling about the costs you can refer to the following table. To get all details go to http://www.awsnow.info/
+
+<table>
+<tr>
+<td>Server Type</td>
+<td>Cost per Month</td>
+<td>Cost per Month (Reserved instance for 12 months)</td>
+</tr>
+<tr>
+<td>m2.2xlarge</td>
+<td>$800</td>
+<td>$400</td>
+</tr>
+</table>
+
 ## General Information and Security
 
 Since XXX 2013 this project is using EC2 as the server provider. Amazon Elastic Compute Cloud (EC2) is a central part of Amazon.com's cloud computing platform, Amazon Web Services (AWS). EC2 allows users to rent virtual computers on which to run their own computer applications. EC2 allows scalable deployment of applications by providing a Web service through which a user can boot an Amazon Machine Image to create a virtual machine, which Amazon calls an "instance", containing any software desired. A user can create, launch, and terminate server instances as needed, paying by the hour for active servers, hence the term "elastic".
