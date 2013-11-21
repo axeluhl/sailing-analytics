@@ -50,7 +50,8 @@ find_project_home ()
 load_from_release_file ()
 {
     cd $USER_HOME/servers/server
-    rm -f ./$USE_ENVIRONMENT
+    rm -rf environment
+    mkdir environment
     rm -f ./$INSTALL_FROM_RELEASE.tar.gz*
     rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
     echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
@@ -58,8 +59,9 @@ load_from_release_file ()
     `which tar` xvzf $INSTALL_FROM_RELEASE.tar.gz
     echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
     `which wget` http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-    chmod a+x $USE_ENVIRONMENT
-    ./$USE_ENVIRONMENT
+    mv $USE_ENVIRONMENT environment/
+    chmod a+x environment/$USE_ENVIRONMENT
+    source environment/$USE_ENVIRONMENT
     echo "Configuration for this server is:"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"
