@@ -9,14 +9,14 @@
 - Which instance type to choose:
   - Archive: m2.2xlarge
   - Live: c1.xlarge
-- Using a release
+- Using a release, set the following in the instance's user data:
 <pre>
 INSTALL_FROM_RELEASE=master-201311062138
 USE_ENVIRONMENT=live-server
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 </pre>
-- Building
+- To build from git, install and start, set the following in the instance's user data, adjusting the MONGODB_PORT and memory settings according to your needs:
 <pre>
 BUILD_BEFORE_START=True
 BUILD_FROM=master
