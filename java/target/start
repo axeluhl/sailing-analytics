@@ -32,14 +32,13 @@ if [[ $PARAM != "no-update" ]]; then
             echo "ERROR - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
             exit
          fi 
-
-        # enable special environment configuration
-        if [[ $USE_ENVIRONMENT != "" ]]; then
-            echo "Using environment $USE_ENVIRONMENT"
-            source ./$USE_ENVIRONMENT
-        fi
-
     fi
+fi
+
+# enable special environment configuration
+if [[ $USE_ENVIRONMENT != "" ]]; then
+    echo "Using environment $USE_ENVIRONMENT"
+    source ./$USE_ENVIRONMENT
 fi
 
 # make some checks
