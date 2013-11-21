@@ -236,6 +236,7 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 - clone entire MongoDB content
 - migrate MySQL for Bugzilla
 - fetch all git branches
+- ensure that all users have access; either solicit their public keys and enter to ~trac/.ssh/authorized_keys or migrate /etc/passwd and /etc/group settings for access to trac group
 - run test build and deploy
 - fire up a live server and test it
 - check that tmux with UDP mirror and SwissTiming StoreAndForward is running
