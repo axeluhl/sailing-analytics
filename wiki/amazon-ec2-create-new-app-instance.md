@@ -38,9 +38,11 @@ Configure the key. Make sure to always use the "Administrator" key.
 
 <img src="/wiki/images/amazon/StartInstance7.JPG" width="70%" height="70%"/>
 
-Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costy.
+Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costly.
 
 <img src="/wiki/images/amazon/StartInstance12.JPG" width="70%" height="70%"/>
+
+Should the reachability status check fail, your instance will not be reachable, and the best option is to terminate and re-create that instance. Sorry.
 
 Your application is now ready. Check that everything is green.
 
