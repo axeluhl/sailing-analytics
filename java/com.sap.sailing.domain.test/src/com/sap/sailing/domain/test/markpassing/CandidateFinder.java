@@ -23,37 +23,38 @@ public class CandidateFinder {
     private LinkedHashMap<Mark, DynamicGPSFixTrack<Mark, GPSFix>> markTracks = new LinkedHashMap<>();
     private LinkedHashMap<Waypoint, TrackedLeg> averageLegLengths = new LinkedHashMap<>();
     private CandidateChooser chooser;
-    
+
     private LinkedHashMap<Competitor, DynamicGPSFixTrack<Competitor, GPSFix>> competitorTracks = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, ArrayList<GPSFix>>> candidates = new LinkedHashMap<>();
 
-    public CandidateFinder(ArrayList<Waypoint> waypoints, Iterable<Competitor> competitors, CandidateChooser chooser,  ArrayList<TrackedLeg> legs) {
+    public CandidateFinder(ArrayList<Waypoint> waypoints, Iterable<Competitor> competitors, CandidateChooser chooser,
+            ArrayList<TrackedLeg> legs) {
         this.waypoints = waypoints;
         upDateLegs(legs);
         this.chooser = chooser;
-        for(Competitor c : competitors){
+        for (Competitor c : competitors) {
             competitorTracks.put(c, new DynamicTrackImpl<Competitor, GPSFix>(c, 1000));
             distances.put(c, new LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>());
             candidates.put(c, new LinkedHashMap<Waypoint, ArrayList<GPSFix>>());
-            for(Waypoint w : waypoints){
+            for (Waypoint w : waypoints) {
                 candidates.get(c).put(w, new ArrayList<GPSFix>());
             }
         }
         Set<Mark> marks = new HashSet<>();
-        for(Waypoint w : waypoints){
+        for (Waypoint w : waypoints) {
             Iterator<Mark> it = w.getMarks().iterator();
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 marks.add(it.next());
             }
         }
-        for(Mark m : marks){
+        for (Mark m : marks) {
             markTracks.put(m, new DynamicTrackImpl<Mark, GPSFix>(m, 1000));
         }
     }
 
     public void upDateLegs(ArrayList<TrackedLeg> legs) {
-        for (int i = 0; i < waypoints.size()-1; i++) {
+        for (int i = 0; i < waypoints.size() - 1; i++) {
             averageLegLengths.put(waypoints.get(i), legs.get(i));
         }
     }
@@ -73,11 +74,11 @@ public class CandidateFinder {
         if (!(competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint()) == null)) {
             fixesToBeReevaluated.add(competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint()));
         }
-        for(Waypoint w : waypoints){
-        reEvaluateFixes(fixesToBeReevaluated, c, w);
+        for (Waypoint w : waypoints) {
+            reEvaluateFixes(fixesToBeReevaluated, c, w);
         }
     }
-    
+
     public void newMarkFix(Mark mark, GPSFix fix) {
         markTracks.get(mark).addGPSFix(fix);
         TimePoint start = fix.getTimePoint();
@@ -93,7 +94,7 @@ public class CandidateFinder {
                     for (Competitor c : competitorTracks.keySet()) {
                         ArrayList<GPSFix> fixesAffected = new ArrayList<>();
                         TimePoint t = start;
-                        while (!(competitorTracks.get(c).getFirstFixAfter(t)==null)) {
+                        while (!(competitorTracks.get(c).getFirstFixAfter(t) == null)) {
                             GPSFix nextFix = competitorTracks.get(c).getFirstFixAfter(t);
                             t = nextFix.getTimePoint();
                             if (!(end == null) && !t.before(end)) {
@@ -108,7 +109,8 @@ public class CandidateFinder {
                         if (!(competitorTracks.get(c).getLastFixAtOrBefore(start) == null)) {
                             fixesAffected.add(competitorTracks.get(c).getLastFixAtOrBefore(start));
                         }
-                        if (!fixesAffected.contains(competitorTracks.get(c).getLastFixBefore(start))&&!(competitorTracks.get(c).getLastFixBefore(start)==null)) {
+                        if (!fixesAffected.contains(competitorTracks.get(c).getLastFixBefore(start))
+                                && !(competitorTracks.get(c).getLastFixBefore(start) == null)) {
                             fixesAffected.add(competitorTracks.get(c).getLastFixBefore(start));
                         }
                         if (fixesAffected.size() > 0) {
@@ -123,45 +125,43 @@ public class CandidateFinder {
 
     private void reEvaluateFixes(ArrayList<GPSFix> fixes, Competitor c, Waypoint w) {
         for (GPSFix gps : fixes) {
-                if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
-                    candidates.get(c).get(w).add(gps);
-                    Candidate newCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps)
-                            .get(w), getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
-                    chooser.addCandidate(newCandidate, c);
-                }
+            if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
+                candidates.get(c).get(w).add(gps);
+                Candidate newCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps).get(w),
+                        getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
+                chooser.addCandidate(newCandidate, c);
+            }
 
-                if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
-                    candidates.get(c).get(w).remove(gps);
-                    Candidate badCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps)
-                            .get(w), getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
-                    chooser.removeCandidate(badCandidate, c);
-                }
-            
+            if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
+                candidates.get(c).get(w).remove(gps);
+                Candidate badCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps).get(w),
+                        getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
+                chooser.removeCandidate(badCandidate, c);
+            }
+
         }
     }
-    
-    private double getLegLength(TimePoint t, Waypoint w){
-        if(waypoints.indexOf(w)==0){
+
+    private double getLegLength(TimePoint t, Waypoint w) {
+        if (waypoints.indexOf(w) == 0) {
             return averageLegLengths.get(w).getGreatCircleDistance(t).getMeters();
-        }else if(waypoints.indexOf(w)==waypoints.size()-1){
-            return averageLegLengths.get(waypoints.get(waypoints.size()-2)).getGreatCircleDistance(t).getMeters();
-        }else{
-            return (averageLegLengths.get(w).getGreatCircleDistance(t).getMeters()
-                    + averageLegLengths.get(waypoints.get(waypoints.indexOf(w)-1)).getGreatCircleDistance(t).getMeters())/2;
+        } else if (waypoints.indexOf(w) == waypoints.size() - 1) {
+            return averageLegLengths.get(waypoints.get(waypoints.size() - 2)).getGreatCircleDistance(t).getMeters();
+        } else {
+            return (averageLegLengths.get(w).getGreatCircleDistance(t).getMeters() + averageLegLengths
+                    .get(waypoints.get(waypoints.indexOf(w) - 1)).getGreatCircleDistance(t).getMeters()) / 2;
         }
     }
-    
+
     private double getCost(Double distance, Double legLength) {
-            return distance/legLength;
+        return 1/(10*Math.abs(distance/legLength)+1);
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
         GPSFix fixBefore = competitorTracks.get(c).getLastFixBefore(fix.getTimePoint());
         GPSFix fixAfter = competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint());
-        if (distances.get(c).containsKey(fix) 
-                && !(fixBefore==null)
-                && distances.get(c).get(fix).get(w) < distances.get(c).get(fixBefore).get(w)
-                && !(fixAfter==null) 
+        if (distances.get(c).containsKey(fix) && !(fixBefore == null)
+                && distances.get(c).get(fix).get(w) < distances.get(c).get(fixBefore).get(w) && !(fixAfter == null)
                 && distances.get(c).get(fix).get(w) < distances.get(c).get(fixAfter).get(w)) {
             return true;
         }
@@ -201,7 +201,7 @@ public class CandidateFinder {
             positions.add(markTracks.get(it.next()).getEstimatedPosition(gps.getTimePoint(), true));
         }
         if (p.equals(PassingInstruction.Port) || p.equals(PassingInstruction.Starboard)
-                || p.equals(PassingInstruction.Offset)||p.equals(PassingInstruction.None)) {
+                || p.equals(PassingInstruction.Offset) || p.equals(PassingInstruction.None)) {
             distance = gps.getPosition().getDistance(positions.get(0)).getMeters();
         }
         if (p.equals(PassingInstruction.Line)) {

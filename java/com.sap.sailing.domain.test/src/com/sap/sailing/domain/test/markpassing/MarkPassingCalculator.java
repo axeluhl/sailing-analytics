@@ -20,12 +20,11 @@ public class MarkPassingCalculator extends AbstractRaceChangeListener implements
     private ArrayList<Waypoint> waypoints = new ArrayList<>();
     private TimePoint startOfTracking;
 
-    // TODO Work without Start Time => evaluate possible start times by number of people crossing start line
     // TODO Add reload all method (Specifically for waypoint changes)
     // TODO Document everything
     // TODO Feldmann issue
     // TODO Use Wind/Maneuver analysis
-    // TODO Weighting of Time and Start!!!
+    // TODO Weighting of Time and Start and Distance and together!!!!!!!
     // TODO Edges from proxy-start to anything besides the actual start have a wrong time estimation because the time
     // between start of tracking and start of race is included in actual but not in estimated
 

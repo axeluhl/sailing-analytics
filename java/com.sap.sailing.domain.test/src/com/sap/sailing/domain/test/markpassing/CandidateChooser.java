@@ -23,8 +23,8 @@ public class CandidateChooser {
 
     public CandidateChooser(TimePoint startOfTracking, Iterable<Competitor> competitors, ArrayList<TrackedLeg> legs) {
         this.legs = legs;
-        end = new Candidate(legs.size() + 2, null, 0);
-        start = new Candidate(0, startOfTracking, 0);
+        end = new Candidate(legs.size() + 2, null, 1);
+        start = new Candidate(0, startOfTracking, 1);
         for (Competitor c : competitors) {
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
             allEdges.put(c, new ArrayList<Edge>());
@@ -69,22 +69,22 @@ public class CandidateChooser {
         }
         LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
         candidateWithParent.put(start, start);
-        Edge newCheapestEdge = null;
+        Edge newMostLikelyEdge = null;
         while (!candidateWithParent.keySet().contains(end)) {
-            newCheapestEdge = null;
+            newMostLikelyEdge = null;
             for (Edge e : all) {
                 if (candidateWithParent.keySet().contains(e.getStart())) {
-                    if (newCheapestEdge == null) {
-                        newCheapestEdge = e;
-                    } else if (e.getCost() < newCheapestEdge.getCost()) {
-                        newCheapestEdge = e;
+                    if (newMostLikelyEdge == null) {
+                        newMostLikelyEdge = e;
+                    } else if (e.getCost() < newMostLikelyEdge.getCost()) {
+                        newMostLikelyEdge = e;
                     }
                 }
             }
-            if (!candidateWithParent.keySet().contains(newCheapestEdge.getEnd())) {
-                candidateWithParent.put(newCheapestEdge.getEnd(), newCheapestEdge.getStart());
+            if (!candidateWithParent.keySet().contains(newMostLikelyEdge.getEnd())) {
+                candidateWithParent.put(newMostLikelyEdge.getEnd(), newMostLikelyEdge.getStart());
             }
-            all.remove(newCheapestEdge);
+            all.remove(newMostLikelyEdge);
         }
         currentMarkPasses.get(co).clear();
         Candidate marker = candidateWithParent.get(end);
@@ -106,8 +106,8 @@ public class CandidateChooser {
             if (early == start && late.getID() == 1) {
                 allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
             } else if (late == end) {
-                allEdges.get(co).add(new Edge(early, late, 0));
-            } else if(early == start){
+                allEdges.get(co).add(new Edge(early, late, 1));
+            } else if (early == start) {
                 allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
             } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())) {
                 allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
@@ -116,17 +116,18 @@ public class CandidateChooser {
     }
 
     private double numberOfCloseStarts(TimePoint t) {
-        int numberOfSimilarStarts = 0;
-        int numberOfCompetitors = 0;
+        double numberOfSimilarStarts = -1;
+        double numberOfCompetitors = -1;
         for (Competitor c : candidates.keySet()) {
             numberOfCompetitors++;
             for (Candidate ca : candidates.get(c)) {
-                if (ca.getID() == 1 && Math.abs(ca.getTimePoint().asMillis() - t.asMillis()) < 20000) {
+                if (ca.getID() == 1 && Math.abs(ca.getTimePoint().asMillis() - t.asMillis()) < 60000) {
                     numberOfSimilarStarts++;
+                    break;
                 }
             }
         }
-        return Math.pow((numberOfSimilarStarts/numberOfCompetitors), 2);
+        return numberOfSimilarStarts/numberOfCompetitors;
     }
 
     private double estimatedTime(Candidate c1, Candidate c2) {
@@ -161,7 +162,7 @@ public class CandidateChooser {
         }
         totalTime = totalTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
-        System.out.println((totalTime - actualTime)/1000);
-        return Math.abs(totalTime - actualTime) / actualTime;
+        double timeDiff = Math.abs(totalTime - actualTime) / 1000;
+        return 1 - (Math.log10(timeDiff+1) / 20);
     }
 }

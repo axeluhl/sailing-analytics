@@ -41,19 +41,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     public MarkPassingCalculatorTest() throws MalformedURLException, URISyntaxException {
         super();
     }
-    
-    @Test
-    public void test505_2() throws IOException, InterruptedException, URISyntaxException {
-        System.out.println("Tornado 16");
-        testRace("357c700a-9d9a-11e0-85be-406186cbf87c");
-    }
-    @Test
-    public void test505_7() throws IOException, InterruptedException, URISyntaxException {
-        System.out.println("Tornado 16");
-        testRace("cb043bb4-9e92-11e0-85be-406186cbf87c");
-    }
-  
-    
+
     @Test
     public void testTornado16() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("Tornado 16");
@@ -61,21 +49,33 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void testStar4() throws IOException, InterruptedException, URISyntaxException {
-        System.out.println("Star 4");
-        testRace("f5f531ec-99ed-11e0-85be-406186cbf87c");
-    }
-
-    /*@Test
     public void testTornado4() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("Tornado Race 4");
         testRace("5291b3ea-9934-11e0-85be-406186cbf87c");
-    }*/
+    }
 
     @Test
     public void testStarMedal() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("Star Medal");
         testRace("d591d808-9c48-11e0-85be-406186cbf87c");
+    }
+
+    @Test
+    public void test505_2() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado 16");
+        testRace("357c700a-9d9a-11e0-85be-406186cbf87c");
+    }
+
+    @Test
+    public void test505_7() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado 16");
+        testRace("cb043bb4-9e92-11e0-85be-406186cbf87c");
+    }
+
+    @Test
+    public void testStar4() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Star 4");
+        testRace("f5f531ec-99ed-11e0-85be-406186cbf87c");
     }
 
     private void testRace(String raceID) throws IOException, InterruptedException, URISyntaxException {
@@ -85,12 +85,6 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
     private void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        /*
-         * Tornado Race 4: 5291b3ea-9934-11e0-85be-406186cbf87c
-         * 
-         * Tornado Race 16: 04687b2a-9e68-11e0-85be-406186cbf87c
-         */
-
         if (!loadData(raceID) && !forceReload) {
             System.out.println("Downloading new data from the web.");
             this.setUp("event_20110609_KielerWoch",
