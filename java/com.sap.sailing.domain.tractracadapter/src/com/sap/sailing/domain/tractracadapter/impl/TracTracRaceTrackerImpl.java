@@ -588,7 +588,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         stop(/* stop receivers preemtively */ true);
     }
 
-    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
         synchronized (this) {
             while (controlPointPositionPoller == null) {
@@ -599,6 +598,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         new Thread("TracTrac Controller Stopper for "+getID()) {
             public void run() {
                 controller.stop(/* abortStored */ true);
+                try {
+                    ioThread.join();
+                    if (ioThread.isAlive()) {
+                        logger.severe("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" joined but is still active. Very strange.");
+                    } else {
+                        logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
+                    }
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
+                    updateStatusOfTrackedRaces();
+                } catch (InterruptedException e) {
+                    logger.log(Level.INFO, "Interrupted while trying to join TracTrac DataController thread for "+getID());
+                } // wait no more than three seconds
             }
         }.start();
         for (Receiver receiver : receivers) {
@@ -608,15 +619,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 receiver.stopAfterProcessingQueuedEvents();
             }
         }
-        ioThread.join(3000); // wait no more than three seconds
-        if (ioThread.isAlive()) {
-            ioThread.stop();
-            logger.warning("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
-        } else {
-            logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
-        }
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
-        updateStatusOfTrackedRaces();
     }
 
     protected DataController getController() {
