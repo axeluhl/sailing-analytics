@@ -4,11 +4,17 @@
 
 ## Quickstart
 
+#### Servers
+
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
 - Database and Queue Server: 172.31.25.253
+
+#### Starting an instance
+
 - Which instance type to choose:
   - Archive: m2.2xlarge
   - Live: c1.xlarge
+
 - Using a release, set the following in the instance's user data:
 <pre>
 INSTALL_FROM_RELEASE=master-201311062138
@@ -41,6 +47,9 @@ REPLICATE_MASTER_QUEUE_PORT=
 INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
+
+#### Receiving wind
+
 - To receive and forward wind, log into webserver as user trac and switch to $HOME/udpmirror. Start the mirror and forward it to the instance you want.
 
 
