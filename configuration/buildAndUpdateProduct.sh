@@ -198,6 +198,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
@@ -496,6 +497,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then
