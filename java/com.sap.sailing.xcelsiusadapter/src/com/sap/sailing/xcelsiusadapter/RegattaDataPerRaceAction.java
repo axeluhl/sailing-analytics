@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerRaceAction extends HttpAction {
+    private static final Logger logger = Logger.getLogger(RegattaDataPerRaceAction.class.getName());
+    
     public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
     }
@@ -328,6 +332,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                     } catch (Exception ex) {
                             //competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not complete, remove it from the list
                                                                              // complete, remove it from the list
+                        logger.log(Level.INFO, "Error trying to provide data about competitor "+competitor+" in race "+raceName+": "+ex.getMessage(), ex);
                     }
                 }
             }
