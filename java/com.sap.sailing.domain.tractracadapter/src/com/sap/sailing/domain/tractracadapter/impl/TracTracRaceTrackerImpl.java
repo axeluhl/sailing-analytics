@@ -697,7 +697,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
+        if (lastStatus.getStatus().equals(TrackedRaceStatusEnum.ERROR)) {
+            return;
+        }
         Integer counter = 0;
         final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
         if (lastProgressPair != null) {
@@ -711,6 +713,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         /* make sure to indicate that this race is erroneous */
                         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
                         updateStatusOfTrackedRaces();
+                        return;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -719,6 +722,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
             } 
         }
+        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
         lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();
