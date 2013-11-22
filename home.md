@@ -25,6 +25,8 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Development Environment|wiki/development-environment]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+* Information for Webdesigners
+  * [[Layout repository|wiki/webdesign]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
@@ -46,3 +48,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
 * [Traffic and CPU for app01](http://mrtg.sapsailing.com/)
+
+### TracTrac Workshop in Kopenhagen
+
+* [[TracTrac Workshop in October 2013 in Kopenhagen|wiki/TracTracWorkshop2013]]

@@ -70,7 +70,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
                             if (fix.getTimePoint().compareTo(to) > 0) {
                                 break;
                             }
-                            Distance crossTrackError = fix.getPosition().crossTrackError(fromPosition, bearing);
+                            Distance crossTrackError = fix.getPosition().absoluteCrossTrackError(fromPosition, bearing);
                             if (crossTrackError.compareTo(maxDistance) > 0) {
                                 maxDistance = crossTrackError;
                                 fixFurthestAway = fix;
@@ -100,7 +100,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
                     new Callable<Pair<FixType, Distance>>() {
                         @Override
                         public Pair<FixType, Distance> call() throws Exception {
-                            return new Pair<FixType, Distance>(fix, fix.getPosition().crossTrackError(
+                            return new Pair<FixType, Distance>(fix, fix.getPosition().absoluteCrossTrackError(
                                     fromPosition, bearing));
                         }
                     });

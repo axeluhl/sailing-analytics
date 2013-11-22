@@ -29,30 +29,4 @@ public abstract class AbstractRegattaPanel extends FormPanel implements RegattaD
     @Override
     public abstract void fillRegattas(List<RegattaDTO> result);
     
-    /**
-     * Returns <code>true</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>
-     * 
-     * @param wordsToFilter
-     *            the words to filter on
-     * @param valuesToCheck
-     *            the values to check for. These values contain the values of the current rows.
-     * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
-     *         <code>false</code> if not
-     */
-    protected boolean textContainsStringsToCheck(List<String> wordsToFilter, String... valuesToCheck) {
-        boolean found = true;
-        for (String word : wordsToFilter) {
-            String textAsUppercase = word.toUpperCase().trim();
-            boolean notContainedinEveryValue = true;
-            for (int i = 0; notContainedinEveryValue && i < valuesToCheck.length; i++) {
-                String string = valuesToCheck[i];
-                notContainedinEveryValue = string==null || !string.toUpperCase().contains(textAsUppercase);
-            }
-            if (notContainedinEveryValue) {
-                found = false;
-                break;
-            }
-        }
-        return found;
-    }
 }

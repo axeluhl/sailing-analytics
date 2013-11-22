@@ -13,7 +13,7 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8086/</context-root>
+  <context-root>http://riccardo:riccardo@localhost:8085/</context-root>
   
   <!--
   <screenshots-folder>file:///C:/Users/D049941/screenshots/</screenshots-folder>

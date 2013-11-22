@@ -16,10 +16,15 @@ import com.sap.sailing.selenium.pages.common.CSSHelper;
 
 
 /**
- * <p></p>
+ * <p>Abstract base implementation for a page objects representing a GWT CellTable. The abstract implementation provides
+ *   common functionality like sorting and the selection of entries.</p>
  * 
- * @author D049941
+ * <p>For a basic CellTable you can use the concrete implementation GenericCellTable, which use a factory to create the
+ *   data entries. If you have a customized CellTable with extended functionality you should extend this class to add
+ *   these functionality as a service of the page object.</p>
  * 
+ * @author
+ *   Riccardo Nimser (D049941)
  * @param <T>
  *   The type of the data entries the table contains.
  */
@@ -42,6 +47,8 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
     protected static final String FOOT_TAG_NAME = "tfoot"; //$NON-NLS-1$
     
     private static final String TABLE_HEADER_XPATH = "./thead/tr/th";
+    
+    private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
     private static final String CELL_TABLE_CSS_CLASS = "GCKY0V4BDK"; //$NON-NLS-1$
     
@@ -152,7 +159,7 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
         WebElement header = headers.get(column);
         
         // NOTE: We use "findElements", since "findElement" throws an exception if there is no image (not sorted)
-        List<WebElement> images = header.findElements(By.xpath(".//div/div/img"));
+        List<WebElement> images = header.findElements(By.xpath(SORTING_INDICATOR_XPATH));
         
         if(images.size() == 0)
             return SortingOrder.None;
@@ -182,12 +189,28 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
         return entries;
     }
     
+    /**
+     * <p>Selects the specified entry.</p>
+     * 
+     * <p>Note: If the entry is not contained in the table it will not be selected.</p>
+     * 
+     * @param entry
+     *   The entry to select.
+     */
     public void selectEntry(T entry) {
         if(entry.table == this) {
             entry.select();
         }
     }
     
+    /**
+     * <p>Selects the specified entries.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     * 
+     * @param entries
+     *   The entries to select.
+     */
     public void selectEntries(List<T> entries) {
         // First deselect all selected entries
         for(T entry : getSelectedEntries()) {
@@ -202,6 +225,12 @@ public abstract class CellTable2<T extends DataEntry> extends PageArea {
         }
     }
     
+    /**
+     * <p>Returns all currently selected entries. If no entry is selected, an empty list is returned.</p>
+     * 
+     * @return
+     *   All currently selected entries.
+     */
     public List<T> getSelectedEntries() {
         List<T> entries = getEntries();
         Iterator<T> iterator = entries.iterator();

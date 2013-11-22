@@ -147,14 +147,16 @@ public class SimulatorMainPanel extends SimplePanel {
             if (setting.getDisplayName().equals("Base Bearing (Degrees)")) {
             	simulatorMap.clearOverlays();
             	//System.out.println("Wind Base Bearing: "+setting.getValue());
-            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(1, (Double) setting.getValue());
-            	simulatorMap.raceCourseCanvasOverlay.draw();
+            	simulatorMap.getRegattaAreaCanvasOverlay().updateRaceCourse(1, (Double) setting.getValue());
+            	simulatorMap.getRaceCourseCanvasOverlay().draw();
+                simulatorMap.getWindNeedleCanvasOverlay().draw();
             }
             if (setting.getDisplayName().equals("Race Course Diff (Degrees)")) {
             	simulatorMap.clearOverlays();
             	//System.out.println("Wind Base Bearing: "+setting.getValue());
-            	simulatorMap.regattaAreaCanvasOverlay.updateRaceCourse(2, (Double) setting.getValue());
-	        simulatorMap.raceCourseCanvasOverlay.draw();
+            	simulatorMap.getRegattaAreaCanvasOverlay().updateRaceCourse(2, (Double) setting.getValue());
+            	simulatorMap.getRaceCourseCanvasOverlay().draw();
+                simulatorMap.getWindNeedleCanvasOverlay().draw();
             }
             if (autoUpdate) {
                 update();
@@ -834,7 +836,7 @@ public class SimulatorMainPanel extends SimplePanel {
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, true);
         } else if (summaryButton.getValue()) {
             showTimePanel(false);
-            simulatorMap.regattaAreaCanvasOverlay.draw();
+            simulatorMap.getRegattaAreaCanvasOverlay().draw();
             simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, true);
         } else if (replayButton.getValue()) {
             showTimePanel(true);

@@ -1,21 +1,23 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
-import com.sap.sailing.domain.base.Team;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicPerson;
+import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.EventMasterData;
@@ -28,7 +30,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserialzer;
+import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
@@ -46,10 +48,10 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
     
     public static JsonDeserializer<LeaderboardGroupMasterData> create(DomainFactory domainFactory) {
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
-        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserialzer();
-        JsonDeserializer<Person> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
-        JsonDeserializer<Team> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
-        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
+        JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserializer(domainFactory);
+        JsonDeserializer<DynamicPerson> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
+        JsonDeserializer<DynamicTeam> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
+        JsonDeserializer<DynamicCompetitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
                 boatClassDeserializer, teamDeserializer, domainFactory);
         JsonDeserializer<RaceLogEvent> raceLogEventDeserializer = RaceLogEventDeserializer.create(domainFactory);
         JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(
@@ -102,7 +104,23 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         }
         ScoringScheme overallLeaderboardScoringScheme = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
         int[] overallLeaderboardResultDiscardingThresholds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
-        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, leaderboards, events, regattas);
+        Map<String, Double> metaColumnsWithFactors = !hasOverallLeaderboard ? null : deserializeMetaColumnsWithFactor((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_META_COLUMNS));
+        List<String> overallLeaderboardSuppressedCompetitorsIds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeSuppressedCompetitors((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS));
+        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, overallLeaderboardSuppressedCompetitorsIds, metaColumnsWithFactors, leaderboards, events, regattas);
+    }
+
+    private Map<String, Double> deserializeMetaColumnsWithFactor(JSONArray jsonArray) {
+        Map<String, Double> metaColumnsWithFactors = new HashMap<String, Double>();
+        if (jsonArray != null) {
+            for (Object obj : jsonArray) {
+                JSONObject jsonObj = (JSONObject) obj;
+                String name = (String) jsonObj.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
+                Double explicitFactor = (Double) jsonObj
+                        .get(LeaderboardGroupMasterDataJsonSerializer.FIELD_EXPLICIT_FACTOR);
+                metaColumnsWithFactors.put(name, explicitFactor);
+            }
+        }
+        return metaColumnsWithFactors;
     }
 
 }

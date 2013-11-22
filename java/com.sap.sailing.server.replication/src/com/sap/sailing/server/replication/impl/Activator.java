@@ -12,6 +12,9 @@ public class Activator implements BundleActivator {
     
     private static final String PROPERTY_NAME_EXCHANGE_NAME = "replication.exchangeName";
     private static final String PROPERTY_NAME_EXCHANGE_HOST = "replication.exchangeHost";
+    
+    public static final String REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
+    public static final String REPLICATION_HOST = "REPLICATION_HOST";
 
     private ReplicationInstancesManager replicationInstancesManager;
     
@@ -22,15 +25,23 @@ public class Activator implements BundleActivator {
         String exchangeName = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_NAME);
         String exchangeHost = bundleContext.getProperty(PROPERTY_NAME_EXCHANGE_HOST);
         if (exchangeName == null) {
-            exchangeName = "sapsailinganalytics";
+            if (System.getenv(REPLICATION_CHANNEL) == null) {
+                exchangeName = "sapsailinganalytics";
+            } else {
+                exchangeName = System.getenv(REPLICATION_CHANNEL);
+            }
         }
         if (exchangeHost == null) {
-            exchangeHost = "localhost";
+            if (System.getenv(REPLICATION_HOST) == null) {
+                exchangeHost = "localhost";
+            } else {
+                exchangeHost = System.getenv(REPLICATION_HOST);
+            }
         }
         replicationInstancesManager = new ReplicationInstancesManager();
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, exchangeHost, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
-        logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName);
+        logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {

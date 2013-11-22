@@ -34,12 +34,9 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
     }
 
-
-
     public MasterDataImportObjectCreationCount importMasterData(String response, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer
-                .create(baseDomainFactory);
+        JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = LeaderboardGroupMasterDataJsonDeserializer.create(baseDomainFactory);
         JSONParser parser = new JSONParser();
         try {
             JSONObject masterDataOverall = (JSONObject) parser.parse(response);
@@ -48,7 +45,7 @@ public class MasterDataImporter {
                 JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
                 LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
                         .deserialize(leaderBoardGroupMasterDataJson);
-                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override, creationCount);
+                ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override, creationCount, baseDomainFactory);
                 creationCount = racingEventService.apply(op);
             }
             JsonDeserializer<MediaTrack> mediaTrackDeserializer = new MediaTrackJsonDeserializer();

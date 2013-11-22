@@ -6,15 +6,32 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 
+/**
+ * <p></p>
+ * 
+ * @author
+ *   Riccardo Nimser (D049941)
+ */
 public class WindowManager {
     private static final String JAVA_SCRIPT = "window.open('%s', '_blank')";
     
     private WebDriver driver;
     
+    /**
+     * <p></p>
+     * 
+     * @param driver
+     *   
+     */
     public WindowManager(WebDriver driver) {
         this.driver = driver;
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param url
+     */
     public void switchTo(String url) {
         WebDriverWindow window = findWindow(url);
         
@@ -24,10 +41,26 @@ public class WindowManager {
         window.switchToWindow();
     }
     
+    /**
+     * <p>Returns a handle to the window witch is currently active.</p>
+     * 
+     * @return
+     *   
+     */
     public WebDriverWindow getCurrentWindow() {
         return new WebDriverWindow(this.driver, this.driver.getWindowHandle());
     }
     
+    /**
+     * <p></p>
+     * 
+     * <p>Note: If no window is found with the specified URL, </p>
+     * 
+     * @param url
+     *   
+     * @return
+     *   
+     */
     public WebDriverWindow findWindow(String url) {
         if(url == null)
             throw new IllegalArgumentException();
@@ -44,10 +77,21 @@ public class WindowManager {
         return null;
     }
     
+    /**
+     * <p></p>
+     * 
+     * @return
+     */
     public WebDriverWindow openNewWindow() {
         return openNewWindow("");
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param url
+     * @return
+     */
     public WebDriverWindow openNewWindow(String url) {
         return new WebDriverWindow(this.driver, createWindow(url));
     }
@@ -57,18 +101,12 @@ public class WindowManager {
         Set<String> oldHandles = this.driver.getWindowHandles();
         
         executeScript(url != null ? url : "");
-        // Inject an anchor element
-        //injectAnchorTag(this.name, url);
-        // Click on the anchor element
-        //this.driver.findElement(By.id(this.name)).click();
-
+        
         return getNewHandle(oldHandles);
     }
     
     private void executeScript(String url) {
         JavascriptExecutor executor = (JavascriptExecutor) this.driver;
-        //executor.executeScript(String.format(JAVA_SCRIPT, id, url));
-        String script = String.format(JAVA_SCRIPT, url);
         executor.executeScript(String.format(JAVA_SCRIPT, url));
     }
     

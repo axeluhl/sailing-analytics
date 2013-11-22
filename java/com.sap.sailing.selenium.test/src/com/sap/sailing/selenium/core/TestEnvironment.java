@@ -21,6 +21,13 @@ public interface TestEnvironment {
      */
     public WebDriver getWebDriver();
     
+    /**
+     * <p>Returns the window manager for the used web driver, which can be used to open new windows and switching
+     *   between multiple windows.</p>
+     * 
+     * @return
+     *   The window manager for the used web driver.
+     */
     public WindowManager getWindowManager();
     
     /**
