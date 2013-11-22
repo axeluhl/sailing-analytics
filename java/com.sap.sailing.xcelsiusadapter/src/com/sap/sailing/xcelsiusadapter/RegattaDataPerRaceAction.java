@@ -207,7 +207,8 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         addNamedElementWithValue(competitor_node, "race_relative_final_rank", 1.0 - ((rank - 1.0)/(leaderboard.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size() - 1.0)));
 
                         addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedRace.getDistanceTraveled(competitor, trackedRace.getEndOfTracking()).getMeters());
-                        addNamedElementWithValue(competitor_node, "avg_xte_m", trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true).getMeters());
+                        final Distance averageCrossTrackError = trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true);
+                        addNamedElementWithValue(competitor_node, "avg_xte_m", averageCrossTrackError==null?0:averageCrossTrackError.getMeters());
                         
                         TrackedLeg previousLeg = null;
                         ArrayList<Integer> posGLlist = new ArrayList<Integer>();
