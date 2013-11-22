@@ -8,11 +8,11 @@ When you start to write UI tests, the first thing you have to do is, to ensure t
             ...
             
             Button createEventBtn = new Button(stringMessages.actionAddEvent());
-            createEventBtn.enusreDebugId(“AddEventButton”);
+            createEventBtn.enusreDebugId("AddEventButton");
             ...
             
             eventTable = new CellTable<EventDTO>(10000, tableRes);
-            eventTable.enusreDebugId(“EventsCellTable”);
+            eventTable.enusreDebugId("EventsCellTable");
             ...
         }
     }
