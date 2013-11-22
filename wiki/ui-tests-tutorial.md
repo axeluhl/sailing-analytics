@@ -18,3 +18,26 @@ When you start to write UI tests, the first thing you have to do is, to ensure t
     }
 
 : Listing 1
+
+    public class EventDialog extends EventCreateDialog<EventDTO> {
+        public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
+                DialogCallback<EventDTO> callback) {
+            super(new EventParameterValidator(stringConstants, existingEvents), stringConstants, callback);
+            
+            nameEntryField = createTextBox(null);
+            nameEntryField.ensureDebugId("NameTextField");
+            nameEntryField.setWidth("200px");
+            
+            venueEntryField = createTextBox(null);
+            venueEntryField.ensureDebugId("VenueTextField");
+            venueEntryField.setWidth("200px");
+            
+            publicationUrlEntryField = createTextBox(null);
+            publicationUrlEntryField.ensureDebugId("PublicationUrlTextField");
+            publicationUrlEntryField.setWidth("200px");
+            
+            isPublicCheckBox = createCheckbox("");
+            isPublicCheckBox.ensureDebugId("IsPublicCheckbox");
+            isPublicCheckBox.setValue(false);
+        }
+    }
