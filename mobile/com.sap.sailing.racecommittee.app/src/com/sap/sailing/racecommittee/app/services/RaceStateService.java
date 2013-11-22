@@ -88,7 +88,6 @@ public class RaceStateService extends Service {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         setupNotificationBuilder();
         
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
         super.onCreate();
         ExLog.i(TAG, "Started.");
     }
@@ -193,10 +192,7 @@ public class RaceStateService extends Service {
         unregisterAllRaces();
         clearAllRaces();
         
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder
-                .setNumber(0)
-                .setContentText(getString(R.string.service_text_no_races))
-                .build());
+        stopForeground(true);
     }
 
     private void clearAllRaces() {
@@ -217,6 +213,7 @@ public class RaceStateService extends Service {
                 .setNumber(numRaces)
                 .setContentText(String.format(getString(R.string.service_text_num_races), numRaces))
                 .build());
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private ManagedRace getRaceFromIntent(Intent intent) {
