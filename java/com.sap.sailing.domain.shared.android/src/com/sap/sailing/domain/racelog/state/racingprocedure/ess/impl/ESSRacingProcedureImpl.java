@@ -36,7 +36,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     
     public ESSRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory, ESSConfiguration configuration) {
-        super(raceLog, author, factory);
+        super(raceLog, author, factory, configuration);
         this.configuration = configuration;
         update();
     }
@@ -44,11 +44,6 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     @Override
     public RacingProcedureType getType() {
         return RacingProcedureType.ESS;
-    }
-    
-    @Override
-    public boolean hasIndividualRecall() {
-        return true;
     }
 
     @Override
@@ -150,6 +145,16 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
             return firstBoatTime.plus((long) ((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
         }
         return null;
+    }
+    
+    @Override
+    protected boolean hasIndividualRecallByDefault() {
+        return true;
+    }
+    
+    @Override
+    public ESSConfiguration getConfiguration() {
+        return (ESSConfiguration) super.getConfiguration();
     }
 
 }

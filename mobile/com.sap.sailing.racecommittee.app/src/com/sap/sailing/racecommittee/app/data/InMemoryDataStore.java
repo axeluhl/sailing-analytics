@@ -9,8 +9,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
@@ -22,7 +20,6 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
-    private StoreableConfiguration<DeviceConfiguration> configuration;
     private SharedDomainFactory domainFactory;
 
     private InMemoryDataStore() {
@@ -35,7 +32,6 @@ public enum InMemoryDataStore implements DataStore {
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
         this.courseData = null;
-        this.configuration = null;
         this.domainFactory = new SharedDomainFactoryImpl();
     }
 
@@ -176,15 +172,5 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void setLastPublishedCourseDesign(CourseBase courseData) {
         this.courseData = courseData;
-    }
-
-    @Override
-    public StoreableConfiguration<DeviceConfiguration> getTabletConfiguration() {
-        return configuration;
-    }
-
-    @Override
-    public void setTabletConfiguration(StoreableConfiguration<DeviceConfiguration> configuration) {
-        this.configuration = configuration;
     }
 }

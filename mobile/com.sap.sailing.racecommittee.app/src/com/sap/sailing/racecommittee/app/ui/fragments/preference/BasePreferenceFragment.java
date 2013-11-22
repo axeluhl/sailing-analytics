@@ -1,8 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import com.sap.sailing.racecommittee.app.utils.MultiplePreferenceChangeListener;
+
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
@@ -32,7 +35,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
     };
 
     protected static void bindPreferenceSummaryToValue(Preference preference) {
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
@@ -41,7 +44,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
     }
     
     protected static void bindPreferenceSummaryToInteger(Preference preference) {
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
@@ -51,12 +54,29 @@ public class BasePreferenceFragment extends PreferenceFragment {
 
     protected static void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {
         target.setEnabled(checkboxPreference.isChecked());
-        checkboxPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        addOnPreferenceChangeListener(checkboxPreference, new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object value) {
                 target.setEnabled((Boolean) value);
                 return true;
             }
         });
+    }
+    
+    protected static void addOnPreferenceChangeListener(Preference preference, OnPreferenceChangeListener newListener) {
+        OnPreferenceChangeListener oldListener = preference.getOnPreferenceChangeListener();
+        if (oldListener == null) {
+            MultiplePreferenceChangeListener multiListener = new MultiplePreferenceChangeListener();
+            multiListener.addOnPreferenceChangeListener(newListener);
+            preference.setOnPreferenceChangeListener(multiListener);
+        } else if (oldListener instanceof MultiplePreferenceChangeListener) {
+            MultiplePreferenceChangeListener multiListener = (MultiplePreferenceChangeListener) oldListener;
+            multiListener.addOnPreferenceChangeListener(newListener);
+        } else {
+            MultiplePreferenceChangeListener multiListener = new MultiplePreferenceChangeListener();
+            multiListener.addOnPreferenceChangeListener(oldListener);
+            multiListener.addOnPreferenceChangeListener(newListener);
+            preference.setOnPreferenceChangeListener(multiListener);
+        }
     }
 }

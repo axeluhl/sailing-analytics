@@ -2,9 +2,7 @@ package com.sap.sailing.racecommittee.app.data.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedDeviceConfiguration;
@@ -12,17 +10,17 @@ import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBa
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 
-public class StoredDeviceConfigurationJsonDeserializer extends DeviceConfigurationJsonDeserializer {
+public class PreferencesBasedDeviceConfigurationJsonDeserializer extends DeviceConfigurationJsonDeserializer {
 
-    public static StoredDeviceConfigurationJsonDeserializer create(final AppPreferences preferences) {
-        return new StoredDeviceConfigurationJsonDeserializer(preferences, 
-                new StoredRacingProceduresConfigurationJsonDeserializer(preferences));
+    public static PreferencesBasedDeviceConfigurationJsonDeserializer create(final AppPreferences preferences) {
+        return new PreferencesBasedDeviceConfigurationJsonDeserializer(preferences, 
+                new PreferencesBasedRacingProceduresConfigurationJsonDeserializer(preferences));
     }
     
     private final AppPreferences preferences;
 
-    public StoredDeviceConfigurationJsonDeserializer(AppPreferences preferences,
-            StoredRacingProceduresConfigurationJsonDeserializer proceduresDeserializer) {
+    public PreferencesBasedDeviceConfigurationJsonDeserializer(AppPreferences preferences,
+            PreferencesBasedRacingProceduresConfigurationJsonDeserializer proceduresDeserializer) {
         super(proceduresDeserializer);
         this.preferences = preferences;
     }
@@ -33,9 +31,8 @@ public class StoredDeviceConfigurationJsonDeserializer extends DeviceConfigurati
                 (PreferencesBasedRacingProceduresConfiguration) proceduresConfiguration);
     }
     
-    @SuppressWarnings("unchecked")
-    public StoreableConfiguration<DeviceConfiguration> deserializeAsStored(JSONObject object) throws JsonDeserializationException {
-        return (StoreableConfiguration<DeviceConfiguration>) super.deserialize(object);
+    public PreferencesBasedDeviceConfiguration deserializeAsStored(JSONObject object) throws JsonDeserializationException {
+        return (PreferencesBasedDeviceConfiguration) deserialize(object);
     }
 
 }

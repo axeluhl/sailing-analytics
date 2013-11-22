@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure;
 
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -11,6 +12,7 @@ import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceStateChangedListener {
     RaceLog getRaceLog();
     RacingProcedureType getType();
+    RacingProcedureConfiguration getConfiguration();
     
     void addChangedListener(RacingProcedureChangedListener listener);
     void removeChangedListener(RacingProcedureChangedListener listener);

@@ -30,9 +30,13 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
     @Override
     public DeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
         
-        JSONObject proceduresObject = 
+        RacingProceduresConfiguration proceduresConfiguration = null;
+        
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION)) {
+            JSONObject proceduresObject = 
                 Helpers.getNestedObjectSafe(object, DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION);
-        RacingProceduresConfiguration proceduresConfiguration = proceduresDeserializer.deserialize(proceduresObject);
+            proceduresConfiguration = proceduresDeserializer.deserialize(proceduresObject);
+        }
         
         DeviceConfigurationImpl configuration = createConfiguration(proceduresConfiguration);
 

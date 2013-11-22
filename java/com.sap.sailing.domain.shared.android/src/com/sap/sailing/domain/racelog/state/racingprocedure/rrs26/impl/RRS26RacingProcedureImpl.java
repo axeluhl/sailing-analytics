@@ -32,17 +32,19 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
-    @SuppressWarnings("unused")
-    private final RRS26Configuration configuration;
-    private final RRS26StartModeFlagFinder startmodeFlagAnalyzer;
+    private final RRS26StartModeFlagFinder startModeFlagAnalyzer;
     private Flags cachedStartmodeFlag;
     
     public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory, RRS26Configuration configuration) {
-        super(raceLog, author, factory);
-        this.configuration = configuration;
-        this.startmodeFlagAnalyzer = new RRS26StartModeFlagFinder(new RacingProcedureTypeAnalyzer(raceLog), raceLog);
+        super(raceLog, author, factory, configuration);
         
+        RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
+        if (configuration.getStartModeFlags() != null) {
+            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
+        } else {
+            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
+        }
         this.cachedStartmodeFlag = ReadonlyRRS26RacingProcedure.DefaultStartMode;
         
         update();
@@ -54,7 +56,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     }
     
     @Override
-    public boolean hasIndividualRecall() {
+    protected boolean hasIndividualRecallByDefault() {
         return true;
     }
 
@@ -155,12 +157,17 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     
     @Override
     protected void update() {
-        Flags startmodeFlag = startmodeFlagAnalyzer.analyze();
+        Flags startmodeFlag = startModeFlagAnalyzer.analyze();
         if (startmodeFlag != null && !startmodeFlag.equals(cachedStartmodeFlag)) {
             cachedStartmodeFlag = startmodeFlag;
             getChangedListeners().onStartmodeChanged(this);
         }
         super.update();
+    }
+    
+    @Override
+    public RRS26Configuration getConfiguration() {
+        return (RRS26Configuration) super.getConfiguration();
     }
 
 }

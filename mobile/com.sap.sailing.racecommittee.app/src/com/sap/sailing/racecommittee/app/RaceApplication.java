@@ -6,6 +6,7 @@ import java.util.Date;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -63,6 +64,12 @@ public class RaceApplication extends Application {
             defaultHandler.uncaughtException(thread, ex);
         }
 
+    }    
+    
+    public static void restartApp(Context context) {
+        Intent i = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(i);
     }
 
 }

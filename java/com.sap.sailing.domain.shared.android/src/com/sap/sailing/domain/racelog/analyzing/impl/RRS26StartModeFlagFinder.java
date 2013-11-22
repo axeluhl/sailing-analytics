@@ -11,8 +11,10 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
 
-    private final List<Flags> startModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA);
-    private RacingProcedureTypeAnalyzer procedureAnalyzer;
+    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA);
+    
+    private final RacingProcedureTypeAnalyzer procedureAnalyzer;
+    private final List<Flags> startModeFlags;
 
     /**
      * Searches for the start mode flag of a RRS26 race.
@@ -22,11 +24,16 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
      *            {@link IllegalArgumentException} is thrown.
      */
     public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog) {
+        this(procedureAnalyzer, raceLog, defaultStartModeFlags);
+    }
+    
+    public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog, List<Flags> startModeFlags) {
         super(raceLog);
         if (raceLog != procedureAnalyzer.getRaceLog()) {
             throw new IllegalArgumentException("Both analyzers must operate on the same race log.");
         }
         this.procedureAnalyzer = procedureAnalyzer;
+        this.startModeFlags = startModeFlags;
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -130,6 +130,6 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<StoreableConfiguration<DeviceConfiguration>>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<StoreableConfiguration<DeviceConfiguration>> callback);
+    public LoaderCallbacks<DataLoaderResult<ConfigurationLoader<DeviceConfiguration>>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<ConfigurationLoader<DeviceConfiguration>> callback);
 }

@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -112,14 +112,17 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
                     AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
             getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<StoreableConfiguration<DeviceConfiguration>>() {
+                    dataManager.createConfigurationLoader(identifier, new LoadClient<ConfigurationLoader<DeviceConfiguration>>() {
 
                         @Override
-                        public void onLoadSucceded(StoreableConfiguration<DeviceConfiguration> configuration, boolean isCached) {
+                        public void onLoadSucceded(ConfigurationLoader<DeviceConfiguration> configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 
+                            // this is our 'global' configuration, so let's enable overwrite for everything!
+                            preferences.setRacingProcedureConfigurationOverwriteAllowed(true);
                             configuration.store();
+                            
                             Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);
                         }

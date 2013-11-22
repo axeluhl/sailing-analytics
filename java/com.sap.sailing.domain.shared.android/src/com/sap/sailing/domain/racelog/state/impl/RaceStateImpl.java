@@ -2,8 +2,8 @@ package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.EmptyConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -29,13 +29,13 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
     public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author) {
-        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyConfiguration());
+        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyRacingProceduresConfiguration());
     }
     
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value.
      */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, StoreableConfiguration<RacingProceduresConfiguration> configuration) {
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RacingProceduresConfiguration> configuration) {
         return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, configuration);
     }
     
@@ -43,7 +43,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
      * Creates a {@link RaceState}.
      */
     public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, RacingProcedureType initalRacingProcedureType,
-            StoreableConfiguration<RacingProceduresConfiguration> configuration) {
+            ConfigurationLoader<RacingProceduresConfiguration> configuration) {
         return new RaceStateImpl(raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
                 initalRacingProcedureType, 

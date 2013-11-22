@@ -38,6 +38,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
             // TODO: deserialize CourseArea ...
+            // WHY should I?
         }
         
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {

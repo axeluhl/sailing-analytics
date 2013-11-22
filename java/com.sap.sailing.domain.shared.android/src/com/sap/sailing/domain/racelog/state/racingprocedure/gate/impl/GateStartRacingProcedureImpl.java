@@ -43,7 +43,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     
     public GateStartRacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory, GateStartConfiguration configuration) {
-        super(raceLog, author, factory);
+        super(raceLog, author, factory, configuration);
         this.configuration = configuration;
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
         this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
@@ -59,7 +59,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
     
     @Override
-    public boolean hasIndividualRecall() {
+    protected boolean hasIndividualRecallByDefault() {
         return false;
     }
 
@@ -211,6 +211,11 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         }
         
         super.update();
+    }
+    
+    @Override
+    public GateStartConfiguration getConfiguration() {
+        return (GateStartConfiguration) super.getConfiguration();
     }
 
     private void rescheduleGateShutdownTime(TimePoint startTime) {

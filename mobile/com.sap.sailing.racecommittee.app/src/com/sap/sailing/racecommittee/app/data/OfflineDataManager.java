@@ -21,7 +21,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -89,7 +89,7 @@ public class OfflineDataManager extends DataManager {
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
-        StoreableConfiguration<RacingProceduresConfiguration> configuration = new PreferencesBasedRacingProceduresConfiguration(preferences);
+        ConfigurationLoader<RacingProceduresConfiguration> configuration = new PreferencesBasedRacingProceduresConfiguration(preferences);
         
         log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
                 1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
@@ -209,11 +209,11 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<StoreableConfiguration<DeviceConfiguration>>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<StoreableConfiguration<DeviceConfiguration>> callback) {
-        return new ImmediateDataLoaderCallbacks<StoreableConfiguration<DeviceConfiguration>>(context, callback, new Callable<StoreableConfiguration<DeviceConfiguration>>() {
+    public LoaderCallbacks<DataLoaderResult<ConfigurationLoader<DeviceConfiguration>>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<ConfigurationLoader<DeviceConfiguration>> callback) {
+        return new ImmediateDataLoaderCallbacks<ConfigurationLoader<DeviceConfiguration>>(context, callback, new Callable<ConfigurationLoader<DeviceConfiguration>>() {
             @Override
-            public StoreableConfiguration<DeviceConfiguration> call() throws Exception {
+            public ConfigurationLoader<DeviceConfiguration> call() throws Exception {
                 throw new IllegalStateException("No remote configuration in offline mode.");
             }
         });

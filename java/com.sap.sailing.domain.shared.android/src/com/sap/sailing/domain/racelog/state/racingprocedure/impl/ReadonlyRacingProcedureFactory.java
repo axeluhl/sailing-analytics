@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -16,9 +16,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.RRS26Raci
 
 public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
 
-    protected final StoreableConfiguration<RacingProceduresConfiguration> configuration;
+    protected final ConfigurationLoader<RacingProceduresConfiguration> configuration;
     
-    public ReadonlyRacingProcedureFactory(StoreableConfiguration<RacingProceduresConfiguration> configuration) {
+    public ReadonlyRacingProcedureFactory(ConfigurationLoader<RacingProceduresConfiguration> configuration) {
         this.configuration = configuration;
     }
     

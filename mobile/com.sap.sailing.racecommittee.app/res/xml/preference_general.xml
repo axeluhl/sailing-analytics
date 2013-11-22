@@ -18,6 +18,12 @@
         android:title="@string/settings_general_manageareas_header"
         android:summary="@string/empty" />
     
+    <com.sap.sailing.racecommittee.app.ui.fragments.preference.EditListPreference
+        android:key="what_a_key"
+        android:defaultValue="a,b,c"
+        android:title="@string/settings_general_manageareas_header"
+        android:summary="@string/empty" />
+    
     <EditTextPreference
         android:key="@string/preference_mail_key"
         android:defaultValue="@string/preference_mail_default"

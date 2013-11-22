@@ -37,6 +37,8 @@ public class AppPreferences {
     private final static String PREFERENCE_BOAT_CLASS = "boatClassPref";
     private final static String PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
     private final static String PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
+    
+    private final static String PREFERENCE_PROCEDURE_CONFIG_OVERWRITE = "procedureConfigOverwriteAllowed";
 
     private final SharedPreferences preferences;
     private final Context context;
@@ -228,6 +230,14 @@ public class AppPreferences {
 
     public String getAndroidIdentifier() {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    }
+
+    public boolean isRacingProcedureConfigurationOverwriteAllowed() {
+        return preferences.getBoolean(PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, true);
+    }
+
+    public void setRacingProcedureConfigurationOverwriteAllowed(boolean allowed) {
+        preferences.edit().putBoolean(PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, allowed).commit();
     }
 
 }

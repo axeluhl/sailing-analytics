@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -40,6 +41,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     protected final RaceLog raceLog;
     protected final RaceLogEventAuthor author;
     protected final RaceLogEventFactory factory;
+    private final RacingProcedureConfiguration configuration;
 
     private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
     private final IsIndividualRecallDisplayedAnalyzer isRecallDisplayedAnalyzer;
@@ -51,10 +53,12 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
      */
-    public BaseRacingProcedure(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory) {
+    public BaseRacingProcedure(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory,
+            RacingProcedureConfiguration configuration) {
         this.raceLog = raceLog;
         this.author = author;
         this.factory = factory;
+        this.configuration = configuration;
 
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
@@ -153,6 +157,14 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             return false;
         }
     }
+    
+    @Override
+    public boolean hasIndividualRecall() {
+        return configuration.hasInidividualRecall() == null ? 
+                hasIndividualRecallByDefault() : configuration.hasInidividualRecall();
+    }
+
+    protected abstract boolean hasIndividualRecallByDefault();
 
     @Override
     public void eventAdded(RaceLogEvent event) {
@@ -194,6 +206,11 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         if (scheduler != null) {
             scheduler.unscheduleStateEvent(raceStateEventName);
         }
+    }
+    
+    @Override
+    public RacingProcedureConfiguration getConfiguration() {
+        return configuration;
     }
 
     protected abstract Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime);

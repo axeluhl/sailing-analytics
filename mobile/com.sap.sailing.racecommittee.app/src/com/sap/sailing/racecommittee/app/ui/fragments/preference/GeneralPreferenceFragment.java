@@ -24,8 +24,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private void setupServerUrlBox() {
         Preference preference = findPreference(getString(R.string.preference_server_url_key));
-        preference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-            
+        addOnPreferenceChangeListener(preference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getActivity(), 
@@ -36,13 +35,14 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupLanguageButton() {
-        Preference button = findPreference(getString(R.string.preference_language_key));
-        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        Preference preference = findPreference(getString(R.string.preference_language_key));
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) { 
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
                 startActivity(intent);
+                preference.getOnPreferenceChangeListener().onPreferenceChange(preference, null);
                 return true;
             }
         });

@@ -80,8 +80,12 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
         this.byNameDesignerCourseNames = byNameDesignerCourseNames;
     }
     
-    protected static DeviceConfiguration copy(DeviceConfiguration configuration) {
-        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(configuration.getRacingProceduresConfiguration());
+    protected DeviceConfiguration copy() {
+        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(proceduresConfiguration);
+        copyConfiguration.setAllowedCourseAreaNames(allowedCourseAreaNames);
+        copyConfiguration.setByNameDesignerCourseNames(byNameDesignerCourseNames);
+        copyConfiguration.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
+        copyConfiguration.setResultsMailRecipient(resultsMailRecipient);
         return copyConfiguration;
     }
 

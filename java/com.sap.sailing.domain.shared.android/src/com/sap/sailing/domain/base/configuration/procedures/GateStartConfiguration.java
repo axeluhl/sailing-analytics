@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.configuration.procedures;
 
-public interface GateStartConfiguration {
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
+
+public interface GateStartConfiguration extends RacingProcedureConfiguration {
 
 }

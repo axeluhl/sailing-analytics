@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.impl.EmptyConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -45,7 +45,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      */
     public static ReadonlyRaceState create(RaceLog raceLog) {
         return new ReadonlyRaceStateImpl(raceLog, ReadonlyRaceStateImpl.FallbackInitialProcedureType,
-                new ReadonlyRacingProcedureFactory(new EmptyConfiguration()));
+                new ReadonlyRacingProcedureFactory(new EmptyRacingProceduresConfiguration()));
     }
     
     protected final RaceLog raceLog;

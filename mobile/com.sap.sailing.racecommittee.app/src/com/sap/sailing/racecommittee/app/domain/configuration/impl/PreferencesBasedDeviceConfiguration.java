@@ -2,29 +2,31 @@ package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.StoreableConfiguration;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl implements StoreableConfiguration<DeviceConfiguration> {
+public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl implements ConfigurationLoader<DeviceConfiguration> {
 
     private static final long serialVersionUID = 9146162601389924219L;
     private static final String TAG = PreferencesBasedDeviceConfiguration.class.getName();
 
     private final AppPreferences preferences;
-    private final StoreableConfiguration<RacingProceduresConfiguration> storableRacingProceduresConfiguration;
+    private final ConfigurationLoader<RacingProceduresConfiguration> storableRacingProceduresConfiguration;
     
     public PreferencesBasedDeviceConfiguration(final AppPreferences preferences, 
-            StoreableConfiguration<RacingProceduresConfiguration> proceduresConfiguration) {
-        super(proceduresConfiguration.load());
+            ConfigurationLoader<RacingProceduresConfiguration> proceduresConfiguration) {
+        super(proceduresConfiguration == null ? null : proceduresConfiguration.load());
         this.preferences = preferences;
         this.storableRacingProceduresConfiguration = proceduresConfiguration;
     }
 
     @Override
     public DeviceConfiguration load() {
-        setRacingProceduresConfiguration(storableRacingProceduresConfiguration.load());
+        if (storableRacingProceduresConfiguration != null) {
+            setRacingProceduresConfiguration(storableRacingProceduresConfiguration.load());
+        }
         
         setAllowedCourseAreaNames(preferences.getManagedCourseAreaNames());
         setResultsMailRecipient(preferences.getMailRecipient());
@@ -36,12 +38,19 @@ public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl
             setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
         }
         setByNameDesignerCourseNames(preferences.getByNameCourseDesignerCourseNames());
-        return super.copy(this);
+        return copy();
     }
 
     @Override
     public void store() {
-        storableRacingProceduresConfiguration.store();
+        ExLog.i(TAG, "Storing new device configuration.");
+        
+        if (storableRacingProceduresConfiguration != null) {
+            storableRacingProceduresConfiguration.store();
+            preferences.setRacingProcedureConfigurationOverwriteAllowed(false);
+        } else {
+            preferences.setRacingProcedureConfigurationOverwriteAllowed(true);
+        }
         
         if (getAllowedCourseAreaNames() != null) {
             preferences.setManagedCourseAreaNames(getAllowedCourseAreaNames());
