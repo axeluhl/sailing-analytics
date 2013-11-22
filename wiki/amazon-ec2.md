@@ -41,6 +41,8 @@ REPLICATE_MASTER_QUEUE_PORT=
 INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
+- To receive and forward wind, log into webserver as user trac and switch to $HOME/udpmirror. Start the mirror and forward it to the instance you want.
+
 
 ## Costs per month
 
