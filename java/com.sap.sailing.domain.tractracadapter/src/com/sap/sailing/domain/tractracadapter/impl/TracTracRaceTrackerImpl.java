@@ -251,7 +251,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         addListenersForStoredDataAndStartController(typeControllers);
         // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+        synchronized (this) {
+            controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI,
+                    delayToLiveInMillis, tracTracUsername, tracTracPassword);
+            notifyAll(); // the stop(boolean) method will try to cancel the controlPointPositionPoller; this may happen even before the above assignment took place; synchronize!
+        }
     }
 
     private URI checkForCachedStoredData(URI storedURI){
@@ -586,6 +590,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+        synchronized (this) {
+            while (controlPointPositionPoller == null) {
+                wait(); // constructor will notify all waiters once the controlPointPositionPoller is set
+            }
+        }
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         new Thread("TracTrac Controller Stopper for "+getID()) {
             public void run() {
