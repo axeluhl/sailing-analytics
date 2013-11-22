@@ -3,7 +3,9 @@ In this tutorial, we want to give a practical introduction in how to write UI-Te
 When you start to write UI tests, the first thing you have to do is, to ensure that the UI is testable. This means, that you have to be able to easily find all widgets in the final HTML-Document the user interacts with. The simplest approach here is to use debug identifiers which are provided by GWT and to assign an identifier to all important widgets, like buttons and text fields. Our framework contains a corresponding mechanism to lookup elements by the debug identifier, but more on this later.
 
     public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
-    
+        public SailingEventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages) {
+        }
     }
 
 : Listing 1
