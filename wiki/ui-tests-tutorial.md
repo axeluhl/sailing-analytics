@@ -19,7 +19,7 @@ When you start to write UI tests, the first thing you have to do is, to ensure t
 
 : Listing 1
 
-    public class EventDialog extends EventCreateDialog<EventDTO> {
+    public class EventCreateDialog extends EventDialog<EventDTO> {
         public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
                 DialogCallback<EventDTO> callback) {
             super(new EventParameterValidator(stringConstants, existingEvents), stringConstants, callback);
