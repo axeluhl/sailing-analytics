@@ -81,7 +81,7 @@ TODO
                     createNewEvent(newEvent);
                 }
             });
-            dialog.ensureDebugId(„EventCreateDialog“);
+            dialog.ensureDebugId("EventCreateDialog");
             dialog.show();
         }
     }
