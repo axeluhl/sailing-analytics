@@ -64,3 +64,24 @@ When you start to write UI tests, the first thing you have to do is, to ensure t
             return textBox;
         }
     }
+
+TODO
+
+    public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
+        private void openCreateEventDialog() {
+            List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
+            EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
+                    stringMessages, new DialogCallback<EventDTO>() {
+                @Override
+                public void cancel() {
+                }
+                
+                @Override
+                public void ok(EventDTO newEvent) {
+                    createNewEvent(newEvent);
+                }
+            });
+            dialog.ensureDebugId(„EventCreateDialog“);
+            dialog.show();
+        }
+    }
