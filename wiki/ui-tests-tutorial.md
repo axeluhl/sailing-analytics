@@ -5,4 +5,5 @@ When you start to write UI tests, the first thing you have to do is, to ensure t
     public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
     
     }
+
 :Listing 1
