@@ -251,11 +251,12 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 - run test build and deploy (DONE)
 - fire up a live server and test it (DONE)
 - fire up a replica and check that it works correctly (ERROR!)
-- check that tmux with UDP mirror and SwissTiming StoreAndForward is running
+- check that UDP mirror is working (DONE)
+- check that SwissTiming StoreAndForward is working
 - check that we can fire up a live2 / archive2 server and switch transparently
 
 ### Just before the migration on Sunday evening
-- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf
+- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration 
 - tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
 
 ### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
