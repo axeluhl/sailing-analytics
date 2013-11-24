@@ -24,14 +24,16 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRacingProceduresConfiguration;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
-    // private static final String TAG = ManagedRacesDataParser.class.getName();
+    private static final String TAG = ManagedRacesDataParser.class.getName();
 
     private final JsonDeserializer<RaceGroup> deserializer;
     private final ConfigurationLoader<RacingProceduresConfiguration> globalConfiguration;
@@ -53,13 +55,19 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
             JSONObject json = Helpers.toJSONObjectSafe(element);
 
             RaceGroup group = deserializer.deserialize(json);
-            // TODO: store configuration of RaceGroup!
-            globalConfiguration.store();
-            
+            storeRaceGroupLocalConfiguration(group);
             addManagedRaces(managedRaces, group);
         }
 
         return managedRaces;
+    }
+
+    private void storeRaceGroupLocalConfiguration(RaceGroup group) {
+        RacingProceduresConfiguration groupConfiguration = group.getRacingProceduresConfiguration();
+        if (groupConfiguration != null && groupConfiguration instanceof PreferencesBasedRacingProceduresConfiguration) {
+            ExLog.i(TAG, "Trying to store the RaceGroup's local procedures configuration.");
+            ((PreferencesBasedRacingProceduresConfiguration)groupConfiguration).store();
+        }
     }
 
     private void addManagedRaces(Collection<ManagedRace> target, RaceGroup raceGroup) {

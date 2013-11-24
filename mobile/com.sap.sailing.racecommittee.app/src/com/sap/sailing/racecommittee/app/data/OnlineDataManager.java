@@ -11,20 +11,20 @@ import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedDeviceConfigurationJsonDeserializer;
+import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedRacingProceduresConfigurationJsonDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
@@ -55,19 +55,11 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceCellDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
-import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceRowDeserializer;
-import com.sap.sailing.server.gateway.deserialization.racegroup.impl.SeriesWithRowsDeserializer;
-import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogDeserializer;
-import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 /**
  * Enables accessing of data.
@@ -142,13 +134,10 @@ public class OnlineDataManager extends DataManager {
                 ConfigurationLoader<RacingProceduresConfiguration> configuration = 
                         new PreferencesBasedRacingProceduresConfiguration(preferences);
                 
-                JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
+                JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer = 
+                        PreferencesBasedRacingProceduresConfigurationJsonDeserializer.create(preferences);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
-                        configuration,
-                        new RaceGroupDeserializer(boatClassDeserializer, new SeriesWithRowsDeserializer(
-                                new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()),
-                                        new RaceCellDeserializer(new RaceLogDeserializer(
-                                                RaceLogEventDeserializer.create(domainFactory)))))));
+                        configuration, RaceGroupDeserializer.create(domainFactory, proceduresDeserializer));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/racegroups?"+

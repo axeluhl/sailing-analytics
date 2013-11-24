@@ -17,7 +17,7 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
     public static final String FIELD_PROCEDURES_CONFIGURATION = "procedures";
     
     public static DeviceConfigurationJsonSerializer create() {
-        return new DeviceConfigurationJsonSerializer(new RacingProceduresConfigurationJsonSerializer());
+        return new DeviceConfigurationJsonSerializer(RacingProceduresConfigurationJsonSerializer.create());
     }
     
     private final JsonSerializer<RacingProceduresConfiguration> proceduresSerializer;

@@ -12,15 +12,9 @@
         android:title="@string/settings_advanced_service_header"
         android:summary="@string/empty" />
     
-    <EditTextPreference
+    <com.sap.sailing.racecommittee.app.ui.views.EditSetPreference
         android:key="@string/preference_course_areas_key"
-        android:defaultValue="@string/preference_course_areas_default"
-        android:title="@string/settings_general_manageareas_header"
-        android:summary="@string/empty" />
-    
-    <com.sap.sailing.racecommittee.app.ui.fragments.preference.EditListPreference
-        android:key="what_a_key"
-        android:defaultValue="a,b,c"
+        android:defaultValue="@array/preference_course_areas_default"
         android:title="@string/settings_general_manageareas_header"
         android:summary="@string/empty" />
     

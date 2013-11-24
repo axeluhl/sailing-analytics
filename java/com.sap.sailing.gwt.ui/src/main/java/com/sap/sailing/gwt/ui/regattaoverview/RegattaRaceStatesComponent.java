@@ -27,7 +27,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -417,26 +416,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                /*RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+                RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
                 if (courseDTO != null && courseDTO.waypoints.size() > 0) {
                     DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
                     courseViewDialogBox.center();
                     courseViewDialogBox.setGlassEnabled(true);
                     courseViewDialogBox.setAnimationEnabled(true);
                     courseViewDialogBox.show();
-                } */
-                sailingService.fakeNewStartTime(object, new Date(), new AsyncCallback<Void>() {
-                    
-                    @Override
-                    public void onSuccess(Void result) {
-                        
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        
-                    }
-                });
+                }
             }
         });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);

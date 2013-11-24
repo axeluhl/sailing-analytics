@@ -15,6 +15,7 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_BOAT_CLASS = "boatClass";
     public static final String FIELD_DEFAULT_RACING_PROCEDURE = "defaultProcedure";
     public static final String FIELD_DEFAULT_COURSE_DESIGNER = "defaultCourseDesigner";
+    public static final String FIELD_RACING_PROCEDURES_CONFIGURATION = "proceduresConfiguration";
 
     private JsonSerializer<BoatClass> boatClassSerializer;
     private JsonSerializer<CourseArea> courseAreaSerializer;
@@ -48,6 +49,10 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
         
         if (object.getDefaultCourseDesignerMode() != null) {
             result.put(FIELD_DEFAULT_COURSE_DESIGNER, object.getDefaultCourseDesignerMode().name());
+        }
+        
+        if (object.getRacingProceduresConfiguration() != null) {
+            result.put(FIELD_RACING_PROCEDURES_CONFIGURATION, object.getRacingProceduresConfiguration());
         }
 
         return result;

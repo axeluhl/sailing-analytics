@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="empty_array"/>
 
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
@@ -275,5 +276,15 @@
 	<string name="override_default_course_designer_type_header">Override Course Designer type</string>
 	<string name="override_default_course_designer_type_description">Use configured Course Designer instead of race\'s.</string>
 	<string name="override_default_course_designer_type_select_header">Course Designer type</string>
+	
+	<string name="settings_course_designer_by_name_course_names_header">Course Names</string>
+	<string name="enter_new_item">Enter new item</string>
+	<string name="add">Add</string>
+	<string name="there_are_no_items_yet_">There are no items yet.</string>
+	
+	<string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmode Flags</string>
+	<string name="preference_racing_procedure_classflag_header">Class Flag</string>
+	<string name="preference_racing_procedure_hasxray_header">Activate Individual Recall</string>
+	
 	
 </resources>

@@ -7,7 +7,9 @@ import java.util.List;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 
@@ -18,13 +20,32 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         addPreferencesFromResource(R.xml.preference_racing_procedure);
         
         setupRacingProcedurePreferences();
+        setupRRS26();
+        setupGateStart();
+        setupESS();
+        
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+    }
+
+    private void setupRRS26() {
+        setupStartmodeFlagsList();
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+    }
+
+    private void setupGateStart() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
+    }
+
+    private void setupESS() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
     }
 
     private void setupRacingProcedurePreferences() {
-        CheckBoxPreference overrideStartProcedurePreference = (CheckBoxPreference) 
-                findPreference(getString(R.string.preference_racing_procedure_is_overridden_key));
-        final ListPreference startProcedurePreference = (ListPreference) 
-                findPreference(getString(R.string.preference_racing_procedure_override_key));
+        CheckBoxPreference overrideStartProcedurePreference = findPreference(R.string.preference_racing_procedure_is_overridden_key);
+        final ListPreference startProcedurePreference = findPreference(R.string.preference_racing_procedure_override_key);
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
         List<CharSequence> entryValues = new ArrayList<CharSequence>();
@@ -33,10 +54,32 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
             entryValues.add(type.name());
         }
         
-        startProcedurePreference.setEntries(entries.toArray(new CharSequence[0]));
-        startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+        startProcedurePreference.setEntries(entries.toArray(new CharSequence[entries.size()]));
+        startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
         
         bindPreferenceToCheckbox(overrideStartProcedurePreference, startProcedurePreference);
         bindPreferenceSummaryToValue(startProcedurePreference);
+    }
+
+    private void setupStartmodeFlagsList() {
+        MultiSelectListPreference listPreference = findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
+        List<String> flags = new ArrayList<String>();
+        for (Flags flag : Flags.validValues()) {
+            flags.add(flag.name());
+        }
+        listPreference.setEntries(flags.toArray(new String[flags.size()]));
+        listPreference.setEntryValues(flags.toArray(new String[flags.size()]));
+    }
+
+    private void setupClassFlagList(ListPreference preference) {
+        List<CharSequence> entries = new ArrayList<CharSequence>();
+        List<CharSequence> entryValues = new ArrayList<CharSequence>();
+        for (Flags flag: Flags.validValues()) {
+            entries.add(flag.toString());
+            entryValues.add(flag.name());
+        }
+        
+        preference.setEntries(entries.toArray(new CharSequence[entries.size()]));
+        preference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
     }
 }

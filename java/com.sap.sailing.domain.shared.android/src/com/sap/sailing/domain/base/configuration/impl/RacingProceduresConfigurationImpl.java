@@ -1,55 +1,50 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
-import java.util.List;
-
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 
 public class RacingProceduresConfigurationImpl implements RacingProceduresConfiguration {
 
     private static final long serialVersionUID = 8501755084811977792L;
     
-    private Flags classFlag;
-    private Boolean hasInidividualRecall;
-    
-    private List<Flags> startModeFlags;
-    
-    // GENERAL
+    private RRS26Configuration rrs26Configuration;
+    private GateStartConfiguration gateStartConfiguration;
+    private ESSConfiguration essConfiguration;
 
     @Override
-    public Flags getClassFlag() {
-        return classFlag;
+    public RRS26Configuration getRRS26Configuration() {
+        return rrs26Configuration;
     }
-    
-    public void setClassFlag(Flags classFlag) {
-        this.classFlag = classFlag;
+
+    public void setRRS26Configuration(RRS26Configuration rrs26Configuration) {
+        this.rrs26Configuration = rrs26Configuration;
     }
 
     @Override
-    public Boolean hasInidividualRecall() {
-        return hasInidividualRecall;
+    public GateStartConfiguration getGateStartConfiguration() {
+        return gateStartConfiguration;
     }
 
-    public void setHasInidividualRecall(Boolean hasInidividualRecall) {
-        this.hasInidividualRecall = hasInidividualRecall;
+    public void setGateStartConfiguration(GateStartConfiguration gateStartConfiguration) {
+        this.gateStartConfiguration = gateStartConfiguration;
     }
-    
-    // RRS26
 
     @Override
-    public List<Flags> getStartModeFlags() {
-        return startModeFlags;
-    }
-    
-    public void setStartModeFlags(List<Flags> flags) {
-        this.startModeFlags = flags;
+    public ESSConfiguration getESSConfiguration() {
+        return essConfiguration;
     }
 
+    public void setESSConfiguration(ESSConfiguration essConfiguration) {
+        this.essConfiguration = essConfiguration;
+    }    
+    
     protected RacingProceduresConfiguration copy() {
         RacingProceduresConfigurationImpl copy = new RacingProceduresConfigurationImpl();
-        copy.setClassFlag(classFlag);
-        copy.setHasInidividualRecall(hasInidividualRecall);
-        copy.setStartModeFlags(startModeFlags);
+        copy.setRRS26Configuration(rrs26Configuration);
+        copy.setGateStartConfiguration(gateStartConfiguration);
+        copy.setESSConfiguration(essConfiguration);
         return copy;
     }
 

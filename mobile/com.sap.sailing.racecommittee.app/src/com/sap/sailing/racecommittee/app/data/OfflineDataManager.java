@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -77,7 +78,7 @@ public class OfflineDataManager extends DataManager {
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
-                medal), RacingProcedureType.RRS26, CourseDesignerMode.BY_NAME);
+                medal), RacingProcedureType.RRS26, CourseDesignerMode.BY_NAME, new EmptyRacingProceduresConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));

@@ -13,10 +13,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 public class PreferencesBasedDeviceConfigurationJsonDeserializer extends DeviceConfigurationJsonDeserializer {
 
     public static PreferencesBasedDeviceConfigurationJsonDeserializer create(final AppPreferences preferences) {
-        return new PreferencesBasedDeviceConfigurationJsonDeserializer(preferences, 
-                new PreferencesBasedRacingProceduresConfigurationJsonDeserializer(preferences));
+        return new PreferencesBasedDeviceConfigurationJsonDeserializer(preferences,
+                PreferencesBasedRacingProceduresConfigurationJsonDeserializer.create(preferences));
     }
-    
+
     private final AppPreferences preferences;
 
     public PreferencesBasedDeviceConfigurationJsonDeserializer(AppPreferences preferences,
@@ -27,11 +27,12 @@ public class PreferencesBasedDeviceConfigurationJsonDeserializer extends DeviceC
 
     @Override
     protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
-        return new PreferencesBasedDeviceConfiguration(preferences, 
+        return new PreferencesBasedDeviceConfiguration(preferences,
                 (PreferencesBasedRacingProceduresConfiguration) proceduresConfiguration);
     }
-    
-    public PreferencesBasedDeviceConfiguration deserializeAsStored(JSONObject object) throws JsonDeserializationException {
+
+    public PreferencesBasedDeviceConfiguration deserializeAsStored(JSONObject object)
+            throws JsonDeserializationException {
         return (PreferencesBasedDeviceConfiguration) deserialize(object);
     }
 

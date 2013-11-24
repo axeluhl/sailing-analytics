@@ -1,9 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
 import com.sap.sailing.racecommittee.app.utils.MultiplePreferenceChangeListener;
 
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
@@ -13,7 +21,12 @@ import android.preference.PreferenceManager;
  * Created by I074137 on 18.09.13.
  */
 public class BasePreferenceFragment extends PreferenceFragment {
-
+    
+    @SuppressWarnings("unchecked")
+    protected <T extends Preference> T findPreference(int resourceId) {
+        return (T) findPreference(getString(resourceId));
+    }
+    
     protected static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -27,6 +40,12 @@ public class BasePreferenceFragment extends PreferenceFragment {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
+            } else if (preference instanceof MultiSelectListPreference || preference instanceof EditSetPreference) {
+                @SuppressWarnings("unchecked")
+                Set<String> setValue = (Set<String>) value;
+                List<String> listValue = new ArrayList<String>(setValue);
+                Collections.sort(listValue);
+                preference.setSummary(listValue.toString());
             } else {
                 preference.setSummary(stringValue);
             }
@@ -50,6 +69,15 @@ public class BasePreferenceFragment extends PreferenceFragment {
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getInt(preference.getKey(), 0));
+    }
+    
+    protected static void bindPreferenceSummaryToSet(Preference preference) {
+        addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
+
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getStringSet(preference.getKey(), new HashSet<String>()));
     }
 
     protected static void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {

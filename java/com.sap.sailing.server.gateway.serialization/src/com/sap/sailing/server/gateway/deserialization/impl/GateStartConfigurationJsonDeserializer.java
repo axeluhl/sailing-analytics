@@ -1,0 +1,36 @@
+package com.sap.sailing.server.gateway.deserialization.impl;
+
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+
+
+public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements JsonDeserializer<RacingProcedureConfiguration> {
+
+    public static GateStartConfigurationJsonDeserializer create() {
+        return new GateStartConfigurationJsonDeserializer();
+    }
+
+
+    public GateStartConfigurationJsonDeserializer() {
+    	super();
+    }
+
+    @Override
+    public GateStartConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
+    	return (GateStartConfiguration) super.deserialize(object);    
+    }
+
+    protected GateStartConfiguration createResult(JSONObject object, Flags classFlag, Boolean inidividualRecall) throws JsonDeserializationException {
+    	GateStartConfigurationImpl result = new GateStartConfigurationImpl();
+    	result.setClassFlag(classFlag);
+    	result.setHasInidividualRecall(inidividualRecall);
+    	return result;
+    }
+
+}

@@ -10,6 +10,7 @@ import android.preference.ListPreference;
 
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
 
 public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
     @Override
@@ -18,14 +19,19 @@ public class CourseDesignerPreferenceFragment extends BasePreferenceFragment {
         addPreferencesFromResource(R.xml.preference_course_designer);
         
         setupCourseDesignerTypePreferences();
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_course_designer_by_name_course_names_key)));
+        setupCourseDesignerByNameCourseNames();
+        
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_course_designer_by_name_course_names_key));
+    }
+
+    private void setupCourseDesignerByNameCourseNames() {
+        EditSetPreference preference = findPreference(R.string.preference_course_designer_by_name_course_names_key);
+        preference.setExampleValues(getResources().getStringArray(R.array.preference_course_designer_by_name_course_names_example));
     }
 
     private void setupCourseDesignerTypePreferences() {
-        CheckBoxPreference overrideCourseDesignerPreference = (CheckBoxPreference) 
-                findPreference(getString(R.string.preference_course_designer_is_overridden_key));
-        final ListPreference courseDesignerPreference = (ListPreference) 
-                findPreference(getString(R.string.preference_course_designer_override_key));
+        CheckBoxPreference overrideCourseDesignerPreference = findPreference(R.string.preference_course_designer_is_overridden_key);
+        final ListPreference courseDesignerPreference = findPreference(R.string.preference_course_designer_override_key);
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
         List<CharSequence> entryValues = new ArrayList<CharSequence>();

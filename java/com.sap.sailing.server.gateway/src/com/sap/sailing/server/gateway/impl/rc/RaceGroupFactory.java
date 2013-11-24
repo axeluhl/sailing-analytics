@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -46,18 +47,20 @@ public class RaceGroupFactory {
         BoatClass boatClass = null;
         RacingProcedureType defaultProcedureType = RacingProcedureType.UNKNOWN;
         CourseDesignerMode defaultCourseDesignerMode = CourseDesignerMode.UNKNOWN;
+        RacingProceduresConfiguration procedureConfiguration = null;
         
         if (leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
             boatClass = regatta.getBoatClass();
             defaultProcedureType = regatta.getDefaultRacingProcedureType();
             defaultCourseDesignerMode = regatta.getDefaultCourseDesignerMode();
+            //procedureConfiguration = regatta.getRacingProceduresConfiguration();
         }
 
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
 
         return new RaceGroupImpl(name, boatClass, courseArea, series,
-                defaultProcedureType, defaultCourseDesignerMode);
+                defaultProcedureType, defaultCourseDesignerMode, procedureConfiguration);
     }
 
     public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {

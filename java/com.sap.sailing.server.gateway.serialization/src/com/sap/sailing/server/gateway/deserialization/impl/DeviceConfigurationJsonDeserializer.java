@@ -16,32 +16,33 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 
 public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<DeviceConfiguration> {
-    
+
     public static DeviceConfigurationJsonDeserializer create() {
-        return new DeviceConfigurationJsonDeserializer(new RacingProceduresConfigurationJsonDeserializer());
+        return new DeviceConfigurationJsonDeserializer(RacingProceduresConfigurationJsonDeserializer.create());
     }
 
-    private final JsonDeserializer<? extends RacingProceduresConfiguration> proceduresDeserializer;
-    
-    public DeviceConfigurationJsonDeserializer(JsonDeserializer<? extends RacingProceduresConfiguration> proceduresDeserializer) {
+    private final JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer;
+
+    public DeviceConfigurationJsonDeserializer(JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer) {
         this.proceduresDeserializer = proceduresDeserializer;
     }
-    
+
     @Override
     public DeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
-        
+
         RacingProceduresConfiguration proceduresConfiguration = null;
-        
+
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION)) {
-            JSONObject proceduresObject = 
-                Helpers.getNestedObjectSafe(object, DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION);
+            JSONObject proceduresObject = Helpers.getNestedObjectSafe(object,
+                    DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION);
             proceduresConfiguration = proceduresDeserializer.deserialize(proceduresObject);
         }
-        
+
         DeviceConfigurationImpl configuration = createConfiguration(proceduresConfiguration);
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES)) {
-            JSONArray courseAreaNames = Helpers.getNestedArraySafe(object, DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES);
+            JSONArray courseAreaNames = Helpers.getNestedArraySafe(object,
+                    DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_NAMES);
             List<String> allowedCourseAreaNames = new ArrayList<String>();
             for (Object name : courseAreaNames) {
                 allowedCourseAreaNames.add(name.toString());
@@ -53,23 +54,23 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
             String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
             configuration.setResultsMailRecipient(resultsRecipient);
         }
-        
+
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE)) {
-            RacingProcedureType type = RacingProcedureType.valueOf(
-                    object.get(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE).toString());
+            RacingProcedureType type = RacingProcedureType.valueOf(object.get(
+                    DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE).toString());
             configuration.setDefaultRacingProcedureType(type);
         }
-        
+
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE)) {
-            CourseDesignerMode mode = CourseDesignerMode.valueOf(
-                    object.get(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
+            CourseDesignerMode mode = CourseDesignerMode.valueOf(object.get(
+                    DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
             configuration.setDefaultCourseDesignerMode(mode);
         }
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES)) {
-            JSONArray namesArray = Helpers.getNestedArraySafe(object, 
+            JSONArray namesArray = Helpers.getNestedArraySafe(object,
                     DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES);
-            
+
             List<String> names = new ArrayList<String>();
             for (Object name : namesArray) {
                 names.add(name.toString());
@@ -79,7 +80,7 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
 
         return configuration;
     }
-    
+
     protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
         return new DeviceConfigurationImpl(proceduresConfiguration);
     }

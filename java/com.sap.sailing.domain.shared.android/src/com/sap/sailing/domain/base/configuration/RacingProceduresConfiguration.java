@@ -10,7 +10,10 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 /**
  * Aggregate interface holding configuration options for all {@link RacingProcedure}s.
  */
-public interface RacingProceduresConfiguration extends RRS26Configuration, GateStartConfiguration, ESSConfiguration,
-        Serializable {
+public interface RacingProceduresConfiguration extends Serializable {
+    
+    RRS26Configuration getRRS26Configuration();
+    GateStartConfiguration getGateStartConfiguration();
+    ESSConfiguration getESSConfiguration();
 
 }

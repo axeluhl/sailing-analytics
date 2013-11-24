@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
@@ -18,27 +21,28 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
+/**
+ * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
+ */
 public class AppPreferences {
-
-    //private static String TAG = AppPreferences.class.getSimpleName();
 
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
     }
 
-    private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
+    private final static String HIDDEN_PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
 
-    private final static String PREFERENCE_AUTHOR_NAME = "authorName";
-    private final static String PREFERENCE_AUTHOR_PRIORITY = "authorPriority";
+    private final static String HIDDEN_PREFERENCE_AUTHOR_NAME = "authorName";
+    private final static String HIDDEN_PREFERENCE_AUTHOR_PRIORITY = "authorPriority";
 
-    private final static String PREFERENCE_WIND_BEARING = "windBearingPref";
-    private final static String PREFERENCE_WIND_SPEED = "windSpeedPref";
+    private final static String HIDDEN_PREFERENCE_WIND_BEARING = "windBearingPref";
+    private final static String HIDDEN_PREFERENCE_WIND_SPEED = "windSpeedPref";
 
-    private final static String PREFERENCE_BOAT_CLASS = "boatClassPref";
-    private final static String PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
-    private final static String PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
+    private final static String HIDDEN_PREFERENCE_BOAT_CLASS = "boatClassPref";
+    private final static String HIDDEN_PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
+    private final static String HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
     
-    private final static String PREFERENCE_PROCEDURE_CONFIG_OVERWRITE = "procedureConfigOverwriteAllowed";
+    private final static String HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE = "procedureConfigOverwriteAllowed";
 
     private final SharedPreferences preferences;
     private final Context context;
@@ -47,28 +51,36 @@ public class AppPreferences {
         this.context = context;
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
+    
+    private String key(int keyId) {
+        return context.getString(keyId);
+    }
+
+    public String getAndroidIdentifier() {
+        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    }
 
     public boolean isSendingActive() {
-        return preferences.getBoolean(PREFERENCE_SENDING_ACTIVE, false);
+        return preferences.getBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, false);
     }
 
     public void setSendingActive(boolean activate) {
-        preferences.edit().putBoolean(PREFERENCE_SENDING_ACTIVE, activate).commit();
+        preferences.edit().putBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, activate).commit();
     }
 
     public void setAuthor(RaceLogEventAuthor author) {
-        preferences.edit().putString(PREFERENCE_AUTHOR_NAME, author.getName()).commit();
-        preferences.edit().putInt(PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
+        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
+        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
     }
 
     public RaceLogEventAuthor getAuthor() {
-        String authorName = preferences.getString(PREFERENCE_AUTHOR_NAME, "<anonymous>");
-        int authorPriority = preferences.getInt(PREFERENCE_AUTHOR_PRIORITY, 0);
+        String authorName = preferences.getString(HIDDEN_PREFERENCE_AUTHOR_NAME, "<anonymous>");
+        int authorPriority = preferences.getInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, 0);
         return new RaceLogEventAuthorImpl(authorName, authorPriority);
     }
 
     public BoatClassType getBoatClass() {
-        String boatClass = preferences.getString(PREFERENCE_BOAT_CLASS, null);
+        String boatClass = preferences.getString(HIDDEN_PREFERENCE_BOAT_CLASS, null);
         if (boatClass == null) {
             return null;
         }
@@ -77,11 +89,11 @@ public class AppPreferences {
 
     public void setBoatClass(BoatClassType boatClass) {
         String boatClassString = boatClass.name();
-        preferences.edit().putString(PREFERENCE_BOAT_CLASS, boatClassString).commit();
+        preferences.edit().putString(HIDDEN_PREFERENCE_BOAT_CLASS, boatClassString).commit();
     }
 
     public CourseLayouts getCourseLayout() {
-        String courseLayout = preferences.getString(PREFERENCE_COURSE_LAYOUT, null);
+        String courseLayout = preferences.getString(HIDDEN_PREFERENCE_COURSE_LAYOUT, null);
         if (courseLayout == null)
             return null;
         CourseLayouts storedCourseLayout;
@@ -97,11 +109,11 @@ public class AppPreferences {
 
     public void setCourseLayout(CourseLayouts courseLayout) {
         String courseLayoutString = courseLayout.name();
-        preferences.edit().putString(PREFERENCE_COURSE_LAYOUT, courseLayoutString).commit();
+        preferences.edit().putString(HIDDEN_PREFERENCE_COURSE_LAYOUT, courseLayoutString).commit();
     }
 
     public NumberOfRounds getNumberOfRounds() {
-        String numberOfRounds = preferences.getString(PREFERENCE_NUMBER_OF_ROUNDS, null);
+        String numberOfRounds = preferences.getString(HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS, null);
         if (numberOfRounds == null)
             return null;
         return NumberOfRounds.valueOf(numberOfRounds);
@@ -109,48 +121,39 @@ public class AppPreferences {
 
     public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
         String numberOfRoundsString = numberOfRounds.name();
-        preferences.edit().putString(PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).commit();
+        preferences.edit().putString(HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).commit();
     }
 
     public double getWindBearingFromDirection() {
-        long windBearingAsLong = preferences.getLong(PREFERENCE_WIND_BEARING, 0);
+        long windBearingAsLong = preferences.getLong(HIDDEN_PREFERENCE_WIND_BEARING, 0);
         return Double.longBitsToDouble(windBearingAsLong);
     }
 
     public void setWindBearingFromDirection(double enteredWindBearing) {
         long windBearingAsLong = Double.doubleToLongBits(enteredWindBearing);
-        preferences.edit().putLong(PREFERENCE_WIND_BEARING, windBearingAsLong).commit();
+        preferences.edit().putLong(HIDDEN_PREFERENCE_WIND_BEARING, windBearingAsLong).commit();
     }
 
     public double getWindSpeed() {
-        long windSpeedAsLong = preferences.getLong(PREFERENCE_WIND_SPEED, 0);
+        long windSpeedAsLong = preferences.getLong(HIDDEN_PREFERENCE_WIND_SPEED, 0);
         return Double.longBitsToDouble(windSpeedAsLong);
     }
 
     public void setWindSpeed(double enteredWindSpeed) {
         long windSpeedAsLong = Double.doubleToLongBits(enteredWindSpeed);
-        preferences.edit().putLong(PREFERENCE_WIND_SPEED, windSpeedAsLong).commit();
+        preferences.edit().putLong(HIDDEN_PREFERENCE_WIND_SPEED, windSpeedAsLong).commit();
     }
 
     public List<String> getManagedCourseAreaNames() {
-        String value = preferences.getString(key(R.string.preference_course_areas_key), "");
-        String[] managedCourseAreas = value.split(",");
-        for (int i = 0; i < managedCourseAreas.length; i++) {
-            managedCourseAreas[i] = managedCourseAreas[i].trim();
-        }
-        return Arrays.asList(managedCourseAreas);
+        Set<String> values = preferences.getStringSet(key(R.string.preference_course_areas_key), new HashSet<String>());
+        return new ArrayList<String>(values);
     }
 
     public void setManagedCourseAreaNames(List<String> courseAreaNames) {
-        StringBuilder builder = new StringBuilder();
-        for (String name : courseAreaNames) {
-            builder.append(name);
-            builder.append(",");
-        }
         preferences
                 .edit()
-                .putString(key(R.string.preference_course_areas_key),
-                        builder.substring(0, builder.length() - 1)).commit();
+                .putStringSet(key(R.string.preference_course_areas_key),
+                        new HashSet<String>(courseAreaNames)).commit();
     }
 
     public String getServerBaseURL() {
@@ -204,40 +207,96 @@ public class AppPreferences {
     }
 
     public List<String> getByNameCourseDesignerCourseNames() {
-        String value = preferences.getString(key(R.string.preference_course_designer_by_name_course_names_key), "");
-        String[] courseNames = value.split(",");
-        for (int i = 0; i < courseNames.length; i++) {
-            courseNames[i] = courseNames[i].trim();
-        }
-        return Arrays.asList(courseNames);
+        Set<String> values = preferences.getStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>());
+        return new ArrayList<String>(values);
     }
 
     public void setByNameCourseDesignerCourseNames(List<String> courseNames) {
-        StringBuilder builder = new StringBuilder();
-        for (String name : courseNames) {
-            builder.append(name);
-            builder.append(",");
-        }
         preferences
                 .edit()
-                .putString(key(R.string.preference_course_designer_by_name_course_names_key),
-                        builder.substring(0, builder.length() - 1)).commit();
-    }
-    
-    private String key(int keyId) {
-        return context.getString(keyId);
-    }
-
-    public String getAndroidIdentifier() {
-        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key),
+                        new HashSet<String>(courseNames)).commit();
     }
 
     public boolean isRacingProcedureConfigurationOverwriteAllowed() {
-        return preferences.getBoolean(PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, true);
+        return preferences.getBoolean(HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, true);
     }
 
     public void setRacingProcedureConfigurationOverwriteAllowed(boolean allowed) {
-        preferences.edit().putBoolean(PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, allowed).commit();
+        preferences.edit().putBoolean(HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, allowed).commit();
+    }
+    
+    public void setRacingProcedureClassFlag(RacingProcedureType type, Flags flag) {
+        String key = getRacingProcedureClassFlagKey(type);
+        preferences.edit().putString(key, flag.name()).commit();
+    }
+    
+    public Flags getRacingProcedureClassFlag(RacingProcedureType type) {
+        String key = getRacingProcedureClassFlagKey(type);
+        return Flags.valueOf(preferences.getString(key, null));
+    }
+    
+    public void setRacingProcedureHasIndividualRecall(RacingProcedureType type, Boolean hasRecall) {
+        String key = getRacingProcedureHasIndividualRecallKey(type);
+        preferences.edit().putBoolean(key, hasRecall).commit();
     }
 
+    public boolean getRacingProcedureHasIndividualRecall(RacingProcedureType type) {
+        String key = getRacingProcedureHasIndividualRecallKey(type);
+        return preferences.getBoolean(key, false);
+    }
+    
+    public void setRRS26StartmodeFlags(Set<Flags> flags) {
+        Set<String> flagNames = new HashSet<String>();
+        for (Flags flag : flags) {
+            flagNames.add(flag.name());
+        }
+        preferences.edit().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames);
+    }
+    
+    public Set<Flags> getRRS26StartmodeFlags() {
+        Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), null);
+        if (flagNames != null) {
+            Set<Flags> flags = new HashSet<Flags>();
+            for (String flagName : flagNames) {
+                flags.add(Flags.valueOf(flagName));
+            }
+            return flags;
+        }
+        return null;
+    }
+
+    private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
+        String key;
+        switch (type) {
+        case RRS26:
+            key = key(R.string.preference_racing_procedure_rrs26_classflag_key);
+            break;
+        case GateStart:
+            key = key(R.string.preference_racing_procedure_gatestart_classflag_key);
+            break;
+        case ESS:
+            key = key(R.string.preference_racing_procedure_ess_classflag_key);
+        default:
+            throw new IllegalArgumentException("Unknown racing procedure type.");
+        }
+        return key;
+    }
+    
+    private String getRacingProcedureHasIndividualRecallKey(RacingProcedureType type) {
+        String key;
+        switch (type) {
+        case RRS26:
+            key = key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            break;
+        case GateStart:
+            key = key(R.string.preference_racing_procedure_gatestart_hasxray_key);
+            break;
+        case ESS:
+            key = key(R.string.preference_racing_procedure_ess_hasxray_key);
+        default:
+            throw new IllegalArgumentException("Unknown racing procedure type.");
+        }
+        return key;
+    }
 }

@@ -19,10 +19,10 @@
     
     <PreferenceCategory android:title="By-Name Course Designer" >
 		
-	    <EditTextPreference
+	    <com.sap.sailing.racecommittee.app.ui.views.EditSetPreference
 	        android:key="@string/preference_course_designer_by_name_course_names_key"
-	        android:defaultValue="@string/preference_course_designer_by_name_course_names_default"
-	        android:title="Course Names"
+	        android:defaultValue="@array/preference_course_designer_by_name_course_names_default"
+	        android:title="@string/settings_course_designer_by_name_course_names_header"
 	        android:summary="@string/empty" />
 		
     </PreferenceCategory>

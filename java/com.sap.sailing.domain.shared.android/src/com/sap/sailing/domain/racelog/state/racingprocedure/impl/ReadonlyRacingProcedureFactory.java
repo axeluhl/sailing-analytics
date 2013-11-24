@@ -27,11 +27,11 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
         RacingProceduresConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:
-            return new ESSRacingProcedureImpl(raceLog, author, factory, loadedConfiguration);
+            return new ESSRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getESSConfiguration());
         case GateStart:
-            return new GateStartRacingProcedureImpl(raceLog, author, factory, loadedConfiguration);
+            return new GateStartRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getGateStartConfiguration());
         case RRS26:
-            return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration);
+            return new RRS26RacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getRRS26Configuration());
         default:
             throw new UnsupportedOperationException("Unknown racing procedure " + type.toString());
         }

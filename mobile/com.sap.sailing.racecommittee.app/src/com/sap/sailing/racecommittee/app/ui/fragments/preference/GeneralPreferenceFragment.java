@@ -8,6 +8,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
     @Override
@@ -17,9 +18,18 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         
         setupLanguageButton();
         setupServerUrlBox();
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_server_url_key)));
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_course_areas_key)));
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_mail_key)));
+        setupCourseAreasList();
+        
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
+    }
+
+    private void setupCourseAreasList() {
+        EditSetPreference preference = findPreference(R.string.preference_course_areas_key);
+        //ReadonlyDataManager dataManager = DataManager.create(getActivity());
+        
+        preference.setExampleValues(getResources().getStringArray(R.array.preference_course_areas_example));
     }
 
     private void setupServerUrlBox() {
