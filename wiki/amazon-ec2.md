@@ -267,6 +267,7 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 - fetch all git branches from what is now old.sapsailing.com; also sync gollum wiki git
 - ask people (including internal Git team) to update their known_hosts files according to the new web server's key
 - check if build server can access new sapsailing.com
+- check why swisstiminglistener doesn't receive connections and fix
 
 ## Glossary
 
