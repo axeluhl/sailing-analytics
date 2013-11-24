@@ -5,7 +5,7 @@
 # enable special environment configuration
 if [[ $USE_ENVIRONMENT != "" ]]; then
     echo "Using environment $USE_ENVIRONMENT"
-    source ./$USE_ENVIRONMENT
+    source ./environment/$USE_ENVIRONMENT
 fi
 
 TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
