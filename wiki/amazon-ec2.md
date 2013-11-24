@@ -257,6 +257,7 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 
 ### Just before the migration on Sunday evening
 - check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration 
+- disable bugzilla and git on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone
 - tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
 
 ### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
@@ -264,6 +265,7 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 - check that EC2 web server is responding to sapsailing.com now
 - fetch all git branches from what is now old.sapsailing.com; also sync gollum wiki git
 - ask people (including internal Git team) to update their known_hosts files according to the new web server's key
+- check if build server can access new sapsailing.com
 
 ## Glossary
 
