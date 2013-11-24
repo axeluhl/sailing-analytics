@@ -256,9 +256,11 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 - check that we can fire up a live2 / archive2 server and switch transparently
 
 ### Just before the migration on Sunday evening
-- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration 
-- disable bugzilla on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone
-- copy /home/trac/releases to webserver
+- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration (DONE)
+- disable bugzilla on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone (DONE)
+- copy /home/trac/releases to webserver (DONE)
+- import bugzilla to mysql (DONE)
+- git fetch --all on webserver (DONE)
 - tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
 
 ### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
