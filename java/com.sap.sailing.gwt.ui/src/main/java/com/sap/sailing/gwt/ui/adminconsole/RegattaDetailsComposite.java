@@ -53,6 +53,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label defaultCourseArea;
     private final Label defaultRacingProcedureType;
     private final Label defaultCourseDesignerMode;
+    private final Label racingProceduresConfiguration;
 
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -70,7 +71,7 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-        Grid grid = new Grid(6, 2);
+        Grid grid = new Grid(7, 2);
         vPanel.add(grid);
         regattaName = new Label();
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
@@ -82,14 +83,17 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
         defaultRacingProcedureType = new Label();
-        grid.setWidget(3, 0, new Label("Procedure:"));
+        grid.setWidget(3, 0, new Label(stringMessages.racingProcedure() + ":"));
         grid.setWidget(3, 1, defaultRacingProcedureType);;
         defaultCourseDesignerMode = new Label();
-        grid.setWidget(4, 0, new Label("Course Designer:"));
-        grid.setWidget(4, 1, defaultCourseDesignerMode);;
+        grid.setWidget(4, 0, new Label(stringMessages.courseDesignerMode() + ":"));
+        grid.setWidget(4, 1, defaultCourseDesignerMode);
+        racingProceduresConfiguration = new Label();
+        grid.setWidget(5, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
+        grid.setWidget(5, 1, racingProceduresConfiguration);;
         scoringSystem = new Label();
-        grid.setWidget(5 , 0, new Label(stringMessages.scoringSystem() + ":"));
-        grid.setWidget(5 , 1, scoringSystem);
+        grid.setWidget(6 , 0, new Label(stringMessages.scoringSystem() + ":"));
+        grid.setWidget(6 , 1, scoringSystem);
         seriesTable = createRegattaSeriesTable();
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -336,6 +340,11 @@ public class RegattaDetailsComposite extends Composite {
                 defaultCourseDesignerMode.setText(stringMessages.none());
             } else {
                 defaultCourseDesignerMode.setText(designerMode.toString());
+            }
+            if (regatta.racingProceduresConfiguration != null) {
+                racingProceduresConfiguration.setText(stringMessages.configured());
+            } else {
+                racingProceduresConfiguration.setText(stringMessages.none());
             }
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               

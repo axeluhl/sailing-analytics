@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -77,6 +78,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RacingProceduresConfigurationJsonSerializer;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -480,6 +482,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         if (regatta.getDefaultCourseDesignerMode() != null) {
             dbRegatta.put(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name(), regatta.getDefaultCourseDesignerMode().name());
+        }
+        if (regatta.getRacingProceduresConfiguration() != null) {
+            JsonSerializer<RacingProceduresConfiguration> serializer = RacingProceduresConfigurationJsonSerializer.create();
+            JSONObject json = serializer.serialize(regatta.getRacingProceduresConfiguration());
+            DBObject configurationObject = (DBObject) JSON.parse(json.toString());
+            dbRegatta.put(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name(), configurationObject);
         }
 
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);

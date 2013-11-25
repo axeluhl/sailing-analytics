@@ -12,13 +12,14 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
 
 public class DeviceConfigurationReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testCreateConfiguration() throws InterruptedException {
         DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
         
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
         Thread.sleep(1000);
@@ -31,7 +32,7 @@ public class DeviceConfigurationReplicationTest extends AbstractServerReplicatio
     @Test
     public void testUpdateConfiguration() throws InterruptedException {
         DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("23");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
         
         configuration.setAllowedCourseAreaNames(Arrays.asList("hallo"));
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
@@ -50,7 +51,7 @@ public class DeviceConfigurationReplicationTest extends AbstractServerReplicatio
     @Test
     public void testRemoveConfiguration() throws InterruptedException {
         DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("24");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl();
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
         
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
         Thread.sleep(1000);

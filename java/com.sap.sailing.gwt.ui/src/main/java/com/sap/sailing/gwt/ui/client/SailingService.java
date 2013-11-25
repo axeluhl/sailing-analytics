@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -159,7 +160,9 @@ public interface SailingService extends RemoteService {
 
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId,
+            RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode,
+            RacingProceduresConfigurationDTO racingProceduresConfiguration);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
@@ -348,6 +351,4 @@ public interface SailingService extends RemoteService {
     DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds);
-    
-    void fakeNewStartTime(RegattaOverviewEntryDTO dto, Date startTime);
 }

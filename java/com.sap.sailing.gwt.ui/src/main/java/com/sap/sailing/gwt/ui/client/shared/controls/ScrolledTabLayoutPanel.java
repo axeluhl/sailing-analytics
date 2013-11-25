@@ -114,6 +114,10 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                if (isScrolling) {
+                    return;
+                }
+                
                 int difference = diff;
                 Widget lastTab = getLastTab();
                 if (lastTab == null)

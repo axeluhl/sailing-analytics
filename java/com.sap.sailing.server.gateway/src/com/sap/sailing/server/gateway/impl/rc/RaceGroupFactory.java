@@ -54,7 +54,7 @@ public class RaceGroupFactory {
             boatClass = regatta.getBoatClass();
             defaultProcedureType = regatta.getDefaultRacingProcedureType();
             defaultCourseDesignerMode = regatta.getDefaultCourseDesignerMode();
-            //procedureConfiguration = regatta.getRacingProceduresConfiguration();
+            procedureConfiguration = regatta.getRacingProceduresConfiguration();
         }
 
         Iterable<SeriesWithRows> series = getSeries(leaderboard);

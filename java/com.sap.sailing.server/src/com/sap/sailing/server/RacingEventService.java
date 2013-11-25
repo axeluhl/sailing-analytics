@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -267,7 +268,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode, RacingProceduresConfiguration newRacingProceduresConfiguration);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

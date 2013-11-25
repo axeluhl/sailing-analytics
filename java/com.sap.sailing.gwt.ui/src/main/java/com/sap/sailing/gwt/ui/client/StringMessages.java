@@ -850,4 +850,24 @@ public interface StringMessages extends Messages {
     String racingProcedure();
     String courseNames();
     String generate();
+    String dontoverwrite();
+    
+    String setRacingProcedureConfiguration();
+    String racingProcedureConfiguration();
+    String activateIndividualRecall();
+    String rrs26Start();
+    String overwriteConfiguration();
+    String classFlag();
+    String classFlagHelpText(String procedure);
+    String individualRecallHelpText();
+    String startmodeFlags(); 
+    String startmodeFlagsHelpText();
+    String gateStart();
+    String activatePathfinder();
+    String pathfinderHelpText();
+    String essStart();
+    String basicStart();
+    String configured();
+    String overwriteRacingProceduresConfiguration();
+    String overwriteRacingProceduresConfigurationHelpText();
 }

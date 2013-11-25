@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -10,6 +11,7 @@ public class RegattaMasterData {
     private final String defaultCourseAreaId;
     private final RacingProcedureType defaultRacingProcedureType;
     private final CourseDesignerMode defaultCourseDesignerMode;
+    private final RacingProceduresConfiguration proceduresConfiguration;
     private final String boatClassName;
     private final String scoringSchemeType;
     private final Iterable<SeriesMasterData> series;
@@ -19,7 +21,8 @@ public class RegattaMasterData {
 
     public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
-            Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode) {
+            Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode,
+            RacingProceduresConfiguration proceduresConfiguration) {
         this.id = id;
         this.baseName = baseName;
         this.defaultCourseAreaId = defaultCourseAreaId;
@@ -31,6 +34,7 @@ public class RegattaMasterData {
         this.raceIdsAsStrings = raceIdsAsStrings;
         this.defaultRacingProcedureType = procedureType;
         this.defaultCourseDesignerMode = designerMode;
+        this.proceduresConfiguration = proceduresConfiguration;
     }
 
     public Iterable<String> getRaceIdsAsStrings() {
@@ -55,6 +59,10 @@ public class RegattaMasterData {
 
     public CourseDesignerMode getDefaultCourseDesignerMode() {
         return defaultCourseDesignerMode;
+    }
+    
+    public RacingProceduresConfiguration getRacingProceduresConfiguration() {
+        return proceduresConfiguration;
     }
 
     public String getBoatClassName() {

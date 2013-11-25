@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.RegattaMasterDataJsonSerializer;
 
@@ -23,10 +25,13 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
     
     private final JsonDeserializer<Fleet> fleetDeserializer;
     private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer;
+    private final JsonDeserializer<RacingProceduresConfiguration> racingProceduresConfigurationDeserializer;
 
-    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer) {
+    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer,
+            JsonDeserializer<RacingProceduresConfiguration> racingProceduresConfigurationDeserializer) {
         this.fleetDeserializer = fleetDeserializer;
         this.raceColumnDeserializer = raceColumnDeserializer;
+        this.racingProceduresConfigurationDeserializer = racingProceduresConfigurationDeserializer;
     }
 
     @Override
@@ -52,8 +57,14 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
             designerMode = CourseDesignerMode.valueOf(defaultCourseDesignerModeValue);
         }
         
+        RacingProceduresConfiguration proceduresConfiguration = null;
+        if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION)) {
+            proceduresConfiguration = racingProceduresConfigurationDeserializer.deserialize(
+                    Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION));
+        }
+        
         return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 
-                series, isPersistent, regattaName, raceIdsAsStrings, procedureType, designerMode);
+                series, isPersistent, regattaName, raceIdsAsStrings, procedureType, designerMode, proceduresConfiguration);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {

@@ -1,38 +1,64 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.List;
+
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public final class ListBoxUtils {
 
 
-    public static void setupCourseDesignerModeListBox(ListBox listBox, CourseDesignerMode selectedCourseDesignerMode, 
-            StringMessages stringMessages) {
+    public static void setupCourseDesignerModeListBox(ListBox box, CourseDesignerMode selectedCourseDesignerMode, 
+            String noItemText) {
         for (CourseDesignerMode mode : CourseDesignerMode.values()) {
             if (mode == CourseDesignerMode.UNKNOWN) {
-                listBox.addItem(stringMessages.none(), mode.name());
+                box.addItem(noItemText, mode.name());
             } else {
-                listBox.addItem(mode.toString(), mode.name());
+                box.addItem(mode.toString(), mode.name());
             }
             if (mode == selectedCourseDesignerMode) {
-                listBox.setSelectedIndex(listBox.getItemCount() - 1);
+                box.setSelectedIndex(box.getItemCount() - 1);
             }
         }
     }
 
-    public static void setupRacingProcedureTypeListBox(ListBox listBox, RacingProcedureType selectedRacingProcedureType, 
-            StringMessages stringMessages) {
-        listBox.clear();
+    public static void setupRacingProcedureTypeListBox(ListBox box, RacingProcedureType selectedRacingProcedureType, 
+            String noItemText) {
+        box.clear();
         for (RacingProcedureType type : RacingProcedureType.values()) {
             if (type == RacingProcedureType.UNKNOWN) {
-                listBox.addItem(stringMessages.none(), type.name());
+                box.addItem(noItemText, type.name());
             } else {
-                listBox.addItem(type.toString(), type.name());
+                box.addItem(type.toString(), type.name());
             }
             if (type == selectedRacingProcedureType) {
-                listBox.setSelectedIndex(listBox.getItemCount() - 1);
+                box.setSelectedIndex(box.getItemCount() - 1);
+            }
+        }
+    }
+
+    public static void setupFlagsListBox(ListBox box, Flags selectedFlag, String noItemText) {
+        box.clear();
+        for (Flags flag : Flags.values()) {
+            if (flag == Flags.NONE) {
+                box.addItem(noItemText, flag.name());
+            } else {
+                box.addItem(flag.toString(), flag.name());
+            }
+            if (flag == selectedFlag) {
+                box.setSelectedIndex(box.getItemCount() -1);
+            }
+        }
+    }
+    
+    public static void setupFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+        box.clear();
+        for (Flags flag : Flags.validValues()) {            
+            box.addItem(flag.toString(), flag.name());
+            if (selectedFlags.contains(flag)) {
+                box.setItemSelected(box.getItemCount() - 1, true);
             }
         }
     }

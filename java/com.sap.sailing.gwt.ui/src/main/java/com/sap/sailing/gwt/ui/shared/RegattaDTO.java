@@ -25,6 +25,7 @@ public class RegattaDTO extends NamedDTO {
     public String defaultCourseAreaName;
     public RacingProcedureType defaultRacingProcedureType;
     public CourseDesignerMode defaultCourseDesignerMode;
+    public DeviceConfigurationDTO.RacingProceduresConfigurationDTO racingProceduresConfiguration;
 
     public RegattaDTO() {}
 

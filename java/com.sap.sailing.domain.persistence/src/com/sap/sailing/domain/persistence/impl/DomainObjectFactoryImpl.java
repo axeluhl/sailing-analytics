@@ -46,7 +46,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -130,6 +132,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.deserialization.impl.RacingProceduresConfigurationJsonDeserializer;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -917,11 +920,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 designerMode = CourseDesignerMode.valueOf(
                         dbRegatta.get(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name()).toString());
             }
-
+            
+            RacingProceduresConfiguration proceduresConfiguration = null;
+            if (dbRegatta.containsField(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name())) {
+                try {
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(dbRegatta.get(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name()))));
+                    proceduresConfiguration = RacingProceduresConfigurationJsonDeserializer.create().deserialize(json);
+                } catch (JsonDeserializationException|ParseException e) {
+                    logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
+                }
+            }
             
             result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
             result.setDefaultRacingProcedureType(procedureType);
             result.setDefaultCourseDesignerMode(designerMode);
+            result.setRacingProceduresConfiguration(proceduresConfiguration);
         }
         return result;
     }
@@ -1386,7 +1399,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (JsonDeserializationException | ParseException e) {
             logger.log(Level.SEVERE, "Error parsing configuration object from MongoDB, falling back to empty configuration.");
             logger.log(Level.SEVERE, "loadConfiguration", e);
-            configuration = new DeviceConfigurationImpl();
+            configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
         }
         return configuration;
     }

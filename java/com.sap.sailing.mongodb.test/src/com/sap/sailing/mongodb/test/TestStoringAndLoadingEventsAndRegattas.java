@@ -26,6 +26,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -138,12 +140,14 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         final RacingProcedureType type = RacingProcedureType.GateStart;
         final CourseDesignerMode mode = CourseDesignerMode.BY_MAP;
+        final RacingProceduresConfiguration proceduresConfiguration = new RacingProceduresConfigurationImpl();
         
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", false);
         Regatta regatta = createRegattaAndAddRaceColumns(1, 1, "RR", boatClass, false, 
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         regatta.setDefaultRacingProcedureType(type);
         regatta.setDefaultCourseDesignerMode(mode);
+        regatta.setRacingProceduresConfiguration(proceduresConfiguration);
         
         MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         mof.storeRegatta(regatta);
@@ -152,6 +156,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         assertEquals(type, loadedRegatta.getDefaultRacingProcedureType());
         assertEquals(mode, loadedRegatta.getDefaultCourseDesignerMode());
+        assertNotNull(loadedRegatta.getRacingProceduresConfiguration());
     }
 
     @Test

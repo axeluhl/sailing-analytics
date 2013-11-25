@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -428,7 +429,7 @@ public interface SailingServiceAsync {
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode, AsyncCallback<Void> callback);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode, RacingProceduresConfigurationDTO racingProceduresConfiguration, AsyncCallback<Void> callback);
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 
@@ -471,8 +472,6 @@ public interface SailingServiceAsync {
     void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
-
-    void fakeNewStartTime(RegattaOverviewEntryDTO dto, Date startTime, AsyncCallback<Void> callback);
     
 }
 

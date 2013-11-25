@@ -222,6 +222,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         
         sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString,
                 editedRegatta.defaultRacingProcedureType, editedRegatta.defaultCourseDesignerMode,
+                editedRegatta.racingProceduresConfiguration,
                 new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {

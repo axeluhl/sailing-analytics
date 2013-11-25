@@ -30,8 +30,10 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
     public JSONObject serialize(DeviceConfiguration object) {
         JSONObject result = new JSONObject();
         
-        result.put(FIELD_PROCEDURES_CONFIGURATION, 
-                proceduresSerializer.serialize(object.getRacingProceduresConfiguration()));
+        if (object.getRacingProceduresConfiguration() != null) {
+            result.put(FIELD_PROCEDURES_CONFIGURATION, 
+                    proceduresSerializer.serialize(object.getRacingProceduresConfiguration()));
+        }
 
         if (object.getAllowedCourseAreaNames() != null) {
             JSONArray courseAreaNames = new JSONArray();

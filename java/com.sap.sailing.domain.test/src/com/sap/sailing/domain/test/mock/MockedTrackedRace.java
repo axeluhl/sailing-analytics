@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
@@ -453,6 +454,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public RacingProceduresConfiguration getRacingProceduresConfiguration() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void setRacingProceduresConfiguration(RacingProceduresConfiguration configuration) {
                         // TODO Auto-generated method stub
                         
                     }

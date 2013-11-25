@@ -3,17 +3,22 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -25,20 +30,23 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 
 public class DeviceConfigurationDetailComposite extends Composite {
+    
+    private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     
     private CaptionPanel captionPanel;
-    private Grid mainGrid;
+    private VerticalPanel contentPanel;
     private Button updateButton;
     
     private DeviceConfigurationMatcherDTO matcher;
-    private DeviceConfigurationDTO configuration;
+    private DeviceConfigurationDTO originalConfiguration;
     
     private TextBox allowedCourseAreasBox;
     private TextBox mailRecipientBox;
@@ -46,17 +54,22 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private ListBox designerModeEntryListBox;
     private TextBox courseNamesBox;
     
-    public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, StringMessages stringMessages) {
+    private CheckBox overwriteProceduresConfigurationBox;
+    private RacingProceduresConfigurationDTO currentProceduresConfiguration;
+    
+    
+    public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         
         this.matcher = null;
-        this.configuration = null;
+        this.originalConfiguration = null;
+        this.currentProceduresConfiguration = null;
         
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
-        mainGrid = new Grid(5, 3);
+        contentPanel = new VerticalPanel();
         updateButton = new Button(stringMessages.save());
         updateButton.addClickHandler(new ClickHandler() {
             @Override
@@ -64,8 +77,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 updateConfiguration(sailingService, errorReporter);
             }
         });
-
-        verticalPanel.add(mainGrid);
+        verticalPanel.add(contentPanel);
         verticalPanel.add(updateButton);
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
@@ -92,48 +104,102 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private void setupUi(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO result) {
         clearUi();
         this.matcher = matcher;
-        this.configuration = result;
+        this.originalConfiguration = result;
+        this.currentProceduresConfiguration = result.procedures;
         
-        setupCourseAreasBox(0);
-        setupRecipientBox(1);
-        setupRacingProcedureListBox(2);
-        setupCourseDesignerListBox(3);
-        setupCourseNameBox(4);
+        setupGeneral();
+        setupRacingProceduresConfiguration();
     }
 
-    private void setupRacingProcedureListBox(int gridRow) {
+    private void setupRacingProceduresConfiguration() {
+        Grid grid = new Grid(1, 3);
+        
+        final Button editButton = new Button(stringMessages.edit());
+        overwriteProceduresConfigurationBox = new CheckBox(stringMessages.overwriteRacingProceduresConfiguration());
+        overwriteProceduresConfigurationBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                markAsDrity(true);
+                editButton.setEnabled(event.getValue());
+            }
+        });
+        grid.setWidget(0, 0, overwriteProceduresConfigurationBox);
+        
+        editButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new RacingProceduresConfigurationDialog(currentProceduresConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RacingProceduresConfigurationDTO>() {
+                    @Override
+                    public void ok(RacingProceduresConfigurationDTO newProcedures) {
+                        currentProceduresConfiguration = newProcedures;
+                        markAsDrity(true);
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();;
+            }
+        });
+        
+        overwriteProceduresConfigurationBox.setValue(currentProceduresConfiguration != null);
+        editButton.setEnabled(currentProceduresConfiguration != null);
+
+        Image helpImage = new Image(resources.help());
+        helpImage.setAltText(stringMessages.overwriteRacingProceduresConfigurationHelpText());
+        helpImage.setTitle(stringMessages.overwriteRacingProceduresConfigurationHelpText());
+        
+        grid.setWidget(0, 1, editButton);
+        grid.setWidget(0, 2, helpImage);
+        contentPanel.add(grid);
+    }
+
+    private void setupGeneral() {
+        Grid grid = new Grid(5, 3);
+        setupCourseAreasBox(grid, 0);
+        setupRecipientBox(grid, 1);
+        setupRacingProcedureListBox(grid, 2);
+        setupCourseDesignerListBox(grid, 3);
+        setupCourseNameBox(grid, 4);
+        contentPanel.add(grid);
+    }
+
+    private void setupRacingProcedureListBox(Grid grid, int gridRow) {
         racingProcedureListBox = new ListBox(false);
-        ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, configuration.defaultRacingProcedureType, stringMessages);
+        racingProcedureListBox.setWidth("100%");
+        ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, originalConfiguration.defaultRacingProcedureType, stringMessages.dontoverwrite());
         racingProcedureListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 markAsDrity(true);
             }
         });
-        mainGrid.setWidget(gridRow, 0, new Label(stringMessages.racingProcedure()));
-        mainGrid.setWidget(gridRow, 1, racingProcedureListBox);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.racingProcedure()));
+        grid.setWidget(gridRow, 1, racingProcedureListBox);
     }
 
-    private void setupCourseDesignerListBox(int gridRow) {
+    private void setupCourseDesignerListBox(Grid grid, int gridRow) {
         designerModeEntryListBox = new ListBox(false);
-        ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox, configuration.defaultCourseDesignerMode, stringMessages);
+        designerModeEntryListBox.setWidth("100%");
+        ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox, originalConfiguration.defaultCourseDesignerMode, stringMessages.dontoverwrite());
         designerModeEntryListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 markAsDrity(true);
             }
         });
-        mainGrid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
-        mainGrid.setWidget(gridRow, 1, designerModeEntryListBox);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
+        grid.setWidget(gridRow, 1, designerModeEntryListBox);
     }
 
-    private void setupCourseAreasBox(int gridRow) {
+    private void setupCourseAreasBox(Grid grid, int gridRow) {
         allowedCourseAreasBox = new TextBox();
+        allowedCourseAreasBox.setWidth("100%");
         allowedCourseAreasBox.addKeyUpHandler(dirtyMarker);
-        if (configuration.allowedCourseAreaNames != null) {
+        if (originalConfiguration.allowedCourseAreaNames != null) {
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < configuration.allowedCourseAreaNames.size(); i++) {
-                builder.append(configuration.allowedCourseAreaNames.get(i));
+            for (int i = 0; i < originalConfiguration.allowedCourseAreaNames.size(); i++) {
+                builder.append(originalConfiguration.allowedCourseAreaNames.get(i));
                 builder.append(',');
             }
             allowedCourseAreasBox.setText(builder.substring(0, builder.length() - 1));
@@ -141,15 +207,16 @@ public class DeviceConfigurationDetailComposite extends Composite {
             allowedCourseAreasBox.setText("Alpha,Bravo,Charlie");
             markAsDrity(true);
         }
-        mainGrid.setWidget(gridRow, 0, new Label(stringMessages.allowedCourseAreas()));
-        mainGrid.setWidget(gridRow, 1, allowedCourseAreasBox);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.allowedCourseAreas()));
+        grid.setWidget(gridRow, 1, allowedCourseAreasBox);
     }
 
-    private void setupCourseNameBox(int gridRow) {
+    private void setupCourseNameBox(Grid grid, int gridRow) {
         courseNamesBox = new TextBox();
+        courseNamesBox.setWidth("100%");
         courseNamesBox.addKeyUpHandler(dirtyMarker);
-        if (configuration.byNameDesignerCourseNames != null) {
-            fillCourseNamesBox(configuration.byNameDesignerCourseNames);
+        if (originalConfiguration.byNameDesignerCourseNames != null) {
+            fillCourseNamesBox(originalConfiguration.byNameDesignerCourseNames);
         } else {
             courseNamesBox.setText("O2,I2");
             markAsDrity(true);
@@ -174,9 +241,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         
-        mainGrid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
-        mainGrid.setWidget(gridRow, 1, courseNamesBox);
-        mainGrid.setWidget(gridRow, 2, generateButton);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
+        grid.setWidget(gridRow, 1, courseNamesBox);
+        grid.setWidget(gridRow, 2, generateButton);
     }
 
     private void fillCourseNamesBox(List<String> names) {
@@ -192,24 +259,25 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     }
 
-    private void setupRecipientBox(int gridRow) {
+    private void setupRecipientBox(Grid grid, int gridRow) {
         mailRecipientBox = new TextBox();
+        mailRecipientBox.setWidth("100%");
         mailRecipientBox.addKeyUpHandler(dirtyMarker);
-        if (configuration.resultsMailRecipient != null) {
-            mailRecipientBox.setText(configuration.resultsMailRecipient);
+        if (originalConfiguration.resultsMailRecipient != null) {
+            mailRecipientBox.setText(originalConfiguration.resultsMailRecipient);
         }
-        mainGrid.setWidget(gridRow, 0, new Label(stringMessages.resultsMailRecipient()));
-        mainGrid.setWidget(gridRow, 1, mailRecipientBox);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.resultsMailRecipient()));
+        grid.setWidget(gridRow, 1, mailRecipientBox);
     }
 
     private void clearUi() {
         this.matcher = null;
-        this.configuration = null;
-        mainGrid.clear();
+        this.originalConfiguration = null;
+        contentPanel.clear();
     }
     
     private void markAsDrity(boolean dirty) {
-        if (dirty) {
+        if (dirty && !(captionPanel.getTitle() == stringMessages.configuration())) {
             captionPanel.setCaptionText(stringMessages.configuration() + "* (CHANGED)");
         } else {
             captionPanel.setCaptionText(stringMessages.configuration());
@@ -242,11 +310,16 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (!courseNamesBox.getText().isEmpty()) {
             result.byNameDesignerCourseNames = Arrays.asList(courseNamesBox.getText().split(","));
         }
+        
+        if (overwriteProceduresConfigurationBox.getValue()) {
+            result.procedures = currentProceduresConfiguration;
+        }
+        
         return result;
     }
     
     private void updateConfiguration(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
-        if (matcher == null || configuration == null) {
+        if (matcher == null || originalConfiguration == null) {
             errorReporter.reportError("Invalid state.");
             return;
         }

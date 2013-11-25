@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -16,19 +17,23 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final Serializable newDefaultCourseAreaId;
     private final RacingProcedureType newDefaultRacingProcedureType;
     private final CourseDesignerMode newDefaultCourseDesignerMode;
+    private final RacingProceduresConfiguration newRacingProceduresConfiguration;
     
     public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId,
-            RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode) {
+            RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode,
+            RacingProceduresConfiguration newRacingProceduresConfiguration) {
         this.regattaIdentifier = regattaIdentifier;
         this.newDefaultCourseAreaId = newDefaultCourseAreaId;
         this.newDefaultRacingProcedureType = newDefaultRacingProcedureType;
         this.newDefaultCourseDesignerMode = newDefaultCourseDesignerMode;
+        this.newRacingProceduresConfiguration = newRacingProceduresConfiguration;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         return toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, 
-                newDefaultRacingProcedureType, newDefaultCourseDesignerMode);
+                newDefaultRacingProcedureType, newDefaultCourseDesignerMode,
+                newRacingProceduresConfiguration);
     }
 
     @Override

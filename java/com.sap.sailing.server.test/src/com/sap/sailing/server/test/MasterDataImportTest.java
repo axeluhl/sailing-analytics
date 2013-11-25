@@ -34,6 +34,7 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -968,6 +969,7 @@ public class MasterDataImportTest {
         // Let's use the setters directly because we are not testing replication
         regatta.setDefaultRacingProcedureType(RacingProcedureType.GateStart);
         regatta.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
+        regatta.setRacingProceduresConfiguration(new RacingProceduresConfigurationImpl());
         
         
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
@@ -1001,6 +1003,7 @@ public class MasterDataImportTest {
         assertNotNull(importedRegatta.getDefaultCourseDesignerMode());
         assertEquals(regatta.getDefaultRacingProcedureType(), importedRegatta.getDefaultRacingProcedureType());
         assertEquals(regatta.getDefaultCourseDesignerMode(), importedRegatta.getDefaultCourseDesignerMode());
+        assertNotNull(importedRegatta.getRacingProceduresConfiguration());
     }
     
     @Test

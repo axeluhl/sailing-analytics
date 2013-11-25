@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
@@ -17,16 +18,19 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_DEFAULT_COURSE_DESIGNER = "defaultCourseDesigner";
     public static final String FIELD_RACING_PROCEDURES_CONFIGURATION = "procedures";
 
-    private JsonSerializer<BoatClass> boatClassSerializer;
-    private JsonSerializer<CourseArea> courseAreaSerializer;
+    private final JsonSerializer<BoatClass> boatClassSerializer;
+    private final JsonSerializer<CourseArea> courseAreaSerializer;
+    private final JsonSerializer<RacingProceduresConfiguration> proceduresSerializer;
 
     public RaceGroupJsonSerializer(
             JsonSerializer<BoatClass> boatClassSerializer,
             JsonSerializer<CourseArea> courseAreaSerializer,
+            JsonSerializer<RacingProceduresConfiguration> proceduresSerializer,
             ExtensionJsonSerializer<RaceGroup, ?> extensionSerializer) {
         super(extensionSerializer);
         this.courseAreaSerializer = courseAreaSerializer;
         this.boatClassSerializer = boatClassSerializer;
+        this.proceduresSerializer = proceduresSerializer;
     }
 
     @Override
@@ -52,7 +56,8 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
         }
         
         if (object.getRacingProceduresConfiguration() != null) {
-            result.put(FIELD_RACING_PROCEDURES_CONFIGURATION, object.getRacingProceduresConfiguration());
+            result.put(FIELD_RACING_PROCEDURES_CONFIGURATION, 
+                    proceduresSerializer.serialize(object.getRacingProceduresConfiguration()));
         }
 
         return result;

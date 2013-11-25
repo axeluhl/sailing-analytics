@@ -17,10 +17,6 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     private RacingProcedureType defaultRacingProcedureType;
     private CourseDesignerMode defaultCourseDesignerMode;
     private List<String> byNameDesignerCourseNames;
-    
-    public DeviceConfigurationImpl() {
-        this.proceduresConfiguration = null;
-    }
 
     public DeviceConfigurationImpl(RacingProceduresConfiguration proceduresConfiguration) {
         this.proceduresConfiguration = proceduresConfiguration;
