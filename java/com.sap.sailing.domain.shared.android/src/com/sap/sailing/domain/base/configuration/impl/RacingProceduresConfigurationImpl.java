@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
@@ -12,6 +13,7 @@ public class RacingProceduresConfigurationImpl implements RacingProceduresConfig
     private RRS26Configuration rrs26Configuration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
+    private RacingProcedureConfiguration basicConfiguration;
 
     @Override
     public RRS26Configuration getRRS26Configuration() {
@@ -38,13 +40,23 @@ public class RacingProceduresConfigurationImpl implements RacingProceduresConfig
 
     public void setESSConfiguration(ESSConfiguration essConfiguration) {
         this.essConfiguration = essConfiguration;
-    }    
+    }   
+
+    @Override
+    public RacingProcedureConfiguration getBasicConfiguration() {
+        return basicConfiguration;
+    }     
+    
+    public void setBasicConfiguration(RacingProcedureConfiguration basicConfiguration) {
+        this.basicConfiguration = basicConfiguration;
+    }   
     
     protected RacingProceduresConfiguration copy() {
         RacingProceduresConfigurationImpl copy = new RacingProceduresConfigurationImpl();
         copy.setRRS26Configuration(rrs26Configuration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
+        copy.setBasicConfiguration(basicConfiguration);
         return copy;
     }
 

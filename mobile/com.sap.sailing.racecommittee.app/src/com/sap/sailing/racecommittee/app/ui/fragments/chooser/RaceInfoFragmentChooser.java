@@ -18,8 +18,10 @@ public abstract class RaceInfoFragmentChooser {
             return new GateStartRaceInfoFragmentChooser();
         case ESS:
             return new ESSRaceInfoFragmentChooser();
+        case BASIC:
+            return new BasicRaceInfoFragmentChooser();
         default:
-            throw new UnsupportedOperationException("");
+            throw new UnsupportedOperationException(racingProcedureType.toString());
         }
     }
     

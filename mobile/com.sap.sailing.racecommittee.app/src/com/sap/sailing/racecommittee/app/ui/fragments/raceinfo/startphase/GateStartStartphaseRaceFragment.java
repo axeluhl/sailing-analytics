@@ -45,6 +45,11 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
                 fragment.show(fragmentManager, null);
             }
         });
+        Boolean hasPathfinder = getRacingProcedure().getConfiguration().hasInidividualRecall();
+        if (hasPathfinder != null && hasPathfinder == false) {
+            pathfinderButton.setVisibility(View.GONE);
+            pathfinderTextView.setVisibility(View.GONE);
+        }
         
         Button gateLaunchTimeButton = (Button) getView().findViewById(R.id.race_startphase_gate_actions_opening_button);
         gateLaunchTimeButton.setOnClickListener(new OnClickListener() {
@@ -87,7 +92,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
         } else {
             pathfinderTextView.setText(R.string.no_pathfinder_selected);
         }
-        
+       
         Long gateLaunchTime = procedure.getGateLaunchTime();
         if (gateLaunchTime != null) {
             gateLaunchTimeTextView.setText(getString(R.string.gate_launch_stops_after, gateLaunchTime / 1000 / 60));

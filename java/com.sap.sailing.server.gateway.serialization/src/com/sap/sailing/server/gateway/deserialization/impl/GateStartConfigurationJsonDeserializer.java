@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.configuration.procedures.GateStartConfigurati
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.GateStartConfigurationJsonSerializer;
 
 
 public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements JsonDeserializer<RacingProcedureConfiguration> {
@@ -31,6 +32,10 @@ public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfi
     	GateStartConfigurationImpl result = new GateStartConfigurationImpl();
     	result.setClassFlag(classFlag);
     	result.setHasInidividualRecall(inidividualRecall);
+    	
+    	if (object.containsKey(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER)) {
+    	    result.setHasInidividualRecall((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER));
+    	}
     	return result;
     }
 

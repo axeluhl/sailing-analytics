@@ -9,6 +9,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.impl.ESSConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GateStartConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RRS26ConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RacingProcedureConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RacingProceduresConfigurationJsonDeserializer;
 
 public class PreferencesBasedRacingProceduresConfigurationJsonDeserializer extends RacingProceduresConfigurationJsonDeserializer {
@@ -17,13 +18,14 @@ public class PreferencesBasedRacingProceduresConfigurationJsonDeserializer exten
     
     public static PreferencesBasedRacingProceduresConfigurationJsonDeserializer create(AppPreferences preferences) {
         return new PreferencesBasedRacingProceduresConfigurationJsonDeserializer(preferences, RRS26ConfigurationJsonDeserializer.create(),
-                GateStartConfigurationJsonDeserializer.create(), ESSConfigurationJsonDeserializer.create());
+                GateStartConfigurationJsonDeserializer.create(), ESSConfigurationJsonDeserializer.create(),
+                RacingProcedureConfigurationJsonDeserializer.create());
     }
 
     public PreferencesBasedRacingProceduresConfigurationJsonDeserializer(AppPreferences preferences, 
             RRS26ConfigurationJsonDeserializer rrs26, GateStartConfigurationJsonDeserializer gateStart, 
-            ESSConfigurationJsonDeserializer ess) {
-        super(rrs26, gateStart, ess);
+            ESSConfigurationJsonDeserializer ess, RacingProcedureConfigurationJsonDeserializer basic) {
+        super(rrs26, gateStart, ess, basic);
         this.preferences = preferences;
     }
     

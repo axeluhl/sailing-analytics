@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
@@ -40,6 +41,7 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
         gateStart.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
+        gateStart.setHasPathfinder(preferences.getGateStartHasPathfinder());
         setGateStartConfiguration(gateStart);
 
         ESSConfigurationImpl ess = new ESSConfigurationImpl();
@@ -60,33 +62,34 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
 
         if (getRRS26Configuration() != null) {
             RRS26Configuration config = getRRS26Configuration();
-            if (config.getClassFlag() != null) {
-                preferences.setRacingProcedureClassFlag(RacingProcedureType.RRS26, config.getClassFlag());
-            }
-            if (config.hasInidividualRecall() != null) {
-                preferences.setRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26, config.hasInidividualRecall());
-            }
+            storeRacingProcedureConfiguration(config);
             if (config.getStartModeFlags() != null) {
                 preferences.setRRS26StartmodeFlags(new HashSet<Flags>(config.getStartModeFlags()));
             }
         }
         if (getGateStartConfiguration() != null) {
             GateStartConfiguration config = getGateStartConfiguration();
-            if (config.getClassFlag() != null) {
-                preferences.setRacingProcedureClassFlag(RacingProcedureType.GateStart, config.getClassFlag());
-            }
-            if (config.hasInidividualRecall() != null) {
-                preferences.setRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart, config.hasInidividualRecall());
+            storeRacingProcedureConfiguration(config);
+            if (config.hasPathfinder() != null) {
+                preferences.setGateStartHasPathfinder(config.hasPathfinder());
             }
         }
         if (getESSConfiguration() != null) {
             ESSConfiguration config = getESSConfiguration();
-            if (config.getClassFlag() != null) {
-                preferences.setRacingProcedureClassFlag(RacingProcedureType.ESS, config.getClassFlag());
-            }
-            if (config.hasInidividualRecall() != null) {
-                preferences.setRacingProcedureHasIndividualRecall(RacingProcedureType.ESS, config.hasInidividualRecall());
-            }
+            storeRacingProcedureConfiguration(config);
+        }
+        if (getBasicConfiguration() != null) {
+            RacingProcedureConfiguration config = getBasicConfiguration();
+            storeRacingProcedureConfiguration(config);
+        }
+    }
+
+    private void storeRacingProcedureConfiguration(RacingProcedureConfiguration config) {
+        if (config.getClassFlag() != null) {
+            preferences.setRacingProcedureClassFlag(RacingProcedureType.ESS, config.getClassFlag());
+        }
+        if (config.hasInidividualRecall() != null) {
+            preferences.setRacingProcedureHasIndividualRecall(RacingProcedureType.ESS, config.hasInidividualRecall());
         }
     }
 

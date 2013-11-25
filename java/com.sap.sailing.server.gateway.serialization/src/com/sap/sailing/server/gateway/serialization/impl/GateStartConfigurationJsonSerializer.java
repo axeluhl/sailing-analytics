@@ -12,6 +12,8 @@ public class GateStartConfigurationJsonSerializer extends RacingProcedureConfigu
     public static GateStartConfigurationJsonSerializer create() {
         return new GateStartConfigurationJsonSerializer();
     }
+    
+    public static final String FIELD_HAS_PATHFINDER = "hasPathfinder";
 
     public GateStartConfigurationJsonSerializer() {
         super();
@@ -20,8 +22,11 @@ public class GateStartConfigurationJsonSerializer extends RacingProcedureConfigu
     @Override
     public JSONObject serialize(RacingProcedureConfiguration baseObject) {
         JSONObject result = super.serialize(baseObject);
-        @SuppressWarnings("unused")
         GateStartConfiguration object = (GateStartConfiguration) baseObject;
+        
+        if (object.hasPathfinder() != null) {
+            result.put(FIELD_HAS_PATHFINDER, object.hasPathfinder());
+        }
 
         return result;
     }

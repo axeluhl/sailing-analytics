@@ -284,7 +284,10 @@
 	
 	<string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmode Flags</string>
 	<string name="preference_racing_procedure_classflag_header">Class Flag</string>
-	<string name="preference_racing_procedure_hasxray_header">Activate Individual Recall</string>
+	<string name="preference_racing_procedure_hasxray_header">Individual Recall</string>
+	<string name="preference_racing_procedure_hasxray_description">Activate this option to enable individual recall</string>
+	<string name="preference_racing_procedure_gatestart_haspathfinder_description">Activate this option to enable choosing the Pathfinder</string>
+	<string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
 	
 	
 </resources>

@@ -15,5 +15,6 @@ public interface RacingProceduresConfiguration extends Serializable {
     RRS26Configuration getRRS26Configuration();
     GateStartConfiguration getGateStartConfiguration();
     ESSConfiguration getESSConfiguration();
+    RacingProcedureConfiguration getBasicConfiguration();
 
 }

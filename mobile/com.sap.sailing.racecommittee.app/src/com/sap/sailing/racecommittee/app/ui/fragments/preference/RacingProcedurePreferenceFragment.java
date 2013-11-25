@@ -11,9 +11,7 @@ import android.preference.MultiSelectListPreference;
 
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
     @Override
@@ -21,22 +19,21 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_racing_procedure);
         
-        AppPreferences p = AppPreferences.on(getActivity());
-        ExLog.i("BLA", p.getRRS26StartmodeFlags().toString());
-        
         setupGeneral();
         setupRRS26();
         setupGateStart();
         setupESS();
+        setupBasic();
         
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
         bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
     }
 
     private void setupRRS26() {
-        setupStartmodeFlagsList();
+        setupRRS26StartmodeFlagsList();
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
     }
 
@@ -46,6 +43,10 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
 
     private void setupESS() {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
+    }
+
+    private void setupBasic() {
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_basic_classflag_key));
     }
 
     private void setupGeneral() {
@@ -66,7 +67,7 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToValue(startProcedurePreference);
     }
 
-    private void setupStartmodeFlagsList() {
+    private void setupRRS26StartmodeFlagsList() {
         MultiSelectListPreference listPreference = findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
         List<String> flags = new ArrayList<String>();
         for (Flags flag : Flags.validValues()) {

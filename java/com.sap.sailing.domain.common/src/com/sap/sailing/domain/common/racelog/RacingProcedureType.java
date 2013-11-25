@@ -12,7 +12,8 @@ public enum RacingProcedureType {
     UNKNOWN("Unknown"),
     RRS26("Fix Line Start (RRS26)"),
     GateStart("Gate Start"),
-    ESS("\"Extreme Sailing Series\"-Start");
+    ESS("\"Extreme Sailing Series\"-Start"),
+    BASIC("Basic Countdown Start");
     
     private String displayName;
 

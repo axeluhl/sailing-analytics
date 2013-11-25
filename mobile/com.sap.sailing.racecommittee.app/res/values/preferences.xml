@@ -61,7 +61,12 @@
     <string name="preference_racing_procedure_gatestart_classflag_key">gateStartClassFlag</string>
     <string name="preference_racing_procedure_gatestart_hasxray_key">gateStartIndividualRecall</string>
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_key">gateStartPathfinder</string>
+    <bool name="preference_racing_procedure_gatestart_haspathfinder_default">true</bool>
 	<string name="preference_racing_procedure_ess_classflag_key">essClassFlag</string>
     <string name="preference_racing_procedure_ess_hasxray_key">essIndividualRecall</string>
     <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>
+	<string name="preference_racing_procedure_basic_classflag_key">basicClassFlag</string>
+    <string name="preference_racing_procedure_basic_hasxray_key">basicIndividualRecall</string>
+    <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
 </resources>
