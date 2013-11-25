@@ -127,7 +127,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	b) onegwtpermutationonly=1;;
+	    b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -161,22 +161,25 @@ if [[ "$@" == "release" ]]; then
     fi
 
     RELEASE_NOTES=""
-    echo ""
-    echo "Please provide me with some notes about this release. You can add more than"
-    echo "one line. Please include major changes or new features. After your notes I will"
-    echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
-    while read -e -p "> " line; do
-        RELEASE_NOTES="$RELEASE_NOTES\n$line"
-    done
+    COMMIT_WEEK_COUNT=4
+	if [ $suppress_confirmation -eq 0 ]; then
+        echo ""
+        echo "Please provide me with some notes about this release. You can add more than"
+        echo "one line. Please include major changes or new features. After your notes I will"
+        echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
+        while read -e -p "> " line; do
+            RELEASE_NOTES="$RELEASE_NOTES\n$line"
+        done
 
-    if [[ $RELEASE_NOTES == "" ]]; then
-        echo -e "\nCome on - I can not release without at least some notes about this release!"
-        exit
+        if [[ $RELEASE_NOTES == "" ]]; then
+            echo -e "\nCome on - I can not release without at least some notes about this release!"
+            exit
+        fi
+        echo -e "\nThank you! One last thing..."
+
+        echo "How many weeks of commits do you want to include (0=No commits)?"
+        read -p "> " -e COMMIT_WEEK_COUNT
     fi
-    echo -e "\nThank you! One last thing..."
-
-    echo "How many weeks of commits do you want to include (0=No commits)?"
-    read -p "> " -e COMMIT_WEEK_COUNT
 
     mkdir -p $PROJECT_HOME/dist
     mkdir -p $PROJECT_HOME/build
