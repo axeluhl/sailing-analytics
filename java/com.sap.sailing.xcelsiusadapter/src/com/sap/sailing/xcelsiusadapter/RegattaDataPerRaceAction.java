@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerRaceAction extends HttpAction {
+    private static final Logger logger = Logger.getLogger(RegattaDataPerRaceAction.class.getName());
+    
     public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
     }
@@ -207,7 +211,8 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         addNamedElementWithValue(competitor_node, "race_relative_final_rank", 1.0 - ((rank - 1.0)/(leaderboard.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size() - 1.0)));
 
                         addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedRace.getDistanceTraveled(competitor, trackedRace.getEndOfTracking()).getMeters());
-                        addNamedElementWithValue(competitor_node, "avg_xte_m", trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true).getMeters());
+                        final Distance averageCrossTrackError = trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true);
+                        addNamedElementWithValue(competitor_node, "avg_xte_m", averageCrossTrackError==null?0:averageCrossTrackError.getMeters());
                         
                         TrackedLeg previousLeg = null;
                         ArrayList<Integer> posGLlist = new ArrayList<Integer>();
@@ -327,6 +332,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                     } catch (Exception ex) {
                             //competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not complete, remove it from the list
                                                                              // complete, remove it from the list
+                        logger.log(Level.INFO, "Error trying to provide data about competitor "+competitor+" in race "+raceName+": "+ex.getMessage(), ex);
                     }
                 }
             }
