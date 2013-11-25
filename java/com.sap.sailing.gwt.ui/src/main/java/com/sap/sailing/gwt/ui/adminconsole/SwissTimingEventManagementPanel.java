@@ -227,6 +227,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         raceNameColumn.setSortable(true);
         raceStartTimeColumn.setSortable(true);
+        boatClassColumn.setSortable(true);
+        raceDescriptionColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
@@ -242,7 +244,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn, raceDescriptionColumn, boatClassColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
         
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -253,6 +255,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.ID);
+                strings.add(t.description);
+                strings.add(t.boatClass);
                 return strings;
             }
         };
@@ -272,7 +276,9 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
-            Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn) {
+            Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn,
+            Column<SwissTimingRaceRecordDTO, ?> raceDescriptionColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn) {
+           
         ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
@@ -285,6 +291,20 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
                 return o1.raceStartTime == null ? -1 : o2.raceStartTime == null ? 1 : o1.raceStartTime
                         .compareTo(o2.raceStartTime);
+            }
+        });
+        result.setComparator(raceDescriptionColumn, new Comparator<SwissTimingRaceRecordDTO>() {
+            @Override
+            public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
+                return o1.description == null ? -1 : o2.description == null ? 1 : o1.description
+                        .compareTo(o2.description);
+            }
+        });
+        result.setComparator(boatClassColumn, new Comparator<SwissTimingRaceRecordDTO>() {
+            @Override
+            public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
+                return o1.boatClass == null ? -1 : o2.boatClass == null ? 1 : o1.boatClass
+                        .compareTo(o2.boatClass);
             }
         });
         return result;
