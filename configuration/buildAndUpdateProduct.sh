@@ -198,6 +198,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
@@ -217,17 +218,7 @@ if [[ "$@" == "release" ]]; then
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    # make sure to save the information from env.sh
-    . $ACDIR/env.sh
-
     echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
-
-    sed -i "/mongo.host/d" "$ACDIR/configuration/config.ini"
-    sed -i "/mongo.port/d" "$ACDIR/configuration/config.ini"
-    sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
-    sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
-    sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
 
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO=$OSGI_BUNDLE_NAME
@@ -506,6 +497,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then

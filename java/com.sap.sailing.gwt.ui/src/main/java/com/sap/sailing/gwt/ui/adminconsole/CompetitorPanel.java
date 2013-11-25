@@ -10,8 +10,6 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -26,7 +24,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -39,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 
 /**
  * Allows an administrator to view and edit the set of competitors currently maintained by the server.
@@ -54,7 +52,7 @@ public class CompetitorPanel extends SimplePanel {
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
     private List<CompetitorDTO> allCompetitors;
-    private TextBox filterField;
+    private AbstractFilterablePanel<CompetitorDTO> filterField;
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
@@ -91,7 +89,7 @@ public class CompetitorPanel extends SimplePanel {
         buttonPanel.add(allowReloadButton);
         competitorsPanel.add(buttonPanel);
 
-        // sailing events table
+        // competitors table
         TextColumn<CompetitorDTO> competitorNameColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -162,24 +160,42 @@ public class CompetitorPanel extends SimplePanel {
 
         });
 
-        HorizontalPanel filterBoxWithLabel = new HorizontalPanel();
-        filterBoxWithLabel.setSpacing(5);
-        filterBoxWithLabel.add(new Label(stringMessages.filterCompetitors()));
-        filterField = new TextBox();
-        filterField.addKeyUpHandler(new KeyUpHandler() {
+        TextColumn<CompetitorDTO> competitorIdColumn = new TextColumn<CompetitorDTO>() {
             @Override
-            public void onKeyUp(KeyUpEvent event) {
-                applyFilter();
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getIdAsString();
+            }
+
+        };
+
+        competitorIdColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorIdColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getIdAsString().compareTo(o2.getIdAsString());
             }
         });
-        filterBoxWithLabel.add(filterField);
-        mainPanel.add(filterBoxWithLabel);
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
+        filterField = new AbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
+                allCompetitors, competitorTable, competitorProvider) {
+
+            @Override
+            public Iterable<String> getSearchableStrings(CompetitorDTO t) {
+                List<String> string = new ArrayList<String>();
+                string.add(t.getName());
+                string.add(t.getSailID());
+                string.add(t.getBoatClass().getName());
+                return string;
+            }
+        };
+
+        mainPanel.add(filterField);
         competitorProvider.addDataDisplay(competitorTable);
         competitorTable.addColumnSortHandler(competitorColumnListHandler);
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
         competitorTable.addColumn(competitorNameColumn, stringMessages.name());
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
+        competitorTable.addColumn(competitorIdColumn, stringMessages.id());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
         competitorTable.setSelectionModel(competitorSelectionModel);
@@ -223,7 +239,7 @@ public class CompetitorPanel extends SimplePanel {
                         for (int i=0; i<allCompetitors.size(); i++) {
                             if (allCompetitors.get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
                                 allCompetitors.set(i, updatedCompetitor);
-                                applyFilter();
+                                filterField.updateAll(allCompetitors);
                                 break;
                             }
                         }
@@ -250,38 +266,10 @@ public class CompetitorPanel extends SimplePanel {
                 for (CompetitorDTO c : result) {
                     allCompetitors.add(c);
                 }
-                applyFilter();
+                filterField.updateAll(allCompetitors);
             }
         });
     }
 
-    private void applyFilter() {
-        competitorProvider.getList().clear();
-        for (CompetitorDTO competitor : allCompetitors) {
-            if (filterMatches(competitor)) {
-                competitorProvider.getList().add(competitor);
-            }
-        }
-    }
-
-    private boolean filterMatches(CompetitorDTO competitor) {
-        if (!getFilterText().trim().isEmpty()) {
-            String[] filterWords = getFilterText().split(" ");
-            String[] matchAgainsts = new String[] { competitor.getName(), competitor.getBoatClass().getName(), competitor.getSailID() };
-            outer: for (String filterWord : filterWords) {
-                for (String matchAgainst : matchAgainsts) {
-                    if (matchAgainst.toLowerCase().indexOf(filterWord.trim().toLowerCase()) >= 0) {
-                        continue outer; // found a match
-                    }
-                }
-                return false; // no match found for filterWord; filter does not match
-            }
-        }
-        return true; // found a match for all filter words
-    }
-
-    private String getFilterText() {
-        return filterField.getText();
-    }
 
 }

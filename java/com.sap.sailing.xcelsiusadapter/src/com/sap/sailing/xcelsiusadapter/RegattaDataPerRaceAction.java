@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerRaceAction extends HttpAction {
+    private static final Logger logger = Logger.getLogger(RegattaDataPerRaceAction.class.getName());
+    
     public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
     }
@@ -169,8 +173,10 @@ public class RegattaDataPerRaceAction extends HttpAction {
                 
                 final Element competitors_node = addNamedElement(race_node, "competitors"); // add node that contains all competitors
                 
-                
-                for (Competitor competitor : trackedRace.getCompetitorsFromBestToWorst(trackedRace.getEndOfTracking())) {
+                int rank = 0;
+                List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(r, trackedRace.getEndOfTracking());
+                for (Competitor competitor : competitorsFromBestToWorst) {
+                    rank += 1;
                     final Element competitor_node = addNamedElement(competitors_node, "competitor"); // add competitor node
                     
                     try {
@@ -200,12 +206,13 @@ public class RegattaDataPerRaceAction extends HttpAction {
                                     addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
                         }
     
-                        addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor, now));
+                        addNamedElementWithValue(competitor_node, "race_final_rank", rank);
                         addNamedElementWithValue(competitor_node, "race_participants", trackedRace.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size());
-                        addNamedElementWithValue(competitor_node, "race_relative_final_rank", 1.0 - ((trackedRace.getRank(competitor, now) - 1.0)/(trackedRace.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size() - 1.0)));
+                        addNamedElementWithValue(competitor_node, "race_relative_final_rank", 1.0 - ((rank - 1.0)/(leaderboard.getCompetitorsFromBestToWorst(trackedRace.getStartOfTracking()).size() - 1.0)));
 
                         addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedRace.getDistanceTraveled(competitor, trackedRace.getEndOfTracking()).getMeters());
-                        addNamedElementWithValue(competitor_node, "avg_xte_m", trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true).getMeters());
+                        final Distance averageCrossTrackError = trackedRace.getAverageCrossTrackError(competitor, trackedRace.getEndOfTracking(), true);
+                        addNamedElementWithValue(competitor_node, "avg_xte_m", averageCrossTrackError==null?0:averageCrossTrackError.getMeters());
                         
                         TrackedLeg previousLeg = null;
                         ArrayList<Integer> posGLlist = new ArrayList<Integer>();
@@ -278,7 +285,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                         addNamedElementWithValue(competitor_node, "rank_gains", posGLlist.toString()); // Ranks Gained/Lost
                         
                         addNamedElementWithValue(competitor_node, "rank_after_first_leg", rankAfterFirstLeg); // Rank after first leg
-                        addNamedElementWithValue(competitor_node, "rank_gain_between_first_and_finish", rankAfterFirstLeg - trackedRace.getRank(competitor, now)); // Rank gain between first leg and finish
+                        addNamedElementWithValue(competitor_node, "rank_gain_between_first_and_finish", rankAfterFirstLeg - rank); // Rank gain between first leg and finish
                         
                         addNamedElementWithValue(competitor_node, "race_time_s", race_time); 
                         
@@ -325,6 +332,7 @@ public class RegattaDataPerRaceAction extends HttpAction {
                     } catch (Exception ex) {
                             //competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not complete, remove it from the list
                                                                              // complete, remove it from the list
+                        logger.log(Level.INFO, "Error trying to provide data about competitor "+competitor+" in race "+raceName+": "+ex.getMessage(), ex);
                     }
                 }
             }

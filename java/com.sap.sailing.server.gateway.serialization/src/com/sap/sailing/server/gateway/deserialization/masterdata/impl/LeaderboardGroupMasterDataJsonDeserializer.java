@@ -1,8 +1,10 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -102,7 +104,23 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         }
         ScoringScheme overallLeaderboardScoringScheme = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
         int[] overallLeaderboardResultDiscardingThresholds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
-        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, leaderboards, events, regattas);
+        Map<String, Double> metaColumnsWithFactors = !hasOverallLeaderboard ? null : deserializeMetaColumnsWithFactor((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_META_COLUMNS));
+        List<String> overallLeaderboardSuppressedCompetitorsIds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeSuppressedCompetitors((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS));
+        return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, overallLeaderboardSuppressedCompetitorsIds, metaColumnsWithFactors, leaderboards, events, regattas);
+    }
+
+    private Map<String, Double> deserializeMetaColumnsWithFactor(JSONArray jsonArray) {
+        Map<String, Double> metaColumnsWithFactors = new HashMap<String, Double>();
+        if (jsonArray != null) {
+            for (Object obj : jsonArray) {
+                JSONObject jsonObj = (JSONObject) obj;
+                String name = (String) jsonObj.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_NAME);
+                Double explicitFactor = (Double) jsonObj
+                        .get(LeaderboardGroupMasterDataJsonSerializer.FIELD_EXPLICIT_FACTOR);
+                metaColumnsWithFactors.put(name, explicitFactor);
+            }
+        }
+        return metaColumnsWithFactors;
     }
 
 }
