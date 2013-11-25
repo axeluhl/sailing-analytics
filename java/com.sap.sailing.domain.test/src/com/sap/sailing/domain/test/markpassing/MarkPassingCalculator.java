@@ -34,7 +34,6 @@ public class MarkPassingCalculator extends AbstractRaceChangeListener implements
         if(startOfTracking==null){
             startOfTracking = race.getTimePointOfOldestEvent();
         }
-        System.out.println(startOfTracking);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
         }

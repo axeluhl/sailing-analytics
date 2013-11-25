@@ -116,12 +116,12 @@ public class CandidateChooser {
     }
 
     private double numberOfCloseStarts(TimePoint t) {
-        double numberOfSimilarStarts = -1;
-        double numberOfCompetitors = -1;
+        double numberOfSimilarStarts = 0;
+        double numberOfCompetitors = 0;
         for (Competitor c : candidates.keySet()) {
             numberOfCompetitors++;
             for (Candidate ca : candidates.get(c)) {
-                if (ca.getID() == 1 && Math.abs(ca.getTimePoint().asMillis() - t.asMillis()) < 60000) {
+                if (ca.getID() == 1 && Math.abs(ca.getTimePoint().asMillis() - t.asMillis()) < 30000) {
                     numberOfSimilarStarts++;
                     break;
                 }
@@ -163,6 +163,6 @@ public class CandidateChooser {
         totalTime = totalTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
         double timeDiff = Math.abs(totalTime - actualTime) / 1000;
-        return 1 - (Math.log10(timeDiff+1) / 20);
+        return 1-(Math.log10(timeDiff+1)/20);
     }
 }

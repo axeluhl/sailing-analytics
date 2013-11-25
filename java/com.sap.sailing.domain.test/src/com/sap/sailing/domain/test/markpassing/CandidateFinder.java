@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
@@ -59,7 +60,7 @@ public class CandidateFinder {
         }
     }
 
-    public void newCompetitorFix(GPSFix fix, Competitor c) {
+    public void newCompetitorFix(GPSFixMoving fix, Competitor c) {
         competitorTracks.get(c).addGPSFix(fix);
         distances.get(c).put(fix, new LinkedHashMap<Waypoint, Double>());
         for (Waypoint w : waypoints) {
@@ -94,11 +95,10 @@ public class CandidateFinder {
                     for (Competitor c : competitorTracks.keySet()) {
                         ArrayList<GPSFix> fixesAffected = new ArrayList<>();
                         TimePoint t = start;
-                        while (!(competitorTracks.get(c).getFirstFixAfter(t) == null)) {
+                        while (competitorTracks.get(c).getFirstFixAfter(t) != null) {
                             GPSFix nextFix = competitorTracks.get(c).getFirstFixAfter(t);
                             t = nextFix.getTimePoint();
-                            if (!(end == null) && !t.before(end)) {
-                                fixesAffected.add(competitorTracks.get(c).getFirstFixAtOrAfter(end));
+                            if (end!=null && !t.before(end)) {
                                 break;
                             }
                             fixesAffected.add(nextFix);
@@ -106,18 +106,11 @@ public class CandidateFinder {
                         for (GPSFix gps : fixesAffected) {
                             distances.get(c).get(gps).put(w, calculateDistance(gps, w));
                         }
-                        if (!(competitorTracks.get(c).getLastFixAtOrBefore(start) == null)) {
-                            fixesAffected.add(competitorTracks.get(c).getLastFixAtOrBefore(start));
-                        }
-                        if (!fixesAffected.contains(competitorTracks.get(c).getLastFixBefore(start))
-                                && !(competitorTracks.get(c).getLastFixBefore(start) == null)) {
-                            fixesAffected.add(competitorTracks.get(c).getLastFixBefore(start));
-                        }
                         if (fixesAffected.size() > 0) {
+                            System.out.println(fixesAffected.size());
                             reEvaluateFixes(fixesAffected, c, w);
                         }
                     }
-                    break;
                 }
             }
         }
@@ -127,6 +120,8 @@ public class CandidateFinder {
         for (GPSFix gps : fixes) {
             if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
                 candidates.get(c).get(w).add(gps);
+                if (waypoints.indexOf(w) == 0) {
+                }
                 Candidate newCandidate = new Candidate(w, gps.getTimePoint(), getCost(distances.get(c).get(gps).get(w),
                         getLegLength(gps.getTimePoint(), w)), waypoints.indexOf(w) + 1);
                 chooser.addCandidate(newCandidate, c);
@@ -154,15 +149,15 @@ public class CandidateFinder {
     }
 
     private double getCost(Double distance, Double legLength) {
-        return 1/(10*Math.abs(distance/legLength)+1);
+        return 1/(500*Math.abs(distance/legLength)+1);
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
         GPSFix fixBefore = competitorTracks.get(c).getLastFixBefore(fix.getTimePoint());
         GPSFix fixAfter = competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint());
         if (distances.get(c).containsKey(fix) && !(fixBefore == null)
-                && distances.get(c).get(fix).get(w) < distances.get(c).get(fixBefore).get(w) && !(fixAfter == null)
-                && distances.get(c).get(fix).get(w) < distances.get(c).get(fixAfter).get(w)) {
+                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) && !(fixAfter == null)
+                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)) {
             return true;
         }
         return false;
@@ -198,7 +193,7 @@ public class CandidateFinder {
         ArrayList<Position> positions = new ArrayList<>();
         Iterator<Mark> it = w.getMarks().iterator();
         while (it.hasNext()) {
-            positions.add(markTracks.get(it.next()).getEstimatedPosition(gps.getTimePoint(), true));
+            positions.add(markTracks.get(it.next()).getEstimatedPosition(gps.getTimePoint(), false));
         }
         if (p.equals(PassingInstruction.Port) || p.equals(PassingInstruction.Starboard)
                 || p.equals(PassingInstruction.Offset) || p.equals(PassingInstruction.None)) {
@@ -206,6 +201,8 @@ public class CandidateFinder {
         }
         if (p.equals(PassingInstruction.Line)) {
             distance = gps.getPosition().getDistanceToLine(positions.get(0), positions.get(1)).getMeters();
+            if(waypoints.indexOf(w)==0){
+            }
         }
         if (p.equals(PassingInstruction.Gate)) {
             // Right now, both marks are observered, even though only one is actully rounded.
