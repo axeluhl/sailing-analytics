@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -44,14 +45,13 @@ public class RaceStateTest {
     
     private RaceState state;
     
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         raceLog = new RaceLogImpl("test-log");
         author = new RaceLogEventAuthorImpl("Test", 1);
         factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
-        configuration = mock(ConfigurationLoader.class);
+        configuration = new EmptyRacingProceduresConfiguration();
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
