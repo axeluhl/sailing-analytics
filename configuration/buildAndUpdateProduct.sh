@@ -51,7 +51,11 @@ fi
 
 cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
-active_branch=`basename $active_branch`
+if [[ $active_branch == "" ]]; then
+    active_branch="unknown"
+else
+    active_branch=`basename $active_branch`
+fi
 
 HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
@@ -120,6 +124,7 @@ fi
 echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
+echo VERSION is $VERSION_INFO
 
 options=':bgtocpm:n:l:s:w:u'
 while getopts $options option
