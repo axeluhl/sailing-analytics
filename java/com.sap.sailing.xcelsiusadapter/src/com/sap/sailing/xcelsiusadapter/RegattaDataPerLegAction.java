@@ -203,14 +203,7 @@ public class RegattaDataPerLegAction extends HttpAction {
                         }
                         
                         long compLegTimeAlt = -1;
-                        try {
-                            compLegTimeAlt = trackedLegOfCompetitor.getTimeInMilliSeconds(compareLegEnd);
-                        } catch (Exception e1) {
-//                            e1.printStackTrace();
-//                            If this happens, the race is probably broken
-                            leg_node.detach();
-                            break;
-                        }
+                        compLegTimeAlt = trackedLegOfCompetitor.getTimeInMilliSeconds(compareLegEnd);
                         TimePoint compFinishedLeg = compareLegEnd;
 
                         // plausibility check
@@ -228,8 +221,7 @@ public class RegattaDataPerLegAction extends HttpAction {
                                 posGL = rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getTo()) -
                                         rankAtWaypoint.get(competitor).get(trackedLeg.getLeg().getFrom());
                             } else {
-                                leg_node.detach();
-                                break;
+                                posGL = 0;
                             }
 
                             final Element competitor_node = addNamedElement(competitor_data_node, "competitor");

@@ -5,40 +5,10 @@
 
 PARAM=$@
 
-# check if automatic tests and build should be executed
-# before starting up the server
-if [[ $PARAM != "no-update" ]]; then
-    if [[ $BUILD_BEFORE_START == "True" ]] || [[ $INSTALL_FROM_RELEASE != "" ]]; then
-
-        # check for available memory - build can not be started with less than 1GB
-        MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
-        if [ $MEM_TOTAL -lt 924 ]; then
-            echo "Could not start build process with less than 1GB of RAM!"
-            echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
-            exit 10
-        fi
-
-        if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-            echo "Build process has been started - it can take 5 to 20 minutes until your instance is ready. " | `which mail` -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
-        fi
-
-        `pwd`/shouldIBuildOrShouldIGo.sh &> last_automatic_build.txt
-         STATUS=$?
-         if [ $STATUS -eq 0 ]; then
-            echo "Deployment Successful"
-            echo "OK - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
-         else
-            echo "Deployment Failed"
-            echo "ERROR - check the attachment for more information." | `which mail` -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
-            exit
-         fi 
-
-        # enable special environment configuration
-        if [[ $USE_ENVIRONMENT != "" ]]; then
-            ./$USE_ENVIRONMENT
-        fi
-
-    fi
+# enable special environment configuration
+if [[ $USE_ENVIRONMENT != "" ]]; then
+    echo "Using environment $USE_ENVIRONMENT"
+    source ./environment/$USE_ENVIRONMENT
 fi
 
 # make some checks
@@ -96,6 +66,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # give instances on amazon more time to start because
         # they may be influenced by the server's boot process
+        echo "Be aware of the fact that starting amazon instances takes up to two minutes!"
         sleep 120
     else
         sleep 10
@@ -107,7 +78,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Startup of java server failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | `which mail` -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
     fi
@@ -117,6 +88,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
     echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_HOST: $MONGODB_HOST"
     echo "MONGODB_PORT: $MONGODB_PORT"
     echo "EXPEDITION_PORT: $EXPEDITION_PORT"
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
@@ -124,9 +96,9 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
         if [[ ! -z "$ON_AMAZON" ]]; then
-            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "Go to http://$INSTANCE_DNS:$SERVER_PORT to reach your instance!" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         else
-            echo "OK" | `which mail` -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
+            echo "OK" | mail -s "Server $INSTANCE_ID started up!" -a env.sh $SERVER_STARTUP_NOTIFY
         fi
     fi
 elif [[ $PARAM == "debug" ]]; then

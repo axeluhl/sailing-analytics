@@ -63,7 +63,7 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
-        if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.get(0) != null) {
+        if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.size() > 0 && courseDTO.waypointPositions.get(0) != null) {
             PositionDTO positionDTO = courseDTO.waypointPositions.get(0);
             latDegBox = createDoubleBox(positionDTO.latDeg, 10);
             lngDegBox = createDoubleBox(positionDTO.lngDeg, 10);
