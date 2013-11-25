@@ -233,7 +233,7 @@ public class AppPreferences {
     
     public Flags getRacingProcedureClassFlag(RacingProcedureType type) {
         String key = getRacingProcedureClassFlagKey(type);
-        return Flags.valueOf(preferences.getString(key, null));
+        return Flags.valueOf(preferences.getString(key, Flags.CLASS.name()));
     }
     
     public void setRacingProcedureHasIndividualRecall(RacingProcedureType type, Boolean hasRecall) {
@@ -251,11 +251,11 @@ public class AppPreferences {
         for (Flags flag : flags) {
             flagNames.add(flag.name());
         }
-        preferences.edit().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames);
+        preferences.edit().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames).commit();
     }
     
     public Set<Flags> getRRS26StartmodeFlags() {
-        Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), null);
+        Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
         if (flagNames != null) {
             Set<Flags> flags = new HashSet<Flags>();
             for (String flagName : flagNames) {
@@ -267,36 +267,28 @@ public class AppPreferences {
     }
 
     private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
-        String key;
         switch (type) {
         case RRS26:
-            key = key(R.string.preference_racing_procedure_rrs26_classflag_key);
-            break;
+            return key(R.string.preference_racing_procedure_rrs26_classflag_key);
         case GateStart:
-            key = key(R.string.preference_racing_procedure_gatestart_classflag_key);
-            break;
+            return key(R.string.preference_racing_procedure_gatestart_classflag_key);
         case ESS:
-            key = key(R.string.preference_racing_procedure_ess_classflag_key);
+            return key(R.string.preference_racing_procedure_ess_classflag_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
         }
-        return key;
     }
     
     private String getRacingProcedureHasIndividualRecallKey(RacingProcedureType type) {
-        String key;
         switch (type) {
         case RRS26:
-            key = key(R.string.preference_racing_procedure_rrs26_hasxray_key);
-            break;
+            return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
         case GateStart:
-            key = key(R.string.preference_racing_procedure_gatestart_hasxray_key);
-            break;
+            return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
         case ESS:
-            key = key(R.string.preference_racing_procedure_ess_hasxray_key);
+            return key(R.string.preference_racing_procedure_ess_hasxray_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
         }
-        return key;
     }
 }

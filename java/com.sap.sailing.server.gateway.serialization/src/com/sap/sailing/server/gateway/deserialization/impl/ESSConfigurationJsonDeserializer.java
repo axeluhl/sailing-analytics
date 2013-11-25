@@ -25,7 +25,8 @@ public class ESSConfigurationJsonDeserializer extends RacingProcedureConfigurati
         return (ESSConfiguration) super.deserialize(object);
     }
 
-    protected ESSConfiguration createResult(JSONObject object, Flags classFlag, Boolean inidividualRecall)
+    @Override
+    protected ESSConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag)
             throws JsonDeserializationException {
         ESSConfigurationImpl result = new ESSConfigurationImpl();
         result.setClassFlag(classFlag);

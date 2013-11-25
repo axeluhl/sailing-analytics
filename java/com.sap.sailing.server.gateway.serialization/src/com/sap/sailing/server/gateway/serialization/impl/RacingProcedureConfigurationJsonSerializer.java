@@ -11,7 +11,7 @@ public class RacingProcedureConfigurationJsonSerializer implements JsonSerialize
         return new RacingProcedureConfigurationJsonSerializer();
     }
 
-    public static final String FIELD_INIDIVIDUAL_RECALL = "inidividualRecall";
+    public static final String FIELD_INIDIVIDUAL_RECALL = "individualRecall";
     public static final String FIELD_CLASS_FLAG = "classFlag";
 
     public RacingProcedureConfigurationJsonSerializer() {

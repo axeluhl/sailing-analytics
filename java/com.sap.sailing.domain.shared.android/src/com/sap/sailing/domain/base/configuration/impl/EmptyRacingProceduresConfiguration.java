@@ -13,6 +13,9 @@ public class EmptyRacingProceduresConfiguration extends RacingProceduresConfigur
 
     @Override
     public RacingProceduresConfiguration load() {
+        setRRS26Configuration(new RRS26ConfigurationImpl());
+        setGateStartConfiguration(new GateStartConfigurationImpl());
+        setESSConfiguration(new ESSConfigurationImpl());
         return copy();
     }
 

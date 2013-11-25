@@ -11,7 +11,9 @@ import android.preference.MultiSelectListPreference;
 
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
     @Override
@@ -19,7 +21,10 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_racing_procedure);
         
-        setupRacingProcedurePreferences();
+        AppPreferences p = AppPreferences.on(getActivity());
+        ExLog.i("BLA", p.getRRS26StartmodeFlags().toString());
+        
+        setupGeneral();
         setupRRS26();
         setupGateStart();
         setupESS();
@@ -43,7 +48,7 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_ess_classflag_key));
     }
 
-    private void setupRacingProcedurePreferences() {
+    private void setupGeneral() {
         CheckBoxPreference overrideStartProcedurePreference = findPreference(R.string.preference_racing_procedure_is_overridden_key);
         final ListPreference startProcedurePreference = findPreference(R.string.preference_racing_procedure_override_key);
         

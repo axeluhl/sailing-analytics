@@ -25,8 +25,9 @@ public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfi
     public GateStartConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
     	return (GateStartConfiguration) super.deserialize(object);    
     }
-
-    protected GateStartConfiguration createResult(JSONObject object, Flags classFlag, Boolean inidividualRecall) throws JsonDeserializationException {
+    
+    @Override
+    protected GateStartConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag) throws JsonDeserializationException {
     	GateStartConfigurationImpl result = new GateStartConfigurationImpl();
     	result.setClassFlag(classFlag);
     	result.setHasInidividualRecall(inidividualRecall);

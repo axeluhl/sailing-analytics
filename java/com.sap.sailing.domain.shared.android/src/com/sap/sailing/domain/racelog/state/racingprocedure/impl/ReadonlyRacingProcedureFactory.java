@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -24,6 +25,9 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
     
     protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory) {
+        if (configuration instanceof EmptyRacingProceduresConfiguration) {
+            System.out.println();
+        }
         RacingProceduresConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:

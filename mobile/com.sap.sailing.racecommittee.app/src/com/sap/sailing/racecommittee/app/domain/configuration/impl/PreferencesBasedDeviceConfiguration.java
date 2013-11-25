@@ -10,14 +10,14 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl implements ConfigurationLoader<DeviceConfiguration> {
 
     private static final long serialVersionUID = 9146162601389924219L;
-    private static final String TAG = PreferencesBasedDeviceConfiguration.class.getName();
+    private static final String TAG = PreferencesBasedDeviceConfiguration.class.getSimpleName();
 
     private final AppPreferences preferences;
     private final ConfigurationLoader<RacingProceduresConfiguration> storableRacingProceduresConfiguration;
     
     public PreferencesBasedDeviceConfiguration(final AppPreferences preferences, 
-            ConfigurationLoader<RacingProceduresConfiguration> proceduresConfiguration) {
-        super(proceduresConfiguration == null ? null : proceduresConfiguration.load());
+            PreferencesBasedRacingProceduresConfiguration proceduresConfiguration) {
+        super(proceduresConfiguration);
         this.preferences = preferences;
         this.storableRacingProceduresConfiguration = proceduresConfiguration;
     }
@@ -81,7 +81,7 @@ public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl
     }
     
     private static void logApply(String configurationName, Object value) {
-        ExLog.i(TAG, String.format("Applied '%s' configuration: %s", configurationName, value.toString()));
+        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value.toString()));
     }
 
 }

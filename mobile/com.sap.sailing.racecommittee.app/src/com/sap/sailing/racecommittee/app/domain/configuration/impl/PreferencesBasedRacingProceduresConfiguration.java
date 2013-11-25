@@ -21,7 +21,7 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
         ConfigurationLoader<RacingProceduresConfiguration> {
 
     private static final long serialVersionUID = -2109422929668306199L;
-    private static final String TAG = PreferencesBasedRacingProceduresConfiguration.class.getName();
+    private static final String TAG = PreferencesBasedRacingProceduresConfiguration.class.getSimpleName();
 
     private final AppPreferences preferences;
 

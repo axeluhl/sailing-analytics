@@ -3,7 +3,7 @@
 
     <string name="preference_language_key">languagePref</string>
     <string name="preference_server_url_key">webserviceUrlPref</string>
-    <string name="preference_server_url_default">http://192.168.56.1:8880</string>
+    <string name="preference_server_url_default">http://192.168.1.192:8880</string>
     <string name="preference_course_areas_key">courseAreasPref</string>
     <string name="preference_course_areas_default">Alpha,Bravo</string>
     <string-array name="preference_course_areas_default">
@@ -47,8 +47,8 @@
         <item>I3</item>
     </string-array>
 
-    <string name="preference_racing_procedure_rrs26_classflag_key">rrs26ClassFlag</string>
     <string name="preference_racing_procedure_classflag_default">CLASS</string>
+    <string name="preference_racing_procedure_rrs26_classflag_key">rrs26ClassFlag</string>
     <string name="preference_racing_procedure_rrs26_hasxray_key">rrs26IndividualRecall</string>
     <bool name="preference_racing_procedure_rrs26_hasxray_default">true</bool>
     <string name="preference_racing_procedure_rrs26_startmode_flags_key">rrs26StartmodeFlags</string>
@@ -61,7 +61,7 @@
     <string name="preference_racing_procedure_gatestart_classflag_key">gateStartClassFlag</string>
     <string name="preference_racing_procedure_gatestart_hasxray_key">gateStartIndividualRecall</string>
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
-	<string name="preference_racing_procedure_ess_classflag_key">gateStartClassFlag</string>
-    <string name="preference_racing_procedure_ess_hasxray_key">gateStartIndividualRecall</string>
+	<string name="preference_racing_procedure_ess_classflag_key">essClassFlag</string>
+    <string name="preference_racing_procedure_ess_hasxray_key">essIndividualRecall</string>
     <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>
 </resources>

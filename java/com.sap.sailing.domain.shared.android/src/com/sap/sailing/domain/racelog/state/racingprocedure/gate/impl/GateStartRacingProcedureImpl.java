@@ -119,26 +119,28 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
 
     @Override
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
+        Flags classFlag = getConfiguration().getClassFlag() != null ?
+                getConfiguration().getClassFlag() : Flags.CLASS;
         TimePoint gateShutdownTime = getGateShutdownTime(startTime);
         if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, false), new FlagPole(Flags.PAPA, false)), 
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),  
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, false), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),  
                     startTime.minus(startPhaseClassOverGolfUpIntervall));
         } else if (now.before(startTime.minus(startPhasePapaUpInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
                     startTime.minus(startPhasePapaUpInterval));
         } else if (now.before(startTime.minus(startPhasePapaDownInterval))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
                     startTime.minus(startPhasePapaDownInterval));
         } else if (now.before(startTime)) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.CLASS, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
-                    Arrays.asList(new FlagPole(Flags.CLASS, false), new FlagPole(Flags.GOLF, true)),
+                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), 
+                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(Flags.GOLF, true)),
                     startTime);
         } else if (now.before(gateShutdownTime)) {
             return new FlagPoleState(

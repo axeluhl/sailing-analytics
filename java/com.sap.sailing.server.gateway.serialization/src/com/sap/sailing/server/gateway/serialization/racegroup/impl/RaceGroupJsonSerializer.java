@@ -15,7 +15,7 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_BOAT_CLASS = "boatClass";
     public static final String FIELD_DEFAULT_RACING_PROCEDURE = "defaultProcedure";
     public static final String FIELD_DEFAULT_COURSE_DESIGNER = "defaultCourseDesigner";
-    public static final String FIELD_RACING_PROCEDURES_CONFIGURATION = "proceduresConfiguration";
+    public static final String FIELD_RACING_PROCEDURES_CONFIGURATION = "procedures";
 
     private JsonSerializer<BoatClass> boatClassSerializer;
     private JsonSerializer<CourseArea> courseAreaSerializer;
