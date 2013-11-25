@@ -3326,7 +3326,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             long timeToImport = System.currentTimeMillis() - startTime;
             logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
             try {
-                gzip.close();
+                if (gzip != null) {
+                    gzip.close();
+                }
             } catch (IOException e) {
             }
         }
