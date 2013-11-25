@@ -4,11 +4,17 @@
 
 ## Quickstart
 
+#### Servers
+
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
 - Database and Queue Server: 172.31.25.253
+
+#### Starting an instance
+
 - Which instance type to choose:
   - Archive: m2.2xlarge
   - Live: c1.xlarge
+
 - Using a release, set the following in the instance's user data:
 <pre>
 INSTALL_FROM_RELEASE=master-201311062138
@@ -41,6 +47,11 @@ REPLICATE_MASTER_QUEUE_PORT=
 INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
+
+#### Receiving wind
+
+- To receive and forward wind, log into webserver as user trac and switch to $HOME/udpmirror. Start the mirror and forward it to the instance you want.
+
 
 ## Costs per month
 
@@ -231,18 +242,34 @@ Amazon ELB is designed to handle unlimited concurrent requests per second with â
 
 ## Migration Checklist
 
-- fire up archive server and load it
-- configure 001-events.conf starting with a copy from old sapsailing.com
-- clone entire MongoDB content
+### Before switching sapsailing.com to the EC2 webserver
+- fire up archive server and load it (DONE)
+- configure 001-events.conf starting with a copy from old sapsailing.com, using test URLs (rombalur.de) (DONE)
+- clone entire MongoDB content (DONE)
 - migrate MySQL for Bugzilla
-- fetch all git branches; also sync gollum wiki git
-- ensure that all users have access; either solicit their public keys and enter to ~trac/.ssh/authorized_keys or migrate /etc/passwd and /etc/group settings for access to trac group
-- run test build and deploy
-- fire up a live server and test it
-- check that tmux with UDP mirror and SwissTiming StoreAndForward is running
+- ensure that all users have access; either solicit their public keys and enter to ~trac/.ssh/authorized_keys or migrate /etc/passwd and /etc/group settings for access to trac group (DONE)
+- run test build and deploy (DONE)
+- fire up a live server and test it (DONE)
+- fire up a replica and check that it works correctly (ERROR!)
+- check that UDP mirror is working (DONE)
+- check that SwissTiming StoreAndForward is working
 - check that we can fire up a live2 / archive2 server and switch transparently
-- check that sapsailing.com is entered everywhere a hostname / domain name is required
+
+### Just before the migration on Sunday evening
+- check that sapsailing.com is entered everywhere a hostname / domain name is required, particularly in /etc/httpd/conf.d/001-events.conf and /opt/piwik-scripts and all of /etc - also have a look at piwik and bugzilla configuration (DONE)
+- disable bugzilla on old.sapsailing.com because Nameserver switch can take up to 48 hours for everyone (DONE)
+- copy /home/trac/releases to webserver (DONE)
+- import bugzilla to mysql (DONE)
+- git fetch --all on webserver (DONE)
 - tell SAP hostmaster to point old.sapsailing.com to 195.227.10.246
+
+### Immediately after switching the sapsailing.com domain to the EC2 webserver on Sunday evening
+- check that old.sapsailing.com points to 195.227.10.246
+- check that EC2 web server is responding to sapsailing.com now
+- fetch all git branches from what is now old.sapsailing.com; also sync gollum wiki git
+- ask people (including internal Git team) to update their known_hosts files according to the new web server's key
+- check if build server can access new sapsailing.com
+- check why swisstiminglistener doesn't receive connections and fix
 
 ## Glossary
 
