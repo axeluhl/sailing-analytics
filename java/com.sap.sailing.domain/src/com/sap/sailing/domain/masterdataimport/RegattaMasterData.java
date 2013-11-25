@@ -5,24 +5,33 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RegattaMasterData {
 
-    private String id;
-    private String baseName;
-    private String defaultCourseAreaId;
-    private RacingProcedureType defaultRacingProcedureType;
-    private CourseDesignerMode defaultCourseDesignerMode;
-    private String boatClassName;
-    private String scoringSchemeType;
-    private Iterable<SeriesMasterData> series;
-    private boolean isPersistent;
-    private String regattaName;
-    private Iterable<String> raceIdsAsStrings;
+    private final String id;
+    private final String baseName;
+    private final String defaultCourseAreaId;
+    private final RacingProcedureType defaultRacingProcedureType;
+    private final CourseDesignerMode defaultCourseDesignerMode;
+    private final String boatClassName;
+    private final String scoringSchemeType;
+    private final Iterable<SeriesMasterData> series;
+    private final boolean isPersistent;
+    private final String regattaName;
+    private final Iterable<String> raceIdsAsStrings;
 
     public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
             Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode) {
-                this.raceIdsAsStrings = raceIdsAsStrings;
-                this.defaultRacingProcedureType = procedureType;
-                this.defaultCourseDesignerMode = designerMode;    }
+        this.id = id;
+        this.baseName = baseName;
+        this.defaultCourseAreaId = defaultCourseAreaId;
+        this.boatClassName = boatClassName;
+        this.scoringSchemeType = scoringSchemeType;
+        this.series = series;
+        this.isPersistent = isPersistent;
+        this.regattaName = regattaName;
+        this.raceIdsAsStrings = raceIdsAsStrings;
+        this.defaultRacingProcedureType = procedureType;
+        this.defaultCourseDesignerMode = designerMode;
+    }
 
     public Iterable<String> getRaceIdsAsStrings() {
         return raceIdsAsStrings;
