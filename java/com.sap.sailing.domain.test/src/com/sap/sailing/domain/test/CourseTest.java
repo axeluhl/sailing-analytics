@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -25,6 +27,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
@@ -33,6 +36,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 import difflib.PatchFailedException;
 
@@ -245,12 +249,12 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertWaypointIndexes(course);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
-        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
-                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
-                        hasso), Collections.<Sideline> emptyList(),
-                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
-                        /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 8000);
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new TrackedRegattaImpl(
+                new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
+                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
+                /* millisecondsOverWhichToAverageWind */30000,
+                /* millisecondsOverWhichToAverageSpeed */8000);
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -275,7 +279,8 @@ public class CourseTest {
         waypoints.add(wp2);
         Course course = new CourseImpl("Test Course", waypoints);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
-        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new TrackedRegattaImpl(
+                new RegattaImpl("test", null, new HashSet<Series>(), false, null, "test", null)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
                         hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,

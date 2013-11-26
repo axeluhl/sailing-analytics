@@ -835,4 +835,6 @@ public interface StringMessages extends Messages {
     String successfullyAllowedCompetitorReset(String names);
     String allowReload();
     String id();
+    String compress();
+    String compressTooltip();
 }

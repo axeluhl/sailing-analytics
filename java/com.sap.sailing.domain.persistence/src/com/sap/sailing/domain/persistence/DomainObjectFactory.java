@@ -28,9 +28,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
  */
 public interface DomainObjectFactory {
     /**
-     * @param regatta only needed for backward compatibility because old wind tracks used the regatta name as part of the key
+     * @param regattaName only needed for backward compatibility because old wind tracks used the regatta name as part of the key
      */
-    WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
+    WindTrack loadWindTrack(String regattaName, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     /**
      * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
@@ -75,7 +75,7 @@ public interface DomainObjectFactory {
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
-    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
 
     Event loadEvent(String name);
