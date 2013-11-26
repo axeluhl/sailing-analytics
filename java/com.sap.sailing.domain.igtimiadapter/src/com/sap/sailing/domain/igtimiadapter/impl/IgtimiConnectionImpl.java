@@ -68,8 +68,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = getHttpClient();
-        HttpGet getResources = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
-        JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
+        JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
     }
 }

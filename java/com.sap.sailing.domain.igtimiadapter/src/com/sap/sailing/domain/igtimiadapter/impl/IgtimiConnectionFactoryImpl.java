@@ -130,7 +130,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
-        url.append("&start_time=");
+        url.append("resources/data?start_time=");
         url.append(startTime.asMillis());
         url.append("&end_time=");
         url.append(endTime.asMillis());
