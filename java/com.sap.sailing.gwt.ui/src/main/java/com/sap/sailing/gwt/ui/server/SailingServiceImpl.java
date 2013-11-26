@@ -226,6 +226,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -3521,6 +3522,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             procedures.setBasicConfiguration(config);
         }
         return procedures;
+    }
+
+    @Override
+    public boolean setStartTime(RaceLogSetStartTimeDTO dto) {
+        TimePoint newStartTime = getService().setStartTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime));
+        return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
+    }
+
+    @Override
+    public Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+        Pair<TimePoint, Integer> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
+        if (result == null) {
+            return null;
+        }
+        return new Pair<Date, Integer>(result.getA().asDate(), result.getB());
     }
 
 }

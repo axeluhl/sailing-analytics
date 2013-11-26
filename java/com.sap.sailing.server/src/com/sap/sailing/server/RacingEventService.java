@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -49,6 +50,8 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -456,6 +459,26 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return the {@link DeviceConfiguration}s.
      */
     Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
+
+    /**
+     * Sets a new start time on the RaceLog identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link RaceLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @param startTime the new Start-Time
+     * @return
+     */
+    TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
+
+    /**
+     * Gets the start time and pass identifier for the queried race.
+     */
+    Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
 
     MongoObjectFactory getMongoObjectFactory();
     

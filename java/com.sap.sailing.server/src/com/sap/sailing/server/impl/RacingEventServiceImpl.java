@@ -91,6 +91,11 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -2026,6 +2031,40 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations() {
         return new HashMap<DeviceConfigurationMatcher, DeviceConfiguration>(configurationMap);
+    }
+    
+    @Override
+    public TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            state.setStartTime(logicalTimePoint, startTime);
+            return state.getStartTime();
+        }
+        return null;
+    }
+    
+    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                return raceColumn.getRaceLog(fleetImpl);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
+        }
+        return null;
     }
 
 }

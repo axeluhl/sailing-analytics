@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -472,6 +473,11 @@ public interface SailingServiceAsync {
     void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+
+    void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
+
+    void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<Date, Integer>> callback);
     
 }
 

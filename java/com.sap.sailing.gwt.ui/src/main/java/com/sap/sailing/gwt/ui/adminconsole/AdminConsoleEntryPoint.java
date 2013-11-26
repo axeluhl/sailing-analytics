@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.SystemInformationPanel;
 import com.sap.sailing.gwt.ui.client.shared.panels.UserStatusPanel;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
+import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
@@ -33,6 +34,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        BetterDateTimeBox.initialize();
+        
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
         rootPanel.add(dockPanel);

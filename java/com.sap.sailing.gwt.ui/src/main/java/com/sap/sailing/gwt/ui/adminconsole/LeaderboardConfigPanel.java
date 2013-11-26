@@ -52,7 +52,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -64,10 +63,12 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
@@ -514,6 +515,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
                     refreshRaceLog(object.getA(), object.getB(), true);
+                } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
+                    setStartTime(object.getA(), object.getB());
                 }
             }
         });
@@ -703,6 +706,31 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 raceColumnAndFleetList.refresh();
             }
         });
+    }
+
+    private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
+        new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeDTO>() {
+            @Override
+            public void ok(RaceLogSetStartTimeDTO editedObject) {
+                sailingService.setStartTime(editedObject, new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (!result) {
+                            Window.alert("Failed to set new start time.");
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() { }
+        }).show();
     }
 
     private void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet, final boolean showAlerts) {

@@ -870,4 +870,7 @@ public interface StringMessages extends Messages {
     String configured();
     String overwriteRacingProceduresConfiguration();
     String overwriteRacingProceduresConfigurationHelpText();
+    
+    String setStartTime();
+    String currentPass();
 }
