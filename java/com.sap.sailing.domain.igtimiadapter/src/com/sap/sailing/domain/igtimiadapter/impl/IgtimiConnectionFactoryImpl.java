@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -13,23 +14,21 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.http.HttpRequest;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.Attributes;
@@ -159,10 +158,30 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         }
         return result;
     }
-    
-    private HttpResponse signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
-            final String userEmail, final String userPassword) throws ParserConfigurationException, SAXException, IOException,
-            UnsupportedEncodingException, ClientProtocolException {
+
+    /**
+     * Tries to authorize our client on behalf of a user identified by e-mail and password.
+     * 
+     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
+     *         to access data owned by the user identified by e-mail and password.
+     */
+    public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword)
+            throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException,
+            SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
+        logger.info("Trying to authorize application client " + getClient().getId() + " for user " + userEmail);
+        DefaultHttpClient client = new SystemDefaultHttpClient();
+        CookieStore cookieStore = new BasicCookieStore();
+        client.setCookieStore(cookieStore);
+        client.setRedirectStrategy(new LaxRedirectStrategy());
+        HttpGet get = new HttpGet(getOauthAuthorizeUrl());
+        HttpResponse responseForAuthorize = client.execute(get);
+        return signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
+    }
+
+    private String signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
+            final String userEmail, final String userPassword) throws ParserConfigurationException, SAXException,
+            IOException, UnsupportedEncodingException, ClientProtocolException, IllegalStateException,
+            ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
@@ -190,72 +209,72 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             // swallow; we try to grab what we can; let's hope it was enough...
         }
         response.getEntity().getContent().close();
+        final RedirectStrategy oldRedirectStrategy = client.getRedirectStrategy();
+        final RedirectStrategyExtractingAuthorizationCode codeExtractor = new RedirectStrategyExtractingAuthorizationCode(oldRedirectStrategy);
+        client.setRedirectStrategy(codeExtractor);
+        logger.info("Posting sign-in form for user "+userEmail);
         HttpResponse authorizationForm = ConnectivityUtils.postForm(getBaseUrl(), action[0], inputFieldsToSubmit, client, getSignInUrl());
-        return authorizationForm;
+        if (codeExtractor.getCode() == null) {
+            logger.info("Client app "+getClient().getId()+" doesn't seem to be authorized yet.");
+            authorizeAndGetCode(authorizationForm, client);
+        } else {
+            logger.info("Client app "+getClient().getId()+" seems to be authorized for user "+userEmail+" already.");
+        }
+        return codeExtractor.getCode();
     }
     
     /**
-     * Tries to authorize our client on behalf of a user identified by e-mail and password.
-     * 
-     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
-     *         to access data owned by the user identified by e-mail and password.
-     */
-    public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword) throws ClientProtocolException, IOException,
-            IllegalStateException, ParserConfigurationException, SAXException {
-        DefaultHttpClient client = new SystemDefaultHttpClient();
-        CookieStore cookieStore = new BasicCookieStore();
-        client.setCookieStore(cookieStore);
-        client.setRedirectStrategy(new LaxRedirectStrategy());
-        HttpGet get = new HttpGet(getOauthAuthorizeUrl());
-        HttpResponse responseForAuthorize = client.execute(get);
-        HttpResponse authorizationForm = signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
-        return authorizeAndGetCode(authorizationForm, client);
-    }
-
-    /**
      * Parses the form in the <code>autorizationForm</code> response and posts it by submitting the form that contains
-     * the commit button with the value "Authorize".
-     * 
-     * @return the code intercepted from the redirect location
+     * the commit button with the value "Authorize". If a redirect strategy is set on the <code>client</code> it will
+     * see the redirect URL in the <code>Location</code> header. The redirection target is closed immediately.
+     * @throws ClassCastException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
+     * @throws ClassNotFoundException 
      */
-    private String authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client) throws IllegalStateException, SAXException, IOException, ParserConfigurationException {
-        final String[] code = new String[1];
-        client.setRedirectStrategy(new DefaultRedirectStrategy() {
-            @Override
-            public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)
-                    throws ProtocolException {
-                code[0] = response.getHeaders("Location")[0].getValue().substring(getClient().getRedirectUri().length() + "?".length());
-                return response.getStatusLine().getStatusCode() >= 300
-                        && response.getStatusLine().getStatusCode() < 400;
-            }
-        });
+    private void authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client)
+            throws IllegalStateException, SAXException, IOException, ParserConfigurationException,
+            ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
+        // If the user already authorized the app, an empty document will be returned
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-        final String[] action = new String[1];
+        final String action[] = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
         try {
-            parser.parse(authorizationForm.getEntity().getContent(), new DefaultHandler() {
+            String pageContent = ConnectivityUtils.getContent(authorizationForm);
+            String unescapedHtml = StringEscapeUtils.unescapeHtml(pageContent);
+            final boolean[] completedAuthorizeForm = new boolean[1];
+            parser.parse(new ByteArrayInputStream(unescapedHtml.getBytes()), new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
                         throws SAXException {
-                    // TODO stop after the Authorization form
-                    if (qName.equals("form")) {
-                        action[0] = attributes.getValue("action");
-                    } else if (qName.equals("input")) {
-                        if (attributes.getValue("value") != null && !attributes.getValue("value").isEmpty()) {
-                            inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
+                    if (!completedAuthorizeForm[0]) {
+                        if (qName.equals("form")) {
+                            action[0] = attributes.getValue("action");
+                        } else if (qName.equals("input")) {
+                            if (attributes.getValue("value") != null && !attributes.getValue("value").isEmpty()) {
+                                inputFieldsToSubmit.put(attributes.getValue("name"), attributes.getValue("value"));
+                            }
                         }
                     }
+                    super.startElement(uri, localName, qName, attributes);
+                }
+
+                @Override
+                public void endElement(String uri, String localName, String qName) throws SAXException {
+                    if (qName.equals("form") && inputFieldsToSubmit.get("commit").equals("Authorize")) {
+                        completedAuthorizeForm[0] = true;
+                    }
+                    super.endElement(uri, localName, qName);
                 }
             });
         } catch (SAXParseException e) {
             // swallow; we try to grab what we can; let's hope it was enough...
+            logger.warning("The authorization form was not well-formed. Extracted the following parameters so far: "+inputFieldsToSubmit+" ("+e.getMessage()+")");
         }
         authorizationForm.getEntity().getContent().close();
+        logger.info("Posting authorization form to authorize client "+getClient().getId()+" for access to data of user");
         HttpResponse authorizationResponse = ConnectivityUtils.postForm(getBaseUrl(), action[0], inputFieldsToSubmit, client, /* referer */ getSignInUrl());
-        // TODO remove debug output:
-        String content = ConnectivityUtils.getContent(authorizationResponse);
-        logger.info("Authorization response: "+content);
-        return code[0];
+        authorizationResponse.getEntity().getContent().close();
     }
 
 }
