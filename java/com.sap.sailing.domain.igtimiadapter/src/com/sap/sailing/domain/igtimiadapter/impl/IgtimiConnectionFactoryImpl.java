@@ -275,7 +275,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             String pageContent = ConnectivityUtils.getContent(authorizationForm);
             String unescapedHtml = StringEscapeUtils.unescapeHtml(pageContent);
             final boolean[] completedAuthorizeForm = new boolean[1];
-            parser.parse(new ByteArrayInputStream(unescapedHtml.getBytes()), new DefaultHandler() {
+            parser.parse(new ByteArrayInputStream(unescapedHtml.getBytes("UTF-8")), new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
                         throws SAXException {
