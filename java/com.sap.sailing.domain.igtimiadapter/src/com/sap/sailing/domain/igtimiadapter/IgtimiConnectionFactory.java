@@ -2,11 +2,13 @@ package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
 
 /**
@@ -59,4 +61,7 @@ public interface IgtimiConnectionFactory {
 
     String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Iterable<String> streamIds, Account account);
+
+    String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
+            Map<Type, Double> typeAndCompression, Account account);
 }

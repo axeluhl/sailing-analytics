@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -19,6 +20,8 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.User;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
@@ -59,5 +62,14 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             result.add(user);
         }
         return result;
+    }
+
+    @Override
+    public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
+            Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = getHttpClient();
+        HttpGet getResources = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
+        JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        return new FixFactory().createFixes(resourceDataJson);
     }
 }

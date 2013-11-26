@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
@@ -125,7 +127,28 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers, Iterable<String> streamIds, Account account) {
+    public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
+            Map<Type, Double> typeAndCompression, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("&start_time=");
+        url.append(startTime.asMillis());
+        url.append("&end_time=");
+        url.append(endTime.asMillis());
+        for (String serialNumber : serialNumbers) {
+            url.append("&serial_numbers[]=");
+            url.append(serialNumber);
+        }
+        for (Entry<Type, Double> e : typeAndCompression.entrySet()) {
+            url.append("&types["+e.getKey().getCode()+"]="+e.getValue());
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
+    @Override
+    public String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> serialNumbers, Iterable<String> streamIds, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
         url.append("resources?");
         url.append("permission=");
