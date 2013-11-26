@@ -41,22 +41,25 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
     public JSONObject serialize(WindTrack windTrack) {
         JSONObject windTrackJson = new JSONObject();
         windTrack.lockForRead();
-        windTrackJson.put(FIELD_WIND_SOURCE_TYPE, source.getType().name());
-        if (source.getId() != null) {
-            windTrackJson.put(FIELD_WIND_SOURCE_ID, source.getId().toString());
+        try {
+            windTrackJson.put(FIELD_WIND_SOURCE_TYPE, source.getType().name());
+            if (source.getId() != null) {
+                windTrackJson.put(FIELD_WIND_SOURCE_ID, source.getId().toString());
+            }
+            windTrackJson.put(FIELD_RACE_NAME, raceName);
+            if (raceId != null) {
+                windTrackJson.put(FIELD_RACE_ID, raceId.toString());
+            }
+            windTrackJson.put(FIELD_REGATTA_NAME, regattaName);
+            JSONArray fixes = new JSONArray();
+            Iterable<Wind> fixesIterator = windTrack.getFixes();
+            for (Wind wind : fixesIterator) {
+                fixes.add(windSerializer.serialize(wind));
+            }
+            windTrackJson.put(FIELD_FIXES, fixes);
+        } finally {
+            windTrack.unlockAfterRead();
         }
-        windTrackJson.put(FIELD_RACE_NAME, raceName);
-        if (raceId != null) {
-            windTrackJson.put(FIELD_RACE_ID, raceId.toString());
-        }
-        windTrackJson.put(FIELD_REGATTA_NAME, regattaName);
-        JSONArray fixes = new JSONArray();
-        Iterable<Wind> fixesIterator = windTrack.getFixes();
-        for (Wind wind : fixesIterator) {
-            fixes.add(windSerializer.serialize(wind));
-        }
-        windTrackJson.put(FIELD_FIXES, fixes);
-        windTrack.unlockAfterRead();
         return windTrackJson;
     }
 
