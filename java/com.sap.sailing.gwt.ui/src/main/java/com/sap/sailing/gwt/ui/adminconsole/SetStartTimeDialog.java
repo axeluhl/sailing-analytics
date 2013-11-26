@@ -7,6 +7,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,7 +19,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util;
@@ -42,12 +44,15 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
     
     private Label currentStartTimeLabel;
     private Label currentPassIdBox;
-    private BetterDateTimeBox box; 
+    private BetterDateTimeBox timeBox;
+    private TextBox authorNameBox;
+    private com.sap.sailing.gwt.ui.client.IntegerBox authorPriorityBox;
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 
             DataEntryDialog.DialogCallback<RaceLogSetStartTimeDTO> callback) {
-        super(stringMessages.setStartTime(), "Select a new start time for the race", stringMessages.setStartTime(), stringMessages.cancel(), null, callback);
+        super(stringMessages.setStartTime(), stringMessages.setStartTimeDescription(), stringMessages.setStartTime(), 
+                stringMessages.cancel(), new StartTimeValidator(stringMessages), callback);
         this.service = service;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -93,20 +98,35 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
     }
     
     private Widget createInputPanel() {
-        SimplePanel content = new SimplePanel();
-        box = new BetterDateTimeBox();
-        box.addAttachHandler(new Handler() {
+        Grid content = new Grid(3, 2);
+        timeBox = new BetterDateTimeBox();
+        timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                validate();
+            }
+        });
+        timeBox.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
                 if (event.isAttached()) {
-                    addAutoHidePartner(box.getPicker());
+                    addAutoHidePartner(timeBox.getPicker());
                 }
             }
         });
-        box.setAutoClose(true);
-        box.setStartView(ViewMode.HOUR);
-        box.setFormat("dd/mm/yyyy hh:ii");
-        content.add(box);
+        timeBox.setAutoClose(true);
+        timeBox.setStartView(ViewMode.HOUR);
+        timeBox.setFormat("dd/mm/yyyy hh:ii");
+        content.setWidget(0, 0, createLabel(stringMessages.startTime()));
+        content.setWidget(0, 1, timeBox);
+        
+        
+        authorNameBox = createTextBox("Shore");
+        content.setWidget(1, 0, createLabel("Author name"));
+        content.setWidget(1, 1, authorNameBox);
+        authorPriorityBox = createIntegerBox(4, 2);
+        content.setWidget(2, 0, createLabel("Author priority"));
+        content.setWidget(2, 1, authorPriorityBox);
         return content;
     }
 
@@ -116,10 +136,10 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
         dto.fleetName = fleetName;
-        dto.authorName = "Shore";
-        dto.authorPriority = 4;
+        dto.authorName = authorNameBox.getValue();
+        dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = new Date();
-        dto.startTime = box.getValue();
+        dto.startTime = timeBox.getValue();
         dto.passId = -1;
         return dto;
     }
@@ -137,7 +157,8 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
                     if (startTime == null) {
                         currentStartTimeLabel.setText(stringMessages.unknown());
                     } else {
-                        currentStartTimeLabel.setText(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_MEDIUM).format(startTime));                    
+                        currentStartTimeLabel.setText(DateTimeFormat.getFormat(
+                                DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM).format(startTime));                    
                     }
                     currentPassIdBox.setText(result.getB().toString());
                 }
@@ -148,6 +169,25 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
                 errorReporter.reportError(caught.getMessage());
             }
         });
+    }
+    
+    private static class StartTimeValidator implements Validator<RaceLogSetStartTimeDTO> {
+        
+        private final StringMessages stringMessages;
+        
+        public StartTimeValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public String getErrorMessage(RaceLogSetStartTimeDTO dto) {
+            if (dto.authorName == null || dto.authorName.isEmpty() || 
+                    dto.authorPriority == null || dto.startTime == null) {
+                return stringMessages.pleaseEnterAValue();
+            }
+            return null;
+        }
+        
     }
 
 }

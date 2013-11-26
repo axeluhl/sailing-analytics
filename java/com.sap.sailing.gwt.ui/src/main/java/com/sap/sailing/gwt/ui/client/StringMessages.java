@@ -873,4 +873,5 @@ public interface StringMessages extends Messages {
     
     String setStartTime();
     String currentPass();
+    String setStartTimeDescription();
 }
