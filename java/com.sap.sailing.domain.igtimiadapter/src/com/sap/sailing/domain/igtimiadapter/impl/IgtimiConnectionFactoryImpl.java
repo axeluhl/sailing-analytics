@@ -218,7 +218,9 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
         try {
-            parser.parse(response.getEntity().getContent(), new DefaultHandler() {
+            String pageContent = ConnectivityUtils.getContent(response);
+            String unescapedHtml = StringEscapeUtils.unescapeHtml(pageContent);
+            parser.parse(new ByteArrayInputStream(unescapedHtml.getBytes("UTF-8")), new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
                         throws SAXException {
@@ -235,6 +237,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
                             }
                         }
                     }
+                    super.startElement(uri, localName, qName, attributes);
                 }
             });
         } catch (SAXParseException e) {
