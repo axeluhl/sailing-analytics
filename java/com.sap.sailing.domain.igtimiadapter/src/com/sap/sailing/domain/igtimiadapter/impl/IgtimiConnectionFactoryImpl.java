@@ -150,6 +150,8 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
                 url.append(streamId);
             }
         }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
         return url.toString();
     }
 

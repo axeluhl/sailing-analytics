@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -80,7 +81,8 @@ public class SignInTest {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
         IgtimiConnection connection = connectionFactory.connect(account);
-        Iterable<Resource> resources = connection.getResources(Permission.read, /* start time */ null, /* end time */ null, /* serial numbers */ null, /* stream IDs */ null);
+        Iterable<Resource> resources = connection.getResources(Permission.read, /* start time */ null, /* end time */ null,
+                /* serial numbers */ Collections.singleton("GA-EN-AAEJ"), /* stream IDs */ null);
         assertTrue(resources.iterator().hasNext());
     }
 }

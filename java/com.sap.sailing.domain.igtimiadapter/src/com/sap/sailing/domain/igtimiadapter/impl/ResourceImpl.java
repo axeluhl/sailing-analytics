@@ -10,11 +10,11 @@ public class ResourceImpl implements Resource {
     private final TimePoint endTime;
     private final String deviceSerialNumber;
     private final int[] dataTypes;
-    private final Permission[] permissions;
+    private final Iterable<Permission> permissions;
     private final boolean blob;
     
     public ResourceImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber, int[] dataTypes,
-            Permission[] permissions, boolean blob) {
+            Iterable<Permission> permissions, boolean blob) {
         super();
         this.id = id;
         this.startTime = startTime;
@@ -51,7 +51,7 @@ public class ResourceImpl implements Resource {
     }
 
     @Override
-    public Permission[] getPermissions() {
+    public Iterable<Permission> getPermissions() {
         return permissions;
     }
 

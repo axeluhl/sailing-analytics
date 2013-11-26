@@ -8,7 +8,7 @@ public interface Resource {
 
     public abstract boolean isBlob();
 
-    public abstract Permission[] getPermissions();
+    public abstract Iterable<Permission> getPermissions();
 
     public abstract int[] getDataTypes();
 

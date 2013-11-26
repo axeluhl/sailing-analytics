@@ -52,9 +52,9 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             Iterable<String> serialNumbers, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = getHttpClient();
         HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, serialNumbers, streamIds, account));
-        JSONObject usersJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        JSONObject resourcesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Resource> result = new ArrayList<>();
-        for (Object userJson : (JSONArray) usersJson.get("resources")) {
+        for (Object userJson : (JSONArray) resourcesJson.get("resources")) {
             Resource user = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) userJson).get("resource"));
             result.add(user);
         }
