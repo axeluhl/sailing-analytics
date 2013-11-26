@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.oauth;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
@@ -41,13 +42,13 @@ public class AuthorizationCallback {
     @Produces("application/json;charset=UTF-8")
     @Path(AUTHORIZATIONCALLBACK)
     public Response obtainAccessToken(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
-        final String errorMessage = connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
-        final Response result;
-        if (errorMessage != null) {
-            result = Response.status(Status.UNAUTHORIZED).entity(errorMessage).build();
-            logger.severe("Error trying to obtain access token from authentication code "+code+": "+errorMessage);
-        } else {
+        Response result;
+        try {
+            connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
             result = Response.ok().build();
+        } catch (Exception e) {
+            result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
+            logger.log(Level.SEVERE, "Error trying to obtain access token from authentication code "+code, e);
         }
         return result;
     }

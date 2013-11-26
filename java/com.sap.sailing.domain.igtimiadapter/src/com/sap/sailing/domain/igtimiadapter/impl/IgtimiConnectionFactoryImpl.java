@@ -36,10 +36,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.Permission;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
@@ -121,6 +123,35 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public String getUsersUrl(Account account) {
         return getApiV1BaseUrl()+"users?"+getAccessTokenUrlParameter(account);
     }
+    
+    @Override
+    public String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers, Iterable<String> streamIds, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("resources?");
+        url.append("permission=");
+        url.append(permission.name());
+        if (startTime != null) {
+            url.append("&start_time=");
+            url.append(startTime.asMillis());
+        }
+        if (endTime != null) {
+            url.append("&end_time=");
+            url.append(endTime.asMillis());
+        }
+        if (serialNumbers != null) {
+            for (String serialNumber : serialNumbers) {
+                url.append("&serial_numbers[]=");
+                url.append(serialNumber);
+            }
+        }
+        if (streamIds != null) {
+            for (String streamId : streamIds) {
+                url.append("&stream_ids[]=");
+                url.append(streamId);
+            }
+        }
+        return url.toString();
+    }
 
     private String getAccessTokenUrlParameter(Account account) {
         return "access_token="+getAccessTokenForAccount(account);
@@ -136,7 +167,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String obtainAccessTokenFromAuthorizationCode(String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
+    public Account obtainAccessTokenFromAuthorizationCode(String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
         HttpClient client = new SystemDefaultHttpClient();
         HttpPost post = new HttpPost(getOauthTokenUrl());
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
@@ -148,13 +179,12 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
         JSONObject accessTokenJson = ConnectivityUtils.getJsonFromResponse(response);
-        final String result;
+        final Account result;
         if (accessTokenJson.get("error") != null) {
-            result = accessTokenJson.toString();
+            throw new RuntimeException(accessTokenJson.toString());
         } else {
-            result = null;
             String accessToken = (String) accessTokenJson.get("access_token");
-            registerAccountForWhichClientIsAuthorized(accessToken);
+            result = registerAccountForWhichClientIsAuthorized(accessToken);
         }
         return result;
     }

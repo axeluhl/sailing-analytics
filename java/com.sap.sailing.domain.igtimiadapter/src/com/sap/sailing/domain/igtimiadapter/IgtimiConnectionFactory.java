@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
 
 /**
@@ -46,12 +47,16 @@ public interface IgtimiConnectionFactory {
      * an access token for an authorization code which encodes the authorization given by a user to this factory's
      * client.
      * 
-     * @return <code>null</code> if everything went OK; some indication as to the error state otherwise
+     * @return the account encoding the application that is authorized for a user's account
+     * @throws RuntimeException in case there was an error while retrieving the token
      */
-    String obtainAccessTokenFromAuthorizationCode(String code) throws UnsupportedEncodingException,
+    Account obtainAccessTokenFromAuthorizationCode(String code) throws UnsupportedEncodingException,
             ClientProtocolException, IOException, IllegalStateException, ParseException;
 
     String getAccountUrl(Account account);
 
     String getUsersUrl(Account account);
+
+    String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> serialNumbers, Iterable<String> streamIds, Account account);
 }

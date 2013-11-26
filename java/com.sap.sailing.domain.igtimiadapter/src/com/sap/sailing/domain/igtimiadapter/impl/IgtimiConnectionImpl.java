@@ -12,9 +12,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.Permission;
+import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.User;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
@@ -28,12 +31,31 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     
     @Override
     public Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = getHttpClient();
         HttpGet getUsers = new HttpGet(connectionFactory.getUsersUrl(account));
         JSONObject usersJson = ConnectivityUtils.getJsonFromResponse(client.execute(getUsers));
         final List<User> result = new ArrayList<>();
         for (Object userJson : (JSONArray) usersJson.get("users")) {
             User user = new UserDeserializer().createUserFromJson((JSONObject) ((JSONObject) userJson).get("user"));
+            result.add(user);
+        }
+        return result;
+    }
+
+    private HttpClient getHttpClient() {
+        HttpClient client = new SystemDefaultHttpClient();
+        return client;
+    }
+    
+    @Override
+    public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> serialNumbers, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = getHttpClient();
+        HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, serialNumbers, streamIds, account));
+        JSONObject usersJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        final List<Resource> result = new ArrayList<>();
+        for (Object userJson : (JSONArray) usersJson.get("resources")) {
+            Resource user = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) userJson).get("resource"));
             result.add(user);
         }
         return result;
