@@ -107,26 +107,29 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
         } else {
             GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
             track.lockForRead();
-            Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
-            TimePoint lastConsideredTimePoint = null;
-            if (finishedEarlyAtWaypoint != -1) {
-                NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
-                MarkPassing lastConsideredPassing = markPassings.last();
-                lastConsideredPassing = markPassings.lower(lastConsideredPassing);
-                lastConsideredTimePoint = lastConsideredPassing.getTimePoint();
-            }
-            boolean reachedEnd = false;
-            while (fixesIterator.hasNext() && reachedEnd == false) {
-                GPSFixMoving fix = fixesIterator.next();
-                if (fix.getTimePoint().after(endTime)
-                        || (lastConsideredTimePoint != null && fix.getTimePoint().after(lastConsideredTimePoint))) {
-                    reachedEnd = true;
-                } else {
-                    addFixIfValid(track, fix);
+            try {
+                Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
+                TimePoint lastConsideredTimePoint = null;
+                if (finishedEarlyAtWaypoint != -1) {
+                    NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
+                    MarkPassing lastConsideredPassing = markPassings.last();
+                    lastConsideredPassing = markPassings.lower(lastConsideredPassing);
+                    lastConsideredTimePoint = lastConsideredPassing.getTimePoint();
                 }
+                boolean reachedEnd = false;
+                while (fixesIterator.hasNext() && reachedEnd == false) {
+                    GPSFixMoving fix = fixesIterator.next();
+                    if (fix.getTimePoint().after(endTime)
+                            || (lastConsideredTimePoint != null && fix.getTimePoint().after(lastConsideredTimePoint))) {
+                        reachedEnd = true;
+                    } else {
+                        addFixIfValid(track, fix);
+                    }
+                }
+            } finally {
+                track.unlockAfterRead();
+                done = true;
             }
-            track.unlockAfterRead();
-            done = true;
         }
     }
 
