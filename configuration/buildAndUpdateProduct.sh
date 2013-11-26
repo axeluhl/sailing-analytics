@@ -51,7 +51,11 @@ fi
 
 cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
-active_branch=`basename $active_branch`
+if [[ $active_branch == "" ]]; then
+    active_branch="unknown"
+else
+    active_branch=`basename $active_branch`
+fi
 
 HEAD_SHA=$(git show-ref --head -s | head -1)
 HEAD_DATE=$(date "+%Y%m%d%H%M")
@@ -120,6 +124,7 @@ fi
 echo PROJECT_HOME is $PROJECT_HOME
 echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
+echo VERSION is $VERSION_INFO
 
 options=':bgtocpm:n:l:s:w:u'
 while getopts $options option
@@ -127,7 +132,7 @@ do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	b) onegwtpermutationonly=1;;
+	    b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
@@ -161,22 +166,25 @@ if [[ "$@" == "release" ]]; then
     fi
 
     RELEASE_NOTES=""
-    echo ""
-    echo "Please provide me with some notes about this release. You can add more than"
-    echo "one line. Please include major changes or new features. After your notes I will"
-    echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
-    while read -e -p "> " line; do
-        RELEASE_NOTES="$RELEASE_NOTES\n$line"
-    done
+    COMMIT_WEEK_COUNT=4
+	if [ $suppress_confirmation -eq 0 ]; then
+        echo ""
+        echo "Please provide me with some notes about this release. You can add more than"
+        echo "one line. Please include major changes or new features. After your notes I will"
+        echo "also include the commits of the last 4 weeks. You can save and quit by hitting ctrl+d."
+        while read -e -p "> " line; do
+            RELEASE_NOTES="$RELEASE_NOTES\n$line"
+        done
 
-    if [[ $RELEASE_NOTES == "" ]]; then
-        echo -e "\nCome on - I can not release without at least some notes about this release!"
-        exit
+        if [[ $RELEASE_NOTES == "" ]]; then
+            echo -e "\nCome on - I can not release without at least some notes about this release!"
+            exit
+        fi
+        echo -e "\nThank you! One last thing..."
+
+        echo "How many weeks of commits do you want to include (0=No commits)?"
+        read -p "> " -e COMMIT_WEEK_COUNT
     fi
-    echo -e "\nThank you! One last thing..."
-
-    echo "How many weeks of commits do you want to include (0=No commits)?"
-    read -p "> " -e COMMIT_WEEK_COUNT
 
     mkdir -p $PROJECT_HOME/dist
     mkdir -p $PROJECT_HOME/build
@@ -198,6 +206,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
@@ -496,6 +505,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then

@@ -117,9 +117,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
         splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
         splitPanel.add(createLeaderboardGroupDetailsGUI(tableRes));
-        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         splitPanel.add(createSwitchLeaderboardsGUI());
-        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_BOTTOM);
         splitPanel.add(createLeaderboardsGUI(tableRes));
 
         //Load Data
