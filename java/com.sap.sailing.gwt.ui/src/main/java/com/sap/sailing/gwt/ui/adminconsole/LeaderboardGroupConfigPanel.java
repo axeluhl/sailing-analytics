@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -613,14 +614,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(),
-                newGroup.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<LeaderboardGroupDTO>() {
+                newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>() {
             @Override
-            public void onFailure(Throwable t) {
+            public void handleFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
                         + ": " + t.getMessage());
             }
             @Override
-            public void onSuccess(LeaderboardGroupDTO newGroup) {
+            public void handleSuccess(LeaderboardGroupDTO newGroup) {
                 availableLeaderboardGroups.add(newGroup);
                 groupsProvider.getList().add(newGroup);
                 groupsSelectionModel.clear();
