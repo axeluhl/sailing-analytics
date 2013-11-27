@@ -47,7 +47,11 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -64,9 +68,12 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
@@ -183,7 +190,7 @@ public class MasterDataImportTest {
         sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
-        Set<Competitor> competitors = new HashSet<Competitor>();
+        List<Competitor> competitors = new ArrayList<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
@@ -214,10 +221,18 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
+        TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
         RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
                 logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
+        Position p = new DegreePosition(3, 3);
+        Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
+        RaceLogWindFixEvent windEvent = factory.createWindFixEvent(logTimePoint2, UUID.randomUUID(),
+                new ArrayList<Competitor>(), 2,
+                wind);
+        raceColumn.getRaceLog(testFleet1).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
+        storedLogUUIDs.add(windEvent.getId());
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -308,8 +323,11 @@ public class MasterDataImportTest {
         Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
 
         // Check for race log event
-        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix());
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFixAtOrAfter(logTimePoint));
         Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFixAtOrAfter(logTimePoint).getId());
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstFixAtOrAfter(logTimePoint2));
+        Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(fleet1OnTarget)
+                .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
     }
     
     @Test
