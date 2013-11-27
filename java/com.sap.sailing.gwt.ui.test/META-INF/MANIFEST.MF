@@ -17,5 +17,6 @@ Import-Package: javax.jms;version="1.1.0",
  org.json.simple,
  org.json.simple.parser,
  org.junit;version="4.8.1",
+ org.mockito;version="1.9.5",
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.0"

@@ -763,7 +763,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
             updateGroup(selectedGroup);
             //Refilters the leaderboards list (hides the moved leaderboards if they don't fit to the filter) and resorts the list
-            leaderboardsFilterablePanel.updateAll(availableLeaderboards);
+            leaderboardsFilterablePanel.upDateAll(availableLeaderboards);
 
         }
     }

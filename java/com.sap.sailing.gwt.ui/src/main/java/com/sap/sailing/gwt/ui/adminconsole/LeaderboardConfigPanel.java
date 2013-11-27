@@ -627,7 +627,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
                 availableLeaderboardList.addAll(leaderboards);
-                filterLeaderboardPanel.updateAll(availableLeaderboardList);
+                filterLeaderboardPanel.upDateAll(availableLeaderboardList);
                 leaderboardSelectionChanged();
                 leaderboardRaceColumnSelectionChanged();
             }
