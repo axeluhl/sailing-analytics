@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import java.util.Iterator;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,8 +11,12 @@ import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.igtimiadapter.datatypes.AntHrm;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
+import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
 
 public class FixFactoryTest {
     private static final String demoJson = "{\n"+
@@ -82,5 +89,20 @@ public class FixFactoryTest {
         FixFactory fixFactory = new FixFactory();
         Iterable<Fix> fixes = fixFactory.createFixes(json);
         assertFalse(Util.isEmpty(fixes));
+        final Iterator<Fix> fixIter = fixes.iterator();
+        GpsLatLong firstFix = (GpsLatLong) fixIter.next();
+        assertEquals(new MillisecondsTimePoint(12345677000l), firstFix.getTimePoint());
+        assertEquals(-160.123, firstFix.getPosition().getLngDeg(), 0.0000001);
+        assertEquals(40.43, firstFix.getPosition().getLatDeg(), 0.00000001);
+        GpsLatLong secondFix = (GpsLatLong) fixIter.next();
+        assertEquals(new MillisecondsTimePoint(12345677500l), secondFix.getTimePoint());
+        assertEquals(-160.1233, secondFix.getPosition().getLngDeg(), 0.0000001);
+        assertEquals(40.44, secondFix.getPosition().getLatDeg(), 0.00000001);
+        GpsQualitySatCount satCount = (GpsQualitySatCount) fixIter.next();
+        assertEquals(21, satCount.getSatCount());
+        fixIter.next();
+        AntHrm hrm = (AntHrm) fixIter.next();
+        assertEquals("100", hrm.getSensor().getDeviceId());
+        assertEquals(60, hrm.getHeartRate());
     }
 }

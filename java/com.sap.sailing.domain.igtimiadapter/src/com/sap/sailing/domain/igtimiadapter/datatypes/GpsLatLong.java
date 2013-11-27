@@ -12,7 +12,7 @@ public class GpsLatLong extends Fix {
     
     public GpsLatLong(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        position = new DegreePosition(((Number) valuesPerSubindex.get(1)).doubleValue(), ((Number) valuesPerSubindex.get(2)).doubleValue());
+        position = new DegreePosition(((Number) valuesPerSubindex.get(2)).doubleValue(), ((Number) valuesPerSubindex.get(1)).doubleValue());
     }
 
     public Position getPosition() {

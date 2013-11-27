@@ -98,8 +98,8 @@ public class SignInTest {
         IgtimiConnection connection = connectionFactory.connect(account);
         Map<Type, Double> typesAndCompression = new HashMap<>();
         typesAndCompression.put(Type.gps_latlong, 0.0);
-        Iterable<Fix> resources = connection.getResourceData(new MillisecondsTimePoint(1384420883000l),
+        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384420883000l),
                 new MillisecondsTimePoint(1384421639000l), Collections.singleton("GA-EN-AAEJ"), typesAndCompression);
-        assertTrue(resources.iterator().hasNext());
+        assertTrue(data.iterator().hasNext());
     }
 }
