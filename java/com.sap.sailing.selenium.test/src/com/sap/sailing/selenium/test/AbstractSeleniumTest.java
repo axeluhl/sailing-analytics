@@ -43,7 +43,7 @@ import com.sap.sailing.selenium.core.WindowManager;
 public abstract class AbstractSeleniumTest {
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
-    private static final int CLEAR_STATE_SUCCESFULL_STATUS_CODE = 204;
+    private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
     
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     
@@ -80,7 +80,7 @@ public abstract class AbstractSeleniumTest {
             connection.setRequestMethod("POST");
             connection.connect();
             
-            return connection.getResponseCode() == CLEAR_STATE_SUCCESFULL_STATUS_CODE;
+            return connection.getResponseCode() == CLEAR_STATE_SUCCESFUL_STATUS_CODE;
         } catch(Exception exception) {
             throw new RuntimeException(exception);
         }
