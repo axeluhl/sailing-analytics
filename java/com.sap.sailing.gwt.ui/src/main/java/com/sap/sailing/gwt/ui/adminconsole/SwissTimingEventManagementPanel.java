@@ -32,6 +32,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -296,11 +297,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         .compareTo(o2.raceStartTime);
             }
         });
-        result.setComparator(raceDescriptionColumn, new Comparator<SwissTimingRaceRecordDTO>() {
+        result.setComparator(raceDescriptionColumn, new Comparator<SwissTimingRaceRecordDTO>()  {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return o1.description == null ? -1 : o2.description == null ? 1 : o1.description
-                        .compareTo(o2.description);
+                return o1.description == null ? -1 : o2.description == null ? 1 : 
+                    new NaturalComparator().compare(o1.description, o2.description);
             }
         });
         result.setComparator(boatClassColumn, new Comparator<SwissTimingRaceRecordDTO>() {
