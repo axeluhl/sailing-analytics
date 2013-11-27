@@ -16,4 +16,9 @@ public class GpsQualityIndicator extends Fix {
     public int getQuality() {
         return quality;
     }
+
+    @Override
+    protected String localToString() {
+        return "GPS Quality: "+getQuality();
+    }
 }

@@ -24,4 +24,9 @@ public class HDG extends Fix {
     public Bearing getTrueHeading() {
         return trueHeading;
     }
+
+    @Override
+    protected String localToString() {
+        return "HDG: "+getTrueHeading();
+    }
 }

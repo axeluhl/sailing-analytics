@@ -18,4 +18,9 @@ public class GpsQualityHdop extends Fix {
     public Distance getHdop() {
         return hdop;
     }
+
+    @Override
+    protected String localToString() {
+        return "HDOP: "+getHdop();
+    }
 }

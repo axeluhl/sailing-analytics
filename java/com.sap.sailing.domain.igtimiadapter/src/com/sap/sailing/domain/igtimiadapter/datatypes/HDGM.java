@@ -24,4 +24,9 @@ public class HDGM extends Fix {
     public Bearing getMagnetigHeading() {
         return magnetigHeading;
     }
+
+    @Override
+    protected String localToString() {
+        return "HDGM: "+getMagnetigHeading();
+    }
 }

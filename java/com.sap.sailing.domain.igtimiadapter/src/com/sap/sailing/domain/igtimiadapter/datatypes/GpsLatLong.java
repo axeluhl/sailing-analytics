@@ -18,4 +18,9 @@ public class GpsLatLong extends Fix {
     public Position getPosition() {
         return position;
     }
+
+    @Override
+    protected String localToString() {
+        return position.toString();
+    }
 }

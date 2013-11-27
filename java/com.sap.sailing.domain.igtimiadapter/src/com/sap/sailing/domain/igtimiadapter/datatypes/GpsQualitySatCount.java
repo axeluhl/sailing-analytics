@@ -16,4 +16,9 @@ public class GpsQualitySatCount extends Fix {
     public int getSatCount() {
         return satCount;
     }
+
+    @Override
+    protected String localToString() {
+        return ""+getSatCount()+" satellites";
+    }
 }

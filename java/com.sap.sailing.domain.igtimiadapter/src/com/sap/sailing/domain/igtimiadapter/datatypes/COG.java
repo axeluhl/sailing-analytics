@@ -24,4 +24,9 @@ public class COG extends Fix {
     public Bearing getCourseOverGround() {
         return courseOverGround;
     }
+
+    @Override
+    protected String localToString() {
+        return "COG: "+getCourseOverGround();
+    }
 }

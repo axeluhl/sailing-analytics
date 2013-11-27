@@ -16,4 +16,9 @@ public class BatteryLevel extends Fix {
     public double getPercentage() {
         return percentage;
     }
+
+    @Override
+    protected String localToString() {
+        return "Battery: "+getPercentage()+"%";
+    }
 }

@@ -22,4 +22,9 @@ public class AntCbst extends Fix {
     public int getCadence() {
         return cadence;
     }
+    
+    @Override
+    public String localToString() {
+        return "Cadence "+getCadence();
+    }
 }

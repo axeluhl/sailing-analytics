@@ -20,6 +20,11 @@ public class SensorImpl implements Sensor {
     public String getDeviceId() {
         return deviceId;
     }
+    
+    @Override
+    public String toString() {
+        return "Transmitter "+getTransmitterId()+(getDeviceId()==null?"":(", device "+getDeviceId()));
+    }
 
     @Override
     public int hashCode() {

@@ -18,4 +18,9 @@ public class GpsAltitude extends Fix {
     public Distance getAltitude() {
         return altitude;
     }
+
+    @Override
+    protected String localToString() {
+        return "Altitude "+getAltitude();
+    }
 }

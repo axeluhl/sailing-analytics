@@ -24,4 +24,9 @@ public class AWA extends Fix {
     public Bearing getApparentWindAngle() {
         return apparentWindAngle;
     }
+
+    @Override
+    protected String localToString() {
+        return "AWA: "+getApparentWindAngle();
+    }
 }

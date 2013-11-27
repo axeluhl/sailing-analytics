@@ -46,4 +46,9 @@ public class File extends Fix {
     public long getSize() {
         return size;
     }
+
+    @Override
+    protected String localToString() {
+        return "File: "+getFileName()+", MD5: "+getMd5()+" content type "+getContentType()+", "+getSize()+" bytes";
+    }
 }

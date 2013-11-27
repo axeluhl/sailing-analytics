@@ -24,4 +24,9 @@ public class SOG extends Fix {
     public Speed getSpeedOverGround() {
         return speedOverGround;
     }
+
+    @Override
+    protected String localToString() {
+        return "SOG: "+getSpeedOverGround();
+    }
 }

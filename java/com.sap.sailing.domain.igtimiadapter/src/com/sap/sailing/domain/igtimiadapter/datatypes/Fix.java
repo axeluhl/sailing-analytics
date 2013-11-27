@@ -20,4 +20,11 @@ public abstract class Fix {
     public Sensor getSensor() {
         return sensor;
     }
+    
+    abstract protected String localToString();
+    
+    @Override
+    public String toString() {
+        return localToString() + " at "+getTimePoint()+" from "+getSensor();
+    }
 }

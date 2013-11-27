@@ -22,4 +22,9 @@ public class AntHrm extends Fix {
     public int getHeartRate() {
         return heartRate;
     }
+
+    @Override
+    protected String localToString() {
+        return "heart rate "+getHeartRate()+"/min";
+    }
 }

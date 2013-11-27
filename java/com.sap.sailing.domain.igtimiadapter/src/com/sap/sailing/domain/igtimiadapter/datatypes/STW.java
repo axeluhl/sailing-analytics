@@ -24,4 +24,9 @@ public class STW extends Fix {
     public Speed getSpeedThroughWater() {
         return speedThroughWater;
     }
+
+    @Override
+    protected String localToString() {
+        return "STW: "+getSpeedThroughWater();
+    }
 }

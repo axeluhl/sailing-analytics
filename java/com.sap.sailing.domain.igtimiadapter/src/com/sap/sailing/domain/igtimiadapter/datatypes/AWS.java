@@ -24,4 +24,9 @@ public class AWS extends Fix {
     public Speed getApparentWindSpeed() {
         return apparentWindSpeed;
     }
+
+    @Override
+    protected String localToString() {
+        return "AWS: "+getApparentWindSpeed();
+    }
 }
