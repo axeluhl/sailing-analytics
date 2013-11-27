@@ -5,6 +5,7 @@
 	<stylesheet src="../VideoPopup.css" />
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
+  	<inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
 	<entry-point
 		class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
