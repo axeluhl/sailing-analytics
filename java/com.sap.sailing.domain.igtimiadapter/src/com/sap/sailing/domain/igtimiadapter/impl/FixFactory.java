@@ -20,7 +20,8 @@ public class FixFactory {
             String sensorId = (String) e.getKey();
             JSONObject typesJson = (JSONObject) e.getValue();
             for (Entry<Object, Object> fixTypeAndFixesJson : typesJson.entrySet()) {
-                int fixType = ((Long) fixTypeAndFixesJson.getKey()).intValue();
+                final String[] fixTypeAndOptionalColonSeparatedSensorsSubId = ((String) fixTypeAndFixesJson.getKey()).split(":");
+                int fixType = Integer.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[0]);
                 JSONObject fixesJson = (JSONObject) fixTypeAndFixesJson.getValue();
                 JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
                 int fixIndex = 0;
@@ -31,9 +32,17 @@ public class FixFactory {
                     JSONArray values;
                     while ((values=(JSONArray) fixesJson.get(""+i)) != null) {
                         valuesPerSubindex.put(i, (Number) values.get(fixIndex));
+                        i++;
                     }
-                    Fix fix = createFix(sensorId, fixType, timePoint, valuesPerSubindex);
+                    final String sensorIdAndOptionalSubId;
+                    if (fixTypeAndOptionalColonSeparatedSensorsSubId.length == 2) {
+                        sensorIdAndOptionalSubId = sensorId+":"+fixTypeAndOptionalColonSeparatedSensorsSubId[1];
+                    } else {
+                        sensorIdAndOptionalSubId = sensorId;
+                    }
+                    Fix fix = createFix(sensorIdAndOptionalSubId, fixType, timePoint, valuesPerSubindex);
                     result.add(fix);
+                    fixIndex++;
                 }
             }
         }
