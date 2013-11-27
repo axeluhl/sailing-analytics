@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class AbstractListFilter<T> {
@@ -17,11 +18,10 @@ public abstract class AbstractListFilter<T> {
     
     
     /**
-     * Reconstructs the {@link #filtered} list contents based on the contents of {@link #all} as provided through
-     * {@link #filter(Iterable)} and the current search phrase entered in the search {@link #textBox text box}. After
-     * filtering, the original sort order is restored with {@link #sort()}.
+     * Constructs a list based on the contents of {@link #all} and the current search phrase {@link #text}. 
      */
-    public List<T> applyFilter(List<String> inputText, Iterable<T> all) {
+    public List<T> applyFilter(String text, Iterable<T> all) {
+        List<String> inputText = Arrays.asList(text.split(" "));
         List<T> sortedList = new ArrayList<T>();
         if (all != null) {
             if (inputText != null && !inputText.isEmpty()) {
@@ -45,22 +45,22 @@ public abstract class AbstractListFilter<T> {
      * @param wordsToFilter
      *            the words to filter on
      * @param valuesToCheck
-     *            the values to check for. These values contain the values of the current rows.
+     *            the values to check for.
      * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
      *         <code>false</code> if not
      */
     private boolean containsText(T obj, List<String> wordsToFilter) {
-        boolean notcontains = false;
+        boolean failed = false;
         for (String word : wordsToFilter) {
             String textAsUppercase = word.toUpperCase().trim();
-            notcontains = true;
+            failed = true;
             for (String s : getStrings(obj)) {
                 if (s != null && s.toUpperCase().contains(textAsUppercase)) {
-                    notcontains = false;
+                    failed = false;
                     break;
                 }
             }
-            if (notcontains) {
+            if (failed) {
                 return false;
             }
         }

@@ -260,7 +260,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
         }
         allRegattas = newAllRegattas;
-        filterablePanelRegattas.upDateAll(allRegattas);
+        filterablePanelRegattas.updateAll(allRegattas);
         regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
     }
 

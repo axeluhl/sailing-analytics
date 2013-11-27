@@ -239,7 +239,7 @@ public class CompetitorPanel extends SimplePanel {
                         for (int i=0; i<allCompetitors.size(); i++) {
                             if (allCompetitors.get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
                                 allCompetitors.set(i, updatedCompetitor);
-                                filterField.upDateAll(allCompetitors);
+                                filterField.updateAll(allCompetitors);
                                 break;
                             }
                         }
@@ -266,7 +266,7 @@ public class CompetitorPanel extends SimplePanel {
                 for (CompetitorDTO c : result) {
                     allCompetitors.add(c);
                 }
-                filterField.upDateAll(allCompetitors);
+                filterField.updateAll(allCompetitors);
             }
         });
     }

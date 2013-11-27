@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.panels;
 
-import java.util.Arrays;
-
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -14,13 +12,13 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
 
 /**
  * This Panel contains a label and a text box. Text entered into the text box filters the {@link CellTable} passed to
- * the constructor by adjusting the cell table's {@link ListDataProvider}'s contents and then sorting the table again
- * according the the sorting criteria currently active (the sorting is the only reason why the {@link CellTable}
- * actually needs to be known to an instance of this class). To be initiated the method
- * {@link #getSearchableStrings(Object)} has to be defined, which gets those Strings from a <code>T</code> that should
- * be considered when filtering, e.g. name or boatClass. The cell table can be sorted independently from the text box 
- * (e.g. after adding new objects) by calling the method  {@link #updateAll(Iterable)} which then runs the filter over 
- * the new selection.
+ * the constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the {@link
+ * applyFilter(String, List)} of the {@link AbstractListFilter} and then sorting the table again according the the
+ * sorting criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be
+ * known to an instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be
+ * defined, which gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or
+ * boatClass. The cell table can be sorted independently from the text box (e.g. after adding new objects) by calling
+ * the method {@link #updateAll(Iterable)} which then runs the filter over the new selection.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
@@ -70,14 +68,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * table view.
      */
     
-    public void upDateAll(Iterable<T> all){
+    public void updateAll(Iterable<T> all){
         this.all = all;
         filter();
     }
     
     public void filter(){
         filtered.getList().clear(); 
-        filtered.getList().addAll(filterer.applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all));
+        filtered.getList().addAll(filterer.applyFilter(getTextBox().getText(), all));
         sort();
     }
    
