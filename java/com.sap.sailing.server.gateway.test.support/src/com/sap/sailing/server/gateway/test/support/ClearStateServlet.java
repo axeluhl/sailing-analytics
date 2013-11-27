@@ -48,7 +48,7 @@ public class ClearStateServlet extends HttpServlet {
         
         try {
             RacingEventServiceWithTestSupport service = getService();
-            service.clearSate();
+            service.clearState();
             
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (Exception exception) {
