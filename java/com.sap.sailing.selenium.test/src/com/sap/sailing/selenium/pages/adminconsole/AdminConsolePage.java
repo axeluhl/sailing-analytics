@@ -2,20 +2,17 @@ package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
 
-import java.util.concurrent.TimeUnit;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanel;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
@@ -45,6 +42,8 @@ public class AdminConsolePage extends HostPage {
     private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
     private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration"; //$NON-NLS-1$
 
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
     
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
@@ -109,6 +108,11 @@ public class AdminConsolePage extends HostPage {
     public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {
         return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
+    }
+
+    public LeaderboardGroupConfigurationPanel goToLeaderboardGroupConfiguration() {
+        return new LeaderboardGroupConfigurationPanel(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
+                LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER));
     }
 
     /**

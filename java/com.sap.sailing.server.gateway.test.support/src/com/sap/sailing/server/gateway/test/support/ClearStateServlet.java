@@ -17,6 +17,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 
 public class ClearStateServlet extends HttpServlet {
+    private static final long serialVersionUID = -880795218153271730L;
 
     private static final String OSGI_BUNDLECONTEXT_ATTRIBUTE_NAME = "osgi-bundlecontext"; 
     

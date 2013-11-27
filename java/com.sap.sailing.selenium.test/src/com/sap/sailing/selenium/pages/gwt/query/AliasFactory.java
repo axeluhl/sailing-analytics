@@ -7,7 +7,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 public class AliasFactory {
-    private interface ManagedObject {
+    public interface ManagedObject {
         /**
          * <p></p>
          * 

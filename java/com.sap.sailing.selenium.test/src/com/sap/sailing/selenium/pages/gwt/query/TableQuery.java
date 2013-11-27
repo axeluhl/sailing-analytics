@@ -48,12 +48,29 @@ public class TableQuery<S extends DataEntry> {
     }
     
     /**
-     * <p>Returns a single result or null if no result is found. For multiple results only the first one is returned.</p>
+     * <p>Returns a single result if there's exactly one result, else throws exception.</p>
      *
      * @return
      *   the first result or null if no result is found.
      */
     public S singleResult() {
+        List<S> results = allResults();
+        if (results.size() == 1) {
+            return results.get(0);
+        } else if (results.size() == 0) {
+            throw new QueryException("No result found.");
+        } else {
+            throw new QueryException("Multiple results found.");
+        }
+    }
+    
+    /**
+     * <p>Returns a single result or null if no result is found. For multiple results only the first one is returned.</p>
+     *
+     * @return
+     *   the first result or null if no result is found.
+     */
+    public S firstResult() {
         List<S> results = allResults();
         
         return (results.isEmpty() ? null : results.get(0));

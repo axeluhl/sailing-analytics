@@ -157,6 +157,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private Widget createLeaderboardsGUI(Resources tableRes) {
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
+        leaderboardsCaptionPanel.ensureDebugId("LeaderboardsCaptionPanel");
         leaderboardsCaptionPanel.setWidth("95%");
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -172,6 +173,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
         leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
+        leaderboardsTable.ensureDebugId("LeaderboardsTable");
         leaderboardsFilterablePanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
@@ -189,6 +191,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 refreshLeaderboardsList();
             }
         });
+        refreshLeaderboardsButton.ensureDebugId("refreshLeaderboardsButton");
         leaderboardsFunctionPanel.add(refreshLeaderboardsButton);
         TextColumn<StrippedLeaderboardDTO> leaderboardsNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -393,6 +396,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
         groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
+        groupsTable.ensureDebugId("LeaderboardGroupsTable");
         groupsFilterablePanel = new AbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
@@ -409,6 +413,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 addNewGroup();
             }
         });
+        createGroupButton.ensureDebugId("CreateLeaderboardGroupButton");
         leaderboardGroupsFunctionPanel.add(createGroupButton);
         
         removeButton = new Button(stringMessages.remove());
@@ -601,6 +606,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                         createNewGroup(newGroup);
                     }
                 });
+        dialog.ensureDebugId("LeaderboardGroupCreateDialog");
         dialog.show();
     }
 

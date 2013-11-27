@@ -14,6 +14,7 @@ public class PathFactory {
             return new BooleanPath(metadata);
         }
         
-        throw new QueryException("Unknown path type");
+        return null;
+        //throw new QueryException("Unknown path type");
     }
 }
