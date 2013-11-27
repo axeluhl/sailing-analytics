@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.StringListEditComposite;
 
 public class DeviceConfigurationDetailComposite extends Composite {
     
@@ -47,12 +48,12 @@ public class DeviceConfigurationDetailComposite extends Composite {
     
     private DeviceConfigurationMatcherDTO matcher;
     private DeviceConfigurationDTO originalConfiguration;
-    
-    private TextBox allowedCourseAreasBox;
+
+    private StringListEditComposite allowedCourseAreasList;
     private TextBox mailRecipientBox;
     private ListBox racingProcedureListBox;
     private ListBox designerModeEntryListBox;
-    private TextBox courseNamesBox;
+    private StringListEditComposite courseNamesList;
     
     private CheckBox overwriteProceduresConfigurationBox;
     private RacingProceduresConfigurationDTO currentProceduresConfiguration;
@@ -193,34 +194,26 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
-        allowedCourseAreasBox = new TextBox();
-        allowedCourseAreasBox.setWidth("100%");
-        allowedCourseAreasBox.addKeyUpHandler(dirtyMarker);
-        if (originalConfiguration.allowedCourseAreaNames != null) {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < originalConfiguration.allowedCourseAreaNames.size(); i++) {
-                builder.append(originalConfiguration.allowedCourseAreaNames.get(i));
-                builder.append(',');
-            }
-            allowedCourseAreasBox.setText(builder.substring(0, builder.length() - 1));
-        } else {
-            allowedCourseAreasBox.setText("Alpha,Bravo,Charlie");
-            markAsDrity(true);
-        }
+        List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
+                .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
+                
+        allowedCourseAreasList = new StringListEditComposite(false, initialValues, stringMessages,
+                resources.removeIcon(), stringMessages.courseAreas());
+        allowedCourseAreasList.setWidth("100%");
+        allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
+                
         grid.setWidget(gridRow, 0, new Label(stringMessages.allowedCourseAreas()));
-        grid.setWidget(gridRow, 1, allowedCourseAreasBox);
+        grid.setWidget(gridRow, 1, allowedCourseAreasList);
     }
 
     private void setupCourseNameBox(Grid grid, int gridRow) {
-        courseNamesBox = new TextBox();
-        courseNamesBox.setWidth("100%");
-        courseNamesBox.addKeyUpHandler(dirtyMarker);
-        if (originalConfiguration.byNameDesignerCourseNames != null) {
-            fillCourseNamesBox(originalConfiguration.byNameDesignerCourseNames);
-        } else {
-            courseNamesBox.setText("O2,I2");
-            markAsDrity(true);
-        }
+        List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
+                .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
+        
+        courseNamesList = new StringListEditComposite(false, initialValues, stringMessages,
+                resources.removeIcon(), stringMessages.courseNames());
+        courseNamesList.setWidth("100%");
+        courseNamesList.addValueChangeHandler(dirtyValueMarker);
         
         
         Button generateButton = new Button(stringMessages.generate());
@@ -230,8 +223,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 CourseNamesGenerationDialog dialog = new CourseNamesGenerationDialog(stringMessages, new DialogCallback<List<String>>() {
                     @Override
                     public void ok(List<String> courseNames) {
-                        fillCourseNamesBox(courseNames);
-                        markAsDrity(true);
+                        courseNamesList.setValue(courseNames);
                     }
 
                     @Override
@@ -242,21 +234,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         });
         
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
-        grid.setWidget(gridRow, 1, courseNamesBox);
+        grid.setWidget(gridRow, 1, courseNamesList);
         grid.setWidget(gridRow, 2, generateButton);
-    }
-
-    private void fillCourseNamesBox(List<String> names) {
-        if (names.isEmpty()) {
-            courseNamesBox.setText("");
-        } else {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < names.size(); i++) {
-                builder.append(names.get(i));
-                builder.append(',');
-            }
-            courseNamesBox.setText(builder.substring(0, builder.length() - 1));
-        }
     }
 
     private void setupRecipientBox(Grid grid, int gridRow) {
@@ -287,8 +266,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private DeviceConfigurationDTO getResult() {
         DeviceConfigurationDTO result = new DeviceConfigurationDTO();
        
-        if (!allowedCourseAreasBox.getText().isEmpty()) {
-            result.allowedCourseAreaNames = Arrays.asList(allowedCourseAreasBox.getText().split(","));
+        if (!allowedCourseAreasList.getValue().isEmpty()) {
+            result.allowedCourseAreaNames = allowedCourseAreasList.getValue();
         }
         
         if (!mailRecipientBox.getText().isEmpty()) {
@@ -307,8 +286,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
         
-        if (!courseNamesBox.getText().isEmpty()) {
-            result.byNameDesignerCourseNames = Arrays.asList(courseNamesBox.getText().split(","));
+        if (!courseNamesList.getValue().isEmpty()) {
+            result.byNameDesignerCourseNames = courseNamesList.getValue();
         }
         
         if (overwriteProceduresConfigurationBox.getValue()) {
@@ -341,6 +320,13 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private KeyUpHandler dirtyMarker = new KeyUpHandler() {
         @Override
         public void onKeyUp(KeyUpEvent event) {
+            markAsDrity(true);
+        }
+    };
+    
+    private ValueChangeHandler<List<String>> dirtyValueMarker = new ValueChangeHandler<List<String>>() {
+        @Override
+        public void onValueChange(ValueChangeEvent<List<String>> event) {
             markAsDrity(true);
         }
     };
