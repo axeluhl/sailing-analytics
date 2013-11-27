@@ -11,7 +11,8 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
  org.apache.httpcomponents.httpcore;bundle-version="4.0.0",
  org.apache.commons.logging;bundle-version="1.1.1",
- com.sap.sailing.domain.common
+ com.sap.sailing.domain.common,
+ org.eclipse.jetty.websocket.client;bundle-version="9.0.4"
 Import-Package: javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
  javax.ws.rs.ext;version="1.1.1",

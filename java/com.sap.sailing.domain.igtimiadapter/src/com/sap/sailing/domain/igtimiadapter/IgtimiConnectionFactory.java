@@ -2,9 +2,12 @@ package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -64,4 +67,8 @@ public interface IgtimiConnectionFactory {
 
     String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account);
+
+    Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
+
+    HttpClient getHttpClient();
 }
