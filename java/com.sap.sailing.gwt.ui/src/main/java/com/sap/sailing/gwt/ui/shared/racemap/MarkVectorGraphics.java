@@ -15,7 +15,7 @@ public class MarkVectorGraphics {
     private final String color;
     private final String shape;
     private final String pattern;
-    private  MarkType type;
+    private final MarkType type;
     
     private static final double doublePi = 2 * Math.PI;
 
@@ -52,8 +52,6 @@ public class MarkVectorGraphics {
     }
 
     protected void drawMark(Context2d ctx, boolean isSelected, String color) {
-        type = MarkType.LANDMARK;
-        
         switch(type) {
             case BUOY:
                 if(pattern != null && "Checkered".equalsIgnoreCase(pattern) && 
