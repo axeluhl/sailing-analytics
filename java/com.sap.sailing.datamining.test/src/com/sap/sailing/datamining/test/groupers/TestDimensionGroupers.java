@@ -26,7 +26,6 @@ public class TestDimensionGroupers {
     @Test
     public void testGroupByDimension() {
         Dimension<Integer, String> crossSum = createCrossSumDimension();
-        @SuppressWarnings("unchecked")
         GroupingWorker<Integer> groupByDimension = new OpenGrouper<Integer>(Arrays.asList(crossSum));
         
         DataReceiver receiver = new DataReceiver();
@@ -76,7 +75,6 @@ public class TestDimensionGroupers {
             }
         };
         
-        @SuppressWarnings("unchecked")
         OpenGrouper<Integer> grouper = new OpenGrouper<Integer>(Arrays.asList(first, second, third));
         GroupKey expectedGroupKey = new CompoundGroupKey(new GenericGroupKey<String>("First"), new CompoundGroupKey(new GenericGroupKey<String>("Second"), new GenericGroupKey<String>("Third")));
         assertEquals(expectedGroupKey, grouper.getGroupKey(1));
@@ -86,7 +84,6 @@ public class TestDimensionGroupers {
     public void testGroupByMultipleDimensions() {
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         Dimension<Integer, String> signum = createSignumDimension();
-        @SuppressWarnings("unchecked")
         GroupingWorker<Integer> groupByDimensions = new OpenGrouper<Integer>(Arrays.asList(crossSum, signum));
         
         DataReceiver receiver = new DataReceiver();
