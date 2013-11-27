@@ -10,5 +10,5 @@ public interface RacingEventServiceWithTestSupport extends RacingEventService {
      * 
      * @throws Exception
      */
-    void clearSate() throws Exception;
+    void clearState() throws Exception;
 }

@@ -288,7 +288,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      *   
      */
     @Override
-    public void clearSate() throws Exception {
+    public void clearState() throws Exception {
         for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
             removeLeaderboardGroup(leaderboardGroupName);
         }
