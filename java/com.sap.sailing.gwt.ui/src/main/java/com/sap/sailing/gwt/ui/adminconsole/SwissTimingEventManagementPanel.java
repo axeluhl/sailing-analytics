@@ -245,7 +245,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn, raceDescriptionColumn, boatClassColumn, raceStateColumn);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, raceStartTimeColumn,
+                raceDescriptionColumn, boatClassColumn, raceStateColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
         
         trackedRacesPanel.add(trackedRacesListComposite);
@@ -278,7 +279,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private ListHandler<SwissTimingRaceRecordDTO> getRaceTableColumnSortHandler(List<SwissTimingRaceRecordDTO> raceRecords,
             Column<SwissTimingRaceRecordDTO, ?> nameColumn, Column<SwissTimingRaceRecordDTO, ?> trackingStartColumn,
-            Column<SwissTimingRaceRecordDTO, ?> raceDescriptionColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn, Column<SwissTimingRaceRecordDTO, ?> raceStateColumn) {
+            Column<SwissTimingRaceRecordDTO, ?> raceDescriptionColumn, Column<SwissTimingRaceRecordDTO, ?> boatClassColumn,
+            final Column<SwissTimingRaceRecordDTO, ?> raceStateColumn) {
            
         ListHandler<SwissTimingRaceRecordDTO> result = new ListHandler<SwissTimingRaceRecordDTO>(raceRecords);
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
@@ -311,7 +313,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         result.setComparator(raceStateColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return o1.hasCourse&&o1.hasStartlist ? 1 : o1.hasCourse ? 1 : o1.hasStartlist ? 1 : -1;
+                return raceStateColumn.getValue(o1).toString().compareTo(raceStateColumn.getValue(o2).toString());
             }
         });
         return result;
