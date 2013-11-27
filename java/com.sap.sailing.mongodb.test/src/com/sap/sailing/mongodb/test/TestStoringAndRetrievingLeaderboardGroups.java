@@ -49,6 +49,7 @@ import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -314,7 +315,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         // the leaderboard named leaderboardNames[2] occurs in both groups
         RacingEventService racingEventService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE)); // expected to load leaderboard groups
+                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE); // expected to load leaderboard groups
         final LeaderboardGroup loadedLeaderboardGroup1 = racingEventService.getLeaderboardGroupByName(groupName1);
         final LeaderboardGroup loadedLeaderboardGroup2 = racingEventService.getLeaderboardGroupByName(groupName2);
 

@@ -251,7 +251,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         addListenersForStoredDataAndStartController(typeControllers);
         // Read event data from configuration file
-        controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI, delayToLiveInMillis, tracTracUsername, tracTracPassword);
+        synchronized (this) {
+            controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI,
+                    delayToLiveInMillis, tracTracUsername, tracTracPassword);
+            notifyAll(); // the stop(boolean) method will try to cancel the controlPointPositionPoller; this may happen even before the above assignment took place; synchronize!
+        }
     }
 
     private URI checkForCachedStoredData(URI storedURI){
@@ -584,12 +588,28 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         stop(/* stop receivers preemtively */ true);
     }
 
-    @SuppressWarnings("deprecation") // explicitly calling Thread.stop in case IO thread didn't join in three seconds time
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+        synchronized (this) {
+            while (controlPointPositionPoller == null) {
+                wait(); // constructor will notify all waiters once the controlPointPositionPoller is set
+            }
+        }
         controlPointPositionPoller.cancel(/* mayInterruptIfRunning */ false);
         new Thread("TracTrac Controller Stopper for "+getID()) {
             public void run() {
                 controller.stop(/* abortStored */ true);
+                try {
+                    ioThread.join();
+                    if (ioThread.isAlive()) {
+                        logger.severe("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" joined but is still active. Very strange.");
+                    } else {
+                        logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
+                    }
+                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
+                    updateStatusOfTrackedRaces();
+                } catch (InterruptedException e) {
+                    logger.log(Level.INFO, "Interrupted while trying to join TracTrac DataController thread for "+getID());
+                } // wait no more than three seconds
             }
         }.start();
         for (Receiver receiver : receivers) {
@@ -599,15 +619,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 receiver.stopAfterProcessingQueuedEvents();
             }
         }
-        ioThread.join(3000); // wait no more than three seconds
-        if (ioThread.isAlive()) {
-            ioThread.stop();
-            logger.warning("Tractrac IO thread in tracker "+getID()+" for race(s) "+getRaces()+" didn't join in 3s. Stopped forcefully.");
-        } else {
-            logger.info("Joined TracTrac IO thread in tracker "+getID()+" for race(s) "+getRaces());
-        }
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */ 1.0);
-        updateStatusOfTrackedRaces();
     }
 
     protected DataController getController() {
@@ -686,7 +697,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void storedDataProgress(float progress) {
-        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
+        if (lastStatus.getStatus().equals(TrackedRaceStatusEnum.ERROR)) {
+            return;
+        }
         Integer counter = 0;
         final Pair<Integer, Float> lastProgressPair = lastProgressPerID.get(getID());
         if (lastProgressPair != null) {
@@ -700,6 +713,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         /* make sure to indicate that this race is erroneous */
                         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
                         updateStatusOfTrackedRaces();
+                        return;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -708,6 +722,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
             } 
         }
+        logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRaces()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(progress==1.0 ? TrackedRaceStatusEnum.TRACKING : TrackedRaceStatusEnum.LOADING, progress);
         lastProgressPerID.put(getID(), new Pair<Integer, Float>(counter, progress));
         updateStatusOfTrackedRaces();

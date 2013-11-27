@@ -31,7 +31,6 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 public interface RaceColumn extends Named {
     /**
      * Sets the information object used to access the race column's race logs.
-     * @param information
      */
     void setRaceLogInformation(RaceLogInformation information);
     

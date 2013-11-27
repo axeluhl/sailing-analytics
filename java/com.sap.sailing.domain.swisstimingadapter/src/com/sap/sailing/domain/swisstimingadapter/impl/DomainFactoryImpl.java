@@ -49,7 +49,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 import difflib.PatchFailedException;
@@ -327,10 +326,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, WindStore windStore,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RaceSpecificMessageLoader messageLoader) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis, 
-                swissTimingFactory, domainFactory, raceLogStore, windStore, messageLoader);
+                swissTimingFactory, domainFactory, raceLogStore, messageLoader);
     }
 
 }
