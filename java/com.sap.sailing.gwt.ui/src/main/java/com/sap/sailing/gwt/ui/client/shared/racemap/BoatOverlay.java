@@ -86,7 +86,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
     
-    
     public GPSFixDTO getBoatFix() {
         return boatFix;
     }
@@ -96,7 +95,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     public Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
-        double minBoatLength = 25;
+        double minBoatLength = 35;
 
         Size boatSizeInPixel = calculateBoundingBox(mapProjection,
                 LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg),
