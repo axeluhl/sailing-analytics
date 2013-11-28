@@ -11,12 +11,18 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
  org.apache.httpcomponents.httpcore;bundle-version="4.0.0",
  org.apache.commons.logging;bundle-version="1.1.1",
- com.sap.sailing.domain.common,
- org.eclipse.jetty.websocket.client;bundle-version="9.0.4"
+ com.sap.sailing.domain.common
 Import-Package: javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
  javax.ws.rs.ext;version="1.1.1",
  org.apache.commons.lang,
+ org.eclipse.jetty.io;version="9.0.0",
+ org.eclipse.jetty.util.component;version="9.0.4",
+ org.eclipse.jetty.websocket.api;version="9.0.0",
+ org.eclipse.jetty.websocket.api.annotations;version="9.0.0",
+ org.eclipse.jetty.websocket.api.extensions;version="9.0.0",
+ org.eclipse.jetty.websocket.client;version="9.0.0",
+ org.eclipse.jetty.websocket.common;version="9.0.0",
  org.osgi.framework;version="1.7.0"
 Web-ContextPath: /igtimi
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.impl.Activator
