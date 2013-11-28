@@ -8,7 +8,12 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 
 /**
- * The base class for boat graphics based on SVG graphics drawn to a HTML5 canvas
+ * The base class for boat graphics based on SVG graphics drawn to a HTML5 canvas.
+ * The drawing of the graphics is implemented as a list of graphics command on the Context2D,
+ * We created the drawing commands not manually but used a SVG graphics with a well defined scale as a basis in combination
+ * with a tool which translates this SVG graphics into the list of drawing commands. 
+ * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.
+ * 
  * @author Frank
  *
  */

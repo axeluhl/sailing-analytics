@@ -66,16 +66,18 @@ public class MarkVectorGraphics {
                     drawSimpleBuoy(ctx, isSelected, color);
                 }
                 break;
-            case CAMERABOAT:
-                break;
             case FINISHBOAT:
+                drawFinishBoat(ctx, isSelected, color);
                 break;
             case LANDMARK:
                 drawLandmark(ctx, isSelected, color);
                 break;
             case STARTBOAT:
+                drawStartBoat(ctx, isSelected, color);
                 break;
             case UMPIREBOAT:
+            case CAMERABOAT:
+                // umpire and camera boats are not course marks -> see TrackedAssetVectorGraphics 
                 break;
             default:
                 break;
@@ -468,7 +470,13 @@ public class MarkVectorGraphics {
         ctx.stroke();
         ctx.restore();
     }
-    
+
+    protected void drawStartBoat(Context2d ctx, boolean isSelected, String color2) {
+    }
+
+    protected void drawFinishBoat(Context2d ctx, boolean isSelected, String color2) {
+    }
+
     public double getMarkHeightInMeters() {
         return markHeightInMeters;
     }
