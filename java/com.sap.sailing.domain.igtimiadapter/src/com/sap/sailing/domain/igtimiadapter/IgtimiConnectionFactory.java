@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -71,4 +72,17 @@ public interface IgtimiConnectionFactory {
     Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
 
     HttpClient getHttpClient();
+
+    /**
+     * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
+     * live data from the units whose IDs are specified by <code>unitIds</code>. The sending units are expected to
+     * belong to the user account to which this factory's application client has been granted permission.
+     * 
+     * @param account
+     *            represents this factory's client's permissions to access a user account's data
+     * @param unitIds
+     *            IDs of the transmitting units expected to be visible to the account's {@link Account#getUser() user's}
+     *            .
+     */
+    JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> unitIds);
 }

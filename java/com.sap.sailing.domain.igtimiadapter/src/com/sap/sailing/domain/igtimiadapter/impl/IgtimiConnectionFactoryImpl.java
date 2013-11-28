@@ -125,6 +125,18 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
+    public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> unitIds) {
+        JSONObject result = new JSONObject();
+        result.put("auth_token", getAccessTokenForAccount(account));
+        JSONArray unitIdsJson = new JSONArray();
+        result.put("units", unitIdsJson);
+        for (String unitId : unitIds) {
+            unitIdsJson.add(unitId);
+        }
+        return result;
+    }
+    
+    @Override
     public String getUsersUrl(Account account) {
         return getApiV1BaseUrl()+"users?"+getAccessTokenUrlParameter(account);
     }
