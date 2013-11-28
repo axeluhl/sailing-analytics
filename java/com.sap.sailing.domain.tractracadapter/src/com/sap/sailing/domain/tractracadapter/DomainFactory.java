@@ -247,7 +247,7 @@ public interface DomainFactory {
     Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore,
             String tracTracUsername, String tracTracPassword);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the

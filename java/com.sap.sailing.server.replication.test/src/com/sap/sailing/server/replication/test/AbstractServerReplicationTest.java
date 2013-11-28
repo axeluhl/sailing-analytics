@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -92,7 +93,7 @@ public abstract class AbstractServerReplicationTest {
             this.master = master;
         } else {
             this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
+                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         if (replica != null) {
             this.replica = replica;
@@ -100,7 +101,7 @@ public abstract class AbstractServerReplicationTest {
             this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
                     new DomainFactoryImpl()), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService));
+                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);

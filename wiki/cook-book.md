@@ -140,3 +140,11 @@ Max nice priority         0                    0
 Max realtime priority     0                    0                    
 Max realtime timeout      unlimited            unlimited            us        
 </pre>
+
+### Show threads consuming most CPU time for a Java process
+
+Assume that you want to know which threads exactly eat up all the CPU time. This can be done by using JConsole and the JTop plugin. You can download the plugin here `wget http://arnhem.luminis.eu/wp-content/uploads/2013/10/topthreads-1.1.jar`. The you can open jconsole like so:
+
+<pre>
+/opt/jdk1.7.0_02/bin/jconsole -pluginpath topthreads-1.1.jar
+</pre>
