@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +33,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.StringListEditComposite;
+import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
 
 public class DeviceConfigurationDetailComposite extends Composite {
+    
+    private static List<String> suggestedCourseAreaNames = Arrays.asList("Alpha", "Bravo", "Charly", "Delta", 
+            "Foxtrott", "Stadium", "Offshore");
+    private static List<String> suggestedCourseNames = Arrays.asList("Upwind", "Downwind");
     
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
@@ -49,11 +55,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private DeviceConfigurationMatcherDTO matcher;
     private DeviceConfigurationDTO originalConfiguration;
 
-    private StringListEditComposite allowedCourseAreasList;
+    private ListEditorComposite<String> allowedCourseAreasList;
     private TextBox mailRecipientBox;
     private ListBox racingProcedureListBox;
     private ListBox designerModeEntryListBox;
-    private StringListEditComposite courseNamesList;
+    private ListEditorComposite<String> courseNamesList;
     
     private CheckBox overwriteProceduresConfigurationBox;
     private RacingProceduresConfigurationDTO currentProceduresConfiguration;
@@ -197,8 +203,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
-        allowedCourseAreasList = new StringListEditComposite(false, initialValues, stringMessages,
-                resources.removeIcon(), stringMessages.courseAreas());
+        allowedCourseAreasList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(), suggestedCourseAreaNames);
         allowedCourseAreasList.setWidth("100%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
                 
@@ -210,8 +215,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
-        courseNamesList = new StringListEditComposite(false, initialValues, stringMessages,
-                resources.removeIcon(), stringMessages.courseNames());
+        courseNamesList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames);
         courseNamesList.setWidth("100%");
         courseNamesList.addValueChangeHandler(dirtyValueMarker);
         

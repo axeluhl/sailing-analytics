@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -19,7 +18,6 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<RegattaDTO> {
 
@@ -32,7 +30,6 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     protected ListBox courseAreaListBox;
     protected ListBox sailingEventsListBox;
 
-    protected List<SeriesDTO> series;
     protected List<EventDTO> existingEvents;
 
     protected abstract void setupAdditionalWidgetsOnPanel(VerticalPanel panel);
@@ -46,7 +43,6 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         
         this.regatta = regatta;
         this.existingEvents = existingEvents;
-        this.series = new ArrayList<SeriesDTO>();
 
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(40);
@@ -102,8 +98,6 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         regatta.setName(nameEntryField.getText());
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
         regatta.scoringScheme = getSelectedScoringSchemeType();
-        regatta.series = new ArrayList<SeriesDTO>();
-        regatta.series.addAll(series);
         setCourseAreaInRegatta(regatta);
         return regatta;
     }
