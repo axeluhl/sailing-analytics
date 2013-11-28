@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
@@ -21,10 +22,9 @@ public class CandidateChooser {
     Candidate end;
     ArrayList<TrackedLeg> legs;
 
-    public CandidateChooser(TimePoint startOfTracking, Iterable<Competitor> competitors, ArrayList<TrackedLeg> legs) {
-        this.legs = legs;
+    public CandidateChooser(TimePoint startOfRace, Iterable<Competitor> competitors) {
         end = new Candidate(legs.size() + 2, null, 1);
-        start = new Candidate(0, startOfTracking, 1);
+        start = new Candidate(0, startOfRace, 1);
         for (Competitor c : competitors) {
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
             allEdges.put(c, new ArrayList<Edge>());
@@ -39,20 +39,28 @@ public class CandidateChooser {
         this.legs = legs;
     }
 
-    public void addCandidate(Candidate c, Competitor co) {
-        candidates.get(co).add(c);
-        createNewEdges(co, c);
+    public void addCandidates(List<Candidate> newCandidates, Competitor co) {
+        for (Candidate c : newCandidates) {
+            candidates.get(co).add(c);
+        }
+        createNewEdges(co, newCandidates);
         findShortestPath(co);
     }
 
-    public void removeCandidate(Candidate c, Competitor co) {
-        candidates.get(co).remove(c);
-        for (Edge e : allEdges.get(co)) {
-            if (e.getStart().equals(c) || e.getEnd().equals(c)) {
-                allEdges.remove(e);
+    public void removeCandidates(List<Candidate> wrongCandidates, Competitor co) {
+        boolean needToRecalculate = false;
+        for (Candidate c : wrongCandidates) {
+            candidates.get(co).remove(c);
+            for (Edge e : allEdges.get(co)) {
+                if (e.getStart().equals(c) || e.getEnd().equals(c)) {
+                    allEdges.remove(e);
+                }
+            }
+            if (currentMarkPasses.get(co).containsValue(c)) {
+                needToRecalculate = true;
             }
         }
-        if (currentMarkPasses.get(co).containsValue(c)) {
+        if (needToRecalculate) {
             findShortestPath(co);
         }
     }
@@ -62,7 +70,6 @@ public class CandidateChooser {
     }
 
     private void findShortestPath(Competitor co) {
-
         ArrayList<Edge> all = new ArrayList<>();
         for (Edge e : allEdges.get(co)) {
             all.add(e);
@@ -76,7 +83,7 @@ public class CandidateChooser {
                 if (candidateWithParent.keySet().contains(e.getStart())) {
                     if (newMostLikelyEdge == null) {
                         newMostLikelyEdge = e;
-                    } else if (e.getCost() < newMostLikelyEdge.getCost()) {
+                    } else if (e.getLikelyhood() < newMostLikelyEdge.getLikelyhood()) {
                         newMostLikelyEdge = e;
                     }
                 }
@@ -95,22 +102,24 @@ public class CandidateChooser {
         }
     }
 
-    private void createNewEdges(Competitor co, Candidate newCan) {
-        for (Candidate oldCan : candidates.get(co)) {
-            Candidate early = newCan;
-            Candidate late = oldCan;
-            if (oldCan.getID() < newCan.getID()) {
-                early = oldCan;
-                late = newCan;
-            }
-            if (early == start && late.getID() == 1) {
-                allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
-            } else if (late == end) {
-                allEdges.get(co).add(new Edge(early, late, 1));
-            } else if (early == start) {
-                allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
-            } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())) {
-                allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
+    private void createNewEdges(Competitor co, List<Candidate> newCans) {
+        for (Candidate newCan : newCans) {
+            for (Candidate oldCan : candidates.get(co)) {
+                Candidate early = newCan;
+                Candidate late = oldCan;
+                if (oldCan.getID() < newCan.getID()) {
+                    early = oldCan;
+                    late = newCan;
+                }
+                if (early == start && late.getID() == 1) {
+                    allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
+                } else if (late == end) {
+                    allEdges.get(co).add(new Edge(early, late, 1));
+                } else if (early == start && early.getTimePoint() == null) {
+                    allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
+                } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())) {
+                    allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
+                }
             }
         }
     }
@@ -127,11 +136,10 @@ public class CandidateChooser {
                 }
             }
         }
-        return numberOfSimilarStarts/numberOfCompetitors;
+        return numberOfSimilarStarts / numberOfCompetitors;
     }
 
     private double estimatedTime(Candidate c1, Candidate c2) {
-
         double speedUpwind = 6;
         double speedDownwind = 10;
         double speedReaching = 8;
@@ -163,6 +171,6 @@ public class CandidateChooser {
         totalTime = totalTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
         double timeDiff = Math.abs(totalTime - actualTime) / 1000;
-        return 1-(Math.log10(timeDiff+1)/20);
+        return 1 - (Math.log10(timeDiff + 1) / 20);
     }
 }
