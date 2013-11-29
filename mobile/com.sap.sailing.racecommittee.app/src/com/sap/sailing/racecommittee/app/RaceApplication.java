@@ -23,7 +23,6 @@ public class RaceApplication extends Application {
 
     private final static String TAG = RaceApplication.class.getName();
     
-    
     /**
      * Whenever you change a preference's type (e.g. from Integer to String) you need to bump
      * this version code to the appropriate app version (see AndroidManifest.xml).

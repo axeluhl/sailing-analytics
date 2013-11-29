@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.util.Date;
 
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
