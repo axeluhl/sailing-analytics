@@ -128,10 +128,10 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds) {
         JSONObject result = new JSONObject();
         result.put("access_token", getAccessTokenForAccount(account));
-        JSONArray unitIdsJson = new JSONArray();
-        result.put("devices", unitIdsJson);
-        for (String unitId : deviceIds) {
-            unitIdsJson.add(unitId);
+        JSONArray deviceIdsJson = new JSONArray();
+        result.put("devices", deviceIdsJson);
+        for (String deviceId : deviceIds) {
+            deviceIdsJson.add(deviceId);
         }
         return result;
     }

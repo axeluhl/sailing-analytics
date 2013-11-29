@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,12 +14,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -79,6 +82,11 @@ public class WebSocketTest {
             session.close(StatusCode.NORMAL, "I'm done");
         }
         
+        @OnWebSocketError
+        public void onError(Throwable cause) {
+            logger.log(Level.SEVERE, "Error with web socket connection", cause);
+        }
+        
         @OnWebSocketMessage
         public void onMessage(String msg) {
             logger.info("Received "+msg);
@@ -96,7 +104,7 @@ public class WebSocketTest {
     
     @Test
     public void simpleWebSockeEchoTest() throws Exception {
-        String destUri = "ws://echo.websocket.org";
+        String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
         WebSocketClient client = new WebSocketClient();
         SimpleEchoTestSocket socket = new SimpleEchoTestSocket();
         try {
@@ -137,7 +145,7 @@ public class WebSocketTest {
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
         WebSocketConnectionManager manager = new WebSocketConnectionManager(connectionFactory, Collections.singleton("GA-EN-AAEJ"), account);
         assertNotNull(manager);
-        Thread.sleep(1000000);
+        assertTrue("Connection handshake not successful within 5s", manager.waitForConnection(5000));
         manager.disconnect();
     }
 }

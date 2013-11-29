@@ -80,9 +80,8 @@ public interface IgtimiConnectionFactory {
      * 
      * @param account
      *            represents this factory's client's permissions to access a user account's data
-     * @param unitIds
+     * @param deviceIds
      *            IDs of the transmitting units expected to be visible to the account's {@link Account#getUser() user's}
-     *            .
      */
-    JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> unitIds);
+    JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds);
 }

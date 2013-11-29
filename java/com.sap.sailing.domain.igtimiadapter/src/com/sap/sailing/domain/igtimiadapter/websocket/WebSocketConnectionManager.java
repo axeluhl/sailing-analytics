@@ -40,7 +40,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private final ClientUpgradeRequest request;
     private final JSONObject configurationMessage;
     private final Timer timer;
-    private final Iterable<String> unitIds;
+    private final Iterable<String> deviceIds;
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
@@ -48,18 +48,37 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> unitIds, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+unitIds+" and account "+account);
-        this.unitIds = unitIds;
+    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceIds, Account account) throws Exception {
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceIds+" and account "+account);
+        this.deviceIds = deviceIds;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
         this.liveDataListeners = new ConcurrentSkipListSet<>();
         client = new WebSocketClient();
-        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, unitIds);
+        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceIds);
         request = new ClientUpgradeRequest();
         client.start();
         reconnect();
+    }
+    
+    /**
+     * Waits until the web socket connection has been established and the initial configuration handshake has
+     * successfully completed. Technically, this means that the Igtimi server timestamp has successfully been received
+     * and parsed. {@link #getIgtimiServerTimePointAndWhenItWasReceived()} then holds a valid time point.
+     * 
+     * @param timeoutInMillis
+     *            use 0 to wait indefinitely
+     * @return <code>true</code> if the connection is established before the timeout occurred
+     */
+    public boolean waitForConnection(long timeoutInMillis) throws InterruptedException {
+        long startedToWait = System.currentTimeMillis();
+        synchronized (this) {
+            while (igtimiServerTimepoint == null && System.currentTimeMillis() - startedToWait < timeoutInMillis) {
+                wait(timeoutInMillis);
+            }
+            return igtimiServerTimepoint != null;
+        }
     }
     
     public void addLiveDataListener(LiveDataListener listener) {
@@ -72,7 +91,9 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     }
 
     @Override
-    public void onWebSocketConnect(Session sess) {
+    public void onWebSocketConnect(Session session) {
+        super.onWebSocketConnect(session);
+        logger.info("received connection "+session+" for "+this);
         try {
             getRemote().sendString(configurationMessage.toString());
             startClientHeartbeat();
@@ -85,7 +106,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
 
     @Override
     public void onWebSocketText(String message) {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("Received "+message+" in "+this);
+        }
         if (message.equals("1")) {
+            logger.fine("Received server heartbeat");
             receivedServerHeartbeatInInterval = true;
         } else if (message.startsWith("[")) {
             List<Fix> fixes = new ArrayList<>();
@@ -94,14 +119,21 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
                 for (Object o : jsonArray) {
                     Util.addAll(fixFactory.createFixes((JSONObject) o), fixes);
                 }
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("Received fixes"+fixes);
+                }
                 notifyListeners(fixes);
             } catch (ParseException e) {
                 logger.log(Level.SEVERE, "Error trying to parse a web socket data package coming from Igtimi "+this, e);
             }
         } else {
             // try to parse server time stamp in response to the configuration message
-            igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
-            localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
+            synchronized (this) {
+                igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
+                localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
+                logger.info("Received server timestamp "+igtimiServerTimepoint);
+                notifyAll();
+            }
         }
     }
     
@@ -133,7 +165,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
 
     @Override
     public String toString() {
-        return "Web Socket Connection Manager for units "+unitIds+" and account "+account+" with web socket session "+getSession();
+        return "Web Socket Connection Manager for devices "+deviceIds+" and account "+account+" with web socket session "+getSession();
     }
 
     private void startListeningForServerHeartbeat() {
@@ -157,6 +189,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
             @Override
             public void run() {
                 try {
+                    logger.fine("Sending client heartbeat");
                     getRemote().sendString("1");
                 } catch (IOException e) {
                     logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+this, e);
@@ -169,11 +202,14 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
-                logger.log(Level.INFO, "Trying to connect to "+uri+" for "+this);
-                client.connect(this, uri, request);
-                logger.log(Level.INFO, "Successfully connected to "+uri+" for "+this);
-                lastException = null;
-                break; // successfully connected
+                if (uri.getScheme().equals("ws")) { // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
+                                                    // look for ws connectivity
+                    logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
+                    client.connect(this, uri, request);
+                    logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
+                    lastException = null;
+                    break; // successfully connected
+                }
             } catch (IOException e) {
                 logger.log(Level.INFO, "Couldn't connect to "+uri+" for "+this, e);
                 lastException = e;
