@@ -125,12 +125,12 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> unitIds) {
+    public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds) {
         JSONObject result = new JSONObject();
-        result.put("auth_token", getAccessTokenForAccount(account));
+        result.put("access_token", getAccessTokenForAccount(account));
         JSONArray unitIdsJson = new JSONArray();
-        result.put("units", unitIdsJson);
-        for (String unitId : unitIds) {
+        result.put("devices", unitIdsJson);
+        for (String unitId : deviceIds) {
             unitIdsJson.add(unitId);
         }
         return result;
