@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 
 public class SystemInformationActivity extends BaseActivity {
 
@@ -66,7 +67,7 @@ public class SystemInformationActivity extends BaseActivity {
         identifierView.setText(AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
         
         TextView versionView = (TextView) findViewById(R.id.system_information_application_version);
-        PackageInfo info = getPackageInfo();
+        PackageInfo info = RaceApplication.getPackageInfo(getApplication());
         if (info == null) {
             versionView.setText(getString(R.string.generic_error));
         } else {
@@ -76,21 +77,13 @@ public class SystemInformationActivity extends BaseActivity {
 
     private void setupInstalledView() {
         TextView installView = (TextView) findViewById(R.id.system_information_application_install);
-        PackageInfo info = getPackageInfo();
+        PackageInfo info = RaceApplication.getPackageInfo(getApplication());
         if (info == null) {
             installView.setText(getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
             installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(this).format(installDate),
                     DateFormat.getTimeFormat(this).format(installDate)));
-        }
-    }
-
-    private PackageInfo getPackageInfo() {
-        try {
-            return getPackageManager().getPackageInfo(getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            return null;
         }
     }
 

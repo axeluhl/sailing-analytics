@@ -1,18 +1,18 @@
 package com.sap.sailing.racecommittee.app;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
-import java.util.Date;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
 import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
+import com.sap.sailing.racecommittee.app.utils.LoggingExceptionHandler;
 
 /**
  * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
@@ -22,6 +22,13 @@ import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
 public class RaceApplication extends Application {
 
     private final static String TAG = RaceApplication.class.getName();
+    
+    
+    /**
+     * Whenever you change a preference's type (e.g. from Integer to String) you need to bump
+     * this version code to the appropriate app version (see AndroidManifest.xml).
+     */
+    private final static int LAST_VERSION_COMPATIBLE_WITH_PREFERENCES = 3;
     
     private static StringContext stringContext;
     
@@ -40,31 +47,34 @@ public class RaceApplication extends Application {
         LifecycleLogger.enableLifecycleLogging(AppConstants.ENABLE_LIFECYCLE_LOGGING);
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
 
+        setupPreferences();
+    }
+    
+    private void setupPreferences() {
+        clearPreferencesIfNeeded();
         PreferenceManager.setDefaultValues(this, R.xml.preference_general, false);
         PreferenceManager.setDefaultValues(this, R.xml.preference_racing_procedure, false);
         PreferenceManager.setDefaultValues(this, R.xml.preference_course_designer, false);
     }
 
-    private static class LoggingExceptionHandler implements UncaughtExceptionHandler {
-
-        private UncaughtExceptionHandler defaultHandler;
-
-        public LoggingExceptionHandler(UncaughtExceptionHandler defaultHandler) {
-            this.defaultHandler = defaultHandler;
+    void clearPreferencesIfNeeded()
+    {
+        PackageInfo info = getPackageInfo(this);
+        if(info == null || info.versionCode < LAST_VERSION_COMPATIBLE_WITH_PREFERENCES)
+        {
+            ExLog.i(TAG, "Clearing the preference cache.");
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.clear().commit();
         }
-
-        public void uncaughtException(Thread thread, Throwable ex) {
-            FileLoggingTask task = new FileLoggingTask();
-            if (task.tryStartFileLogging("sap_rc_crash_%s.txt")) {
-                task.log(String.format("%s - Exception occured on thread %s:", new Date(), thread.getId()));
-                task.logException(ex);
-            } else {
-                Log.e(TAG, "Could not log uncaught exception to file.");
-            }
-            defaultHandler.uncaughtException(thread, ex);
+    }
+    
+    public static PackageInfo getPackageInfo(Application app) {
+        try {
+            return app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            return null;
         }
-
-    }    
+    }
     
     public static void restartApp(Context context) {
         Intent i = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());

@@ -132,6 +132,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
                             
+                            // No configuration? Let the configuration of the regatta still overwrite the procedure's configuration!
+                            preferences.setRacingProcedureConfigurationOverwriteAllowed(true);
+                            
                             if (reason instanceof FileNotFoundException) {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
                                         Toast.LENGTH_LONG).show();
