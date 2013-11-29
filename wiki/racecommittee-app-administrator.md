@@ -23,3 +23,7 @@ Fire up the RaceCommittee app on the target device. Go to the **settings view** 
 Back in the AdminConsole configure your device (see next step). When done click **Save + Clone** to use the current configuration as a template for the next device.
 
 Repeat until you've configured all your devices.
+
+## Configuration of devices
+
+There are several preferences you can configure to control the overall functionality of the RaceCommittee App. All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, it will overwrite the corresponding options in the device's local configuration.
