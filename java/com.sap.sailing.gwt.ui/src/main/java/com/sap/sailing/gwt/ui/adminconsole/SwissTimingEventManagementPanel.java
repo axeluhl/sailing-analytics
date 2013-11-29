@@ -287,7 +287,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         result.setComparator(nameColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return o1.ID.compareTo(o2.ID);
+                return new NaturalComparator().compare(o1.ID,  o2.ID);
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<SwissTimingRaceRecordDTO>() {
