@@ -29,4 +29,9 @@ public class TrackedRaceStatusImpl implements TrackedRaceStatus {
     public double getLoadingProgress() {
         return loadingProgress;
     }
+    
+    @Override
+    public String toString() {
+        return ""+status+" ("+loadingProgress+")";
+    }
 }
