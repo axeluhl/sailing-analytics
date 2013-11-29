@@ -51,7 +51,7 @@ In the following we will have a look at some of these settings. Most of them are
 
 ## Configuration of regattas
 
-For races attached to a regatta (i.e. RegattaLeaderboard) you are able to configure certain options _per-regatta_.
+For races attached to a regatta (i.e. RegattaLeaderboard) you are able to configure certain options _per-regatta_. The regatta's configuration is fetched by the app together with the race information on logon.
 
 In the **Regatta** tab of the AdminConsole select click on the **Edit **action of the regatta to be configured. You are able to configure the following options:
 
