@@ -26,9 +26,11 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 
 public class DeviceConfigurationListComposite extends Composite {
 
+    protected static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
+    
     private final SelectionModel<DeviceConfigurationMatcherDTO> configurationSelectionModel;
     private final CellTable<DeviceConfigurationMatcherDTO> configurationTable;
-    private ListDataProvider<DeviceConfigurationMatcherDTO> configurationsDataProvider;
+    protected ListDataProvider<DeviceConfigurationMatcherDTO> configurationsDataProvider;
     
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -38,8 +40,6 @@ public class DeviceConfigurationListComposite extends Composite {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-
-    private static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
 
     public DeviceConfigurationListComposite(final SailingServiceAsync sailingService, 
             final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
@@ -102,7 +102,7 @@ public class DeviceConfigurationListComposite extends Composite {
         });
     }
 
-    private CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable() {
+    protected CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable() {
         CellTable<DeviceConfigurationMatcherDTO> table = new CellTable<DeviceConfigurationMatcherDTO>(
                 /* pageSize */10000, tableResource);
         configurationsDataProvider.addDataDisplay(table);
@@ -131,7 +131,7 @@ public class DeviceConfigurationListComposite extends Composite {
                 new TextColumn<DeviceConfigurationMatcherDTO>() {
             @Override
             public String getValue(DeviceConfigurationMatcherDTO identifier) {
-                return identifier.clients.toString();
+                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients);
             }
         };
         identifierNameColumn.setSortable(true);

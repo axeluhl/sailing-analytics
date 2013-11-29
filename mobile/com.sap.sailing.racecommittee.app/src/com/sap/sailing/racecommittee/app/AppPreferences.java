@@ -56,8 +56,9 @@ public class AppPreferences {
         return context.getString(keyId);
     }
 
-    public String getAndroidIdentifier() {
-        return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+    public String getDeviceIdentifier() {
+        String identifier = preferences.getString(key(R.string.preference_identifier_key), "");
+        return identifier.isEmpty() ? Secure.getString(context.getContentResolver(), Secure.ANDROID_ID) : identifier;
     }
 
     public boolean isSendingActive() {

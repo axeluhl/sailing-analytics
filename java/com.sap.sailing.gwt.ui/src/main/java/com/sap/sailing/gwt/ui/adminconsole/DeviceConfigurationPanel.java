@@ -13,7 +13,10 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationDetailComposite.DeviceConfigurationCloneListener;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
@@ -23,7 +26,17 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 
-public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO> {
+public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO>, DeviceConfigurationCloneListener {
+
+    public static String renderIdentifiers(List<String> clientIdentifiers) {
+        if (clientIdentifiers.size() == 1) {
+            return clientIdentifiers.get(0);
+        } else if (clientIdentifiers.size() == 0) {
+            return "[ANY]";
+        } else {
+            return clientIdentifiers.toString();
+        }
+    }
     
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -31,6 +44,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
     
     private Button addConfigurationButton;
     private Button removeConfigurationButton;
+    private Button refreshConfigurationsButton;
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
     
@@ -62,7 +76,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         addConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addConfiguration();
+                createConfiguration();
             }
         });
         deviceManagementControlPanel.add(addConfigurationButton);
@@ -76,6 +90,19 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
             }
         });
         deviceManagementControlPanel.add(removeConfigurationButton);
+        
+        refreshConfigurationsButton = new Button(stringMessages.refresh());
+        refreshConfigurationsButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                detailComposite.setConfiguration(null);
+                detailComposite.setVisible(false);
+                listComposite.refreshTable();
+            }
+        });
+        deviceManagementControlPanel.add(refreshConfigurationsButton);
+        
         mainPanel.add(deviceManagementControlPanel);
     }
 
@@ -83,13 +110,12 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
         
-        listComposite = new DeviceConfigurationListComposite(sailingService, selectionProvider, 
-                errorReporter, stringMessages);
+        listComposite = createListComposite(sailingService, selectionProvider, errorReporter, stringMessages);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         
-        detailComposite = new DeviceConfigurationDetailComposite(sailingService, errorReporter, stringMessages);
+        detailComposite = createDetailComposite(sailingService, errorReporter, stringMessages, this);
         detailComposite.setVisible(false);
         grid.setWidget(0, 1, detailComposite);
     }
@@ -105,36 +131,16 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         }
         removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
     }
+    
+    private void createConfiguration() {
+        createConfiguration(new DeviceConfigurationDTO());
+    }
 
-    private void addConfiguration() {
+    private void createConfiguration(final DeviceConfigurationDTO configuration) {
         sailingService.getDeviceConfigurationMatchers(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationMatcherDTO> allMatchers) {
-                DeviceConfigurationCreateDialog dialog = new DeviceConfigurationCreateDialog(
-                        stringMessages, 
-                        new DeviceConfigurationCreateDialog.DuplicationValidator(allMatchers), 
-                        new DialogCallback<DeviceConfigurationMatcherDTO>() {
-                    @Override
-                    public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
-                        sailingService.createOrUpdateDeviceConfiguration(createdMatcher, new DeviceConfigurationDTO(), 
-                                new AsyncCallback<DeviceConfigurationMatcherDTO>() {
-                            @Override
-                            public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
-                                listComposite.refreshTable();
-                                onSelectionChange(Arrays.asList(matcher));
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(caught.getMessage());
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void cancel() { }
-                });
-                dialog.show();
+                createConfiguration(allMatchers, configuration);
             }
             
             @Override
@@ -142,6 +148,49 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
                 errorReporter.reportError(caught.getMessage());
             }
         });
+    }
+
+    private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
+        getCreateDialog(stringMessages, 
+                new DeviceConfigurationCreateMatcherDialog.MatcherValidator(allMatchers), 
+                new DialogCallback<DeviceConfigurationMatcherDTO>() {
+            @Override
+            public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
+                sailingService.createOrUpdateDeviceConfiguration(createdMatcher, configuration, 
+                        new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                    @Override
+                    public void onSuccess(DeviceConfigurationMatcherDTO newMatcher) {
+                        listComposite.refreshTable();
+                        onSelectionChange(Arrays.asList(newMatcher));
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() { }
+        }).show();
+    }
+    
+    protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
+            final Validator<DeviceConfigurationMatcherDTO> validator,
+            final DialogCallback<DeviceConfigurationMatcherDTO> callback) {
+        return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
+    }
+
+    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
+            ErrorReporter errorReporter, StringMessages stringMessages) {
+        return new DeviceConfigurationListComposite(sailingService, selectionProvider, 
+                errorReporter, stringMessages);
+    }
+
+    protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener) {
+        return new DeviceConfigurationDetailComposite(sailingService, errorReporter, stringMessages, cloneListener);
     }
 
     private void removeConfiguration() {
@@ -160,6 +209,11 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
                 }                  
             });
         }
+    }
+
+    @Override
+    public void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration) {
+        createConfiguration(configuration);
     }
 
 }

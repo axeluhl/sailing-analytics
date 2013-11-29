@@ -19,6 +19,8 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -38,23 +40,31 @@ import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
 
 public class DeviceConfigurationDetailComposite extends Composite {
     
+    public interface DeviceConfigurationCloneListener {
+        void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration);
+    }
+    
     private static List<String> suggestedCourseAreaNames = Arrays.asList("Alpha", "Bravo", "Charly", "Delta", 
             "Foxtrott", "Stadium", "Offshore");
     private static List<String> suggestedCourseNames = Arrays.asList("Upwind", "Downwind");
     
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-    private final StringMessages stringMessages;
+    protected final SailingServiceAsync sailingService;
+    protected final ErrorReporter errorReporter;
+    protected final StringMessages stringMessages;
+    
+    private final DeviceConfigurationCloneListener cloneListener;
     
     private CaptionPanel captionPanel;
     private VerticalPanel contentPanel;
+    private Button cloneButton;
     private Button updateButton;
     
     private DeviceConfigurationMatcherDTO matcher;
     private DeviceConfigurationDTO originalConfiguration;
 
+    protected TextBox identifierBox;
     private ListEditorComposite<String> allowedCourseAreasList;
     private TextBox mailRecipientBox;
     private ListBox racingProcedureListBox;
@@ -65,10 +75,13 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private RacingProceduresConfigurationDTO currentProceduresConfiguration;
     
     
-    public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages,
+            final DeviceConfigurationCloneListener listener) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        
+        this.cloneListener = listener;
         
         this.matcher = null;
         this.originalConfiguration = null;
@@ -77,15 +90,30 @@ public class DeviceConfigurationDetailComposite extends Composite {
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
+        cloneButton = new Button(stringMessages.save() + " + " +  "Clone");
+        cloneButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updateConfiguration();
+                cloneListener.onCloneRequested(matcher, getResult());
+            }
+        });
         updateButton = new Button(stringMessages.save());
         updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateConfiguration(sailingService, errorReporter);
+                updateConfiguration();
             }
         });
         verticalPanel.add(contentPanel);
-        verticalPanel.add(updateButton);
+        
+        verticalPanel.add(new HTML("<hr  style=\"width:100%;\" />"));
+        
+        HorizontalPanel actionPanel = new HorizontalPanel();
+        actionPanel.add(cloneButton);
+        actionPanel.add(updateButton);
+        verticalPanel.add(actionPanel);
+        
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
     }
@@ -162,13 +190,26 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(5, 3);
-        setupCourseAreasBox(grid, 0);
-        setupRecipientBox(grid, 1);
-        setupRacingProcedureListBox(grid, 2);
-        setupCourseDesignerListBox(grid, 3);
-        setupCourseNameBox(grid, 4);
+        Grid grid = new Grid(6, 3);
+        int row = 0;
+        setupIdentifier(grid, row++);
+        setupCourseAreasBox(grid, row++);
+        setupRecipientBox(grid, row++);
+        setupRacingProcedureListBox(grid, row++);
+        setupCourseDesignerListBox(grid, row++);
+        setupCourseNameBox(grid, row++);
+        
         contentPanel.add(grid);
+    }
+
+    protected void setupIdentifier(Grid grid, int gridRow) {
+        identifierBox = new TextBox();
+        identifierBox.setWidth("100%");
+        identifierBox.setText(DeviceConfigurationPanel.renderIdentifiers(matcher.clients));
+        identifierBox.setReadOnly(true);
+        
+        grid.setWidget(gridRow, 0, new Label("Identifier"));
+        grid.setWidget(gridRow, 1, identifierBox);
     }
 
     private void setupRacingProcedureListBox(Grid grid, int gridRow) {
@@ -301,7 +342,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         return result;
     }
     
-    private void updateConfiguration(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
+    private void updateConfiguration() {
         if (matcher == null || originalConfiguration == null) {
             errorReporter.reportError("Invalid state.");
             return;

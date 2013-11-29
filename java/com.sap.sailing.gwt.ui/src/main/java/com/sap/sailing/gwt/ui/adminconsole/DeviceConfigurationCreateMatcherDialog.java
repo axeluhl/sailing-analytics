@@ -22,13 +22,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 
-public class DeviceConfigurationCreateDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
+public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
     
-    public static class DuplicationValidator implements Validator<DeviceConfigurationMatcherDTO> {
+    public static class MatcherValidator implements Validator<DeviceConfigurationMatcherDTO> {
         
         private List<DeviceConfigurationMatcherDTO> allMatchers;
 
-        public DuplicationValidator(List<DeviceConfigurationMatcherDTO> allMatchers) {
+        public MatcherValidator(List<DeviceConfigurationMatcherDTO> allMatchers) {
             this.allMatchers = allMatchers;
         }
 
@@ -55,6 +55,11 @@ public class DeviceConfigurationCreateDialog extends DataEntryDialog<DeviceConfi
                     }
                 }
             }
+            for (String identifier : valueToValidate.clients) {
+                if (identifier.isEmpty()) {
+                    return "Enter an identifier name";
+                }
+            }
             return null;
         }
         
@@ -64,7 +69,7 @@ public class DeviceConfigurationCreateDialog extends DataEntryDialog<DeviceConfi
     private ListBox typeBox;
     private List<TextBox> devicesBoxes;
     
-    public DeviceConfigurationCreateDialog(StringMessages stringMessages,
+    public DeviceConfigurationCreateMatcherDialog(StringMessages stringMessages,
             Validator<DeviceConfigurationMatcherDTO> validator,
             com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
         super("Create Device Configuration", "Specify for which devices the new configuration should apply", 

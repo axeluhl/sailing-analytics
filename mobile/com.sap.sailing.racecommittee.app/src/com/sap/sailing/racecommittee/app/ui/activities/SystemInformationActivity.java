@@ -63,7 +63,7 @@ public class SystemInformationActivity extends BaseActivity {
 
     private void setupVersionView() {
         TextView identifierView = (TextView) findViewById(R.id.system_information_application_identifier);
-        identifierView.setText(AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
+        identifierView.setText(AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
         
         TextView versionView = (TextView) findViewById(R.id.system_information_application_version);
         PackageInfo info = getPackageInfo();

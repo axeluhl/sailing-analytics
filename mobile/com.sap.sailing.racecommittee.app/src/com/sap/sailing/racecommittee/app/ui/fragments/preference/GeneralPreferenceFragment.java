@@ -1,22 +1,41 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import com.sap.sailing.domain.common.impl.QRCodeUtils;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
+
+    private static int requestCodeQRCode = 45392;
+    
+    private AppPreferences appPreferences;
+    private Preference identifierPreference;
+    private Preference serverUrlPreference;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_general);
         
+        appPreferences = AppPreferences.on(getActivity());
+        
         setupLanguageButton();
+        setupIdentifierBox();
+        setupSyncQRCodeButton();
         setupServerUrlBox();
         setupCourseAreasList();
         
@@ -25,16 +44,26 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
     }
 
-    private void setupCourseAreasList() {
-        EditSetPreference preference = findPreference(R.string.preference_course_areas_key);
-        //ReadonlyDataManager dataManager = DataManager.create(getActivity());
-        
-        preference.setExampleValues(getResources().getStringArray(R.array.preference_course_areas_example));
+    private void setupIdentifierBox() {
+        identifierPreference = findPreference(R.string.preference_identifier_key);
+        identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+        addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String value = (String) newValue;
+                if (value.isEmpty()) {
+                    preference.setSummary(appPreferences.getDeviceIdentifier());
+                } else {
+                    preference.setSummary(value);
+                }
+                return true;
+            }
+        });
     }
 
     private void setupServerUrlBox() {
-        Preference preference = findPreference(getString(R.string.preference_server_url_key));
-        addOnPreferenceChangeListener(preference, new OnPreferenceChangeListener() {
+        serverUrlPreference = findPreference(getString(R.string.preference_server_url_key));
+        addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 Toast.makeText(getActivity(), 
@@ -44,8 +73,26 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
+    private void setupSyncQRCodeButton() {
+        Preference preference = findPreference(R.string.preference_sync_key);
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                requestQRCodeScan();
+                return false;
+            }
+        });
+    }
+
+    private void setupCourseAreasList() {
+        EditSetPreference preference = findPreference(R.string.preference_course_areas_key);
+        //ReadonlyDataManager dataManager = DataManager.create(getActivity());
+        
+        preference.setExampleValues(getResources().getStringArray(R.array.preference_course_areas_example));
+    }
+
     private void setupLanguageButton() {
-        Preference preference = findPreference(getString(R.string.preference_language_key));
+        Preference preference = findPreference(R.string.preference_language_key);
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) { 
@@ -56,5 +103,44 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 return true;
             }
         });
+    }
+
+    protected boolean requestQRCodeScan() {
+        try {
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, requestCodeQRCode);
+            return true;
+        } catch (Exception e) {    
+            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+            startActivity(marketIntent);
+        }
+        return false;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != requestCodeQRCode) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        
+        if (resultCode == Activity.RESULT_OK) {
+            String content = data.getStringExtra("SCAN_RESULT");
+            Pair<String, String> connectionConfiguration = QRCodeUtils.splitQRContent(content);
+            
+            String identifier = connectionConfiguration.getA();
+            String serverUrl = connectionConfiguration.getB();
+            
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
+            preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
+            
+            identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
+            serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
+        } else {
+            Toast.makeText(getActivity(), "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -110,7 +110,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
             DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                    AppPreferences.on(getApplicationContext()).getAndroidIdentifier());
+                    AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
             getLoaderManager().restartLoader(0, null,
                     dataManager.createConfigurationLoader(identifier, new LoadClient<ConfigurationLoader<DeviceConfiguration>>() {
 
