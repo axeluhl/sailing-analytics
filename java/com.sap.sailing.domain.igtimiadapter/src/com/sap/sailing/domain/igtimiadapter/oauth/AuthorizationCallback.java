@@ -29,7 +29,7 @@ public class AuthorizationCallback {
     static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
     private final IgtimiConnectionFactory connectionFactory;
     
-    public AuthorizationCallback() {
+    public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         connectionFactory = Activator.getInstance().getConnectionFactory();
     }
 
