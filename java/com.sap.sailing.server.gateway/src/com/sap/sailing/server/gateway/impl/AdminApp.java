@@ -3,10 +3,8 @@ package com.sap.sailing.server.gateway.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Bearing;
@@ -37,20 +34,12 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -58,10 +47,6 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
 
     private static final String ACTION_NAME_ADD_WIND_TO_MARKS = "addwindtomarksforonehour";
-
-    private static final String ACTION_NAME_ADD_EVENT = "addevent";
-
-    private static final String ACTION_NAME_ADD_RACE = "addrace";
 
     private static final String ACTION_NAME_LIST_RACES_IN_REGATTA = "listracesinregatta";
 
@@ -82,12 +67,6 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_SPEED_AVERAGING_INTERVAL_MILLIS = "speedaveragingintervalmillis";
 
     private static final String PARAM_NAME_EVENT_JSON_URL = "eventJSONURL";
-
-    private static final String PARAM_NAME_PARAM_URL = "paramURL";
-
-    private static final String PARAM_NAME_LIVE_URI = "liveURI";
-
-    private static final String PARAM_NAME_STORED_URI = "storedURI";
 
     private static final String PARAM_NAME_FROM_TIME = "fromtime";
 
@@ -116,15 +95,7 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_PORT = "port";
 
     private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
-
-    private static final String PARAM_NAME_WINDSTORE = "windstore";
     
-    private static final String PARAM_NAME_RACELOGSTORE = "racelogstore";
-
-    private static final String STORE_EMPTY = "empty";
-
-    private static final String STORE_MONGO = "mongo";
-
     public AdminApp() {
     }
 
@@ -133,13 +104,9 @@ public class AdminApp extends SailingServerHttpServlet {
         try {
             String action = req.getParameter(PARAM_ACTION);
             if (action != null) {
-                if (ACTION_NAME_ADD_EVENT.equals(action)) {
-                    addEvent(req, resp);
-                } else if (ACTION_NAME_STOP_REGATTA.equals(action)) {
+                if (ACTION_NAME_STOP_REGATTA.equals(action)) {
                     stopRegatta(req, resp);
-                } else if (ACTION_NAME_ADD_RACE.equals(action)) {
-                    addRace(req, resp);
-                } else if (ACTION_NAME_LIST_RACES_IN_REGATTA.equals(action)) {
+                }  else if (ACTION_NAME_LIST_RACES_IN_REGATTA.equals(action)) {
                     listRacesInEvent(req, resp);
                 } else if (ACTION_NAME_STOP_RACE.equals(action)) {
                     stopRace(req, resp);
@@ -468,64 +435,6 @@ public class AdminApp extends SailingServerHttpServlet {
         } else {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         }
-    }
-
-    private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
-        URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
-        URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
-        URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        
-        //The course design update URI is not available at this place
-        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addRegatta(getService(),
-                jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */null, /* timeoutInMilliseconds */
-                getWindStore(req),
-                60000, /* tracTracUsername */null, /* tracTracPassword */null, getRaceLogStore(req));
-    }
-
-    private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
-        String windStore = req.getParameter(PARAM_NAME_WINDSTORE);
-        if (windStore != null) {
-            if (windStore.equals(STORE_EMPTY)) {
-                return EmptyWindStore.INSTANCE;
-            } else if (windStore.equals(STORE_MONGO)) {
-                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(
-                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory()));
-            } else {
-                log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
-                return EmptyWindStore.INSTANCE;
-            }
-        }
-        return EmptyWindStore.INSTANCE;
-    }
-
-    private RaceLogStore getRaceLogStore(HttpServletRequest req) throws UnknownHostException, MongoException {
-        String raceLogStore = req.getParameter(PARAM_NAME_RACELOGSTORE);
-        if (raceLogStore != null) {
-            if (raceLogStore.equals(STORE_EMPTY)) {
-                return EmptyRaceLogStore.INSTANCE;
-            } else if (raceLogStore.equals(STORE_MONGO)) {
-                return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory()));
-            } else {
-                log("Couldn't find race log store "+raceLogStore+". Using EmptyRaceLogStore instead.");
-                return EmptyRaceLogStore.INSTANCE;
-            }
-        }
-        return EmptyRaceLogStore.INSTANCE;
-    }
-
-    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
-        URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
-        URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
-        URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        //The course design update URI is not available at this place
-        getTracTracAdapterFactory().getOrCreateTracTracAdapter(getService().getBaseDomainFactory()).addTracTracRace(getService(), paramURL, liveURI, storedURI,
-                /*courseDesignUpdateURI*/ null,
-                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, getService().getBaseDomainFactory())), getWindStore(req),
-                        /* timeoutInMilliseconds */ 60000l, /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

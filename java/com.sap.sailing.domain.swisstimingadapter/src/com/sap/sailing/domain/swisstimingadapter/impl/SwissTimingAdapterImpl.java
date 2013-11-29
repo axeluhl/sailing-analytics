@@ -19,7 +19,6 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
-import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     private final SwissTimingFactory swissTimingFactory;
@@ -65,11 +64,11 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
 
     @Override
     public RacesHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID, String hostname,
-            int port, boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds)
+            int port, boolean canSendRequests, RaceLogStore logStore, long timeoutInMilliseconds)
             throws Exception {
         return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port,
                 raceID, canSendRequests, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
-                swissTimingDomainFactory, logStore, windStore, raceSpecificMessageLoader), windStore,
+                swissTimingDomainFactory, logStore, raceSpecificMessageLoader),
                 timeoutInMilliseconds);
     }
 

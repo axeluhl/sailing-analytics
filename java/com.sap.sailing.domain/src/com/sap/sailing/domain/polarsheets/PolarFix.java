@@ -37,15 +37,19 @@ public class PolarFix {
         this.windSpeed = windSpeed;
         Set<WindSource> windSourcesToExclude;
         if (settings.useOnlyEstimatedForWindDirection()) {
-            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, true);
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */ true);
         } else {
             windSourcesToExclude = new HashSet<WindSource>();
         }
         
         Wind windEstimated = race.getWind(position, fix.getTimePoint(), windSourcesToExclude);
         if (windEstimated == null) {
-            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, false);
+            // no estimated wind; try to include course layout
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */ false);
             windEstimated = race.getWind(position, fix.getTimePoint(), windSourcesToExclude);
+        }
+        if (windEstimated == null) {
+            windEstimated = windSpeed; // maybe no upwind start; need to default to measured wind speed/direction
         }
         Bearing windBearing = windEstimated.getFrom();
         angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
