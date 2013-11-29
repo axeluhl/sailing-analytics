@@ -14,7 +14,7 @@ The Feedback a User gave to the Application and the Feedback the user gave to th
 
 Have a look at the following user guides to get an idea how to work with the RaceCommittee App.
 
-* [[RaceCommittee App as an administrator|wiki/racecommittee-app-admin]]
+* [[RaceCommittee App as an administrator|wiki/racecommittee-app-adminstrator]]
 * [[RaceCommittee App as a race officer|wiki/racecommittee-app-user]]
 
 ## Course Designer
