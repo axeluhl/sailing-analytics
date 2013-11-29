@@ -45,7 +45,7 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals("6264", race_42.getRaceId());
         assertEquals("SAW010955", race_42.getRsc());
         assertEquals("02.08.2012 15:30", swissTimingReplayService.getStartTimeFormat().format(races.get(42).getStartTime()));
-        assertEquals("live.ota.st-sportservice.com/Data/Log?_rsc=SAM009901&_date=30.07.2012", races.get(races.size() - 1).getLink());
+        assertEquals("live.ota.st-sportservice.com/Data/Log?_rsc=SAM009901&_date=30.07.2012&_start=0", races.get(races.size() - 1).getLink());
     }    
     
     @Test
@@ -73,7 +73,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012").getContent());
+                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012&_start=0").getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -112,7 +112,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_online() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012").getContent());
+                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012&_start=0").getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
