@@ -3,10 +3,10 @@ package com.sap.sailing.simulator.impl;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 
 public class PolarDiagram49 extends PolarDiagramBase {
     private static final long serialVersionUID = -878812179468801167L;
