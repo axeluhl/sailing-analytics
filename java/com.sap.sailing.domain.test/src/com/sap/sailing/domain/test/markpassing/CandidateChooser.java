@@ -39,9 +39,16 @@ public class CandidateChooser {
         this.legs = legs;
     }
 
+    public MarkPassing getMarkPass(Competitor c, Waypoint w) {
+        return currentMarkPasses.get(c).get(w);
+    }
+
     public void addCandidates(List<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
             candidates.get(co).add(c);
+            if (c.getID() == 1) {
+                reEvaluateStartingEdges();
+            }
         }
         createNewEdges(co, newCandidates);
         findShortestPath(co);
@@ -62,43 +69,6 @@ public class CandidateChooser {
         }
         if (needToRecalculate) {
             findShortestPath(co);
-        }
-    }
-
-    public MarkPassing getMarkPass(Competitor c, Waypoint w) {
-        return currentMarkPasses.get(c).get(w);
-    }
-
-    private void findShortestPath(Competitor co) {
-        ArrayList<Edge> all = new ArrayList<>();
-        for (Edge e : allEdges.get(co)) {
-            all.add(e);
-        }
-        LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
-        candidateWithParent.put(start, start);
-        Edge newMostLikelyEdge = null;
-        while (!candidateWithParent.keySet().contains(end)) {
-            newMostLikelyEdge = null;
-            for (Edge e : all) {
-                if (candidateWithParent.keySet().contains(e.getStart())) {
-                    if (newMostLikelyEdge == null) {
-                        newMostLikelyEdge = e;
-                    } else if (e.getLikelyhood() < newMostLikelyEdge.getLikelyhood()) {
-                        newMostLikelyEdge = e;
-                    }
-                }
-            }
-            if (!candidateWithParent.keySet().contains(newMostLikelyEdge.getEnd())) {
-                candidateWithParent.put(newMostLikelyEdge.getEnd(), newMostLikelyEdge.getStart());
-            }
-            all.remove(newMostLikelyEdge);
-        }
-        currentMarkPasses.get(co).clear();
-        Candidate marker = candidateWithParent.get(end);
-        while (!(marker == start)) {
-            currentMarkPasses.get(co).put(marker.getWaypoint(),
-                    new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
-            marker = candidateWithParent.get(marker);
         }
     }
 
@@ -124,19 +94,72 @@ public class CandidateChooser {
         }
     }
 
-    private double numberOfCloseStarts(TimePoint t) {
-        double numberOfSimilarStarts = 0;
-        double numberOfCompetitors = 0;
+    private void findShortestPath(Competitor co) {
+        ArrayList<Edge> all = new ArrayList<>();
+        for (Edge e : allEdges.get(co)) {
+            all.add(e);
+        }
+        LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
+        candidateWithParent.put(start, start);
+        Edge newMostLikelyEdge = null;
+        while (!candidateWithParent.keySet().contains(end)) {
+            newMostLikelyEdge = null;
+            for (Edge e : all) {
+                if (candidateWithParent.keySet().contains(e.getStart())) {
+                    if (newMostLikelyEdge == null) {
+                        newMostLikelyEdge = e;
+                    } else if (e.getProbability() < newMostLikelyEdge.getProbability()) {
+                        newMostLikelyEdge = e;
+                    }
+                }
+            }
+            if (!candidateWithParent.keySet().contains(newMostLikelyEdge.getEnd())) {
+                candidateWithParent.put(newMostLikelyEdge.getEnd(), newMostLikelyEdge.getStart());
+            }
+            all.remove(newMostLikelyEdge);
+        }
+        currentMarkPasses.get(co).clear();
+        Candidate marker = candidateWithParent.get(end);
+        while (!(marker == start)) {
+            currentMarkPasses.get(co).put(marker.getWaypoint(),
+                    new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
+            marker = candidateWithParent.get(marker);
+        }
+    }
+
+    private void reEvaluateStartingEdges() {
         for (Competitor c : candidates.keySet()) {
-            numberOfCompetitors++;
-            for (Candidate ca : candidates.get(c)) {
-                if (ca.getID() == 1 && Math.abs(ca.getTimePoint().asMillis() - t.asMillis()) < 30000) {
-                    numberOfSimilarStarts++;
-                    break;
+            for (Edge e : allEdges.get(c)) {
+                if (e.getStart().getID() == 0 && e.getEnd().getID() == 1) {
+                    allEdges.get(c).add(
+                            new Edge(e.getStart(), e.getEnd(), numberOfCloseStarts(e.getEnd().getTimePoint())));
+                    allEdges.get(c).remove(e);
                 }
             }
         }
-        return numberOfSimilarStarts / numberOfCompetitors;
+    }
+
+    private double numberOfCloseStarts(TimePoint t) {
+
+        double numberOfCompetitors = 0;
+        double totalTimeDifference = 0;
+        for (Competitor c : candidates.keySet()) {
+            numberOfCompetitors++;
+            Candidate closestCandidate = null;
+            for (Candidate ca : candidates.get(c)) {
+                if (ca.getID() == 1) {
+                    if (closestCandidate == null) {
+                        closestCandidate = ca;
+                    } else if (Math.abs(closestCandidate.getTimePoint().asMillis() - t.asMillis()) > Math.abs(ca
+                            .getTimePoint().asMillis() - t.asMillis())) {
+                        closestCandidate = ca;
+                    }
+                }
+            }
+            totalTimeDifference = totalTimeDifference
+                    + Math.abs(closestCandidate.getTimePoint().asMillis() - t.asMillis());
+        }
+        return 1 / (0.00001 * (totalTimeDifference / numberOfCompetitors) + 1);
     }
 
     private double estimatedTime(Candidate c1, Candidate c2) {

@@ -24,6 +24,7 @@ public class MarkPassingCalculator extends AbstractRaceChangeListener implements
 
     // TODO Start-analysis is not working, maybe adding time difference would help
     // TODO How should Edges between the proxy start and end be treated
+    // TODO Make sure the functions return the right probability
     // TODO Connection to rest of infrastructure
     // TODO Feldmann issue
     // TODO Use Wind/Maneuver analysis

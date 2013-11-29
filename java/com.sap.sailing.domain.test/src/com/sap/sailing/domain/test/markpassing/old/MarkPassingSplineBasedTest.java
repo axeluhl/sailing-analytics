@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -49,7 +48,7 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 		TANGENT_SCALING_FACTOR = 100.0;
 	}
 	
-	@Test
+
 	public void testTangentScaling() {
 		Map<Double, Integer> results = new HashMap<Double, Integer>();
 		double s = 100.0;

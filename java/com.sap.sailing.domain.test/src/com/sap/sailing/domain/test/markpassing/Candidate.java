@@ -6,20 +6,20 @@ import com.sap.sailing.domain.common.TimePoint;
 public class Candidate {
     private Waypoint w;
     private TimePoint p;
-    private double distanceLikelyhood;
+    private double distanceProbability;
     private int id;
 
-    public Candidate(int id, TimePoint p, double distanceLikelyhood, Waypoint w) {
+    public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w) {
         this.w = w;
         this.p = p;
-        this.distanceLikelyhood = distanceLikelyhood;
+        this.distanceProbability = distanceProbability;
         this.id = id;
     }
 
-    public Candidate(int id, TimePoint p, double distanceLikelyhood) {
+    public Candidate(int id, TimePoint p, double distanceProbability) {
         this.id = id;
         this.p = p;
-        this.distanceLikelyhood = distanceLikelyhood;
+        this.distanceProbability = distanceProbability;
     }
 
     public int getID() {
@@ -28,8 +28,8 @@ public class Candidate {
     public TimePoint getTimePoint() {
         return p;
     }
-    public double getLikelyhood() {
-        return distanceLikelyhood;
+    public double getProbability() {
+        return distanceProbability;
     }
     public Waypoint getWaypoint() {
         return w;

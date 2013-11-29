@@ -37,7 +37,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
-    private boolean forceReload = false;
+    private boolean forceReload = true;
 
     public MarkPassingCalculatorTest() throws MalformedURLException, URISyntaxException {
         super();
@@ -57,10 +57,10 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
       System.out.println("Star Medal"); testRace("d591d808-9c48-11e0-85be-406186cbf87c"); }
       
       @Test public void test505_2() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Tornado 16"); testRace("357c700a-9d9a-11e0-85be-406186cbf87c"); }
+      System.out.println("505 2"); testRace("357c700a-9d9a-11e0-85be-406186cbf87c"); }
       
       @Test public void test505_7() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Tornado 16"); testRace("cb043bb4-9e92-11e0-85be-406186cbf87c"); }
+      System.out.println("505 7"); testRace("cb043bb4-9e92-11e0-85be-406186cbf87c"); }
       
       @Test public void testStar4() throws IOException, InterruptedException, URISyntaxException {
       System.out.println("Star 4"); testRace("f5f531ec-99ed-11e0-85be-406186cbf87c"); }
@@ -72,7 +72,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
     private void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        if (!loadData(raceID) && !forceReload) {
+        if (!loadData(raceID) && forceReload) {
             System.out.println("Downloading new data from the web.");
             this.setUp("event_20110609_KielerWoch",
             /* raceId */raceID, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,

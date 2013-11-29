@@ -156,19 +156,6 @@ public class CandidateFinder {
         }
     }
     
-    private void reCalculateEverything(){
-        for(Competitor c : competitorTracks.keySet()){
-            ArrayList<GPSFix> fixes = new ArrayList<>();
-            for(GPSFix fix : competitorTracks.get(c).getFixes()){
-                fixes.add(fix);
-                for (Waypoint w : waypoints) {
-                    distances.get(c).get(fix).put(w, calculateDistance(fix, w));
-                    reEvaluateFixes(fixes, c, w);
-                }
-            } 
-        }
-    }
-
     private double getLikelyhood(Double distance, Double legLength) {
         return 1 / (500 * Math.abs(distance / legLength) + 1);
     }
@@ -182,6 +169,19 @@ public class CandidateFinder {
             return true;
         }
         return false;
+    }
+
+    private void reCalculateEverything(){
+        for(Competitor c : competitorTracks.keySet()){
+            ArrayList<GPSFix> fixes = new ArrayList<>();
+            for(GPSFix fix : competitorTracks.get(c).getFixes()){
+                fixes.add(fix);
+                for (Waypoint w : waypoints) {
+                    distances.get(c).get(fix).put(w, calculateDistance(fix, w));
+                    reEvaluateFixes(fixes, c, w);
+                }
+            } 
+        }
     }
 
     private double calculateDistance(GPSFix gps, Waypoint w) {

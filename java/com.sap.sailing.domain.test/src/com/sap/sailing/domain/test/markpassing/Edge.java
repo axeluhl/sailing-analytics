@@ -4,19 +4,19 @@ public class Edge {
     private Candidate start;
     private Candidate end;
     private final double penaltyForSkipped;
-    double timeEstimationOrStartAnalysis;
+    double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
         this.start = start;
         this.end = end;
         penaltyForSkipped = 0.3;
-        this.timeEstimationOrStartAnalysis = timeEstimationOrStartAnalysis;
+        this.timeEstimationOrCloseStartsProbability = timeEstimationOrStartAnalysis;
     }
     public String getIDs(){
         return start.getID()+"-"+end.getID();
     }
-    public double getLikelyhood() {
-        return 1-(start.getLikelyhood() * end.getLikelyhood() * timeEstimationOrStartAnalysis) + penaltyForSkipped * (end.getID()-start.getID())-1;
+    public double getProbability() {
+        return 1-(start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability) + penaltyForSkipped * (end.getID()-start.getID())-1;
     }
     public Candidate getStart() {
         return start;
