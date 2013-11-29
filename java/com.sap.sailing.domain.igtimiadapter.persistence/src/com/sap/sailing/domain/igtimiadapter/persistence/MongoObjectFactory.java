@@ -2,4 +2,8 @@ package com.sap.sailing.domain.igtimiadapter.persistence;
 
 public interface MongoObjectFactory {
 
+    void storeAccessToken(String accessToken);
+
+    void removeAccessToken(String accessToken);
+
 }

@@ -46,9 +46,9 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
 
     @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+            Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, serialNumbers, streamIds, account));
+        HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds, account));
         JSONObject resourcesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Resource> result = new ArrayList<>();
         for (Object userJson : (JSONArray) resourcesJson.get("resources")) {

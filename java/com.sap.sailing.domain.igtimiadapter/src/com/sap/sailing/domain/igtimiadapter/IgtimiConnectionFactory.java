@@ -6,10 +6,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
@@ -84,4 +87,16 @@ public interface IgtimiConnectionFactory {
      *            IDs of the transmitting units expected to be visible to the account's {@link Account#getUser() user's}
      */
     JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds);
+
+    Iterable<Account> getAllAccounts();
+
+    /**
+     * Tries to authorize our client on behalf of a user identified by e-mail and password.
+     * 
+     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
+     *         to access data owned by the user identified by e-mail and password.
+     */
+    String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword) throws ClientProtocolException,
+            IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
+            InstantiationException, IllegalAccessException, ClassCastException;
 }
