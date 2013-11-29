@@ -3,6 +3,8 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.Attributes;
@@ -119,6 +122,18 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     @Override
     public String getAccountUrl(Account account) {
         return getApiV1BaseUrl()+"account?"+getAccessTokenUrlParameter(account);
+    }
+    
+    @Override
+    public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds) {
+        JSONObject result = new JSONObject();
+        result.put("access_token", getAccessTokenForAccount(account));
+        JSONArray deviceIdsJson = new JSONArray();
+        result.put("devices", deviceIdsJson);
+        for (String deviceId : deviceIds) {
+            deviceIdsJson.add(deviceId);
+        }
+        return result;
     }
     
     @Override
@@ -335,4 +350,22 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         authorizationResponse.getEntity().getContent().close();
     }
 
+    @Override
+    public HttpClient getHttpClient() {
+        HttpClient client = new SystemDefaultHttpClient();
+        return client;
+    }
+    
+    @Override
+    public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
+        HttpClient client = getHttpClient();
+        HttpGet getWebsocketServers = new HttpGet("https://www.igtimi.com/server_listers/web_sockets");
+        JSONObject serversJson = ConnectivityUtils.getJsonFromResponse(client.execute(getWebsocketServers));
+        final List<URI> result = new ArrayList<>();
+        for (Object serverUrl : (JSONArray) serversJson.get("web_socket_servers")) {
+            URI uri = new URI((String) serverUrl);
+            result.add(uri);
+        }
+        return result;
+    }
 }

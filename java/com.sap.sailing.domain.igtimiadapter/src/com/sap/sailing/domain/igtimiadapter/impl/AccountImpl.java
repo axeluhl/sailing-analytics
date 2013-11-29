@@ -16,4 +16,8 @@ public class AccountImpl implements Account {
         return user;
     }
 
+    @Override
+    public String toString() {
+        return getUser().toString();
+    }
 }
