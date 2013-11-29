@@ -28,7 +28,7 @@ Repeat until you've configured all your devices.
 
 There are several preferences you can configure to control the overall functionality of the RaceCommittee App. All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, it will overwrite the corresponding options in the device's local configuration.
 
-In the following we will have a look at some of these settings.
+In the following we will have a look at some of these settings. Most of them are enabled for remote configuration.
 
 ### General preferences
 
@@ -37,3 +37,13 @@ In the following we will have a look at some of these settings.
 * **Synchronize connection settings:** See above.
 * **Managed course areas:** The user is able to logon to the configured course areas.
 * **Results recipient:** When active, the race's results (photos) will be sent to this mail.
+
+### Racing Procedure
+
+* **Overwrite Racing Procedure**: Selecting this option will let the app preselect your overwrite racing procedure regardless of the regatta's configuration and the history of the race's procedures.
+* Configuration of procedure: Each racing procedure has some options to be configured. Keep in mind that changing these settings will have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings!)
+
+### Course Designer
+
+* **Overwrite Course Designer**: See overwrite of racing procedure.
+* Configuration of designers: Each designer has some options to be configured.
