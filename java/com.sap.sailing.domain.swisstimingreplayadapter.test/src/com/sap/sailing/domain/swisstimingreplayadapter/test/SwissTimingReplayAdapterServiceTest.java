@@ -40,7 +40,7 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals("Elliott", race_42.getBoatClass());
         assertEquals("19", race_42.getFlightNumber());
         assertEquals(swissTimingUrlText, race_42.getJsonUrl());
-        assertEquals("live.ota.st-sportservice.com/Data/Log?_rsc=SAW010955&_date=02.08.2012", race_42.getLink());
+        assertEquals("live.ota.st-sportservice.com/Data/Log?_rsc=SAW010955&_date=02.08.2012&_start=0", race_42.getLink());
         assertEquals("Match 55", race_42.getName());
         assertEquals("6264", race_42.getRaceId());
         assertEquals("SAW010955", race_42.getRsc());
