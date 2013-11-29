@@ -152,11 +152,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new AbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-            @Override
-            public void applyFilter() {
-                super.applyFilter();
-                onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            }
 
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
