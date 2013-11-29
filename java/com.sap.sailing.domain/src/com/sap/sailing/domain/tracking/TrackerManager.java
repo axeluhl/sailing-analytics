@@ -4,8 +4,9 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 
 public interface TrackerManager {
 
@@ -18,10 +19,8 @@ public interface TrackerManager {
      *            identifier; if the regatta is found, it is used to add the races to, and
      *            {@link #setRegattaForRace(Regatta, RaceDefinition)} is called to remember the association
      *            persistently. Otherwise, a default regatta as described above will be created and used.
-     * @param windStore
-     *            must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
      */
-    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
 }

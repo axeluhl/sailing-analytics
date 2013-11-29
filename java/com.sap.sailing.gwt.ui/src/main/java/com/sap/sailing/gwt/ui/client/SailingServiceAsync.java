@@ -456,8 +456,7 @@ public interface SailingServiceAsync {
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
 
-
-    void importMasterData(String host, String[] names, boolean override,
+    void importMasterData(String host, String[] names, boolean override, boolean compress,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);

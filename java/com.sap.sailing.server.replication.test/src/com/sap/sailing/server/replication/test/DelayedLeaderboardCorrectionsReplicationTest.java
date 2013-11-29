@@ -1,5 +1,9 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 
@@ -25,6 +29,7 @@ import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -33,8 +38,6 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-
-import static org.junit.Assert.*;
 
 public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServerReplicationTest {
     private static final String Q2 = "Q2";
@@ -125,7 +128,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE)) {
+                .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
