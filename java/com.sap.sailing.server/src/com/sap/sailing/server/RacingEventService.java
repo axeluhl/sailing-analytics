@@ -457,4 +457,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     MongoObjectFactory getMongoObjectFactory();
     
     DomainObjectFactory getDomainObjectFactory();
+    
+    WindStore getWindStore();
 }

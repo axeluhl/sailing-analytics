@@ -162,8 +162,8 @@ public class ReplicationPanel extends FlowPanel {
                             public void onFailure(Throwable e) {
                                 addButton.setEnabled(true);
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(), e.getMessage()));
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
+                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(), e.getMessage()));
                                 updateReplicaList();
                             }
 

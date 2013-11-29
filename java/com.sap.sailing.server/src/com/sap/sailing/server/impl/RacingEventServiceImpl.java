@@ -82,6 +82,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
@@ -214,6 +215,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     protected final DeviceConfigurationMapImpl configurationMap;
 
+    private final WindStore windStore;
+
     /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
@@ -222,7 +225,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(true);
+        this(true, null);
+    }
+    
+    public RacingEventServiceImpl(WindStore windStore) {
+        this(true, windStore);
     }
     
     /**
@@ -235,11 +242,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            created and stored during previous service executions will initially be loaded.
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore) {
-        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore));
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), null);
     }
     
-    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore) {
-        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore);
+    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), windStore);
+    }
+    
+    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore) {
+        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore);
     }
 
     /**
@@ -247,12 +258,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * {@link PersistenceFactory#getDefaultDomainObjectFactory() default domain object factory}. This constructor should
      * be used for testing because it provides a transient {@link CompetitorStore} as required for competitor persistence.
      */
-    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB) {
-        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore());
+    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore) {
+        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore);
     }
 
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore) {
+            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
         logger.info("Created " + this);
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
@@ -272,6 +283,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
+        
+        if (windStore == null) {
+            try {
+                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
+        }
+        this.windStore = windStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
@@ -766,16 +786,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
-            WindStore windStore, long timeoutInMilliseconds) throws Exception {
+            long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
             Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
             if (regatta == null) {
                 // create tracker and use an existing or create a default regatta
-                tracker = params.createRaceTracker(this);
+                tracker = params.createRaceTracker(this, windStore);
             } else {
                 // use the regatta selected by the RaceIdentifier regattaToAddTo
-                tracker = params.createRaceTracker(regatta, this);
+                tracker = params.createRaceTracker(regatta, this, windStore);
                 assert tracker.getRegatta() == regatta;
             }
             synchronized (raceTrackersByRegatta) {
@@ -1986,6 +2006,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
             }
         }
+    }
+
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
     }
     @Override
     public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {

@@ -697,9 +697,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
+    public WindTrack loadWindTrack(String regattaName, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
         final WindTrack result;
-        Map<WindSource, WindTrack> resultMap = loadWindTracks(regatta, race, windSource, millisecondsOverWhichToAverage);
+        Map<WindSource, WindTrack> resultMap = loadWindTracks(regattaName, race, windSource, millisecondsOverWhichToAverage);
         if (resultMap.containsKey(windSource)) {
             result = resultMap.get(windSource);
         } else {
@@ -712,9 +712,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName, RaceDefinition race,
             long millisecondsOverWhichToAverageWind) {
-        Map<WindSource, WindTrack> result = loadWindTracks(regatta, race, /* constrain wind source */ null, millisecondsOverWhichToAverageWind);
+        Map<WindSource, WindTrack> result = loadWindTracks(regattaName, race, /* constrain wind source */ null, millisecondsOverWhichToAverageWind);
         return result;
     }
 
@@ -723,7 +723,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            if <code>null</code>, wind for all sources will be loaded; otherwise, only wind data for the wind
      *            source specified by this argument will be loaded
      */
-    private Map<WindSource, WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
+    private Map<WindSource, WindTrack> loadWindTracks(String regattaName, RaceDefinition race,
             WindSource constrainToWindSource, long millisecondsOverWhichToAverageWind) {
         Map<WindSource, WindTrack> result = new HashMap<WindSource, WindTrack>();
         try {
@@ -738,7 +738,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
             }
             BasicDBObject queryByName = new BasicDBObject();
-            queryByName.put(FieldNames.EVENT_NAME.name(), regatta.getName());
+            queryByName.put(FieldNames.EVENT_NAME.name(), regattaName);
             queryByName.put(FieldNames.RACE_NAME.name(), race.getName());
             if (constrainToWindSource != null) {
                 queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
@@ -749,13 +749,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 for (DBObject dbWind : windFixesFoundByName) {
                     Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
                     // write the wind fix with the new ID-based key and remove the legacy wind fix from the DB
-                    windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regatta.getName(),
+                    windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regattaName,
                             wind.getB(), wind.getA()));
                 }
-                logger.info("Migrating "+windFixesFoundByName.size()+" wind fixes of regatta "+regatta.getName()+
+                logger.info("Migrating "+windFixesFoundByName.size()+" wind fixes of regatta "+regattaName+
                         " and race "+race.getName()+" to ID-based keys");
                 windTracks.insert(windFixesToMigrate.toArray(new DBObject[windFixesToMigrate.size()]));
-                logger.info("Removing "+windFixesFoundByName.size()+" wind fixes that were keyed by the names of regatta "+regatta.getName()+
+                logger.info("Removing "+windFixesFoundByName.size()+" wind fixes that were keyed by the names of regatta "+regattaName+
                         " and race "+race.getName());
                 windTracks.remove(queryByName);
             }

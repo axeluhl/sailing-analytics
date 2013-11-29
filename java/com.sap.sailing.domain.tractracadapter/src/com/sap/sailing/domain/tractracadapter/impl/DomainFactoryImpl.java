@@ -632,9 +632,9 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword) {
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, String tracTracUsername, String tracTracPassword) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, this, tracTracUsername, tracTracPassword);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, this, tracTracUsername, tracTracPassword);
     }
 
     @Override
