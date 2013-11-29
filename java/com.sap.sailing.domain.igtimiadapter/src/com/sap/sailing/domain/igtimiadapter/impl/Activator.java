@@ -24,14 +24,22 @@ import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
  * 
  */
 public class Activator implements BundleActivator {
+
     private static Activator INSTANCE;
     
-    private static final String CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
-    private static final String CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
+    private static final String DEFAULT_CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
+    private static final String DEFAULT_CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
+    private static final String DEFAULT_CLIENT_REDIRECT_URI = "http://sapsailing.com/igtimi/oauth/v1/authorizationcallback";
+    private static final String CLIENT_ID_PROPERTY_NAME = "igtimi.client.id";
+    private static final String CLIENT_SECRET_PROPERTY_NAME = "igtimi.client.secret";
+    private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
     private IgtimiConnectionFactory connectionFactory;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Client client = new ClientImpl(CLIENT_ID, CLIENT_SECRET, "http://sapsailing.com");
+        final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
+        final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME, DEFAULT_CLIENT_SECRET);
+        final String clientRedirectUri = System.getProperty(CLIENT_REDIRECT_URI_PROPERTY_NAME, DEFAULT_CLIENT_REDIRECT_URI);
+        Client client = new ClientImpl(clientId, clientSecret, clientRedirectUri);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         connectionFactory = new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
