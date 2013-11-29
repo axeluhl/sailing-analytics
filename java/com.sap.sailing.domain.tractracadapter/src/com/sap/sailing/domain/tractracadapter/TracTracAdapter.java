@@ -47,7 +47,7 @@ public interface TracTracAdapter {
      *            is stopped; use -1 to wait forever
      */
     RacesHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds,
+            URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds,
             String tracTracUsername, String tracTracPassword) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -66,7 +66,7 @@ public interface TracTracAdapter {
      */
     RacesHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
-            TimePoint trackingEndTime, RaceLogStore raceLogStore, WindStore windStore,
+            TimePoint trackingEndTime, RaceLogStore raceLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 

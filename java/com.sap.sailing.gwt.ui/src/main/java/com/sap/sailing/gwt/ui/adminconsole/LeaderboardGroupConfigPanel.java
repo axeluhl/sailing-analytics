@@ -176,7 +176,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.displayName);
-                return null;
+                return strings;
             }
         };
         leaderboardsFunctionPanel.add(leaderboardsFilterablePanel);

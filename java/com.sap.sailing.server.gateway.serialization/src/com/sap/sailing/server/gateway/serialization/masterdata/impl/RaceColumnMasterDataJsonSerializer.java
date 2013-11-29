@@ -1,11 +1,16 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.io.Serializable;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceColumn> {
@@ -17,6 +22,7 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_REGATTA_NAME = "regattaName";
     public static final String FIELD_FACTOR = "factor";
+    public static final String FIELD_WIND = "wind";
     
     @Override
     public JSONObject serialize(RaceColumn raceColumn) {
@@ -35,8 +41,31 @@ public class RaceColumnMasterDataJsonSerializer implements JsonSerializer<RaceCo
                 jsonRaceIdentifierForFleet.put(FIELD_REGATTA_NAME, raceIdentifierForFleet.getRegattaName());
                 raceIdentifiers.add(jsonRaceIdentifierForFleet);
             }
+            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+            if (trackedRace != null) {
+                jsonRaceColumn.put(FIELD_WIND, serializeWindInformation(trackedRace));
+            }
         }
         return jsonRaceColumn;
+    }
+
+    private JSONArray serializeWindInformation(TrackedRace trackedRace) {
+        JSONArray jsonWindInfo = new JSONArray();
+        Iterable<WindSource> windSources = trackedRace.getWindSources();
+        String raceName = trackedRace.getRace().getName();
+        Serializable raceId = trackedRace.getRace().getId();
+        String regattaName = trackedRace.getTrackedRegatta().getRegatta().getName();
+        if (windSources != null) {
+            for (WindSource source : windSources) {
+                if (source.canBeStored()) {
+                    WindTrack track = trackedRace.getOrCreateWindTrack(source);
+                    JsonSerializer<WindTrack> windtrackSerializer = new WindTrackMasterDataJsonSerializer(source,
+                            regattaName, raceName, raceId);
+                    jsonWindInfo.add(windtrackSerializer.serialize(track));
+                }
+            }
+        }
+        return jsonWindInfo;
     } 
 
 }

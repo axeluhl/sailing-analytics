@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -151,11 +152,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new AbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-            @Override
-            public void applyFilter() {
-                super.applyFilter();
-                onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            }
 
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
@@ -229,7 +225,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.getName().compareTo(r2.getName());
+                return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
 
