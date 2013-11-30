@@ -16,8 +16,8 @@
     <string name="current_time">Zeit</string>
     <string name="race_finished_template">%s ist beendet</string>
     <string name="race_first_boat_finished">Erstes Boot im Ziel:</string>
-    <string name="race_first_finisher" formatted="false">Erstes Boot im Ziel um %s</string>
-    <string name="race_first_finisher_and_time_limit" formatted="false">Erstes Boot im Ziel um %s, Zeitlimit endet %s</string>
+    <string name="race_first_finisher">Erstes Boot im Ziel um %1$s</string>
+    <string name="race_first_finisher_and_time_limit">Erstes Boot im Ziel um %1$s, Zeitlimit endet %2$s</string>
     <string name="race_time_limit">Zeitlimit endet %s</string>
     <string name="choose_startmode">Wähle Startmodus</string>
     <string name="choose_abort_mode">Wähle anzuzeigende Flaggen</string>
@@ -51,7 +51,6 @@
     <string name="select_raceStartType">Startmodus auswählen</string>
     <string name="time_until_start">Zeit bis Start (mit Startzeit oben)</string>
     <string name="label_race">Rennen: </string>
-    <string name="login_type_officer">Als Wettfahrtleiter auf Rennbahn anmelden</string>
     <string name="login_type_viewer">Im Demo-Modus anmelden</string>
     <string name="racelist_unscheduled">Noch nicht geplant</string>
     <string name="racelist_scheduled">Geplant für %s</string>
@@ -82,7 +81,7 @@
     <string name="confirmation_blue_flag_display">Blaue Flagge wirklich anzeigen?</string>
     <string name="confirmation_first_substitute_display">Gesamtrückruf wirklich anzeigen?</string>
     <string name="finishing_limit_template">Zeitlimit endet um %s</string>
-    <string name="race_running_since_template" formatted="false">%s läuft seit %s</string>
+    <string name="race_running_since_template">%1$s läuft seit %2$s</string>
     <string name="race_reset_confirmation_header">Zurücksetzen des Rennens</string>
     <string name="race_reset_confirmation_warning">Beim Zurücksetzen des Rennens werden alle Daten gelöscht. Alle Informationen zum Rennen müssen erneut eingegeben werden. Nur der eingegeben Kurs bleibt erhalten. Ein Zurücksetzen wird nicht empfohlen.</string>
     <string name="race_reset_confirmation_title">Zurücksetzen</string>
@@ -180,7 +179,6 @@
     <string name="longitude">Longitude</string>
     <string name="wind_speed_direction_not_a_valid_number">Die Windgeschwindigkeit oder -richtung ist keine valide Zahl. Bitte korrigieren Sie den Wert.</string>
     <string name="wind_location_or_fields_not_valid">Die eingegebene Position, Windgeschwindigkeit oder -richtung ist leer. Bitte korrigieren Sie die Werte.</string>
-    <string name="your_position">Aktuelle Position</string>
     <string name="waiting_for_gps">Warte auf GPS Signal&#8230;</string>
     <string name="store_wind_entry">4. Windeingaben speichern</string>
     <string name="store_wind">Windeingaben speichern</string>
@@ -222,7 +220,7 @@
     
     <string name="loading_failure">Fehler beim Laden</string>
 	<string name="wind_unknown">(Wind setzen)</string>
-	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	<string name="wind_info">(%1$s kn, %2$s)</string>
 	<string name="login">Anmelden</string>
 	<string name="login_onto_course_area">Auf Rennbahn anmelden</string>
 	<string name="please_select_a_login_type">Bitte Login-Typ angeben.</string>
@@ -243,7 +241,7 @@
 	<string name="logout_dialog_message">Wenn Sie sich abmelden wird kein Rennen mehr verwaltet.</string>
 	<string name="logout">Abmelden</string>
 	
-	<string name="loading_configuration">Lade Konfiguration...</string>
+	<string name="loading_configuration">Lade Konfiguration&#8230;</string>
 	<string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
 <string name="loading_configuration_not_found">Für dieses Gerät existiert keine Konfiguration auf dem Server.</string>
 	<string name="loading_configuration_succeded">Konfiguration vom Server übernommen.</string>

@@ -17,8 +17,8 @@
     <string name="current_time">Current time</string>
     <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
-    <string name="race_first_finisher" formatted="false">First finisher at %s</string>
-    <string name="race_first_finisher_and_time_limit" formatted="false">First finisher at %s, Race finishing limit is at %s</string>
+    <string name="race_first_finisher">First finisher at %1$s</string>
+    <string name="race_first_finisher_and_time_limit">First finisher at %1$s, Race finishing limit is at %2$s</string>
     <string name="race_time_limit">Race finishing limit is at %s</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
     <string name="choose_abort_mode">Select the flags you want to display</string>
@@ -85,7 +85,7 @@
     <string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
     <string name="confirmation_first_substitute_display">Are you sure to display general recall?</string>
     <string name="finishing_limit_template">Race finishing limit is at %s</string>
-    <string name="race_running_since_template" formatted="false">%s runs since %s</string>
+    <string name="race_running_since_template">%1$s runs since %2$s</string>
     <string name="race_reset_confirmation_header">You are about to reset the race</string>
     <string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. All information regarding the race state has to be entered again. Only the entered course information are kept. We strongly recommend to not reset the race.</string>
     <string name="race_reset_confirmation_title">Reset race</string>
@@ -231,7 +231,7 @@
     
     <string name="loading_failure">Load failure</string>
 	<string name="wind_unknown">(click to set wind)</string>
-	<string name="wind_info" formatted="false">(%s kn, %s)</string>
+	<string name="wind_info">(%1$s kn, %2$s)</string>
 	<string name="login">Login</string>
 	<string name="login_onto_course_area">Login onto course area</string>
 	<string name="please_select_a_login_type">Please select a login type.</string>
