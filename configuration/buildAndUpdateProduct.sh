@@ -1,6 +1,7 @@
 #!/bin/bash
 set -o functrace
 
+
 find_project_home () 
 {
     if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
@@ -76,6 +77,7 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
+android=0
 reporting=0
 suppress_confirmation=0
 extra=''
@@ -89,6 +91,7 @@ if [ $# -eq 0 ]; then
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo "-p Enable proxy mode (overwrites file specified by -m)"
+    echo "-a Build the Android projects (RaceCommittee App)"
     echo "-r Enable generating surefire test reports"
     echo "-m <path to file> Specify alternate maven configuration (possibly has side effect on proxy setting)"
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
@@ -128,7 +131,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocprm:n:l:s:w:u'
+options=':bgtocparm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
@@ -138,6 +141,7 @@ do
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
+        a) android=1;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
@@ -420,6 +424,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="-Pdebug.no-gwt-compile"
 	fi
 
+    # back to root!
+    cd $PROJECT_HOME
+
 	if [ $testing -eq 0 ]; then
 	    echo "INFO: Skipping tests"
 	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
@@ -440,6 +447,21 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
+    if [ $android -eq 1 ]; then
+        if [[ $ANDROID_HOME == "" ]]; then
+            echo "Environment variable ANDROID_HOME not found. Aborting."
+            exit
+        fi
+        echo "ANDROID_HOME=$ANDROID_HOME"
+        PATH=$PATH:$ANDROID_HOME/tools
+        PATH=$PATH:$ANDROID_HOME/platform-tools
+
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        echo "RC_APPVERSION=$RC_APP_VERSION"
+        
+        extra="$extra -P with-mobile"
+    fi
+
     if [ $reporting -eq 1 ]; then
         echo "INFO: Activating reporting"
         extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
@@ -450,7 +472,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-    cd $PROJECT_HOME
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
     if [ $reporting -eq 1 ]; then
