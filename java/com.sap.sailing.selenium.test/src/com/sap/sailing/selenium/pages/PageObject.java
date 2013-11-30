@@ -4,15 +4,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.PageFactory;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
@@ -20,6 +17,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
+import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
 
 /**
  * <p>Within a web app's UI there are areas that tests interact with. A page object simply models these as objects
@@ -241,7 +239,7 @@ public class PageObject {
      *   the default implementation.</p>
      */
     protected void initElements() {
-        PageFactory.initElements(new SeleniumElementLocatorFactory(this.context, getPageLoadTimeOut()), this);
+        PageFactory.initElements(new SeleniumFieldDecorator(new SeleniumElementLocatorFactory(this.context, getPageLoadTimeOut())), this);
     }
     
     /**
