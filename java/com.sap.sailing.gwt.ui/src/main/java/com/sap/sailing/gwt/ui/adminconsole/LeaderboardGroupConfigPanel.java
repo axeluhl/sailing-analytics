@@ -192,7 +192,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 refreshLeaderboardsList();
             }
         });
-        refreshLeaderboardsButton.ensureDebugId("refreshLeaderboardsButton");
+        refreshLeaderboardsButton.ensureDebugId("RefreshLeaderboardsButton");
         leaderboardsFunctionPanel.add(refreshLeaderboardsButton);
         TextColumn<StrippedLeaderboardDTO> leaderboardsNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
