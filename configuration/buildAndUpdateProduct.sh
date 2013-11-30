@@ -77,22 +77,22 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
-android=0
+android=1
 reporting=0
 suppress_confirmation=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
+    echo "-a Disable mobile projects (RaceCommittee App)"
+    echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo "-p Enable proxy mode (overwrites file specified by -m)"
-    echo "-a Build the Android projects (RaceCommittee App)"
-    echo "-r Enable generating surefire test reports"
     echo "-m <path to file> Specify alternate maven configuration (possibly has side effect on proxy setting)"
     echo "-n <package name> Name of the bundle you want to hot deploy. Needs fully qualified name like"
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
@@ -141,7 +141,7 @@ do
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
-        a) android=1;;
+        a) android=0;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
@@ -450,6 +450,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     if [ $android -eq 1 ]; then
         if [[ $ANDROID_HOME == "" ]]; then
             echo "Environment variable ANDROID_HOME not found. Aborting."
+            echo "Deactivate mobile build with parameter -a."
             exit
         fi
         echo "ANDROID_HOME=$ANDROID_HOME"
@@ -459,7 +460,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APPVERSION=$RC_APP_VERSION"
         
-        extra="$extra -P with-mobile"
+    else
+        echo "INFO: Deactivating mobile modules"
+        extra="$extra -P !with-mobile"
     fi
 
     if [ $reporting -eq 1 ]; then

@@ -11,17 +11,20 @@
 
 	<modules>
 		<module>java</module>
-		<module>mobile</module>
 	</modules>
 
-	<!--<profiles>
+	<profiles>
 		<profile>
+			<!-- deactivate with parameter '-P !with-mobile'-->
 			<id>with-mobile</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<modules>
 				<module>mobile</module>
 			</modules>
 		</profile>
-    </profiles>-->
+    </profiles>
 
 	<!--<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
