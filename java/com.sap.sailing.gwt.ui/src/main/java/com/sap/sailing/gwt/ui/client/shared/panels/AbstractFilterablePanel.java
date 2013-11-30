@@ -104,25 +104,21 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *         <code>false</code> if not
      */
     private boolean filter(T obj, List<String> wordsToFilter) {
-        for (String s : getSearchableStrings(obj)) {
-            boolean failed = false;
-            if (s == null) {
-                failed = true;
-            } else {
-                for (String word : wordsToFilter) {
-                    String textAsUppercase = word.toUpperCase().trim();
-                    if (!s.toUpperCase().contains(textAsUppercase)) {
-                        failed = true;
-                        break;
-                    }
+        boolean failed = false;
+        for (String word : wordsToFilter) {
+            String textAsUppercase = word.toUpperCase().trim();
+            failed = true;
+            for (String s : getSearchableStrings(obj)) {
+                if (s != null && s.toUpperCase().contains(textAsUppercase)) {
+                    failed = false;
+                    break;
                 }
             }
-            if (!failed) {
-                return true;
-
+            if (failed) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public TextBox getTextBox() {
