@@ -11,6 +11,7 @@
     <string name="preference_course_areas_default">Alpha,Bravo</string>
     <string-array name="preference_course_areas_default">
         <item>Alpha</item>
+        <item>Stadium</item>
     </string-array>
     <string-array name="preference_course_areas_example">
         <item>Alpha</item>
