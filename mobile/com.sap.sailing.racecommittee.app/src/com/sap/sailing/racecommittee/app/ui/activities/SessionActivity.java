@@ -11,7 +11,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class SessionActivity extends BaseActivity {
+public abstract class SessionActivity extends BaseActivity {
 
     private static final String TAG = BaseActivity.class.getName();
     

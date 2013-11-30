@@ -5,14 +5,13 @@ import java.lang.ref.WeakReference;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.preference.PreferenceManager;
 
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.logging.LifecycleLogger;
 import com.sap.sailing.racecommittee.app.utils.LoggingExceptionHandler;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 /**
  * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
@@ -22,12 +21,6 @@ import com.sap.sailing.racecommittee.app.utils.LoggingExceptionHandler;
 public class RaceApplication extends Application {
 
     private final static String TAG = RaceApplication.class.getName();
-    
-    /**
-     * Whenever you change a preference's type (e.g. from Integer to String) you need to bump
-     * this version code to the appropriate app version (see AndroidManifest.xml).
-     */
-    private final static int LAST_VERSION_COMPATIBLE_WITH_PREFERENCES = 3;
     
     private static StringContext stringContext;
     
@@ -46,28 +39,10 @@ public class RaceApplication extends Application {
         LifecycleLogger.enableLifecycleLogging(AppConstants.ENABLE_LIFECYCLE_LOGGING);
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
 
-        setupPreferences();
+        new PreferenceHelper(this).setupPreferences();
     }
     
-    private void setupPreferences() {
-        clearPreferencesIfNeeded();
-        PreferenceManager.setDefaultValues(this, R.xml.preference_general, false);
-        PreferenceManager.setDefaultValues(this, R.xml.preference_racing_procedure, false);
-        PreferenceManager.setDefaultValues(this, R.xml.preference_course_designer, false);
-    }
-
-    void clearPreferencesIfNeeded()
-    {
-        PackageInfo info = getPackageInfo(this);
-        if(info == null || info.versionCode < LAST_VERSION_COMPATIBLE_WITH_PREFERENCES)
-        {
-            ExLog.i(TAG, "Clearing the preference cache.");
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            editor.clear().commit();
-        }
-    }
-    
-    public static PackageInfo getPackageInfo(Application app) {
+    public static PackageInfo getPackageInfo(Context app) {
         try {
             return app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
         } catch (NameNotFoundException e) {
