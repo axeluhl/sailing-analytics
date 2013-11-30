@@ -11,16 +11,17 @@
 
 	<modules>
 		<module>java</module>
+		<module>mobile</module>
 	</modules>
 
-	<profiles>
+	<!--<profiles>
 		<profile>
 			<id>with-mobile</id>
 			<modules>
 				<module>mobile</module>
 			</modules>
 		</profile>
-    </profiles>
+    </profiles>-->
 
 	<!--<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
