@@ -459,6 +459,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APPVERSION=$RC_APP_VERSION"
+        extra="$extra -Drc-app-api-version=$RC_APP_VERSION"
         
     else
         echo "INFO: Deactivating mobile modules"
