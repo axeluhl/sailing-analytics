@@ -65,15 +65,20 @@ public class GenericCellTable<T extends DataEntry> extends CellTable2<T> {
          */
         @Override
         public <S extends CellTable2<T>> T createEntry(S table, WebElement element) {
-            try {
-                Constructor<T> constructor = this.type.getConstructor(table.getClass(), WebElement.class);
-                
-                return constructor.newInstance(table, element);
-            } catch (Exception exception) {
-                throw new RuntimeException("Can't create DataEntry of type " + this.type, exception);
-            }
+        	Class<?> clazz = table.getClass();
+        	
+        	while(clazz != null) {
+        		try {
+        			Constructor<T> constructor = this.type.getConstructor(clazz, WebElement.class);
+        			
+                    return constructor.newInstance(table, element);
+        		} catch (Exception exception) {
+        			clazz = clazz.getSuperclass();
+        		}
+        	}
+        	
+        	throw new RuntimeException("Can't create DataEntry of type " + this.type);
         }
-        
     }
     
     private DataEntryFactory<T> factory;
@@ -90,6 +95,8 @@ public class GenericCellTable<T extends DataEntry> extends CellTable2<T> {
     
     @Override
     protected T createDataEntry(WebElement element) {
-        return this.factory.createEntry(this, element);
+        T entry = this.factory.createEntry(this, element);
+        System.out.println(entry.getColumnContent(0));
+        return entry;
     }
 }
