@@ -386,8 +386,7 @@ public class StoreAndForward implements Runnable {
         int sailMasterPort = Integer.valueOf(args[i++]);
         int clientPort = Integer.valueOf(args[i++]);
         
-        MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
+        MongoDBService mongoDBService = MongoDBConfiguration.getDefaultConfiguration().getService();
         SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         if (hostname == null) {
             new StoreAndForward(sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);

@@ -1974,4 +1974,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
     }
+
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
+    }
 }

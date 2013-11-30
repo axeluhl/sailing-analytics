@@ -17,6 +17,8 @@ Select a subnet that matches the one of the database server (in most cases this 
 
 Leave Kernel and RAM disk to Default. Then put the configuration for this server into the text area labeled "User Data" (Advanced Data). Here one example that loads a specific release package.
 
+<img src="/wiki/images/amazon/UserDataDetails.JPG" width="70%" height="70%"/>
+
 <pre>
 INSTALL_FROM_RELEASE=master-201311062138
 USE_ENVIRONMENT=live-server
@@ -38,9 +40,11 @@ Configure the key. Make sure to always use the "Administrator" key.
 
 <img src="/wiki/images/amazon/StartInstance7.JPG" width="70%" height="70%"/>
 
-Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costy.
+Your instance is now launching. You can create alarms if you want to monitor the state of the application. Be aware that monitoring is costly.
 
 <img src="/wiki/images/amazon/StartInstance12.JPG" width="70%" height="70%"/>
+
+Should the reachability status check fail, your instance will not be reachable, and the best option is to terminate and re-create that instance. Sorry.
 
 Your application is now ready. Check that everything is green.
 

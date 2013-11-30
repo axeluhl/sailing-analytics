@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -34,28 +34,37 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRaceWithWindEssentials;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class DummyTrackedRace implements TrackedRace {
+public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
-    private Iterable<? extends Competitor> competitors;
     private Regatta regatta;
+    private String raceName = "DummyRace";
+    private Serializable raceId;
+    private Iterable<? extends Competitor> competitors = new HashSet<Competitor>();
 
-    public DummyTrackedRace(Iterable<? extends Competitor> competitors, Regatta regatta) {
-        this.competitors = competitors;
+    public DummyTrackedRace(final Iterable<? extends Competitor> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta) {
+        super(new RaceDefinitionImpl("DummyRace", null, null, competitors), trackedRegatta, EmptyWindStore.INSTANCE, -1);
+        this.competitors  = competitors;
         this.regatta = regatta;
+    }
+    
+    public DummyTrackedRace(final String raceName, final Serializable raceId) {
+        super(new RaceDefinitionImpl(raceName, null, null, new HashSet<Competitor>()), null, EmptyWindStore.INSTANCE, -1);
+        this.raceName = raceName;
+        this.raceId = raceId;
     }
 
     @Override
     public RaceDefinition getRace() {
-        return new RaceDefinitionImpl("dummy", null, null, competitors);
+        return new RaceDefinitionImpl(raceName, null, null, competitors, raceId);
     }
 
     @Override
@@ -180,28 +189,6 @@ public class DummyTrackedRace implements TrackedRace {
 
     @Override
     public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        return null;
-    }
-
-    @Override
-    public Iterable<WindSource> getWindSources(WindSourceType type) {
-        return null;
-    }
-
-    @Override
-    public Iterable<WindSource> getWindSources() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
-        return null;
-    }
-
-    @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        // TODO Auto-generated method stub
         return null;
     }
 

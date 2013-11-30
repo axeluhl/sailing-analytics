@@ -12,6 +12,6 @@ public class RestApiApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return new HashSet<Class<?>>(Arrays.asList(new Class<?>[] { Callback.class }));
+        return new HashSet<Class<?>>(Arrays.asList(new Class<?>[] { AuthorizationCallback.class }));
     }
 }

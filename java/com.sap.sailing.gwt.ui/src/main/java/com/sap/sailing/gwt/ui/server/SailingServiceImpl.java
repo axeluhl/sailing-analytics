@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
 
@@ -64,7 +65,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -119,6 +119,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -3264,22 +3265,35 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
+        long startTime = System.currentTimeMillis();
         String hostname;
+        Integer port = -1;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
+            port = url.getPort();
         } catch (MalformedURLException e1) {
-            hostname = urlAsString.split("://")[1].split("/")[0]; // also eliminate a trailing slash
+            hostname = urlAsString;
+            if (urlAsString.contains("://")) {
+                hostname = hostname.split("://")[1];
+            }
+            if (hostname.contains("/")) {
+                hostname = hostname.split("/")[0]; // also eliminate a trailing slash
+            }
+            if (hostname.contains(":")) {
+                String[] split = hostname.split(":");
+                hostname = split[0];
+                port = Integer.parseInt(split[1]);
+            }
         }
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
-        BufferedReader rd  = null;
-        StringBuilder sb = null;
-        String line = null;
+
         URL serverAddress = null;
+        GZIPInputStream gzip = null;
         try {
-            serverAddress = createUrl(hostname, query);
+            serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
             connection = null;
             //Set up the initial connection
@@ -3288,9 +3302,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection.setDoOutput(true);
             connection.setReadTimeout(10000);
             connection.connect();
+
             //read the result from the server
-            rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            sb = new StringBuilder();
+            BufferedReader rd;
+            if (compress) {
+                gzip = new GZIPInputStream(connection.getInputStream());
+                rd  = new BufferedReader(new InputStreamReader(gzip));
+            } else {
+                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            }
+            StringBuilder sb = new StringBuilder();
+            String line;
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
@@ -3300,19 +3322,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } finally {
             // close the connection, set all objects to null
             connection.disconnect();
-            rd = null;
-            sb = null;
             connection = null;
+            long timeToImport = System.currentTimeMillis() - startTime;
+            logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
+            try {
+                if (gzip != null) {
+                    gzip.close();
+                }
+            } catch (IOException e) {
+            }
         }
     }
     
-    private URL createUrl(String host, String query) throws Exception {
-        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    private URL createUrl(String host, Integer port, String query) throws Exception {
+        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
     }
     
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(response, override);
+        return importer.importMasterData(string, override);
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
@@ -3320,12 +3348,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
-        if (queryStringBuffer.length() == 1) {
-            return "";
-        } else {
-            // Delete last "&"
-            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
-        }
+        queryStringBuffer.append("compress=true");
         return queryStringBuffer.toString();
     }
 

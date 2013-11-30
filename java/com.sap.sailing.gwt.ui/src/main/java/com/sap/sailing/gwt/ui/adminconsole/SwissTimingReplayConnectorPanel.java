@@ -33,6 +33,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -257,7 +258,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         result.setComparator(nameColumn, new Comparator<SwissTimingReplayRaceDTO>() {
             @Override
             public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
-                return o1.name.compareTo(o2.name);
+                return new NaturalComparator().compare(o1.name, o2.name);
             }
         });
         result.setComparator(boatClassColumn, new Comparator<SwissTimingReplayRaceDTO>() {

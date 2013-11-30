@@ -117,9 +117,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
         splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
         splitPanel.add(createLeaderboardGroupDetailsGUI(tableRes));
-        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         splitPanel.add(createSwitchLeaderboardsGUI());
-        splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_BOTTOM);
         splitPanel.add(createLeaderboardsGUI(tableRes));
 
         //Load Data
@@ -178,7 +176,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.displayName);
-                return null;
+                return strings;
             }
         };
         leaderboardsFunctionPanel.add(leaderboardsFilterablePanel);
