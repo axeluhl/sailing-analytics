@@ -10,10 +10,10 @@ import com.sap.sailing.selenium.pages.common.DataEntryDialog;
 
 public class LeaderboardGroupCreateDialog extends DataEntryDialog {
 
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardGroupNameField")
+    @FindBy(how = BySeleniumId.class, using = "NameTextBox")
     private WebElement nameField;
 
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardGroupDescriptionField")
+    @FindBy(how = BySeleniumId.class, using = "DescriptionTextBox")
     private WebElement descriptionField;
 
     public LeaderboardGroupCreateDialog(WebDriver driver, WebElement element) {
