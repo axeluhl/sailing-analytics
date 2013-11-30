@@ -62,6 +62,7 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
         DataEntry result = query.firstResult();
         if (result != null) {
             Actions.findRemoveAction(result.getWebElement()).click();
+            Actions.acceptAlert(this.driver);
         }
     }
 
@@ -83,7 +84,7 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
     }
 
     public void filterLeaderboards(String filterText) {
-        WebElement leaderboardFilterTextField = leaderboardsCaptionPanel.findElement(BySeleniumId.id("FilterTextField"));
+        WebElement leaderboardFilterTextField = leaderboardsCaptionPanel.findElement(new BySeleniumId("FilterTextField"));
         leaderboardFilterTextField.clear();
         leaderboardFilterTextField.sendKeys(filterText);
     }
