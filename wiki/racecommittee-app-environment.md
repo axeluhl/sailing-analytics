@@ -71,3 +71,5 @@ See https://github.com/mosabua/maven-android-sdk-deployer/ on how to reference o
 ## Building and Build-Script
 
 When executing Maven the **mobile** sub-module (including the RaceCommittee App) will be build by default. The buildAndUpdateProduct.sh has been extended to support disabling building the mobile projects. Check the script's help text to see how.
+
+buildAndUpdateProduct.sh will check if **ANDROID_HOME** is set.
