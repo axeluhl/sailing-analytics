@@ -76,7 +76,7 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 
 #### Additional steps required for Android projects
 
-To ensure that all components of the Analysis Suite are working, you should also import all Android projects into your workspace. There are some additional requirements to enable the build process of these projects.
+To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
 
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
   - In Eclipse click Help -> Install New Software -> Add and enter https://dl-ssl.google.com/android/eclipse/
@@ -87,6 +87,7 @@ To ensure that all components of the Analysis Suite are working, you should also
   - In Eclipse press Window -> Android SDK Manager
   - Ensure that everything of "Tools" is installed
   - Install everything of "Android 3.2 API 13"
+  - Optional: it's a good idea to install the newest API Version
   - Install "Android Support Library" (Extras), "Google Play Services" (Extras) and "Google USB Driver" (Extras)
 3. Import the Android projects into your workspace
   - Android projects can be found in the /mobile subdirectory
