@@ -18,6 +18,8 @@ You need to assign this identifier to the target device. Click on **QR-Sync**, r
 
 Fire up the RaceCommittee app on the target device. Go to the **settings view** by clicking on the options overflow button (top right corner) or your device's menu button. Select the preference category **General** and click on **Synchronize connection settings**. Scan the barcode shown in the AdminConsole (if you don't have a barcode app installed the RaceCommittee App should redirect you to the Google Play Store offering an app). The **Device Identifier** and **Webservice URL** preferences should reflect the changes made.
 
+After the server URL has been updated the app will check the server whether it should auto-update itself or not. To ensure that your app is compatible with the server you should choose to install the APK provided by the server.
+
 <img src="/wiki/images/rcapp/admin_config_step_4.png" />
 
 Back in the AdminConsole configure your device (see next step). When done click **Save + Clone** to use the current configuration as a template for the next device.
