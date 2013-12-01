@@ -4,7 +4,7 @@ Building the RaceCommittee App has been integrated into the maven build process 
 
 ## Maven
 
-Bla.
+Currently there is no Naven plugin available for Android 3.2 on the internets (see [Maven Repository](http://mvnrepository.com/artifact/com.google.android/android)). Therefore we had to build the correct plugins by hand and place them into http://maven.sapsailing.com/maven/.
 
 ## Android SDK
 
