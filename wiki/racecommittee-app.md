@@ -25,6 +25,8 @@ Have a look at the following user guides to get an idea how to work with the Rac
 
 ## Course Designer
 
+Kuruh, Kuruh,...
+
 ## Build and Auto-Update
 
 On Maven builds the resulting APK of the RaceCommittee App will be made available as a static content on the server's web page.
