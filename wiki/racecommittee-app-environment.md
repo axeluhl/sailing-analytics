@@ -37,6 +37,8 @@ Install them by
 
     ./android update sdk --no-ui --all --filter 1,2,3,9,11,15,54,56,61,81,86
 
+**Your server must be capable of running 32bit binaries.** Otherwise installing and using the SDK will fail with errors similiar to "adb exit code -2: file or device not found".
+
 ## Maven
 
 Currently there is no Maven plugin available for Android 3.2 on the internets (see [Maven Repository](http://mvnrepository.com/artifact/com.google.android/android)). Therefore we had to build the correct plugins by hand and place them into http://maven.sapsailing.com/maven/.
