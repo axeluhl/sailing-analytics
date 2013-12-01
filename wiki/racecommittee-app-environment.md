@@ -1,4 +1,4 @@
-# RaceCommittee App (Build Environment)
+# RaceCommittee App (Server Build Environment)
 
 Building the RaceCommittee App has been integrated into the maven build process of the project. This document outlines how this environment is setup. Use this description whenever you need to set it up again (build-server, Maven repo, ...)
 
