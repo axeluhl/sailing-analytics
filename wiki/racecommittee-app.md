@@ -8,6 +8,7 @@ The RaceCommittee App is an Android 3.2 Tablet application.
 
 * See the [[OnBoarding Information|wiki/onboarding]] on how to setup your local environment for building the app
 * See [[Mobile Development|wiki/mobile-development]] for general tipps on mobile development.
+* See [[Server Environment|wiki/racecommittee-app-environment]] on how the server's build environment is configured for building the RaceCommittee App.
 
 ## Features
 A Feature List collected in September 2013 at the Testevent in Santander can be seen here:
@@ -19,7 +20,6 @@ The Feedback a User gave to the Application and the Feedback the user gave to th
 
 Have a look at the following user guides to get an idea how to work with the RaceCommittee App.
 
-* [[RaceCommittee App as the server administrator|wiki/racecommittee-app-environment]]
 * [[RaceCommittee App as an administrator|wiki/racecommittee-app-administrator]]
 * [[RaceCommittee App as a race officer|wiki/racecommittee-app-user]]
 
