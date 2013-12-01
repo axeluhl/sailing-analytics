@@ -35,6 +35,8 @@ Now these plugins can be referenced in your project's pom, e.g.:
       <version>19</version> <!-- Check your local plugin! Might be 19.0.0! See maven-sdk-deployer README! ->
     </dependency>
 
+See https://github.com/mosabua/maven-android-sdk-deployer/ on how to reference other SDK components. Be sure to read the section _Known Problems_.
+
 ## Build-Script
 
 Brom.
