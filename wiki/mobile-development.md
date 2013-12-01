@@ -22,3 +22,11 @@ Besides running the application on a plugged-in device there are multiple option
 ## Mocking the server
 
 For rapid development of the mobile applications using a mocked server has proven to work best. One can use [Fiddler](http://fiddler2.com/)'s AutoResponder feature to quickly try out new mobile features and easily test some edge cases.
+
+## Android Studio
+
+At the time of writing there is no way to develop in Eclipse and Android Studio simultaneously. This due to different project file formats and expected project directory structure. Although Android Studio will be the number one platform for Android development in the future, currently it is not feasible to switch, because of
+
+* Android Studio's build system Gradle is still in beta
+* OSGi support in the free version of Android Studio is far from completed
+* Android Studio is in Alpha (December 2013)
