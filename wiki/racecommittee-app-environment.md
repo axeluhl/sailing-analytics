@@ -16,7 +16,7 @@ This has been done with the help of the [maven-sdk-deployer](https://github.com/
 
 will install the needed android.jar as a Maven plugin into your local repository. Now you can copy/remote-deploy this plugin to your target repository (in our case http://maven.sapsailing.com/maven/). Ensure that you do this step with all other needed SDK components (see above). For example you need to issue 
 
-    maven-android-sdk-deployer/extras/compatibility-v13/mvn install
+    maven-android-sdk-deployer/extras/compatibility-v4/mvn install
 
 too.
 
