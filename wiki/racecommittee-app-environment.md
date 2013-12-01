@@ -1,10 +1,39 @@
 # RaceCommittee App (Build Environment)
 
-Building the RaceCommittee App has been integrated into the maven build process of the project. This document outlines how this environment is setup. Use this description whenever you need to set it up again.
+Building the RaceCommittee App has been integrated into the maven build process of the project. This document outlines how this environment is setup. Use this description whenever you need to set it up again (build-server, Maven repo, ...)
 
 ## Android SDK
 
-Rarar.
+On all build servers the Android SDK has to be installed. Pick up the [SDK Tools](http://developer.android.com/sdk/index.html) and install them on your server. Set an environment variable _ANDROID_HOME_ pointing to the install directory. It's a good idea to append some of the tools to your path:
+
+    PATH=$PATH:$ANDROID_HOME/tools
+    PATH=$PATH:$ANDROID_HOME/platform-tools
+
+Now it's time to install all the needed SDK components. List all available components by issuing
+
+    ./android list sdk --no-ui --all
+
+Each component will have a component ID attached. Mark down all needed component IDs. Install them by issuing
+
+    ./android update sdk --no-ui --all --filter [your-ids-comma-separated]
+
+At the time being the RaceCommittee App needs the following components:
+
+ 1- Android SDK Tools, revision 22.3
+     2- Android SDK Platform-tools, revision 19
+     3- Android SDK Build-tools, revision 19
+     9- SDK Platform Android 4.4, API 19, revision 1
+    11- SDK Platform Android 4.2.2, API 17, revision 2
+    15- SDK Platform Android 3.2, API 13, revision 1
+    54- Google APIs, Android API 19, revision 1
+    56- Google APIs, Android API 17, revision 3
+    61- Google APIs, Android API 13, revision 1
+    81- Android Support Library, revision 19
+    86- Google Play services, revision 13
+
+Install them by
+
+    ./android update sdk --no-ui --all --filter 1,2,3,9,11,15,54,56,61,81,86
 
 ## Maven
 
