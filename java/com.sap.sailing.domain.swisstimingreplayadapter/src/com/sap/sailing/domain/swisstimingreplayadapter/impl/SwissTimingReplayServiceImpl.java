@@ -106,7 +106,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
                     (String) jsonRaceEntry.get("flight_number"), (String) jsonRaceEntry.get("race_id"),
                     (String) jsonRaceEntry.get("rsc"), (String) jsonRaceEntry.get("name"),
                     (String) jsonRaceEntry.get("class"), startTime,
-                    (String) jsonRaceEntry.get("link"));
+                    (String) jsonRaceEntry.get("link")+"&_start=0");
             result.add(replayRace);
         }
         return result;

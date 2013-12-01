@@ -152,11 +152,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new AbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-            @Override
-            public void applyFilter() {
-                super.applyFilter();
-                onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            }
 
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
@@ -201,7 +196,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.getRegattaName().compareTo(r2.getRegattaName());
+                return new NaturalComparator().compare(r1.getRegattaName(), r2.getRegattaName());
             }
         });
 

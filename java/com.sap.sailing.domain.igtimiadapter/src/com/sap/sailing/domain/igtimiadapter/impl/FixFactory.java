@@ -34,7 +34,7 @@ public class FixFactory {
                 JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
                 int fixIndex = 0;
                 for (Object timePointMillis : timePointsMillis) {
-                    TimePoint timePoint = new MillisecondsTimePoint((Long) timePointMillis);
+                    TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
                     Map<Integer, Object> valuesPerSubindex = new HashMap<>();
                     int i=1;
                     JSONArray values;

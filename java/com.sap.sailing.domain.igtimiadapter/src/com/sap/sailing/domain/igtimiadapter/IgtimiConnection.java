@@ -20,13 +20,18 @@ public interface IgtimiConnection {
     Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     /**
-     * @param startTime optional; may be <code>null</code>
-     * @param endTime optional; may be <code>null</code>
-     * @param serialNumbers optional (may be <code>null</code>) if <code>permission</code> is {@link Permission#modify}
-     * @param streamIds optional; may be <code>null</code>
+     * @param startTime
+     *            optional; may be <code>null</code>
+     * @param endTime
+     *            optional; may be <code>null</code>
+     * @param deviceIds
+     *            optional (may be <code>null</code>) if <code>permission</code> is {@link Permission#modify}; lists the
+     *            devices for which to look for resources
+     * @param streamIds
+     *            optional; may be <code>null</code>
      */
     Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Iterable<String> streamIds) throws IllegalStateException,
+            Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException,
             ClientProtocolException, IOException, ParseException;
 
     /**

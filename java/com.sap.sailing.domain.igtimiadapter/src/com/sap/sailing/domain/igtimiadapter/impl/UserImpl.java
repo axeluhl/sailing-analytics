@@ -36,5 +36,10 @@ public class UserImpl implements User {
     public String getEmail() {
         return email;
     }
+    
+    @Override
+    public String toString() {
+        return getFirstName()+" "+getSurname()+" <"+getEmail()+">, ID "+getId();
+    }
 
 }

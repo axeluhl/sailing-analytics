@@ -26,6 +26,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -132,7 +133,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.getName().compareTo(r2.getName());
+                return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
 

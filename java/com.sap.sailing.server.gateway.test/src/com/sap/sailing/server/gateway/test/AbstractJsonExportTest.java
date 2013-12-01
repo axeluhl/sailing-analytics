@@ -41,8 +41,7 @@ public abstract class AbstractJsonExportTest {
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     public void setUp() {
-        service = MongoDBService.INSTANCE;
-        service.setConfiguration(MongoDBConfiguration.getDefaultTestConfiguration());
+        service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
 
         racingEventService = new RacingEventServiceImpl();

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -34,7 +33,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     
     @Override
     public Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpClient client = getHttpClient();
+        HttpClient client = connectionFactory.getHttpClient();
         HttpGet getUsers = new HttpGet(connectionFactory.getUsersUrl(account));
         JSONObject usersJson = ConnectivityUtils.getJsonFromResponse(client.execute(getUsers));
         final List<User> result = new ArrayList<>();
@@ -45,16 +44,11 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         return result;
     }
 
-    private HttpClient getHttpClient() {
-        HttpClient client = new SystemDefaultHttpClient();
-        return client;
-    }
-    
     @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpClient client = getHttpClient();
-        HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, serialNumbers, streamIds, account));
+            Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds, account));
         JSONObject resourcesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Resource> result = new ArrayList<>();
         for (Object userJson : (JSONArray) resourcesJson.get("resources")) {
@@ -67,7 +61,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpClient client = getHttpClient();
+        HttpClient client = connectionFactory.getHttpClient();
         HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
