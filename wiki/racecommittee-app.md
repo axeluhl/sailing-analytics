@@ -4,6 +4,8 @@
 
 ## Introduction
 
+The RaceCommittee App is an Android 3.2 Tablet application.
+
 ## Features
 A Feature List collected in September 2013 at the Testevent in Santander can be seen here:
 [Feature List RaceCommittee App](/doc/RaceCommittee Feature List.xlsx) (RaceCommittee Feature List, Sep. 2013, Julian Gimbel)
