@@ -17,9 +17,9 @@ Each component will have a component ID attached. Mark down all needed component
 
     ./android update sdk --no-ui --all --filter [your-ids-comma-separated]
 
-At the time being the RaceCommittee App needs the following components:
+At the time being the RaceCommittee App needs the following components (**warning: the component IDs will change in the future!**):
 
- 1- Android SDK Tools, revision 22.3
+     1- Android SDK Tools, revision 22.3
      2- Android SDK Platform-tools, revision 19
      3- Android SDK Build-tools, revision 19
      9- SDK Platform Android 4.4, API 19, revision 1
