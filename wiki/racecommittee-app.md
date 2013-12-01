@@ -23,7 +23,7 @@ Have a look at the following user guides to get an idea how to work with the Rac
 * [[RaceCommittee App as an administrator|wiki/racecommittee-app-administrator]]
 * [[RaceCommittee App as a race officer|wiki/racecommittee-app-user]]
 
-## Course Designer
+## Course Updates
 
 Kuruh, Kuruh,...
 
