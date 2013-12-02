@@ -78,6 +78,7 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>org.json.simple</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
