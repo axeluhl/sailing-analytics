@@ -8,7 +8,6 @@ import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite.Resolver;
 import com.sap.sailing.domain.tracking.Wind;
 
 public interface RaceState extends ReadonlyRaceState {
