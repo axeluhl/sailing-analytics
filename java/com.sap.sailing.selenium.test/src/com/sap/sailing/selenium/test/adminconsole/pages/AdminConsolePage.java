@@ -2,6 +2,8 @@ package com.sap.sailing.selenium.test.adminconsole.pages;
 
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -33,6 +35,8 @@ public class AdminConsolePage extends HostPage {
 
     private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration";
     private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration";
+    
+    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
 
     
     /**
@@ -119,10 +123,12 @@ public class AdminConsolePage extends HostPage {
             wait.pollingEvery(2, TimeUnit.SECONDS);
             WebElement scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
                     By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
+            scroller = scroller.findElement(By.tagName("img"));
             
             scroller.click();
             driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         }
+        logger.log(Level.INFO, String.format("Scrolled %d times.", 20 - maxScrollActions));
         
         tab.click();
         
