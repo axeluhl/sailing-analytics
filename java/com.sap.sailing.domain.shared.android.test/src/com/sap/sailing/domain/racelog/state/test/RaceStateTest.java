@@ -32,7 +32,6 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
-import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 
 public class RaceStateTest {
     
@@ -79,7 +78,7 @@ public class RaceStateTest {
         state.addChangedListener(listener);
         
         TimePoint startTime = MillisecondsTimePoint.now().plus(60 * 60 * 1000);
-        state.requestStartTime(nowMock, startTime, new RacingProcedurePrerequisiteAutoResolver());
+        state.forceStartTime(nowMock, startTime);
         
         assertEquals(startTime, state.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, state.getStatus());

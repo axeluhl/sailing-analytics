@@ -111,7 +111,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      
         // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
         // RacingProcedure we need to have a fallback
-        if (initalRacingProcedureType == null || initalRacingProcedureType == RacingProcedureType.UNKNOWN) {
+        RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
+        if (inRaceLogType != RacingProcedureType.UNKNOWN) {
+            this.cachedRacingProcedureType = inRaceLogType;
+        } else if (initalRacingProcedureType == null || initalRacingProcedureType == RacingProcedureType.UNKNOWN) {
             this.cachedRacingProcedureType = FallbackInitialProcedureType;
         } else {
             this.cachedRacingProcedureType = initalRacingProcedureType;
