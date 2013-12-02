@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class ScrolledTabLayoutPanel extends TabLayoutPanel {
     
     public static final String scrollLeftWidgetStyle = "gwt-ScrolledTabLayoutPanel-scrollLeft";
-    public static final String scrollRightWidgetStyle = "gwt-ScrolledTabLayoutPanel-scrollLeft";
+    public static final String scrollRightWidgetStyle = "gwt-ScrolledTabLayoutPanel-scrollRight";
 
     private static final int SCROLL_RIGHT_TAB_MARGIN = 10;
     private static final int SCROLL_ANIMATION_SPEED = 150;

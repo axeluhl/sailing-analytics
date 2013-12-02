@@ -114,10 +114,14 @@ public class AdminConsolePage extends HostPage {
         
         int maxScrollActions = 20;
         while (!tab.isDisplayed() && maxScrollActions-- > 0) {
-            WebElement scroller = tabPanel.findElement(By.className("gwt-ScrolledTabLayoutPanel-scrollRight"));
-            scroller.click();
             FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
-            wait.withTimeout(2, TimeUnit.SECONDS);
+            wait.withTimeout(10, TimeUnit.SECONDS);
+            wait.pollingEvery(2, TimeUnit.SECONDS);
+            WebElement scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
+                    By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
+            
+            scroller.click();
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         }
         
         tab.click();
