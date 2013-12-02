@@ -6,7 +6,14 @@ Building the RaceCommittee App has been integrated into the maven build process 
 
 ## Android SDK
 
-On all build servers the Android SDK has to be installed. Pick up the [SDK Tools](http://developer.android.com/sdk/index.html) and install them on your server. Set an environment variable _ANDROID_HOME_ pointing to the install directory. It's a good idea to append some of the tools to your path:
+Before starting to install the Android SDK: **Your server must be capable of running 32bit binaries.** Otherwise installing and using the SDK will fail with errors similiar to "adb exit code -2: file or device not found".
+
+On CentOS 6.4 you should issue the following commands:
+
+    yum install libstdc++-4.4.7-4.el6.x86_64 # ensure that x86_x64 stdlib is up to date
+    yum install glibc.i686 glibc-devel.i686 libstdc++.i686 zlib-devel.i686 ncurses-devel.i686 libX11-devel.i686 libXrender.i686 libXrandr.i686
+
+Now we are ready to install the SDK. Pick up the [SDK Tools](http://developer.android.com/sdk/index.html) and install them on your server. Set an environment variable _ANDROID_HOME_ pointing to the install directory. It's a good idea to append some of the tools to your path:
 
     PATH=$PATH:$ANDROID_HOME/tools
     PATH=$PATH:$ANDROID_HOME/platform-tools
@@ -36,8 +43,6 @@ At the time being the RaceCommittee App needs the following components (**warnin
 Install them by
 
     ./android update sdk --no-ui --all --filter 1,2,3,9,11,15,54,56,61,81,86
-
-**Your server must be capable of running 32bit binaries.** Otherwise installing and using the SDK will fail with errors similiar to "adb exit code -2: file or device not found".
 
 ## Maven
 
