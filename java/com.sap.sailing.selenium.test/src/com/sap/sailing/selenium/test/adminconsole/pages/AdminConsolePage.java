@@ -112,6 +112,14 @@ public class AdminConsolePage extends HostPage {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
         
+        int maxScrollActions = 20;
+        while (!tab.isDisplayed() && maxScrollActions-- > 0) {
+            WebElement scroller = tabPanel.findElement(By.id("gwt-ScrolledTabLayoutPanel-scrollRight"));
+            scroller.click();
+            FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
+            wait.withTimeout(2, TimeUnit.SECONDS);
+        }
+        
         tab.click();
         
         // Wait for the tab to become visible due to the used animations.
