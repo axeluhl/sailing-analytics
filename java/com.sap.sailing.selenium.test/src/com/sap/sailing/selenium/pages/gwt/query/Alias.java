@@ -14,17 +14,14 @@ public class Alias {
         return factory.getCurrentExpressionAndReset();
     }
     
-    @SuppressWarnings("unused")
     public static StringPath $(String value) {
         return $();
     }
     
-    @SuppressWarnings("unused")
     public static BooleanPath $(Boolean value) {
         return $();
     }
     
-    @SuppressWarnings("unused")
     public static BooleanPath $(boolean value) {
         return $();
     }

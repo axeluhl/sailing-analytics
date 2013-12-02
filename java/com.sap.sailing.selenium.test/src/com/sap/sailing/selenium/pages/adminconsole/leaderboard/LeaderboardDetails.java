@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+
 import com.sap.sailing.selenium.pages.PageArea;
+
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
+
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
-import com.sap.sailing.selenium.pages.gwt.CellTable;
+
+import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
 public class LeaderboardDetails extends PageArea {
     public static class RaceDescriptor {
@@ -93,17 +98,14 @@ public class LeaderboardDetails extends PageArea {
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
         
-        CellTable table = new CellTable(this.driver, this.racesTable);
-        List<WebElement> rows = table.getRows();
+        CellTable2<DataEntry> racesTable = getRacesTable();
         
-        for(WebElement row : rows) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            
-            String name = columns.get(0).getText();
-            String fleet = columns.get(1).getText();
-            String medalRace = columns.get(2).getText();
-            String linked = columns.get(3).getText();
-            String factor = columns.get(4).getText();
+        for(DataEntry entry : racesTable.getEntries()) {
+            String name = entry.getColumnContent(0);
+            String fleet = entry.getColumnContent(1);
+            //String medalRace = entry.getColumnContent(2);
+            //String linked = entry.getColumnContent(3);
+            //String factor = entry.getColumnContent(4);
             
             result.add(new RaceDescriptor(name, fleet, false, false, 0.0));
         }
@@ -121,75 +123,80 @@ public class LeaderboardDetails extends PageArea {
 //    }
     
     public void unlinkRace(RaceDescriptor race) {
-        WebElement action = Actions.findUnlinkRaceAction(findRace(race));
+        DataEntry entry = findRace(race);
         
-        action.click();
+        if(entry != null) {
+            WebElement action = Actions.findUnlinkRaceAction(entry.getWebElement());
+            
+            action.click();
+        }
     }
     
     public void refreshRaceLog(RaceDescriptor race) {
-        WebElement action = Actions.findRefreshAction(findRace(race));
+        DataEntry entry = findRace(race);
         
-        action.click();
-        
-        // QUESTION [D049941]: What else can happen?
-        Actions.acceptAlert(this.driver);
+        if(entry != null) {
+            WebElement action = Actions.findRefreshAction(entry.getWebElement());
+            
+            action.click();
+            
+            // QUESTION [D049941]: What else can happen?
+            Actions.acceptAlert(this.driver);
+        }
     }
     
     public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
-        CellTable raceTable = new CellTable(this.driver, this.racesTable);
-        WebElement raceRow = findRace(race);
-        
-        CellTable trackingTable = getTrackedRacesTable();
-        WebElement trackingRow = findTracking(tracking);
+        DataEntry raceRow = findRace(race);
+        DataEntry trackingRow = findTracking(tracking);
         
         if(raceRow == null || trackingRow == null) {
         }
         
-        raceTable.selectRow(raceRow);
-        trackingTable.selectRow(trackingRow);
+        raceRow.select();
+        trackingRow.select();
     }
     
-    private WebElement findRace(RaceDescriptor race) {
-        CellTable table = new CellTable(this.driver, this.racesTable);
-        List<WebElement> rows = table.getRows();
+    private DataEntry findRace(RaceDescriptor race) {
+        CellTable2<DataEntry> racesTable = getRacesTable();
         
-        for(WebElement row : rows) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            
-            String name = columns.get(0).getText();
-            String fleet = columns.get(1).getText();
-            String medalRace = columns.get(2).getText();
-            String linked = columns.get(3).getText();
-            String factor = columns.get(4).getText();
+        for(DataEntry entry : racesTable.getEntries()) {
+            String name = entry.getColumnContent(0);
+            String fleet = entry.getColumnContent(1);
+            //String medalRace = entry.getColumnContent(2);
+            //String linked = entry.getColumnContent(3);
+            //String factor = entry.getColumnContent(4);
             
             RaceDescriptor descriptor = new RaceDescriptor(name, fleet, false, false, 0.0);
             
             if(descriptor.equals(race))
-                return row;
+                return entry;
         }
         
         return null;
     }
     
-    private WebElement findTracking(TrackedRaceDescriptor tracking) {
-        CellTable trackingTable = getTrackedRacesTable();
+    private DataEntry findTracking(TrackedRaceDescriptor tracking) {
+        CellTable2<DataEntry> trackingTable = getTrackedRacesTable();
         
-        for(WebElement row : trackingTable.getRows()) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            String regatta = columns.get(0).getText();
-            String boatClass = columns.get(1).getText();
-            String raceName = columns.get(2).getText();
+        for(DataEntry entry : trackingTable.getEntries()) {
+            String regatta = entry.getColumnContent(0);
+            String boatClass = entry.getColumnContent(1);
+            String raceName = entry.getColumnContent(2);
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, raceName);
             
             if(descriptor.equals(tracking))
-                return row;
+                return entry;
         }
         
         return null;
     }
     
-    private CellTable getTrackedRacesTable() {
-        return new CellTable(this.driver, findElementBySeleniumId(this.trackedRacesPanel, "TrackedRacesTable"));
+    private CellTable2<DataEntry> getRacesTable() {
+        return new GenericCellTable<>(this.driver, this.racesTable, DataEntry.class);
+    }
+    
+    private CellTable2<DataEntry> getTrackedRacesTable() {
+        return new GenericCellTable<>(this.driver, findElementBySeleniumId(this.trackedRacesPanel, "TrackedRacesTable"), DataEntry.class);
     }
 }

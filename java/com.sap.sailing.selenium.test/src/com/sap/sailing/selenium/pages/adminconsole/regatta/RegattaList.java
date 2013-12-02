@@ -1,12 +1,9 @@
 package com.sap.sailing.selenium.pages.adminconsole.regatta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -17,8 +14,10 @@ import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.CellTable.SortingOrder;
+import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable2.SortingOrder;
+import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
 public class RegattaList extends PageArea {
     public static class RegattaDescriptor {
@@ -105,12 +104,11 @@ public class RegattaList extends PageArea {
     
     public List<RegattaDescriptor> getRegattas() {
         List<RegattaDescriptor> descriptors = new LinkedList<>();
-        CellTable table = new CellTable(this.driver, this.regattasTable);
+        CellTable2<DataEntry> table = getRegattasTable();
         
-        for(WebElement row : table.getRows()) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            String name = columns.get(0).getText();
-            String boatClass = columns.get(1).getText();
+        for(DataEntry entry : table.getEntries()) {
+            String name = entry.getColumnContent(0);
+            String boatClass = entry.getColumnContent(1);
             
             descriptors.add(new RegattaDescriptor(name, boatClass));
         }
@@ -119,23 +117,22 @@ public class RegattaList extends PageArea {
     }
     
     public void selectRegatta(RegattaDescriptor regatta) {
-        selectRegattas(Arrays.asList(regatta));
+        DataEntry entry = findRegatta(regatta);
+        
+        if(entry != null) {
+            entry.select();
+        }
     }
     
-    public void selectRegattas(List<RegattaDescriptor> regattas) {
-        CellTable table = new CellTable(this.driver, this.regattasTable);
-        table.selectRows(findRegattas(regattas));
-    }
-
 //    public EditRegattaDialog editRegatta(RegattaDescriptor regatta) {
 //        
 //    }
-
+    
     public void removeRegatta(RegattaDescriptor regatta) {
-        WebElement row = findRegatta(regatta);
+        DataEntry entry = findRegatta(regatta);
         
-        if(row != null) {
-            WebElement action = Actions.findRemoveAction(row);
+        if(entry != null) {
+            WebElement action = Actions.findRemoveAction(entry.getWebElement());
             action.click();
             
             waitForAjaxRequests();
@@ -144,44 +141,28 @@ public class RegattaList extends PageArea {
         }
     }
     
-    private WebElement findRegatta(RegattaDescriptor regatta) {
-        CellTable table = new CellTable(this.driver, this.regattasTable);
+    private DataEntry findRegatta(RegattaDescriptor regatta) {
+        CellTable2<DataEntry> table = getRegattasTable();
         
-        for(WebElement row : table.getRows()) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            String name = columns.get(0).getText();
-//            String boatClass = columns.get(1).getText();
+        for(DataEntry entry : table.getEntries()) {
+            String name = entry.getColumnContent(0);
+//            String boatClass = columns.getColumnContent(1);
 //            
 //            if(regatta.equals(new RegattaDescriptor(name, boatClass)))
 //                return row;
             if(regatta.equals(RegattaDescriptor.fromString(name)))
-                return row;
+                return entry;
         }
         
         return null;
     }
     
-    private List<WebElement> findRegattas(List<RegattaDescriptor> regattas) {
-        List<WebElement> result = new ArrayList<>();
-        
-        CellTable table = new CellTable(this.driver, this.regattasTable);
-        
-        for(WebElement row : table.getRows()) {
-            List<WebElement> columns = row.findElements(By.tagName("td"));
-            String name = columns.get(0).getText();
-//            String boatClass = columns.get(1).getText();
-//            
-//            if(regattas.contains(new RegattaDescriptor(name, boatClass)))
-//                result.add(row);
-            if(regattas.contains(RegattaDescriptor.fromString(name)))
-                result.add(row);
-        }
-        
-        return result;
+    private void sortRegattaList(int column, SortingOrder order) {
+        CellTable2<DataEntry> table = getRegattasTable();
+        table.sortByColumn(column, order);
     }
     
-    private void sortRegattaList(int column, SortingOrder order) {
-        CellTable table = new CellTable(this.driver, this.regattasTable);
-        table.sortByColumn(column, order);
+    private CellTable2<DataEntry> getRegattasTable() {
+        return new GenericCellTable<>(this.driver, this.regattasTable, DataEntry.class);
     }
 }

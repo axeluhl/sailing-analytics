@@ -2,15 +2,15 @@ package com.sap.sailing.selenium.pages.gwt.query.expr;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import com.sap.sailing.selenium.pages.gwt.query.Expression;
 
 import com.sap.sailing.selenium.pages.gwt.query.operation.BooleanOperation;
 
 import com.sap.sailing.selenium.pages.gwt.query.operation.bool.Eq;
+
 import com.sap.sailing.selenium.pages.gwt.query.operation.collection.In;
+
 import com.sap.sailing.selenium.pages.gwt.query.operation.object.IsNotNull;
 import com.sap.sailing.selenium.pages.gwt.query.operation.object.IsNull;
 

@@ -52,13 +52,14 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
         return new GenericCellTable<DataEntry>(driver, leaderboardGroupsTable, DataEntry.class);
     }
     
-    
-
     public void deleteLeaderboardGroup(String name) {
         CellTable2<DataEntry> table = getLeaderboardGroupsTable();
         final DataEntry alias = Alias.alias(DataEntry.class);
         TableQuery<DataEntry> query = new TableQuery<>();
-        query.from(table).where($(alias.getColumnContent("Name")).eq(name));
+        query.from(table)
+            .where(
+                $(alias.getColumnContent("Name")).eq(name)
+            );
         DataEntry result = query.firstResult();
         if (result != null) {
             Actions.findRemoveAction(result.getWebElement()).click();
@@ -84,7 +85,7 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
     }
 
     public void filterLeaderboards(String filterText) {
-        WebElement leaderboardFilterTextField = leaderboardsCaptionPanel.findElement(new BySeleniumId("FilterTextField"));
+        WebElement leaderboardFilterTextField = findElementBySeleniumId(leaderboardsCaptionPanel, "FilterTextField");
         leaderboardFilterTextField.clear();
         leaderboardFilterTextField.sendKeys(filterText);
     }

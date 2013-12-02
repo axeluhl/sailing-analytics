@@ -16,7 +16,9 @@ import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
 public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateFlexibleLeaderboardButton")
@@ -42,7 +44,9 @@ public class LeaderboardConfigurationPanel extends PageArea {
         this.createFlexibleLeaderboardButton.click();
         // Wait, since we trigger an AJAX-request to get the available events
         waitForAjaxRequests();
+        
         WebElement dialog = findElementBySeleniumId(this.driver, "FlexibleLeaderboardCreateDialog");
+        
         return new FlexibleLeaderboardCreateDialog(this.driver, dialog);
     }
     
@@ -55,7 +59,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     
     public RegattaLeaderboardCreateDialog startCreatingRegattaLeaderboard() {
         this.createRegattaLeaderboardButton.click();
-                                                                  
+        
         WebElement dialog = findElementBySeleniumId(this.driver, "RegattaLeaderboardCreateDialog");
         
         return new RegattaLeaderboardCreateDialog(this.driver, dialog);
@@ -68,16 +72,17 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public void deleteLeaderboard(String leaderboard) {
-        CellTable table = getLeaderboardTable();
-        List<WebElement> rows = table.getRows();
+        CellTable2<DataEntry> table = getLeaderboardTable();
+        List<DataEntry> entries = table.getEntries();
         
-        for(WebElement row : rows) {
-            WebElement name = row.findElement(By.xpath(".//td/div/a"));
+        for(DataEntry entry : entries) {
+            String name = entry.getColumnContent(0);
             
-            if(!leaderboard.equals(name.getText()))
+            if(!leaderboard.equals(name)) {
                 continue;
+            }
             
-            WebElement removeAction = Actions.findRemoveAction(row);//row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
+            WebElement removeAction = Actions.findRemoveAction(entry.getWebElement());
             removeAction.click();
             
             Actions.acceptAlert(this.driver);
@@ -87,11 +92,11 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public String getLeaderboardURL(String leaderboard) {
-        CellTable table = getLeaderboardTable();
-        List<WebElement> rows = table.getRows();
+        CellTable2<DataEntry> table = getLeaderboardTable();
+        List<DataEntry> entries = table.getEntries();
         
-        for(WebElement row : rows) {
-            WebElement name = row.findElement(By.xpath(".//td/div/a"));
+        for(DataEntry entry : entries) {
+            WebElement name = entry.getWebElement().findElement(By.xpath(".//td/div/a"));
             
             if(!leaderboard.equals(name.getText()))
                 continue;
@@ -105,27 +110,25 @@ public class LeaderboardConfigurationPanel extends PageArea {
     public List<String> getAvailableLeaderboards() {
         List<String> leaderboards = new ArrayList<>();
         
-        CellTable table = getLeaderboardTable();
-        List<WebElement> rows = table.getRows();
+        CellTable2<DataEntry> table = getLeaderboardTable();
+        List<DataEntry> entries = table.getEntries();
         
-        for(WebElement row : rows) {
-            WebElement name = row.findElement(By.xpath(".//td/div/a"));
-            
-            leaderboards.add(name.getText());
+        for(DataEntry entry : entries) {
+            leaderboards.add(entry.getColumnContent(0));
         }
         
         return leaderboards;
     }
     
     public LeaderboardDetails getLeaderboardDetails(String leaderboard) {
-        CellTable table = getLeaderboardTable();
-        List<WebElement> rows = table.getRows();
+        CellTable2<DataEntry> table = getLeaderboardTable();
+        List<DataEntry> entries = table.getEntries();
         
-        for(WebElement row : rows) {
-            WebElement name = row.findElement(By.xpath(".//td/div/a"));
+        for(DataEntry entry : entries) {
+            String name = entry.getColumnContent(0);
             
-            if(leaderboard.equals(name.getText())) {
-                table.selectRow(row);
+            if(leaderboard.equals(name)) {
+                entry.select();
             
                 return new LeaderboardDetails(this.driver, this.leaderboardDetails);
             }
@@ -134,7 +137,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
         return null;
     }
     
-    private CellTable getLeaderboardTable() {
-        return new CellTable(this.driver, this.availableLeaderboardsTable);
+    private CellTable2<DataEntry> getLeaderboardTable() {
+        return new GenericCellTable<>(this.driver, this.availableLeaderboardsTable, DataEntry.class);
     }
 }
