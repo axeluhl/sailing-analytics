@@ -1,19 +1,18 @@
 package com.sap.sailing.selenium.test.adminconsole.pages;
 
 import java.text.MessageFormat;
-
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.test.HostPage;
 
 /**
@@ -27,7 +26,7 @@ public class AdminConsolePage extends HostPage {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            "div[contains(@class, \"gwt-TabLayoutPanelTab\")]/*[text()=\"{0}\"]");
+            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/*[text()=\"{0}\"]");
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
@@ -48,6 +47,14 @@ public class AdminConsolePage extends HostPage {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         driver.get(root + "gwt/AdminConsole.html?" + System.getProperty("gwt.codesvr", "")); //$NON-NLS-1$
+        try {
+            Alert alert = driver.switchTo().alert();
+            if (alert != null) {
+                alert.accept();
+            }
+        } catch (NoAlertPresentException e) {
+            
+        }
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
 //        FluentWait<WebDriver> wait = new FluentWait<>(driver);
@@ -97,7 +104,7 @@ public class AdminConsolePage extends HostPage {
     @Override
     protected void verify() {
         if(!PAGE_TITLE.equals(this.driver.getTitle())) {
-            throw new IllegalStateException("This is not the administration console"); //$NON-NLS-1$
+            throw new IllegalStateException("This is not the administration console: " + this.driver.getTitle()); //$NON-NLS-1$
         }
     }
     
