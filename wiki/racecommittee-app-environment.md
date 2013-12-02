@@ -48,7 +48,7 @@ If you are unsure about the components to install, just install everything with
 
     ./android update sdk --no-ui --all
 
-Last but not least make sure that the user executing the build has **full read and write access** to the Android SDK folders.
+Last but not least make sure that the user executing the build has **full read and write access** on the Android SDK folders.
 
 ## Maven
 
