@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -124,7 +124,7 @@ public class RaceStateTest {
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
         
-        state.requestStartTime(nowMock, new MillisecondsTimePoint(1), new RacingProcedurePrerequisiteAutoResolver());
+        state.forceStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
         state.setCourseDesign(nowMock, mock(CourseBase.class));

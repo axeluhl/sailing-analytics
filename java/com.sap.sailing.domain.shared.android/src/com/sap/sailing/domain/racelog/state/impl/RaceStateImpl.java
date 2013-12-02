@@ -107,6 +107,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         
         getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
     }
+    
+    @Override
+    public void forceStartTime(TimePoint now, TimePoint startTime) {
+        raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
+    }
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {
