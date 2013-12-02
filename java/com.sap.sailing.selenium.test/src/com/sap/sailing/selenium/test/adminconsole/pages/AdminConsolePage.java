@@ -27,7 +27,7 @@ public class AdminConsolePage extends HostPage {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            "div[contains(@class, 'gwt-TabLayoutPanelTab')]/*[text()=\"{0}\"]");
+            "div[contains(@class, \"gwt-TabLayoutPanelTab\")]/*[text()=\"{0}\"]");
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
