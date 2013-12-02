@@ -114,7 +114,7 @@ public class AdminConsolePage extends HostPage {
         
         int maxScrollActions = 20;
         while (!tab.isDisplayed() && maxScrollActions-- > 0) {
-            WebElement scroller = tabPanel.findElement(By.id("gwt-ScrolledTabLayoutPanel-scrollRight"));
+            WebElement scroller = tabPanel.findElement(By.className("gwt-ScrolledTabLayoutPanel-scrollRight"));
             scroller.click();
             FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
             wait.withTimeout(2, TimeUnit.SECONDS);
