@@ -7,15 +7,18 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.ReadonlyRacingProced
 
 public interface ReadonlyGateStartRacingProcedure extends ReadonlyRacingProcedure {
     
-    public final static long DefaultGolfDownTimeout = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    public final static long DefaultGateLaunchStopTime = 4 * 60 * 1000; // 4 minutes
+    public final static long DefaultGolfDownTime = 3 * 60 * 1000; // 3 minutes
+    public final static String DefaultPathfinderId = "Unknown";
     
     GateStartConfiguration getConfiguration();
     
     void addChangedListener(GateStartChangedListener listener);
 
-    TimePoint getGateLaunchStopTime(TimePoint startTime);
-    TimePoint getGateShutdownTime(TimePoint startTime);
-    Long getGateLaunchTime();
+    TimePoint getGateLaunchStopTimePoint(TimePoint startTime);
+    TimePoint getGateShutdownTimePoint(TimePoint startTime);
+    long getGateLaunchStopTime();
+    long getGolfDownTime();
 
     String getPathfinder();
 

@@ -12,9 +12,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacing
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChooseGateLaunchTimeDialog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseGateLaunchTimesDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChoosePathFinderDialog;
 
 public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<GateStartRacingProcedure> {
     
@@ -56,7 +56,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getFragmentManager();
-                RaceDialogFragment fragment = new RaceChooseGateLaunchTimeDialog();
+                RaceDialogFragment fragment = new RaceChooseGateLaunchTimesDialog();
                 Bundle args = getRecentArguments();
                 fragment.setArguments(args);
                 fragment.show(fragmentManager, null);
@@ -93,7 +93,7 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
             pathfinderTextView.setText(R.string.no_pathfinder_selected);
         }
        
-        Long gateLaunchTime = procedure.getGateLaunchTime();
+        Long gateLaunchTime = procedure.getGateLaunchStopTime();
         if (gateLaunchTime != null) {
             gateLaunchTimeTextView.setText(getString(R.string.gate_launch_stops_after, gateLaunchTime / 1000 / 60));
         } else {

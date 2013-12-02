@@ -23,6 +23,9 @@ import com.google.gwt.user.client.ui.Widget;
  * A {@link TabLayoutPanel} that shows scroll buttons if necessary. Stolen from the internets and adapted.
  */
 public class ScrolledTabLayoutPanel extends TabLayoutPanel {
+    
+    public static final String scrollLeftWidgetStyle = "gwt-ScrolledTabLayoutPanel-scrollLeft";
+    public static final String scrollRightWidgetStyle = "gwt-ScrolledTabLayoutPanel-scrollLeft";
 
     private static final int SCROLL_RIGHT_TAB_MARGIN = 10;
     private static final int SCROLL_ANIMATION_SPEED = 150;
@@ -136,21 +139,11 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
             }
         };
     }
-    
-    private Widget centerVertical(Widget widget) {
-        VerticalPanel vertical = new VerticalPanel();
-        vertical.setSize("100%", "100%");
-        vertical.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        DOM.setStyleAttribute(vertical.getElement(), "backgroundColor", "#ccc");
-        DOM.setStyleAttribute(vertical.getElement(), "marginTop", "6px");
-        vertical.add(widget);
-        return vertical;
-    }
 
     /** Create and attach the scroll button images with a click handler */
     private void initScrollButtons() {
         Image scrollLeftButton = new Image(leftArrowImage);
-        scrollLeftWidget = centerVertical(scrollLeftButton);
+        scrollLeftWidget = centerVertical(scrollLeftButton, scrollLeftWidgetStyle);
         panel.insert(scrollLeftWidget, 0);
         panel.setWidgetLeftWidth(scrollLeftWidget, 0, Unit.PX, scrollLeftButton.getWidth(), Unit.PX);
         panel.setWidgetTopHeight(scrollLeftWidget, 0, Unit.PX, barHeight, barUnit);
@@ -159,13 +152,24 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
         scrollLeftWidget.setVisible(false);
 
         Image scrollRightButton = new Image(rightArrowImage);
-        scrollRightWidget = centerVertical(scrollRightButton);
+        scrollRightWidget = centerVertical(scrollRightButton, scrollRightWidgetStyle);
         panel.insert(scrollRightWidget, 0);
         panel.setWidgetRightWidth(scrollRightWidget, 0, Unit.PX, scrollRightButton.getWidth(), Unit.PX);
         panel.setWidgetTopHeight(scrollRightWidget, 0, Unit.PX, barHeight, barUnit);
 
         scrollRightButton.addClickHandler(createScrollClickHandler(-scrollSpeed));
         scrollRightWidget.setVisible(false);
+    }
+    
+    private Widget centerVertical(Widget widget, String styleName) {
+        VerticalPanel vertical = new VerticalPanel();
+        vertical.setSize("100%", "100%");
+        vertical.setStylePrimaryName(styleName);
+        vertical.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        DOM.setStyleAttribute(vertical.getElement(), "backgroundColor", "#ccc");
+        DOM.setStyleAttribute(vertical.getElement(), "marginTop", "6px");
+        vertical.add(widget);
+        return vertical;
     }
 
     private void checkIfScrollButtonsNecessary() {

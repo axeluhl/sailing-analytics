@@ -275,6 +275,14 @@ public class AppPreferences {
         return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_haspathfinder_key), true);
     }
 
+    public void setGateStartHasAdditionalGolfDownTime(boolean hasAdditionalGolfDownTime) {
+        preferences.edit().putBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), hasAdditionalGolfDownTime).commit();
+    }
+
+    public boolean getGateStartHasAdditionalGolfDownTime() {
+        return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), true);
+    }
+
     private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
         switch (type) {
         case RRS26:

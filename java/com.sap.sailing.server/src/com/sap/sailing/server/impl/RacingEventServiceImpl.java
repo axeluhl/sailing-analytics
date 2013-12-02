@@ -97,6 +97,7 @@ import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -2064,7 +2065,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
-            state.setStartTime(logicalTimePoint, startTime);
+            state.requestStartTime(logicalTimePoint, startTime, new RacingProcedurePrerequisiteAutoResolver());
             return state.getStartTime();
         }
         return null;

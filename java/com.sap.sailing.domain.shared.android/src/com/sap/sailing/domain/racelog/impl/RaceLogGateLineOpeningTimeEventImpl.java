@@ -12,12 +12,13 @@ import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 public class RaceLogGateLineOpeningTimeEventImpl extends RaceLogEventImpl implements RaceLogGateLineOpeningTimeEvent {
    
     private static final long serialVersionUID = 793529890804809490L;
-    private final Long gateLineOpeningTime;
+    private final GateLineOpeningTimes gateLineOpeningTimes;
 
     public RaceLogGateLineOpeningTimeEventImpl(TimePoint createdAt,
-            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, Long gateLineOpeningTime) {
+            RaceLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, 
+            long gateLaunchStopTime, long golfDownTime) {
         super(createdAt, author, pTimePoint, pId, pCompetitors, pPassId);
-        this.gateLineOpeningTime = gateLineOpeningTime;
+        this.gateLineOpeningTimes = new GateLineOpeningTimes(gateLaunchStopTime, golfDownTime);
     }
 
     @Override
@@ -26,8 +27,8 @@ public class RaceLogGateLineOpeningTimeEventImpl extends RaceLogEventImpl implem
     }
 
     @Override
-    public Long getGateLineOpeningTime() {
-        return this.gateLineOpeningTime;
+    public GateLineOpeningTimes getGateLineOpeningTimes() {
+        return this.gateLineOpeningTimes;
     }
 
 }

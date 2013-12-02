@@ -137,7 +137,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesGateLineOpeningTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createGateLineOpeningTimeEvent(null, author, 0, new Long(0));
+        RaceLogEvent event = factory.createGateLineOpeningTimeEvent(null, author, 0, 2l, 1l);
         serializer.serialize(event);
         verify(gateLineOpeningTimeEventSerializer).serialize(event);
     }

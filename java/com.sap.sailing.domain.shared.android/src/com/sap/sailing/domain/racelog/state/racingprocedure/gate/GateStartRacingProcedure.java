@@ -6,7 +6,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 public interface GateStartRacingProcedure extends ReadonlyGateStartRacingProcedure, RacingProcedure {
     
-    void setGateLaunchTime(TimePoint timePoint, long milliseconds);
+    void setGateLineOpeningTimes(TimePoint now, long gateLaunchTime, long golfDownInterval);
     void setPathfinder(TimePoint timePoint, String sailingId);
 
 }

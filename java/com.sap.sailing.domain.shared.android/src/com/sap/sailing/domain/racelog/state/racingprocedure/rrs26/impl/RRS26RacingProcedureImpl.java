@@ -20,11 +20,12 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26ChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 
 public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS26RacingProcedure {
 
@@ -33,7 +34,9 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
     private final RRS26StartModeFlagFinder startModeFlagAnalyzer;
+    
     private Flags cachedStartmodeFlag;
+    private boolean startmodeFlagHasBeenSet;
     
     public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory, RRS26Configuration configuration) {
@@ -45,7 +48,9 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
         } else {
             this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
         }
-        this.cachedStartmodeFlag = ReadonlyRRS26RacingProcedure.DefaultStartMode;
+        
+        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
+        this.startmodeFlagHasBeenSet = false;
         
         update();
     }
@@ -59,10 +64,14 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
-
+    
     @Override
-    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now) {
-        return null;
+    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
+            FulfillmentFunction function) {
+        if (startTime.minus(startPhaseStartModeUpInterval).before(now) && !startmodeFlagHasBeenSet) {
+            return new StartmodePrerequisite(function, this, now, startTime);
+        }
+        return new NoMorePrerequisite(function);
     }
 
     @Override
@@ -160,8 +169,9 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     @Override
     protected void update() {
         Flags startmodeFlag = startModeFlagAnalyzer.analyze();
-        if (startmodeFlag != null && !startmodeFlag.equals(cachedStartmodeFlag)) {
+        if (startmodeFlag != null && (!startmodeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
             cachedStartmodeFlag = startmodeFlag;
+            startmodeFlagHasBeenSet = true;
             getChangedListeners().onStartmodeChanged(this);
         }
         super.update();

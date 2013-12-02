@@ -24,6 +24,10 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.impl.PathfinderPrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -32,6 +36,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.PrerequisiteRaceDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseGateLaunchTimesDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChoosePathFinderDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseStartModeDialog;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 
@@ -154,7 +162,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        
+
         RacingProcedureType type;
         if (preferences.isDefaultRacingProcedureTypeOverridden()) {
             type = preferences.getDefaultRacingProcedureType();
@@ -234,37 +242,35 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(Date newStartTime) {
-        
-        // We do not have to worry about the ordering of the following three RaceLogEvents
-        // because "setAdvancePass" will opens a new pass and ProcedureChangedEvents and
-        // SetStartTimeEvents don't have to be ordered!
-        TimePoint now = MillisecondsTimePoint.now();
-        getRaceState().setAdvancePass(now);
-        getRaceState().setRacingProcedure(now, selectedStartProcedureType);
-        getRaceState().setStartTime(now, new MillisecondsTimePoint(newStartTime));
-        
-        /*getRace().getState().createNewStartProcedure(selectedStartProcedureType);
-        Class<? extends RaceDialogFragment> action = getRace().getState().getStartProcedure()
-                .checkForUserActionRequiredActions(new MillisecondsTimePoint(newStartTime), this);*/
-        /*if (action == null) {
-            getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
-        } else {
-            FragmentManager fragmentManager = getFragmentManager();
+        final TimePoint now = MillisecondsTimePoint.now();
 
-            RaceDialogFragment fragment;
-            try {
-                fragment = action.newInstance();
-                Bundle args = getRecentArguments();
-                fragment.setArguments(args);
+        RacingProcedurePrerequisite.Resolver resolver = new RacingProcedurePrerequisite.Resolver() {
 
-                fragment.show(fragmentManager, "userActionRequiredDialog");
-            } catch (java.lang.InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            @Override
+            public void fulfill(GateLaunchTimePrerequisite prerequisite) {
+                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                        new RaceChooseGateLaunchTimesDialog(), getRace(), prerequisite);
+                dialog.show(getFragmentManager(), "userActionRequiredDialog");
             }
 
-        }*/
+            @Override
+            public void fulfill(PathfinderPrerequisite prerequisite) {
+                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                        new RaceChoosePathFinderDialog(), getRace(), prerequisite);
+                dialog.show(getFragmentManager(), "userActionRequiredDialog");
+            }
+
+            @Override
+            public void fulfill(StartmodePrerequisite prerequisite) {
+                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                        new RaceChooseStartModeDialog(), getRace(), prerequisite);
+                dialog.show(getFragmentManager(), "userActionRequiredDialog");
+            }
+        };
+
+        getRaceState().setAdvancePass(now);
+        getRaceState().setRacingProcedure(now, selectedStartProcedureType);
+        getRaceState().requestStartTime(now, new MillisecondsTimePoint(newStartTime), resolver);
 
     }
 

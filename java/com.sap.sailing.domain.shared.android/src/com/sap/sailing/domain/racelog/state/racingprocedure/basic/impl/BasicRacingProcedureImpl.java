@@ -14,7 +14,9 @@ import com.sap.sailing.domain.racelog.state.RaceStateEvent;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureChangedListeners;
 
 public class BasicRacingProcedureImpl extends BaseRacingProcedure {
@@ -28,10 +30,11 @@ public class BasicRacingProcedureImpl extends BaseRacingProcedure {
     public RacingProcedureType getType() {
         return RacingProcedureType.BASIC;
     }
-
+    
     @Override
-    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now) {
-        return null;
+    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
+            FulfillmentFunction function) {
+        return new NoMorePrerequisite(function);
     }
 
     @Override

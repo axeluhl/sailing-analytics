@@ -753,7 +753,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         switch (raceInfoDTO.startProcedure) {
         case GateStart:
             ReadonlyGateStartRacingProcedure gateStart = state.getTypedReadonlyRacingProcedure();
-            info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchTime());
+            info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchStopTime());
             break;
         case RRS26:
             ReadonlyRRS26RacingProcedure rrs26 = state.getTypedReadonlyRacingProcedure();

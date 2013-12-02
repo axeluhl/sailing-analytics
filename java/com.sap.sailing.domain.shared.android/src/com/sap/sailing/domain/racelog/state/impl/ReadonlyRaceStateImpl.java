@@ -251,6 +251,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         if (cachedPassId != passId) {
             cachedPassId = passId;
             changedListeners.onAdvancePass(this);
+            // reset racing procedure to force recreate on next event!
+            cachedRacingProcedureType = null;
         }
         
         TimePoint startTime = startTimeAnalyzer.analyze();

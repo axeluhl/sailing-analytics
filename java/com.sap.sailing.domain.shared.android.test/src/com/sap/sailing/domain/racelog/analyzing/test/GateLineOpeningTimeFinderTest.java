@@ -12,9 +12,10 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 
-public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<GateLineOpeningTimeFinder, Long> {
+public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<GateLineOpeningTimeFinder, GateLineOpeningTimes> {
 
     @Override
     protected GateLineOpeningTimeFinder createAnalyzer(RaceLog raceLog) {
@@ -24,8 +25,8 @@ public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<
     @Override
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, RaceLogEventAuthor author) {
         RaceLogGateLineOpeningTimeEvent event = createEvent(RaceLogGateLineOpeningTimeEvent.class, 1, passId, author);
-        when(event.getGateLineOpeningTime()).thenReturn(new Long(2));
-        return new TargetPair(Arrays.asList(event), new Long(2));
+        when(event.getGateLineOpeningTimes()).thenReturn(new GateLineOpeningTimes(2, 3));
+        return new TargetPair(Arrays.asList(event), new GateLineOpeningTimes(2, 3));
     }
     
     @Test
@@ -38,13 +39,13 @@ public class GateLineOpeningTimeFinderTest extends PassAwareRaceLogAnalyzerTest<
     @Test
     public void testMostRecent() {
         RaceLogGateLineOpeningTimeEvent event1 = createEvent(RaceLogGateLineOpeningTimeEvent.class, 1);
-        when(event1.getGateLineOpeningTime()).thenReturn(new Long(1));
+        when(event1.getGateLineOpeningTimes()).thenReturn(new GateLineOpeningTimes(1, 2));
         RaceLogGateLineOpeningTimeEvent event2 = createEvent(RaceLogGateLineOpeningTimeEvent.class, 2);
-        when(event2.getGateLineOpeningTime()).thenReturn(new Long(2));
+        when(event2.getGateLineOpeningTimes()).thenReturn(new GateLineOpeningTimes(2, 3));
         
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getGateLineOpeningTime(), analyzer.analyze());
+        assertEquals(event2.getGateLineOpeningTimes(), analyzer.analyze());
     }
 }

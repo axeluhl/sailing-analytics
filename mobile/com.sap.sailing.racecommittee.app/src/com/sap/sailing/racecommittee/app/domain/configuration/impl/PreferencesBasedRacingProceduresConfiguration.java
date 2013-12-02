@@ -43,6 +43,7 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
         gateStart.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
         gateStart.setHasPathfinder(preferences.getGateStartHasPathfinder());
+        gateStart.setHasAdditionalGolfDownTime(preferences.getGateStartHasAdditionalGolfDownTime());
         setGateStartConfiguration(gateStart);
 
         ESSConfigurationImpl ess = new ESSConfigurationImpl();
@@ -78,6 +79,9 @@ public class PreferencesBasedRacingProceduresConfiguration extends RacingProcedu
             storeRacingProcedureConfiguration(RacingProcedureType.GateStart, config);
             if (config.hasPathfinder() != null) {
                 preferences.setGateStartHasPathfinder(config.hasPathfinder());
+            }
+            if (config.hasAdditionalGolfDownTime() != null) {
+                preferences.setGateStartHasAdditionalGolfDownTime(config.hasAdditionalGolfDownTime());
             }
         }
         if (getESSConfiguration() != null) {

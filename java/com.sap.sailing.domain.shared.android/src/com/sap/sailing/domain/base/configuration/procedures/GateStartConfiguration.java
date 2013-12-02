@@ -5,5 +5,6 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 public interface GateStartConfiguration extends RacingProcedureConfiguration {
 
     Boolean hasPathfinder();
+    Boolean hasAdditionalGolfDownTime();
     
 }

@@ -150,16 +150,16 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTimeInMillis) {
+            Serializable id, List<Competitor> competitors, int passId, Long gateLaunchStopTime, Long golfDownTime) {
         return new RaceLogGateLineOpeningTimeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors,
-                passId, gateLineOpeningTimeInMillis);
+                passId, gateLaunchStopTime, golfDownTime);
     }
 
     @Override
     public RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
-            int passId, Long gateLineOpeningTimeInMillis) {
+            int passId, Long gateLaunchStopTime, Long golfDownTime) {
         return createGateLineOpeningTimeEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(),
-                passId, gateLineOpeningTimeInMillis);
+                passId, gateLaunchStopTime, golfDownTime);
     }
 
     @Override

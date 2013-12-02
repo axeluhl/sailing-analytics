@@ -143,7 +143,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
             ReadonlyGateStartRacingProcedure procedure = state.getTypedReadonlyRacingProcedure(ReadonlyGateStartRacingProcedure.class);
             if (procedure != null) {
                 raceLogStateJson.put("pathfinderId", procedure.getPathfinder());
-                raceLogStateJson.put("gateLineOpeningTime", procedure.getGateLaunchTime());
+                raceLogStateJson.put("gateLineOpeningTime", procedure.getGateLaunchStopTime());
             }
             
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);

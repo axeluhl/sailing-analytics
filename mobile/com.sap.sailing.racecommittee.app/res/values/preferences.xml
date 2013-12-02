@@ -67,6 +67,8 @@
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
     <string name="preference_racing_procedure_gatestart_haspathfinder_key">gateStartPathfinder</string>
     <bool name="preference_racing_procedure_gatestart_haspathfinder_default">true</bool>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key">gateStartHasAdditionalGolfDownTime</string>
+    <bool name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default">true</bool>
 	<string name="preference_racing_procedure_ess_classflag_key">essClassFlag</string>
     <string name="preference_racing_procedure_ess_hasxray_key">essIndividualRecall</string>
     <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>

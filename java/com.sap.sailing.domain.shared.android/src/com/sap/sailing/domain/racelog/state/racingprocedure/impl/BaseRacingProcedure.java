@@ -227,6 +227,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
     @Override
     public void onAdvancePass(ReadonlyRaceState state) {
         unscheduleAllEvents();
+        update();
     }
 
     private void unscheduleAllEvents() {

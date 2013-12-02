@@ -7,6 +7,7 @@ public class GateStartConfigurationImpl extends RacingProcedureConfigurationImpl
     private static final long serialVersionUID = 1862408542829215027L;
     
     private Boolean hasPathfinder;
+    private Boolean hasAdditionalGolfDownTime;
 
     public void setHasPathfinder(Boolean hasPathfinder) {
         this.hasPathfinder = hasPathfinder;
@@ -17,9 +18,19 @@ public class GateStartConfigurationImpl extends RacingProcedureConfigurationImpl
         return hasPathfinder;
     }
     
+    public void setHasAdditionalGolfDownTime(Boolean hasAdditionalGolfDownTime) {
+        this.hasAdditionalGolfDownTime = hasAdditionalGolfDownTime;
+    }
+
+    @Override
+    public Boolean hasAdditionalGolfDownTime() {
+        return hasAdditionalGolfDownTime;
+    }
+    
     protected GateStartConfiguration copy() {
         GateStartConfigurationImpl copy = (GateStartConfigurationImpl) super.copy(new GateStartConfigurationImpl());
-        copy.setHasPathfinder(hasPathfinder());
+        copy.setHasPathfinder(hasPathfinder);
+        copy.setHasAdditionalGolfDownTime(hasAdditionalGolfDownTime);
         return copy;
     }
 

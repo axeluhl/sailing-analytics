@@ -32,6 +32,7 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 
 public class RaceStateTest {
     
@@ -78,7 +79,7 @@ public class RaceStateTest {
         state.addChangedListener(listener);
         
         TimePoint startTime = MillisecondsTimePoint.now().plus(60 * 60 * 1000);
-        state.setStartTime(nowMock, startTime);
+        state.requestStartTime(nowMock, startTime, new RacingProcedurePrerequisiteAutoResolver());
         
         assertEquals(startTime, state.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, state.getStatus());
@@ -123,7 +124,7 @@ public class RaceStateTest {
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
         
-        state.setStartTime(nowMock, new MillisecondsTimePoint(1));
+        state.requestStartTime(nowMock, new MillisecondsTimePoint(1), new RacingProcedurePrerequisiteAutoResolver());
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
         state.setCourseDesign(nowMock, mock(CourseBase.class));

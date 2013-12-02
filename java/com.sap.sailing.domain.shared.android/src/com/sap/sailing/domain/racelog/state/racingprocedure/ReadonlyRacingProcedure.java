@@ -20,7 +20,8 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     void setStateEventScheduler(RaceStateEventScheduler scheduler);
     void triggerStateEventScheduling(ReadonlyRaceState state);
     
-    RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint startTime, TimePoint now);
+    RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime, 
+            RacingProcedurePrerequisite.FulfillmentFunction function);
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
     
     boolean hasIndividualRecall();

@@ -67,10 +67,10 @@ public interface RaceLogEventFactory {
     RaceLogPathfinderEvent createPathfinderEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, String pathfinderId);
 
     RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, Long gateLineOpeningTimeInMillis);
+            Serializable id, List<Competitor> competitors, int passId, Long gateLaunchStopTime, Long golfDownTime);
 
     RaceLogGateLineOpeningTimeEvent createGateLineOpeningTimeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
-            int passId, Long gateLineOpeningTimeInMillis);
+            int passId, Long gateLaunchStopTime, Long golfDownTime);
 
     RaceLogStartProcedureChangedEvent createStartProcedureChangedEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
             Serializable id, List<Competitor> competitors, int passId, RacingProcedureType type);

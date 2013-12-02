@@ -14,6 +14,7 @@ public class GateStartConfigurationJsonSerializer extends RacingProcedureConfigu
     }
     
     public static final String FIELD_HAS_PATHFINDER = "hasPathfinder";
+    public static final String FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME = "hasAdditionalGolfDownTime";
 
     public GateStartConfigurationJsonSerializer() {
         super();
@@ -26,6 +27,10 @@ public class GateStartConfigurationJsonSerializer extends RacingProcedureConfigu
         
         if (object.hasPathfinder() != null) {
             result.put(FIELD_HAS_PATHFINDER, object.hasPathfinder());
+        }
+        
+        if (object.hasAdditionalGolfDownTime() != null) {
+            result.put(FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME, object.hasAdditionalGolfDownTime());
         }
 
         return result;

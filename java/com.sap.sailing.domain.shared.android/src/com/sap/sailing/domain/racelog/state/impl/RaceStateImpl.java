@@ -97,14 +97,15 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public RacingProcedurePrerequisite setStartTime(TimePoint now, TimePoint startTime) {
-        RacingProcedurePrerequisite pre = getRacingProcedure().checkPrerequisitesForStart(startTime, now);
-        if (pre != null) {
-            return pre;
-        } else {
-            raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
-            return null;
-        }
+    public void requestStartTime(final TimePoint now, final TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver) {
+        RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
+            @Override
+            public void execute() {
+                raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
+            }
+        };
+        
+        getRacingProcedure().checkPrerequisitesForStart(now, startTime, function).resolve(resolver);
     }
 
     @Override
