@@ -73,15 +73,17 @@ public abstract class AbstractSeleniumTest {
      * @return
      *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
      */
-    protected static boolean clearState(String contextRoot) {
+    protected static void clearState(String contextRoot) {
         try {
             URL url = new URL(contextRoot + CLEAR_STATE_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.connect();
             
-            return connection.getResponseCode() == CLEAR_STATE_SUCCESFUL_STATUS_CODE;
-        } catch(Exception exception) {
+            if(connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+        } catch(IOException exception) {
             throw new RuntimeException(exception);
         }
     }
