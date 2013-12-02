@@ -376,7 +376,7 @@ public class ByMapCourseDesignDialog extends RaceDialogFragment {
         description.append(mark.getName());
         description.append(", bearing: ");
         description.append(bearingFormat.format(mark.getBearingFrom(referencePoint).getDegrees()));
-        description.append("°, distance: ");
+        description.append("o, distance: ");
         description.append(distanceFormat.format(mark.getDistanceFromPosition(referencePoint).getNauticalMiles()));
         description.append("nm");
         return description.toString();
