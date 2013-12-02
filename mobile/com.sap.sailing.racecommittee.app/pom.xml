@@ -114,7 +114,7 @@
                     <sdk>
                         <platform>13</platform>
                     </sdk>
-                    <release>false</release>
+                    <release>true</release>
                     <proguard>
                         <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
                         <skip>true</skip>
