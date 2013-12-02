@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement;
  * @param <T>
  *   The type of the data entries the table contains.
  */
-public class GenericCellTable<T extends DataEntry> extends CellTable2<T> {
+public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
     /**
      * <p></p>
      * 
@@ -33,7 +33,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable2<T> {
          * @return
          *   The data entry representing the element.
          */
-        public <S extends CellTable2<T>> T createEntry(S table, WebElement element);
+        public <S extends CellTable<T>> T createEntry(S table, WebElement element);
     }
     
     /**
@@ -64,7 +64,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable2<T> {
          * with the formal parameter types CellTable and WebElement.</p>
          */
         @Override
-        public <S extends CellTable2<T>> T createEntry(S table, WebElement element) {
+        public <S extends CellTable<T>> T createEntry(S table, WebElement element) {
         	Class<?> clazz = table.getClass();
         	
         	while(clazz != null) {

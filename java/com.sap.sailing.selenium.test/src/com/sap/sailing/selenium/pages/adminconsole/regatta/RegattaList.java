@@ -14,8 +14,8 @@ import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
-import com.sap.sailing.selenium.pages.gwt.CellTable2.SortingOrder;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTable.SortingOrder;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -104,7 +104,7 @@ public class RegattaList extends PageArea {
     
     public List<RegattaDescriptor> getRegattas() {
         List<RegattaDescriptor> descriptors = new LinkedList<>();
-        CellTable2<DataEntry> table = getRegattasTable();
+        CellTable<DataEntry> table = getRegattasTable();
         
         for(DataEntry entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
@@ -142,7 +142,7 @@ public class RegattaList extends PageArea {
     }
     
     private DataEntry findRegatta(RegattaDescriptor regatta) {
-        CellTable2<DataEntry> table = getRegattasTable();
+        CellTable<DataEntry> table = getRegattasTable();
         
         for(DataEntry entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
@@ -158,11 +158,11 @@ public class RegattaList extends PageArea {
     }
     
     private void sortRegattaList(int column, SortingOrder order) {
-        CellTable2<DataEntry> table = getRegattasTable();
+        CellTable<DataEntry> table = getRegattasTable();
         table.sortByColumn(column, order);
     }
     
-    private CellTable2<DataEntry> getRegattasTable() {
+    private CellTable<DataEntry> getRegattasTable() {
         return new GenericCellTable<>(this.driver, this.regattasTable, DataEntry.class);
     }
 }

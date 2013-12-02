@@ -10,7 +10,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -84,7 +84,7 @@ public class RegattaDetails extends PageArea {
     }
     
     private DataEntry findSeries(String series) {
-        CellTable2<DataEntry> table = getSeriesTable();
+        CellTable<DataEntry> table = getSeriesTable();
         
         for(DataEntry entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
@@ -96,7 +96,7 @@ public class RegattaDetails extends PageArea {
         return null;
     }
     
-    private CellTable2<DataEntry> getSeriesTable() {
+    private CellTable<DataEntry> getSeriesTable() {
         return new GenericCellTable<>(this.driver, this.seriesTable, DataEntry.class);
     }
 }

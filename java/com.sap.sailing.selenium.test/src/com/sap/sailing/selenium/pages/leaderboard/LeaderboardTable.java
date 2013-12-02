@@ -3,12 +3,12 @@ package com.sap.sailing.selenium.pages.leaderboard;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTable.LeaderboardEntry;
 
-public class LeaderboardTable extends CellTable2<LeaderboardEntry> {
+public class LeaderboardTable extends CellTable<LeaderboardEntry> {
     public class LeaderboardEntry extends DataEntry {
         private static final String TOTAL_RANK = "Total rank";
         private static final String COMPETITOR = "Competitor";

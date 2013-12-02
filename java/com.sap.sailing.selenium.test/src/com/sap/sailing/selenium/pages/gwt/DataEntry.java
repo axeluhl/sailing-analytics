@@ -27,7 +27,7 @@ public class DataEntry extends CellTableRow {
     @FindBy(how = ByTagName.class, using = CELL_TAG_NAME)
     private List<WebElement> columns;
     
-    public DataEntry(CellTable2<?> table, WebElement element) {
+    public DataEntry(CellTable<?> table, WebElement element) {
         super(table, element);
     }
     
@@ -44,7 +44,7 @@ public class DataEntry extends CellTableRow {
     }
     
     public boolean isSelected() {
-        return CSSHelper.hasCSSClass((WebElement) this.context, CellTable2.SELECTED_ROW_CSS_CLASS);
+        return CSSHelper.hasCSSClass((WebElement) this.context, CellTable.SELECTED_ROW_CSS_CLASS);
     }
     
     public void select() {

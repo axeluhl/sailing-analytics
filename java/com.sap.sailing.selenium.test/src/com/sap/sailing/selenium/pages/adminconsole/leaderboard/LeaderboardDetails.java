@@ -17,7 +17,7 @@ import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -98,7 +98,7 @@ public class LeaderboardDetails extends PageArea {
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
         
-        CellTable2<DataEntry> racesTable = getRacesTable();
+        CellTable<DataEntry> racesTable = getRacesTable();
         
         for(DataEntry entry : racesTable.getEntries()) {
             String name = entry.getColumnContent(0);
@@ -157,7 +157,7 @@ public class LeaderboardDetails extends PageArea {
     }
     
     private DataEntry findRace(RaceDescriptor race) {
-        CellTable2<DataEntry> racesTable = getRacesTable();
+        CellTable<DataEntry> racesTable = getRacesTable();
         
         for(DataEntry entry : racesTable.getEntries()) {
             String name = entry.getColumnContent(0);
@@ -176,7 +176,7 @@ public class LeaderboardDetails extends PageArea {
     }
     
     private DataEntry findTracking(TrackedRaceDescriptor tracking) {
-        CellTable2<DataEntry> trackingTable = getTrackedRacesTable();
+        CellTable<DataEntry> trackingTable = getTrackedRacesTable();
         
         for(DataEntry entry : trackingTable.getEntries()) {
             String regatta = entry.getColumnContent(0);
@@ -192,11 +192,11 @@ public class LeaderboardDetails extends PageArea {
         return null;
     }
     
-    private CellTable2<DataEntry> getRacesTable() {
+    private CellTable<DataEntry> getRacesTable() {
         return new GenericCellTable<>(this.driver, this.racesTable, DataEntry.class);
     }
     
-    private CellTable2<DataEntry> getTrackedRacesTable() {
+    private CellTable<DataEntry> getTrackedRacesTable() {
         return new GenericCellTable<>(this.driver, findElementBySeleniumId(this.trackedRacesPanel, "TrackedRacesTable"), DataEntry.class);
     }
 }

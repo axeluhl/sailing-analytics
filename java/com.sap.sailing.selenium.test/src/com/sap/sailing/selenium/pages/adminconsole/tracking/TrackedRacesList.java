@@ -14,7 +14,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -116,7 +116,7 @@ public class TrackedRacesList extends PageArea {
     
     public List<TrackedRaceDescriptor> getTrackedRaces() {
         List<TrackedRaceDescriptor> descriptors = new LinkedList<>();
-        CellTable2<DataEntry> table = getTrackedRacesTable();
+        CellTable<DataEntry> table = getTrackedRacesTable();
         
         for(DataEntry entry : table.getEntries()) {
             String regatta = entry.getColumnContent(0);
@@ -138,7 +138,7 @@ public class TrackedRacesList extends PageArea {
     public List<Status> getStatus(List<TrackedRaceDescriptor> races) {
         List<Status> result = new ArrayList<>(Collections.<Status>nCopies(races.size(), null));
         
-        CellTable2<DataEntry> table = getTrackedRacesTable();
+        CellTable<DataEntry> table = getTrackedRacesTable();
         
         for(DataEntry entry : table.getEntries()) {
             String regatta = entry.getColumnContent(0);
@@ -170,7 +170,7 @@ public class TrackedRacesList extends PageArea {
         waitForAjaxRequests();
     }
     
-    private CellTable2<DataEntry> getTrackedRacesTable() {
+    private CellTable<DataEntry> getTrackedRacesTable() {
         return new GenericCellTable<>(this.driver, this.trackedRacesTable, DataEntry.class);
     }
     

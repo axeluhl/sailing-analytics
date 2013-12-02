@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.Actions;
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 import com.sap.sailing.selenium.pages.gwt.query.Alias;
@@ -48,12 +48,12 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
         dialog.pressOk();
     }
     
-    public CellTable2<DataEntry> getLeaderboardGroupsTable() {
+    public CellTable<DataEntry> getLeaderboardGroupsTable() {
         return new GenericCellTable<DataEntry>(driver, leaderboardGroupsTable, DataEntry.class);
     }
     
     public void deleteLeaderboardGroup(String name) {
-        CellTable2<DataEntry> table = getLeaderboardGroupsTable();
+        CellTable<DataEntry> table = getLeaderboardGroupsTable();
         final DataEntry alias = Alias.alias(DataEntry.class);
         TableQuery<DataEntry> query = new TableQuery<>();
         query.from(table)
@@ -72,12 +72,12 @@ public class LeaderboardGroupConfigurationPanel extends PageArea {
         
     }
 
-    public CellTable2<DataEntry> getLeaderboardsTable() {
+    public CellTable<DataEntry> getLeaderboardsTable() {
         return new GenericCellTable<DataEntry>(driver, leaderboardsTable, DataEntry.class);
     }
 
     public DataEntry findLeaderboardEntry(String name) {
-        CellTable2<DataEntry> table = getLeaderboardsTable();
+        CellTable<DataEntry> table = getLeaderboardsTable();
         final DataEntry alias = Alias.alias(DataEntry.class);
         TableQuery<DataEntry> query = new TableQuery<>();
         query.from(table).where($(alias.getColumnContent("Leaderboard Name")).eq(name));

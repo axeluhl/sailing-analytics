@@ -16,7 +16,7 @@ import com.sap.sailing.selenium.pages.adminconsole.Actions;
 
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -72,7 +72,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public void deleteLeaderboard(String leaderboard) {
-        CellTable2<DataEntry> table = getLeaderboardTable();
+        CellTable<DataEntry> table = getLeaderboardTable();
         List<DataEntry> entries = table.getEntries();
         
         for(DataEntry entry : entries) {
@@ -92,7 +92,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public String getLeaderboardURL(String leaderboard) {
-        CellTable2<DataEntry> table = getLeaderboardTable();
+        CellTable<DataEntry> table = getLeaderboardTable();
         List<DataEntry> entries = table.getEntries();
         
         for(DataEntry entry : entries) {
@@ -110,7 +110,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     public List<String> getAvailableLeaderboards() {
         List<String> leaderboards = new ArrayList<>();
         
-        CellTable2<DataEntry> table = getLeaderboardTable();
+        CellTable<DataEntry> table = getLeaderboardTable();
         List<DataEntry> entries = table.getEntries();
         
         for(DataEntry entry : entries) {
@@ -121,7 +121,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
     }
     
     public LeaderboardDetails getLeaderboardDetails(String leaderboard) {
-        CellTable2<DataEntry> table = getLeaderboardTable();
+        CellTable<DataEntry> table = getLeaderboardTable();
         List<DataEntry> entries = table.getEntries();
         
         for(DataEntry entry : entries) {
@@ -137,7 +137,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
         return null;
     }
     
-    private CellTable2<DataEntry> getLeaderboardTable() {
+    private CellTable<DataEntry> getLeaderboardTable() {
         return new GenericCellTable<>(this.driver, this.availableLeaderboardsTable, DataEntry.class);
     }
 }

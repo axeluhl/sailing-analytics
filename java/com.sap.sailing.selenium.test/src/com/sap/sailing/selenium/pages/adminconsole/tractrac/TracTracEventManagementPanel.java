@@ -18,7 +18,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable2;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
 import com.sap.sailing.selenium.pages.gwt.DataEntry;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
@@ -163,7 +163,7 @@ public class TracTracEventManagementPanel extends PageArea {
      */
     public List<TrackableRaceDescriptor> getTrackableRaces() {
         List<TrackableRaceDescriptor> descriptors = new LinkedList<>();
-        CellTable2<DataEntry> table = getTrackableRacesTable();
+        CellTable<DataEntry> table = getTrackableRacesTable();
         
         for(DataEntry entry : table.getEntries()) {
             String event = entry.getColumnContent(0);
@@ -223,7 +223,7 @@ public class TracTracEventManagementPanel extends PageArea {
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
-        CellTable2<DataEntry> table = getTrackableRacesTable();
+        CellTable<DataEntry> table = getTrackableRacesTable();
         List<DataEntry> entries = table.getEntries();
         Iterator<DataEntry> iterator = entries.iterator();
         
@@ -247,7 +247,7 @@ public class TracTracEventManagementPanel extends PageArea {
         waitForAjaxRequests();
     }
     
-    private CellTable2<DataEntry> getTrackableRacesTable() {
+    private CellTable<DataEntry> getTrackableRacesTable() {
         return new GenericCellTable<>(this.driver, this.trackableRacesTable, DataEntry.class);
     }
     
