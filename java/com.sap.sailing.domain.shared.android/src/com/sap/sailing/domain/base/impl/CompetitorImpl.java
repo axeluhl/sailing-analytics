@@ -25,6 +25,11 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
     
     @Override
+    public String toString() {
+        return getName();
+    }
+    
+    @Override
     public void setName(String newName) {
         this.name = newName;
     }

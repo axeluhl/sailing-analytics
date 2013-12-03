@@ -2,12 +2,12 @@ import socket
 import sys
 
 if len(sys.argv) <= 2:
-    print "Please provide an IP address and mode"
+    print "Please provide an IP, port and mode (UDP, TCP)"
     sys.exit(1)
 
 UDP_IP = sys.argv[1]
-MODE = sys.argv[2]
-UDP_PORT = 2013
+UDP_PORT = sys.argv[2]
+MODE = sys.argv[3]
 
 print "Listening on %s port %s (%s)" % (UDP_IP, UDP_PORT, MODE)
 if MODE == 'UDP':

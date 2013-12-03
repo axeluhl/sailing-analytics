@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class SpeedWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Double, Speed, RelativeTo> implements SpeedWithConfidence<RelativeTo> {

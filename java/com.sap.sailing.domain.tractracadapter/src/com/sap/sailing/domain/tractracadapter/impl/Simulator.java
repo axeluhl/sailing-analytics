@@ -8,8 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -68,7 +68,7 @@ public class Simulator {
     private void startWindPlayer() {
         assert this.trackedRace != null;
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
-                trackedRace.getTrackedRegatta(), trackedRace,
+                trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {
             new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override

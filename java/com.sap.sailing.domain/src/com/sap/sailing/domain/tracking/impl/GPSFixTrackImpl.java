@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -29,6 +28,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -184,6 +184,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         ois.defaultReadObject();
         distanceCache = new DistanceCache(trackedItem.toString());
         maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" for "+getTrackedItem();
     }
 
     @Override

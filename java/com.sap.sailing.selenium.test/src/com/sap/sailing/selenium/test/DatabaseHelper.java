@@ -39,8 +39,7 @@ public class DatabaseHelper {
     
     public DatabaseHelper(MongoDBConfiguration configuration) {
         this.configuration = configuration;
-        this.service = MongoDBService.INSTANCE;
-        this.service.setConfiguration(configuration);
+        this.service = getDBConfiguration().getService();
         this.database = this.service.getDB();
     }
     

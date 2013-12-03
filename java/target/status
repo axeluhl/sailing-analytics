@@ -3,6 +3,12 @@
 # source variables
 . `pwd`/env.sh
 
+# enable special environment configuration
+if [[ $USE_ENVIRONMENT != "" ]]; then
+    echo "Using environment $USE_ENVIRONMENT"
+    source ./environment/$USE_ENVIRONMENT
+fi
+
 TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
 if [[ $TELNET_ACTIVE != "" ]]; then
     echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"

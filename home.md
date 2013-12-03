@@ -18,6 +18,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Information for Developers
   * [[Cook Book|wiki/cook-book]]
   * [[OnBoarding Information|wiki/onboarding]]
+  * [[Building and Deploying|wiki/building-and-deploying]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
   * [[Server Replication|wiki/server-replication]]
@@ -25,6 +26,9 @@ Like businesses, sailors need the latest information to make strategic decisions
   * [[Development Environment|wiki/development-environment]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Mobile Development|wiki/mobile-development]]
+* Information for Webdesigners
+  * [[Layout repository|wiki/webdesign]]
+  * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]

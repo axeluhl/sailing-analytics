@@ -115,3 +115,36 @@ Assume you want to forward UDP packets from machine A (port 2014) to machine B (
 - Activate UDP to TCP forwarding on machine A: <pre>A$ socat -T15 udp4-recvfrom:2014,reuseaddr,fork tcp:localhost:6667</pre>
 
 Now also UDP packets get transmitted through.
+
+### Set limits (ulimit) for a running process
+
+<pre>
+[root@ip-172-31-26-232 1388]# cd /proc/1388
+[root@ip-172-31-26-232 1388]# echo -n "Max processes=150000:150000" > limits 
+[root@ip-172-31-26-232 1388]# cat limits 
+Limit                     Soft Limit           Hard Limit           Units     
+Max cpu time              unlimited            unlimited            seconds   
+Max file size             unlimited            unlimited            bytes     
+Max data size             unlimited            unlimited            bytes     
+Max stack size            10485760             unlimited            bytes     
+Max core file size        0                    unlimited            bytes     
+Max resident set          unlimited            unlimited            bytes     
+Max processes             150000               150000               processes 
+Max open files            30000                30000                files     
+Max locked memory         65536                65536                bytes     
+Max address space         unlimited            unlimited            bytes     
+Max file locks            unlimited            unlimited            locks     
+Max pending signals       273211               273211               signals   
+Max msgqueue size         819200               819200               bytes     
+Max nice priority         0                    0                    
+Max realtime priority     0                    0                    
+Max realtime timeout      unlimited            unlimited            us        
+</pre>
+
+### Show threads consuming most CPU time for a Java process
+
+Assume that you want to know which threads exactly eat up all the CPU time. This can be done by using JConsole and the JTop plugin. You can download the plugin here `wget http://arnhem.luminis.eu/wp-content/uploads/2013/10/topthreads-1.1.jar`. The you can open jconsole like so:
+
+<pre>
+/opt/jdk1.7.0_02/bin/jconsole -pluginpath topthreads-1.1.jar
+</pre>
