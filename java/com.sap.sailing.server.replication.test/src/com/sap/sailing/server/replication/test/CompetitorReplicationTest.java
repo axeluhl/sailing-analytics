@@ -71,7 +71,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
-        Competitor competitor = master.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(
+        Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
                 123, competitorName,
                 new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",

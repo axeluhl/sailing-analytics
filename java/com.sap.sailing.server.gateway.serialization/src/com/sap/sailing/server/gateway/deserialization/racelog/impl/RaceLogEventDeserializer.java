@@ -33,7 +33,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixE
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
     
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
-        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), null, /* boatDeserializer */ null);
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory, null, /* boatDeserializer */ null);
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 

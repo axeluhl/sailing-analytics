@@ -139,7 +139,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         
         if (positioningList != null) {
             for (Triple<Serializable, String, MaxPointsReason> positionedCompetitor : positioningList) {
-                Competitor competitor = service.getBaseDomainFactory().getCompetitorStore().getExistingCompetitorById(positionedCompetitor.getA());
+                Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getA());
 
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {

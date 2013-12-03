@@ -51,7 +51,7 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getCompetitorStore().getOrCreateCompetitor(getId(), getName(), getTeam(), getBoat());
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getTeam(), getBoat());
         return result;
     }
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
@@ -16,12 +17,12 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
-    protected final CompetitorStore competitorStore;
+    protected final CompetitorFactory competitorStore;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
 
     public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
-        return new CompetitorJsonDeserializer(baseDomainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(
+        return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
                 new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(baseDomainFactory)));
     }
 
@@ -29,7 +30,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
         this(store, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorJsonDeserializer(CompetitorStore competitorStore, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+    public CompetitorJsonDeserializer(CompetitorFactory competitorStore, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
         this.competitorStore = competitorStore;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;

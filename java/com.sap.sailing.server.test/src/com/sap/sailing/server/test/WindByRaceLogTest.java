@@ -101,7 +101,7 @@ public class WindByRaceLogTest {
     }
 
     private Competitor createCompetitor(final DomainFactory masterDomainFactory) {
-        return masterDomainFactory.getCompetitorStore().getOrCreateCompetitor("GER 61", "Sailor", new TeamImpl("Sailor",
+        return masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));

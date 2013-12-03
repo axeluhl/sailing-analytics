@@ -107,7 +107,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Competitor getCompetitorByBoatIDAndRaceType(String boatID, RaceType raceType) {
-        return baseDomainFactory.getCompetitorStore().getExistingCompetitorById(getCompetitorID(boatID, raceType));
+        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, raceType));
     }
 
     @Override
