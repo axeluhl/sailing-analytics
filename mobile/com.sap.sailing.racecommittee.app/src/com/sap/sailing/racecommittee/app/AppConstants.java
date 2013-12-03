@@ -1,6 +1,10 @@
 package com.sap.sailing.racecommittee.app;
 
 
+import java.io.File;
+
+import android.os.Environment;
+
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class AppConstants {
@@ -29,7 +33,13 @@ public class AppConstants {
     public final static String INTENT_ACTION_ALARM_ACTION = "com.sap.sailing.racecommittee.app.action.alarmAction";
     public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = "com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction";
 
-    public final static String ApplicationFolder = "/racecommittee";
+    private final static String ApplicationFolder = "/racecommittee";
+    
+    public static File getExternalApplicationFolder() {
+        File dir = new File(Environment.getExternalStorageDirectory() + ApplicationFolder);
+        dir.mkdirs();
+        return dir;
+    }
 
     // Login activity
     public final static String EventIdTag = "EventId";

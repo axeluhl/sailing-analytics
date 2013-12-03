@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         DialogListenerHost {
@@ -73,6 +74,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             ExLog.i(TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
+        
+        new AutoUpdater(this).notifyAfterUpdate();
     }
 
     private void addEventListFragment() {

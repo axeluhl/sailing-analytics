@@ -3,6 +3,7 @@
     
     <string name="preference_identifier_key">identifierPreference</string>
     <string name="preference_sync_key">syncConnectionPreference</string>
+    <string name="preference_update_key">forceUpdatePreference</string>
 
     <string name="preference_language_key">languagePref</string>
     <string name="preference_server_url_key">webserviceUrlPref</string>

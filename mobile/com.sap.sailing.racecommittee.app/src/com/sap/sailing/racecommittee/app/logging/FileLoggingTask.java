@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 
-import android.os.Environment;
 import android.util.Log;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -46,8 +45,7 @@ public class FileLoggingTask implements Runnable {
             Format format = new SimpleDateFormat(logFileDateFormat, Locale.US);
             logFileName = String.format(template, format.format(new Date()));
 
-            File loggingDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
-            loggingDirectory.mkdirs();
+            File loggingDirectory = AppConstants.getExternalApplicationFolder();
             logFile = new File(loggingDirectory, logFileName);
 
             if (prepareFile(logFile)) {

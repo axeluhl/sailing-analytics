@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +20,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -36,6 +40,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupLanguageButton();
         setupIdentifierBox();
         setupSyncQRCodeButton();
+        setupForceUpdateButton();
         setupServerUrlBox();
         setupCourseAreasList();
         
@@ -79,6 +84,17 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 requestQRCodeScan();
+                return false;
+            }
+        });
+    }
+
+    private void setupForceUpdateButton() {
+        Preference preference = findPreference(R.string.preference_update_key);
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new AutoUpdater(getActivity()).checkForUpdate(true);
                 return false;
             }
         });
@@ -128,19 +144,38 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         
         if (resultCode == Activity.RESULT_OK) {
             String content = data.getStringExtra("SCAN_RESULT");
-            Pair<String, String> connectionConfiguration = QRCodeUtils.splitQRContent(content);
-            
-            String identifier = connectionConfiguration.getA();
-            String serverUrl = connectionConfiguration.getB();
-            
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
-            preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
-            
-            identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
-            serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
+            try {
+                Pair<String, String> connectionConfiguration = QRCodeUtils.splitQRContent(content);
+                
+                String identifier = connectionConfiguration.getA();
+                String serverUrl = connectionConfiguration.getB();
+                
+                if (isWellformedURL(serverUrl)) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
+                    preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
+                    
+                    identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
+                    serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
+                    
+                    new AutoUpdater(getActivity()).checkForUpdate(false);
+                } else {
+                    Toast.makeText(getActivity(), "Error scanning QRCode (malformed URL)", Toast.LENGTH_LONG).show();
+                }
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(getActivity(), "Error scanning QRCode (" + e.getMessage() + ")", Toast.LENGTH_LONG).show();
+            }
         } else {
             Toast.makeText(getActivity(), "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private boolean isWellformedURL(String url) {
+        try {
+            new URL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
         }
     }
 }

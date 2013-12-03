@@ -179,4 +179,6 @@
 <string name="loading_configuration_not_found">Für dieses Gerät existiert keine Konfiguration auf dem Server.</string>
 	<string name="loading_configuration_succeded">Konfiguration vom Server übernommen.</string>
 	
+	<string name="auto_update_install">Installieren</string>
+	<string name="auto_update_install_anyway">Trotzdem installieren</string>
 </resources>
