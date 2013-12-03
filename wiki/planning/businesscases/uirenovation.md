@@ -15,10 +15,13 @@ Over the last year we have seen a huge increase in the mobile usage of our solut
 We started 2011 with a solution for sailing moderators. From there by extended the supported user roles step by step to sailing event visitors, sailors, trainers, race officers, VIP lounge stuff and so on. So far we tried to serve all user roles with the same UI, but as a result the UI is overloaded with too many functions. As we understand the needs of the different user roles much better now, we think that we should provide more focused UI's for specific user roles.
 
 ### Raceboard
-tbd.
+The raceboard is our 2D viewer to display tracked races on a map enriched with other sensor data (e.g. wind) and a lot of derived data (ranks, analytical data, etc.). Additionally we can also integrate media streams (video, audio). This feature rich viewer is recognized as complex and overloaded as it tries to be two viewers in one: one viewer for visitors following live races and another one for deep analysis of races for sailors and trainers.
+By providing different viewers for the different scenarios we can focus more on the really required feature sets.
+#### 1. Race viewer for specators -> to view
+#### 2. Race viewer for professionals (sailors, trainers) -> to analyze
 
 ### Leaderboard
-tbd.
+A leaderboard is actually an overall ranking for the competitors of a regatta. We advanced the leaderboard by adding analytical data on different levels (leg, race, regatta) for each competitor to a rather generic competitor data table. This data table is very useful as the basis for further competitor analysis but lacks any help if you are looking for a specific problems (e.g. let's do a maneuver performance analysis).
 
-### Event structure navigation
+### Event/Regatta structure navigation
 tbd.
