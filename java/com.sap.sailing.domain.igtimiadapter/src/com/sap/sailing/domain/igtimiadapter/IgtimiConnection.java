@@ -57,4 +57,6 @@ public interface IgtimiConnection {
     Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
+    User getUser(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
 }

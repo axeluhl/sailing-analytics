@@ -66,6 +66,8 @@ public interface IgtimiConnectionFactory {
 
     String getUsersUrl(Account account);
 
+    String getUserUrl(long id, Account account);
+
     String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Iterable<String> streamIds, Account account);
 

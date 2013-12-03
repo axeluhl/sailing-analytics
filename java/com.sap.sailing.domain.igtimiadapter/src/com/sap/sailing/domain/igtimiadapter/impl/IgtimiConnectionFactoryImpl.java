@@ -161,6 +161,11 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
+    public String getUserUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"users/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());

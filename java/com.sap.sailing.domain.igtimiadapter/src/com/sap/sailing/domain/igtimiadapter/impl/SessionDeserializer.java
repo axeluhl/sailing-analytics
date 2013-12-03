@@ -3,10 +3,11 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Session;
 
 public class SessionDeserializer extends HasPermissionsDeserializer {
-    public Session createResourceFromJson(JSONObject sessionJson) {
+    public Session createResourceFromJson(JSONObject sessionJson, IgtimiConnection conn) {
         Boolean blob = (Boolean) sessionJson.get("blob");
         final Double startTime = (Double) sessionJson.get("start_time");
         final Double endTime = (Double) sessionJson.get("end_time");
@@ -15,6 +16,6 @@ public class SessionDeserializer extends HasPermissionsDeserializer {
                 getPermissions((JSONObject) sessionJson.get("permissions")),
                 startTime==null?null:new MillisecondsTimePoint(startTime.longValue()),
                 endTime==null?null:new MillisecondsTimePoint(endTime.longValue()),
-                blob == null ? false : blob);
+                blob == null ? false : blob, conn);
     }
 }

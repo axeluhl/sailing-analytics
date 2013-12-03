@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 
@@ -14,7 +15,7 @@ public class ResourceImpl implements Resource {
     private final boolean blob;
     
     public ResourceImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber, int[] dataTypes,
-            Iterable<Permission> permissions, boolean blob) {
+            Iterable<Permission> permissions, boolean blob, IgtimiConnection conn) {
         super();
         this.id = id;
         this.startTime = startTime;

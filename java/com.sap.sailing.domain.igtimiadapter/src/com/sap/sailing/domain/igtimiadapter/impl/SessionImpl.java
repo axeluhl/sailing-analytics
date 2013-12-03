@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Session;
 
@@ -15,7 +16,7 @@ public class SessionImpl extends HasIdImpl implements Session {
     private final boolean blob;
 
     protected SessionImpl(long id, String name, long ownerId, long sessionGroupId,
-            long adminSessionGroupId, Iterable<Permission> permissions, TimePoint startTime, TimePoint endTime, boolean blob) {
+            long adminSessionGroupId, Iterable<Permission> permissions, TimePoint startTime, TimePoint endTime, boolean blob, IgtimiConnection conn) {
         super(id);
         this.name = name;
         this.ownerId = ownerId;

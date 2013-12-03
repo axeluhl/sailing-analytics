@@ -108,9 +108,12 @@ public class SignInTest {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
         IgtimiConnection connection = connectionFactory.connect(account);
-        Iterable<Session> sessions = connection.getSessions(Collections.singleton(2725l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
+        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4571l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
         assertTrue(sessions.iterator().hasNext());
-        assertEquals("19.6.13", sessions.iterator().next().getName());
+        final Session session = sessions.iterator().next();
+        assertEquals("Auto Session - 01:14:02 10 Nov", session.getName());
+        User sessionOwher = connection.getUser(session.getOwnerId());
+        assertEquals("Uhl", sessionOwher.getSurname());
     }
 
     @Test

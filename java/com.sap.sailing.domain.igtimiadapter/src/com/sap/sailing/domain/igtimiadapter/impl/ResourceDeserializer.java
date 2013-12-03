@@ -4,10 +4,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 
 public class ResourceDeserializer extends HasPermissionsDeserializer {
-    public Resource createResourceFromJson(JSONObject resourceJson) {
+    public Resource createResourceFromJson(JSONObject resourceJson, IgtimiConnection conn) {
         Boolean blob = (Boolean) resourceJson.get("blob");
         return new ResourceImpl((Long) resourceJson.get("id"),
                 new MillisecondsTimePoint(((Double) resourceJson.get("start_time")).longValue()),
@@ -15,7 +16,7 @@ public class ResourceDeserializer extends HasPermissionsDeserializer {
                 (String) resourceJson.get("device_serial_number"),
                 getDataTypes((JSONArray) resourceJson.get("data_types")),
                 getPermissions((JSONObject) resourceJson.get("permissions")),
-                blob == null ? false : blob);
+                blob == null ? false : blob, conn);
     }
 
     private int[] getDataTypes(JSONArray jsonArray) {

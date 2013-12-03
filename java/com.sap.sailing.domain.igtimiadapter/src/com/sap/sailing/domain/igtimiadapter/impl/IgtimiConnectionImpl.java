@@ -46,6 +46,15 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
+    public User getUser(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getUsers = new HttpGet(connectionFactory.getUserUrl(id, account));
+        JSONObject userJson = ConnectivityUtils.getJsonFromResponse(client.execute(getUsers));
+        User result = new UserDeserializer().createUserFromJson((JSONObject) ((JSONObject) userJson).get("user"));
+        return result;
+    }
+    
+    @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
@@ -53,7 +62,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         JSONObject resourcesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Resource> result = new ArrayList<>();
         for (Object resourceJson : (JSONArray) resourcesJson.get("resources")) {
-            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"));
+            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"), this);
             result.add(resource);
         }
         return result;
@@ -68,7 +77,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         JSONObject sessionsJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Session> result = new ArrayList<>();
         for (Object sessionJson : (JSONArray) sessionsJson.get("sessions")) {
-            Session session = new SessionDeserializer().createResourceFromJson((JSONObject) ((JSONObject) sessionJson).get("session"));
+            Session session = new SessionDeserializer().createResourceFromJson((JSONObject) ((JSONObject) sessionJson).get("session"), this);
             result.add(session);
         }
         return result;
