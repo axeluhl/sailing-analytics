@@ -13,7 +13,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
@@ -28,12 +27,12 @@ import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardM
 
 public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardMasterData> {
 
-    private final JsonDeserializer<DynamicCompetitor> competitorDeserializer;
+    private final JsonDeserializer<Competitor> competitorDeserializer;
     private final DomainFactory domainFactory;
     private final JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer;
     private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer = new RaceColumnMasterDataJsonDeserializer();
 
-    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
+    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<Competitor> competitorDeserializer,
             DomainFactory domainFactory, JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer) {
         this.competitorDeserializer = competitorDeserializer;
         this.domainFactory = domainFactory;

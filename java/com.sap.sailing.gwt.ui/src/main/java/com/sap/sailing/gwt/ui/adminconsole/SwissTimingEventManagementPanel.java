@@ -307,8 +307,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         result.setComparator(boatClassColumn, new Comparator<SwissTimingRaceRecordDTO>() {
             @Override
             public int compare(SwissTimingRaceRecordDTO o1, SwissTimingRaceRecordDTO o2) {
-                return o1.boatClass == null ? -1 : o2.boatClass == null ? 1 : o1.boatClass
-                        .compareTo(o2.boatClass);
+                return o1.boatClass == null ? -1 : o2.boatClass == null ? 1 : new NaturalComparator(false).compare(o1.boatClass, o2.boatClass);
             }
         });
         result.setComparator(raceStateColumn, new Comparator<SwissTimingRaceRecordDTO>() {
