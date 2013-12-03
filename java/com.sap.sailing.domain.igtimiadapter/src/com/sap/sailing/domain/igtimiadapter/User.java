@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter;
 
-public interface User {
-    long getId();
-
+public interface User extends Recipient {
     String getFirstName();
 
     String getSurname();

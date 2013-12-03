@@ -116,7 +116,7 @@ public class FixFactoryTest {
         assertEquals(21, satCount.getSatCount());
         fixIter.next();
         AntHrm hrm = (AntHrm) fixIter.next();
-        assertEquals("100", hrm.getSensor().getDeviceId());
+        assertEquals("100", hrm.getSensor().getSubDeviceId());
         assertEquals(72, hrm.getHeartRate());
     }
 }

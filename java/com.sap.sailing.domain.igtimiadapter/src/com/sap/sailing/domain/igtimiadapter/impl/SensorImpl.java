@@ -3,35 +3,35 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class SensorImpl implements Sensor {
-    private final String transmitterId;
-    private final String deviceId;
-    protected SensorImpl(String transmitterId, String deviceId) {
+    private final String deviceSerialNumber;
+    private final String subDeviceId;
+    protected SensorImpl(String eviceSerialNumber, String subDeviceId) {
         super();
-        this.transmitterId = transmitterId;
-        this.deviceId = deviceId;
+        this.deviceSerialNumber = eviceSerialNumber;
+        this.subDeviceId = subDeviceId;
     }
     
     @Override
-    public String getTransmitterId() {
-        return transmitterId;
+    public String getDeviceSerialNumber() {
+        return deviceSerialNumber;
     }
     
     @Override
-    public String getDeviceId() {
-        return deviceId;
+    public String getSubDeviceId() {
+        return subDeviceId;
     }
     
     @Override
     public String toString() {
-        return "Transmitter "+getTransmitterId()+(getDeviceId()==null?"":(", device "+getDeviceId()));
+        return "Transmitter "+getDeviceSerialNumber()+(getSubDeviceId()==null?"":(", device "+getSubDeviceId()));
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((deviceId == null) ? 0 : deviceId.hashCode());
-        result = prime * result + ((transmitterId == null) ? 0 : transmitterId.hashCode());
+        result = prime * result + ((subDeviceId == null) ? 0 : subDeviceId.hashCode());
+        result = prime * result + ((deviceSerialNumber == null) ? 0 : deviceSerialNumber.hashCode());
         return result;
     }
 
@@ -44,15 +44,15 @@ public class SensorImpl implements Sensor {
         if (getClass() != obj.getClass())
             return false;
         SensorImpl other = (SensorImpl) obj;
-        if (deviceId == null) {
-            if (other.deviceId != null)
+        if (subDeviceId == null) {
+            if (other.subDeviceId != null)
                 return false;
-        } else if (!deviceId.equals(other.deviceId))
+        } else if (!subDeviceId.equals(other.subDeviceId))
             return false;
-        if (transmitterId == null) {
-            if (other.transmitterId != null)
+        if (deviceSerialNumber == null) {
+            if (other.deviceSerialNumber != null)
                 return false;
-        } else if (!transmitterId.equals(other.transmitterId))
+        } else if (!deviceSerialNumber.equals(other.deviceSerialNumber))
             return false;
         return true;
     }
