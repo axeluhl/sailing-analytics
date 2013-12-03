@@ -4,8 +4,8 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class SensorImpl implements Sensor {
     private final String deviceSerialNumber;
-    private final String subDeviceId;
-    protected SensorImpl(String eviceSerialNumber, String subDeviceId) {
+    private final long subDeviceId;
+    protected SensorImpl(String eviceSerialNumber, long subDeviceId) {
         super();
         this.deviceSerialNumber = eviceSerialNumber;
         this.subDeviceId = subDeviceId;
@@ -17,21 +17,21 @@ public class SensorImpl implements Sensor {
     }
     
     @Override
-    public String getSubDeviceId() {
+    public long getSensorId() {
         return subDeviceId;
     }
     
     @Override
     public String toString() {
-        return "Transmitter "+getDeviceSerialNumber()+(getSubDeviceId()==null?"":(", device "+getSubDeviceId()));
+        return "Transmitter "+getDeviceSerialNumber()+", device "+getSensorId();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((subDeviceId == null) ? 0 : subDeviceId.hashCode());
         result = prime * result + ((deviceSerialNumber == null) ? 0 : deviceSerialNumber.hashCode());
+        result = prime * result + (int) (subDeviceId ^ (subDeviceId >>> 32));
         return result;
     }
 
@@ -44,15 +44,12 @@ public class SensorImpl implements Sensor {
         if (getClass() != obj.getClass())
             return false;
         SensorImpl other = (SensorImpl) obj;
-        if (subDeviceId == null) {
-            if (other.subDeviceId != null)
-                return false;
-        } else if (!subDeviceId.equals(other.subDeviceId))
-            return false;
         if (deviceSerialNumber == null) {
             if (other.deviceSerialNumber != null)
                 return false;
         } else if (!deviceSerialNumber.equals(other.deviceSerialNumber))
+            return false;
+        if (subDeviceId != other.subDeviceId)
             return false;
         return true;
     }

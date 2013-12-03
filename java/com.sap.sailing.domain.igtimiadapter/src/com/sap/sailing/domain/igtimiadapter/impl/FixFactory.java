@@ -42,7 +42,9 @@ public class FixFactory {
                         valuesPerSubindex.put(i, (Number) values.get(fixIndex));
                         i++;
                     }
-                    Sensor sensor = new SensorImpl(deviceSerialNumber, fixTypeAndOptionalColonSeparatedSensorsSubId.length<2?null:fixTypeAndOptionalColonSeparatedSensorsSubId[1]);
+                    Sensor sensor = new SensorImpl(deviceSerialNumber,
+                            fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
+                                    : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
                     Fix fix = createFix(sensor, Type.valueOf(fixType), timePoint, valuesPerSubindex);
                     result.add(fix);
                     fixIndex++;

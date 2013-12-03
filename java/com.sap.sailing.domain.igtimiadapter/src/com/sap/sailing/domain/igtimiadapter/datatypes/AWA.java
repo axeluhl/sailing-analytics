@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
- * Apparent wind angle, relative to the device's or vessel's orientation
+ * Apparent wind angle, relative to the device's or vessel's orientation, in degrees from -180 to +180
  * 
  * @author Axel Uhl (d043530)
  *
