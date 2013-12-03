@@ -2172,32 +2172,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("replaySwissTimingRace for regatta "+regattaIdentifier+" for races "+replayRaceDTOs);
         Regatta regatta;
         for (SwissTimingReplayRaceDTO replayRaceDTO : replayRaceDTOs) {
-            if (regattaIdentifier == null) {
-                String boatClass = replayRaceDTO.boat_class;
-                for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
-                    Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
-                    Matcher m = p.matcher(boatClass.trim());
-                    if (m.find()) {
-                        boatClass = boatClass.trim().substring(0, m.start(1));
-                        break;
+            try {
+                if (regattaIdentifier == null) {
+                    String boatClass = replayRaceDTO.boat_class;
+                    for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
+                        Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
+                        Matcher m = p.matcher(boatClass.trim());
+                        if (m.find()) {
+                            boatClass = boatClass.trim().substring(0, m.start(1));
+                            break;
+                        }
                     }
+                    regatta = getService().createRegatta(
+                            replayRaceDTO.rsc,
+                            boatClass.trim(),
+                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
+                            Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                            /* isMedal */false, Collections.singletonList(new FleetImpl(
+                                    LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                            /* race column names */new ArrayList<String>(), getService())), false,
+                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                    // TODO: is course area relevant for swiss timing replay?
+                } else {
+                    regatta = getService().getRegatta(regattaIdentifier);
                 }
-                regatta = getService().createRegatta(
-                        replayRaceDTO.rsc,
-                        boatClass.trim(),
-                        RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
-                        Collections.singletonList(new SeriesImpl(
-                                LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
-                                /* isMedal */false, 
-                                Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), 
-                                /* race column names */ new ArrayList<String>(), getService())), 
-                                false,
-                                baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-                //TODO: is course area relevant for swiss timing replay?
-            } else {
-                regatta = getService().getRegatta(regattaIdentifier);
+                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
-            getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
         }
     }
 

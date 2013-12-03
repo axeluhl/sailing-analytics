@@ -442,6 +442,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+	echo "Maven version used: `mvn --version`"
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
 	if [ $gwtcompile -eq 1 ]; then
