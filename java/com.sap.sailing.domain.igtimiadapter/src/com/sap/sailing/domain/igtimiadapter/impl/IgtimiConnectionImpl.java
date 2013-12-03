@@ -14,6 +14,9 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
@@ -55,6 +58,28 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
     
     @Override
+    public Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getGroups = new HttpGet(connectionFactory.getGroupsUrl(account));
+        JSONObject groupsJson = ConnectivityUtils.getJsonFromResponse(client.execute(getGroups));
+        final List<Group> result = new ArrayList<>();
+        for (Object groupJson : (JSONArray) groupsJson.get("groups")) {
+            Group group = new GroupDeserializer().createGroupFromJson((JSONObject) ((JSONObject) groupJson).get("group"));
+            result.add(group);
+        }
+        return result;
+    }
+
+    @Override
+    public Group getGroup(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getGroup = new HttpGet(connectionFactory.getGroupUrl(id, account));
+        JSONObject groupJson = ConnectivityUtils.getJsonFromResponse(client.execute(getGroup));
+        Group result = new GroupDeserializer().createGroupFromJson((JSONObject) ((JSONObject) groupJson).get("group"));
+        return result;
+    }
+
+    @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
@@ -67,7 +92,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         }
         return result;
     }
-
+    
     @Override
     public Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit,
             Boolean includeIncomplete) throws IllegalStateException, ClientProtocolException, IOException,
@@ -84,11 +109,49 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
+    public Session getSession(long id) throws IllegalStateException, ClientProtocolException, IOException,
+            ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getSessions = new HttpGet(connectionFactory.getSessionUrl(id, account));
+        JSONObject sessionJson = ConnectivityUtils.getJsonFromResponse(client.execute(getSessions));
+        Session result = new SessionDeserializer().createResourceFromJson((JSONObject) ((JSONObject) sessionJson).get("session"), this);
+        return result;
+    }
+
+    @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
         HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
+    }
+
+    @Override
+    public Iterable<Device> getOwnedDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getResources = new HttpGet(connectionFactory.getOwnedDevicesUrl(account));
+        JSONObject devicesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        final List<Device> result = new ArrayList<>();
+        for (Object deviceJson : (JSONArray) devicesJson.get("devices")) {
+            Device device = new DeviceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"), this);
+            result.add(device);
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<DataAccessWindow> getDataAccessWindows(Permission permission, TimePoint startTime,
+            TimePoint endTime, Iterable<String> deviceSerialNumbers) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getDataAccessWindows = new HttpGet(connectionFactory.getDataAccessWindowsUrl(permission, startTime, endTime, deviceSerialNumbers, account));
+        JSONObject dataAccessWindowsJson = ConnectivityUtils.getJsonFromResponse(client.execute(getDataAccessWindows));
+        final List<DataAccessWindow> result = new ArrayList<>();
+        for (Object dataAccessWindowJson : (JSONArray) dataAccessWindowsJson.get("data_access_windows")) {
+            DataAccessWindow dataAccessWindow = new DataAccessWindowDeserializer().createDataAccessWindowFromJson(
+                    (JSONObject) ((JSONObject) dataAccessWindowJson).get("data_access_window"), this);
+            result.add(dataAccessWindow);
+        }
+        return result;
     }
 }

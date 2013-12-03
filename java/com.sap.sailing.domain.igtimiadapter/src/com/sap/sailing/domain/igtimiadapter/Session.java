@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.igtimiadapter;
 
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
+
 /**
  * Sessions are a container that gives meaning and structure to a group of {@link Device devices} that are brought
  * together at a particular time for a race etc. It has a few direct properties such as {@link #getName() name},
@@ -27,4 +32,10 @@ public interface Session extends HasId, HasPermissions, HasStartAndEndTime {
     long getOwnerId();
 
     String getName();
+
+    User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+    Group getSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+    Group getAdminSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }

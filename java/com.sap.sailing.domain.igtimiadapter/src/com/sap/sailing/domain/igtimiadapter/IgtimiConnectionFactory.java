@@ -68,6 +68,10 @@ public interface IgtimiConnectionFactory {
 
     String getUserUrl(long id, Account account);
 
+    String getGroupsUrl(Account account);
+
+    String getGroupUrl(long id, Account account);
+
     String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Iterable<String> streamIds, Account account);
 
@@ -76,6 +80,13 @@ public interface IgtimiConnectionFactory {
 
     String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete,
             Account account);
+
+    String getSessionUrl(long id, Account account);
+
+    String getOwnedDevicesUrl(Account account);
+
+    String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Account account);
 
     Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
 

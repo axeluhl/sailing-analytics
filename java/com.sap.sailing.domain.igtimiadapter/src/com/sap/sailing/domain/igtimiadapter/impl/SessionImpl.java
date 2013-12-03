@@ -1,9 +1,16 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
+
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Session;
+import com.sap.sailing.domain.igtimiadapter.User;
 
 public class SessionImpl extends HasIdImpl implements Session {
     private final long ownerId;
@@ -14,6 +21,7 @@ public class SessionImpl extends HasIdImpl implements Session {
     private final TimePoint startTime;
     private final TimePoint endTime;
     private final boolean blob;
+    private final IgtimiConnection conn;
 
     protected SessionImpl(long id, String name, long ownerId, long sessionGroupId,
             long adminSessionGroupId, Iterable<Permission> permissions, TimePoint startTime, TimePoint endTime, boolean blob, IgtimiConnection conn) {
@@ -26,6 +34,7 @@ public class SessionImpl extends HasIdImpl implements Session {
         this.startTime = startTime;
         this.endTime = endTime;
         this.blob = blob;
+        this.conn = conn;
     }
 
     @Override
@@ -68,4 +77,18 @@ public class SessionImpl extends HasIdImpl implements Session {
         return blob;
     }
 
+    @Override
+    public User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        return conn.getUser(getOwnerId());
+    }
+    
+    @Override
+    public Group getSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        return conn.getGroup(getSessionGroupId());
+    }
+    
+    @Override
+    public Group getAdminSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        return conn.getGroup(getAdminSessionGroupId());
+    }
 }

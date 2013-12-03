@@ -19,6 +19,8 @@ public interface IgtimiConnection {
 
     Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
+    User getUser(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
     /**
      * @param startTime
      *            optional; may be <code>null</code>
@@ -57,6 +59,30 @@ public interface IgtimiConnection {
     Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
-    User getUser(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    Session getSession(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    
+    /**
+     * Returns the devices owned by the user to which the application client represented by this connection belongs.
+     */
+    Iterable<Device> getOwnedDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    
+    /**
+     * Returns all devices that this connection has access to with the requested <code>permission</code>.
+     * 
+     * @param startTime
+     *            optional; may be <code>null</code>
+     * @param endTime
+     *            optional; may be <code>null</code>
+     * @param deviceSerialNumbers
+     *            optional; if not <code>null</code> and not empty, only data access windows for the devices identified
+     *            by these serial numbers will be returned
+     */
+    Iterable<DataAccessWindow> getDataAccessWindows(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers) throws IllegalStateException, ClientProtocolException, IOException,
+            ParseException;
+
+    Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    
+    Group getGroup(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException; 
 
 }

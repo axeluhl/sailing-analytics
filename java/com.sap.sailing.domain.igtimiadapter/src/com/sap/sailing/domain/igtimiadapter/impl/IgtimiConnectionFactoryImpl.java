@@ -166,6 +166,51 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
+    public String getGroupsUrl(Account account) {
+        return getApiV1BaseUrl()+"groups?"+getAccessTokenUrlParameter(account);
+    }
+    
+    @Override
+    public String getGroupUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"group/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getSessionUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"sessions/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getOwnedDevicesUrl(Account account) {
+        return getApiV1BaseUrl()+"devices/?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("data_access_windows?type=");
+        url.append(permission.name());
+        if (startTime != null) {
+            url.append("&start_time=");
+            url.append(startTime.asMillis());
+        }
+        if (endTime != null) {
+            url.append("&end_time=");
+            url.append(endTime.asMillis());
+        }
+        if (deviceSerialNumbers != null) {
+            for (String serialNumber : deviceSerialNumbers) {
+                url.append("&serial_numbers[]=");
+                url.append(serialNumber);
+            }
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
+    @Override
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());

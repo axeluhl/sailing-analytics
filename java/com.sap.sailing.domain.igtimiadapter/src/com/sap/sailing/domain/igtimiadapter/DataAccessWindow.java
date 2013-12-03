@@ -15,6 +15,8 @@ package com.sap.sailing.domain.igtimiadapter;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface DataAccessWindow extends HasStartAndEndTime {
+public interface DataAccessWindow extends HasStartAndEndTime, HasPermissions {
     String getDeviceSerialNumber();
+
+    SecurityEntity getRecipient();
 }

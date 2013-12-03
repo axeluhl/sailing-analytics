@@ -13,6 +13,4 @@ public class UserDeserializer {
                 (String) userJson.get("email"),
                 blob == null ? false : blob);
     }
-
-
 }
