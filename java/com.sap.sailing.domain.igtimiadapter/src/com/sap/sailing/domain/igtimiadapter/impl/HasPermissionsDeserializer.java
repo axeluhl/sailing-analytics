@@ -10,10 +10,15 @@ import com.sap.sailing.domain.igtimiadapter.Permission;
 
 public abstract class HasPermissionsDeserializer {
     protected Iterable<Permission> getPermissions(JSONObject permissions) {
-        final List<Permission> result = new ArrayList<>();
-        for (Entry<Object, Object> e : permissions.entrySet()) {
-            if ((Boolean) e.getValue()) {
-                result.add(Permission.valueOf((String) e.getKey()));
+        final List<Permission> result;
+        if (permissions == null) {
+            result = null;
+        } else {
+            result = new ArrayList<>();
+            for (Entry<Object, Object> e : permissions.entrySet()) {
+                if ((Boolean) e.getValue()) {
+                    result.add(Permission.valueOf((String) e.getKey()));
+                }
             }
         }
         return result;

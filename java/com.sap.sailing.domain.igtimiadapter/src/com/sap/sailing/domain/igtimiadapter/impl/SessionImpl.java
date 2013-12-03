@@ -6,7 +6,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Session;
@@ -80,15 +79,5 @@ public class SessionImpl extends HasIdImpl implements Session {
     @Override
     public User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         return conn.getUser(getOwnerId());
-    }
-    
-    @Override
-    public Group getSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        return conn.getGroup(getSessionGroupId());
-    }
-    
-    @Override
-    public Group getAdminSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        return conn.getGroup(getAdminSessionGroupId());
     }
 }

@@ -6,7 +6,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.User;
@@ -62,20 +61,10 @@ public class DeviceImpl extends HasIdImpl implements Device {
     }
     
     @Override
-    public Group getDeviceUserGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        return conn.getGroup(getDeviceUserGroupId());
-    }
-
-    @Override
     public Long getAdminDeviceUserGroupId() {
         return adminDeviceUserGroupId;
     }
     
-    @Override
-    public Group getAdminDeviceUserGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        return conn.getGroup(getAdminDeviceUserGroupId());
-    }
-
     @Override
     public User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         return conn.getUser(getOwnerId());

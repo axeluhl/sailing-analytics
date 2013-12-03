@@ -172,7 +172,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     
     @Override
     public String getGroupUrl(long id, Account account) {
-        return getApiV1BaseUrl()+"group/"+id+"?"+getAccessTokenUrlParameter(account);
+        return getApiV1BaseUrl()+"groups/"+id+"?"+getAccessTokenUrlParameter(account);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
-        url.append("data_access_windows?type=");
+        url.append("devices/data_access_windows?type=");
         url.append(permission.name());
         if (startTime != null) {
             url.append("&start_time=");

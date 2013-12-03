@@ -26,8 +26,4 @@ public interface Device extends HasId {
     String getName();
 
     User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Group getAdminDeviceUserGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Group getDeviceUserGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }

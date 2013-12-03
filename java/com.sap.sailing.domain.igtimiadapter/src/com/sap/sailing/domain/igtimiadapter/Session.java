@@ -34,8 +34,4 @@ public interface Session extends HasId, HasPermissions, HasStartAndEndTime {
     String getName();
 
     User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Group getSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Group getAdminSessionGroup() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.oauth;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -22,6 +23,8 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
@@ -93,6 +96,29 @@ public class SignInTest {
         assertEquals(account.getUser().getId(), users.iterator().next().getId());
     }
 
+    @Test
+    public void testGetGroups() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        Iterable<Group> groups = connection.getGroups();
+        assertTrue(Util.size(groups) > 1);
+    }
+
+    @Test
+    public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
+                /* endTime */ null, /* deviceSerialNumbers */ Collections.singleton("DD-EE-AAGA"));
+        assertFalse(Util.isEmpty(daws));
+        for (DataAccessWindow daw : daws) {
+            assertEquals("DD-EE-AAGA", daw.getDeviceSerialNumber());
+            assertTrue(daw.getRecipient() instanceof Group);
+        }
+    }
+    
     @Test
     public void testGetResources() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();

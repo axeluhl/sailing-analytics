@@ -6,10 +6,10 @@ import com.sap.sailing.domain.igtimiadapter.Permission;
 public class GroupImpl extends HasIdImpl implements Group {
     private final String name;
     private final Iterable<Permission> permissions;
-    private final boolean hidden;
-    private final boolean blob;
+    private final Boolean hidden;
+    private final Boolean blob;
     
-    public GroupImpl(long id, String name, Iterable<Permission> permissions, boolean hidden, boolean blob) {
+    public GroupImpl(long id, String name, Iterable<Permission> permissions, Boolean hidden, Boolean blob) {
         super(id);
         this.name = name;
         this.permissions = permissions;
@@ -28,12 +28,12 @@ public class GroupImpl extends HasIdImpl implements Group {
     }
 
     @Override
-    public boolean isHidden() {
+    public Boolean isHidden() {
         return hidden;
     }
 
     @Override
-    public boolean isBlob() {
+    public Boolean isBlob() {
         return blob;
     }
 }

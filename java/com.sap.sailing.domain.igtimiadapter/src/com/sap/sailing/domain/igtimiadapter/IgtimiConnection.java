@@ -82,7 +82,4 @@ public interface IgtimiConnection {
             ParseException;
 
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-    
-    Group getGroup(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException; 
-
 }

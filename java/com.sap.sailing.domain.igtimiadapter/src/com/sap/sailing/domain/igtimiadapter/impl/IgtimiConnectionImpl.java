@@ -71,15 +71,6 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
-    public Group getGroup(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getGroup = new HttpGet(connectionFactory.getGroupUrl(id, account));
-        JSONObject groupJson = ConnectivityUtils.getJsonFromResponse(client.execute(getGroup));
-        Group result = new GroupDeserializer().createGroupFromJson((JSONObject) ((JSONObject) groupJson).get("group"));
-        return result;
-    }
-
-    @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
