@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.io.Serializable;
+
 public class RegattaMasterData {
 
-    private String id;
+    private Serializable id;
     private String baseName;
     private String defaultCourseAreaId;
     private String boatClassName;
@@ -12,7 +14,7 @@ public class RegattaMasterData {
     private String regattaName;
     private Iterable<String> raceIdsAsStrings;
 
-    public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
+    public RegattaMasterData(Serializable id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
             Iterable<String> raceIdsAsStrings) {
         this.id = id;
@@ -30,7 +32,7 @@ public class RegattaMasterData {
         return raceIdsAsStrings;
     }
 
-    public String getId() {
+    public Serializable getId() {
         return id;
     }
 

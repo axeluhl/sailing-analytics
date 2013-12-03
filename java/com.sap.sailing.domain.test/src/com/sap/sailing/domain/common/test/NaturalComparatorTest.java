@@ -11,10 +11,17 @@ import com.sap.sailing.domain.common.impl.NaturalComparator;
 public class NaturalComparatorTest {
 
     private NaturalComparator comparator;
+    private NaturalComparator caseInsensitive;
 
     @Before
     public void setUp() {
         comparator = new NaturalComparator();
+        caseInsensitive = new NaturalComparator(false);
+    }
+    
+    @Test 
+    public void testCaseInsesitive(){
+        assertEquals(0, caseInsensitive.compare("E", "e"));
     }
 
     @Test

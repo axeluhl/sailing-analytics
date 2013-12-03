@@ -13,40 +13,32 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
 
     public static class UnknownMessageIdentificationCode extends RuntimeException {
         private static final long serialVersionUID = 1L;
-        public final byte messageIdentificationCode;
-        public UnknownMessageIdentificationCode(byte messageIdentificationCode) {
-            super("Unknown message identification code: " +  messageIdentificationCode);
-            this.messageIdentificationCode = messageIdentificationCode;
+        public UnknownMessageIdentificationCode(byte messageIdentificationCode, long position) {
+            super("Unknown message identification code: " +  messageIdentificationCode+" at position "+position);
             
         }
     }
 
     public static class UnexpectedStartByte extends RuntimeException {
         private static final long serialVersionUID = 1L;
-        public final byte unexpectedStartByte;
-        public UnexpectedStartByte(byte unexpectedStartByte) {
-            super("Unexpected start byte: " + unexpectedStartByte);
-            this.unexpectedStartByte = unexpectedStartByte;
-            
+        
+        public UnexpectedStartByte(byte unexpectedStartByte, long position) {
+            super("Unexpected start byte: " + unexpectedStartByte+" at position "+position);
         }
     }
 
     public static class PayloadMismatch extends RuntimeException {
         private static final long serialVersionUID = 1L;
-        public final short remainingPayloadSize;
-        public PayloadMismatch(short remainingPayloadSize) {
-            super("Payload mismatch. Remaining payload: " + remainingPayloadSize);
-            this.remainingPayloadSize = remainingPayloadSize;
+        public PayloadMismatch(short remainingPayloadSize, long position) {
+            super("Payload mismatch. Remaining payload: " + remainingPayloadSize+" at position "+position);
             
         }
     }
 
     public static class PrematureEndOfData extends RuntimeException {
         private static final long serialVersionUID = 1L;
-        public byte endByte;
-        public PrematureEndOfData(byte endByte) {
-            super("Premature end of data: " + endByte);
-            this.endByte = endByte;
+        public PrematureEndOfData(byte endByte, long position) {
+            super("Premature end of data: " + endByte+" at position "+position);
             
         }
     }
@@ -71,57 +63,62 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
     public void readData(InputStream urlInputStream, SwissTimingReplayListener replayListener) throws IOException,
             UnknownMessageIdentificationCode, UnexpectedStartByte, PayloadMismatch, PrematureEndOfData {
         replayListener.progress(0.0);
+        long numberOfBytesRead = 0;
         long initiallyAvailable = urlInputStream.available();
         DataInputStream data = new DataInputStream(urlInputStream);
         byte[] startByteBuffer = new byte[1];
         int readSuccess = data.read(startByteBuffer);
         while (readSuccess != -1) {
+            numberOfBytesRead += readSuccess;
             replayListener.progress((double) (initiallyAvailable-urlInputStream.available())/(double) initiallyAvailable);
             byte startByte = startByteBuffer[0];
             if (startByte != STX) {
-                throw new UnexpectedStartByte(startByte);
+                throw new UnexpectedStartByte(startByte, numberOfBytesRead-1);
             }
             byte messageIdentificationCode = data.readByte();
+            numberOfBytesRead++;
             short messageLength = data.readShort();
+            numberOfBytesRead += 2;
             if (messageLength > 0) {
                 short payloadSize = (short) (messageLength - 5); // payload is message minus STX, MIC, message length
                                                                  // and ETX/EOT --> = 5 byte
+                short remainingPayloadSize = payloadSize;
                 switch (messageIdentificationCode) {
                 case MessageIdentificationCodes.MIC_00_Reference_Timestamp:
-                    while (payloadSize > 0) {
+                    while (remainingPayloadSize > 0) {
                         long referenceTimestamp = data.readLong();
                         replayListener.referenceTimestamp(referenceTimestamp);
-                        payloadSize -= 8;
+                        remainingPayloadSize -= 8;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_01_Reference_Location:
-                    while (payloadSize > 0) {
+                    while (remainingPayloadSize > 0) {
                         int latitude = data.readInt();
                         int longitude = data.readInt();
                         replayListener.referenceLocation(latitude, longitude);
-                        payloadSize -= 8;
+                        remainingPayloadSize -= 8;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_09_Keyframe_Index:
                     int keyFrameIndex = data.readInt();
                     replayListener.keyFrameIndex(keyFrameIndex);
-                    payloadSize -= 4;
-                    while (payloadSize > 0) {
+                    remainingPayloadSize -= 4;
+                    while (remainingPayloadSize > 0) {
                         int keyFrameIndexPosition = data.readInt();
                         replayListener.keyFrameIndexPosition(keyFrameIndexPosition);
-                        payloadSize -= 4;
+                        remainingPayloadSize -= 4;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_10_RSC_CID:
-                    while (payloadSize > 0) {
+                    while (remainingPayloadSize > 0) {
                         int length = 9;
                         String text = readString(data, length);
                         replayListener.raceID(text);
-                        payloadSize -= length;
+                        remainingPayloadSize -= length;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_113_Marks:
-                    while (payloadSize > 0) {
+                    while (remainingPayloadSize > 0) {
                         byte markType = data.readByte();
                         String identifier = readString(data, 8);
                         byte index = data.readByte();
@@ -130,14 +127,14 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         short windSpeed = data.readShort();
                         short windDirection = data.readShort();
                         replayListener.mark(new MarkType(markType), identifier, index, id1, id2, windSpeed, windDirection);
-                        payloadSize -= 1 + 8 + 1 + 8 + 8 + 2 + 2;
+                        remainingPayloadSize -= 1 + 8 + 1 + 8 + 8 + 2 + 2;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_121_Competitor:
                     short competitorsCount = data.readShort();
                     replayListener.competitorsCount(competitorsCount);
-                    payloadSize -= 2;
-                    while (payloadSize > 0) {
+                    remainingPayloadSize -= 2;
+                    while (remainingPayloadSize > 0) {
                         int hashValue = data.readInt();
                         String nation = readString(data, 3);
                         byte sailNumberLength = data.readByte();
@@ -152,11 +149,11 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         replayListener.competitor(hashValue, nation, sailNumber, name,
                                 CompetitorStatus.byCode(competitorStatus), BoatType.byCode(boatType), cRank_Bracket,
                                 cnPoints_x10_Bracket, ctPoints_x10_Winner);
-                        payloadSize -= 4 + 3 + 1 + sailNumberLength + 1 + nameLength + 1 + 1 + 2 + 2 + 2;
+                        remainingPayloadSize -= 4 + 3 + 1 + sailNumberLength + 1 + nameLength + 1 + 1 + 2 + 2 + 2;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_122_Frame_Meta:
-                    while (payloadSize > 0) {
+                    while (remainingPayloadSize > 0) {
                         byte cid = data.readByte();
                         int raceTime = read3ByteInt(data);
                         int startTime = read3ByteInt(data);
@@ -175,14 +172,14 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         replayListener.frameMetaData(cid, raceTime, startTime, estimatedStartTime,
                                 RaceStatus.byCode(raceStatus), distanceToNextMark, Weather.byCode(weather), humidity,
                                 temperature, messageText, cFlag, rFlag, duration, nm);
-                        payloadSize -= 1 + 3 + 3 + 3 + 1 + 2 + 1 + 2 + 2 + 1 + messageTextLength + 1 + 1 + 1 + 2;
+                        remainingPayloadSize -= 1 + 3 + 3 + 3 + 1 + 2 + 1 + 2 + 2 + 1 + messageTextLength + 1 + 1 + 1 + 2;
                     }
                     break;
                 case MessageIdentificationCodes.MIC_123_Ranking_table:
                     short entriesCount = data.readShort();
                     replayListener.rankingsCount(entriesCount);
-                    payloadSize -= 2;
-                    while (payloadSize > 0) {
+                    remainingPayloadSize -= 2;
+                    while (remainingPayloadSize > 0) {
                         int hashValue = data.readInt();
                         short rank = data.readShort();
                         short rankIndex = data.readShort();
@@ -195,22 +192,22 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         short marksCount = data.readShort();
                         replayListener.ranking(hashValue, rank, rankIndex, racePoints,
                                 CompetitorStatus.byCode(competitorStatus), finishRank, finishRankIndex, gap, raceTime);
-                        payloadSize -= 4 + 2 + 2 + 2 + 1 + 2 + 2 + 3 + 3 + 2;
+                        remainingPayloadSize -= 4 + 2 + 2 + 2 + 1 + 2 + 2 + 3 + 3 + 2;
                         for (int i = 0; i < marksCount; i++) {
                             short marksRank = data.readShort();
                             short marksRankIndex = data.readShort();
                             int marksGap = read3ByteInt(data);
                             int marksRaceTime = read3ByteInt(data);
                             replayListener.rankingMark(marksRank, marksRankIndex, marksGap, marksRaceTime);
-                            payloadSize -= 2 + 2 + 3 + 3;
+                            remainingPayloadSize -= 2 + 2 + 3 + 3;
                         }
                     }
                     break;
                 case MessageIdentificationCodes.MIC_124_Trackers:
                     short trackersCount = data.readShort();
                     replayListener.trackersCount(trackersCount);
-                    payloadSize -= 2;
-                    while (payloadSize > 0) {
+                    remainingPayloadSize -= 2;
+                    while (remainingPayloadSize > 0) {
                         int hashValue = data.readInt();
                         int latitude = data.readInt();
                         int longitude = data.readInt();
@@ -229,24 +226,27 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         replayListener.trackers(hashValue, latitude, longitude, cog, sog, average_sog, vmg,
                                 CompetitorStatus.byCode(competitorStatus), rank, dtl, dtnm, nm, pRank, ptPoints,
                                 pnPoints);
-                        payloadSize -= 4 + 4 + 4 + 2 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 2 + 2 + 2 + 2;
+                        remainingPayloadSize -= 4 + 4 + 4 + 2 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 2 + 2 + 2 + 2;
                     }
                     break;
                 default:
-                    throw new UnknownMessageIdentificationCode(messageIdentificationCode);
+                    throw new UnknownMessageIdentificationCode(messageIdentificationCode, numberOfBytesRead-3);
                 }
-                if (payloadSize != 0) {
-                    throw new PayloadMismatch(payloadSize);
+                if (remainingPayloadSize != 0) {
+                    throw new PayloadMismatch(remainingPayloadSize, numberOfBytesRead);
+                } else {
+                    numberOfBytesRead += payloadSize;
                 }
                 replayListener.progress((double) (initiallyAvailable-urlInputStream.available())/(double) initiallyAvailable);
             }
             byte endByte = data.readByte();
+            numberOfBytesRead++;
             if (endByte == EOT) {
                 replayListener.eot();
             } else if (endByte == ETX) {
                 // observe whether ETX is interesting for anybody.
             } else {
-                throw new PrematureEndOfData(endByte);
+                throw new PrematureEndOfData(endByte, numberOfBytesRead-1);
             }
             readSuccess = data.read(startByteBuffer);
         }
