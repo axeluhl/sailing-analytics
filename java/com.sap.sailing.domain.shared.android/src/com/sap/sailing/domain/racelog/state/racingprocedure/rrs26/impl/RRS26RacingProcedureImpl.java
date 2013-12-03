@@ -37,7 +37,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     
     private Flags cachedStartmodeFlag;
     private boolean startmodeFlagHasBeenSet;
-    
+
     public RRS26RacingProcedureImpl(RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory, RRS26Configuration configuration) {
         super(raceLog, author, factory, configuration);
@@ -95,8 +95,11 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     @Override
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
-        case RRS26_CLASS_UP:
         case RRS26_STARTMODE_UP:
+            if (!startmodeFlagHasBeenSet) {
+                setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
+            }
+        case RRS26_CLASS_UP:
         case RRS26_STARTMODE_DOWN:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
@@ -164,6 +167,10 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     @Override
     public Flags getStartModeFlag() {
         return cachedStartmodeFlag;
+    }
+    
+    public boolean startmodeFlagHasBeenSet() {
+        return startmodeFlagHasBeenSet;
     }
     
     @Override

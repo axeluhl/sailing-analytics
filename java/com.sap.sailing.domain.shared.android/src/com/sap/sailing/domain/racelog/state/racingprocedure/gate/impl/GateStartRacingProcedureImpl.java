@@ -120,6 +120,10 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
         case START:
+            if (!gateLineOpeningTimesHasBeenSet) {
+                setGateLineOpeningTimes(event.getTimePoint(), 
+                        cachedGateLineOpeningTimes.getGateLaunchStopTime(), cachedGateLineOpeningTimes.getGolfDownTime());
+            }
             rescheduleGateShutdownTime(event.getTimePoint());
             return true;
         case GATE_CLASS_OVER_GOLF_UP:

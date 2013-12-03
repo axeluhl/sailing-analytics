@@ -9,7 +9,7 @@ public interface ReadonlyGateStartRacingProcedure extends ReadonlyRacingProcedur
     
     public final static long DefaultGateLaunchStopTime = 4 * 60 * 1000; // 4 minutes
     public final static long DefaultGolfDownTime = 3 * 60 * 1000; // 3 minutes
-    public final static String DefaultPathfinderId = "Unknown";
+    public final static String DefaultPathfinderId = "";
     
     GateStartConfiguration getConfiguration();
     
