@@ -10,6 +10,15 @@ We have developed a growing number of technical solutions for the sailing world,
 
 Over the last year we have seen a huge increase in the mobile usage of our solutions. During the Kiel week 2013 around 50% of the website access came from mobile devices. As our solutions has been designed for the usage on laptops and PC's we urgently need to improve the user experience for tablet and smartphone devices.
 
-## 2D Raceviewer and Leaderboard
+## Sailing Analytics
 
 We started 2011 with a solution for sailing moderators. From there by extended the supported user roles step by step to sailing event visitors, sailors, trainers, race officers, VIP lounge stuff and so on. So far we tried to serve all user roles with the same UI, but as a result the UI is overloaded with too many functions. As we understand the needs of the different user roles much better now, we think that we should provide more focused UI's for specific user roles.
+
+### Raceboard
+tbd.
+
+### Leaderboard
+tbd.
+
+### Event structure navigation
+tbd.
