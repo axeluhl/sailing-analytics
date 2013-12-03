@@ -54,13 +54,15 @@ Last but not least make sure that the user executing the build has **full read a
 
 Currently there is no Maven plugin available for Android 3.2 on the internets (see [Maven Repository](http://mvnrepository.com/artifact/com.google.android/android)). Therefore we had to build the correct plugins by hand and place them into http://maven.sapsailing.com/maven/.
 
-This has been done with the help of the [maven-sdk-deployer](https://github.com/mosabua/maven-android-sdk-deployer). Issuing
+This has been done with the help of the [maven-sdk-deployer](https://github.com/mosabua/maven-android-sdk-deployer). If you are ever in the need of recreating http://maven.sapsailing.com/maven/ you'll need to re-do the steps to extract Maven plugins from your local Android SDK installation. Download the maven-sdk-deployer, switch to its root. Issuing
 
     mvn install -P 3.2
 
-will install the needed android.jar as a Maven plugin into your local repository. Now you can copy/remote-deploy this plugin to your target repository (in our case http://maven.sapsailing.com/maven/). Ensure that you do this step with all other needed SDK components (see above). For example you need to issue 
+will install the needed android.jar as a Maven plugin into your local Maven repository. Now you can copy/remote-deploy this plugin to your target repository (in our case http://maven.sapsailing.com/maven/). Be aware that you might need more SDK components besides the core jar. Check your project's poms to see what you need. For example to get the RaceCommittee App working you need to issue 
 
-    maven-android-sdk-deployer/extras/compatibility-v4/mvn install
+    maven-android-sdk-deployer/extras/compatibility-v4/mvn clean install # compatibility lib
+    maven-android-sdk-deployer/add-ons/google-apis-13/mvn clean install # maps and other stuff
+    maven-android-sdk-deployer/extras/google-play-services/mvn clean install # play integration
 
 too.
 
