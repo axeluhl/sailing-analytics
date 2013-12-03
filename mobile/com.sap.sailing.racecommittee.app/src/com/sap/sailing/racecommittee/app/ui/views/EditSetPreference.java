@@ -22,7 +22,7 @@ import android.widget.ListView;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.utils.ArrayRemoveAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.ArrayRemoveAdapter;
 
 public class EditSetPreference extends DialogPreference {
 

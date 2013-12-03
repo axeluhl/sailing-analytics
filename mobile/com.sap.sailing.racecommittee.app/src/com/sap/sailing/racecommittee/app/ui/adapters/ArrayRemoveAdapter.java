@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.List;
 

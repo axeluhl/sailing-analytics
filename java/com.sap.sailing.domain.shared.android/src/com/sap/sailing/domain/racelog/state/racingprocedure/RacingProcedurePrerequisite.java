@@ -7,6 +7,8 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.Startmode
 public interface RacingProcedurePrerequisite {
 
     public interface Resolver {
+        void onFulfilled();
+        
         void fulfill(PathfinderPrerequisite prerequisite);
 
         void fulfill(GateLaunchTimePrerequisite prerequisite);

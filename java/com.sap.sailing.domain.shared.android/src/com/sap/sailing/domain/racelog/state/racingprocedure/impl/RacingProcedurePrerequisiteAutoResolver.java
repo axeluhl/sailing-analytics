@@ -22,4 +22,9 @@ public class RacingProcedurePrerequisiteAutoResolver implements Resolver {
         prerequisite.fulfillWithDefault();
     }
 
+    @Override
+    public void onFulfilled() {
+        
+    }
+
 }

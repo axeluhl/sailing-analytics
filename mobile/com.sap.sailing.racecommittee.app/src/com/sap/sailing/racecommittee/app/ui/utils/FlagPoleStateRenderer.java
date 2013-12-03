@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.racecommittee.app.ui.utils;
 
 import android.content.Context;
 import android.graphics.Color;

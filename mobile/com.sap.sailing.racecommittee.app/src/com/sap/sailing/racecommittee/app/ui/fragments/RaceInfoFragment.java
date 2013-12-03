@@ -30,7 +30,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentCh
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
-import com.sap.sailing.racecommittee.app.utils.CourseDesignerChooser;
+import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 
 public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();

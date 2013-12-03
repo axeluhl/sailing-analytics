@@ -10,13 +10,15 @@
         android:id="@+id/race_startphase_base_start_countdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" />
+        android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/race_startphase_base_next_countdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"
+        android:visibility="gone" />
 
     <ImageView
         android:layout_width="500dp"
@@ -25,7 +27,8 @@
         android:contentDescription="@string/empty"
         android:paddingBottom="2dp"
         android:scaleType="fitXY"
-        android:src="@android:drawable/divider_horizontal_textfield" />
+        android:src="@android:drawable/divider_horizontal_textfield"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,53 +40,60 @@
         android:baselineAligned="false"
         android:orientation="horizontal" >
 
-        <include layout="@layout/race_flag_space"
-		    android:layout_width="match_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="0.618" />
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.618"
+            layout="@layout/race_flag_space"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:background="#DADADA" />
+            android:background="#DADADA"
+            android:visibility="gone" />
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.99"
-            android:gravity="center_horizontal"
-            android:orientation="vertical" >
+            android:layout_height="match_parent" >
 
-            <ViewStub
-                android:id="@+id/race_startphase_base_actions"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <ImageButton
-                android:id="@+id/race_startphase_base_abort_button"
-                android:layout_width="200dp"
-                android:layout_height="110dp"
-                android:contentDescription="@string/flag_ap"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ap_flag" />
-
-            <TextView
-                android:id="@+id/abortingFlagButtonLabel"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="2dp"
-                android:text="@string/abort_starting_phase"
-                android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+                android:gravity="center_horizontal"
+                android:orientation="vertical" >
 
-            <Button
-                android:id="@+id/race_startphase_base_reset_time_button"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:text="@string/reset_time" />
-        </LinearLayout>
+                <ViewStub
+                    android:id="@+id/race_startphase_base_actions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <ImageButton
+                    android:id="@+id/race_startphase_base_abort_button"
+                    android:layout_width="200dp"
+                    android:layout_height="110dp"
+                    android:contentDescription="@string/flag_ap"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ap_flag" />
+
+                <TextView
+                    android:id="@+id/abortingFlagButtonLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/abort_starting_phase"
+                    android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+
+                <Button
+                    android:id="@+id/race_startphase_base_reset_time_button"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:text="@string/reset_time" />
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 
 </LinearLayout>

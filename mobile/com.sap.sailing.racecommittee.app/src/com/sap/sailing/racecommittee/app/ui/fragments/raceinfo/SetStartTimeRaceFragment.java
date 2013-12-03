@@ -4,8 +4,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.app.DatePickerDialog.OnDateSetListener;
-import android.app.FragmentManager;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceC
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 
+    private static final String KEY_STATE = "KEY";
+
+    private static final String TAG = SetStartTimeRaceFragment.class.getName();
+
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
         fragment.setArguments(createArguments(race));
@@ -50,7 +55,6 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     protected boolean isReset;
-    private RacingProcedureType selectedStartProcedureType;
 
     protected Spinner spinnerStartProcedure;
     protected TimePicker pickerTime;
@@ -60,6 +64,10 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     protected TextView textInfoText;
 
     protected DatePickerFragment datePicker;
+    
+
+    private RacingProcedureType selectedStartProcedureType;
+    private SetStartTimeState state;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -106,6 +114,12 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         });
 
         textInfoText = (TextView) getView().findViewById(R.id.race_reset_time_text_infotext);
+        
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_STATE)) {
+            ExLog.i(TAG, "Restoring set start time state...");
+            this.state = savedInstanceState.getParcelable(KEY_STATE);
+            setStartTime(this.state);
+        }
     }
 
     private void setupDatePicker() {
@@ -180,6 +194,15 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (state != null) {
+            ExLog.i(TAG, "Storing start time state...");
+            outState.putParcelable(KEY_STATE, state);
+        }
+    }
+
+    @Override
     public void notifyTick() {
         super.notifyTick();
 
@@ -244,46 +267,88 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     private void setStartTime(Date newStartTime) {
         final TimePoint now = MillisecondsTimePoint.now();
 
-        RacingProcedurePrerequisite.Resolver resolver = new RacingProcedurePrerequisite.Resolver() {
-
-            @Override
-            public void fulfill(GateLaunchTimePrerequisite prerequisite) {
-                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
-                        new RaceChooseGateLaunchTimesDialog(), getRace(), prerequisite);
-                dialog.show(getFragmentManager(), "userActionRequiredDialog");
-            }
-
-            @Override
-            public void fulfill(PathfinderPrerequisite prerequisite) {
-                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
-                        new RaceChoosePathFinderDialog(), getRace(), prerequisite);
-                dialog.show(getFragmentManager(), "userActionRequiredDialog");
-            }
-
-            @Override
-            public void fulfill(StartmodePrerequisite prerequisite) {
-                RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
-                        new RaceChooseStartModeDialog(), getRace(), prerequisite);
-                dialog.show(getFragmentManager(), "userActionRequiredDialog");
-            }
-        };
-
         getRaceState().setAdvancePass(now);
         getRaceState().setRacingProcedure(now, selectedStartProcedureType);
-        getRaceState().requestStartTime(now, new MillisecondsTimePoint(newStartTime), resolver);
+        
+        this.state = new SetStartTimeState(now, new MillisecondsTimePoint(newStartTime));
+        setStartTime(state);
+    }
 
+    private void setStartTime(SetStartTimeState state) {
+        getRaceState().requestStartTime(state.now, state.startTime, resolver);
     }
 
     protected void showAPModeDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-
         RaceDialogFragment fragment = new AbortModeSelectionDialog();
-
         Bundle args = getRecentArguments();
         args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
         fragment.setArguments(args);
+        fragment.show(getFragmentManager(), "dialogAPMode");
+    }
 
-        fragment.show(fragmentManager, "dialogAPMode");
+    RacingProcedurePrerequisite.Resolver resolver = new RacingProcedurePrerequisite.Resolver() {
+        @Override
+        public void fulfill(GateLaunchTimePrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChooseGateLaunchTimesDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void fulfill(PathfinderPrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChoosePathFinderDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void fulfill(StartmodePrerequisite prerequisite) {
+            RaceDialogFragment dialog = PrerequisiteRaceDialog.setPrerequisiteArguments(
+                    new RaceChooseStartModeDialog(), getRace(), prerequisite);
+            dialog.show(getFragmentManager(), "userActionRequiredDialog");
+        }
+
+        @Override
+        public void onFulfilled() {
+            state = null;
+        }
+    };
+
+    public static class SetStartTimeState implements Parcelable {
+
+        private final TimePoint now;
+        private final TimePoint startTime;
+        
+        public SetStartTimeState(TimePoint now, TimePoint startTime) {
+            this.now = now;
+            this.startTime = startTime;
+        }
+
+        private SetStartTimeState(Parcel in) {
+            now = (TimePoint) in.readSerializable();
+            startTime = (TimePoint) in.readSerializable();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeSerializable(now);
+            dest.writeSerializable(startTime);
+        }
+
+        public static final Parcelable.Creator<SetStartTimeState> CREATOR = new Parcelable.Creator<SetStartTimeState>() {
+            public SetStartTimeState createFromParcel(Parcel in) {
+                return new SetStartTimeState(in);
+            }
+
+            public SetStartTimeState[] newArray(int size) {
+                return new SetStartTimeState[size];
+            }
+        };
+        
+        @Override
+        public int describeContents() {
+            return 0;
+        }
     }
 
 }

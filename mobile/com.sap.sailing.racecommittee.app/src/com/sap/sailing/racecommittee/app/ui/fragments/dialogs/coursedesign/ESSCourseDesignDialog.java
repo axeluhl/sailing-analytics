@@ -47,7 +47,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCours
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.ESSMarkImageHelper;
+import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 
 public class ESSCourseDesignDialog extends RaceDialogFragment {
     // private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
