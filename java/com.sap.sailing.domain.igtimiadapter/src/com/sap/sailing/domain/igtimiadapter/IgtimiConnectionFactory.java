@@ -72,6 +72,9 @@ public interface IgtimiConnectionFactory {
     String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account);
 
+    String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete,
+            Account account);
+
     Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
 
     HttpClient getHttpClient();
@@ -99,4 +102,5 @@ public interface IgtimiConnectionFactory {
     String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException;
+
 }

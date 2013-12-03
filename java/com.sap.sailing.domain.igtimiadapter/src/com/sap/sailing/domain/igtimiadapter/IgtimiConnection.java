@@ -41,4 +41,20 @@ public interface IgtimiConnection {
             Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
 
+    /**
+     * @param sessionIds
+     *            the optional IDs of the sessions for which to obtain the metadata; if <code>null</code>, all available
+     *            sessions will be returned
+     * @param isPublic
+     *            optional; if <code>null</code> or <code>true</code>, only public sessions will be included in the
+     *            result
+     * @param limit
+     *            optional; if not <code>null</code>, no more than this many session objects will be returned
+     * @param includeIncomplete
+     *            optional; if not <code>false</code>, only completed sessions that have a start and an end time will be
+     *            returned
+     */
+    Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete)
+            throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
 }

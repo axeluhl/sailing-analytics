@@ -18,6 +18,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
@@ -51,9 +52,24 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         HttpGet getResources = new HttpGet(connectionFactory.getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds, account));
         JSONObject resourcesJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
         final List<Resource> result = new ArrayList<>();
-        for (Object userJson : (JSONArray) resourcesJson.get("resources")) {
-            Resource user = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) userJson).get("resource"));
-            result.add(user);
+        for (Object resourceJson : (JSONArray) resourcesJson.get("resources")) {
+            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"));
+            result.add(resource);
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit,
+            Boolean includeIncomplete) throws IllegalStateException, ClientProtocolException, IOException,
+            ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getResources = new HttpGet(connectionFactory.getSessionsUrl(sessionIds, isPublic, limit, includeIncomplete, account));
+        JSONObject sessionsJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResources));
+        final List<Session> result = new ArrayList<>();
+        for (Object sessionJson : (JSONArray) sessionsJson.get("sessions")) {
+            Session session = new SessionDeserializer().createResourceFromJson((JSONObject) ((JSONObject) sessionJson).get("session"));
+            result.add(session);
         }
         return result;
     }

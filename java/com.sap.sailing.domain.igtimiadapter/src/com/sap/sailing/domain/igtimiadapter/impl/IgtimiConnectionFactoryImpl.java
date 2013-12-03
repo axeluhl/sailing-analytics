@@ -212,6 +212,33 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
+    
+    @Override
+    public String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("sessions?");
+        url.append(getAccessTokenUrlParameter(account));
+        if (sessionIds != null) {
+            for (Long sessionId : sessionIds) {
+                url.append("&ids[]=");
+                url.append(sessionId);
+            }
+        }
+        if (isPublic != null) {
+            url.append("&public=");
+            url.append(isPublic.toString().toLowerCase());
+        }
+        if (limit != null) {
+            url.append("&limit=");
+            url.append(limit);
+        }
+        if (includeIncomplete != null) {
+            url.append("&include_incomplete");
+            url.append(includeIncomplete.toString().toLowerCase());
+        }
+        return url.toString();
+    }
+
     private String getAccessTokenUrlParameter(Account account) {
         return "access_token="+getAccessTokenForAccount(account);
     }

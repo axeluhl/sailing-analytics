@@ -26,6 +26,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
@@ -100,6 +101,16 @@ public class SignInTest {
         Iterable<Resource> resources = connection.getResources(Permission.read, /* start time */ null, /* end time */ null,
                 /* serial numbers */ Collections.singleton("GA-EN-AAEJ"), /* stream IDs */ null);
         assertTrue(resources.iterator().hasNext());
+    }
+    
+    @Test
+    public void testGetSessions() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        Iterable<Session> sessions = connection.getSessions(Collections.singleton(2725l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
+        assertTrue(sessions.iterator().hasNext());
+        assertEquals("19.6.13", sessions.iterator().next().getName());
     }
 
     @Test
