@@ -10,9 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
@@ -267,6 +269,27 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public CompetitorStore getCompetitorStore() {
         return competitorStore;
+    }
+
+    @Override
+    public Competitor getExistingCompetitorById(Serializable competitorId) {
+        return getCompetitorStore().getExistingCompetitorById(competitorId);
+    }
+
+    @Override
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
+        return getCompetitorStore().isCompetitorToUpdateDuringGetOrCreate(result);
+    }
+
+    @Override
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, team, boat);
+    }
+
+    @Override
+    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team,
+            DynamicBoat boat) {
+        return getCompetitorStore().getOrCreateDynamicCompetitor(competitorId, name, team, boat);
     }
 
     @Override

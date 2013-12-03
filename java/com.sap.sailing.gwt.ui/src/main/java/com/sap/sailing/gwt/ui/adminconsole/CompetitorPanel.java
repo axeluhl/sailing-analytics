@@ -30,6 +30,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -114,7 +115,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorColumnListHandler.setComparator(boatClassColumn, new Comparator<CompetitorDTO>() {
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getBoatClass().getName().compareTo(o2.getBoatClass().getName());
+                return new NaturalComparator(false).compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
         
@@ -142,7 +143,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDTO>() {
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getSailID().compareTo(o2.getSailID());
+                return new NaturalComparator(false).compare(o1.getSailID(), o2.getSailID());
             }
         });
 
@@ -172,7 +173,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorColumnListHandler.setComparator(competitorIdColumn, new Comparator<CompetitorDTO>() {
             @Override
             public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getIdAsString().compareTo(o2.getIdAsString());
+                return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);

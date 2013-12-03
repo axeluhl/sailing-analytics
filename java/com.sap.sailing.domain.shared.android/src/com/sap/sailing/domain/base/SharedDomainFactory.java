@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 
-public interface SharedDomainFactory {
+public interface SharedDomainFactory extends CompetitorFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -74,12 +74,25 @@ public interface SharedDomainFactory {
      */
     BoatClass getOrCreateBoatClass(String name);
 
+    /**
+     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
+     */
     CompetitorStore getCompetitorStore();
    
-    CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
+    /**
+     * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
+     * is created.
+     */
+    CourseArea getOrCreateCourseArea(Serializable id, String name);
     
+    /**
+     * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
+     */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
     
+    /**
+     * Hm.
+     */
     DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type type, List<String> clientIdentifiers);
 
 

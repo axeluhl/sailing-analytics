@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
@@ -53,7 +54,7 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserializer(domainFactory);
         JsonDeserializer<DynamicPerson> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
         JsonDeserializer<DynamicTeam> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
-        JsonDeserializer<DynamicCompetitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
                 boatClassDeserializer, teamDeserializer, domainFactory);
         JsonDeserializer<RaceLogEvent> raceLogEventDeserializer = RaceLogEventDeserializer.create(domainFactory);
         JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(

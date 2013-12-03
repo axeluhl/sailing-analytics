@@ -1,9 +1,12 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -36,7 +39,28 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
 
     @Override
     public RegattaMasterData deserialize(JSONObject object) throws JsonDeserializationException {
-        String id = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_ID);
+        Object idClassName = object.get(RegattaMasterDataJsonSerializer.FIELD_ID_TYPE);
+        Serializable id = (Serializable) object.get(RegattaMasterDataJsonSerializer.FIELD_ID);
+        if (idClassName != null) {
+            try {
+                Class<?> idClass = Class.forName((String) idClassName);
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    id = (Serializable) constructorFromString.newInstance(id.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    id = Helpers.tryUuidConversion(id);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            // To ensure some kind of a backward compability.
+            try {
+                id = UUID.fromString(id.toString());
+            } catch (IllegalArgumentException e) {
+                id = id.toString();
+            }
+        }
         String regattaName = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_NAME);
         String baseName = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_BASE_NAME);
         String defaultCourseAreaId = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_COURSE_AREA_ID);

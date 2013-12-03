@@ -399,7 +399,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         result.setComparator(boatClassColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
-                return getBoatClassNamesAsString(o1).compareTo(getBoatClassNamesAsString(o2));
+                return new NaturalComparator(false).compare(getBoatClassNamesAsString(o1), getBoatClassNamesAsString(o2));
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<TracTracRaceRecordDTO>() {

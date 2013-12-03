@@ -210,7 +210,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
-                return r1.boatClass.compareTo(r2.boatClass);
+                return new NaturalComparator(false).compare(r1.boatClass, r2.boatClass);
             }
         });
 

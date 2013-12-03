@@ -3,23 +3,22 @@ package com.sap.sailing.domain.masterdataimport;
 import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-
+import java.io.Serializable;
 public class RegattaMasterData {
 
-    private final String id;
-    private final String baseName;
-    private final String defaultCourseAreaId;
+    private Serializable id;
+    private String baseName;
+    private String defaultCourseAreaId;
+    private String boatClassName;
+    private String scoringSchemeType;
+    private Iterable<SeriesMasterData> series;
     private final RacingProcedureType defaultRacingProcedureType;
     private final CourseDesignerMode defaultCourseDesignerMode;
     private final RacingProceduresConfiguration proceduresConfiguration;
-    private final String boatClassName;
-    private final String scoringSchemeType;
-    private final Iterable<SeriesMasterData> series;
-    private final boolean isPersistent;
-    private final String regattaName;
-    private final Iterable<String> raceIdsAsStrings;
-
-    public RegattaMasterData(String id, String baseName, String defaultCourseAreaId, String boatClassName,
+    private boolean isPersistent;
+    private String regattaName;
+    private Iterable<String> raceIdsAsStrings;
+    public RegattaMasterData(Serializable id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
             Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode,
             RacingProceduresConfiguration proceduresConfiguration) {
@@ -41,7 +40,7 @@ public class RegattaMasterData {
         return raceIdsAsStrings;
     }
 
-    public String getId() {
+    public Serializable getId() {
         return id;
     }
 
