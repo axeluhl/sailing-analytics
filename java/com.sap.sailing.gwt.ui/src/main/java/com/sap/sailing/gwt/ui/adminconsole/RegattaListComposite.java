@@ -147,7 +147,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.boatClass.getName().compareTo(r2.boatClass.getName());
+                return new NaturalComparator(false).compare(r1.boatClass.getName(), r2.boatClass.getName());
             }
         });
 
