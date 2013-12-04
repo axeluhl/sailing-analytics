@@ -47,8 +47,8 @@ In the following we will have a look at some of these settings. Most of them are
 
 ### Regatta Configuration (default)
 
-* **Default racing procedure:** the app will preselect the chosen racing procedure for all races, whose specific regatta configuration (see down) overwrites this.
-* **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see down) overwrites this.
+* **Default racing procedure:** the app will preselect the chosen racing procedure for all races, whose specific regatta configuration (see down) doesn't overwrite this.
+* **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see down) doesn't overwrite this.
 * Configuration of procedure: Each racing procedure has some options to be configured. An option value applies to all races, whose specific regatta configuration doesn't have this option set. 
 
 Keep in mind that changing these options in the app will only have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings).
