@@ -1,3 +1,7 @@
 # RaceCommittee App (User Guide)
 
-Start the app by clicking on the icon.
+[[_TOC_]]
+
+## Introduction
+
+This user guide is intended for race officers and other users of the RaceCommittee App.
