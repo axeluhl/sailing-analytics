@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -3289,7 +3292,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 port = Integer.parseInt(split[1]);
             }
         }
-        String query = createLeaderboardQuery(groupNames);
+        String query;
+        try {
+            query = createLeaderboardQuery(groupNames, compress);
+        } catch (UnsupportedEncodingException e1) {
+            throw new RuntimeException(e1);
+        }
         HttpURLConnection connection = null;
 
         URL serverAddress = null;
@@ -3309,9 +3317,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BufferedReader rd;
             if (compress) {
                 gzip = new GZIPInputStream(connection.getInputStream());
-                rd  = new BufferedReader(new InputStreamReader(gzip));
+                rd = new BufferedReader(new InputStreamReader(gzip, Charset.forName("UTF-8")));
             } else {
-                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
             }
             StringBuilder sb = new StringBuilder();
             String line;
@@ -3337,7 +3345,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+        return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
@@ -3345,12 +3353,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return importer.importMasterData(string, override);
     }
 
-    private String createLeaderboardQuery(String[] groupNames) {
+    private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
-            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+            String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
+            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        queryStringBuffer.append("compress=true");
+        if (compress) {
+            queryStringBuffer.append("compress=true");
+        } else {
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
         return queryStringBuffer.toString();
     }
 

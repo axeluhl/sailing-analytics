@@ -13,6 +13,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
@@ -54,19 +55,21 @@ public class MasterDataResource extends AbstractSailingServerResource {
                         .getAllMediaTracks());
 
         JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
-        byte[] uncompressedResult = masterData.toJSONString().getBytes("UTF-8");
-        byte[] result;
+        ResponseBuilder resp;
         if (compress) {
+            byte[] uncompressedResult = masterData.toJSONString().getBytes("UTF-8");
+            byte[] result;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             GZIPOutputStream gzip = new GZIPOutputStream(out);
             gzip.write(uncompressedResult);
             gzip.close();
             result = out.toByteArray();
+            resp = Response.ok(result, MediaType.APPLICATION_JSON).header("Content-Encoding", "gzip");
         } else {
-            result = uncompressedResult;
+            String result = masterData.toJSONString();
+            resp = Response.ok(result, MediaType.APPLICATION_JSON);
         }
-        ResponseBuilder resp = Response.ok(result,
-                "application/json;charset=UTF-8");
+
         Response builtResponse = resp.build();
         long timeToExport = System.currentTimeMillis() - startTime;
         logger.info(String.format("Took %s ms to export master data.", timeToExport));
