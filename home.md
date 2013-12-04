@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
+This is the <img src="http://www.sapsailing.com/images/sap-logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
