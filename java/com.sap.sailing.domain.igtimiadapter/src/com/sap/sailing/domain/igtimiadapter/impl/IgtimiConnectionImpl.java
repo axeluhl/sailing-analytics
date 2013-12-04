@@ -26,7 +26,8 @@ import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
@@ -131,23 +132,32 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
-    public Map<String, Map<Type, Track<? extends Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+    public Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
             Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
-        Map<String, Map<Type, Track<? extends Fix>>> result = new HashMap<>();
+        Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
         for (Fix fix : fixes) {
             String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();
             Type type = fix.getType();
-            Track<? extends Fix> track = getOrCreateTrack(result, deviceSerialNumber, type);
-            track.ad
+            DynamicTrack<Fix> track = (DynamicTrack<Fix>) getOrCreateTrack(result, deviceSerialNumber, type);
+            track.add(fix);
         }
         return result;
     }
-
-    private Track<? extends Fix> getOrCreateTrack(Map<String, Map<Type, Track<? extends Fix>>> result,
+    
+    private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,
             String deviceSerialNumber, Type type) {
-        // TODO Auto-generated method stub
-        return null;
+        Map<Type, DynamicTrack<Fix>> mapForDevice = result.get(deviceSerialNumber);
+        if (mapForDevice == null) {
+            mapForDevice = new HashMap<>();
+            result.put(deviceSerialNumber, mapForDevice);
+        }
+        DynamicTrack<Fix> track = mapForDevice.get(type);
+        if (track == null) {
+            track = new DynamicTrackImpl<Fix>("Track for Igtimi fixes of type "+type.name()+" for "+this);
+            mapForDevice.put(type, track);
+        }
+        return track;
     }
 
     @Override

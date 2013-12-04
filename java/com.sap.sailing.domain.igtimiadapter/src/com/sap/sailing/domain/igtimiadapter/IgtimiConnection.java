@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
 
 /**
@@ -116,7 +117,7 @@ public interface IgtimiConnection {
      *         in the map. Note further that should a device not have produced fixes of a given type, that type won't
      *         appear as a key in the map for that device.
      */
-    Map<String, Map<Type, Track<? extends Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
+    Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
             IOException, ParseException;
 }
