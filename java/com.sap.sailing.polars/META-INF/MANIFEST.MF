@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Domain
+Bundle-SymbolicName: com.sap.sailing.polars
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: .
+Export-Package: 
+ com.sap.sailing.polars
+Bundle-ActivationPolicy: lazy
+Require-Bundle: 
+ com.sap.sailing.domain.common;bundle-version="1.0.0"
+Import-Package: com.sap.sailing.domain.base
