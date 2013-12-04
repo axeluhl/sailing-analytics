@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class STW extends Fix {
+    private static final long serialVersionUID = -7854740389524286036L;
     private final Speed speedThroughWater;
     
     public STW(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

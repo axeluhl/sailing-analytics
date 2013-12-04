@@ -12,6 +12,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AntHrm extends Fix {
+    private static final long serialVersionUID = 94260324289901500L;
     private final int eventTime;
     private final int heartBeatCount;
     private final int heartRate;

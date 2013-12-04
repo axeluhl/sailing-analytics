@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  * 
  */
 public class HDG extends Fix {
+    private static final long serialVersionUID = -2400420107580758551L;
     private final Bearing trueHeading;
     
     public HDG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

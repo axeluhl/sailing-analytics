@@ -12,6 +12,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AntCbst extends Fix {
+    private static final long serialVersionUID = 7696345613317022955L;
     private final int cadence;
     
     public AntCbst(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

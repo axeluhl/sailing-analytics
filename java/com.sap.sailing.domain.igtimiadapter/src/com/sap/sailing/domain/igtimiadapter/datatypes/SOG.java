@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class SOG extends Fix {
+    private static final long serialVersionUID = 6926121760778539823L;
     private final Speed speedOverGround;
     
     public SOG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
