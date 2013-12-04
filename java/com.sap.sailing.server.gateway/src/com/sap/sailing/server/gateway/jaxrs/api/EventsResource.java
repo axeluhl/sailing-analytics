@@ -4,6 +4,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
@@ -26,8 +27,8 @@ public class EventsResource extends AbstractSailingServerResource {
         for (EventBase event : getService().getAllEvents()) {
             result.add(eventSerializer.serialize(event));
         }
-        byte[] json = result.toJSONString().getBytes();
-        return Response.ok(json).build();
+        String json = result.toJSONString();
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 
     @GET

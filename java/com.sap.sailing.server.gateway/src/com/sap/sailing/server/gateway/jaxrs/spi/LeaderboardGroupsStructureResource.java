@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONObject;
@@ -38,8 +39,8 @@ public class LeaderboardGroupsStructureResource extends AbstractSailingServerRes
 
         JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
         
-        byte[] json = masterData.toJSONString().getBytes();
-        return Response.ok(json).build();
+        String json = masterData.toJSONString();
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 }
  
