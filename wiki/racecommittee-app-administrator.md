@@ -1,3 +1,5 @@
+# RaceCommittee App (Administrator's User Guide)
+
 [[_TOC_]]
 
 ## Introduction
