@@ -30,7 +30,7 @@ Repeat until you've configured all your devices.
 
 There are several preferences you can configure to control the overall functionality of the RaceCommittee App. 
 
-All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will overwrite the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole it will not overwrite the corresponding option, the device will preserves its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
+All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will overwrite the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole, the device will preserves its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
 
 In the following we will have a look at some of these settings. Most of them are enabled for remote configuration.
 
@@ -41,21 +41,23 @@ In the following we will have a look at some of these settings. Most of them are
 * **Managed course areas:** The user is able to logon to the configured course areas.
 * **Results recipient:** When active, the race's results (photos) will be sent to this mail.
 
-### Racing Procedure
-
-* **Overwrite Racing Procedure**: Selecting this option will let the app preselect your overwrite racing procedure regardless of the regatta's configuration and the history of the race's procedures.
-* Configuration of procedure: Each racing procedure has some options to be configured. Keep in mind that changing these options will have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings!)
-
 ### Course Designer
 
-* **Overwrite Course Designer**: See overwrite of racing procedure.
 * Configuration of designers: Each designer has some options to be configured.
 
-## Configuration of regattas
+### Regatta Configuration (default)
+
+* **Default racing procedure:** the app will preselect the chosen racing procedure for all races, whose specific regatta configuration (see down) overwrites this.
+* **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see down) overwrites this.
+* Configuration of procedure: Each racing procedure has some options to be configured. An option value applies to all races, whose specific regatta configuration doesn't have this option set. 
+
+Keep in mind that changing these options in the app will only have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings).
+
+## Regatta Configuration (specific)
 
 For races attached to a regatta (i.e. RegattaLeaderboard) you are able to configure certain options _per-regatta_. The regatta's configuration is fetched by the app together with the race information on logon.
 
-In the **Regatta** tab of the AdminConsole select click on the **Edit **action of the regatta to be configured. You are able to configure the following options:
+In the **Regatta** tab of the AdminConsole click the **Edit** action of the regatta to be configured. If you check **Set regatta configuration** this configuration will overwrite any device configuration.
 
 * **Regatta's default racing procedure:** the app will preselect the chosen racing procedure for all races of this regatta. _This option will have no effect when **Overwrite Racing Procedure** is set in the device's configuration_.
 * **Regatta's default course designer:** the app will preselect the chosen course designer for all races of this regatta. This option will have no effect when **Overwrite Course Designer** is set in the device's configuration.
