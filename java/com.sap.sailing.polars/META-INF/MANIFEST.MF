@@ -11,4 +11,6 @@ Export-Package:
 Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0"
-Import-Package: com.sap.sailing.domain.base
+Import-Package: com.sap.sailing.domain.base,
+ com.sap.sailing.domain.polarsheets,
+ com.sap.sailing.util
