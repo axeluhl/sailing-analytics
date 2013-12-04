@@ -1,7 +1,30 @@
 package com.sap.sailing.domain.igtimiadapter.test;
 
+import static org.junit.Assert.assertFalse;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.Permission;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.impl.Activator;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -16,6 +39,21 @@ import com.sap.sailing.domain.tracking.Wind;
  */
 public class IgtimiFixTrackTest {
     @Test
-    public void testFetchFixesIntoTracks() {
+    public void testFetchFixesIntoTracks() throws ParseException, ClientProtocolException, IllegalStateException, IOException, org.json.simple.parser.ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
+        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
+        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
+        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
+        Set<String> deviceSerialNumbers = new HashSet<>();
+        for (DataAccessWindow daw : daws) {
+            deviceSerialNumbers.add(daw.getDeviceSerialNumber());
+        }
+        Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getResourceDataAsTracks(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
+        assertFalse(data.isEmpty());
+        // TODO continue here, evaluating the tracks...
     }
 }
