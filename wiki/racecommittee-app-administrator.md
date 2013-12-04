@@ -53,7 +53,7 @@ In the following we will have a look at some of these settings. Most of them are
 
 Keep in mind that changing these options in the app will only have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings).
 
-## Regatta Configuration (specific)
+## Configuration of regattas
 
 For races attached to a regatta (i.e. RegattaLeaderboard) you are able to configure certain options _per-regatta_. The regatta's configuration is fetched by the app together with the race information on logon.
 
