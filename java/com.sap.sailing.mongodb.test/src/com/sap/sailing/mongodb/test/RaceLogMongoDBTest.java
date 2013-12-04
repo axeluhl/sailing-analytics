@@ -9,16 +9,15 @@ import java.util.UUID;
 import junit.framework.Assert;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -58,8 +57,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         compareMarks(storedGate.getLeft(), loadedGate.getLeft());
         compareMarks(storedGate.getRight(), loadedGate.getRight());
         
-        assertEquals(storedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
-        assertEquals(loadedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(storedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(loadedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(storedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(loadedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         
