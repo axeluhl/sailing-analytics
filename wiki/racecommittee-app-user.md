@@ -80,6 +80,14 @@ If active for your configuration/regatta you can click the **bravo flag** on a f
 
 In the dialog window select all races of the fleet whose protest time should be set. By default all already finished races are selected.
 
+#### Wind
+
+In the top bar of each race information screen you are able to enter wind data. Click on the yellow link text 'enter wind' to open the wind input dialog
+
+<img src="" title="Wind input dialog" />
+
+Using the GPS receiver of your device the dialog will determine your position. Enter the wind direction and speed and click 'store'.
+
 ## Signaling a course change
 <a name="coursechange"></a>
 
@@ -89,6 +97,18 @@ The following sections will help you with some common problems.
 
 ### Race reset
 
+Whenever a managed race is in a wrong state or you want to redo the race, click 'Reset race' in the race information's top bar. Please read the warning displayed.
+
 ### Connectivity problems
 
+In the top right corner three dots indicate the connectivity status. If there is a problem with sending or receiving data to/from the server the dots will turn red. Don't panic: since you probably aren't sitting in the range of a Starbuck's WiFi this will happen **often**. Just wait some time and put the device you expect it to have a celluar network connection. The device will re-try to send data every minute.
+
+<img src="" title="Connectivity ok" /> <img src="" title="Connectivity problem detected />
+
+If the dots stay red contact the administration team (or see the [[guide for device administrators|wiki/racecommittee-app-administrator]]).
+
 ### Crashes
+
+If the app crashes it will try to restart. You'll have to re-logon onto your course area. The previous state of your managed race will be restored, including unsent changes and data.
+
+If the app crashes over and over again contact the [[administration team|wiki/racecommittee-app-administrator]].
