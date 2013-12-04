@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
+This is the <img src="http://www.sapsailing.com/images/sap-logo.png"/> Sailing Analytics Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
@@ -46,7 +46,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
-* [Maven Repository Browser](http://maven.sapsailing.com/maven/)
+* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/racecommittee-app-environment]])
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
 * [Traffic and CPU for app01](http://mrtg.sapsailing.com/)
