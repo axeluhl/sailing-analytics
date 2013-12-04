@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class COG extends Fix {
+    private static final long serialVersionUID = 1105936972187917331L;
     private final Bearing courseOverGround;
     
     public COG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

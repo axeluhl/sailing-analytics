@@ -27,6 +27,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  * 
  */
 public class GpsQualitySatCount extends Fix {
+    private static final long serialVersionUID = -5507100027164944068L;
     private final int satCount;
     
     public GpsQualitySatCount(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

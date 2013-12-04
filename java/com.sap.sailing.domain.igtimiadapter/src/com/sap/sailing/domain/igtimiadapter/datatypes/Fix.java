@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.igtimiadapter.datatypes;
 
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
-public abstract class Fix {
+public abstract class Fix implements Timed {
+    private static final long serialVersionUID = -486253194440558670L;
     private final TimePoint timePoint;
     private final Sensor sensor;
 
@@ -13,6 +15,7 @@ public abstract class Fix {
         this.sensor = sensor;
     }
 
+    @Override
     public TimePoint getTimePoint() {
         return timePoint;
     }
