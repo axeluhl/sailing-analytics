@@ -693,6 +693,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (startTime != null) {
                 FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now());
                 List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+                // TODO: adapt the LastFlagFinder#getMostRecent method!
                 if (!activeFlags.isEmpty()) {
                     raceInfoDTO.lastUpperFlag = activeFlags.get(0).getUpperFlag();
                     raceInfoDTO.lastLowerFlag = activeFlags.get(0).getLowerFlag();
@@ -3489,6 +3490,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             dto.gateStartConfiguration.classFlag = procedures.getGateStartConfiguration().getClassFlag();
             dto.gateStartConfiguration.hasInidividualRecall = procedures.getGateStartConfiguration().hasInidividualRecall();
             dto.gateStartConfiguration.hasPathfinder = procedures.getGateStartConfiguration().hasPathfinder();
+            dto.gateStartConfiguration.hasAdditionalGolfDownTime = procedures.getGateStartConfiguration().hasAdditionalGolfDownTime();
         }
         if (procedures.getESSConfiguration() != null) {
             dto.essConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.ESSConfigurationDTO();
@@ -3530,6 +3532,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             config.setClassFlag(dto.gateStartConfiguration.classFlag);
             config.setHasInidividualRecall(dto.gateStartConfiguration.hasInidividualRecall);
             config.setHasPathfinder(dto.gateStartConfiguration.hasPathfinder);
+            config.setHasAdditionalGolfDownTime(dto.gateStartConfiguration.hasAdditionalGolfDownTime);
             procedures.setGateStartConfiguration(config);
         }
         if (dto.essConfiguration != null) {

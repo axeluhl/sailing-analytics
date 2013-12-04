@@ -10,6 +10,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
         
+        <TextView 
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/gate_launch"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"/>
+        
         <EditText
             android:id="@+id/gateLaunchStopTimeText"
             android:layout_width="0dp"
@@ -34,6 +40,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/golfDownTimeContainer" >
+        
+	<TextView 
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/golf_down"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
         
         <EditText
             android:id="@+id/golfDownTimeText"

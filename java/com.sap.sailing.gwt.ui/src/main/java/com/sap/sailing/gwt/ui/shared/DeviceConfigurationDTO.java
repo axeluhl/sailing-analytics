@@ -16,6 +16,7 @@ public class DeviceConfigurationDTO implements IsSerializable {
         
         public static class GateStartConfigurationDTO extends RacingProcedureConfigurationDTO {
             public Boolean hasPathfinder;
+            public Boolean hasAdditionalGolfDownTime;
         }
         
         public static class ESSConfigurationDTO extends RacingProcedureConfigurationDTO {

@@ -218,4 +218,6 @@
 	
 	<string name="auto_update_install">Install</string>
 	<string name="auto_update_install_anyway">Install anyway</string>
+	<string name="gate_launch">Gate Launch</string>
+	<string name="golf_down">Golf down</string>
 </resources>

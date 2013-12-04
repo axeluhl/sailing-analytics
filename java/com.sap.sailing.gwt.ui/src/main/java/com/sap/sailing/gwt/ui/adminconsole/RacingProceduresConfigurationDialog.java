@@ -291,6 +291,7 @@ public class RacingProceduresConfigurationDialog extends DataEntryDialog<DeviceC
             result.gateStartConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.GateStartConfigurationDTO();
             getRacingProcedureConfigurationResults(result.gateStartConfiguration, gateStartClassFlagListBox, gateStartRecallBox);
             result.gateStartConfiguration.hasPathfinder = gateStartPathfinderBox.getValue();
+            //result.gateStartConfiguration.hasAdditionalGolfDownTime = ???
         }
         if (essEnabledBox.getValue()) {
             result.essConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.ESSConfigurationDTO();
