@@ -153,6 +153,7 @@ public class BasicIgtimiAdapterTest {
             foundWind = foundWind || fix instanceof AWA || fix instanceof AWS;
             assertTrue(fix.getTimePoint().compareTo(start) >= 0 && fix.getTimePoint().compareTo(end) <= 0);
         }
+        assertTrue(foundWind);
     }
     
 }
