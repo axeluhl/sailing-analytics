@@ -35,31 +35,22 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 
-public class BasicIgtimiAdapterTest {
+public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<User> users = connection.getUsers();
         assertEquals(1, Util.size(users));
-        assertEquals(account.getUser().getId(), users.iterator().next().getId());
+        assertEquals(connection.getAccount().getUser().getId(), users.iterator().next().getId());
     }
 
     @Test
     public void testGetGroups() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<Group> groups = connection.getGroups();
         assertTrue(Util.size(groups) > 1);
     }
 
     @Test
     public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
                 /* endTime */ null, /* deviceSerialNumbers */ Collections.singleton("DD-EE-AAGA"));
         assertFalse(Util.isEmpty(daws));
@@ -71,9 +62,6 @@ public class BasicIgtimiAdapterTest {
     
     @Test
     public void testGetAllDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
                 /* endTime */ null, /* deviceSerialNumbers */ null);
         assertFalse(Util.isEmpty(daws));
@@ -81,9 +69,6 @@ public class BasicIgtimiAdapterTest {
     
     @Test
     public void testGetResources() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<Resource> resources = connection.getResources(Permission.read, /* start time */ null, /* end time */ null,
                 /* serial numbers */ Collections.singleton("GA-EN-AAEJ"), /* stream IDs */ null);
         assertTrue(resources.iterator().hasNext());
@@ -91,9 +76,6 @@ public class BasicIgtimiAdapterTest {
     
     @Test
     public void testGetSessions() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Iterable<Session> sessions = connection.getSessions(Collections.singleton(4571l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
         assertTrue(sessions.iterator().hasNext());
         final Session session = sessions.iterator().next();
@@ -104,9 +86,6 @@ public class BasicIgtimiAdapterTest {
 
     @Test
     public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         Map<Type, Double> typesAndCompression = new HashMap<>();
         typesAndCompression.put(Type.gps_latlong, 0.0);
         Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384420883000l),
@@ -119,9 +98,6 @@ public class BasicIgtimiAdapterTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
         TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-07T08:00:00Z"));
         TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T18:00:00Z"));
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
         assertFalse(Util.isEmpty(daws));

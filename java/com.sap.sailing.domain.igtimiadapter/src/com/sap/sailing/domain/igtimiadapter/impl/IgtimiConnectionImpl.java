@@ -39,6 +39,11 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
     
     @Override
+    public Account getAccount() {
+        return account;
+    }
+    
+    @Override
     public Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
         HttpGet getUsers = new HttpGet(connectionFactory.getUsersUrl(account));

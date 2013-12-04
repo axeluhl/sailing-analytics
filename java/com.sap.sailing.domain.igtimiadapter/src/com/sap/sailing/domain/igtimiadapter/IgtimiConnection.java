@@ -120,4 +120,6 @@ public interface IgtimiConnection {
     Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
             IOException, ParseException;
+
+    Account getAccount();
 }
