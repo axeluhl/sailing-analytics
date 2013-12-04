@@ -38,9 +38,27 @@ public interface IgtimiConnection {
 
     /**
      * All arguments are mandatory.
+     * 
+     * @param deviceSerialNumbers
+     *            the serial numbers of the devices for which to return data; these numbers can be obtained, e.g., from
+     *            {@link #getOwnedDevices()}.{@link Device#getSerialNumber() getSerialNumber()} or from
+     *            {@link #getDataAccessWindows(Permission, TimePoint, TimePoint, Iterable)}.
+     *            {@link DataAccessWindow#getDeviceSerialNumber() getDeviceSerialNumber()}.
+     * @param typeAndCompression
+     *            for each data type to be obtained, tells the compression level; <code>0.0</code> is a good default,
+     *            meaning "no compression". Compression is currently only supported for type {@link Type#gps_latlong} where
+     *            the number provided represents a maximum error in degrees of latitude and longitude.
      */
-    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
+    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
             Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException,
+            ParseException;
+    
+    /**
+     * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
+     * any type.
+     */
+    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
 
     /**
@@ -67,14 +85,16 @@ public interface IgtimiConnection {
     Iterable<Device> getOwnedDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
     
     /**
-     * Returns all devices that this connection has access to with the requested <code>permission</code>.
+     * Returns all devices that this connection has access to with the requested <code>permission</code>. Note that
+     * these don't necessarily need to be devices owned by the user to which this connection belongs. The user only
+     * needs to have been authorized by the owner of the data to access the respective window of data.
      * 
      * @param startTime
-     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range after this
-     *            time will be returned.
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a
+     *            non-empty range after this time will be returned.
      * @param endTime
-     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range before this
-     *            time will be returned.
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a
+     *            non-empty range before this time will be returned.
      * @param deviceSerialNumbers
      *            optional; if not <code>null</code> and not empty, only data access windows for the devices identified
      *            by these serial numbers will be returned

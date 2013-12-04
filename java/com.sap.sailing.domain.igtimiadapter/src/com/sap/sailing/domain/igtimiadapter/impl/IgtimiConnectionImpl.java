@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,11 +112,21 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
 
     @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+            Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
+        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
+    }
+
+    @Override
+    public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Map<Type, Double> typeAndCompression = new HashMap<>();
+        for (Type type : types) {
+            typeAndCompression.put(type, 0.0);
+        }
+        return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
     }
 
     @Override

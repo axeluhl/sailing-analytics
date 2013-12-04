@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -27,6 +29,8 @@ import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
+import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
+import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
@@ -125,6 +129,29 @@ public class BasicIgtimiAdapterTest {
             assertTrue((daw.getStartTime().compareTo(start)<=0 && daw.getEndTime().compareTo(start)>0)  // spans start
                     || (daw.getStartTime().compareTo(end)<=0 && daw.getEndTime().compareTo(end)>0)      // spans end
                     || (daw.getStartTime().compareTo(start)>=0 && daw.getEndTime().compareTo(end)<=0)); // lies within
+        }
+    }
+    
+    @Test
+    public void testResourceDataForGivenTimeFrame() throws java.text.ParseException, IllegalStateException, ClientProtocolException, IOException, ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
+        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
+        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
+        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
+        Set<String> deviceSerialNumbers = new HashSet<>();
+        for (DataAccessWindow daw : daws) {
+            deviceSerialNumbers.add(daw.getDeviceSerialNumber());
+        }
+        Iterable<Fix> windData = connection.getResourceData(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG);
+        assertFalse(Util.isEmpty(windData));
+        boolean foundWind = false;
+        for (Fix fix : windData) {
+            foundWind = foundWind || fix instanceof AWA || fix instanceof AWS;
+            assertTrue(fix.getTimePoint().compareTo(start) >= 0 && fix.getTimePoint().compareTo(end) <= 0);
         }
     }
     
