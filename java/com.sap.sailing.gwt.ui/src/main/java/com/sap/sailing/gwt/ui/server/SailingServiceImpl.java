@@ -81,7 +81,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -144,7 +143,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -633,8 +631,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.defaultCourseAreaIdAsString = regatta.getDefaultCourseArea().getId().toString();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
-        regattaDTO.defaultRacingProcedureType = regatta.getDefaultRacingProcedureType();
-        regattaDTO.defaultCourseDesignerMode = regatta.getDefaultCourseDesignerMode();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         return regattaDTO;
     }
@@ -2889,12 +2885,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId, 
-            RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode,
             RegattaConfigurationDTO configurationDTO) {
         UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
-        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, 
-                defaultRacingProcedureType, defaultCourseDesignerMode,
-                convertToRegattaConfiguration(configurationDTO)));
+        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, convertToRegattaConfiguration(configurationDTO)));
     }
 
     @Override
@@ -3463,8 +3456,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
-        dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
-        dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
@@ -3477,8 +3468,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (configuration == null) {
             return null;
         }
-        
         DeviceConfigurationDTO.RegattaConfigurationDTO dto = new DeviceConfigurationDTO.RegattaConfigurationDTO();
+        
+        dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
+        dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             dto.rrs26Configuration.classFlag = configuration.getRRS26Configuration().getClassFlag();
@@ -3509,8 +3503,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration));
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
-        configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
-        configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
         return configuration;
     }
@@ -3519,13 +3511,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (dto == null) {
             return null;
         }
-        RegattaConfigurationImpl regattaConfiguration = new RegattaConfigurationImpl();
+        RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
+        configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
+        configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
             config.setClassFlag(dto.rrs26Configuration.classFlag);
             config.setHasInidividualRecall(dto.rrs26Configuration.hasInidividualRecall);
             config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
-            regattaConfiguration.setRRS26Configuration(config);
+            configuration.setRRS26Configuration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
@@ -3533,21 +3527,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             config.setHasInidividualRecall(dto.gateStartConfiguration.hasInidividualRecall);
             config.setHasPathfinder(dto.gateStartConfiguration.hasPathfinder);
             config.setHasAdditionalGolfDownTime(dto.gateStartConfiguration.hasAdditionalGolfDownTime);
-            regattaConfiguration.setGateStartConfiguration(config);
+            configuration.setGateStartConfiguration(config);
         }
         if (dto.essConfiguration != null) {
             ESSConfigurationImpl config = new ESSConfigurationImpl();
             config.setClassFlag(dto.essConfiguration.classFlag);
             config.setHasInidividualRecall(dto.essConfiguration.hasInidividualRecall);
-            regattaConfiguration.setESSConfiguration(config);
+            configuration.setESSConfiguration(config);
         }
         if (dto.basicConfiguration != null) {
             RacingProcedureConfigurationImpl config = new RacingProcedureConfigurationImpl();
             config.setClassFlag(dto.basicConfiguration.classFlag);
             config.setHasInidividualRecall(dto.basicConfiguration.hasInidividualRecall);
-            regattaConfiguration.setBasicConfiguration(config);
+            configuration.setBasicConfiguration(config);
         }
-        return regattaConfiguration;
+        return configuration;
     }
 
     @Override

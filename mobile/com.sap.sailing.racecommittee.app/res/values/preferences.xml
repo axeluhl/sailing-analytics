@@ -23,15 +23,9 @@
 
     <string name="preference_mail_key">mailRecipientPreference</string>
     <string name="preference_mail_default">lukas.niemeier@sap.com</string>
-    <string name="preference_racing_procedure_is_overridden_key">overrideDefaultRacingProcedureType</string>
-
-    <bool name="preference_racing_procedure_is_overridden_default">false</bool>
 
     <string name="preference_racing_procedure_override_key">defaultRacingProcedureType</string>
     <string name="preference_racing_procedure_override_default">RRS26</string>
-    <string name="preference_course_designer_is_overridden_key">overrideDefaultCourseDesignerType</string>
-
-    <bool name="preference_course_designer_is_overridden_default">false</bool>
 
     <string name="preference_course_designer_override_key">defaultCourseDesignerType</string>
     <string name="preference_course_designer_override_default">BY_NAME</string>

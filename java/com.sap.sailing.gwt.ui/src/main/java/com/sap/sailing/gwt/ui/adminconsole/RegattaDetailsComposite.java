@@ -19,14 +19,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -51,8 +49,6 @@ public class RegattaDetailsComposite extends Composite {
     private final Label boatClassName;
     private final Label scoringSystem;
     private final Label defaultCourseArea;
-    private final Label defaultRacingProcedureType;
-    private final Label defaultCourseDesignerMode;
     private final Label configuration;
 
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
@@ -71,7 +67,7 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-        Grid grid = new Grid(7, 2);
+        Grid grid = new Grid(5, 2);
         vPanel.add(grid);
         regattaName = new Label();
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
@@ -82,18 +78,12 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseArea = new Label();
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
-        defaultRacingProcedureType = new Label();
-        grid.setWidget(3, 0, new Label(stringMessages.racingProcedure() + ":"));
-        grid.setWidget(3, 1, defaultRacingProcedureType);;
-        defaultCourseDesignerMode = new Label();
-        grid.setWidget(4, 0, new Label(stringMessages.courseDesignerMode() + ":"));
-        grid.setWidget(4, 1, defaultCourseDesignerMode);
         configuration = new Label();
-        grid.setWidget(5, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(5, 1, configuration);;
+        grid.setWidget(3, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
+        grid.setWidget(3, 1, configuration);;
         scoringSystem = new Label();
-        grid.setWidget(6 , 0, new Label(stringMessages.scoringSystem() + ":"));
-        grid.setWidget(6 , 1, scoringSystem);
+        grid.setWidget(4 , 0, new Label(stringMessages.scoringSystem() + ":"));
+        grid.setWidget(4 , 1, scoringSystem);
         seriesTable = createRegattaSeriesTable();
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -329,18 +319,6 @@ public class RegattaDetailsComposite extends Composite {
             regattaName.setText(regatta.getName());
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName);
-            RacingProcedureType procedureType = regatta.defaultRacingProcedureType; 
-            if (procedureType == null || procedureType == RacingProcedureType.UNKNOWN) {
-                defaultRacingProcedureType.setText(stringMessages.none());
-            } else {
-                defaultRacingProcedureType.setText(procedureType.toString());
-            }
-            CourseDesignerMode designerMode = regatta.defaultCourseDesignerMode;
-            if (designerMode == null || designerMode == CourseDesignerMode.UNKNOWN) {
-                defaultCourseDesignerMode.setText(stringMessages.none());
-            } else {
-                defaultCourseDesignerMode.setText(designerMode.toString());
-            }
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {

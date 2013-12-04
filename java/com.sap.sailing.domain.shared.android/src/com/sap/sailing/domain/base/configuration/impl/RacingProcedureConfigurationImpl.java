@@ -37,4 +37,16 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
         return target;
     }
 
+    @Override
+    public RacingProcedureConfiguration merge(RacingProcedureConfiguration update) {
+        RacingProcedureConfigurationImpl target = (RacingProcedureConfigurationImpl) this.copy();
+        if (update.getClassFlag() != null) {
+            target.setClassFlag(update.getClassFlag());
+        }
+        if (update.hasInidividualRecall() != null) {
+            target.setHasInidividualRecall(update.hasInidividualRecall());
+        }
+        return target;
+    }
+
 }

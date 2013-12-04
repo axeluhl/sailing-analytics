@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -11,12 +12,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ESSCo
 public class CourseDesignerChooser {
     
     public static RaceDialogFragment choose(AppPreferences preferences, ManagedRace race) {
-        CourseDesignerMode mode;
-        if (preferences.isDefaultCourseDesignerModeOverridden()) {
-            mode = preferences.getDefaultCourseDesignerMode();
-        } else {
-            mode = race.getRaceGroup().getDefaultCourseDesignerMode();
-        }
+        RegattaConfiguration configuration = race.getRaceGroup().getRegattaConfiguration();
+        CourseDesignerMode mode = configuration.getDefaultCourseDesignerMode();
         
         switch (mode) {
         case BY_MAP:

@@ -49,7 +49,7 @@ public class PreferenceHelper {
 
         PreferenceManager.setDefaultValues(context, R.xml.preference_course_designer, readAgain);
         PreferenceManager.setDefaultValues(context, R.xml.preference_general, readAgain);
-        PreferenceManager.setDefaultValues(context, R.xml.preference_racing_procedure, readAgain);
+        PreferenceManager.setDefaultValues(context, R.xml.preference_regatta_defaults, readAgain);
     }
 
     private boolean clearPreferencesIfNeeded(boolean forceReset) {

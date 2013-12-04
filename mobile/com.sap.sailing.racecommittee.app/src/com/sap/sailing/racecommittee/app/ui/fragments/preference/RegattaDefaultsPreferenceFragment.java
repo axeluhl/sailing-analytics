@@ -5,19 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 
-public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
+public class RegattaDefaultsPreferenceFragment extends BasePreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preference_racing_procedure);
+        addPreferencesFromResource(R.xml.preference_regatta_defaults);
         
         setupGeneral();
         setupRRS26();
@@ -50,7 +50,11 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupGeneral() {
-        CheckBoxPreference overrideStartProcedurePreference = findPreference(R.string.preference_racing_procedure_is_overridden_key);
+        setupRacingProcedureTypePreference();
+        setupCourseDesignerTypePreference();
+    }
+
+    private void setupRacingProcedureTypePreference() {
         final ListPreference startProcedurePreference = findPreference(R.string.preference_racing_procedure_override_key);
         
         List<CharSequence> entries = new ArrayList<CharSequence>();
@@ -63,8 +67,24 @@ public class RacingProcedurePreferenceFragment extends BasePreferenceFragment {
         startProcedurePreference.setEntries(entries.toArray(new CharSequence[entries.size()]));
         startProcedurePreference.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
         
-        bindPreferenceToCheckbox(overrideStartProcedurePreference, startProcedurePreference);
         bindPreferenceSummaryToValue(startProcedurePreference);
+    }
+    
+
+    private void setupCourseDesignerTypePreference() {
+        final ListPreference courseDesignerPreference = findPreference(R.string.preference_course_designer_override_key);
+        
+        List<CharSequence> entries = new ArrayList<CharSequence>();
+        List<CharSequence> entryValues = new ArrayList<CharSequence>();
+        for (CourseDesignerMode type : CourseDesignerMode.validValues()) {
+            entries.add(type.toString());
+            entryValues.add(type.name());
+        }
+        
+        courseDesignerPreference.setEntries(entries.toArray(new CharSequence[0]));
+        courseDesignerPreference.setEntryValues(entryValues.toArray(new CharSequence[0]));
+        
+        bindPreferenceSummaryToValue(courseDesignerPreference);
     }
 
     private void setupRRS26StartmodeFlagsList() {

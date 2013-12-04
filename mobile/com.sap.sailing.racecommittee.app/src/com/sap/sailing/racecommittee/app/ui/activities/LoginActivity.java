@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
@@ -23,6 +23,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -74,7 +75,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             ExLog.i(TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
-        
+
         new AutoUpdater(this).notifyAfterUpdate();
     }
 
@@ -112,21 +113,22 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             progressDialog.show();
 
             ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
-            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                    AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
-            getLoaderManager().restartLoader(0, null,
-                    dataManager.createConfigurationLoader(identifier, new LoadClient<ConfigurationLoader<DeviceConfiguration>>() {
+            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(
+                    getApplicationContext()).getDeviceIdentifier());
+            
+            LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, 
+                    new LoadClient<DeviceConfiguration>() {
 
                         @Override
-                        public void onLoadSucceded(ConfigurationLoader<DeviceConfiguration> configuration, boolean isCached) {
+                        public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
 
-                            // this is our 'global' configuration, so let's enable overwrite for everything!
-                            preferences.setRacingProcedureConfigurationOverwriteAllowed(true);
-                            configuration.store();
-                            
-                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
+                            // this is our 'global' configuration, let's store it in app preferences
+                            PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
+                                    Toast.LENGTH_LONG).show();
                             showCourseAreaListFragment(eventId);
                         }
 
@@ -134,24 +136,20 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                         public void onLoadFailed(Exception reason) {
                             setProgressBarIndeterminateVisibility(false);
                             progressDialog.dismiss();
-                            
-                            // No configuration? Let the configuration of the regatta still overwrite the procedure's configuration!
-                            preferences.setRacingProcedureConfigurationOverwriteAllowed(true);
-                            
+
                             if (reason instanceof FileNotFoundException) {
-                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
-                                        Toast.LENGTH_LONG).show();
-                                ExLog.w(TAG, String.format("There seems to be no configuration for this device: %s", 
-                                        reason.toString()));
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
+                                ExLog.w(TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
                             } else {
-                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
-                                        Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                                 ExLog.ex(TAG, reason);
                             }
 
                             showCourseAreaListFragment(eventId);
                         }
-                    })).forceLoad();
+                    });
+            // always reload the configuration...
+            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         }
     };
 

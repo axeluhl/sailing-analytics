@@ -23,8 +23,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedDeviceConfigurationJsonDeserializer;
-import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedRegattaConfigurationJsonDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
@@ -46,7 +44,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRegattaConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -57,7 +55,9 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeseri
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
 
@@ -131,13 +131,10 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                ConfigurationLoader<RegattaConfiguration> configuration = 
-                        new PreferencesBasedRegattaConfiguration(preferences);
+                ConfigurationLoader<RegattaConfiguration> globalConfiguration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
                 
-                JsonDeserializer<RegattaConfiguration> proceduresDeserializer = 
-                        PreferencesBasedRegattaConfigurationJsonDeserializer.create(preferences);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
-                        configuration, RaceGroupDeserializer.create(domainFactory, proceduresDeserializer));
+                        globalConfiguration, RaceGroupDeserializer.create(domainFactory, RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
                     + "/sailingserver/rc/racegroups?"+
@@ -225,18 +222,17 @@ public class OnlineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<ConfigurationLoader<DeviceConfiguration>>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
-            LoadClient<ConfigurationLoader<DeviceConfiguration>> callback) {
-        return new DataLoaderCallbacks<ConfigurationLoader<DeviceConfiguration>>(callback, new LoaderCreator<ConfigurationLoader<DeviceConfiguration>>() {
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback) {
+        return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
-            public Loader<DataLoaderResult<ConfigurationLoader<DeviceConfiguration>>> create(int id, Bundle args) throws Exception {
+            public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
                 
-                DataHandler<ConfigurationLoader<DeviceConfiguration>> handler = new NullDataHandler<ConfigurationLoader<DeviceConfiguration>>();
-                DataParser<ConfigurationLoader<DeviceConfiguration>> parser = new DeviceConfigurationParser(
-                        PreferencesBasedDeviceConfigurationJsonDeserializer.create(preferences));
+                DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
+                DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
                 
-                return new OnlineDataLoader<ConfigurationLoader<DeviceConfiguration>>(
+                return new OnlineDataLoader<DeviceConfiguration>(
                         context, 
                         new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
                         parser, handler);

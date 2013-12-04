@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
@@ -37,6 +39,18 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
     @Override
     public RegattaConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
         RegattaConfigurationImpl configuration = createConfiguration();
+
+        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE)) {
+            RacingProcedureType type = RacingProcedureType.valueOf(object.get(
+                    RegattaConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE).toString());
+            configuration.setDefaultRacingProcedureType(type);
+        }
+
+        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE)) {
+            CourseDesignerMode mode = CourseDesignerMode.valueOf(object.get(
+                    RegattaConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
+            configuration.setDefaultCourseDesignerMode(mode);
+        }
         
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_RRS26)) {
             RRS26Configuration rrs26Configuration = rrs26Deserializer.deserialize(

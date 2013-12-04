@@ -3,7 +3,7 @@
  */
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite;
 
-import java.util.Set;
+import java.util.List;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -35,7 +35,8 @@ public class RaceChooseStartModeDialog extends PrerequisiteRaceDialog<StartmodeP
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Set<Flags> flags = preferences.getRRS26StartmodeFlags();
+        RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+        List<Flags> flags = procedure.getConfiguration().getStartModeFlags();
         GridView container = (GridView) getView().findViewById(R.id.race_choose_startmode_container);
         container.setNumColumns(flags.size() <= 4 ? 2 : 3);
         container.setAdapter(new FlagImageAdapter(getActivity(), flags));
@@ -56,7 +57,7 @@ public class RaceChooseStartModeDialog extends PrerequisiteRaceDialog<StartmodeP
 
         private final FlagsBitmapCache bitmapCache;
 
-        public FlagImageAdapter(Context context, Set<Flags> flags) {
+        public FlagImageAdapter(Context context, List<Flags> flags) {
             super(context, 0, flags.toArray(new Flags[flags.size()]));
             this.bitmapCache = new FlagsBitmapCache(context);
         }

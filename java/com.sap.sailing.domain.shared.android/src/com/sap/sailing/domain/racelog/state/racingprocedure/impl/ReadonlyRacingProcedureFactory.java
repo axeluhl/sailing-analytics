@@ -1,8 +1,7 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -22,6 +21,11 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
     
     public ReadonlyRacingProcedureFactory(ConfigurationLoader<RegattaConfiguration> configuration) {
         this.configuration = configuration;
+    }
+
+    @Override
+    public RegattaConfiguration getConfiguration() {
+        return configuration.load();
     }
     
     protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogEventAuthor author, 

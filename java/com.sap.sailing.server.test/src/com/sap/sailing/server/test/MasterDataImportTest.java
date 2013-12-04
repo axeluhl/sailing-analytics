@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -59,7 +60,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -75,8 +75,8 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -1098,9 +1098,9 @@ public class MasterDataImportTest {
         Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, UUID.randomUUID(), 
                 new ArrayList<Series>(), true, new LowPoint(), null);
         // Let's use the setters directly because we are not testing replication
-        regatta.setDefaultRacingProcedureType(RacingProcedureType.GateStart);
-        regatta.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
-        regatta.setRegattaConfiguration(new RegattaConfigurationImpl());
+        RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
+        configuration.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MAP);
+        regatta.setRegattaConfiguration(configuration);
         
         
         Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
@@ -1130,11 +1130,8 @@ public class MasterDataImportTest {
         
         Regatta importedRegatta = destService.getRegattaByName(regatta.getName());
         
-        assertNotNull(importedRegatta.getDefaultRacingProcedureType());
-        assertNotNull(importedRegatta.getDefaultCourseDesignerMode());
-        assertEquals(regatta.getDefaultRacingProcedureType(), importedRegatta.getDefaultRacingProcedureType());
-        assertEquals(regatta.getDefaultCourseDesignerMode(), importedRegatta.getDefaultCourseDesignerMode());
         assertNotNull(importedRegatta.getRegattaConfiguration());
+        assertEquals(CourseDesignerMode.BY_MAP, importedRegatta.getRegattaConfiguration().getDefaultCourseDesignerMode());
     }
     
     @Test

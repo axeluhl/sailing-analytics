@@ -41,8 +41,6 @@ public class AppPreferences {
     private final static String HIDDEN_PREFERENCE_BOAT_CLASS = "boatClassPref";
     private final static String HIDDEN_PREFERENCE_COURSE_LAYOUT = "courseLayoutPref";
     private final static String HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS = "numberOfRoundsPref";
-    
-    private final static String HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE = "procedureConfigOverwriteAllowed";
 
     private final SharedPreferences preferences;
     private final Context context;
@@ -172,14 +170,6 @@ public class AppPreferences {
     public void setMailRecipient(String mail) {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
-    
-    public boolean isDefaultRacingProcedureTypeOverridden() {
-        return preferences.getBoolean(key(R.string.preference_racing_procedure_is_overridden_key), false);
-    }
-    
-    public void setDefaultRacingProcedureTypeOverridden(boolean isOverridden) {
-        preferences.edit().putBoolean(key(R.string.preference_racing_procedure_is_overridden_key), isOverridden).commit();
-    }
 
     public RacingProcedureType getDefaultRacingProcedureType() {
         String defaultStartProcedureType = preferences.getString(key(R.string.preference_racing_procedure_override_key), "");
@@ -188,14 +178,6 @@ public class AppPreferences {
     
     public void setDefaultRacingProcedureType(RacingProcedureType type) {
         preferences.edit().putString(key(R.string.preference_racing_procedure_override_key), type.name()).commit();
-    }
-    
-    public boolean isDefaultCourseDesignerModeOverridden() {
-        return preferences.getBoolean(key(R.string.preference_course_designer_is_overridden_key), false);
-    }
-    
-    public void setDefaultCourseDesignerModeOverridden(boolean isOverridden) {
-        preferences.edit().putBoolean(key(R.string.preference_course_designer_is_overridden_key), isOverridden).commit();
     }
 
     public CourseDesignerMode getDefaultCourseDesignerMode() {
@@ -217,14 +199,6 @@ public class AppPreferences {
                 .edit()
                 .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key),
                         new HashSet<String>(courseNames)).commit();
-    }
-
-    public boolean isRacingProcedureConfigurationOverwriteAllowed() {
-        return preferences.getBoolean(HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, true);
-    }
-
-    public void setRacingProcedureConfigurationOverwriteAllowed(boolean allowed) {
-        preferences.edit().putBoolean(HIDDEN_PREFERENCE_PROCEDURE_CONFIG_OVERWRITE, allowed).commit();
     }
     
     public void setRacingProcedureClassFlag(RacingProcedureType type, Flags flag) {

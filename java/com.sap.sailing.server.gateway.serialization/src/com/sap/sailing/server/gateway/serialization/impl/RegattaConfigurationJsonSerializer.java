@@ -14,6 +14,8 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
                 RacingProcedureConfigurationJsonSerializer.create());
     }
 
+    public static final Object FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
+    public static final Object FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
     public static final String FIELD_RRS26 = "rrs26";
     public static final String FIELD_GATE_START = "gateStart";
     public static final String FIELD_ESS = "ess";
@@ -36,6 +38,12 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
     @Override
     public JSONObject serialize(RegattaConfiguration object) {
         JSONObject result = new JSONObject();
+        if (object.getDefaultRacingProcedureType() != null) {
+            result.put(FIELD_DEFAULT_RACING_PROCEDURE_TYPE, object.getDefaultRacingProcedureType().name());
+        }
+        if (object.getDefaultCourseDesignerMode() != null) {
+            result.put(FIELD_DEFAULT_COURSE_DESIGNER_MODE, object.getDefaultCourseDesignerMode().name());
+        }
         if (object.getRRS26Configuration() != null) {
             result.put(FIELD_RRS26, rrs26Serializer.serialize(object.getRRS26Configuration()));
         }

@@ -352,8 +352,6 @@ public class ImportMasterDataOperation extends
             Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, id, series,
                     isPersistent, baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
-            createdRegatta.setDefaultRacingProcedureType(singleRegattaData.getDefaultRacingProcedureType());
-            createdRegatta.setDefaultCourseDesignerMode(singleRegattaData.getDefaultCourseDesignerMode());
             createdRegatta.setRegattaConfiguration(singleRegattaData.getRegattaConfiguration());
             toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIdsAsStrings(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());

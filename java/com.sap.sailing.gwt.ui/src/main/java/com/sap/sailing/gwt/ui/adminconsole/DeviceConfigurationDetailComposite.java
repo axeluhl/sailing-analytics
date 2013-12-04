@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -23,11 +21,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -67,8 +62,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
     protected TextBox identifierBox;
     private ListEditorComposite<String> allowedCourseAreasList;
     private TextBox mailRecipientBox;
-    private ListBox racingProcedureListBox;
-    private ListBox designerModeEntryListBox;
     private ListEditorComposite<String> courseNamesList;
     
     private CheckBox overwriteRegattaConfigurationBox;
@@ -190,13 +183,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(6, 3);
+        Grid grid = new Grid(4, 3);
         int row = 0;
         setupIdentifier(grid, row++);
         setupCourseAreasBox(grid, row++);
         setupRecipientBox(grid, row++);
-        setupRacingProcedureListBox(grid, row++);
-        setupCourseDesignerListBox(grid, row++);
         setupCourseNameBox(grid, row++);
         
         contentPanel.add(grid);
@@ -212,7 +203,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         grid.setWidget(gridRow, 1, identifierBox);
     }
 
-    private void setupRacingProcedureListBox(Grid grid, int gridRow) {
+    /*private void setupRacingProcedureListBox(Grid grid, int gridRow) {
         racingProcedureListBox = new ListBox(false);
         racingProcedureListBox.setWidth("100%");
         ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, originalConfiguration.defaultRacingProcedureType, stringMessages.dontoverwrite());
@@ -238,7 +229,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         });
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
         grid.setWidget(gridRow, 1, designerModeEntryListBox);
-    }
+    }*/
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
@@ -319,7 +310,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             result.resultsMailRecipient = mailRecipientBox.getText().isEmpty() ? null : mailRecipientBox.getText();
         }
 
-        int index = racingProcedureListBox.getSelectedIndex();
+        /*int index = racingProcedureListBox.getSelectedIndex();
         if (index >= 0) {
             RacingProcedureType type = RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
             result.defaultRacingProcedureType = type == RacingProcedureType.UNKNOWN ? null : type;
@@ -329,7 +320,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (index >= 0) {
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
-        }
+        }*/
         
         if (!courseNamesList.getValue().isEmpty()) {
             result.byNameDesignerCourseNames = courseNamesList.getValue();

@@ -12,8 +12,6 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
@@ -51,8 +49,6 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
         String name = object.get(RaceGroupJsonSerializer.FIELD_NAME).toString();
         BoatClass boatClass = null;
         CourseArea courseArea = null;
-        RacingProcedureType procedure = RacingProcedureType.UNKNOWN;
-        CourseDesignerMode designer = CourseDesignerMode.UNKNOWN;
         RegattaConfiguration configuration = null;
 
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
@@ -70,22 +66,12 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
             series.add(seriesDeserializer.deserialize(seriesJson));
         }
-
-        if (object.containsKey(RaceGroupJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE)) {
-            procedure = RacingProcedureType.valueOf(object.get(RaceGroupJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE)
-                    .toString());
-        }
-
-        if (object.containsKey(RaceGroupJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER)) {
-            designer = CourseDesignerMode.valueOf(object.get(RaceGroupJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER)
-                    .toString());
-        }
         
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
             JSONObject value = Helpers.getNestedObjectSafe(object, RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION);
             configuration = configurationDeserializer.deserialize(value);
         }
         
-        return new RaceGroupImpl(name, boatClass, courseArea, series, procedure, designer, configuration);
+        return new RaceGroupImpl(name, boatClass, courseArea, series, configuration);
     }
 }

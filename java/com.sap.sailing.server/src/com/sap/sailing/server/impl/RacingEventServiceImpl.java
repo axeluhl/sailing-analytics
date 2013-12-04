@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -69,7 +68,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -1219,7 +1217,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
-           RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode,
            RegattaConfiguration newRegattaConfiguration) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
@@ -1228,17 +1225,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             if (newCourseArea != regatta.getDefaultCourseArea()) {
                 regatta.setDefaultCourseArea(newCourseArea);
             }
-            if (newDefaultRacingProcedureType != regatta.getDefaultRacingProcedureType()) {
-                regatta.setDefaultRacingProcedureType(newDefaultRacingProcedureType);
-            }
-            if (newDefaultCourseDesignerMode != regatta.getDefaultCourseDesignerMode()) {
-                regatta.setDefaultCourseDesignerMode(newDefaultCourseDesignerMode);
-            }
             regatta.setRegattaConfiguration(newRegattaConfiguration);
             
             mongoObjectFactory.storeRegatta(regatta);
-            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId,
-                    newDefaultRacingProcedureType, newDefaultCourseDesignerMode, newRegattaConfiguration));
+            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId, newRegattaConfiguration));
         }
         return regatta;
     }

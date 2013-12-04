@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -24,25 +23,23 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRegattaConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.MergingRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
-    private static final String TAG = ManagedRacesDataParser.class.getName();
 
     private final JsonDeserializer<RaceGroup> deserializer;
-    private final ConfigurationLoader<RegattaConfiguration> globalConfiguration;
+    private final ConfigurationLoader<RegattaConfiguration> globalConfigurationLoader;
     private final RaceLogEventAuthor author;
 
-    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration,
+    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> globalConfiguration,
             JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
-        this.globalConfiguration = configuration;
+        this.globalConfigurationLoader = globalConfiguration;
         this.deserializer = deserializer;
     }
 
@@ -55,19 +52,10 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
             JSONObject json = Helpers.toJSONObjectSafe(element);
 
             RaceGroup group = deserializer.deserialize(json);
-            storeRaceGroupLocalConfiguration(group);
             addManagedRaces(managedRaces, group);
         }
 
         return managedRaces;
-    }
-
-    private void storeRaceGroupLocalConfiguration(RaceGroup group) {
-        RegattaConfiguration groupConfiguration = group.getRegattaConfiguration();
-        if (groupConfiguration != null && groupConfiguration instanceof PreferencesBasedRegattaConfiguration) {
-            ExLog.i(TAG, "Trying to store the RaceGroup's local procedures configuration.");
-            ((PreferencesBasedRegattaConfiguration)groupConfiguration).store();
-        }
     }
 
     private void addManagedRaces(Collection<ManagedRace> target, RaceGroup raceGroup) {
@@ -84,10 +72,14 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
             RaceLog raceLog) {
-        RacingProcedureType startType = raceGroup.getDefaultRacingProcedureType();
+        ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
+        RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();
+        if (localConfiguration != null) {
+            configurationLoader = new MergingRegattaConfigurationLoader(localConfiguration, globalConfigurationLoader);
+        }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
-        RaceState state = RaceStateImpl.create(raceLog, author, startType, globalConfiguration);
+        RaceState state = RaceStateImpl.create(raceLog, author, configurationLoader);
         return new ManagedRaceImpl(identifier, state);
     }
 

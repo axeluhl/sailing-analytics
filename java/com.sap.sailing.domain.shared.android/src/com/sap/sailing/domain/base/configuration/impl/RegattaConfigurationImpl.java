@@ -5,15 +5,38 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     private static final long serialVersionUID = 8501755084811977792L;
+
+    private RacingProcedureType defaultRacingProcedureType;
+    private CourseDesignerMode defaultCourseDesignerMode;
     
     private RRS26Configuration rrs26Configuration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
     private RacingProcedureConfiguration basicConfiguration;
+
+    @Override
+    public RacingProcedureType getDefaultRacingProcedureType() {
+        return defaultRacingProcedureType;
+    }
+
+    public void setDefaultRacingProcedureType(RacingProcedureType type) {
+        defaultRacingProcedureType = type;
+    }
+
+    @Override
+    public CourseDesignerMode getDefaultCourseDesignerMode() {
+        return defaultCourseDesignerMode;
+    }
+
+    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
+        defaultCourseDesignerMode = mode;
+    }
 
     @Override
     public RRS26Configuration getRRS26Configuration() {
@@ -51,8 +74,10 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         this.basicConfiguration = basicConfiguration;
     }   
     
-    protected RegattaConfiguration copy() {
+    public RegattaConfiguration copy() {
         RegattaConfigurationImpl copy = new RegattaConfigurationImpl();
+        copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
+        copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
         copy.setRRS26Configuration(rrs26Configuration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
@@ -60,4 +85,33 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         return copy;
     }
 
+    @Override
+    public RegattaConfiguration merge(RegattaConfiguration update) {
+        RegattaConfigurationImpl target = (RegattaConfigurationImpl) this.copy();
+
+        if (update.getDefaultCourseDesignerMode() != null) {
+            target.setDefaultCourseDesignerMode(update.getDefaultCourseDesignerMode());
+        }
+        if (update.getDefaultRacingProcedureType() != null) {
+            target.setDefaultRacingProcedureType(update.getDefaultRacingProcedureType());
+        }
+        if (update.getRRS26Configuration() != null) {
+            target.setRRS26Configuration(
+                    (RRS26Configuration) target.getRRS26Configuration().merge(update.getRRS26Configuration()));
+        }
+        if (update.getGateStartConfiguration() != null) {
+            target.setGateStartConfiguration(
+                    (GateStartConfiguration) target.getGateStartConfiguration().merge(update.getGateStartConfiguration()));
+        }
+        if (update.getESSConfiguration() != null) {
+            target.setESSConfiguration(
+                    (ESSConfiguration) target.getESSConfiguration().merge(update.getESSConfiguration()));
+        }
+        if (update.getBasicConfiguration() != null) {
+            target.setBasicConfiguration(
+                    (RacingProcedureConfiguration) target.getBasicConfiguration().merge(update.getBasicConfiguration()));
+        }
+
+        return target;
+    }
 }

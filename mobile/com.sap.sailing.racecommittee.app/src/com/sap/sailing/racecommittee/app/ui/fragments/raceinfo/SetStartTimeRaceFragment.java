@@ -177,12 +177,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
 
-        RacingProcedureType type;
-        if (preferences.isDefaultRacingProcedureTypeOverridden()) {
-            type = preferences.getDefaultRacingProcedureType();
-        } else {
-            type = getRaceState().getRacingProcedure().getType();
-        }
+        RacingProcedureType type = getRaceState().getRacingProcedure().getType();
         spinnerStartProcedure.setSelection(adapter.getPosition(type));
     }
 

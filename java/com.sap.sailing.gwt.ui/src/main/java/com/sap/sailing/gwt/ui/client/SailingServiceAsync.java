@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -430,7 +428,7 @@ public interface SailingServiceAsync {
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 

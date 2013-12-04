@@ -13,4 +13,6 @@ public interface RacingProcedureConfiguration extends Serializable {
     Flags getClassFlag();
     Boolean hasInidividualRecall();
 
+    RacingProcedureConfiguration merge(RacingProcedureConfiguration update);
+
 }

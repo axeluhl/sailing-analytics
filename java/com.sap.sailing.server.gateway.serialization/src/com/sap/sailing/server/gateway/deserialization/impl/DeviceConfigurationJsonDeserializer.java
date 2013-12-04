@@ -9,8 +9,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
@@ -53,18 +51,6 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT)) {
             String resultsRecipient = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_RESULTS_RECIPIENT);
             configuration.setResultsMailRecipient(resultsRecipient);
-        }
-
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE)) {
-            RacingProcedureType type = RacingProcedureType.valueOf(object.get(
-                    DeviceConfigurationJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE).toString());
-            configuration.setDefaultRacingProcedureType(type);
-        }
-
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE)) {
-            CourseDesignerMode mode = CourseDesignerMode.valueOf(object.get(
-                    DeviceConfigurationJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE).toString());
-            configuration.setDefaultCourseDesignerMode(mode);
         }
 
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES)) {

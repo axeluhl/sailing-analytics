@@ -10,11 +10,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -23,8 +19,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
-    protected ListBox racingProcedureListBox;
-    protected ListBox designerModeEntryListBox;
     protected CheckBox proceduresConfigurationCheckbox;
     protected Button proceduresConfigurationButton;
     
@@ -41,13 +35,6 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);
-        
-        racingProcedureListBox = createListBox(false);
-        RacingProcedureType selectedRacingProcedureType = regatta.defaultRacingProcedureType;
-        ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, selectedRacingProcedureType, stringMessages.dontoverwrite());
-        designerModeEntryListBox = createListBox(false);
-        CourseDesignerMode selectedCourseDesignerMode = regatta.defaultCourseDesignerMode;
-        ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox, selectedCourseDesignerMode, stringMessages.dontoverwrite());
         
         proceduresConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         proceduresConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() { 
@@ -85,17 +72,11 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     @Override
     protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel) {
         VerticalPanel content = new VerticalPanel();
-        Grid formGrid = new Grid(2, 2);
-        formGrid.setWidget(0, 0, new Label(stringMessages.racingProcedure() + ":"));
-        formGrid.setWidget(0, 1, racingProcedureListBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.courseDesignerMode() + ":"));
-        formGrid.setWidget(1, 1, designerModeEntryListBox);
         
         Grid proceduresGrid = new Grid(1,2);
         proceduresGrid.setWidget(0, 0, proceduresConfigurationCheckbox);
         proceduresGrid.setWidget(0, 1, proceduresConfigurationButton);
         
-        content.add(formGrid);
         content.add(proceduresGrid);
         panel.add(content);
     }
@@ -104,32 +85,12 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected RegattaDTO getResult() {
         RegattaDTO regatta = super.getResult();
         
-        regatta.defaultRacingProcedureType = getSelectedDefaultRacingProcedureType();
-        regatta.defaultCourseDesignerMode = getSelectedDefaultCourseDesignerModeType();
         if (proceduresConfigurationCheckbox.getValue()) {
             regatta.configuration = currentProceduresConfiguration;
         } else {
             regatta.configuration = null;
         }
         return regatta;
-    }
-    
-    private CourseDesignerMode getSelectedDefaultCourseDesignerModeType() {
-        int index = designerModeEntryListBox.getSelectedIndex();
-        if (index >= 0) {
-            CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
-            return mode == CourseDesignerMode.UNKNOWN ? null : mode;
-        }
-        return null;
-    }
-
-    protected RacingProcedureType getSelectedDefaultRacingProcedureType() {
-        int index = racingProcedureListBox.getSelectedIndex();
-        if (index >= 0) {
-            RacingProcedureType type = RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
-            return type == RacingProcedureType.UNKNOWN ? null : type;
-        }
-        return null;
     }
 
 }

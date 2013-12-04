@@ -29,37 +29,26 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
     public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author) {
-        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyRegattaConfiguration());
-    }
-    
-    /**
-     * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value.
-     */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
-        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, configuration);
+        return create(raceLog, author, new EmptyRegattaConfiguration());
     }
     
     /**
      * Creates a {@link RaceState}.
      */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, RacingProcedureType initalRacingProcedureType,
-            ConfigurationLoader<RegattaConfiguration> configuration) {
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
         return new RaceStateImpl(raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
-                initalRacingProcedureType, 
                 new RacingProcedureFactoryImpl(author, RaceLogEventFactory.INSTANCE, configuration));
     }
     
     public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
-            RacingProcedureType initalRacingProcedureType, RacingProcedureFactory procedureFactory) {
-        this(raceLog, author, eventFactory, initalRacingProcedureType, 
-                new RaceStatusAnalyzer.StandardClock(), procedureFactory);
+            RacingProcedureFactory procedureFactory) {
+        this(raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory,
-            RacingProcedureType initalRacingProcedureType, RaceStatusAnalyzer.Clock analyzersClock,
+    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
-        super(raceLog, initalRacingProcedureType, analyzersClock, procedureFactory);
+        super(raceLog, analyzersClock, procedureFactory);
         this.author = author;
         this.factory = eventFactory;
     }

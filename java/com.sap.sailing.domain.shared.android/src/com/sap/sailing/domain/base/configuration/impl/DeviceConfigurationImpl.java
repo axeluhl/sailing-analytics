@@ -3,8 +3,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class DeviceConfigurationImpl implements DeviceConfiguration {
 
@@ -14,15 +12,13 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     
     private List<String> allowedCourseAreaNames;
     private String resultsMailRecipient;
-    private RacingProcedureType defaultRacingProcedureType;
-    private CourseDesignerMode defaultCourseDesignerMode;
     private List<String> byNameDesignerCourseNames;
 
     public DeviceConfigurationImpl(RegattaConfiguration regattaConfiguration) {
         this.regattaConfiguration = regattaConfiguration;
     }
     
-    protected void setRegattaConfiguration(RegattaConfiguration proceduresConfiguration) {
+    public void setRegattaConfiguration(RegattaConfiguration proceduresConfiguration) {
         this.regattaConfiguration = proceduresConfiguration;
     }
 
@@ -50,24 +46,6 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     }
     
     @Override
-    public RacingProcedureType getDefaultRacingProcedureType() {
-        return defaultRacingProcedureType;
-    }
-
-    public void setDefaultRacingProcedureType(RacingProcedureType type) {
-        this.defaultRacingProcedureType = type;
-    }
-    
-    @Override
-    public CourseDesignerMode getDefaultCourseDesignerMode() {
-        return defaultCourseDesignerMode;
-    }
-
-    public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
-        this.defaultCourseDesignerMode = mode;
-    }
-    
-    @Override
     public List<String> getByNameCourseDesignerCourseNames() {
         return byNameDesignerCourseNames;
     }
@@ -76,11 +54,10 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
         this.byNameDesignerCourseNames = byNameDesignerCourseNames;
     }
     
-    protected DeviceConfiguration copy() {
-        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(regattaConfiguration);
+    public DeviceConfiguration copy() {
+        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(regattaConfiguration.copy());
         copyConfiguration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         copyConfiguration.setByNameDesignerCourseNames(byNameDesignerCourseNames);
-        copyConfiguration.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
         copyConfiguration.setResultsMailRecipient(resultsMailRecipient);
         return copyConfiguration;
     }

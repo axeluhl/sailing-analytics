@@ -18,10 +18,10 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -33,10 +33,8 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -48,7 +46,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.data.loaders.ImmediateDataLoaderCallbacks;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRegattaConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 
@@ -78,7 +76,7 @@ public class OfflineDataManager extends DataManager {
         SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
         SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
-                medal), RacingProcedureType.RRS26, CourseDesignerMode.BY_NAME, new EmptyRegattaConfiguration());
+                medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
@@ -90,7 +88,7 @@ public class OfflineDataManager extends DataManager {
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final RaceLogEventAuthor author = AppPreferences.on(context).getAuthor();
-        ConfigurationLoader<RegattaConfiguration> configuration = new PreferencesBasedRegattaConfiguration(preferences);
+        ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
         
         log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author,
                 1, new MillisecondsTimePoint(new Date().getTime() - 1000)));
@@ -101,7 +99,7 @@ public class OfflineDataManager extends DataManager {
 
         ManagedRace q1 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -111,7 +109,7 @@ public class OfflineDataManager extends DataManager {
 
         ManagedRace q2 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -120,7 +118,7 @@ public class OfflineDataManager extends DataManager {
          */
         ManagedRace q3 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup), 
-                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), RacingProcedureType.RRS26, configuration));
+                RaceStateImpl.create(log, AppPreferences.on(context).getAuthor(), configuration));
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -210,11 +208,11 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<ConfigurationLoader<DeviceConfiguration>>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<ConfigurationLoader<DeviceConfiguration>> callback) {
-        return new ImmediateDataLoaderCallbacks<ConfigurationLoader<DeviceConfiguration>>(context, callback, new Callable<ConfigurationLoader<DeviceConfiguration>>() {
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+            LoadClient<DeviceConfiguration> callback) {
+        return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback, new Callable<DeviceConfiguration>() {
             @Override
-            public ConfigurationLoader<DeviceConfiguration> call() throws Exception {
+            public DeviceConfiguration call() throws Exception {
                 throw new IllegalStateException("No remote configuration in offline mode.");
             }
         });

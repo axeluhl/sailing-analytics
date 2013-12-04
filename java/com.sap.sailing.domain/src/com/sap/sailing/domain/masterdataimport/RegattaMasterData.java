@@ -1,9 +1,8 @@
 package com.sap.sailing.domain.masterdataimport;
 
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import java.io.Serializable;
+
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 public class RegattaMasterData {
 
     private Serializable id;
@@ -12,15 +11,13 @@ public class RegattaMasterData {
     private String boatClassName;
     private String scoringSchemeType;
     private Iterable<SeriesMasterData> series;
-    private final RacingProcedureType defaultRacingProcedureType;
-    private final CourseDesignerMode defaultCourseDesignerMode;
     private final RegattaConfiguration configuration;
     private boolean isPersistent;
     private String regattaName;
     private Iterable<String> raceIdsAsStrings;
     public RegattaMasterData(Serializable id, String baseName, String defaultCourseAreaId, String boatClassName,
             String scoringSchemeType, Iterable<SeriesMasterData> series, boolean isPersistent, String regattaName,
-            Iterable<String> raceIdsAsStrings, RacingProcedureType procedureType, CourseDesignerMode designerMode,
+            Iterable<String> raceIdsAsStrings, 
             RegattaConfiguration configuration) {
         this.id = id;
         this.baseName = baseName;
@@ -31,8 +28,6 @@ public class RegattaMasterData {
         this.isPersistent = isPersistent;
         this.regattaName = regattaName;
         this.raceIdsAsStrings = raceIdsAsStrings;
-        this.defaultRacingProcedureType = procedureType;
-        this.defaultCourseDesignerMode = designerMode;
         this.configuration = configuration;
     }
 
@@ -50,14 +45,6 @@ public class RegattaMasterData {
 
     public String getDefaultCourseAreaId() {
         return defaultCourseAreaId;
-    }
-
-    public RacingProcedureType getDefaultRacingProcedureType() {
-        return defaultRacingProcedureType;
-    }
-
-    public CourseDesignerMode getDefaultCourseDesignerMode() {
-        return defaultCourseDesignerMode;
     }
     
     public RegattaConfiguration getRegattaConfiguration() {

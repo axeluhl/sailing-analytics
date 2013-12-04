@@ -15,9 +15,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -31,8 +29,6 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_REGATTAS = "regattas";
     public static final String FIELD_BOAT_CLASS_NAME = "boatClass";
     public static final String FIELD_DEFAULT_COURSE_AREA_ID = "defaultCourseAreaId";
-    public static final String FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
-    public static final String FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
     public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
     public static final String FIELD_SCORING_SCHEME_TYPE = "scoringSchemeType";
     public static final String FIELD_SERIES = "series";
@@ -82,18 +78,6 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
             result.put(FIELD_DEFAULT_COURSE_AREA_ID, defaultCourseArea.getId().toString());
         } else {
             result.put(FIELD_DEFAULT_COURSE_AREA_ID, null);
-        }
-        RacingProcedureType procedureType = regatta.getDefaultRacingProcedureType();
-        if (procedureType != null) {
-            result.put(FIELD_DEFAULT_RACING_PROCEDURE_TYPE, procedureType.name());
-        } else {
-            result.put(FIELD_DEFAULT_RACING_PROCEDURE_TYPE, null);
-        }
-        CourseDesignerMode designerMode = regatta.getDefaultCourseDesignerMode();
-        if (designerMode != null) {
-            result.put(FIELD_DEFAULT_COURSE_DESIGNER_MODE, designerMode.name());
-        } else {
-            result.put(FIELD_DEFAULT_COURSE_DESIGNER_MODE, null);
         }
         if (regatta.getRegattaConfiguration() != null) {
             result.put(FIELD_REGATTA_CONFIGURATION, 

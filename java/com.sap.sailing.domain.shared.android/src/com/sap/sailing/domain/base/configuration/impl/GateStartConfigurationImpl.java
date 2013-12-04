@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 
 public class GateStartConfigurationImpl extends RacingProcedureConfigurationImpl implements GateStartConfiguration {
@@ -27,11 +28,25 @@ public class GateStartConfigurationImpl extends RacingProcedureConfigurationImpl
         return hasAdditionalGolfDownTime;
     }
     
+    @Override
+    public RacingProcedureConfiguration merge(RacingProcedureConfiguration value) {
+        GateStartConfiguration update = (GateStartConfiguration) value;
+        GateStartConfigurationImpl target = (GateStartConfigurationImpl) super.merge(update);
+        if (update.hasPathfinder() != null) {
+            target.setHasPathfinder(update.hasPathfinder());
+        }
+        if (update.hasAdditionalGolfDownTime() != null) {
+            target.setHasAdditionalGolfDownTime(update.hasAdditionalGolfDownTime());
+        }
+        return target;
+    }
+    
     protected GateStartConfiguration copy() {
         GateStartConfigurationImpl copy = (GateStartConfigurationImpl) super.copy(new GateStartConfigurationImpl());
         copy.setHasPathfinder(hasPathfinder);
         copy.setHasAdditionalGolfDownTime(hasAdditionalGolfDownTime);
         return copy;
     }
+    
 
 }

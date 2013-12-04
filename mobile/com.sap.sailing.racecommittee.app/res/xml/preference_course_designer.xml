@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <PreferenceCategory android:title="@string/settings_category_general" >
-        
-	    <CheckBoxPreference
-	        android:key="@string/preference_course_designer_is_overridden_key"
-	        android:defaultValue="@bool/preference_course_designer_is_overridden_default"
-	        android:title="@string/override_default_course_designer_type_header"
-	        android:summary="@string/override_default_course_designer_type_description" />
-	
-	    <ListPreference
-	        android:key="@string/preference_course_designer_override_key"
-	        android:defaultValue="@string/preference_course_designer_override_default"
-	        android:summary="@string/empty"
-	        android:title="@string/override_default_course_designer_type_select_header" />
-    
-    </PreferenceCategory>
     
     <PreferenceCategory android:title="By-Name Course Designer" >
 		

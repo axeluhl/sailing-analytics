@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -37,15 +38,14 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * When trying to initialize a {@link RaceStateImpl} with an initial {@link RacingProcedureType} 
      * of {@link RacingProcedureType#UNKNOWN} the value of this field will be used instead. 
      */
-    protected final static RacingProcedureType FallbackInitialProcedureType = RacingProcedureType.RRS26;
+    public final static RacingProcedureType fallbackInitialProcedureType = RacingProcedureType.RRS26;
     
 
     /**
      * Creates a {@link ReadonlyRaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
     public static ReadonlyRaceState create(RaceLog raceLog) {
-        return new ReadonlyRaceStateImpl(raceLog, ReadonlyRaceStateImpl.FallbackInitialProcedureType,
-                new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
+        return new ReadonlyRaceStateImpl(raceLog, new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
     }
     
     protected final RaceLog raceLog;
@@ -87,12 +87,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
     
-    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, RacingProcedureFactory procedureFactory) {
-        this(raceLog, initalRacingProcedureType, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
+    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureFactory procedureFactory) {
+        this(raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
     
-    public ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureType initalRacingProcedureType, Clock analyzersClock, 
-            RacingProcedureFactory procedureFactory) {
+    public ReadonlyRaceStateImpl(RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory) {
         this.raceLog = raceLog;
         this.procedureFactory = procedureFactory;
         this.changedListeners = new RaceStateChangedListeners();
@@ -109,16 +108,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
      
-        // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
-        // RacingProcedure we need to have a fallback
-        RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
-        if (inRaceLogType != RacingProcedureType.UNKNOWN) {
-            this.cachedRacingProcedureType = inRaceLogType;
-        } else if (initalRacingProcedureType == null || initalRacingProcedureType == RacingProcedureType.UNKNOWN) {
-            this.cachedRacingProcedureType = FallbackInitialProcedureType;
-        } else {
-            this.cachedRacingProcedureType = initalRacingProcedureType;
-        }
+        this.cachedRacingProcedureType = determineInitialProcedureType();
         this.cachedRaceStatus = RaceLogRaceStatus.UNKNOWN;
         this.cachedPassId = raceLog.getCurrentPassId();
         this.cachedIsPositionedCompetitorsConfirmed = false;
@@ -128,6 +118,20 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();
+    }
+
+    protected RacingProcedureType determineInitialProcedureType() {
+        // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
+        // RacingProcedure we need to have a fallback
+        RegattaConfiguration configuration = procedureFactory.getConfiguration();
+        RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
+        if (inRaceLogType != RacingProcedureType.UNKNOWN) {
+            return inRaceLogType;
+        } else if (configuration.getDefaultRacingProcedureType() != null && configuration.getDefaultRacingProcedureType() != RacingProcedureType.UNKNOWN) {
+            return configuration.getDefaultRacingProcedureType();
+        } else {
+            return fallbackInitialProcedureType;
+        }
     }
 
     @Override

@@ -222,7 +222,6 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
         sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString,
-                editedRegatta.defaultRacingProcedureType, editedRegatta.defaultCourseDesignerMode,
                 editedRegatta.configuration,
                 new AsyncCallback<Void>() {
             @Override

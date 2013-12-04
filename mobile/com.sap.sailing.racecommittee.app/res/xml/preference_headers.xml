@@ -4,7 +4,7 @@
         android:fragment="com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment"
         android:title="@string/settings_category_general" />
     <header
-        android:fragment="com.sap.sailing.racecommittee.app.ui.fragments.preference.RacingProcedurePreferenceFragment"
+        android:fragment="com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaDefaultsPreferenceFragment"
         android:title="@string/settings_category_racing_procedure" />
 	<header
         android:fragment="com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment"

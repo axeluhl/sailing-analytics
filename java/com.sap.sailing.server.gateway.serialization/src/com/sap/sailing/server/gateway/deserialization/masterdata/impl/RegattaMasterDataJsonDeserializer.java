@@ -13,8 +13,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.CourseDesignerMode;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
@@ -70,25 +68,14 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
         Iterable<String> raceIdsAsStrings = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
         
-        RacingProcedureType procedureType = null;
-        String defaultRacingProcedureTypeValue = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_RACING_PROCEDURE_TYPE);
-        if (defaultRacingProcedureTypeValue != null) {
-            procedureType = RacingProcedureType.valueOf(defaultRacingProcedureTypeValue);
-        }
-        CourseDesignerMode designerMode = null;
-        String defaultCourseDesignerModeValue = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_COURSE_DESIGNER_MODE);
-        if (defaultCourseDesignerModeValue != null) {
-            designerMode = CourseDesignerMode.valueOf(defaultCourseDesignerModeValue);
-        }
-        
-        RegattaConfiguration proceduresConfiguration = null;
+        RegattaConfiguration regattaConfiguration = null;
         if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
-            proceduresConfiguration = configurationDeserializer.deserialize(
+            regattaConfiguration = configurationDeserializer.deserialize(
                     Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION));
         }
         
         return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 
-                series, isPersistent, regattaName, raceIdsAsStrings, procedureType, designerMode, proceduresConfiguration);
+                series, isPersistent, regattaName, raceIdsAsStrings, regattaConfiguration);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {

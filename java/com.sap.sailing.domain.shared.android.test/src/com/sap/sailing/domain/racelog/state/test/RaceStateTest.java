@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -26,9 +28,11 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
@@ -55,8 +59,7 @@ public class RaceStateTest {
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceStateImpl(raceLog, author, factory, defaultRacingProcedureType, 
-                new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
     }
     
     @Test
@@ -71,6 +74,36 @@ public class RaceStateTest {
         assertEquals(defaultRacingProcedureType, state.getRacingProcedure().getType());
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, state.getStatus());
         assertFalse(state.isFinishPositioningConfirmed());
+    }
+    
+    @Test
+    public void testInitialProcedureTypeFallback() throws Exception {
+        assertEquals(ReadonlyRaceStateImpl.fallbackInitialProcedureType, state.getRacingProcedure().getType());
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testInitialProcedureTypeConfiguration() throws Exception {
+        RegattaConfigurationImpl config = new RegattaConfigurationImpl();
+        config.setDefaultRacingProcedureType(RacingProcedureType.BASIC);
+        configuration = mock(ConfigurationLoader.class);
+        when(configuration.load()).thenReturn(config);
+        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        
+        assertEquals(RacingProcedureType.BASIC, state.getRacingProcedure().getType());
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testInitialProcedureTypeRaceLog() throws Exception {
+        RegattaConfigurationImpl config = new RegattaConfigurationImpl();
+        config.setDefaultRacingProcedureType(RacingProcedureType.BASIC);
+        configuration = mock(ConfigurationLoader.class);
+        when(configuration.load()).thenReturn(config);
+        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, author, nowMock, "12", null, 0, RacingProcedureType.ESS));
+        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        
+        assertEquals(RacingProcedureType.ESS, state.getRacingProcedure().getType());
     }
     
     @Test

@@ -27,6 +27,8 @@ public class DeviceConfigurationDTO implements IsSerializable {
             public Flags classFlag;
             public Boolean hasInidividualRecall;
         }
+        public RacingProcedureType defaultRacingProcedureType;
+        public CourseDesignerMode defaultCourseDesignerMode;
         
         public RRS26ConfigurationDTO rrs26Configuration;
         public GateStartConfigurationDTO gateStartConfiguration;
@@ -36,8 +38,6 @@ public class DeviceConfigurationDTO implements IsSerializable {
 
     public List<String> allowedCourseAreaNames;
     public String resultsMailRecipient;
-    public RacingProcedureType defaultRacingProcedureType;
-    public CourseDesignerMode defaultCourseDesignerMode;
     public List<String> byNameDesignerCourseNames;
     public RegattaConfigurationDTO regattaConfiguration;
 }

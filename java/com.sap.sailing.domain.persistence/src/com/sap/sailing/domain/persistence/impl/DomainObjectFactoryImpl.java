@@ -57,7 +57,6 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -907,34 +906,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 courseArea = baseDomainFactory.getExistingCourseAreaById(courseAreaUuid);
             }
             
-            // Let's set these values to something other then null, this way old regattas will gain this field.
-            RacingProcedureType procedureType = RacingProcedureType.UNKNOWN;
-            CourseDesignerMode designerMode = CourseDesignerMode.UNKNOWN;
-            
-            if (dbRegatta.containsField(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name())) {
-                procedureType = RacingProcedureType.valueOf(
-                        dbRegatta.get(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name()).toString());
-            }
-            
-            if (dbRegatta.containsField(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name())) {
-                designerMode = CourseDesignerMode.valueOf(
-                        dbRegatta.get(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name()).toString());
-            }
-            
-            RegattaConfiguration proceduresConfiguration = null;
-            if (dbRegatta.containsField(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name())) {
+            RegattaConfiguration configuration = null;
+            if (dbRegatta.containsField(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 try {
-                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(dbRegatta.get(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name()))));
-                    proceduresConfiguration = RegattaConfigurationJsonDeserializer.create().deserialize(json);
+                    JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(dbRegatta.get(FieldNames.REGATTA_REGATTA_CONFIGURATION.name()))));
+                    configuration = RegattaConfigurationJsonDeserializer.create().deserialize(json);
                 } catch (JsonDeserializationException|ParseException e) {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
             
             result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
-            result.setDefaultRacingProcedureType(procedureType);
-            result.setDefaultCourseDesignerMode(designerMode);
-            result.setRegattaConfiguration(proceduresConfiguration);
+            result.setRegattaConfiguration(configuration);
         }
         return result;
     }

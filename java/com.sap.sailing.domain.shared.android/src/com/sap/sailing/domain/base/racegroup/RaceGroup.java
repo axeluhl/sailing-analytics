@@ -4,9 +4,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 /**
@@ -44,16 +42,6 @@ public interface RaceGroup extends Named {
      * Gets the collection of series.
      */
     public Iterable<SeriesWithRows> getSeries();
-    
-    /**
-     * Gets the default {@link RacingProcedureType} of this {@link RaceGroup}'s races.
-     */
-    public RacingProcedureType getDefaultRacingProcedureType();
-    
-    /**
-     * Gets the default {@link CourseDesignerMode} of this {@link RaceGroup}'s races.
-     */
-    public CourseDesignerMode getDefaultCourseDesignerMode();
     
     /**
      * Gets configuration objects for {@link RacingProcedure}s of this {@link RaceGroup}'s races.

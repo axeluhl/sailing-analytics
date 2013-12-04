@@ -477,17 +477,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } else {
             dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
         }
-        if (regatta.getDefaultRacingProcedureType() != null) {
-            dbRegatta.put(FieldNames.REGATTA_DEFAULT_RACING_PROCEDURE.name(), regatta.getDefaultRacingProcedureType().name());
-        }
-        if (regatta.getDefaultCourseDesignerMode() != null) {
-            dbRegatta.put(FieldNames.REGATTA_DEFAULT_COURSE_DESIGNER.name(), regatta.getDefaultCourseDesignerMode().name());
-        }
         if (regatta.getRegattaConfiguration() != null) {
             JsonSerializer<RegattaConfiguration> serializer = RegattaConfigurationJsonSerializer.create();
             JSONObject json = serializer.serialize(regatta.getRegattaConfiguration());
             DBObject configurationObject = (DBObject) JSON.parse(json.toString());
-            dbRegatta.put(FieldNames.REGATTA_RACING_PROCEDURES_CONFIGURATION.name(), configurationObject);
+            dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
 
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
