@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 
 public class CandidateFinder {
 
@@ -34,7 +34,7 @@ public class CandidateFinder {
         upDateWaypoints(waypoints, legs);
         this.chooser = chooser;
         for (Competitor c : competitors) {
-            competitorTracks.put(c, new DynamicTrackImpl<Competitor, GPSFix>(c, 1000));
+            competitorTracks.put(c, new DynamicGPSFixTrackImpl<Competitor>(c, 1000));
             distances.put(c, new LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>());
             candidates.put(c, new LinkedHashMap<Waypoint, ArrayList<GPSFix>>());
 
@@ -53,7 +53,7 @@ public class CandidateFinder {
             }
         }
         for (Mark m : marks) {
-            markTracks.put(m, new DynamicTrackImpl<Mark, GPSFix>(m, 1000));
+            markTracks.put(m, new DynamicGPSFixTrackImpl<Mark>(m, 1000));
         }
         for (Competitor c : candidates.keySet()) {
             candidates.get(c).clear();
