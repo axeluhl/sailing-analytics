@@ -12,7 +12,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.coursedesign.ESSCo
 public class CourseDesignerChooser {
     
     public static RaceDialogFragment choose(AppPreferences preferences, ManagedRace race) {
-        RegattaConfiguration configuration = race.getRaceGroup().getRegattaConfiguration();
+        RegattaConfiguration configuration = race.getState().getConfiguration();
         CourseDesignerMode mode = configuration.getDefaultCourseDesignerMode();
         
         switch (mode) {
@@ -22,7 +22,6 @@ public class CourseDesignerChooser {
             return new ESSCourseDesignDialog();
         case BY_NAME:
         default:
-            // might be UNKNOWN... let's take this one
             return new ByNameCourseDesignDialog();
         }
     }

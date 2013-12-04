@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.state;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.CompetitorResults;
@@ -31,4 +32,6 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor{
     boolean isFinishPositioningConfirmed();
     CourseBase getCourseDesign();
     Wind getWindFix();
+
+    RegattaConfiguration getConfiguration();
 }

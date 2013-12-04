@@ -14,6 +14,10 @@ public class PreferenceHelper {
 
     private static final String TAG = PreferenceHelper.class.getName();
 
+    public static String getDefaultSharedPreferencesName(Context context) {
+        return context.getPackageName() + "_preferences";
+    }
+
     /**
      * Whenever you change a preference's type (e.g. from Integer to String) you need to bump this version code to the
      * appropriate app version (see AndroidManifest.xml).
@@ -26,9 +30,15 @@ public class PreferenceHelper {
     private final static String HIDDEN_PREFERENCE_VERSION_CODE_KEY = "hiddenPrefsVersionCode";
 
     private final Context context;
-
+    private final String sharedPreferencesName;
+    
     public PreferenceHelper(Context context) {
+        this(context, getDefaultSharedPreferencesName(context));
+    }
+
+    public PreferenceHelper(Context context, String sharedPreferencesName) {
         this.context = context;
+        this.sharedPreferencesName = sharedPreferencesName;
     }
 
     public void setupPreferences() {
@@ -47,9 +57,18 @@ public class PreferenceHelper {
         ExLog.i(TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}", isCleared,
                 hasSetDefaultsBefore, readAgain));
 
-        PreferenceManager.setDefaultValues(context, R.xml.preference_course_designer, readAgain);
-        PreferenceManager.setDefaultValues(context, R.xml.preference_general, readAgain);
-        PreferenceManager.setDefaultValues(context, R.xml.preference_regatta_defaults, readAgain);
+        resetPreferences(readAgain);
+    }
+
+    public void resetPreferences(boolean force) {
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_course_designer, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_general, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_regatta_defaults, force);
+    }
+
+    public void clearPreferences() {
+        SharedPreferences.Editor editor = getSharedPreferences(sharedPreferencesName).edit();
+        editor.clear().commit();
     }
 
     private boolean clearPreferencesIfNeeded(boolean forceReset) {
@@ -58,8 +77,7 @@ public class PreferenceHelper {
         if (preferencesVersion < LAST_COMPATIBLE_VERSION) {
             ExLog.i(TAG, "Clearing the preference cache");
 
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-            editor.clear().commit();
+            clearPreferences();
 
             ExLog.i(TAG, String.format("Bumping preference version code to %d", LAST_COMPATIBLE_VERSION));
             versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).commit();

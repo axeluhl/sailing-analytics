@@ -123,7 +123,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     protected RacingProcedureType determineInitialProcedureType() {
         // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
         // RacingProcedure we need to have a fallback
-        RegattaConfiguration configuration = procedureFactory.getConfiguration();
+        RegattaConfiguration configuration = getConfiguration();
         RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
         if (inRaceLogType != RacingProcedureType.UNKNOWN) {
             return inRaceLogType;
@@ -213,6 +213,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public Wind getWindFix() {
         return cachedWindFix;
+    }
+    
+    @Override
+    public RegattaConfiguration getConfiguration() {
+        return procedureFactory.getConfiguration();
     }
 
     @Override

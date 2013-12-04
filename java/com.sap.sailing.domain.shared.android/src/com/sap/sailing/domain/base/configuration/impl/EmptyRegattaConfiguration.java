@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base.configuration.impl;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 /**
  * Is empty, does nothing on store and load.
@@ -13,6 +15,8 @@ public class EmptyRegattaConfiguration extends RegattaConfigurationImpl implemen
 
     @Override
     public RegattaConfiguration load() {
+        setDefaultRacingProcedureType(RacingProcedureType.UNKNOWN);
+        setDefaultCourseDesignerMode(CourseDesignerMode.UNKNOWN);
         setRRS26Configuration(new RRS26ConfigurationImpl());
         setGateStartConfiguration(new GateStartConfigurationImpl());
         setESSConfiguration(new ESSConfigurationImpl());

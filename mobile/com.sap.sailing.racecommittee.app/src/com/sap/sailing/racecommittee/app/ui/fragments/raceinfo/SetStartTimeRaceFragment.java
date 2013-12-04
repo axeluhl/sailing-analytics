@@ -177,8 +177,8 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             }
         });
 
-        RacingProcedureType type = getRaceState().getRacingProcedure().getType();
-        spinnerStartProcedure.setSelection(adapter.getPosition(type));
+        RacingProcedureType configType = getRaceState().getConfiguration().getDefaultRacingProcedureType();
+        spinnerStartProcedure.setSelection(adapter.getPosition(configType));
     }
 
     @Override

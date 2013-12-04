@@ -189,8 +189,9 @@
 	
 	<string name="gate_launch_stops_after">Gate Launch stops after %dmin</string>
 	
-	<string name="settings_category_racing_procedure">Racing Procedure</string>
-	<string name="settings_category_course_designer">Course Designer</string>
+	<string name="settings_category_regatta_defaults">Regatta Configuration (default)</string>
+	<string name="settings_category_regattas">Regatta Configuration (specific)</string>
+	<string name="settings_category_course_designer">Course Designer Configuration</string>
 	<string name="override_default_course_designer_type_header">Override Course Designer type</string>
 	<string name="override_default_course_designer_type_description">Use configured Course Designer instead of race\'s.</string>
 	<string name="override_default_course_designer_type_select_header">Course Designer type</string>
@@ -219,5 +220,9 @@
 	<string name="auto_update_install">Install</string>
 	<string name="auto_update_install_anyway">Install anyway</string>
 	<string name="gate_launch">Gate Launch</string>
-	<string name="golf_down">Golf down</string>
+	<string name="golf_down">Golf Down</string>
+	
+	<string name="preference_regatta_specific_title">Regatta Configuration - %1$s</string>
+	<string name="preference_regatta_specific_save_title">Save %1$s configuration</string>
+	<string name="preference_regatta_specific_save_description">This will save the shown configuration for all races of %1$s.</string>
 </resources>

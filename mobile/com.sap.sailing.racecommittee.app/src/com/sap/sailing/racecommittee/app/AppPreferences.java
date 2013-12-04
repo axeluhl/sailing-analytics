@@ -29,6 +29,10 @@ public class AppPreferences {
     public static AppPreferences on(Context context) {
         return new AppPreferences(context);
     }
+    
+    public static AppPreferences on(Context context, String preferenceName) {
+        return new AppPreferences(context, preferenceName);
+    }
 
     private final static String HIDDEN_PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
 
@@ -45,11 +49,16 @@ public class AppPreferences {
     private final SharedPreferences preferences;
     private final Context context;
 
-    public AppPreferences(Context context) {
+    private AppPreferences(Context context) {
         this.context = context;
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     
+    public AppPreferences(Context context, String preferenceName) {
+        this.context = context;
+        this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+    }
+
     private String key(int keyId) {
         return context.getString(keyId);
     }

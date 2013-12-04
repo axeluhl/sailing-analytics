@@ -133,6 +133,10 @@
     <string name="settings_general_language_header">Sprache auswählen</string>
     <string name="settings_general_language_description">Sprache auswählen. Eventuell muss die App neugestartet werden.</string>
     
+    <string name="settings_category_regatta_defaults">Regatta Einstellungen (Standard)</string>
+    <string name="settings_category_regattas">Regatta Einstellungen (Speziell)</string>
+    <string name="settings_category_course_designer">Kursdesigner Einstellungen</string>
+    
     <string name="override_default_start_procedure_type_header">Standard Startprozedur überschreiben</string>
     <string name="override_default_start_procedure_type_description">Aktivieren wenn Startprozedur der Rennen überschrieben werden soll.</string>
     <string name="override_default_start_procedure_type_select_header">Standard Startprozedur (wenn überschrieben)</string>
