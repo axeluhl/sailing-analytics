@@ -33,6 +33,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
@@ -198,7 +199,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsListHandler.setComparator(leaderboardsNameColumn, new Comparator<StrippedLeaderboardDTO>() {
             @Override
             public int compare(StrippedLeaderboardDTO l1, StrippedLeaderboardDTO l2) {
-                return l1.name.compareTo(l2.name);
+                return new NaturalComparator(false).compare(l1.name, l2.name);
             }
         });
 
@@ -441,7 +442,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO group1, LeaderboardGroupDTO group2) {
-                return group1.getName().compareTo(group2.getName());
+                return new NaturalComparator(false).compare(group1.getName(), group2.getName());
             }
         });
 

@@ -12,11 +12,23 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AntHrm extends Fix {
+    private final int eventTime;
+    private final int heartBeatCount;
     private final int heartRate;
     
     public AntHrm(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        heartRate = ((Number) valuesPerSubindex.get(1)).intValue();
+        eventTime = ((Number) valuesPerSubindex.get(1)).intValue();
+        heartBeatCount = ((Number) valuesPerSubindex.get(2)).intValue();
+        heartRate = ((Number) valuesPerSubindex.get(3)).intValue();
+    }
+
+    public int getEventTime() {
+        return eventTime;
+    }
+
+    public int getHeartBeatCount() {
+        return heartBeatCount;
     }
 
     public int getHeartRate() {

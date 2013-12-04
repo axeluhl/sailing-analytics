@@ -5,6 +5,27 @@ import java.util.Map;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
+/**
+ * For YachtBot and WindBot devices, this lists the number of satellites the device currently uses to determine its
+ * position. For the YachtBot smartphone app, restrictions may apply, as per the following e-mail by Brent Russell,
+ * Igtimi CTO, sent at 2013-12-01T21:16:00Z:
+ * 
+ * <pre>
+ * You're correct, we're not reading or propagating it at the moment from mobile devices, although it works fine with YachtBot hardware. 
+ * The mobile platform is what we're giving away for free, so we're not trying to make it a direct feature match for YachtBot :)
+ * 
+ * Both mobile and YachtBot only Tx GPS coordinates when there is a valid fix, so in practice I think you should never see a zeroed
+ * SatQ or SatC that is of any true meaning anyway.  Best just to ignore both these types (or throw away if zero) and not request it
+ * with the ::data call.
+ * 
+ * We do have some plans to change the way fix quality information is transmitted.  Mostly it's so that changes only are transmitted,
+ * and we'll encourage people to use hdop or gdop rather than satellite count.  There's some changes we need to make under the hood
+ * first though, so not a near future thing.
+ * </pre>
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
 public class GpsQualitySatCount extends Fix {
     private final int satCount;
     

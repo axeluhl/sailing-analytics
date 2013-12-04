@@ -1,34 +1,25 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
-import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sailing.domain.igtimiadapter.SecurityEntity;
 
-public class ResourceImpl implements Resource {
-    private final long id;
+public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow {
     private final TimePoint startTime;
     private final TimePoint endTime;
     private final String deviceSerialNumber;
-    private final int[] dataTypes;
     private final Iterable<Permission> permissions;
-    private final boolean blob;
-    
-    public ResourceImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber, int[] dataTypes,
-            Iterable<Permission> permissions, boolean blob, IgtimiConnection conn) {
-        super();
-        this.id = id;
+    private final SecurityEntity recipient;
+
+    public DataAccessWindowImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber,
+            Iterable<Permission> permissions, SecurityEntity recipient) {
+        super(id);
         this.startTime = startTime;
         this.endTime = endTime;
         this.deviceSerialNumber = deviceSerialNumber;
-        this.dataTypes = dataTypes;
         this.permissions = permissions;
-        this.blob = blob;
-    }
-
-    @Override
-    public long getId() {
-        return id;
+        this.recipient = recipient;
     }
 
     @Override
@@ -47,17 +38,17 @@ public class ResourceImpl implements Resource {
     }
 
     @Override
-    public int[] getDataTypes() {
-        return dataTypes;
-    }
-
-    @Override
     public Iterable<Permission> getPermissions() {
         return permissions;
     }
 
     @Override
-    public boolean isBlob() {
-        return blob;
+    public SecurityEntity getRecipient() {
+        return recipient;
+    }
+    
+    @Override
+    public String toString() {
+        return "DAW "+getId()+" for device "+getDeviceSerialNumber()+" from "+getStartTime()+" to "+getEndTime()+", permissions "+getPermissions();
     }
 }

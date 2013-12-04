@@ -18,7 +18,7 @@ public class HDGM extends Fix {
     
     public HDGM(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        magnetigHeading = new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        magnetigHeading = new DegreeBearingImpl((((Number) valuesPerSubindex.get(1)).doubleValue()+360.)%360.);
     }
 
     public Bearing getMagnetigHeading() {

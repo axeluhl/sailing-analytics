@@ -264,7 +264,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         result.setComparator(boatClassColumn, new Comparator<SwissTimingReplayRaceDTO>() {
             @Override
             public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
-                return getBoatClassNamesAsString(o1).compareTo(getBoatClassNamesAsString(o2));
+                return new NaturalComparator(false).compare(getBoatClassNamesAsString(o1), getBoatClassNamesAsString(o2));
             }
         });
         result.setComparator(startTimeColumn, new Comparator<SwissTimingReplayRaceDTO>() {

@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -2172,32 +2175,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("replaySwissTimingRace for regatta "+regattaIdentifier+" for races "+replayRaceDTOs);
         Regatta regatta;
         for (SwissTimingReplayRaceDTO replayRaceDTO : replayRaceDTOs) {
-            if (regattaIdentifier == null) {
-                String boatClass = replayRaceDTO.boat_class;
-                for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
-                    Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
-                    Matcher m = p.matcher(boatClass.trim());
-                    if (m.find()) {
-                        boatClass = boatClass.trim().substring(0, m.start(1));
-                        break;
+            try {
+                if (regattaIdentifier == null) {
+                    String boatClass = replayRaceDTO.boat_class;
+                    for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
+                        Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
+                        Matcher m = p.matcher(boatClass.trim());
+                        if (m.find()) {
+                            boatClass = boatClass.trim().substring(0, m.start(1));
+                            break;
+                        }
                     }
+                    regatta = getService().createRegatta(
+                            replayRaceDTO.rsc,
+                            boatClass.trim(),
+                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
+                            Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                            /* isMedal */false, Collections.singletonList(new FleetImpl(
+                                    LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                            /* race column names */new ArrayList<String>(), getService())), false,
+                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                    // TODO: is course area relevant for swiss timing replay?
+                } else {
+                    regatta = getService().getRegatta(regattaIdentifier);
                 }
-                regatta = getService().createRegatta(
-                        replayRaceDTO.rsc,
-                        boatClass.trim(),
-                        RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
-                        Collections.singletonList(new SeriesImpl(
-                                LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
-                                /* isMedal */false, 
-                                Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), 
-                                /* race column names */ new ArrayList<String>(), getService())), 
-                                false,
-                                baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-                //TODO: is course area relevant for swiss timing replay?
-            } else {
-                regatta = getService().getRegatta(regattaIdentifier);
+                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
-            getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
         }
     }
 
@@ -3287,7 +3292,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 port = Integer.parseInt(split[1]);
             }
         }
-        String query = createLeaderboardQuery(groupNames);
+        String query;
+        try {
+            query = createLeaderboardQuery(groupNames, compress);
+        } catch (UnsupportedEncodingException e1) {
+            throw new RuntimeException(e1);
+        }
         HttpURLConnection connection = null;
 
         URL serverAddress = null;
@@ -3307,9 +3317,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BufferedReader rd;
             if (compress) {
                 gzip = new GZIPInputStream(connection.getInputStream());
-                rd  = new BufferedReader(new InputStreamReader(gzip));
+                rd = new BufferedReader(new InputStreamReader(gzip, Charset.forName("UTF-8")));
             } else {
-                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
             }
             StringBuilder sb = new StringBuilder();
             String line;
@@ -3335,7 +3345,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+        return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
@@ -3343,12 +3353,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return importer.importMasterData(string, override);
     }
 
-    private String createLeaderboardQuery(String[] groupNames) {
+    private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
-            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+            String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
+            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        queryStringBuffer.append("compress=true");
+        if (compress) {
+            queryStringBuffer.append("compress=true");
+        } else {
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
         return queryStringBuffer.toString();
     }
 

@@ -161,6 +161,56 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
+    public String getUserUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"users/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getGroupsUrl(Account account) {
+        return getApiV1BaseUrl()+"groups?"+getAccessTokenUrlParameter(account);
+    }
+    
+    @Override
+    public String getGroupUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"groups/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getSessionUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"sessions/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getOwnedDevicesUrl(Account account) {
+        return getApiV1BaseUrl()+"devices/?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("devices/data_access_windows?type=");
+        url.append(permission.name());
+        if (startTime != null) {
+            url.append("&start_time=");
+            url.append(startTime.asMillis());
+        }
+        if (endTime != null) {
+            url.append("&end_time=");
+            url.append(endTime.asMillis());
+        }
+        if (deviceSerialNumbers != null) {
+            for (String serialNumber : deviceSerialNumbers) {
+                url.append("&serial_numbers[]=");
+                url.append(serialNumber);
+            }
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
+    @Override
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
@@ -209,6 +259,33 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         }
         url.append("&");
         url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
+    
+    @Override
+    public String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("sessions?");
+        url.append(getAccessTokenUrlParameter(account));
+        if (sessionIds != null) {
+            for (Long sessionId : sessionIds) {
+                url.append("&ids[]=");
+                url.append(sessionId);
+            }
+        }
+        if (isPublic != null) {
+            url.append("&public=");
+            url.append(isPublic.toString().toLowerCase());
+        }
+        if (limit != null) {
+            url.append("&limit=");
+            url.append(limit);
+        }
+        if (includeIncomplete != null) {
+            url.append("&include_incomplete");
+            url.append(includeIncomplete.toString().toLowerCase());
+        }
         return url.toString();
     }
 
