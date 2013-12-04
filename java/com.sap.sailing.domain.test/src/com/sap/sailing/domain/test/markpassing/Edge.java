@@ -9,7 +9,7 @@ public class Edge {
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
         this.start = start;
         this.end = end;
-        penaltyForSkipped = 0.3;
+        penaltyForSkipped = 0.45;
         this.timeEstimationOrCloseStartsProbability = timeEstimationOrStartAnalysis;
     }
     public String getIDs(){

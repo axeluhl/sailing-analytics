@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -9,7 +10,6 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
@@ -37,10 +37,14 @@ public class CandidateFinder {
             competitorTracks.put(c, new DynamicTrackImpl<Competitor, GPSFix>(c, 1000));
             distances.put(c, new LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>());
             candidates.put(c, new LinkedHashMap<Waypoint, ArrayList<GPSFix>>());
-            for (Waypoint w : waypoints) {
-                candidates.get(c).put(w, new ArrayList<GPSFix>());
-            }
+
         }
+    }
+
+    public void upDateWaypoints(ArrayList<Waypoint> waypoints, ArrayList<TrackedLeg> legs) {
+        this.waypoints = waypoints;
+        this.legs = legs;
+        markTracks.clear();
         Set<Mark> marks = new HashSet<>();
         for (Waypoint w : waypoints) {
             Iterator<Mark> it = w.getMarks().iterator();
@@ -51,17 +55,20 @@ public class CandidateFinder {
         for (Mark m : marks) {
             markTracks.put(m, new DynamicTrackImpl<Mark, GPSFix>(m, 1000));
         }
-    }
-
-    public void upDateWaypoints(ArrayList<Waypoint> waypoints, ArrayList<TrackedLeg> legs) {
-        this.waypoints = waypoints;
-        this.legs = legs;
+        for (Competitor c : candidates.keySet()) {
+            candidates.get(c).clear();
+            for (Waypoint w : waypoints) {
+                candidates.get(c).put(w, new ArrayList<GPSFix>());
+            }
+        }
         reCalculateEverything();
     }
 
     public void newCompetitorFixes(Iterable<GPSFixMoving> fixes, Competitor c) {
+
         ArrayList<GPSFix> fixesToBeReevaluated = new ArrayList<>();
-        for (GPSFix  fix : fixes) {
+        for (GPSFix fix : fixes) {
+
             competitorTracks.get(c).addGPSFix(fix);
             distances.get(c).put(fix, new LinkedHashMap<Waypoint, Double>());
             for (Waypoint w : waypoints) {
@@ -83,7 +90,12 @@ public class CandidateFinder {
     }
 
     public void newMarkFixes(Mark mark, Iterable<GPSFix> gps) {
-        TreeSet<Timed> fixes = new TreeSet<Timed>();
+        TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(new Comparator<GPSFix>() {
+            @Override
+            public int compare(GPSFix o1, GPSFix o2) {
+                return o1.getTimePoint().compareTo(o2.getTimePoint());
+            }
+        });
         for (GPSFix fix : gps) {
             markTracks.get(mark).addGPSFix(fix);
             fixes.add(fix);
@@ -127,17 +139,15 @@ public class CandidateFinder {
         for (GPSFix gps : fixes) {
             if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
                 candidates.get(c).get(w).add(gps);
-                if (waypoints.indexOf(w) == 0) {
-                }
-                Candidate newCandidate = new Candidate(waypoints.indexOf(w) + 1, gps.getTimePoint(), getLikelyhood(distances.get(c).get(gps).get(w),
-                        getLegLength(gps.getTimePoint(), waypoints.indexOf(w))), w);
+                Candidate newCandidate = new Candidate(waypoints.indexOf(w) + 1, gps.getTimePoint(), getLikelyhood(
+                        distances.get(c).get(gps).get(w), getLegLength(gps.getTimePoint(), waypoints.indexOf(w))), w);
                 newCans.add(newCandidate);
             }
 
             if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
                 candidates.get(c).get(w).remove(gps);
-                Candidate badCandidate = new Candidate(waypoints.indexOf(w) + 1, gps.getTimePoint(), getLikelyhood(distances.get(c).get(gps).get(w),
-                        getLegLength(gps.getTimePoint(), waypoints.indexOf(w))), w);
+                Candidate badCandidate = new Candidate(waypoints.indexOf(w) + 1, gps.getTimePoint(), getLikelyhood(
+                        distances.get(c).get(gps).get(w), getLegLength(gps.getTimePoint(), waypoints.indexOf(w))), w);
                 wrongCans.add(badCandidate);
             }
         }
@@ -155,7 +165,7 @@ public class CandidateFinder {
                     .getMeters()) / 2;
         }
     }
-    
+
     private double getLikelyhood(Double distance, Double legLength) {
         return 1 / (500 * Math.abs(distance / legLength) + 1);
     }
@@ -171,16 +181,21 @@ public class CandidateFinder {
         return false;
     }
 
-    private void reCalculateEverything(){
-        for(Competitor c : competitorTracks.keySet()){
+    private void reCalculateEverything() {
+        for (Competitor c : competitorTracks.keySet()) {
             ArrayList<GPSFix> fixes = new ArrayList<>();
-            for(GPSFix fix : competitorTracks.get(c).getFixes()){
-                fixes.add(fix);
-                for (Waypoint w : waypoints) {
-                    distances.get(c).get(fix).put(w, calculateDistance(fix, w));
-                    reEvaluateFixes(fixes, c, w);
+            try {
+                competitorTracks.get(c).lockForRead();
+                for (GPSFix fix : competitorTracks.get(c).getFixes()) {
+                    fixes.add(fix);
+                    for (Waypoint w : waypoints) {
+                        distances.get(c).get(fix).put(w, calculateDistance(fix, w));
+                        reEvaluateFixes(fixes, c, w);
+                    }
                 }
-            } 
+            } finally {
+                competitorTracks.get(c).unlockAfterRead();
+            }
         }
     }
 
@@ -235,3 +250,8 @@ public class CandidateFinder {
         return distance;
     }
 }
+
+
+
+
+

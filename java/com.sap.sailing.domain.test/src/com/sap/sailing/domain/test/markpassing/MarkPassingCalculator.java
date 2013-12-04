@@ -7,7 +7,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -19,22 +18,22 @@ public class MarkPassingCalculator extends AbstractRaceChangeListener implements
     private CandidateFinder finder;
     private CandidateChooser chooser;
     private ArrayList<Waypoint> waypoints = new ArrayList<>();
-    private TimePoint startOfRace;
     private TrackedRace race;
 
-    // TODO Start-analysis is not working, maybe adding time difference would help
+    // TODO Start-analysis is wrong for gate starts
+    // TODO Prepare for Polars :(
     // TODO How should Edges between the proxy start and end be treated
     // TODO Make sure the functions return the right probability
     // TODO Connection to rest of infrastructure
-    // TODO Feldmann issue
+    // TODO Feldmann issue, also for marks
     // TODO Use Wind/Maneuver analysis
     // TODO Build good test framework that test incremental calculation, tricky cases, ...
     // TODO Document everything
 
     public MarkPassingCalculator(TrackedRace race) {
-
-        startOfRace = race.getStartOfTracking();
-        chooser = new CandidateChooser(startOfRace, race.getRace().getCompetitors());
+        
+        this.race = race;
+        chooser = new CandidateChooser(race);
         finder = new CandidateFinder(race.getRace().getCompetitors(), chooser);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
