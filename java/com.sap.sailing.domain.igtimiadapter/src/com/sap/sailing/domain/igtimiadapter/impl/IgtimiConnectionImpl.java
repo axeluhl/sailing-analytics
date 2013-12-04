@@ -26,6 +26,7 @@ import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.tracking.Track;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
@@ -127,6 +128,26 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             typeAndCompression.put(type, 0.0);
         }
         return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
+    }
+
+    @Override
+    public Map<String, Map<Type, Track<? extends Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        Map<String, Map<Type, Track<? extends Fix>>> result = new HashMap<>();
+        for (Fix fix : fixes) {
+            String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();
+            Type type = fix.getType();
+            Track<? extends Fix> track = getOrCreateTrack(result, deviceSerialNumber, type);
+            track.ad
+        }
+        return result;
+    }
+
+    private Track<? extends Fix> getOrCreateTrack(Map<String, Map<Type, Track<? extends Fix>>> result,
+            String deviceSerialNumber, Type type) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

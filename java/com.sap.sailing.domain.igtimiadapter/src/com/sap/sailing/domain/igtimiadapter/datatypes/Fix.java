@@ -14,6 +14,10 @@ public abstract class Fix implements Timed {
         this.timePoint = timePoint;
         this.sensor = sensor;
     }
+    
+    public Type getType() {
+        return Type.getType(this.getClass());
+    }
 
     @Override
     public TimePoint getTimePoint() {

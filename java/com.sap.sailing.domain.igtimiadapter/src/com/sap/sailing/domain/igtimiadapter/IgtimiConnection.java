@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.tracking.Track;
 
 /**
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
@@ -104,4 +105,18 @@ public interface IgtimiConnection {
             ParseException;
 
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Same as {@link #getResourceData(TimePoint, TimePoint, Iterable, Type...)}, but the resulting {@link Fix}es are
+     * grouped into {@link Track}s per fix type and per device.
+     * 
+     * @return a map whose keys are the devices' serial numbers and whose values are the fixes produced by the device
+     *         identified by the key, grouped in a map with the fix {@link Type} as its key. Note that if a device
+     *         didn't produce any fixes at all under the requested parameters, its serial number may not appear as a key
+     *         in the map. Note further that should a device not have produced fixes of a given type, that type won't
+     *         appear as a key in the map for that device.
+     */
+    Map<String, Map<Type, Track<? extends Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
+            IOException, ParseException;
 }
