@@ -56,8 +56,11 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     protected long getDefaultGolfDownTime() {
-        long defaultGolfDownTime = getConfiguration().hasAdditionalGolfDownTime() ? GateStartRacingProcedure.DefaultGolfDownTime : 0;
-        return defaultGolfDownTime;
+        Boolean flag = getConfiguration().hasAdditionalGolfDownTime();
+        if (flag != null) {
+            return flag ? GateStartRacingProcedure.DefaultGolfDownTime : 0;
+        }
+        return 0;
     }
 
     @Override
@@ -74,7 +77,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
         if (startTime.before(now)) {
-            if (getConfiguration().hasPathfinder() && getPathfinder() == null) {
+            if (getConfiguration().hasPathfinder() != null && getConfiguration().hasPathfinder() && getPathfinder() == null) {
                 return new PathfinderPrerequisite(function, this, now, startTime);
             } else if (!gateLineOpeningTimesHasBeenSet) {
                 return new GateLaunchTimePrerequisite(function, this, now, startTime, getDefaultGolfDownTime());

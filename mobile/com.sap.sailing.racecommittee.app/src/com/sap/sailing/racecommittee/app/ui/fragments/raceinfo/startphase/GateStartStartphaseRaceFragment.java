@@ -45,8 +45,8 @@ public class GateStartStartphaseRaceFragment extends BaseStartphaseRaceFragment<
                 fragment.show(fragmentManager, null);
             }
         });
-        Boolean hasPathfinder = getRacingProcedure().getConfiguration().hasInidividualRecall();
-        if (hasPathfinder != null && hasPathfinder == false) {
+        Boolean hasPathfinder = getRacingProcedure().getConfiguration().hasPathfinder();
+        if (hasPathfinder == false) {
             pathfinderButton.setVisibility(View.GONE);
             pathfinderTextView.setVisibility(View.GONE);
         }
