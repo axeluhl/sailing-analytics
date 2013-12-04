@@ -37,7 +37,9 @@ public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
             List<RaceGroup> sortedGroups = new ArrayList<RaceGroup>(raceGroups);
             Collections.sort(sortedGroups, new RaceGroupComparator());
             for (RaceGroup raceGroup : sortedGroups) {
-                addPreference(screen, raceGroup);
+                if (raceGroup.getRegattaConfiguration() != null) {
+                    addPreference(screen, raceGroup);
+                }
             }
         }
         setPreferenceScreen(screen);

@@ -19,16 +19,16 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
 
-    protected CheckBox proceduresConfigurationCheckbox;
-    protected Button proceduresConfigurationButton;
+    protected CheckBox regattaConfigurationCheckbox;
+    protected Button regattaConfigurationButton;
     
-    private RegattaConfigurationDTO currentProceduresConfiguration;
+    private RegattaConfigurationDTO currentRegattaConfiguration;
     
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
                 null, callback);
-        currentProceduresConfiguration = regatta.configuration;
+        currentRegattaConfiguration = regatta.configuration;
         
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
@@ -36,21 +36,22 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);
         
-        proceduresConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
-        proceduresConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() { 
+        regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
+        regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() { 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                proceduresConfigurationButton.setEnabled(event.getValue());
+                regattaConfigurationButton.setEnabled(event.getValue());
             }
         });
-        proceduresConfigurationButton = new Button(stringMessages.edit());
-        proceduresConfigurationButton.addClickHandler(new ClickHandler() {
+        regattaConfigurationButton = new Button(stringMessages.edit());
+        regattaConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RegattaConfigurationDialog(currentProceduresConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
+                new RegattaConfigurationDialog(currentRegattaConfiguration == null ? new RegattaConfigurationDTO() : currentRegattaConfiguration, 
+                        stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
                     @Override
-                    public void ok(RegattaConfigurationDTO newProcedures) {
-                        currentProceduresConfiguration = newProcedures;
+                    public void ok(RegattaConfigurationDTO newConfiguration) {
+                        currentRegattaConfiguration = newConfiguration;
                     }
 
                     @Override
@@ -59,8 +60,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
                 }).show();;
             }
         });
-        proceduresConfigurationCheckbox.setValue(regatta.configuration != null);
-        proceduresConfigurationButton.setEnabled(regatta.configuration != null);
+        regattaConfigurationCheckbox.setValue(regatta.configuration != null);
+        regattaConfigurationButton.setEnabled(regatta.configuration != null);
     }
 
     @Override
@@ -74,8 +75,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         VerticalPanel content = new VerticalPanel();
         
         Grid proceduresGrid = new Grid(1,2);
-        proceduresGrid.setWidget(0, 0, proceduresConfigurationCheckbox);
-        proceduresGrid.setWidget(0, 1, proceduresConfigurationButton);
+        proceduresGrid.setWidget(0, 0, regattaConfigurationCheckbox);
+        proceduresGrid.setWidget(0, 1, regattaConfigurationButton);
         
         content.add(proceduresGrid);
         panel.add(content);
@@ -85,8 +86,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected RegattaDTO getResult() {
         RegattaDTO regatta = super.getResult();
         
-        if (proceduresConfigurationCheckbox.getValue()) {
-            regatta.configuration = currentProceduresConfiguration;
+        if (regattaConfigurationCheckbox.getValue()) {
+            regatta.configuration = currentRegattaConfiguration;
         } else {
             regatta.configuration = null;
         }

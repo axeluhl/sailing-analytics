@@ -859,7 +859,7 @@ public interface StringMessages extends Messages {
     String racingProcedureConfiguration();
     String activateIndividualRecall();
     String rrs26Start();
-    String overwriteConfiguration();
+    String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
     String individualRecallHelpText();
@@ -877,4 +877,6 @@ public interface StringMessages extends Messages {
     String setStartTime();
     String currentPass();
     String setStartTimeDescription();
+    String hasAdditionalGolfDownTime();
+    String additionalGolfDownTimeHelpText();
 }

@@ -156,7 +156,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RegattaConfigurationDialog(currentRegattaConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
+                new RegattaConfigurationDialog(currentRegattaConfiguration == null ? new RegattaConfigurationDTO() : currentRegattaConfiguration, 
+                        stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
                     @Override
                     public void ok(RegattaConfigurationDTO newConfiguration) {
                         currentRegattaConfiguration = newConfiguration;
@@ -202,34 +203,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         grid.setWidget(gridRow, 0, new Label("Identifier"));
         grid.setWidget(gridRow, 1, identifierBox);
     }
-
-    /*private void setupRacingProcedureListBox(Grid grid, int gridRow) {
-        racingProcedureListBox = new ListBox(false);
-        racingProcedureListBox.setWidth("100%");
-        ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureListBox, originalConfiguration.defaultRacingProcedureType, stringMessages.dontoverwrite());
-        racingProcedureListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                markAsDrity(true);
-            }
-        });
-        grid.setWidget(gridRow, 0, new Label(stringMessages.racingProcedure()));
-        grid.setWidget(gridRow, 1, racingProcedureListBox);
-    }
-
-    private void setupCourseDesignerListBox(Grid grid, int gridRow) {
-        designerModeEntryListBox = new ListBox(false);
-        designerModeEntryListBox.setWidth("100%");
-        ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox, originalConfiguration.defaultCourseDesignerMode, stringMessages.dontoverwrite());
-        designerModeEntryListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                markAsDrity(true);
-            }
-        });
-        grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
-        grid.setWidget(gridRow, 1, designerModeEntryListBox);
-    }*/
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
@@ -309,18 +282,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (!mailRecipientBox.getText().isEmpty()) {
             result.resultsMailRecipient = mailRecipientBox.getText().isEmpty() ? null : mailRecipientBox.getText();
         }
-
-        /*int index = racingProcedureListBox.getSelectedIndex();
-        if (index >= 0) {
-            RacingProcedureType type = RacingProcedureType.valueOf(racingProcedureListBox.getValue(index));
-            result.defaultRacingProcedureType = type == RacingProcedureType.UNKNOWN ? null : type;
-        }
-        
-        index = designerModeEntryListBox.getSelectedIndex();
-        if (index >= 0) {
-            CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
-            result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
-        }*/
         
         if (!courseNamesList.getValue().isEmpty()) {
             result.byNameDesignerCourseNames = courseNamesList.getValue();
