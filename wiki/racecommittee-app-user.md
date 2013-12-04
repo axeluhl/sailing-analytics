@@ -12,7 +12,7 @@ Each race officer is in charge of managing the races of a course area (Alpha, Br
 
 <img src="" title="Logon onto course area" />
 
-In the dialog screen choose "_Login as race officer (start vessel)_". Press **Login**. From now on you will see in the lower right corner the RaceCommittee App icon signaling that you are managing this course area. Using this notification icon you are always able to return back to your race management screen.
+In the dialog screen choose _"Login as race officer (start vessel)"_. Press **Login**. From now on you will see in the lower right corner the RaceCommittee App icon signaling that you are managing this course area. Using this notification icon you are always able to return back to your race management screen.
 
 ## Race management
 
