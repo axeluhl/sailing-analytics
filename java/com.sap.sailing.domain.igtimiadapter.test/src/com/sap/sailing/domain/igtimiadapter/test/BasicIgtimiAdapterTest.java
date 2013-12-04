@@ -5,14 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -63,6 +66,16 @@ public class BasicIgtimiAdapterTest {
     }
     
     @Test
+    public void testGetAllDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
+                /* endTime */ null, /* deviceSerialNumbers */ null);
+        assertFalse(Util.isEmpty(daws));
+    }
+    
+    @Test
     public void testGetResources() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
         Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
@@ -96,4 +109,23 @@ public class BasicIgtimiAdapterTest {
                 new MillisecondsTimePoint(1384421639000l), Collections.singleton("GA-EN-AAEJ"), typesAndCompression);
         assertTrue(data.iterator().hasNext());
     }
+    
+    @Test
+    public void testDataAccessWindowForGivenTimeFrame() throws java.text.ParseException, IllegalStateException, ClientProtocolException, IOException, ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
+        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-07T08:00:00Z"));
+        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T18:00:00Z"));
+        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        IgtimiConnection connection = connectionFactory.connect(account);
+        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
+        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
+        assertFalse(Util.isEmpty(daws));
+        for (DataAccessWindow daw : daws) {
+            assertTrue((daw.getStartTime().compareTo(start)<=0 && daw.getEndTime().compareTo(start)>0)  // spans start
+                    || (daw.getStartTime().compareTo(end)<=0 && daw.getEndTime().compareTo(end)>0)      // spans end
+                    || (daw.getStartTime().compareTo(start)>=0 && daw.getEndTime().compareTo(end)<=0)); // lies within
+        }
+    }
+    
 }

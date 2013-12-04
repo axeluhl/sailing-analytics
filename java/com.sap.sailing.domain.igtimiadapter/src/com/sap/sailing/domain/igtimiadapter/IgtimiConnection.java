@@ -70,9 +70,11 @@ public interface IgtimiConnection {
      * Returns all devices that this connection has access to with the requested <code>permission</code>.
      * 
      * @param startTime
-     *            optional; may be <code>null</code>
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range after this
+     *            time will be returned.
      * @param endTime
-     *            optional; may be <code>null</code>
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range before this
+     *            time will be returned.
      * @param deviceSerialNumbers
      *            optional; if not <code>null</code> and not empty, only data access windows for the devices identified
      *            by these serial numbers will be returned

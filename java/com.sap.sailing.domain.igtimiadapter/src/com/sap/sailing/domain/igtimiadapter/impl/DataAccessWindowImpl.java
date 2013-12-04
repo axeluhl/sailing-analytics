@@ -46,4 +46,9 @@ public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow 
     public SecurityEntity getRecipient() {
         return recipient;
     }
+    
+    @Override
+    public String toString() {
+        return "DAW "+getId()+" for device "+getDeviceSerialNumber()+" from "+getStartTime()+" to "+getEndTime()+", permissions "+getPermissions();
+    }
 }
