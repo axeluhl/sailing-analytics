@@ -105,7 +105,7 @@ In the top right corner three dots indicate the connectivity status. If there is
 
 <img src="" title="Connectivity ok" /> <img src="" title="Connectivity problem detected />
 
-If the dots stay red contact the administration team (or see the [[guide for device administrators|wiki/racecommittee-app-administrator]]).
+If the dots stay red contact the administration team or see the [[guide for device administrators|wiki/racecommittee-app-administrator]].
 
 ### Crashes
 
