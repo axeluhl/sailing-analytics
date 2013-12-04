@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.shared;
 
+
 public final class Components {
 
     public enum GrouperType {
@@ -7,16 +8,18 @@ public final class Components {
     }
 
     public enum AggregatorType {
-        Sum("Sum"), Average("Average"), Median("Median");
-        
-        private final String name;
+        Sum, Average, Median;
 
-        private AggregatorType(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
+        public Message getNameMessage() {
+            switch (this) {
+            case Average:
+                return Message.Average;
+            case Median:
+                return Message.Median;
+            case Sum:
+                return Message.Sum;
+            };
+            throw new IllegalArgumentException("No message available for the aggregator type '" + this + "'");
         }
     }
 
@@ -26,17 +29,15 @@ public final class Components {
 
     public enum StatisticType {
 
-        Speed(ValueType.Double, "speed in knots", Unit.Knots, 2),
-        Distance_TrackedLegOfCompetitor(ValueType.Double, "distance in meters", Unit.Meters, 2);
+        Speed(ValueType.Double, Unit.Knots, 2),
+        Distance_TrackedLegOfCompetitor(ValueType.Double, Unit.Meters, 2);
 
         private final ValueType valueType;
-        private final String signifier;
         private final Unit unit;
         private final int valueDecimals;
 
-        private StatisticType(ValueType valueType, String signifier, Unit unit, int valueDecimals) {
+        private StatisticType(ValueType valueType, Unit unit, int valueDecimals) {
             this.valueType = valueType;
-            this.signifier = signifier;
             this.unit = unit;
             this.valueDecimals = valueDecimals;
         }
@@ -45,12 +46,30 @@ public final class Components {
             return valueType;
         }
         
-        public String getSignifier() {
-            return signifier;
+        public Message getSignifierMessage() {
+            switch (this) {
+            case Distance_TrackedLegOfCompetitor:
+                return Message.Distance;
+            case Speed:
+                return Message.Speed;
+            }
+            throw new IllegalArgumentException("No message available for the statistic type '" + this + "'");
         }
         
         public Unit getUnit() {
             return unit;
+        }
+        
+        public Message getUnitMessage() {
+            switch (unit) {
+            case Knots:
+                return Message.Knots;
+            case Meters:
+                return Message.Meters;
+            case None:
+                return null;
+            }
+            throw new IllegalArgumentException("No message available for the unit '" + unit + "'");
         }
         
         public int getValueDecimals() {

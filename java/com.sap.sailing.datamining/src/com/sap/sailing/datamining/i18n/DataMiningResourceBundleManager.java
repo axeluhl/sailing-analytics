@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.sap.sailing.datamining.DataMiningStringMessages;
+import com.sap.sailing.datamining.shared.Message;
 
 public class DataMiningResourceBundleManager implements DataMiningStringMessages {
     
@@ -67,17 +68,18 @@ public class DataMiningResourceBundleManager implements DataMiningStringMessages
     public String get(String localeName, Message message) {
         return get(getLocaleFrom(localeName), message);
     }
+
+    @Override
+    public Locale getLocaleFrom(String localeName) {
+        Locale locale = supportedLocalesMappedByLocaleInfo.get(localeName);
+        return locale != null ? locale : supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
+    }
     
     private ResourceBundle getResourceBundle(Locale locale) {
         if (!messagesMappedByLocale.containsKey(locale)) {
             messagesMappedByLocale.put(locale, ResourceBundle.getBundle(STRING_MESSAGES_BASE_NAME, locale));
         }
         return messagesMappedByLocale.get(locale);
-    }
-
-    protected Locale getLocaleFrom(String localeName) {
-        Locale locale = supportedLocalesMappedByLocaleInfo.get(localeName);
-        return locale != null ? locale : supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
     }
 
     private void initializeSupportedLocales(Locale defaultLocale) {

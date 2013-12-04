@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.presentation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -156,7 +157,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
     }
 
     private static QueryDefinition getStandardQueryDefinition() {
-        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(ERROR, GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RaceName);
         return standardDefinition;

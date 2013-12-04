@@ -1,10 +1,12 @@
 package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.ParallelAggregator;
 import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.ParallelExtractor;
@@ -12,11 +14,15 @@ import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ParallelGrouper;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.shared.Message;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.datamining.shared.QueryResultImpl;
 import com.sap.sailing.server.RacingEventService;
 
 public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
+
+    private DataMiningStringMessages stringMessages;
+    private Locale locale;
 
     private ParallelDataRetriever<DataType> retriever;
     private ParallelFilter<DataType> filter;
@@ -25,8 +31,10 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     private ParallelExtractor<DataType, ExtractedType> extractor;
     private ParallelAggregator<ExtractedType, AggregatedType> aggregator;
     
-    public QueryImpl(ParallelDataRetriever<DataType> retriever, ParallelFilter<DataType> filter, ParallelGrouper<DataType> grouper,
-                     ParallelExtractor<DataType, ExtractedType> extractor, ParallelAggregator<ExtractedType, AggregatedType> aggregator) {
+    public QueryImpl(DataMiningStringMessages stringMessages, Locale locale, ParallelDataRetriever<DataType> retriever, ParallelFilter<DataType> filter,
+                     ParallelGrouper<DataType> grouper, ParallelExtractor<DataType, ExtractedType> extractor, ParallelAggregator<ExtractedType, AggregatedType> aggregator) {
+        this.stringMessages = stringMessages;
+        this.locale = locale;
         this.retriever = retriever;
         this.filter = filter;
         this.grouper = grouper;
@@ -55,7 +63,7 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     }
 
     private String createResultSignifier() {
-        return aggregator.getName() + " of the " + extractor.getSignifier();
+        return stringMessages.get(locale, Message.ResultSignifier, extractor.getSignifier(), aggregator.getName());
     }
 
 }
