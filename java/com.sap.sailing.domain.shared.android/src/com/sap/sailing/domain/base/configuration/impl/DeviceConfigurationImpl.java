@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.configuration.impl;
 import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -10,7 +10,7 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
 
     private static final long serialVersionUID = 6084215932610324314L;
     
-    private RacingProceduresConfiguration proceduresConfiguration;
+    private RegattaConfiguration regattaConfiguration;
     
     private List<String> allowedCourseAreaNames;
     private String resultsMailRecipient;
@@ -18,17 +18,17 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     private CourseDesignerMode defaultCourseDesignerMode;
     private List<String> byNameDesignerCourseNames;
 
-    public DeviceConfigurationImpl(RacingProceduresConfiguration proceduresConfiguration) {
-        this.proceduresConfiguration = proceduresConfiguration;
+    public DeviceConfigurationImpl(RegattaConfiguration regattaConfiguration) {
+        this.regattaConfiguration = regattaConfiguration;
     }
     
-    protected void setRacingProceduresConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
-        this.proceduresConfiguration = proceduresConfiguration;
+    protected void setRegattaConfiguration(RegattaConfiguration proceduresConfiguration) {
+        this.regattaConfiguration = proceduresConfiguration;
     }
 
     @Override
-    public RacingProceduresConfiguration getRacingProceduresConfiguration() {
-        return proceduresConfiguration;
+    public RegattaConfiguration getRegattaConfiguration() {
+        return regattaConfiguration;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     }
     
     protected DeviceConfiguration copy() {
-        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(proceduresConfiguration);
+        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(regattaConfiguration);
         copyConfiguration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         copyConfiguration.setByNameDesignerCourseNames(byNameDesignerCourseNames);
         copyConfiguration.setDefaultCourseDesignerMode(defaultCourseDesignerMode);

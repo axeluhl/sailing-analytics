@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
@@ -19,20 +19,20 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class PreferencesBasedRacingProceduresConfiguration extends RacingProceduresConfigurationImpl implements
-        ConfigurationLoader<RacingProceduresConfiguration> {
+public class PreferencesBasedRegattaConfiguration extends RegattaConfigurationImpl implements
+        ConfigurationLoader<RegattaConfiguration> {
 
     private static final long serialVersionUID = -2109422929668306199L;
-    private static final String TAG = PreferencesBasedRacingProceduresConfiguration.class.getSimpleName();
+    private static final String TAG = PreferencesBasedRegattaConfiguration.class.getSimpleName();
 
     private final AppPreferences preferences;
 
-    public PreferencesBasedRacingProceduresConfiguration(final AppPreferences preferences) {
+    public PreferencesBasedRegattaConfiguration(final AppPreferences preferences) {
         this.preferences = preferences;
     }
 
     @Override
-    public RacingProceduresConfiguration load() {
+    public RegattaConfiguration load() {
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));

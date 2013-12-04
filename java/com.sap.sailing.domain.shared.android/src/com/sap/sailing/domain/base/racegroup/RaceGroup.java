@@ -3,7 +3,7 @@ package com.sap.sailing.domain.base.racegroup;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -58,5 +58,5 @@ public interface RaceGroup extends Named {
     /**
      * Gets configuration objects for {@link RacingProcedure}s of this {@link RaceGroup}'s races.
      */
-    public RacingProceduresConfiguration getRacingProceduresConfiguration();
+    public RegattaConfiguration getRegattaConfiguration();
 }

@@ -46,7 +46,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -1220,7 +1220,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
            RacingProcedureType newDefaultRacingProcedureType, CourseDesignerMode newDefaultCourseDesignerMode,
-           RacingProceduresConfiguration newRacingProceduresConfiguration) {
+           RegattaConfiguration newRegattaConfiguration) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         synchronized (regatta) {
@@ -1234,11 +1234,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             if (newDefaultCourseDesignerMode != regatta.getDefaultCourseDesignerMode()) {
                 regatta.setDefaultCourseDesignerMode(newDefaultCourseDesignerMode);
             }
-            regatta.setRacingProceduresConfiguration(newRacingProceduresConfiguration);
+            regatta.setRegattaConfiguration(newRegattaConfiguration);
             
             mongoObjectFactory.storeRegatta(regatta);
             replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId,
-                    newDefaultRacingProcedureType, newDefaultCourseDesignerMode, newRacingProceduresConfiguration));
+                    newDefaultRacingProcedureType, newDefaultCourseDesignerMode, newRegattaConfiguration));
         }
         return regatta;
     }

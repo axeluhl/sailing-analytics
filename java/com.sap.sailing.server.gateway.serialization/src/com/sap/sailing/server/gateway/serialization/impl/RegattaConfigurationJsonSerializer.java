@@ -3,13 +3,13 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class RacingProceduresConfigurationJsonSerializer implements JsonSerializer<RacingProceduresConfiguration> {
+public class RegattaConfigurationJsonSerializer implements JsonSerializer<RegattaConfiguration> {
 
-    public static RacingProceduresConfigurationJsonSerializer create() {
-        return new RacingProceduresConfigurationJsonSerializer(RRS26ConfigurationJsonSerializer.create(),
+    public static RegattaConfigurationJsonSerializer create() {
+        return new RegattaConfigurationJsonSerializer(RRS26ConfigurationJsonSerializer.create(),
                 GateStartConfigurationJsonSerializer.create(), ESSConfigurationJsonSerializer.create(),
                 RacingProcedureConfigurationJsonSerializer.create());
     }
@@ -24,7 +24,7 @@ public class RacingProceduresConfigurationJsonSerializer implements JsonSerializ
     private final JsonSerializer<RacingProcedureConfiguration> essSerializer;
     private final JsonSerializer<RacingProcedureConfiguration> basicSerializer;
 
-    public RacingProceduresConfigurationJsonSerializer(JsonSerializer<RacingProcedureConfiguration> rrs26,
+    public RegattaConfigurationJsonSerializer(JsonSerializer<RacingProcedureConfiguration> rrs26,
             JsonSerializer<RacingProcedureConfiguration> gateStart, JsonSerializer<RacingProcedureConfiguration> ess,
             JsonSerializer<RacingProcedureConfiguration> basicSerializer) {
         this.rrs26Serializer = rrs26;
@@ -34,7 +34,7 @@ public class RacingProceduresConfigurationJsonSerializer implements JsonSerializ
     }
 
     @Override
-    public JSONObject serialize(RacingProceduresConfiguration object) {
+    public JSONObject serialize(RegattaConfiguration object) {
         JSONObject result = new JSONObject();
         if (object.getRRS26Configuration() != null) {
             result.put(FIELD_RRS26, rrs26Serializer.serialize(object.getRRS26Configuration()));

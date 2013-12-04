@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 
-public class RacingProceduresConfigurationImpl implements RacingProceduresConfiguration {
+public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     private static final long serialVersionUID = 8501755084811977792L;
     
@@ -51,8 +51,8 @@ public class RacingProceduresConfigurationImpl implements RacingProceduresConfig
         this.basicConfiguration = basicConfiguration;
     }   
     
-    protected RacingProceduresConfiguration copy() {
-        RacingProceduresConfigurationImpl copy = new RacingProceduresConfigurationImpl();
+    protected RegattaConfiguration copy() {
+        RegattaConfigurationImpl copy = new RegattaConfigurationImpl();
         copy.setRRS26Configuration(rrs26Configuration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);

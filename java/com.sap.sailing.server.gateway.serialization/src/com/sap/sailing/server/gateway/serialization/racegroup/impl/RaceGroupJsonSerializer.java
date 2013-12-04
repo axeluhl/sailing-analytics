@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
@@ -16,21 +16,21 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
     public static final String FIELD_BOAT_CLASS = "boatClass";
     public static final String FIELD_DEFAULT_RACING_PROCEDURE = "defaultProcedure";
     public static final String FIELD_DEFAULT_COURSE_DESIGNER = "defaultCourseDesigner";
-    public static final String FIELD_RACING_PROCEDURES_CONFIGURATION = "procedures";
+    public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
 
     private final JsonSerializer<BoatClass> boatClassSerializer;
     private final JsonSerializer<CourseArea> courseAreaSerializer;
-    private final JsonSerializer<RacingProceduresConfiguration> proceduresSerializer;
+    private final JsonSerializer<RegattaConfiguration> configurationSerializer;
 
     public RaceGroupJsonSerializer(
             JsonSerializer<BoatClass> boatClassSerializer,
             JsonSerializer<CourseArea> courseAreaSerializer,
-            JsonSerializer<RacingProceduresConfiguration> proceduresSerializer,
+            JsonSerializer<RegattaConfiguration> configurationSerializer,
             ExtensionJsonSerializer<RaceGroup, ?> extensionSerializer) {
         super(extensionSerializer);
         this.courseAreaSerializer = courseAreaSerializer;
         this.boatClassSerializer = boatClassSerializer;
-        this.proceduresSerializer = proceduresSerializer;
+        this.configurationSerializer = configurationSerializer;
     }
 
     @Override
@@ -55,9 +55,9 @@ public class RaceGroupJsonSerializer extends ExtendableJsonSerializer<RaceGroup>
             result.put(FIELD_DEFAULT_COURSE_DESIGNER, object.getDefaultCourseDesignerMode().name());
         }
         
-        if (object.getRacingProceduresConfiguration() != null) {
-            result.put(FIELD_RACING_PROCEDURES_CONFIGURATION, 
-                    proceduresSerializer.serialize(object.getRacingProceduresConfiguration()));
+        if (object.getRegattaConfiguration() != null) {
+            result.put(FIELD_REGATTA_CONFIGURATION, 
+                    configurationSerializer.serialize(object.getRegattaConfiguration()));
         }
 
         return result;

@@ -4,7 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceConfiguration> {
@@ -14,25 +14,25 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
     public static final Object FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
     public static final Object FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
     public static final String FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES = "byValueCourseNames";
-    public static final String FIELD_PROCEDURES_CONFIGURATION = "procedures";
+    public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
     
     public static DeviceConfigurationJsonSerializer create() {
-        return new DeviceConfigurationJsonSerializer(RacingProceduresConfigurationJsonSerializer.create());
+        return new DeviceConfigurationJsonSerializer(RegattaConfigurationJsonSerializer.create());
     }
     
-    private final JsonSerializer<RacingProceduresConfiguration> proceduresSerializer;
+    private final JsonSerializer<RegattaConfiguration> regattaConfigurationSerializer;
     
-    public DeviceConfigurationJsonSerializer(JsonSerializer<RacingProceduresConfiguration> proceduresSerializer) {
-        this.proceduresSerializer = proceduresSerializer;
+    public DeviceConfigurationJsonSerializer(JsonSerializer<RegattaConfiguration> serializer) {
+        this.regattaConfigurationSerializer = serializer;
     }
 
     @Override
     public JSONObject serialize(DeviceConfiguration object) {
         JSONObject result = new JSONObject();
         
-        if (object.getRacingProceduresConfiguration() != null) {
-            result.put(FIELD_PROCEDURES_CONFIGURATION, 
-                    proceduresSerializer.serialize(object.getRacingProceduresConfiguration()));
+        if (object.getRegattaConfiguration() != null) {
+            result.put(FIELD_REGATTA_CONFIGURATION, 
+                    regattaConfigurationSerializer.serialize(object.getRegattaConfiguration()));
         }
 
         if (object.getAllowedCourseAreaNames() != null) {

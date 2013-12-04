@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base.racegroup.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.CourseDesignerMode;
@@ -18,18 +18,18 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     private final Iterable<SeriesWithRows> series;
     private final RacingProcedureType defaultRacingProcedureType;
     private final CourseDesignerMode defaultCourseDesignerMode;
-    private final RacingProceduresConfiguration proceduresConfiguration;
+    private final RegattaConfiguration regattaConfiguration;
 
     public RaceGroupImpl(String name, BoatClass boatClass, CourseArea courseArea, Iterable<SeriesWithRows> series,
             RacingProcedureType defaultRacingProcedureType, CourseDesignerMode defaultCourseDesignerMode,
-            RacingProceduresConfiguration proceduresConfiguration) {
+            RegattaConfiguration regattaConfiguration) {
         super(name);
         this.boatClass = boatClass;
         this.courseArea = courseArea;
         this.series = series;
         this.defaultRacingProcedureType = defaultRacingProcedureType;
         this.defaultCourseDesignerMode = defaultCourseDesignerMode;
-        this.proceduresConfiguration = proceduresConfiguration;
+        this.regattaConfiguration = regattaConfiguration;
     }
 
     public CourseArea getDefaultCourseArea() {
@@ -55,8 +55,8 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     }
 
     @Override
-    public RacingProceduresConfiguration getRacingProceduresConfiguration() {
-        return proceduresConfiguration;
+    public RegattaConfiguration getRegattaConfiguration() {
+        return regattaConfiguration;
     }
 
 }

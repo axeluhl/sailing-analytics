@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.configuration.impl;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -13,19 +13,19 @@ public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl
     private static final String TAG = PreferencesBasedDeviceConfiguration.class.getSimpleName();
 
     private final AppPreferences preferences;
-    private final ConfigurationLoader<RacingProceduresConfiguration> storableRacingProceduresConfiguration;
+    private final ConfigurationLoader<RegattaConfiguration> storeableRegattaConfiguration;
     
     public PreferencesBasedDeviceConfiguration(final AppPreferences preferences, 
-            PreferencesBasedRacingProceduresConfiguration proceduresConfiguration) {
-        super(proceduresConfiguration);
+            PreferencesBasedRegattaConfiguration regattaConfiguration) {
+        super(regattaConfiguration);
         this.preferences = preferences;
-        this.storableRacingProceduresConfiguration = proceduresConfiguration;
+        this.storeableRegattaConfiguration = regattaConfiguration;
     }
 
     @Override
     public DeviceConfiguration load() {
-        if (storableRacingProceduresConfiguration != null) {
-            setRacingProceduresConfiguration(storableRacingProceduresConfiguration.load());
+        if (storeableRegattaConfiguration != null) {
+            setRegattaConfiguration(storeableRegattaConfiguration.load());
         }
         
         setAllowedCourseAreaNames(preferences.getManagedCourseAreaNames());
@@ -45,8 +45,8 @@ public class PreferencesBasedDeviceConfiguration extends DeviceConfigurationImpl
     public void store() {
         ExLog.i(TAG, "Storing new device configuration.");
         
-        if (storableRacingProceduresConfiguration != null) {
-            storableRacingProceduresConfiguration.store();
+        if (storeableRegattaConfiguration != null) {
+            storeableRegattaConfiguration.store();
             preferences.setRacingProcedureConfigurationOverwriteAllowed(false);
         } else {
             preferences.setRacingProcedureConfigurationOverwriteAllowed(true);

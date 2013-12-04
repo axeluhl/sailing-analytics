@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -25,7 +25,7 @@ import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RacingProceduresConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 
@@ -65,7 +65,7 @@ public class LeaderboardGroupMasterDataJsonSerializer implements JsonSerializer<
         JsonSerializer<Color> colorSerializer = new ColorJsonSerializer();
         JsonSerializer<Fleet> fleetSerializer = new FleetJsonSerializer(colorSerializer);
         JsonSerializer<RaceColumn> raceColumnSerializer = new RaceColumnMasterDataJsonSerializer();
-        JsonSerializer<RacingProceduresConfiguration> configurationSerializer = RacingProceduresConfigurationJsonSerializer.create();
+        JsonSerializer<RegattaConfiguration> configurationSerializer = RegattaConfigurationJsonSerializer.create();
         JsonSerializer<RaceLogEvent> raceLogEventSerializer = RaceLogEventSerializer.create(competitorSerializer);
         eventSerializer = new EventMasterDataJsonSerializer();
         leadboardSerializer = new LeaderboardMasterDataJsonSerializer(competitorSerializer, raceColumnSerializer, raceLogEventSerializer);

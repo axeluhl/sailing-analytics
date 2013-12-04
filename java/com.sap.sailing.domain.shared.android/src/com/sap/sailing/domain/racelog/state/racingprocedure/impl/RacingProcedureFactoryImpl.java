@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -15,7 +15,7 @@ public class RacingProcedureFactoryImpl extends ReadonlyRacingProcedureFactory i
     private final RaceLogEventFactory factory;
     
     public RacingProcedureFactoryImpl(RaceLogEventAuthor author, RaceLogEventFactory factory, 
-            ConfigurationLoader<RacingProceduresConfiguration> configuration) {
+            ConfigurationLoader<RegattaConfiguration> configuration) {
         super(configuration);
         this.author = author;
         this.factory = factory;

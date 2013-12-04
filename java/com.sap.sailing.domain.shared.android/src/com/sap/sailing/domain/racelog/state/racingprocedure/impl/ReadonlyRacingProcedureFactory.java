@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.impl;
 
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
@@ -18,15 +18,15 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.impl.RRS26Raci
 
 public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
 
-    protected final ConfigurationLoader<RacingProceduresConfiguration> configuration;
+    protected final ConfigurationLoader<RegattaConfiguration> configuration;
     
-    public ReadonlyRacingProcedureFactory(ConfigurationLoader<RacingProceduresConfiguration> configuration) {
+    public ReadonlyRacingProcedureFactory(ConfigurationLoader<RegattaConfiguration> configuration) {
         this.configuration = configuration;
     }
     
     protected ReadonlyRacingProcedure createProcedure(RacingProcedureType type, RaceLog raceLog, RaceLogEventAuthor author, 
             RaceLogEventFactory factory) {
-        RacingProceduresConfiguration loadedConfiguration = configuration.load();
+        RegattaConfiguration loadedConfiguration = configuration.load();
         switch (type) {
         case ESS:
             return new ESSRacingProcedureImpl(raceLog, author, factory, loadedConfiguration.getESSConfiguration());

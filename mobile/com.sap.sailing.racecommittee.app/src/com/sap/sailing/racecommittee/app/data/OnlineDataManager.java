@@ -20,11 +20,11 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedDeviceConfigurationJsonDeserializer;
-import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedRacingProceduresConfigurationJsonDeserializer;
+import com.sap.sailing.racecommittee.app.data.deserialization.impl.PreferencesBasedRegattaConfigurationJsonDeserializer;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
@@ -46,7 +46,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRacingProceduresConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRegattaConfiguration;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.EventSendingService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -131,11 +131,11 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                ConfigurationLoader<RacingProceduresConfiguration> configuration = 
-                        new PreferencesBasedRacingProceduresConfiguration(preferences);
+                ConfigurationLoader<RegattaConfiguration> configuration = 
+                        new PreferencesBasedRegattaConfiguration(preferences);
                 
-                JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer = 
-                        PreferencesBasedRacingProceduresConfigurationJsonDeserializer.create(preferences);
+                JsonDeserializer<RegattaConfiguration> proceduresDeserializer = 
+                        PreferencesBasedRegattaConfigurationJsonDeserializer.create(preferences);
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
                         configuration, RaceGroupDeserializer.create(domainFactory, proceduresDeserializer));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);

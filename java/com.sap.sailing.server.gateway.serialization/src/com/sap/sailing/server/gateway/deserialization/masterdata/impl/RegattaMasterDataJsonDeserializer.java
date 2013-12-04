@@ -12,7 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
@@ -28,13 +28,13 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
     
     private final JsonDeserializer<Fleet> fleetDeserializer;
     private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer;
-    private final JsonDeserializer<RacingProceduresConfiguration> racingProceduresConfigurationDeserializer;
+    private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
     public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer,
-            JsonDeserializer<RacingProceduresConfiguration> racingProceduresConfigurationDeserializer) {
+            JsonDeserializer<RegattaConfiguration> configurationDeserializer) {
         this.fleetDeserializer = fleetDeserializer;
         this.raceColumnDeserializer = raceColumnDeserializer;
-        this.racingProceduresConfigurationDeserializer = racingProceduresConfigurationDeserializer;
+        this.configurationDeserializer = configurationDeserializer;
     }
 
     @Override
@@ -81,10 +81,10 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
             designerMode = CourseDesignerMode.valueOf(defaultCourseDesignerModeValue);
         }
         
-        RacingProceduresConfiguration proceduresConfiguration = null;
-        if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION)) {
-            proceduresConfiguration = racingProceduresConfigurationDeserializer.deserialize(
-                    Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION));
+        RegattaConfiguration proceduresConfiguration = null;
+        if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
+            proceduresConfiguration = configurationDeserializer.deserialize(
+                    Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION));
         }
         
         return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 

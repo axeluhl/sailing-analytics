@@ -20,15 +20,15 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO.RacingProcedureConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 
-public class RacingProceduresConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RacingProceduresConfigurationDTO> {
+public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
     
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
     private final StringMessages stringMessages;
-    private final DeviceConfigurationDTO.RacingProceduresConfigurationDTO originalConfiguration;
+    private final DeviceConfigurationDTO.RegattaConfigurationDTO originalConfiguration;
     
     private VerticalPanel contentPanel;
     
@@ -50,10 +50,10 @@ public class RacingProceduresConfigurationDialog extends DataEntryDialog<DeviceC
     private ListBox basicClassFlagListBox;
     private CheckBox basicRecallBox;
     
-    public RacingProceduresConfigurationDialog(
-            DeviceConfigurationDTO.RacingProceduresConfigurationDTO proceduresConfiguration,
+    public RegattaConfigurationDialog(
+            DeviceConfigurationDTO.RegattaConfigurationDTO proceduresConfiguration,
             StringMessages messages,
-            DataEntryDialog.DialogCallback<RacingProceduresConfigurationDTO> callback) {
+            DataEntryDialog.DialogCallback<RegattaConfigurationDTO> callback) {
         super(messages.racingProcedureConfiguration(), "", messages.save(), messages.cancel(), null, callback);
         this.stringMessages = messages;
         this.originalConfiguration = proceduresConfiguration;
@@ -274,10 +274,10 @@ public class RacingProceduresConfigurationDialog extends DataEntryDialog<DeviceC
     }
 
     @Override
-    protected RacingProceduresConfigurationDTO getResult() {
-        DeviceConfigurationDTO.RacingProceduresConfigurationDTO result = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO();
+    protected RegattaConfigurationDTO getResult() {
+        DeviceConfigurationDTO.RegattaConfigurationDTO result = new DeviceConfigurationDTO.RegattaConfigurationDTO();
         if (rrs26EnabledBox.getValue()) {
-            result.rrs26Configuration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.RRS26ConfigurationDTO();
+            result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox);
             List<Flags> flags = new ArrayList<Flags>();
             for (int i = 0; i < rrs26StartModeFlagsBox.getItemCount(); i++) {
@@ -288,24 +288,24 @@ public class RacingProceduresConfigurationDialog extends DataEntryDialog<DeviceC
             result.rrs26Configuration.startModeFlags = flags.isEmpty() ? null : flags;
         }
         if (gateStartEnabledBox.getValue()) {
-            result.gateStartConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.GateStartConfigurationDTO();
+            result.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
             getRacingProcedureConfigurationResults(result.gateStartConfiguration, gateStartClassFlagListBox, gateStartRecallBox);
             result.gateStartConfiguration.hasPathfinder = gateStartPathfinderBox.getValue();
             //result.gateStartConfiguration.hasAdditionalGolfDownTime = ???
         }
         if (essEnabledBox.getValue()) {
-            result.essConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.ESSConfigurationDTO();
+            result.essConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.ESSConfigurationDTO();
             getRacingProcedureConfigurationResults(result.essConfiguration, essClassFlagListBox, essRecallBox);
         }
         if (basicEnabledBox.getValue()) {
-            result.basicConfiguration = new DeviceConfigurationDTO.RacingProceduresConfigurationDTO.RacingProcedureConfigurationDTO();
+            result.basicConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO();
             getRacingProcedureConfigurationResults(result.basicConfiguration, basicClassFlagListBox, basicRecallBox);
         }
         return result;
     }
 
     private void getRacingProcedureConfigurationResults(
-            DeviceConfigurationDTO.RacingProceduresConfigurationDTO.RacingProcedureConfigurationDTO target,
+            DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO target,
             ListBox classListBox, CheckBox recallBox) {
         int index = classListBox.getSelectedIndex();
         if (index >= 0) {

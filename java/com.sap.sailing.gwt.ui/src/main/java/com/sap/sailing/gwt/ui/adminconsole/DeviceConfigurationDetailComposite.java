@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
@@ -71,8 +71,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private ListBox designerModeEntryListBox;
     private ListEditorComposite<String> courseNamesList;
     
-    private CheckBox overwriteProceduresConfigurationBox;
-    private RacingProceduresConfigurationDTO currentProceduresConfiguration;
+    private CheckBox overwriteRegattaConfigurationBox;
+    private RegattaConfigurationDTO currentRegattaConfiguration;
     
     
     public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages,
@@ -85,7 +85,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         
         this.matcher = null;
         this.originalConfiguration = null;
-        this.currentProceduresConfiguration = null;
+        this.currentRegattaConfiguration = null;
         
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -140,33 +140,33 @@ public class DeviceConfigurationDetailComposite extends Composite {
         clearUi();
         this.matcher = matcher;
         this.originalConfiguration = result;
-        this.currentProceduresConfiguration = result.procedures;
+        this.currentRegattaConfiguration = result.regattaConfiguration;
         
         setupGeneral();
-        setupRacingProceduresConfiguration();
+        setupRegattaConfiguration();
     }
 
-    private void setupRacingProceduresConfiguration() {
+    private void setupRegattaConfiguration() {
         Grid grid = new Grid(1, 3);
         
         final Button editButton = new Button(stringMessages.edit());
-        overwriteProceduresConfigurationBox = new CheckBox(stringMessages.overwriteRacingProceduresConfiguration());
-        overwriteProceduresConfigurationBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        overwriteRegattaConfigurationBox = new CheckBox(stringMessages.overwriteRacingProceduresConfiguration());
+        overwriteRegattaConfigurationBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 markAsDrity(true);
                 editButton.setEnabled(event.getValue());
             }
         });
-        grid.setWidget(0, 0, overwriteProceduresConfigurationBox);
+        grid.setWidget(0, 0, overwriteRegattaConfigurationBox);
         
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RacingProceduresConfigurationDialog(currentProceduresConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RacingProceduresConfigurationDTO>() {
+                new RegattaConfigurationDialog(currentRegattaConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
                     @Override
-                    public void ok(RacingProceduresConfigurationDTO newProcedures) {
-                        currentProceduresConfiguration = newProcedures;
+                    public void ok(RegattaConfigurationDTO newConfiguration) {
+                        currentRegattaConfiguration = newConfiguration;
                         markAsDrity(true);
                     }
 
@@ -177,8 +177,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         
-        overwriteProceduresConfigurationBox.setValue(currentProceduresConfiguration != null);
-        editButton.setEnabled(currentProceduresConfiguration != null);
+        overwriteRegattaConfigurationBox.setValue(currentRegattaConfiguration != null);
+        editButton.setEnabled(currentRegattaConfiguration != null);
 
         Image helpImage = new Image(resources.help());
         helpImage.setAltText(stringMessages.overwriteRacingProceduresConfigurationHelpText());
@@ -335,8 +335,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
             result.byNameDesignerCourseNames = courseNamesList.getValue();
         }
         
-        if (overwriteProceduresConfigurationBox.getValue()) {
-            result.procedures = currentProceduresConfiguration;
+        if (overwriteRegattaConfigurationBox.getValue()) {
+            result.regattaConfiguration = currentRegattaConfiguration;
         }
         
         return result;

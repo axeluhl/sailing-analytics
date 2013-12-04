@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -57,15 +57,15 @@ public interface Regatta extends Named, WithID {
     public void setDefaultCourseDesignerMode(CourseDesignerMode mode);
 
     /**
-     * Gets the {@link RacingProceduresConfiguration} associated with this {@link Regatta}'s races.
+     * Gets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
      */
-    RacingProceduresConfiguration getRacingProceduresConfiguration();
+    RegattaConfiguration getRegattaConfiguration();
     
     /**
-     * Sets the {@link RacingProceduresConfiguration} associated with this {@link Regatta}'s races.
+     * Sets the {@link RegattaConfiguration} associated with this {@link Regatta}'s races.
      * @param configuration
      */
-    void setRacingProceduresConfiguration(RacingProceduresConfiguration configuration);
+    void setRegattaConfiguration(RegattaConfiguration configuration);
     
     /**
      * A regatta consists of one or more series.

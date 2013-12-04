@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.racelog.state.impl;
 
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.impl.EmptyRacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -29,13 +29,13 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
     public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author) {
-        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyRacingProceduresConfiguration());
+        return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, new EmptyRegattaConfiguration());
     }
     
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value.
      */
-    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RacingProceduresConfiguration> configuration) {
+    public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
         return create(raceLog, author, RaceStateImpl.FallbackInitialProcedureType, configuration);
     }
     
@@ -43,7 +43,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
      * Creates a {@link RaceState}.
      */
     public static RaceState create(RaceLog raceLog, RaceLogEventAuthor author, RacingProcedureType initalRacingProcedureType,
-            ConfigurationLoader<RacingProceduresConfiguration> configuration) {
+            ConfigurationLoader<RegattaConfiguration> configuration) {
         return new RaceStateImpl(raceLog, author, 
                 RaceLogEventFactory.INSTANCE,
                 initalRacingProcedureType, 

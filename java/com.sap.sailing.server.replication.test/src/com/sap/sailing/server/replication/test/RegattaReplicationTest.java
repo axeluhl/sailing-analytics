@@ -20,8 +20,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
@@ -50,7 +50,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         assertEquals(masterRegatta.getDefaultRacingProcedureType(), replicatedRegatta.getDefaultRacingProcedureType());
         assertEquals(masterRegatta.getDefaultCourseDesignerMode(), replicatedRegatta.getDefaultCourseDesignerMode());
-        assertNull(replicatedRegatta.getRacingProceduresConfiguration());
+        assertNull(replicatedRegatta.getRegattaConfiguration());
     }
     
     @Test
@@ -120,10 +120,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertNull(replicatedRegatta.getDefaultRacingProcedureType());
         assertNull(replicatedRegatta.getDefaultCourseDesignerMode());
-        assertNull(replicatedRegatta.getRacingProceduresConfiguration());
+        assertNull(replicatedRegatta.getRegattaConfiguration());
         
         // Test for values
-        RacingProceduresConfiguration config = new RacingProceduresConfigurationImpl();
+        RegattaConfiguration config = new RegattaConfigurationImpl();
         master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId,
                 RacingProcedureType.ESS, CourseDesignerMode.BY_MARKS, config);
         Thread.sleep(1000);
@@ -131,7 +131,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertEquals(masterRegatta.getDefaultRacingProcedureType(), replicatedRegatta.getDefaultRacingProcedureType());
         assertEquals(masterRegatta.getDefaultCourseDesignerMode(), replicatedRegatta.getDefaultCourseDesignerMode());
-        assertNotNull(replicatedRegatta.getRacingProceduresConfiguration());
+        assertNotNull(replicatedRegatta.getRegattaConfiguration());
     }
 
     @Test

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RacingProceduresConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -28,13 +28,13 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     protected CheckBox proceduresConfigurationCheckbox;
     protected Button proceduresConfigurationButton;
     
-    private RacingProceduresConfigurationDTO currentProceduresConfiguration;
+    private RegattaConfigurationDTO currentProceduresConfiguration;
     
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
                 null, callback);
-        currentProceduresConfiguration = regatta.racingProceduresConfiguration;
+        currentProceduresConfiguration = regatta.configuration;
         
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
@@ -60,9 +60,9 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         proceduresConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RacingProceduresConfigurationDialog(currentProceduresConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RacingProceduresConfigurationDTO>() {
+                new RegattaConfigurationDialog(currentProceduresConfiguration, stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
                     @Override
-                    public void ok(RacingProceduresConfigurationDTO newProcedures) {
+                    public void ok(RegattaConfigurationDTO newProcedures) {
                         currentProceduresConfiguration = newProcedures;
                     }
 
@@ -72,8 +72,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
                 }).show();;
             }
         });
-        proceduresConfigurationCheckbox.setValue(regatta.racingProceduresConfiguration != null);
-        proceduresConfigurationButton.setEnabled(regatta.racingProceduresConfiguration != null);
+        proceduresConfigurationCheckbox.setValue(regatta.configuration != null);
+        proceduresConfigurationButton.setEnabled(regatta.configuration != null);
     }
 
     @Override
@@ -107,9 +107,9 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         regatta.defaultRacingProcedureType = getSelectedDefaultRacingProcedureType();
         regatta.defaultCourseDesignerMode = getSelectedDefaultCourseDesignerModeType();
         if (proceduresConfigurationCheckbox.getValue()) {
-            regatta.racingProceduresConfiguration = currentProceduresConfiguration;
+            regatta.configuration = currentProceduresConfiguration;
         } else {
-            regatta.racingProceduresConfiguration = null;
+            regatta.configuration = null;
         }
         return regatta;
     }

@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class DeviceConfigurationDTO implements IsSerializable {
     
-    public static class RacingProceduresConfigurationDTO implements IsSerializable {
+    public static class RegattaConfigurationDTO implements IsSerializable {
         public static class RRS26ConfigurationDTO extends RacingProcedureConfigurationDTO {
             public List<Flags> startModeFlags;
         }
@@ -39,5 +39,5 @@ public class DeviceConfigurationDTO implements IsSerializable {
     public RacingProcedureType defaultRacingProcedureType;
     public CourseDesignerMode defaultCourseDesignerMode;
     public List<String> byNameDesignerCourseNames;
-    public RacingProceduresConfigurationDTO procedures;
+    public RegattaConfigurationDTO regattaConfiguration;
 }

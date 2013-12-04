@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
@@ -29,10 +29,10 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 
     private final JsonDeserializer<BoatClass> boatClassDeserializer;
     private final JsonDeserializer<SeriesWithRows> seriesDeserializer;
-    private final JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer;
+    private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
     public static RaceGroupDeserializer create(SharedDomainFactory domainFactory,
-            JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer) {
+            JsonDeserializer<RegattaConfiguration> proceduresDeserializer) {
         return new RaceGroupDeserializer(new BoatClassJsonDeserializer(domainFactory), new SeriesWithRowsDeserializer(
                 new RaceRowDeserializer(new FleetDeserializer(new ColorDeserializer()), new RaceCellDeserializer(
                         new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory))))),
@@ -41,10 +41,10 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 
     public RaceGroupDeserializer(JsonDeserializer<BoatClass> boatClassDeserializer,
             JsonDeserializer<SeriesWithRows> seriesDeserializer,
-            JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer) {
+            JsonDeserializer<RegattaConfiguration> configurationDeserializer) {
         this.boatClassDeserializer = boatClassDeserializer;
         this.seriesDeserializer = seriesDeserializer;
-        this.proceduresDeserializer = proceduresDeserializer;
+        this.configurationDeserializer = configurationDeserializer;
     }
 
     public RaceGroup deserialize(JSONObject object) throws JsonDeserializationException {
@@ -53,7 +53,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
         CourseArea courseArea = null;
         RacingProcedureType procedure = RacingProcedureType.UNKNOWN;
         CourseDesignerMode designer = CourseDesignerMode.UNKNOWN;
-        RacingProceduresConfiguration proceduresConfiguration = null;
+        RegattaConfiguration configuration = null;
 
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
             // TODO: deserialize CourseArea ...
@@ -81,11 +81,11 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
                     .toString());
         }
         
-        if (object.containsKey(RaceGroupJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION)) {
-            JSONObject value = Helpers.getNestedObjectSafe(object, RaceGroupJsonSerializer.FIELD_RACING_PROCEDURES_CONFIGURATION);
-            proceduresConfiguration = proceduresDeserializer.deserialize(value);
+        if (object.containsKey(RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
+            JSONObject value = Helpers.getNestedObjectSafe(object, RaceGroupJsonSerializer.FIELD_REGATTA_CONFIGURATION);
+            configuration = configurationDeserializer.deserialize(value);
         }
         
-        return new RaceGroupImpl(name, boatClass, courseArea, series, procedure, designer, proceduresConfiguration);
+        return new RaceGroupImpl(name, boatClass, courseArea, series, procedure, designer, configuration);
     }
 }

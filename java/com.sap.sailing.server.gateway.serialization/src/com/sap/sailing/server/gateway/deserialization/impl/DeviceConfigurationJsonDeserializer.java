@@ -7,7 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -18,24 +18,24 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJson
 public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<DeviceConfiguration> {
 
     public static DeviceConfigurationJsonDeserializer create() {
-        return new DeviceConfigurationJsonDeserializer(RacingProceduresConfigurationJsonDeserializer.create());
+        return new DeviceConfigurationJsonDeserializer(RegattaConfigurationJsonDeserializer.create());
     }
 
-    private final JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer;
+    private final JsonDeserializer<RegattaConfiguration> regattaConfigurationDeserializer;
 
-    public DeviceConfigurationJsonDeserializer(JsonDeserializer<RacingProceduresConfiguration> proceduresDeserializer) {
-        this.proceduresDeserializer = proceduresDeserializer;
+    public DeviceConfigurationJsonDeserializer(JsonDeserializer<RegattaConfiguration> regattaConfigurationDeserializer) {
+        this.regattaConfigurationDeserializer = regattaConfigurationDeserializer;
     }
 
     @Override
     public DeviceConfiguration deserialize(JSONObject object) throws JsonDeserializationException {
 
-        RacingProceduresConfiguration proceduresConfiguration = null;
+        RegattaConfiguration proceduresConfiguration = null;
 
-        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION)) {
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
             JSONObject proceduresObject = Helpers.getNestedObjectSafe(object,
-                    DeviceConfigurationJsonSerializer.FIELD_PROCEDURES_CONFIGURATION);
-            proceduresConfiguration = proceduresDeserializer.deserialize(proceduresObject);
+                    DeviceConfigurationJsonSerializer.FIELD_REGATTA_CONFIGURATION);
+            proceduresConfiguration = regattaConfigurationDeserializer.deserialize(proceduresObject);
         }
 
         DeviceConfigurationImpl configuration = createConfiguration(proceduresConfiguration);
@@ -81,7 +81,7 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         return configuration;
     }
 
-    protected DeviceConfigurationImpl createConfiguration(RacingProceduresConfiguration proceduresConfiguration) {
+    protected DeviceConfigurationImpl createConfiguration(RegattaConfiguration proceduresConfiguration) {
         return new DeviceConfigurationImpl(proceduresConfiguration);
     }
 

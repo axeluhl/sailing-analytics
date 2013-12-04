@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -56,7 +56,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private CourseArea defaultCourseArea;
     private RacingProcedureType defaultRacingProcedureType;
     private CourseDesignerMode defaultCourseDesignerMode;
-    private RacingProceduresConfiguration racingProceduresConfiguration;
+    private RegattaConfiguration configuration;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -116,7 +116,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.defaultCourseArea = courseArea;
         this.defaultRacingProcedureType = RacingProcedureType.UNKNOWN;
         this.defaultCourseDesignerMode = CourseDesignerMode.UNKNOWN;
-        this.racingProceduresConfiguration = null;
+        this.configuration = null;
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -386,13 +386,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public RacingProceduresConfiguration getRacingProceduresConfiguration() {
-        return racingProceduresConfiguration;
+    public RegattaConfiguration getRegattaConfiguration() {
+        return configuration;
     }
     
     @Override
-    public void setRacingProceduresConfiguration(RacingProceduresConfiguration configuration) {
-        racingProceduresConfiguration = configuration;
+    public void setRegattaConfiguration(RegattaConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     /**

@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
-import com.sap.sailing.domain.base.configuration.impl.RacingProceduresConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -36,7 +36,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreEmptyConfiguration() {
         DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
-        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
+        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         mongoFactory.storeDeviceConfiguration(matcher, configuration);
 
         Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> configurations = domainFactory
@@ -53,7 +53,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreConfiguration() {
         DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         configuration.setAllowedCourseAreaNames(Arrays.asList("a","b"));
         configuration.setByNameDesignerCourseNames(Arrays.asList("a", "c"));
         configuration.setResultsMailRecipient("abc");
@@ -76,7 +76,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
     @Test
     public void testRemoveConfiguration() {
         DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
-        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RacingProceduresConfigurationImpl());
+        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         mongoFactory.storeDeviceConfiguration(matcher, configuration);
 
         Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> configurations = domainFactory

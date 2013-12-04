@@ -11,7 +11,7 @@ import org.json.simple.JSONValue;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
-import com.sap.sailing.domain.base.configuration.RacingProceduresConfiguration;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRacingProceduresConfiguration;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesBasedRegattaConfiguration;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
@@ -36,10 +36,10 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     private static final String TAG = ManagedRacesDataParser.class.getName();
 
     private final JsonDeserializer<RaceGroup> deserializer;
-    private final ConfigurationLoader<RacingProceduresConfiguration> globalConfiguration;
+    private final ConfigurationLoader<RegattaConfiguration> globalConfiguration;
     private final RaceLogEventAuthor author;
 
-    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RacingProceduresConfiguration> configuration,
+    public ManagedRacesDataParser(RaceLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration,
             JsonDeserializer<RaceGroup> deserializer) {
         this.author = author;
         this.globalConfiguration = configuration;
@@ -63,10 +63,10 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     }
 
     private void storeRaceGroupLocalConfiguration(RaceGroup group) {
-        RacingProceduresConfiguration groupConfiguration = group.getRacingProceduresConfiguration();
-        if (groupConfiguration != null && groupConfiguration instanceof PreferencesBasedRacingProceduresConfiguration) {
+        RegattaConfiguration groupConfiguration = group.getRegattaConfiguration();
+        if (groupConfiguration != null && groupConfiguration instanceof PreferencesBasedRegattaConfiguration) {
             ExLog.i(TAG, "Trying to store the RaceGroup's local procedures configuration.");
-            ((PreferencesBasedRacingProceduresConfiguration)groupConfiguration).store();
+            ((PreferencesBasedRegattaConfiguration)groupConfiguration).store();
         }
     }
 

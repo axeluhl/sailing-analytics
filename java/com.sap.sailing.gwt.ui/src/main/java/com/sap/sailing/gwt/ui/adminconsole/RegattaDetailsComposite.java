@@ -53,7 +53,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label defaultCourseArea;
     private final Label defaultRacingProcedureType;
     private final Label defaultCourseDesignerMode;
-    private final Label racingProceduresConfiguration;
+    private final Label configuration;
 
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -88,9 +88,9 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseDesignerMode = new Label();
         grid.setWidget(4, 0, new Label(stringMessages.courseDesignerMode() + ":"));
         grid.setWidget(4, 1, defaultCourseDesignerMode);
-        racingProceduresConfiguration = new Label();
+        configuration = new Label();
         grid.setWidget(5, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(5, 1, racingProceduresConfiguration);;
+        grid.setWidget(5, 1, configuration);;
         scoringSystem = new Label();
         grid.setWidget(6 , 0, new Label(stringMessages.scoringSystem() + ":"));
         grid.setWidget(6 , 1, scoringSystem);
@@ -341,10 +341,10 @@ public class RegattaDetailsComposite extends Composite {
             } else {
                 defaultCourseDesignerMode.setText(designerMode.toString());
             }
-            if (regatta.racingProceduresConfiguration != null) {
-                racingProceduresConfiguration.setText(stringMessages.configured());
+            if (regatta.configuration != null) {
+                configuration.setText(stringMessages.configured());
             } else {
-                racingProceduresConfiguration.setText(stringMessages.none());
+                configuration.setText(stringMessages.none());
             }
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               

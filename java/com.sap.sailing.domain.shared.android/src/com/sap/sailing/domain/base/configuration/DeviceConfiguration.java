@@ -22,5 +22,5 @@ public interface DeviceConfiguration extends Serializable {
     List<String> getByNameCourseDesignerCourseNames();
     
     // Racing Procedure Configurations
-    RacingProceduresConfiguration getRacingProceduresConfiguration();
+    RegattaConfiguration getRegattaConfiguration();
 }
