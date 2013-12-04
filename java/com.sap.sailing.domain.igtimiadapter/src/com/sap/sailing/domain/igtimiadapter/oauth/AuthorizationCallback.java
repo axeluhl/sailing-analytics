@@ -29,26 +29,26 @@ public class AuthorizationCallback {
     static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
     private final IgtimiConnectionFactory connectionFactory;
     
-    public AuthorizationCallback() {
+    public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         connectionFactory = Activator.getInstance().getConnectionFactory();
     }
 
-    public static String getRedirectUrl() {
-        // TODO how to find out the external address of this server?
-        return "http://127.0.0.1:8888/igtimi"+V1_AUTHORIZATIONCALLBACK;
-    }
-    
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path(AUTHORIZATIONCALLBACK)
     public Response obtainAccessToken(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
         Response result;
-        try {
-            connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
-            result = Response.ok().build();
-        } catch (Exception e) {
-            result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
-            logger.log(Level.SEVERE, "Error trying to obtain access token from authentication code "+code, e);
+        if (code != null) {
+            try {
+                connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
+                result = Response.ok().build();
+            } catch (Exception e) {
+                result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
+                logger.log(Level.SEVERE, "Error trying to obtain access token from authentication code " + code, e);
+            }
+        } else {
+            result = Response.status(Status.UNAUTHORIZED).entity("code parameter not found in request").build();
+            logger.log(Level.SEVERE, "Authentication code not found in request");
         }
         return result;
     }

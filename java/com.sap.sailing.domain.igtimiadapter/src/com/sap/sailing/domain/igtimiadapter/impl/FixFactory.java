@@ -25,7 +25,7 @@ public class FixFactory {
     public Iterable<Fix> createFixes(JSONObject sensorsJson) {
         List<Fix> result = new ArrayList<>();
         for (Entry<Object, Object> e : sensorsJson.entrySet()) {
-            String sensorId = (String) e.getKey();
+            String deviceSerialNumber = (String) e.getKey();
             JSONObject typesJson = (JSONObject) e.getValue();
             for (Entry<Object, Object> fixTypeAndFixesJson : typesJson.entrySet()) {
                 final String[] fixTypeAndOptionalColonSeparatedSensorsSubId = ((String) fixTypeAndFixesJson.getKey()).split(":");
@@ -34,7 +34,7 @@ public class FixFactory {
                 JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
                 int fixIndex = 0;
                 for (Object timePointMillis : timePointsMillis) {
-                    TimePoint timePoint = new MillisecondsTimePoint((Long) timePointMillis);
+                    TimePoint timePoint = new MillisecondsTimePoint(((Number) timePointMillis).longValue());
                     Map<Integer, Object> valuesPerSubindex = new HashMap<>();
                     int i=1;
                     JSONArray values;
@@ -42,7 +42,9 @@ public class FixFactory {
                         valuesPerSubindex.put(i, (Number) values.get(fixIndex));
                         i++;
                     }
-                    Sensor sensor = new SensorImpl(sensorId, fixTypeAndOptionalColonSeparatedSensorsSubId.length<2?null:fixTypeAndOptionalColonSeparatedSensorsSubId[1]);
+                    Sensor sensor = new SensorImpl(deviceSerialNumber,
+                            fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
+                                    : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
                     Fix fix = createFix(sensor, Type.valueOf(fixType), timePoint, valuesPerSubindex);
                     result.add(fix);
                     fixIndex++;

@@ -11,12 +11,25 @@ import java.util.Comparator;
  * 
  */
 public class NaturalComparator implements Comparator<String> {
+    boolean caseSensitive;
+    
+    public NaturalComparator(boolean caseSensitive){
+        this.caseSensitive = caseSensitive;
+    }
+    
+    public NaturalComparator() {
+        caseSensitive = true;
+    }
 
     /**
      * Compare the passed strings in natural order.
      */
     @Override
     public int compare(String a, String b) {
+        if(!caseSensitive){
+            a = a.toLowerCase();
+            b = a.toLowerCase();
+        }
         int result = 0;
         int aIndex = 0;
         int bIndex = 0;

@@ -3,12 +3,15 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,6 +33,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.Attributes;
@@ -44,6 +48,8 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionFactoryImpl.class.getName());
@@ -51,11 +57,21 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private final Map<Account, String> accessTokensByAccount;
     private Map<String, Account> accountsByEmail;
     private final Client client;
+    private final MongoObjectFactory mongoObjectFactory;
     
-    public IgtimiConnectionFactoryImpl(Client client) {
+    public IgtimiConnectionFactoryImpl(Client client, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.accessTokensByAccount = new HashMap<>();
         this.accountsByEmail = new HashMap<>();
         this.client = client;
+        this.mongoObjectFactory = mongoObjectFactory;
+        for (String accessToken : domainObjectFactory.getAccessTokens()) {
+            try {
+                registerAccountForWhichClientIsAuthorized(accessToken);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error registering Igtimi access token "+accessToken+"; probably the access token was revoked or expired.", e);
+                mongoObjectFactory.removeAccessToken(accessToken);
+            }
+        }
     }
     
     @Override
@@ -63,6 +79,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         Account account = getAccount(accessToken);
         accountsByEmail.put(account.getUser().getEmail(), account);
         accessTokensByAccount.put(account, accessToken);
+        mongoObjectFactory.storeAccessToken(accessToken);
         return account;
     }
 
@@ -106,6 +123,11 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     public Account getAccountByEmail(String eMail) {
         return accountsByEmail.get(eMail);
     }
+    
+    @Override
+    public Iterable<Account> getAllAccounts() {
+        return new ArrayList<Account>(accountsByEmail.values());
+    }
 
     @Override
     public IgtimiConnection connect(Account account) {
@@ -122,10 +144,72 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
+    public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds) {
+        JSONObject result = new JSONObject();
+        result.put("access_token", getAccessTokenForAccount(account));
+        JSONArray deviceIdsJson = new JSONArray();
+        result.put("devices", deviceIdsJson);
+        for (String deviceId : deviceIds) {
+            deviceIdsJson.add(deviceId);
+        }
+        return result;
+    }
+    
+    @Override
     public String getUsersUrl(Account account) {
         return getApiV1BaseUrl()+"users?"+getAccessTokenUrlParameter(account);
     }
     
+    @Override
+    public String getUserUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"users/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getGroupsUrl(Account account) {
+        return getApiV1BaseUrl()+"groups?"+getAccessTokenUrlParameter(account);
+    }
+    
+    @Override
+    public String getGroupUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"groups/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getSessionUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"sessions/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getOwnedDevicesUrl(Account account) {
+        return getApiV1BaseUrl()+"devices/?"+getAccessTokenUrlParameter(account);
+    }
+
+    @Override
+    public String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("devices/data_access_windows?type=");
+        url.append(permission.name());
+        if (startTime != null) {
+            url.append("&start_time=");
+            url.append(startTime.asMillis());
+        }
+        if (endTime != null) {
+            url.append("&end_time=");
+            url.append(endTime.asMillis());
+        }
+        if (deviceSerialNumbers != null) {
+            for (String serialNumber : deviceSerialNumbers) {
+                url.append("&serial_numbers[]=");
+                url.append(serialNumber);
+            }
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
     @Override
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
@@ -178,6 +262,33 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
+    
+    @Override
+    public String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("sessions?");
+        url.append(getAccessTokenUrlParameter(account));
+        if (sessionIds != null) {
+            for (Long sessionId : sessionIds) {
+                url.append("&ids[]=");
+                url.append(sessionId);
+            }
+        }
+        if (isPublic != null) {
+            url.append("&public=");
+            url.append(isPublic.toString().toLowerCase());
+        }
+        if (limit != null) {
+            url.append("&limit=");
+            url.append(limit);
+        }
+        if (includeIncomplete != null) {
+            url.append("&include_incomplete");
+            url.append(includeIncomplete.toString().toLowerCase());
+        }
+        return url.toString();
+    }
+
     private String getAccessTokenUrlParameter(Account account) {
         return "access_token="+getAccessTokenForAccount(account);
     }
@@ -214,12 +325,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return result;
     }
 
-    /**
-     * Tries to authorize our client on behalf of a user identified by e-mail and password.
-     * 
-     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
-     *         to access data owned by the user identified by e-mail and password.
-     */
+    @Override
     public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword)
             throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException,
             SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
@@ -335,4 +441,22 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         authorizationResponse.getEntity().getContent().close();
     }
 
+    @Override
+    public HttpClient getHttpClient() {
+        HttpClient client = new SystemDefaultHttpClient();
+        return client;
+    }
+    
+    @Override
+    public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
+        HttpClient client = getHttpClient();
+        HttpGet getWebsocketServers = new HttpGet("https://www.igtimi.com/server_listers/web_sockets");
+        JSONObject serversJson = ConnectivityUtils.getJsonFromResponse(client.execute(getWebsocketServers));
+        final List<URI> result = new ArrayList<>();
+        for (Object serverUrl : (JSONArray) serversJson.get("web_socket_servers")) {
+            URI uri = new URI((String) serverUrl);
+            result.add(uri);
+        }
+        return result;
+    }
 }

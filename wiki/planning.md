@@ -2,7 +2,9 @@
 
 During our workshop of 2013-09-30, three major areas of development were identified as candidates for focus topics for the next few months. These are:
 
-* [[General quality improvement, including major UI renovation and a mobile version of the SAP Sailing Analytics|wiki/planning/businesscases/QualityImprovements]]
+* [[Data quality improvement|wiki/planning/businesscases/DataQualityImprovement]]
+
+* [[UI-Renovation|wiki/planning/businesscases/UIRenovation]]
 
 * [[ORC / IRC support|wiki/planning/businesscases/ORC]]
 
