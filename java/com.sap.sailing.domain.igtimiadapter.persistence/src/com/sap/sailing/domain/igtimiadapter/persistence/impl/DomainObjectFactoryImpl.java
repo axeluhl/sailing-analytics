@@ -2,7 +2,6 @@ package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
