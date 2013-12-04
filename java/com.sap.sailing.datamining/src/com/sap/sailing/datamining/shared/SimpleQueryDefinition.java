@@ -14,7 +14,7 @@ import com.sap.sailing.datamining.shared.Components.StatisticType;
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;
 
-    private LocaleInfo localeInfo;
+    private String localeName;
     
     private GrouperType grouperType;
     private StatisticType statisticType;
@@ -32,7 +32,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
     SimpleQueryDefinition() { }
 
     public SimpleQueryDefinition(LocaleInfo localeInfo, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
-        this.localeInfo = localeInfo;
+        this.localeName = localeInfo.getLocaleName();
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
@@ -43,8 +43,9 @@ public class SimpleQueryDefinition implements QueryDefinition {
         selectionMappedByDimension = new HashMap<SharedDimension, Iterable<?>>();
     }
     
-    public LocaleInfo getLocaleInfo() {
-        return localeInfo;
+    @Override
+    public String getLocaleName() {
+        return localeName;
     }
 
     @Override
