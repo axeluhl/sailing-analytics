@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -57,7 +58,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
     
     @Override
     public QueryDefinition getQueryDefinition() {
-        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(groupBySelectionPanel.getGrouperType(), getStatisticType(), getAggregatorType(), getDataType());
+        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), groupBySelectionPanel.getGrouperType(), getStatisticType(), getAggregatorType(), getDataType());
         switch (queryDTO.getGrouperType()) {
         case Custom:
             queryDTO.setCustomGrouperScriptText(groupBySelectionPanel.getCustomGrouperScriptText());

@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;
+
+    private LocaleInfo localeInfo;
     
     private GrouperType grouperType;
     private StatisticType statisticType;
@@ -28,7 +31,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     @Deprecated
     SimpleQueryDefinition() { }
 
-    public SimpleQueryDefinition(GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+    public SimpleQueryDefinition(LocaleInfo localeInfo, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+        this.localeInfo = localeInfo;
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
@@ -37,6 +41,10 @@ public class SimpleQueryDefinition implements QueryDefinition {
 //        customGrouperScriptText = "";
         dimensionsToGroupBy = new ArrayList<SharedDimension>();
         selectionMappedByDimension = new HashMap<SharedDimension, Iterable<?>>();
+    }
+    
+    public LocaleInfo getLocaleInfo() {
+        return localeInfo;
     }
 
     @Override

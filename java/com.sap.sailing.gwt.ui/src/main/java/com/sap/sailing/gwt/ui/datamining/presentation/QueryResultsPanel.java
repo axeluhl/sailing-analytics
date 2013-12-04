@@ -156,7 +156,7 @@ public class QueryResultsPanel extends FlowPanel implements QueryDefinitionChang
     }
 
     private static QueryDefinition getStandardQueryDefinition() {
-        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        SimpleQueryDefinition standardDefinition = new SimpleQueryDefinition(ERROR, GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
         standardDefinition.appendDimensionToGroupBy(SharedDimension.RaceName);
         return standardDefinition;
