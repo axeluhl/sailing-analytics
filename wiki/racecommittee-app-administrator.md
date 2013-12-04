@@ -22,7 +22,9 @@ You need to assign this identifier to the target device. Click on **QR-Sync**, r
 
 Fire up the RaceCommittee app on the target device. Go to the **settings view** by clicking on the options overflow button (top right corner) or your device's menu button. Select the preference category **General** and click on **Synchronize connection settings**. Scan the barcode shown in the AdminConsole (if you don't have a barcode app installed the RaceCommittee App should redirect you to the Google Play Store offering an app). The **Device Identifier** and **Webservice URL** preferences should reflect the changes made.
 
-After the server URL has been updated the app will check the server whether it should auto-update itself or not. To ensure that your app is compatible with the server you should choose to install the APK provided by the server.
+<img src="/wiki/images/rcapp/admin_config_step_3a.png" /> <img src="/wiki/images/rcapp/admin_config_step_3b.png" />
+
+After the server URL has been updated the app will check the server whether it should auto-update itself or not. To ensure that your app is compatible with the server you should choose to install the APK provided by the server. Follow the instructions on the screen and reopen the newly updated app. After the update you must re-synchronize your device with the server.
 
 <img src="/wiki/images/rcapp/admin_config_step_4.png" />
 
@@ -55,6 +57,10 @@ In the following we will have a look at some of these settings. Most of them are
 * **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see down) doesn't overwrite this.
 * Configuration of procedure: Each racing procedure has some options to be configured. An option value applies to all races, whose specific regatta configuration doesn't have this option set. 
 
+<img src="/wiki/images/rcapp/admin_config_regatta_configuration.png" />
+
+As you can see you are able to select for which racing procedure type you wish to create a configuration. If you don't activate a racing procedure's configuration the device's local configuration values will be preserved.
+
 Keep in mind that changing these options in the app will only have an effect on _new_ racing procedures (ongoing race with no change in their racing procedure will keep the old settings).
 
 ## Configuration of regattas
@@ -63,6 +69,12 @@ For races attached to a regatta (i.e. RegattaLeaderboard) you are able to config
 
 In the **Regatta** tab of the AdminConsole click the **Edit** action of the regatta to be configured. If you check **Set regatta configuration** this configuration will overwrite any device configuration.
 
-* **Regatta's default racing procedure:** the app will preselect the chosen racing procedure for all races of this regatta. _This option will have no effect when **Overwrite Racing Procedure** is set in the device's configuration_.
-* **Regatta's default course designer:** the app will preselect the chosen course designer for all races of this regatta. This option will have no effect when **Overwrite Course Designer** is set in the device's configuration.
-* **Set racing procedure configuration:** When checked enables you to configure the default racing procedure of this regatta. _This option will have no effect when **Overwrite racing procedure configuration** is set for the device's **remote** configuration_.
+* **Regatta's default racing procedure:** the app will preselect the chosen racing procedure for all races of this regatta. _This option will overwrite the device's configuration_.
+* **Regatta's default course designer:** the app will preselect the chosen course designer for all races of this regatta. This option will overwrite the device's configuration.
+* **Set racing procedure configuration:** When checked enables you to configure the default racing procedure of this regatta. Setting regatta-specific preferences here will overwrite device-global preferences.
+
+<img src="/wiki/images/rcapp/admin_config_edit_regatta.png" />
+
+## On-Device Configuration
+
+As stated above it is possible to (re-)configure these preferences in the app. Changes on the device will not be synchronized with the server.
