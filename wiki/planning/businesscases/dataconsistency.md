@@ -17,9 +17,8 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
 
 ### Features
 * Start Phase
-
-  * Check correctness of start time based on several data sources: tracker, race committee, start detection
-  * Stabilize start detection algorithms
+    * Check correctness of start time based on several data sources: tracker, race committee, start detection
+    * Stabilize start detection algorithms
 
 * Completeness Checks
 
