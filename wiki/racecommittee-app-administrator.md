@@ -93,7 +93,7 @@ If your device users experience persistent connectivity issues, advise them to c
 
 ![Expert view](images/rcapp/app_expert.jpg)
 
-Selecting the "Expert information" option you'll have access to the expert information screen. This screen gives you the chance to have a look at all the data which could not be sent. Additionally you stop the device from trying to send this data by clicking on "Clear Events".
+Selecting the "Expert information" option you'll have access to the expert information screen. This screen gives you the chance to have a look at all the data which could not be sent. Additionally you stop the device from trying to send this data by clicking on "Clear Events". Be sure to re-logon onto the course area or 'Reload' all data!
 
 ### Failure to load data
 
