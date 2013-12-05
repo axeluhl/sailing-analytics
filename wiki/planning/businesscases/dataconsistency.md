@@ -29,7 +29,7 @@
     * no ping available
 * Wind
 
-### Data quality measures
+### Data consistency measures
 * Start Phase
   * correctness of start time on start boat
   * stabilize start detection algorithms / heuristic
