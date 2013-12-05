@@ -13,9 +13,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.masterdataimport.FlexibleLeaderboardMasterData;
@@ -27,15 +24,15 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.RaceColumnMasterDataJsonSerializer;
 
 public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardMasterData> {
 
-    private final JsonDeserializer<DynamicCompetitor> competitorDeserializer;
+    private final JsonDeserializer<Competitor> competitorDeserializer;
     private final DomainFactory domainFactory;
     private final JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer;
+    private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer = new RaceColumnMasterDataJsonDeserializer();
 
-    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer,
+    public LeaderboardMasterDataJsonDeserializer(JsonDeserializer<Competitor> competitorDeserializer,
             DomainFactory domainFactory, JsonDeserializer<RaceLogEvent> raceLogEventDeseriaizer) {
         this.competitorDeserializer = competitorDeserializer;
         this.domainFactory = domainFactory;
@@ -202,26 +199,11 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         return new SingleScoreCorrectionMasterData(competitorId, explicitScoreCorrection, maxPointsReason);
     }
 
-    private List<RaceColumnMasterData> deserializeRaceColumns(JSONArray array) {
+    private List<RaceColumnMasterData> deserializeRaceColumns(JSONArray array) throws JsonDeserializationException {
         List<RaceColumnMasterData> columns = new ArrayList<RaceColumnMasterData>();
         for (Object columnObj : array) {
             JSONObject columnJson = (JSONObject) columnObj;
-            String columnName = (String) columnJson
-                    .get(RaceColumnMasterDataJsonSerializer.FIELD_NAME);
-            Boolean medal = (Boolean) columnJson
-                    .get(RaceColumnMasterDataJsonSerializer.FIELD_MEDAL_RACE);
-            Double factor = (Double) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_FACTOR);
-            Map<String, RaceIdentifier> raceIdentifiers = new HashMap<String, RaceIdentifier>();
-            JSONArray jsonRaceIdentifiers = (JSONArray) columnJson.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_IDENTIFIERS);
-            for (Object raceIdentifierObject : jsonRaceIdentifiers) {
-                JSONObject jsonRaceIdentifier = (JSONObject) raceIdentifierObject;
-                String fleetName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_FLEET_NAME);
-                String raceName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_RACE_NAME);
-                String regattaName = (String) jsonRaceIdentifier.get(RaceColumnMasterDataJsonSerializer.FIELD_REGATTA_NAME);
-                RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-                raceIdentifiers.put(fleetName, raceIdentifier);
-            }
-            columns.add(new RaceColumnMasterData(columnName, medal, raceIdentifiers, factor));
+            columns.add(raceColumnDeserializer.deserialize(columnJson));
         }
         return columns;
     }

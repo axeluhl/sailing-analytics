@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
 
@@ -64,7 +65,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -119,6 +119,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -140,7 +141,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -857,7 +857,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
@@ -2135,7 +2135,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RacesHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo, rr.ID, hostname,
                     port,
                     canSendRequests,
-                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {
@@ -2173,32 +2172,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("replaySwissTimingRace for regatta "+regattaIdentifier+" for races "+replayRaceDTOs);
         Regatta regatta;
         for (SwissTimingReplayRaceDTO replayRaceDTO : replayRaceDTOs) {
-            if (regattaIdentifier == null) {
-                String boatClass = replayRaceDTO.boat_class;
-                for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
-                    Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
-                    Matcher m = p.matcher(boatClass.trim());
-                    if (m.find()) {
-                        boatClass = boatClass.trim().substring(0, m.start(1));
-                        break;
+            try {
+                if (regattaIdentifier == null) {
+                    String boatClass = replayRaceDTO.boat_class;
+                    for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
+                        Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
+                        Matcher m = p.matcher(boatClass.trim());
+                        if (m.find()) {
+                            boatClass = boatClass.trim().substring(0, m.start(1));
+                            break;
+                        }
                     }
+                    regatta = getService().createRegatta(
+                            replayRaceDTO.rsc,
+                            boatClass.trim(),
+                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
+                            Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                            /* isMedal */false, Collections.singletonList(new FleetImpl(
+                                    LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                            /* race column names */new ArrayList<String>(), getService())), false,
+                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                    // TODO: is course area relevant for swiss timing replay?
+                } else {
+                    regatta = getService().getRegatta(regattaIdentifier);
                 }
-                regatta = getService().createRegatta(
-                        replayRaceDTO.rsc,
-                        boatClass.trim(),
-                        RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
-                        Collections.singletonList(new SeriesImpl(
-                                LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
-                                /* isMedal */false, 
-                                Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), 
-                                /* race column names */ new ArrayList<String>(), getService())), 
-                                false,
-                                baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-                //TODO: is course area relevant for swiss timing replay?
-            } else {
-                regatta = getService().getRegatta(regattaIdentifier);
+                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
-            getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService());
         }
     }
 
@@ -3266,22 +3267,35 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override) {
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
+        long startTime = System.currentTimeMillis();
         String hostname;
+        Integer port = -1;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
+            port = url.getPort();
         } catch (MalformedURLException e1) {
-            hostname = urlAsString.split("://")[1].split("/")[0]; // also eliminate a trailing slash
+            hostname = urlAsString;
+            if (urlAsString.contains("://")) {
+                hostname = hostname.split("://")[1];
+            }
+            if (hostname.contains("/")) {
+                hostname = hostname.split("/")[0]; // also eliminate a trailing slash
+            }
+            if (hostname.contains(":")) {
+                String[] split = hostname.split(":");
+                hostname = split[0];
+                port = Integer.parseInt(split[1]);
+            }
         }
         String query = createLeaderboardQuery(groupNames);
         HttpURLConnection connection = null;
-        BufferedReader rd  = null;
-        StringBuilder sb = null;
-        String line = null;
+
         URL serverAddress = null;
+        GZIPInputStream gzip = null;
         try {
-            serverAddress = createUrl(hostname, query);
+            serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
             connection = null;
             //Set up the initial connection
@@ -3290,9 +3304,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection.setDoOutput(true);
             connection.setReadTimeout(10000);
             connection.connect();
+
             //read the result from the server
-            rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            sb = new StringBuilder();
+            BufferedReader rd;
+            if (compress) {
+                gzip = new GZIPInputStream(connection.getInputStream());
+                rd  = new BufferedReader(new InputStreamReader(gzip));
+            } else {
+                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            }
+            StringBuilder sb = new StringBuilder();
+            String line;
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
@@ -3302,19 +3324,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } finally {
             // close the connection, set all objects to null
             connection.disconnect();
-            rd = null;
-            sb = null;
             connection = null;
+            long timeToImport = System.currentTimeMillis() - startTime;
+            logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
+            try {
+                if (gzip != null) {
+                    gzip.close();
+                }
+            } catch (IOException e) {
+            }
         }
     }
     
-    private URL createUrl(String host, String query) throws Exception {
-        return new URI("http", host, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+    private URL createUrl(String host, Integer port, String query) throws Exception {
+        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
     }
     
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(String response, boolean override) {
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(response, override);
+        return importer.importMasterData(string, override);
     }
 
     private String createLeaderboardQuery(String[] groupNames) {
@@ -3322,12 +3350,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (int i = 0; i < groupNames.length; i++) {
             queryStringBuffer.append("names[]=" + groupNames[i] + "&");
         }
-        if (queryStringBuffer.length() == 1) {
-            return "";
-        } else {
-            // Delete last "&"
-            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
-        }
+        queryStringBuffer.append("compress=true");
         return queryStringBuffer.toString();
     }
 

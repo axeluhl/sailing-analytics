@@ -294,7 +294,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 try {
                     // TODO: Does SwissTiming also deliver the passing side for course marks?
                     List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
-                    for(ControlPoint cp: currentCourseDefinition) {
+                    for (ControlPoint cp : currentCourseDefinition) {
                         courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(cp, null));
                     }
                     course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
@@ -389,13 +389,6 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 newStatus = TrackedRaceStatusEnum.LOADING;
             }
             trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
-        }
-    }
-
-    @Override
-    public void eot() {
-        for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
-            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
     }
 }

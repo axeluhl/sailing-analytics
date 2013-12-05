@@ -1,20 +1,23 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.CompetitorMasterDataJsonSerializer;
 
-public class CompetitorMasterDataDeserializer implements JsonDeserializer<DynamicCompetitor> {
+public class CompetitorMasterDataDeserializer implements JsonDeserializer<Competitor> {
     
     private final JsonDeserializer<BoatClass> boatClassDeserializer;
     
@@ -30,12 +33,39 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Dynami
     }
 
     @Override
-    public DynamicCompetitor deserialize(JSONObject object) throws JsonDeserializationException {
+    public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         String name = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_NAME);
-        String id = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
+        Object idClassName = object.get(CompetitorMasterDataJsonSerializer.FIELD_ID_TYPE);
+        Serializable id = (Serializable) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
+        if (idClassName != null) {
+            try {
+                Class<?> idClass = Class.forName((String) idClassName);
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    id = (Serializable) constructorFromString.newInstance(id.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    id = Helpers.tryUuidConversion(id);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            // To ensure some kind of a backward compability.
+            try {
+                id = UUID.fromString(id.toString());
+            } catch (IllegalArgumentException e) {
+                id = id.toString();
+            }
+        }
         DynamicBoat boat = createBoatFromJson((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_BOAT));
         DynamicTeam team = teamDeserializer.deserialize((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_TEAM));
-        return domainFactory.getOrCreateDynamicCompetitor(UUID.fromString(id), name, team, boat);
+        Competitor competitor;
+        if (id instanceof UUID) {
+            competitor = domainFactory.getOrCreateDynamicCompetitor((UUID) id, name, team, boat);
+        } else {
+            competitor = domainFactory.getOrCreateCompetitor(id, name, team, boat);
+        }
+        return competitor;
         
     }
     
