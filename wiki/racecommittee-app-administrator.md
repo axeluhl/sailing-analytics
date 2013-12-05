@@ -36,7 +36,7 @@ Repeat until you've configured all your devices.
 
 There are several preferences you can configure to control the overall functionality of the RaceCommittee App. 
 
-All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will overwrite the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole, the device will preserve its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
+All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will override the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole, the device will preserve its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
 
 In the following we will have a look at some of these settings. Most of them are enabled for remote configuration.
 
@@ -53,8 +53,8 @@ In the following we will have a look at some of these settings. Most of them are
 
 ### Regatta Configuration (default)
 
-* **Default racing procedure:** the app will preselect the chosen racing procedure for all races, whose specific regatta configuration (see below) doesn't overwrite this.
-* **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see below) doesn't overwrite this.
+* **Default racing procedure:** the app will preselect the chosen racing procedure for all races, whose specific regatta configuration (see below) doesn't override this.
+* **Default course designer:** the app will preselect the chosen course designer for all races, whose specific regatta configuration (see below) doesn't override this.
 * Configuration of procedure: Each racing procedure has some options to be configured. An option value applies to all races, whose specific regatta configuration doesn't have this option set. 
 
 <img src="/wiki/images/rcapp/admin_config_regatta_configuration.png" />
@@ -67,11 +67,11 @@ Keep in mind that changing these options in the app will only have an effect on 
 
 For races attached to a regatta (i.e. RegattaLeaderboard) you are able to configure certain options _per-regatta_. The regatta's configuration is fetched by the app together with the race information on logon.
 
-In the **Regatta** tab of the AdminConsole click the **Edit** action of the regatta to be configured. If you check **Set regatta configuration** this configuration will overwrite any device configuration.
+In the **Regatta** tab of the AdminConsole click the **Edit** action of the regatta to be configured. If you check **Set regatta configuration** this configuration will override any device configuration for races of this regatta.
 
-* **Regatta's default racing procedure:** the app will preselect the chosen racing procedure for all races of this regatta. _This option will overwrite the device's configuration_.
-* **Regatta's default course designer:** the app will preselect the chosen course designer for all races of this regatta. This option will overwrite the device's configuration.
-* **Set racing procedure configuration:** When checked enables you to configure the default racing procedure of this regatta. Setting regatta-specific preferences here will overwrite device-global preferences.
+* **Regatta's default racing procedure:** the app will preselect the chosen racing procedure for all races of this regatta. _This option will override the device's configuration_.
+* **Regatta's default course designer:** the app will preselect the chosen course designer for all races of this regatta. This option will override the device's configuration.
+* **Set racing procedure configuration:** When checked enables you to configure the default racing procedure of this regatta. Setting regatta-specific preferences here will override device-global preferences.
 
 <img src="/wiki/images/rcapp/admin_config_edit_regatta.png" />
 
