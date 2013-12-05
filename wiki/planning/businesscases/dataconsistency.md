@@ -12,6 +12,7 @@ The experience from previous sailing events has shown that the SAP sailing solut
 One approach to tackle these problems is to work and improve on the data measurement units (e.g. GPS trackers, wind measurement unit), improve the data transmission infrastructure (e.g. wide-range Wifi vs mobile network GPRS), increase the stability of required WAN network connections to remote servers (e.g. reserve DSL-lines for sailing IT) and extend education & discipline of involved people (e.g. sailors should not accidentally power-off GPS-trackers, race committee officers should not rearrange GPS-trackers across race course marks). But even on events were all these requirements were seemingly fulfilled, intermittent faults in raw data and hence faults of SAP sailing solutions have occurred in the past.
 
 Another approach to gain higher stability of SAP sailing solutions is to introduce robustness against raw data faults right into the heart of data processing: data structures should be able to represent raw data faults and aggregate calculations should react moderately ensuring well-definedness and consistency of visualization and all data displayed.
+Efforts for implementing this approach are bundled into the "Data Consistency" project.
 
 ### Purpose
 
