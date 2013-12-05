@@ -4,7 +4,8 @@ require 'set'
 display_branches = ARGV
 
 if display_branches.empty?
-    puts "You need to specify a branch or ALL for all branches"
+    puts "You need to specify a branch name or ALL for all branches. Make sure to have at least git >=1.8 and be warned that processing one branch takes several minutes!"
+    exit
 end
 
 packed_blobs = {}
@@ -92,26 +93,27 @@ IO.popen("git branch --list", 'r') do |branch_list|
         if display_branches.include?(branch_name) or display_branches.include?("ALL")
             puts "* #{branch_name}"
             if not File.exists?("#{branch_name}.bin")
-                puts "    file #{branch_name}.bin does not exist - reading data from repository"
+                puts "\tFile #{branch_name}.bin does not exist - reading data from repository"
                 branch = Branch.new(branch_name)
                 branches[branch_name] = branch
-                counter = 0; commit_counter = 0
+                commit_counter = 0; obj_counter = 0
                 IO.popen("git rev-list #{branch_name}", 'r') do |rev_list|
                     all_commit_lines = rev_list.readlines
                     all_commit_lines.each do |commit|
                         commit_all_count = all_commit_lines.count
+                        old_obj_counter = obj_counter
                         commit_counter += 1
+                        obj_counter = 0; 
+                        size_count = 0
                         # Look into each commit in order to collect all the blobs used
                         blobs_all = `git ls-tree -zrl #{commit}`.split("\0")
                         for object in blobs_all
-                            counter += 1
+                            obj_counter += 1
                             bits, type, sha, size, path = object.split(/\s+/, 5)
                             if type == 'blob'
                                 blob = packed_blobs[sha]
                                 if blob != nil
-                                    if counter % 5 == 0
-                                      $stdout.write "\r    #{counter} blobs #{commit_counter}/#{commit_all_count} commits"; $stdout.flush;
-                                    end
+                                    size_count += blob.size
                                     branch.blobs.add(blob)
                                     if not blob.is_shared
                                         if blob.branch != nil and blob.branch != branch
@@ -127,15 +129,24 @@ IO.popen("git branch --list", 'r') do |branch_list|
                                 print "F"
                             end
                         end
+                        if old_obj_counter < obj_counter
+                            obj_changes = "%04d" % (obj_counter - old_obj_counter)
+                            change_mode = "++"
+                        else
+                            obj_changes = "%04d" % (old_obj_counter - obj_counter)
+                            change_mode = "--"
+                        end
+                        size_count = "%10d" % (size_count / 1000)
+                        $stdout.write "\r\tProcessed commit #{commit_counter} of #{commit_all_count} (Objects:\t#{obj_counter}\t#{obj_changes}\t#{change_mode}\t#{size_count} kb)"; $stdout.flush;
                     end
                 end
-                print "\n    Writing branch data to file..."
+                print "\n\tWriting branch data to file..."
                 File.open("#{branch_name}.bin",'wb') do |f|
                       f.write Marshal.dump(branch)
                 end
                 puts "OK"
             else
-                print "\n    Loading branch data from file #{branch_name}. Remove this file to get new data..."
+                print "\n\tLoading branch data from file #{branch_name}. Remove this file to get new data..."
                 branches[branch_name] = Marshal.load(File.open("#{branch_name}.bin", 'rb'))
                 puts "OK"
             end
@@ -161,10 +172,11 @@ branches.each_value do |branch|
     end
     # Now print it if wanted
     if display_branches.empty? or display_branches.include?(branch.name) or display_branches.include?("ALL")
-        puts "branch: %s" % branch.name
+        puts "\tblobs: %s" % branch.blobs.count
         puts "\tnon shared:"
         puts "\t\tpacked: %s kb" % (branch.non_shared_packed_size / 1000)
         puts "\t\tnon packed: %s kb" % (branch.non_shared_size / 1000)
+        puts "\t\tall: %s kb" % ((branch.non_shared_packed_size + branch.non_shared_size) / 1000)
         puts "\tnon shared but with dependencies on it:"
         puts "\t\tpacked: %s kb" % (branch.non_shared_dependable_packed_size / 1000)
         puts "\t\tnon packed: %s kb" % (branch.non_shared_dependable_size / 1000)
