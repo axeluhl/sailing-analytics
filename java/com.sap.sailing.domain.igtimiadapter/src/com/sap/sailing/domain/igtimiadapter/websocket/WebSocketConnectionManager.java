@@ -5,10 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +44,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
-    private final Set<BulkFixReceiver> listeners;
+    private final ConcurrentHashMap<BulkFixReceiver, BulkFixReceiver> listeners;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
@@ -55,7 +54,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
-        this.listeners = new ConcurrentSkipListSet<>();
+        this.listeners = new ConcurrentHashMap<>();
         client = new WebSocketClient();
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
@@ -141,11 +140,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     
     @Override
     public void addListener(BulkFixReceiver listener) {
-        listeners.add(listener);
+        listeners.put(listener, listener);
     }
 
     private void notifyListeners(List<Fix> fixes) {
-        for (BulkFixReceiver listener : listeners) {
+        for (BulkFixReceiver listener : listeners.keySet()) {
             listener.received(fixes);
         }
     }
