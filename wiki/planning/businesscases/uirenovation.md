@@ -1,7 +1,7 @@
 # UI-Renovation
 
 # Rationale
-After 2 years of functional growth of our SAP sailing analytics we get more and more feedback that our user interfaces are not meeting the user expectations anymore. This applies not only to external users of our solutions but also to colleagues presenting our solutions at sailing events. Furthermore we lack mobile support for our solutions seeing a growing usage of solutions from mobile devices.
+After 2 years of functional growth of our SAP sailing analytics we get more and more feedback that our user interfaces are not meeting the user expectations anymore. This applies not only to external users of our solutions but also to colleagues presenting our solutions at sailing events. Furthermore we lack mobile support for our solutions seeing a growing usage of solutions from mobile devices at the same time.
 
 # Purpose
 We want to improve the user experience of our sailing solutions by providing more user role focused user interfaces for the common devices used today. 
@@ -39,8 +39,10 @@ By providing different viewers for the different scenarios we can focus more on 
 - Simplification of all settings
 - Full integration of audio and video streams
 - Implementation of many small map improvements (see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1546)
+
 ### Features of race viewer for professionals (sailors, trainers) -> to analyze
-tbd.
+- Specialized views for predefined analysis scenarios (e.g. start analysis)
+- Customizable viewer to integrate more data sources and data views on demand (portlet like)
 
 ## Leaderboard
 ### Description
@@ -56,13 +58,15 @@ Sailing events can be quite complex in terms of their structure. An event can ha
 - Support event series as well as single events
 - Support recurring events (e.g. Kieler Woche 2012, Kieler Woche 2013, etc.)
 - Support events with multiple regattas
+- Support regattas with rounds (e.g. qualification, finals, etc.)
 - Find events and event series (search by name, boat class, location, etc.)
 
 # Synergies
 no idea...
 
 # Risks
-The hardest decision we have to take is whether we should go for native apps for mobile devices or if we can survive with a HTML5 based UI. Development of native apps is cost intensive as if have to support several platforms in parallel. Furthermore we lack the right knowledge for this task in our team. One way we could go is to try first how far we can go with HTML5 and only move to native apps when we can't achieve the expected user experience in any other way.
+The hardest decision we have to take is whether we should go for native apps for mobile devices or if we can survive with a HTML5 based UI. Development of native apps is cost intensive as if have to support several platforms in parallel. Furthermore we lack the right knowledge for this task in our team. One way we could go is to try first how far we can go with HTML5 and only move to native apps when we can't achieve the expected user experience in any other way.<br/>
+All UI-Renovation projects will have similar phases like "user interaction design", "prototype", "visual design", "implementation", "test" and so on. As we don't have all skills for all phases in our team we will need additional external resources.
 
 # Prototype
 We already started (together with the SAP AppHouse Heidelberg) to develop 3 clickable prototypes for different device types: Smartphone, Tablet and Desktop.<br/>
@@ -71,3 +75,10 @@ So far you can access the prototype for smartphone via:<br/>
 - on the desktop via: http://static.sapsailing.com/prototype/Smartphone/start.html
 
 # Estimation
+This estimation is very rough as we have no experience with mobile design and implementation.
+- Homepage (1 week design, 1 week implementation)
+- Mobile Support (4-6 weeks design, 12 weeks implementation)
+- Sailing Analytics
+ - Raceboard: Simple race viewer for spectators (UID concept to be defined by Anna's master thesis)
+ - Raceboard: Analytical race viewer for professionals (UID concept to be defined by Anna's master thesis)
+ - Event/Regatta structure navigation (2 weeks design, 3 weeks implementation)
