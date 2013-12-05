@@ -168,7 +168,6 @@ Whenever a managed race is in a wrong state or you want to redo the race, click 
 
 In the top right corner three dots indicate the connectivity status. If there is a problem with sending or receiving data to/from the server the dots will turn red. Don't panic: since you probably aren't sitting in the range of a Starbuck's WiFi this will happen **often**. Just wait some time and put the device you expect it to have a celluar network connection. The device will re-try to send data every minute.
 
-<img src="http://www.sapsailing.com/images/sap-logo.png" title="Connectivity ok" /> <img src="http://www.sapsailing.com/images/sap-logo.png" title="Connectivity problem detected" />
 ![Connectivity ok](wiki/images/rcapp/app_conn_ok.jpg) ![Connectivity bad](wiki/images/rcapp/app_conn_bad.jpg)
 
 If the dots stay red contact the administration team or see the [[administration wiki|wiki/racecommittee-app-administrator]].
