@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class CandidateFinder {
+public class CandidateFinder implements AbstractCandidateFinder {
 
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFixMoving, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, List<GPSFixMoving>>> candidates = new LinkedHashMap<>();
@@ -54,6 +54,34 @@ public class CandidateFinder {
         return allCandidates;
     }
 
+    @Override
+    public LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> getCandidateDeltas(
+            Pair<LinkedHashMap<Competitor, List<GPSFixMoving>>, LinkedHashMap<Mark, List<GPSFix>>> fixes) {
+
+        LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas = new LinkedHashMap<>();
+
+        LinkedHashMap<Competitor, List<GPSFixMoving>> allAffectedFixes = new LinkedHashMap<>();
+        for (Competitor c : fixes.first().keySet()) {
+            allAffectedFixes.put(c, newCompetitorFixes(fixes.first().get(c), c));
+        }
+        for (Mark m : fixes.second().keySet()) {
+            LinkedHashMap<Competitor, List<GPSFixMoving>> markAffectedFixes = newMarkFixes(m, fixes.second().get(m));
+            for (Competitor c : markAffectedFixes.keySet()) {
+                if (!allAffectedFixes.keySet().contains(c)) {
+                    allAffectedFixes.put(c, markAffectedFixes.get(c));
+                } else {
+                    allAffectedFixes.get(c).addAll(markAffectedFixes.get(c));
+                }
+            }
+            for (Competitor c : allAffectedFixes.keySet()) {
+                candidateDeltas.put(c, reEvaluateFixes(allAffectedFixes.get(c), c));
+            }
+        }
+
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     private void reCalculateEverything() {
         for (Competitor c : distances.keySet()) {
             ArrayList<GPSFixMoving> fixes = new ArrayList<>();
@@ -70,6 +98,58 @@ public class CandidateFinder {
         }
     }
 
+    private List<GPSFixMoving> newCompetitorFixes(Iterable<GPSFixMoving> fixes, Competitor c) {
+
+        calculateDistances(fixes, c);
+        ArrayList<GPSFixMoving> fixesToBeReevaluated = new ArrayList<>();
+        for (GPSFixMoving fix : fixes) {
+            fixesToBeReevaluated.add(fix);
+            if (!(race.getTrack(c).getLastFixBefore(fix.getTimePoint()) == null)
+                    && !fixesToBeReevaluated.contains(race.getTrack(c).getLastFixBefore(fix.getTimePoint()))) {
+                fixesToBeReevaluated.add(race.getTrack(c).getLastFixBefore(fix.getTimePoint()));
+            }
+            if (!(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()) == null)
+                    && !fixesToBeReevaluated.contains(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()))) {
+                fixesToBeReevaluated.add(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()));
+            }
+        }
+        return fixesToBeReevaluated;
+    }
+
+    private LinkedHashMap<Competitor, List<GPSFixMoving>> newMarkFixes(Mark mark, Iterable<GPSFix> gps) {
+        LinkedHashMap<Competitor, List<GPSFixMoving>> allAffectedFixes = new LinkedHashMap<>();
+
+        TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(new Comparator<GPSFix>() {
+            @Override
+            public int compare(GPSFix o1, GPSFix o2) {
+                return o1.getTimePoint().compareTo(o2.getTimePoint());
+            }
+        });
+
+        TimePoint start = fixes.first().getTimePoint();
+        GPSFix nextMarkFixAfterLastGivenFix = race.getOrCreateTrack(mark).getFirstFixAfter(fixes.last().getTimePoint());
+        TimePoint end = null;
+        if (!(nextMarkFixAfterLastGivenFix == null)) {
+            end = race.getOrCreateTrack(mark).getFirstFixAfter(start).getTimePoint();
+        }
+
+        for (Competitor c : distances.keySet()) {
+            ArrayList<GPSFixMoving> fixesAffected = new ArrayList<>();
+            TimePoint t = start;
+            while (race.getTrack(c).getFirstFixAfter(t) != null) {
+                GPSFixMoving nextFix = race.getTrack(c).getFirstFixAfter(t);
+                t = nextFix.getTimePoint();
+                if (end != null && !t.before(end)) {
+                    break;
+                }
+                fixesAffected.add(nextFix);
+            }
+            calculateDistances(fixesAffected, c);
+            allAffectedFixes.put(c, fixesAffected);
+        }
+        return allAffectedFixes;
+    }
+
     private void calculateDistances(Iterable<GPSFixMoving> fixes, Competitor c) {
         for (GPSFixMoving fix : fixes) {
             distances.get(c).put(fix, new LinkedHashMap<Waypoint, Double>());
@@ -77,8 +157,8 @@ public class CandidateFinder {
                 double distance = 0;
                 PassingInstruction p = w.getPassingInstructions();
                 if (p == null) {
-                    
-                    if (w.equals(race.getRace().getCourse().getFirstWaypoint()) 
+
+                    if (w.equals(race.getRace().getCourse().getFirstWaypoint())
                             || w.equals(race.getRace().getCourse().getLastWaypoint())) {
                         p = PassingInstruction.Line;
                     } else {
@@ -173,55 +253,5 @@ public class CandidateFinder {
 
     private double getLikelyhood(Double distance, Double legLength) {
         return 1 / (500 * Math.abs(distance / legLength) + 1);
-    }
-
-    public void newCompetitorFixes(Iterable<GPSFixMoving> fixes, Competitor c) {
-
-        calculateDistances(fixes, c);
-        ArrayList<GPSFixMoving> fixesToBeReevaluated = new ArrayList<>();
-        for (GPSFixMoving fix : fixes) {
-            fixesToBeReevaluated.add(fix);
-            if (!(race.getTrack(c).getLastFixBefore(fix.getTimePoint()) == null)
-                    && !fixesToBeReevaluated.contains(race.getTrack(c).getLastFixBefore(fix.getTimePoint()))) {
-                fixesToBeReevaluated.add(race.getTrack(c).getLastFixBefore(fix.getTimePoint()));
-            }
-            if (!(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()) == null)
-                    && !fixesToBeReevaluated.contains(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()))) {
-                fixesToBeReevaluated.add(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()));
-            }
-        }
-        reEvaluateFixes(fixesToBeReevaluated, c);
-    }
-
-    public void newMarkFixes(Mark mark, Iterable<GPSFix> gps) {
-        TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(new Comparator<GPSFix>() {
-            @Override
-            public int compare(GPSFix o1, GPSFix o2) {
-                return o1.getTimePoint().compareTo(o2.getTimePoint());
-            }
-        });
-
-        TimePoint start = fixes.first().getTimePoint();
-        GPSFix nextMarkFixAfterLastGivenFix = race.getOrCreateTrack(mark).getFirstFixAfter(fixes.last().getTimePoint());
-        TimePoint end = null;
-        if (!(nextMarkFixAfterLastGivenFix == null)) {
-            end = race.getOrCreateTrack(mark).getFirstFixAfter(start).getTimePoint();
-        }
-
-        for (Competitor c : distances.keySet()) {
-            ArrayList<GPSFixMoving> fixesAffected = new ArrayList<>();
-            TimePoint t = start;
-            while (race.getTrack(c).getFirstFixAfter(t) != null) {
-                GPSFixMoving nextFix = race.getTrack(c).getFirstFixAfter(t);
-                t = nextFix.getTimePoint();
-                if (end != null && !t.before(end)) {
-                    break;
-                }
-                fixesAffected.add(nextFix);
-            }
-            calculateDistances(fixesAffected, c);
-            reEvaluateFixes(fixesAffected, c);
-            break;
-        }
     }
 }
