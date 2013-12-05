@@ -78,3 +78,33 @@ In the **Regatta** tab of the AdminConsole click the **Edit** action of the rega
 ## On-Device Configuration
 
 As stated above it is possible to (re-)configure these preferences in the app. Changes on the device will not be synchronized with the server.
+
+## Troubleshooting
+
+Let's have a look at the most common problems.
+
+### Connectivity
+
+In the top right corner three dots indicate the connectivity status. If there is a problem with sending or receiving data to/from the server the dots will turn red. The device will re-try to send data every minute.
+
+![Connectivity ok](wiki/images/rcapp/app_conn_ok.jpg) ![Connectivity bad](wiki/images/rcapp/app_conn_bad.jpg)
+
+If your device users are experience persistent connectivity issues advice them to click on the three red dots. This will display further information including the last successful sent time. Recheck that the device has an overall network connectivity and check if your server is not accepting the data sent by the device. This might be the case when the RaceCommittee App is trying to send data for already deleted/renamed regattas.
+
+![Expert view](wiki/images/rcapp/app_expert.jpg)
+
+Selecting the "Expert information" option you'll have access to the expert information screen. This screen gives you the chance to have a look at all the data which could not be sent. Additionally you stop the device from trying to send this data by clicking on "Clear Events".
+
+### Failure to load data
+
+When trying to logon onto a course area the RaceCommittee App opens an error dialog showing an error similar to "Failure to load data: 'null'" or something more expressive. Most of the times this happens when the current version of the app is not compatible with the server. Redo the synchronization step or even force an update via the app's preference screen.
+
+### Runtime- and Crash-Logs
+
+For further fault localization the app maintains runtime-logs. They are stored on the (emulated) SD-Storage partition under
+
+    /sd/racecommittee/DATE.log
+
+In the case of a crash due to a unchecked exception to app writes to a crash log located in
+
+   /sd/racecommittee/DATE_crash.log
