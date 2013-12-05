@@ -17,10 +17,12 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
 
 ### Features
 * Start Phase
+
   * Check correctness of start time based on several data sources: tracker, race committee, start detection
   * Stabilize start detection algorithms
 
 * Completeness Checks
+
   * Considered levels: leg, race, regatta, regatta series
   * Add completeness state "complete/incomplete" on all levels
   * Refined calculation-behavior of measures dependent on completeness on all levels
