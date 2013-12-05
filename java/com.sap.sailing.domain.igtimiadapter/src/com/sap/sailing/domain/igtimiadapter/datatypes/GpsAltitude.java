@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class GpsAltitude extends Fix {
+    private static final long serialVersionUID = -5740764665236002412L;
     private final Distance altitude;
     
     public GpsAltitude(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

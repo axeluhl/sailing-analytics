@@ -14,11 +14,12 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class HDGM extends Fix {
+    private static final long serialVersionUID = -3344091983385126284L;
     private final Bearing magnetigHeading;
     
     public HDGM(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        magnetigHeading = new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        magnetigHeading = new DegreeBearingImpl((((Number) valuesPerSubindex.get(1)).doubleValue()+360.)%360.);
     }
 
     public Bearing getMagnetigHeading() {

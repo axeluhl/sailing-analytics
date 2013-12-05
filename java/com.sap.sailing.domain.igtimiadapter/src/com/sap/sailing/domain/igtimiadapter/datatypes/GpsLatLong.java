@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class GpsLatLong extends Fix {
+    private static final long serialVersionUID = 5056284867725893553L;
     private final Position position;
     
     public GpsLatLong(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class File extends Fix {
+    private static final long serialVersionUID = 7580174784400926003L;
     private final TimePoint start;
     private final TimePoint end;
     private final String fileName;
