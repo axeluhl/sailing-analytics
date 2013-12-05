@@ -143,6 +143,7 @@ def compute_branch(branch_name)
         else
             print "\n\tLoading branch data from file #{branch_name}. Remove this file to get new data..."
             $branches[branch_name] = Marshal.load(File.open("#{branch_name}.bin", 'rb'))
+            branch = $branches[branch_name]
             puts "OK"
         end
         branch.blobs.each do |blob|
