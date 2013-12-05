@@ -12,7 +12,7 @@ The RaceCommittee App supports remote configuration via the AdminConsole interfa
 
 <img src="/wiki/images/rcapp/admin_config_step_1.png" />
 
-First you need to enter a device identifier. It is a good idea to label the device with the this identifier, to enable the identification of the device by an untrained user.
+First you need to enter a device identifier. It is a good idea to label the device with this identifier, to enable the identification of the device by an untrained user.
 
 <img src="/wiki/images/rcapp/admin_config_step_2.png" />
 
