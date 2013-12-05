@@ -104,7 +104,7 @@ The RRS26 racing procedure should be used for races using the _RRS26 starting se
 3. **1 minute** before start the one minute warning is set. The preparatory flag is removed.
 4. **At start** the class flag is removed.
 
-For the RRS26 racing procedure you are able to signal individual recalls by default.
+Using the default configuration for the RRS26 racing procedure you are able to signal individual recalls (expect when you've chosen Black as the preparatory signal).
 
 ### Gate Start
 
