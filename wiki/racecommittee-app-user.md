@@ -89,6 +89,7 @@ In the top bar of each race information screen you are able to enter wind data. 
 Using the GPS receiver of your device the dialog will determine your position. Enter the wind direction and speed and click 'store'.
 
 ## Racing Procedures
+<a name="procedures"></a>
 
 ### RRS26
 
