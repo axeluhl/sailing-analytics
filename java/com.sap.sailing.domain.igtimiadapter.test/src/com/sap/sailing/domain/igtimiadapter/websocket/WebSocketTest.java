@@ -156,7 +156,8 @@ public class WebSocketTest {
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
         IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-        LiveDataConnection liveDataConnection = conn.createLiveConnection(Collections.singleton("GA-EN-AAEJ"), /* receiver */ new BulkFixReceiver() {
+        LiveDataConnection liveDataConnection = conn.createLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        liveDataConnection.addListener(new BulkFixReceiver() {
             @Override
             public void received(Iterable<Fix> fixes) {
                 Util.addAll(fixes, allFixesReceived);

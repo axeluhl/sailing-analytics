@@ -89,11 +89,12 @@ public interface IgtimiConnection {
     /**
      * For the devices specified by <code>deviceSerialNumbers</code>, creates a live data connection. The <code>account</code>
      * needs to be authorized to access the devices' data for the current time window. Fixes received through this connection
-     * are forwarded to the <code>receiver</code> in the batches in which they are received.
+     * are forwarded in the batches in which they are received to the listeners that can be added to the live connection
+     * using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
      * 
      * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#disconnect()}.
      */
-    LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers, BulkFixReceiver receiver) throws Exception;
+    LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
     /**
      * @param sessionIds

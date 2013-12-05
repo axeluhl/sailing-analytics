@@ -163,8 +163,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     
 
     @Override
-    public LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers, BulkFixReceiver receiver) throws Exception {
-        return new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, getAccount(), receiver);
+    public LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception {
+        return new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, getAccount());
     }
 
     private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,

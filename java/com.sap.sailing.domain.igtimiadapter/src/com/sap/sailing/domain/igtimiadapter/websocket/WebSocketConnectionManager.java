@@ -5,8 +5,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,17 +45,17 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
-    private final BulkFixReceiver receiver;
+    private final Set<BulkFixReceiver> listeners;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account, BulkFixReceiver receiver) throws Exception {
+    public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
-        this.receiver = receiver;
+        this.listeners = new ConcurrentSkipListSet<>();
         client = new WebSocketClient();
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
@@ -137,8 +139,15 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         return new Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
     
+    @Override
+    public void addListener(BulkFixReceiver listener) {
+        listeners.add(listener);
+    }
+
     private void notifyListeners(List<Fix> fixes) {
-        receiver.received(fixes);
+        for (BulkFixReceiver listener : listeners) {
+            listener.received(fixes);
+        }
     }
 
     @Override

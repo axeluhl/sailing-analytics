@@ -14,4 +14,6 @@ public interface LiveDataConnection {
      *            use 0 to wait indefinitely
      */
     boolean waitForConnection(long timeoutInMillis) throws InterruptedException;
+    
+    void addListener(BulkFixReceiver listener);
 }

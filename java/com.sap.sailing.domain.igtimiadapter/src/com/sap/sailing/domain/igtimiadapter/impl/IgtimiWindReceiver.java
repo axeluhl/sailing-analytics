@@ -2,6 +2,10 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,129 +18,159 @@ import com.sap.sailing.domain.base.impl.ScalableSpeed;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
-import com.sap.sailing.domain.igtimiadapter.FixVisitor;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiverAdapter;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
+import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
+import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
-public class IgtimiWindTrackImpl extends WindTrackImpl {
-    private static final long serialVersionUID = 2362868507967460430L;
-    private static final Logger logger = Logger.getLogger(IgtimiWindTrackImpl.class.getName());
+/**
+ * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
+ * work, the time-wise adjacent {@link AWA}, {@link HDG}/{@link HDGM} and {@link GpsLatLong} fixes are used. If only
+ * a magnetic heading ({@link HDGM}) is available, the {@link DeclinationService} is used to map that to a true heading.
+ * The true wind direction is determined by adding the boat speed vector onto the apparent wind vector. 
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
+public class IgtimiWindReceiver implements BulkFixReceiver {
+    private static final Logger logger = Logger.getLogger(IgtimiWindReceiver.class.getName());
     private final DynamicTrack<AWA> awaTrack;
     private final DynamicTrack<AWS> awsTrack;
     private final DynamicTrack<GpsLatLong> gpsTrack;
+    private final DynamicTrack<COG> cogTrack;
+    private final DynamicTrack<SOG> sogTrack;
     private final DynamicTrack<HDG> hdgTrack;
     private final DynamicTrack<HDGM> hdgmTrack;
-    private final BulkFixReceiver receiver;
+    private final FixReceiver receiver;
     private final DeclinationService declinationService;
+    private final Set<WindListener> listeners;
+    
+    private class FixReceiver extends IgtimiFixReceiverAdapter {
+        @Override
+        public void received(AWA fix) {
+            getAwaTrack().add(fix);
+        }
 
-    public IgtimiWindTrackImpl(long millisecondsOverWhichToAverage, String deviceSerialNumber) {
-        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, deviceSerialNumber);
+        @Override
+        public void received(AWS fix) {
+            getAwsTrack().add(fix);
+        }
+
+        @Override
+        public void received(GpsLatLong fix) {
+            getGpsTrack().add(fix);
+        }
+
+        @Override
+        public void received(COG fix) {
+            getCogTrack().add(fix);
+        }
+
+        @Override
+        public void received(SOG fix) {
+            getSogTrack().add(fix);
+        }
+
+        @Override
+        public void received(HDG fix) {
+            getHdgTrack().add(fix);
+        }
+
+        @Override
+        public void received(HDGM fix) {
+            getHdgmTrack().add(fix);
+        }
     }
 
-    public IgtimiWindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, String deviceSerialNumber) {
-        // TODO probably hook up the receiver to the IgtimiConnection right away, asking for stored and live data
-        // TODO consider batch updates which then would typically first fill the tracks and only the look for new wind fixes that may be generated from the additions to the tracks
-        super(millisecondsOverWhichToAverage, baseConfidence, /* useSpeed */ true, /* nameForReadWriteLock */ "Igtimi wind track for device "+deviceSerialNumber);
+    public IgtimiWindReceiver(String deviceSerialNumber) {
+        receiver = new FixReceiver();
         declinationService = DeclinationService.INSTANCE;
+        listeners = new ConcurrentSkipListSet<>();
         awaTrack = new DynamicTrackImpl<>("AWA Track for Igtimi wind track for device "+deviceSerialNumber);
         awsTrack = new DynamicTrackImpl<>("AWS Track for Igtimi wind track for device "+deviceSerialNumber);
         gpsTrack = new DynamicTrackImpl<>("GPS Track for Igtimi wind track for device "+deviceSerialNumber);
+        cogTrack = new DynamicTrackImpl<>("COG Track for Igtimi wind track for device "+deviceSerialNumber);
+        sogTrack = new DynamicTrackImpl<>("SOG Track for Igtimi wind track for device "+deviceSerialNumber);
         hdgTrack = new DynamicTrackImpl<>("HDG Track for Igtimi wind track for device "+deviceSerialNumber);
         hdgmTrack = new DynamicTrackImpl<>("HDGM Track for Igtimi wind track for device "+deviceSerialNumber);
-        receiver = new FixVisitor(new IgtimiFixReceiverAdapter() {
-            @Override
-            public void received(AWA fix) {
-                awaTrack.add(fix);
-            }
-
-            @Override
-            public void received(AWS fix) {
-                awsTrack.add(fix);
-            }
-
-            @Override
-            public void received(GpsLatLong fix) {
-                gpsTrack.add(fix);
-            }
-
-            @Override
-            public void received(HDG fix) {
-                hdgTrack.add(fix);
-            }
-
-            @Override
-            public void received(HDGM fix) {
-                hdgmTrack.add(fix);
-            }
-        }) {
-            /**
-             * Called when a batch of fixes was received, e.g., after loading from stored data or from a live web socket receiver.
-             * The fixes are pumped into the tracks by the superclass implementation. Then, for all new {@link AWS} fixes, a
-             * call to {@link IgtimiWindTrackImpl#getWind} is performed.
-             */
-            @Override
-            public void received(Iterable<Fix> fixes) {
-                super.received(fixes);
-                for (Fix fix : fixes) {
-                    fix.notify(new IgtimiFixReceiverAdapter() {
-                        @Override
-                        public void received(AWS fix) {
-                            try {
-                                final Wind wind = getWind(fix.getTimePoint());
-                                if (wind != null) {
-                                    add(wind);
-                                }
-                            } catch (ClassNotFoundException | IOException | ParseException e) {
-                                logger.log(Level.INFO, "Exception while trying to construct Wind fix from Igtimi fix "+fix, e);
-                            }
-                        }
-                    });
-                }
-            }
-        };
     }
     
     /**
-     * Obtains the fix receiver that can be used to subscribe to a web socket-based live data connection as well as for calls to
-     * {@link IgtimiConnection#getAndNotifyResourceData(TimePoint, TimePoint, Iterable, BulkFixReceiver, com.sap.sailing.domain.igtimiadapter.datatypes.Type...)}.
-     * When sending fixes to the receiver returned, those fixes will be recorded in this object, and after the batch has been received, for all {@link AWS} fixes
-     * received in the batch, a new {@link Wind} fix is added to this wind track.
+     * Called when a batch of fixes was received, e.g., after loading from stored data or from a live web socket receiver.
+     * The fixes are pumped into the tracks by the superclass implementation. Then, for all new {@link AWS} fixes, a
+     * call to {@link IgtimiWindReceiver#getWind} is performed.
      */
-    public BulkFixReceiver getReceiver() {
-        return receiver;
+    @Override
+    public void received(Iterable<Fix> fixes) {
+        final List<AWS> awsFixes = new ArrayList<>();
+        for (Fix fix : fixes) {
+            fix.notify(receiver);
+            fix.notify(new IgtimiFixReceiverAdapter() {
+                @Override
+                public void received(AWS fix) {
+                    awsFixes.add(fix);
+                }
+            });
+        }
+        for (AWS aws : awsFixes) {
+            try {
+                final Wind wind = getWind(aws.getTimePoint());
+                if (wind != null) {
+                    notifyListeners(wind);
+                }
+            } catch (ClassNotFoundException | IOException | ParseException e) {
+                logger.log(Level.INFO, "Exception while trying to construct Wind fix from Igtimi fix " + aws, e);
+            }
+        }
     }
 
+    public void addListener(WindListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void notifyListeners(Wind wind) {
+        for (WindListener listener : listeners) {
+            listener.windDataReceived(wind);
+        }
+    }
+    
     private Wind getWind(TimePoint timePoint) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        Pair<AWA, AWA> awaPair = getSurroundingFixes(awaTrack, timePoint);
+        Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(), timePoint);
         Bearing awa = getAWA(timePoint, awaPair);
-        Pair<AWS, AWS> awsPair = getSurroundingFixes(awsTrack, timePoint);
+        Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(), timePoint);
         Speed aws = getAWS(timePoint, awsPair);
-        Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(gpsTrack, timePoint);
+        Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(), timePoint);
         Position pos = getPosition(timePoint, gpsPair);
-        Pair<HDG, HDG> hdgPair = getSurroundingFixes(hdgTrack, timePoint);
-        Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(hdgmTrack, timePoint);
+        Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(), timePoint);
+        Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(), timePoint);
         Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
         if (awa != null && aws != null && pos != null && heading != null) {
-            Bearing trueWindDirection = heading.add(awa);
-            result = new WindImpl(pos, timePoint, new KnotSpeedWithBearingImpl(aws.getKnots(), trueWindDirection));
+            Bearing apparentWindDirection = heading.add(awa);
+            SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
+            Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(), timePoint);
+            Speed sog = getSOG(timePoint, sogPair);
+            Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(), timePoint);
+            Bearing cog = getCOG(timePoint, cogPair);
+            SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
+            result = new WindImpl(pos, timePoint, new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection));
         } else {
             result = null;
         }
@@ -144,23 +178,23 @@ public class IgtimiWindTrackImpl extends WindTrackImpl {
     }
 
     private Bearing getAWA(TimePoint timePoint, Pair<AWA, AWA> awaPair) {
-        final Bearing awa;
+        final Bearing awaFrom;
         if (awaPair.getA() == null) {
             if (awaPair.getB() == null) {
-                awa = null;
+                awaFrom = null;
             } else {
-                awa = awaPair.getB().getApparentWindAngle();
+                awaFrom = awaPair.getB().getApparentWindAngle();
             }
         } else {
             if (awaPair.getB() == null) {
-                awa = awaPair.getA().getApparentWindAngle();
+                awaFrom = awaPair.getA().getApparentWindAngle();
             } else {
-                awa = timeBasedAgerage(timePoint,
+                awaFrom = timeBasedAgerage(timePoint,
                         new ScalableBearing(awaPair.getA().getApparentWindAngle()), awaPair.getA().getTimePoint(),
                         new ScalableBearing(awaPair.getB().getApparentWindAngle()), awaPair.getB().getTimePoint());
             }
         }
-        return awa;
+        return awaFrom.reverse();
     }
 
     private Speed getAWS(TimePoint timePoint, Pair<AWS, AWS> awsPair) {
@@ -181,6 +215,46 @@ public class IgtimiWindTrackImpl extends WindTrackImpl {
             }
         }
         return aws;
+    }
+
+    private Speed getSOG(TimePoint timePoint, Pair<SOG, SOG> sogPair) {
+        final Speed sog;
+        if (sogPair.getA() == null) {
+            if (sogPair.getB() == null) {
+                sog = null;
+            } else {
+                sog = sogPair.getB().getSpeedOverGround();
+            }
+        } else {
+            if (sogPair.getB() == null) {
+                sog = sogPair.getA().getSpeedOverGround();
+            } else {
+                sog = timeBasedAgerage(timePoint,
+                        new ScalableSpeed(sogPair.getA().getSpeedOverGround()), sogPair.getA().getTimePoint(),
+                        new ScalableSpeed(sogPair.getB().getSpeedOverGround()), sogPair.getB().getTimePoint());
+            }
+        }
+        return sog;
+    }
+
+    private Bearing getCOG(TimePoint timePoint, Pair<COG, COG> cogPair) {
+        final Bearing sog;
+        if (cogPair.getA() == null) {
+            if (cogPair.getB() == null) {
+                sog = null;
+            } else {
+                sog = cogPair.getB().getCourseOverGround();
+            }
+        } else {
+            if (cogPair.getB() == null) {
+                sog = cogPair.getA().getCourseOverGround();
+            } else {
+                sog = timeBasedAgerage(timePoint,
+                        new ScalableBearing(cogPair.getA().getCourseOverGround()), cogPair.getA().getTimePoint(),
+                        new ScalableBearing(cogPair.getB().getCourseOverGround()), cogPair.getB().getTimePoint());
+            }
+        }
+        return sog;
     }
 
     private Position getPosition(TimePoint timePoint, Pair<GpsLatLong, GpsLatLong> gpsPair) {
@@ -269,5 +343,33 @@ public class IgtimiWindTrackImpl extends WindTrackImpl {
         T right = track.getFirstFixAtOrAfter(timePoint);
         Pair<T, T> result = new Pair<>(left, right);
         return result;
+    }
+
+    private DynamicTrack<AWA> getAwaTrack() {
+        return awaTrack;
+    }
+
+    private DynamicTrack<AWS> getAwsTrack() {
+        return awsTrack;
+    }
+
+    private DynamicTrack<GpsLatLong> getGpsTrack() {
+        return gpsTrack;
+    }
+
+    private DynamicTrack<COG> getCogTrack() {
+        return cogTrack;
+    }
+
+    private DynamicTrack<SOG> getSogTrack() {
+        return sogTrack;
+    }
+
+    private DynamicTrack<HDG> getHdgTrack() {
+        return hdgTrack;
+    }
+
+    private DynamicTrack<HDGM> getHdgmTrack() {
+        return hdgmTrack;
     }
 }
