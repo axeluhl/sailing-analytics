@@ -87,7 +87,7 @@ Let's have a look at the most common problems.
 
 In the top right corner three dots indicate the connectivity status. If there is a problem with sending or receiving data to/from the server the dots will turn red. The device will re-try to send data every minute.
 
-![Connectivity ok](wiki/images/rcapp/app_conn_ok.jpg) ![Connectivity bad](wiki/images/rcapp/app_conn_bad.jpg)
+![Connectivity ok](images/rcapp/app_conn_ok.jpg) ![Connectivity bad](images/rcapp/app_conn_bad.jpg)
 
 If your device users are experience persistent connectivity issues advice them to click on the three red dots. This will display further information including the last successful sent time. Recheck that the device has an overall network connectivity and check if your server is not accepting the data sent by the device. This might be the case when the RaceCommittee App is trying to send data for already deleted/renamed regattas.
 
