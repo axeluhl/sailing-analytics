@@ -91,6 +91,18 @@ Using the GPS receiver of your device the dialog will determine your position. E
 ## Signaling a course change
 <a name="coursechange"></a>
 
+There are different ways to signal a course change. Your device has been configured by the [[administration team|wiki/racecommittee-app-administrator]] to select the best method for you.
+
+### By-Name
+
+Simple course name selection screen. The available course names are pre-configured by the administration team.
+
+### By-Marks
+
+Design the course by defining marks and gates from existing assets provided by the server. You can choose to reuse the last published course design when no course change has occurred.
+
+### By-Map
+
 Lorem ipsum.
 
 ## Troubleshooting
