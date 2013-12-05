@@ -59,6 +59,11 @@ Some prototypical work has already been launched to investigate the technical ch
 
 ## Estimation
 
+Scope:
+* Features as listed above
+* Android platform only
+
+
 We assume that a professional smartphone tracking app should be built by an external agency according to our specifications and in conjunction with the [race committee app](http://wiki.sapsailing.com/wiki/planning/businesscases/racecommitteeapp). Efforts therefore are to be divided into those for the agency and those for our team. We assume that parts of the prototype can be used, particularly back-end components such as the replicating race log that is shared with the race committee app.
 
  * Agency and Team: Problem description and architecture and domain knowledge transfer, three weeks
