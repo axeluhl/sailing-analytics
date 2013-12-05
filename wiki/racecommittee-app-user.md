@@ -30,7 +30,7 @@ One of the most important task in the life of a race officer is scheduling her r
 
 ![Scheduling a race](/wiki/images/rcapp/app_schedule.jpg)
 
-When you are satisfied with the start time selected (hint: click on 'Today' to select a different date) and racing procedure, click **'Start'**. As you will see below you are always able to reschedule a race. Therefore the best race officers schedule multiple races at once. After scheduling the first race of the day, just select the next race in the race list and set a estimated start time.
+When you are satisfied with the start time selected (hint: click on 'Today' to select a different date) and racing procedure, click **'Start'**. As you will see below you are always able to reschedule a race. Therefore the best race officers schedule multiple races at once. After scheduling the first race of the day, just select the next race in the race list and set an estimated start time.
 
 On the same race information screen you are able to **postpone** an unschedulded race. Click on 'Postpone' and select the postponment flags.
 
