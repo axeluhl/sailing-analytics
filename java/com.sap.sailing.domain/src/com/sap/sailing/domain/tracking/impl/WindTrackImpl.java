@@ -41,7 +41,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
-    private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
+    protected final static double DEFAULT_BASE_CONFIDENCE = 0.9;
     
     private final double baseConfidence;
     

@@ -149,7 +149,7 @@ public class WebSocketTest {
         final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(client, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        WebSocketConnectionManager manager = new WebSocketConnectionManager(igtimiConnectionFactory, Collections.singleton("GA-EN-AAEJ"), account);
+        WebSocketConnectionManager manager = new WebSocketConnectionManager(igtimiConnectionFactory, Collections.singleton("GA-EN-AAEJ"), account, /* receiver */ null);
         assertNotNull(manager);
         assertTrue("Connection handshake not successful within 5s", manager.waitForConnection(5000));
         manager.disconnect();

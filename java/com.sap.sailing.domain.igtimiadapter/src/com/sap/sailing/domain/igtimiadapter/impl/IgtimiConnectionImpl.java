@@ -15,12 +15,12 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
-import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
@@ -139,12 +139,10 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
 
     @Override
     public Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceSerialNumbers, IgtimiFixReceiver receiverToBeNotified, Type... types)
+            Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         Iterable<Fix> result = getResourceData(startTime, endTime, deviceSerialNumbers, types);
-        for (Fix fix : result) {
-            fix.notify(receiverToBeNotified);
-        }
+        bulkFixReceiver.received(result);
         return result;
     }
 

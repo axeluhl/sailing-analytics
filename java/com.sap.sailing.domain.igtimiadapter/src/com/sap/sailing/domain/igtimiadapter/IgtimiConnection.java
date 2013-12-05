@@ -65,11 +65,10 @@ public interface IgtimiConnection {
 
     /**
      * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
-     * any type. The fixes received are forwarded to the {@link IgtimiFixReceiver} <code>receiverToBeNotified</code> one
-     * by one.
+     * any type. The fixes received are forwarded to the {@link BulkFixReceiver} <code>bulkFixReceiver</code> in one call.
      */
     Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceSerialNumbers, IgtimiFixReceiver receiverToBeNotified, Type... types)
+            Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
 

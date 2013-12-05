@@ -5,10 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,8 +24,8 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
-import com.sap.sailing.domain.igtimiadapter.LiveDataListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 
@@ -44,17 +42,17 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
-    private final Set<LiveDataListener> liveDataListeners;
+    private final BulkFixReceiver receiver;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
+    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceSerialNumbers, Account account, BulkFixReceiver receiver) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
-        this.liveDataListeners = new ConcurrentSkipListSet<>();
+        this.receiver = receiver;
         client = new WebSocketClient();
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
@@ -79,10 +77,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
             }
             return igtimiServerTimepoint != null;
         }
-    }
-    
-    public void addLiveDataListener(LiveDataListener listener) {
-        liveDataListeners.add(listener);
     }
     
     public void disconnect() throws Exception {
@@ -142,9 +136,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     }
     
     private void notifyListeners(List<Fix> fixes) {
-        for (LiveDataListener listener : liveDataListeners) {
-            listener.fixesReceived(fixes);
-        }
+        receiver.received(fixes);
     }
 
     @Override
