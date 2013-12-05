@@ -1,5 +1,7 @@
 # Data Consistency
 
+Author: Christopher Ronnewinkel
+
 ### Rationale
 
 The SAP sailing solutions are a set of software applications that process data - live and recorded - about sailing regattas, in order to visualize sailing races, various linked measures, as well as, regatta results. In order to capture sailing races, information about the race course, the competitors, the boat positions, the weather conditions (especially wind and water current), mark passing times and race times are transmitted using various kinds of wireless communication and collected on servers as raw data. In further processing steps, this raw data is linked by data structures to allow for visualization, live ranking estimation, scoring calculation and calculation of aggregate measures like boat speed, velocity-made-good, distance-to-leader, and more.
