@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -27,5 +28,10 @@ public class AntCbst extends Fix {
     @Override
     public String localToString() {
         return "Cadence "+getCadence();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

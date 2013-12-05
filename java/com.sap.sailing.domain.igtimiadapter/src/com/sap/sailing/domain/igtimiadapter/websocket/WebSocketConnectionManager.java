@@ -48,15 +48,15 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceIds, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceIds+" and account "+account);
-        this.deviceIds = deviceIds;
+    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
+        this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
         this.liveDataListeners = new ConcurrentSkipListSet<>();
         client = new WebSocketClient();
-        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceIds);
+        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
         client.start();
         reconnect();

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
@@ -134,6 +135,17 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             typeAndCompression.put(type, 0.0);
         }
         return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
+    }
+
+    @Override
+    public Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, IgtimiFixReceiver receiverToBeNotified, Type... types)
+            throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> result = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        for (Fix fix : result) {
+            fix.notify(receiverToBeNotified);
+        }
+        return result;
     }
 
     @Override
