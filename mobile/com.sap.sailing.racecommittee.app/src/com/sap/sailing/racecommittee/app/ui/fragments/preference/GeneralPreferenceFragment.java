@@ -115,7 +115,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
                 startActivity(intent);
-                preference.getOnPreferenceChangeListener().onPreferenceChange(preference, null);
                 return true;
             }
         });
