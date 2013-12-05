@@ -16,7 +16,6 @@ The status quo to tackle these problems is to work and improve on the data measu
 In the "Data Consistency" project, we take the new approach to gain higher stability of SAP sailing solutions by introducing robustness against raw data faults right into the heart of data processing: data structures should be able to represent raw data faults and aggregate calculations should react moderately ensuring well-definedness and consistency of visualization and all data displayed.
 
 ### Features
-
 * Start Phase
   * Check correctness of start time based on several data sources: tracker, race committee, start detection
   * Stabilize start detection algorithms
