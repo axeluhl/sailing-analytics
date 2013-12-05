@@ -36,7 +36,7 @@ Repeat until you've configured all your devices.
 
 There are several preferences you can configure to control the overall functionality of the RaceCommittee App. 
 
-All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will overwrite the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole, the device will preserves its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
+All these options can be configured either via remote configuration (see above) or on the device itself. The remote configuration is fetched on selecting an event in the event selection screen. If there is a configuration stored on the server for the target device, each configured option will overwrite the corresponding option in the device's local configuration. If you leave an option unconfigured in the AdminConsole, the device will preserve its value. E.g. by leaving the 'Results recipient' option unchecked in the AdminConsole will preserve the recipient configuration currently stored on the device.
 
 In the following we will have a look at some of these settings. Most of them are enabled for remote configuration.
 
