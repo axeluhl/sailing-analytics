@@ -4,6 +4,18 @@
 
 ## Quick Start: How to run tests locally in Eclipse
 
+There are two ways to run the Selenium tests locally on your computer. Either, you compile the GWT UI using our build script and run the tests based on the compiled UI, or you run the tests using the GWT hosted mode.
+
+### Running the tests with GWT hosted mode
+
+Launch the server by choosing the "Sailing Server (Proxy)" or "Sailing Server (No Proxy)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
+
+You have to ensure that your Firefox browser has a profile called "Selenium" and that in this profile the latest version of the GWT plugin is installed. To ensure this, launch Firefox from the command line with the -p option. On Windows machines, you can do this by pressing the Windows key, then typing "firefox.exe -p". In the profile manager create a profile called Selenium and start Firefow with that profile. Hit the entry page of the AdminConsole by entering `http://127.0.0.1:8888/gwt/AdminConsole.html?gwt.codesvr=127.0.0.1:9997` into the address bar. This will ask you to install the GWT plugin into your Selenium profile. When done, exit the browser. You may use the profile manager again to set your default profile to your original profile.
+
+When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy, GWT Codesvr)" or "com.sap.sailing.senelium.test (No Proxy, GWT Codesvr)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
+
+### Running the tests after a successful local GWT compile
+
 Stop any SailingServers currently running on your local machine (if you fail to do so, the Maven build will be unable to write some of the build artifacts in the _com.sap.sailing.gwt.ui_ project). Build using the git-managed build script from _configuration/buildAndUpdateProduct.sh_. To lower round-trip times, we introduced the _-b_ option that only builds one GWT permuation (Chrome, English). You may use the _-t_ option to keep the Maven build from running the tests. If inside the SAP VPN, additionally use the _-p_ option to ensure the HTTP proxy is being used. This makes for a command line like this:
 
   `./configuration/buildAndUpdateProduct.sh -p -b -t build`
