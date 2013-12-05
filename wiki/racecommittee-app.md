@@ -27,9 +27,13 @@ The Feedback a User gave to the Application and the Feedback the user gave to th
 
 Kuruh, Kuruh,...
 
+## Versioning
+
+Baruh
+
 ## Build and Auto-Update
 
-On Maven builds the resulting APK of the RaceCommittee App will be made available as a static content on the server's web page.
+On Maven builds the resulting APK of the RaceCommittee App will be made available as static content on the server's web page.
 
 The RaceCommittee App is set up as an optional dependency of the bundle **com.sap.sailing.www**. This way the app will be build before the www-bundle. After the install phase the RaceCommittee App bundle will copy its artifact APK into _com.sap.sailing.www/apps_. The contents of this folder are packaged into the **com.sap.sailing.www** plugin, which will be deployed as the server's web page. When build with _buildAndUpdateProduct.sh_ an additional version information file is stored alongside the APK. Version information is taken from the AndroidManifest.xml (**android:versionCode**).
 
