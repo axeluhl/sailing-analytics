@@ -11,6 +11,7 @@ This user guide is intended for race officers and other users of the RaceCommitt
 Each race officer is in charge of managing the races of a course area (Alpha, Bravo, Off-Shore,...). After selecting the active event on the left pane, click on your course area.
 
 ![Logon onto course area](/wiki/images/rcapp/app_login.jpg)
+<img src="/wiki/images/rcapp/app_login.jpg" />
 
 In the dialog screen choose _"Login as race officer (start vessel)"_. Press **Login**. From now on you will see in the lower right corner the RaceCommittee App icon signaling that you are managing this course area. Using this notification icon you are always able to return back to your race management screen.
 
