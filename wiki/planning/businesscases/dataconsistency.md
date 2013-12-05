@@ -1,25 +1,27 @@
 # Data Consistency
 
-## Live-Delay Analysis
+## Minutes from Initial Brainstorming Meeting (December 2, 2013)
+
+### Live-Delay Analysis
 * GPS per competitor
 * wind for advantage line
 
-## Outlier detection
+### Outlier detection
 * GPS tracks
 * Wind
 
-## Dropout interpolation
+### Dropout interpolation
 * GPS tracks
 * Wind
 
-## Connection loss
+### Connection loss
 * GPS Track:
   * introduce states "no data" / "no connection"
     * has to be based on transmission rates
     * no ping available
 * Wind
 
-## Data quality measures
+### Data quality measures
 * Start Phase
   * correctness of start time on start boat
   * stabilize start detection algorithms / heuristic
@@ -48,19 +50,19 @@
 * Network Connectivity
   * all required channels
 
-## Master Data
+### Master Data
 * Competitors: names
 * Sail numbers
 * Boat classes: names
 * Scoring schemes: score corrections
 
-## Data Properties to be visualized or accessible
+### Data Properties to be visualized or accessible
 * Sampling frequency for GPS
 * Number of active GPS satellites
 * Reflect accuracies of measurements somehow on the UI, e.g. tails along GPS tracks
 
-## Extra-/Interpolation of GPS tracks
+### Extra-/Interpolation of GPS tracks
 * bridge phase without connection to network or connection to GPS satellites
 
-## Extra-/Interpolation for wind
+### Extra-/Interpolation for wind
 * bridge phases without estimation or measurement
