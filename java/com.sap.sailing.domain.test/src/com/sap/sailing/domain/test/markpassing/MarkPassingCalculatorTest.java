@@ -12,15 +12,11 @@ import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -28,41 +24,45 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
-    
+
     public MarkPassingCalculatorTest() throws MalformedURLException, URISyntaxException {
         super();
     }
-    
+
     private boolean forceReload = true;
-    @Test public void testStarMedal() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Star Medal"); testRace("d591d808-9c48-11e0-85be-406186cbf87c"); }
-    
-     
-    @Test public void testTornado4() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Tornado Race 4"); testRace("5291b3ea-9934-11e0-85be-406186cbf87c"); }
-      
-/*  
-    @Test public void testTornado16() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Tornado 16"); testRace("04687b2a-9e68-11e0-85be-406186cbf87c"); }
-      
-    @Test public void test505_2() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("505 2"); testRace("357c700a-9d9a-11e0-85be-406186cbf87c"); }
-      
-    @Test public void test505_7() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("505 7"); testRace("cb043bb4-9e92-11e0-85be-406186cbf87c"); }
-      
-    @Test public void testStar4() throws IOException, InterruptedException, URISyntaxException {
-      System.out.println("Star 4"); testRace("f5f531ec-99ed-11e0-85be-406186cbf87c"); }*/
-     
+
+    @Test
+    public void testStarMedal() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Star Medal");
+        testRace("d591d808-9c48-11e0-85be-406186cbf87c");
+    }
+
+    @Test
+    public void testTornado4() throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("Tornado Race 4");
+        testRace("5291b3ea-9934-11e0-85be-406186cbf87c");
+    }
+
+    /*
+     * @Test public void testTornado16() throws IOException, InterruptedException, URISyntaxException {
+     * System.out.println("Tornado 16"); testRace("04687b2a-9e68-11e0-85be-406186cbf87c"); }
+     * 
+     * @Test public void test505_2() throws IOException, InterruptedException, URISyntaxException {
+     * System.out.println("505 2"); testRace("357c700a-9d9a-11e0-85be-406186cbf87c"); }
+     * 
+     * @Test public void test505_7() throws IOException, InterruptedException, URISyntaxException {
+     * System.out.println("505 7"); testRace("cb043bb4-9e92-11e0-85be-406186cbf87c"); }
+     * 
+     * @Test public void testStar4() throws IOException, InterruptedException, URISyntaxException {
+     * System.out.println("Star 4"); testRace("f5f531ec-99ed-11e0-85be-406186cbf87c"); }
+     */
+
     private void testRace(String raceID) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceID);
         compareMarkpasses();
@@ -184,6 +184,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     private void compareMarkpasses() {
         double time = System.currentTimeMillis();
         final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace());
+        time = System.currentTimeMillis() - time;
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
@@ -203,73 +204,8 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             givenPasses.put(c, givenMarkPasses);
         }
 
-        // Get Marks
-        Set<Mark> marks = new HashSet<>();
-        for (Waypoint w : waypoints) {
-            Iterator<Mark> it = w.getMarks().iterator();
-            while (it.hasNext()) {
-                marks.add(it.next());
-            }
-        }
-
-        LinkedHashMap<Mark, GPSFix> nextMarkFix = new LinkedHashMap<>();
-        LinkedHashMap<Mark, DynamicGPSFixTrack<Mark, GPSFix>> markTracks = new LinkedHashMap<>();
-        for (Mark m : marks) {
-            try {
-                getTrackedRace().getOrCreateTrack(m).lockForRead();
-                markTracks.put(m, getTrackedRace().getOrCreateTrack(m));
-            } finally {
-                getTrackedRace().getOrCreateTrack(m).unlockAfterRead();
-            }
-            nextMarkFix.put(m, markTracks.get(m).getFirstRawFix());
-        }
-        LinkedHashMap<Competitor, GPSFixMoving> nextCompetitorFix = new LinkedHashMap<>();
-        LinkedHashMap<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> competitorTracks = new LinkedHashMap<>();
-        for (Competitor c : getRace().getCompetitors()) {
-            try {
-                getTrackedRace().getTrack(c).lockForRead();
-                competitorTracks.put(c, getTrackedRace().getTrack(c));
-            } finally {
-                getTrackedRace().getTrack(c).unlockAfterRead();
-            }
-            nextCompetitorFix.put(c, competitorTracks.get(c).getFirstRawFix());
-        }
-        for (Mark m : marks) {
-            GPSFix fix = nextMarkFix.get(m);
-            while (fix != null) {
-                markPassCreator.markPositionChanged(fix, m);
-                nextMarkFix.put(m, markTracks.get(m).getFirstFixAfter(fix.getTimePoint()));
-                fix = nextMarkFix.get(m);
-            }
-        }
-
-        boolean done = false;
-        while (!done) {
-            done = true;
-            for (Competitor c : getRace().getCompetitors()) {
-                GPSFixMoving fix = nextCompetitorFix.get(c);
-                if (fix != null) {
-                    markPassCreator.competitorPositionChanged(fix, c);
-                    fix = competitorTracks.get(c).getFirstFixAfter(fix.getTimePoint());
-                    nextCompetitorFix.put(c, fix);
-                }
-            }
-            for (Competitor c : getRace().getCompetitors()) {
-                if (!(nextCompetitorFix.get(c) == null)) {
-                    done = false;
-                    break;
-                }
-            }
-        }
-
         // Get results
-        for (Competitor c : getRace().getCompetitors()) {
-            LinkedHashMap<Waypoint, MarkPassing> passes = new LinkedHashMap<>();
-            for (Waypoint w : waypoints) {
-                passes.put(w, markPassCreator.getMarkPass(c, w));
-            }
-            computedPasses.put(c, passes);
-        }
+        computedPasses = markPassCreator.getMarkPasses();
 
         // Compare computed and calculated MarkPassings
         final int tolerance = 20000;
@@ -342,7 +278,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         System.out.println("Should be null but arent:" + wronglyComputed);
         System.out.println("Should not be null but are: " + wronglyNotComputed);
         System.out.println("accuracy: " + accuracy);
-        System.out.println("Computation time: " + (System.currentTimeMillis() - time) / 1000 + " s");
+        System.out.println("Computation time: " + time / 1000 + " s");
         assertTrue(accuracy > 0.7);
 
     }
