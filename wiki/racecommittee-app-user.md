@@ -14,6 +14,8 @@ Each race officer is in charge of managing the races of a course area (Alpha, Br
 
 In the dialog screen choose _"Login as race officer (start vessel)"_. Press **Login**. From now on you will see in the lower right corner the RaceCommittee App icon signaling that you are managing this course area. Using this notification icon you are always able to return back to your race management screen.
 
+![The notification icon](/wiki/images/rcapp/app_notification_icon.jpg)
+
 ## Race management
 
 On the race management screen you see all races grouped by their regatta and fleet on the left side. By default the race list is filtered showing only active races. Use the top action bar to switch to "show all races" if you need to see all.
