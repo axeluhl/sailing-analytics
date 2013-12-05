@@ -82,7 +82,7 @@ In the dialog window select all races of the fleet whose protest time should be 
 
 #### Wind
 
-In the top bar of each race information screen you are able to enter wind data. Click on the yellow link text 'enter wind' to open the wind input dialog
+In the top bar of each race information screen you are able to enter wind data. Click on the yellow link text 'set wind' to open the wind input dialog
 
 ![Wind input dialog](/wiki/images/rcapp/app_wind.jpg)
 
