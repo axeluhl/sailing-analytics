@@ -91,13 +91,53 @@ Using the GPS receiver of your device the dialog will determine your position. E
 ## Racing Procedures
 <a name="procedures"></a>
 
+Every time you start a race (e.g. schedule a race for the first time, restarting a race after general recall, ...) you are able to choose the **racing procedure**. The racing procedure defines how the startphase is set up. This may include signaling flags that are triggered at a fixed time and signals you have to choose from.
+
 ### RRS26
+
+The RRS26 racing procedure should be used for races using the _RRS26 starting sequence_. This sequence is defined as the following:
+
+1. **5 minutes** before start the warning signal is set. Class flag (as configured) is displayed.
+2. **4 minutes** before start the preparatory signal is set. By default you are able to choose between the following flags: Papa, India, Zulu, Black to be displayed.
+3. **1 minute** before start the one minute warning is set. The preparatory flag is removed.
+4. **At start** the class flag is removed.
+
+For the RRS26 racing procedure you are able to signal individual recalls by default.
 
 ### Gate Start
 
+The Gate Start racing procedure should be used for races using a gate (or rabbit or gate launch) start. We've seen some variations of the implementation of a gate start, therefore you should double check with the administration team, that the Gate Start racing procedure is correctly configured fitting your regatta's sailing instructions.
+
+1. At **any time** you are able to configure the following:
+  * **Pathfinder:** If enabled for your regatta, you are able to set the pathfinder. You have to enter the pathfinder's sailing identifier.
+  * **Gate launch stop time:** Before the race starts, you have to set the gate launch stop time. This time determines how many minutes after the start the gate launch will stop.
+  * **Golf down time:** If enabled for your regatta, you have to set the additional golf down time. This time determines how many minutes _after the gate launch has stopped_, the starting line will be closed. If your regatta is configured to not use an additional golf down time, the starting line will close after the gate launch has stopped.
+2. **8 minutes** before start the warning signal is set. Class flag (as configured) over Golf is displayed.
+3. **4 minutes** before start the preparatory signal is set. Papa flag is displayed.
+4. **1 minute** before start the one minute warning is set. Papa flag is removed.
+5. **At start** Class flag is removed.
+6. After the **gate launch stop** time has expired the golf flag is hoisted to half-mast. The gate launch stops. This step is not yet visualized in the app.
+7. After the additional **golf down** time has expired the golf is removed. The starting line is closed. If you're regatta is configured to not use the additional golf down time, the starting line will close after the gate launch stop time is expired.
+
+By default you are not able to signal individual recalls for the Gate Start racing procedure.
+
 ### ESS Start
 
+The ESS racing procedure models the starting sequence used at the Extreme Sailing Series.
+
+1. **4 minutes** before start AP flag is removed.
+2. **3 minutes** before start a flag indicating a 3 is displayed.
+3. **2 minutes** before start a flag indicating a 2 is displayed. The previous flag is removed.
+3. **1 minutes** before start a flag indicating a 1 is displayed. The previous flag is removed.
+4. **At start** the one minute flag is removed.
+
+By default you are able to signal individual recalls for the ESS racing procedure.
+
+Additionally you are able to enter the **finishing list** on the race finishing information screen. Just drag and drop the available sailors from the right to their correct position on the left. You are able to reorder them as you need. **Be sure to confirm your finishing list after the race is finished**. Click on the 'Confirm Competitors* buttons after you have finished the race.
+
 ### Basic Countdown Start
+
+Use the Basic Countdown racing procedure whenever all the other procedures do not match your needs. There are no flags used in the starting sequence, it is just a countdown to the scheduled starting time.
 
 ## Signaling a course change
 <a name="coursechange"></a>
