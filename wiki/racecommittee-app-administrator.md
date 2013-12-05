@@ -91,7 +91,7 @@ In the top right corner three dots indicate the connectivity status. If there is
 
 If your device users are experience persistent connectivity issues advice them to click on the three red dots. This will display further information including the last successful sent time. Recheck that the device has an overall network connectivity and check if your server is not accepting the data sent by the device. This might be the case when the RaceCommittee App is trying to send data for already deleted/renamed regattas.
 
-![Expert view](wiki/images/rcapp/app_expert.jpg)
+![Expert view](images/rcapp/app_expert.jpg)
 
 Selecting the "Expert information" option you'll have access to the expert information screen. This screen gives you the chance to have a look at all the data which could not be sent. Additionally you stop the device from trying to send this data by clicking on "Clear Events".
 
@@ -107,4 +107,4 @@ For further fault localization the app maintains runtime-logs. They are stored o
 
 In the case of a crash due to a unchecked exception to app writes to a crash log located in
 
-   /sd/racecommittee/DATE_crash.log
+    /sd/racecommittee/DATE_crash.log
