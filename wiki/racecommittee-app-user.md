@@ -109,6 +109,10 @@ In the top right corner three dots indicate the connectivity status. If there is
 
 If the dots stay red contact the administration team or see the [[administration wiki|wiki/racecommittee-app-administrator]].
 
+### Reload all data
+
+Lorem.
+
 ### Crashes
 
 If the app crashes it will try to restart. You'll have to re-logon onto your course area. The previous state of your managed race will be restored, including unsent changes and data.
