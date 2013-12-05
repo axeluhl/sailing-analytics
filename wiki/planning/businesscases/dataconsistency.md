@@ -1,17 +1,12 @@
 # Data Consistency
 
-## Rationale
-
-## Purpose
-
-## Features
-
 ## Description
 
-## Synergies
+### Rationale
 
-## Risk
+### Purpose
 
+### Features
 
 ## Minutes from Initial Brainstorming Meeting (December 2, 2013)
 
