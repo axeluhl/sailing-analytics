@@ -20,21 +20,22 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
     
-    public IgtimiConnectionImpl(IgtimiConnectionFactory connectionFactory, Account account) {
+    public IgtimiConnectionImpl(IgtimiConnectionFactoryImpl connectionFactory, Account account) {
         this.connectionFactory = connectionFactory;
         this.account = account;
     }
@@ -160,6 +161,12 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         return result;
     }
     
+
+    @Override
+    public LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers, BulkFixReceiver receiver) throws Exception {
+        return new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, getAccount(), receiver);
+    }
+
     private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,
             String deviceSerialNumber, Type type) {
         Map<Type, DynamicTrack<Fix>> mapForDevice = result.get(deviceSerialNumber);

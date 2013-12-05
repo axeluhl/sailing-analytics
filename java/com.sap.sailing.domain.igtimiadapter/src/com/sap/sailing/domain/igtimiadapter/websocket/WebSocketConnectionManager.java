@@ -25,13 +25,14 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 
-public class WebSocketConnectionManager extends WebSocketAdapter {
+public class WebSocketConnectionManager extends WebSocketAdapter implements LiveDataConnection {
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
     private static enum TargetState { OPEN, CLOSED };
     private TargetState targetState;
     private final WebSocketClient client;
@@ -46,7 +47,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceSerialNumbers, Account account, BulkFixReceiver receiver) throws Exception {
+    public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account, BulkFixReceiver receiver) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
         this.account = account;
@@ -69,6 +70,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
      *            use 0 to wait indefinitely
      * @return <code>true</code> if the connection is established before the timeout occurred
      */
+    @Override
     public boolean waitForConnection(long timeoutInMillis) throws InterruptedException {
         long startedToWait = System.currentTimeMillis();
         synchronized (this) {
@@ -190,7 +192,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
         }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
     }
 
-    public void reconnect() throws IOException, IllegalStateException, ParseException, URISyntaxException {
+    private void reconnect() throws IOException, IllegalStateException, ParseException, URISyntaxException {
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {

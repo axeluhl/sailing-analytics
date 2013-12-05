@@ -17,8 +17,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 
 @Path(AuthorizationCallback.V1)
 public class AuthorizationCallback {
@@ -27,7 +27,7 @@ public class AuthorizationCallback {
     private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
     static final String V1 = "/v1";
     static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
     
     public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         connectionFactory = Activator.getInstance().getConnectionFactory();
