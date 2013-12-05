@@ -1,5 +1,18 @@
 # Data Consistency
 
+## Rationale
+
+## Purpose
+
+## Features
+
+## Description
+
+## Synergies
+
+## Risk
+
+
 ## Minutes from Initial Brainstorming Meeting (December 2, 2013)
 
 ### Live-Delay Analysis
