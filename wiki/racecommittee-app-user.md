@@ -111,7 +111,7 @@ If the dots stay red contact the administration team or see the [[administration
 
 ### Reload all data
 
-Lorem.
+If the available course areas/regattas/races on your device aren't up to date anymore, e.g. you are missing a regatta, you can try to reload all data from the server. Click your devices menu button or select the options overflow icon (top right corner) and click 'Reload'. This will log you out of your course area.
 
 ### Crashes
 
