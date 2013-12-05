@@ -16,7 +16,39 @@ The status quo to tackle these problems is to work and improve on the data measu
 In the "Data Consistency" project, we take the new approach to gain higher stability of SAP sailing solutions by introducing robustness against raw data faults right into the heart of data processing: data structures should be able to represent raw data faults and aggregate calculations should react moderately ensuring well-definedness and consistency of visualization and all data displayed.
 
 ### Features
- 
+
+* Start Phase
+  * Check correctness of start time based on several data sources: tracker, race committee, start detection
+  * Stabilize start detection algorithms
+* Completeness Checks
+  * Considered levels: leg, race, regatta, regatta series
+  * Add completeness state "complete/incomplete" on all levels
+  * Refined calculation-behavior of measures dependent on completeness on all levels
+  * Refined display-behavior in leaderboards and comparison charts dependent on completeness on all levels
+  * Visualize completeness state
+* Connected Checks
+  * Considered entities: GPS-track, mark-track, wind measurement
+  * Add connected state "connected/disconnected" on all entities
+  * Log state changes
+  * Visualize connected state
+* Data Properties
+  * Visualize (or make accessible) data properties
+  * Sampling frequency of GPS-tracker (per competitor, on average)
+  * Number of active GPS-satellites
+  * Accuracies of measurements, especially GPS-positions and wind bearing & speed
+* Outlier detection
+  * Considered entities: GPS-track, mark-track, wind measurement
+  * Add outlier state "in/out" on all entities
+  * Detect faulty jumps in GPS-tracks and mark-tracks by checking physical limits
+  * Detect faulty noise in wind measurements
+* Correction of faulty raw data
+  * Focus: GPS-tracks, mark-tracks, wind measurements
+  * Apply interpolation and extrapolation where possible
+* Robustness of Aggregate Calculations
+  * Remove outliers from calculation
+  * Remove incomplete entities from calculation (if possible, otherwise return "n/a")
+  * Adapt to missing data or changed sampling rate
+
 ### Description
 
 The features listed above each address problems that have occurred frequently in the past while using the SAP sailing software during public events.
