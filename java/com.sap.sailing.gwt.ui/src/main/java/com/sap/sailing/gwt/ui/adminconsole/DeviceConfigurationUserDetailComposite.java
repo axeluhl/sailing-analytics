@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -20,6 +21,9 @@ public class DeviceConfigurationUserDetailComposite extends DeviceConfigurationD
     protected void setupIdentifier(Grid grid, int gridRow) {
         super.setupIdentifier(grid, gridRow);
         
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.add(identifierBox);
+        
         Button qrCodeButton = new Button("QR-Sync");
         qrCodeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -33,6 +37,7 @@ public class DeviceConfigurationUserDetailComposite extends DeviceConfigurationD
                 }
             }
         });
-        grid.setWidget(gridRow, 2, qrCodeButton);
+        panel.add(qrCodeButton);
+        grid.setWidget(gridRow, 1, panel);
     }
 }

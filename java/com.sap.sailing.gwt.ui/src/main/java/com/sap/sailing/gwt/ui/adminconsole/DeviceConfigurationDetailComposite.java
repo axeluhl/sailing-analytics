@@ -184,7 +184,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(4, 3);
+        Grid grid = new Grid(4, 2);
         int row = 0;
         setupIdentifier(grid, row++);
         setupCourseAreasBox(grid, row++);
@@ -196,7 +196,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     protected void setupIdentifier(Grid grid, int gridRow) {
         identifierBox = new TextBox();
-        identifierBox.setWidth("100%");
+        identifierBox.setWidth("80%");
         identifierBox.setText(DeviceConfigurationPanel.renderIdentifiers(matcher.clients));
         identifierBox.setReadOnly(true);
         
@@ -209,7 +209,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
         allowedCourseAreasList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(), suggestedCourseAreaNames);
-        allowedCourseAreasList.setWidth("100%");
+        allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
                 
         grid.setWidget(gridRow, 0, new Label(stringMessages.allowedCourseAreas()));
@@ -221,35 +221,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
         courseNamesList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames);
-        courseNamesList.setWidth("100%");
+        courseNamesList.setWidth("80%");
         courseNamesList.addValueChangeHandler(dirtyValueMarker);
-        
-        
-        Button generateButton = new Button(stringMessages.generate());
-        generateButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                CourseNamesGenerationDialog dialog = new CourseNamesGenerationDialog(stringMessages, new DialogCallback<List<String>>() {
-                    @Override
-                    public void ok(List<String> courseNames) {
-                        courseNamesList.setValue(courseNames);
-                    }
-
-                    @Override
-                    public void cancel() { }
-                });
-                dialog.show();
-            }
-        });
-        
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
         grid.setWidget(gridRow, 1, courseNamesList);
-        grid.setWidget(gridRow, 2, generateButton);
     }
 
     private void setupRecipientBox(Grid grid, int gridRow) {
         mailRecipientBox = new TextBox();
-        mailRecipientBox.setWidth("100%");
+        mailRecipientBox.setWidth("80%");
         mailRecipientBox.addKeyUpHandler(dirtyMarker);
         if (originalConfiguration.resultsMailRecipient != null) {
             mailRecipientBox.setText(originalConfiguration.resultsMailRecipient);
