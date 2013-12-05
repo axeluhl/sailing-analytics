@@ -9,6 +9,8 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.Track;
 
 /**
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
@@ -38,9 +40,27 @@ public interface IgtimiConnection {
 
     /**
      * All arguments are mandatory.
+     * 
+     * @param deviceSerialNumbers
+     *            the serial numbers of the devices for which to return data; these numbers can be obtained, e.g., from
+     *            {@link #getOwnedDevices()}.{@link Device#getSerialNumber() getSerialNumber()} or from
+     *            {@link #getDataAccessWindows(Permission, TimePoint, TimePoint, Iterable)}.
+     *            {@link DataAccessWindow#getDeviceSerialNumber() getDeviceSerialNumber()}.
+     * @param typeAndCompression
+     *            for each data type to be obtained, tells the compression level; <code>0.0</code> is a good default,
+     *            meaning "no compression". Compression is currently only supported for type {@link Type#gps_latlong} where
+     *            the number provided represents a maximum error in degrees of latitude and longitude.
      */
-    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
+    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
             Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException,
+            ParseException;
+    
+    /**
+     * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
+     * any type.
+     */
+    Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
 
     /**
@@ -67,14 +87,16 @@ public interface IgtimiConnection {
     Iterable<Device> getOwnedDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
     
     /**
-     * Returns all devices that this connection has access to with the requested <code>permission</code>.
+     * Returns all devices that this connection has access to with the requested <code>permission</code>. Note that
+     * these don't necessarily need to be devices owned by the user to which this connection belongs. The user only
+     * needs to have been authorized by the owner of the data to access the respective window of data.
      * 
      * @param startTime
-     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range after this
-     *            time will be returned.
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a
+     *            non-empty range after this time will be returned.
      * @param endTime
-     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a non-empty range before this
-     *            time will be returned.
+     *            optional; may be <code>null</code>. If provided, only data access windows whose time frame has a
+     *            non-empty range before this time will be returned.
      * @param deviceSerialNumbers
      *            optional; if not <code>null</code> and not empty, only data access windows for the devices identified
      *            by these serial numbers will be returned
@@ -84,4 +106,20 @@ public interface IgtimiConnection {
             ParseException;
 
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Same as {@link #getResourceData(TimePoint, TimePoint, Iterable, Type...)}, but the resulting {@link Fix}es are
+     * grouped into {@link Track}s per fix type and per device.
+     * 
+     * @return a map whose keys are the devices' serial numbers and whose values are the fixes produced by the device
+     *         identified by the key, grouped in a map with the fix {@link Type} as its key. Note that if a device
+     *         didn't produce any fixes at all under the requested parameters, its serial number may not appear as a key
+     *         in the map. Note further that should a device not have produced fixes of a given type, that type won't
+     *         appear as a key in the map for that device.
+     */
+    Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
+            IOException, ParseException;
+
+    Account getAccount();
 }

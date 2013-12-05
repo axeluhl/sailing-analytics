@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,8 @@ import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
@@ -33,6 +36,11 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     public IgtimiConnectionImpl(IgtimiConnectionFactory connectionFactory, Account account) {
         this.connectionFactory = connectionFactory;
         this.account = account;
+    }
+    
+    @Override
+    public Account getAccount() {
+        return account;
     }
     
     @Override
@@ -111,11 +119,50 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
 
     @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+            Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
+        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
+    }
+
+    @Override
+    public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Map<Type, Double> typeAndCompression = new HashMap<>();
+        for (Type type : types) {
+            typeAndCompression.put(type, 0.0);
+        }
+        return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
+    }
+
+    @Override
+    public Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
+        for (Fix fix : fixes) {
+            String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();
+            Type type = fix.getType();
+            DynamicTrack<Fix> track = (DynamicTrack<Fix>) getOrCreateTrack(result, deviceSerialNumber, type);
+            track.add(fix);
+        }
+        return result;
+    }
+    
+    private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,
+            String deviceSerialNumber, Type type) {
+        Map<Type, DynamicTrack<Fix>> mapForDevice = result.get(deviceSerialNumber);
+        if (mapForDevice == null) {
+            mapForDevice = new HashMap<>();
+            result.put(deviceSerialNumber, mapForDevice);
+        }
+        DynamicTrack<Fix> track = mapForDevice.get(type);
+        if (track == null) {
+            track = new DynamicTrackImpl<Fix>("Track for Igtimi fixes of type "+type.name()+" for "+this);
+            mapForDevice.put(type, track);
+        }
+        return track;
     }
 
     @Override

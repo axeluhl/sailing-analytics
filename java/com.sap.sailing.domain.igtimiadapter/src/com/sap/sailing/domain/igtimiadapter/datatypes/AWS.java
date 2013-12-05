@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AWS extends Fix {
+    private static final long serialVersionUID = -4044229400122127582L;
     private final Speed apparentWindSpeed;
     
     public AWS(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

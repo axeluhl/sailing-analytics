@@ -15,6 +15,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AWA extends Fix {
+    private static final long serialVersionUID = -5979975741914782196L;
     private final Bearing apparentWindAngle;
     
     public AWA(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

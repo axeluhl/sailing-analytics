@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class GpsQualityIndicator extends Fix {
+    private static final long serialVersionUID = 1112428061064399194L;
     private final int quality;
     
     public GpsQualityIndicator(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {

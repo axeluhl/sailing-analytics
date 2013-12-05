@@ -49,13 +49,12 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 
 public class TrackTest {
-    private DynamicTrackImpl<Boat, GPSFixMoving> track;
+    private DynamicGPSFixTrack<Boat, GPSFixMoving> track;
     private GPSFixMovingImpl gpsFix1;
     private GPSFixMovingImpl gpsFix2;
     private GPSFixMovingImpl gpsFix3;

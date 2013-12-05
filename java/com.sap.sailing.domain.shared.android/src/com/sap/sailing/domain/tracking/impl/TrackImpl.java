@@ -274,4 +274,13 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return result;
     }
 
+    protected boolean add(FixType fix) {
+        lockForWrite();
+        try {
+            return getInternalRawFixes().add(fix);
+        } finally {
+            unlockAfterWrite();
+        }
+    }
+
 }
