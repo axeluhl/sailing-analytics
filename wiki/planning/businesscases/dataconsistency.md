@@ -89,7 +89,7 @@ The data consistency features belong closely to the calculation procedures imple
 
 ### Risks
 
-Since this project targets to increase the robustness of SAP sailing solutions, the risk of failures should be reduced as an outcome.
+Since this project targets at increasing the robustness of SAP sailing solutions, the overall risk of failures should be reduced as an outcome.
 
 ### Prototype
 
