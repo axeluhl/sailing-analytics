@@ -64,7 +64,7 @@
 * Boat classes: names
 * Scoring schemes: score corrections
 
-### Data Properties to be visualized or accessible
+### Data properties to be visualized or accessible
 * Sampling frequency for GPS
 * Number of active GPS satellites
 * Reflect accuracies of measurements somehow on the UI, e.g. tails along GPS tracks
