@@ -1,7 +1,11 @@
 # UI-Renovation
 
+# Rationale
 After 2 years of functional growth of our SAP sailing analytics we get more and more feedback that our user interfaces are not meeting the user expectations anymore. This applies not only to external users of our solutions but also to colleagues presenting our solutions at sailing events.
 
+# Purpose
+
+# Description
 ## www.sapsailing.com
 
 We have developed a growing number of technical solutions for the sailing world, but we lack a common description of these solutions. Furthermore we get more and more external requests from interested sailing professionals to use our solutions and we would like to provide them a good entry point into our solution world. Therefore a renovation of our homepage describing our solutions is needed.
@@ -25,3 +29,9 @@ A leaderboard is actually an overall ranking for the competitors of a regatta. W
 
 ### Event/Regatta structure navigation
 tbd.
+
+# Synergies
+
+# Risks
+
+# Estimation
