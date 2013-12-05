@@ -120,7 +120,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public Account getAccountByEmail(String eMail) {
+    public Account getExistingAccountByEmail(String eMail) {
         return accountsByEmail.get(eMail);
     }
     
@@ -350,11 +350,17 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public Account getAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+    public Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException, ParseException {
+        final Account result;
         String code = authorizeAndReturnAuthorizedCode(userEmail, userPassword);
-        return obtainAccessTokenFromAuthorizationCode(code);
+        if (code != null) {
+            result = obtainAccessTokenFromAuthorizationCode(code);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private String signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
@@ -409,10 +415,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * Parses the form in the <code>autorizationForm</code> response and posts it by submitting the form that contains
      * the commit button with the value "Authorize". If a redirect strategy is set on the <code>client</code> it will
      * see the redirect URL in the <code>Location</code> header. The redirection target is closed immediately.
-     * @throws ClassCastException 
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
-     * @throws ClassNotFoundException 
      */
     private void authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client)
             throws IllegalStateException, SAXException, IOException, ParserConfigurationException,

@@ -43,15 +43,16 @@ public interface IgtimiConnectionFactory {
      * Matches <code>eMail</code> with the e-mail information retrieved from the "account" service earlier when an access
      * token was registered.
      */
-    Account getAccountByEmail(String eMail);
+    Account getExistingAccountByEmail(String eMail);
     
     /**
-     * Tries to authorize our client on behalf of a user identified by e-mail and password.
+     * Tries to authorize our client on behalf of a user identified by e-mail and password. If successful, the
+     * account data and the relevant OAuth access token will be stored persistently.
      * 
      * @return the account with which a caller can then {@link #connect obtain a connection} for the data that the user
      *         identified by <code>userEmail</code> and <code>userPassword</code> shares with our client.
      */
-    Account getAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+    Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException, ParseException;
 
