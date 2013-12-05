@@ -27,7 +27,8 @@
     <string name="choose_start_mode_flag">Choose a start mode flag</string>
     <string name="abort_starting_phase">Abort the starting phase</string>
     <string name="abort_running_race">Abort the race</string>
-    <string name="choose_xray_flag_up">Set Individual Recall</string>
+    <string name="choose_xray_flag_up">Display Individual Recall</string>
+    <string name="choose_xray_flag_down">Remove Individual Recall</string>
     <string name="choose_first_substitute_flag">General Recall</string>
     <string name="choose_blue_flag">Begin finish phase</string>
     <string name="flag_ap">AP Flag</string>

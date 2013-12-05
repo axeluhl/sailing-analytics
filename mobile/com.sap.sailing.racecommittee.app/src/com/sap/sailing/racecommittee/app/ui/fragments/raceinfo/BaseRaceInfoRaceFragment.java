@@ -112,6 +112,10 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         }
         return false;
     }
+    
+    protected void onIndividualRecallChanged(boolean displayed) {
+        // overwrite in derived fragments
+    }
 
     private FlagPole getMostInterestingFlagPole(List<FlagPole> poles) {
         for (FlagPole pole : poles) {
@@ -140,6 +144,16 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             setupUi();
             flagPoleCache = null;
+        }
+        
+        @Override
+        public void onIndividualRecallDisplayed(ReadonlyRacingProcedure racingProcedure) {
+            onIndividualRecallChanged(true);
+        }
+        
+        @Override
+        public void onIndividualRecallRemoved(ReadonlyRacingProcedure racingProcedure) {
+            onIndividualRecallChanged(false);
         }
     }
 }

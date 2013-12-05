@@ -26,9 +26,11 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     private ImageButton abortButton;
     private ImageButton finishingButton;
     private ImageButton generalRecallButton;
-    private ImageButton individualRecallButton;
     private TextView startCountUpTextView;
     private TextView nextCountdownTextView;
+
+    protected ImageButton individualRecallButton;
+    protected TextView individualRecallLabel;
     
     private FlagPoleStateRenderer flagRenderer;
     
@@ -54,6 +56,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         finishingButton = (ImageButton) getView().findViewById(R.id.race_running_base_finishing);
         generalRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_general_recall);
         individualRecallButton = (ImageButton) getView().findViewById(R.id.race_running_base_individual_recall);
+        individualRecallLabel = (TextView) getView().findViewById(R.id.race_running_base_individual_recall_label);
         
         if (getRacingProcedure().hasIndividualRecall()) {
             individualRecallButton.setOnClickListener(new OnClickListener() {
@@ -67,9 +70,9 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                     }
                 }
             });
+            onIndividualRecallChanged(getRacingProcedure().isIndividualRecallDisplayed());
         } else {
             individualRecallButton.setVisibility(View.GONE);
-            TextView individualRecallLabel = (TextView) getView().findViewById(R.id.race_running_base_individual_recall_label);
             individualRecallLabel.setVisibility(View.GONE);
         }
         
@@ -125,10 +128,17 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     }
     
     @Override
+    protected void onIndividualRecallChanged(boolean displayed) {
+        int textId = displayed ? (R.string.choose_xray_flag_down) : (R.string.choose_xray_flag_up);
+        individualRecallLabel.setText(getString(textId));
+    }
+    
+    @Override
     protected void setupUi() {
+        ProcedureType procedure = getRacingProcedure();
         TimePoint startTime = getRaceState().getStartTime();
         if (startTime != null) {
-            flagRenderer.render(getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now()));
+            flagRenderer.render(procedure.getActiveFlags(startTime, MillisecondsTimePoint.now()));
         }
     }
 
@@ -137,5 +147,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         fragment.setArguments(getRecentArguments());
         fragment.show(getFragmentManager(), "dialogFinishingTime");
     }
+    
 
 }
