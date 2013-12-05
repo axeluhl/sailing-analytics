@@ -58,7 +58,7 @@ You are still able to **abort** the race (AP or November flag) and signal a **ge
 
 ![A running race](/wiki/images/rcapp/app_running.jpg)
 
-If active for your configuration/regatta you are able to signal an **individual recall** (X-Ray flag). Currently there you're not able to enter the competitors violating the starting line. The X-Ray flag will be removed after 4 minutes automatically. You can always remove it before the timer terminates.
+If active for your configuration/regatta you are able to signal an **individual recall** (X-Ray flag). Currently you're not able to enter the competitors violating the starting line. The X-Ray flag will be removed after 4 minutes automatically. You can always remove it before the timer terminates by clicking on "individual recall" again.
 
 When the race is about to finish (finishing vessel displays blue flag, first finisher crosses the line, last leg,...) click the blue flag to **start the finishing phase**.
 
