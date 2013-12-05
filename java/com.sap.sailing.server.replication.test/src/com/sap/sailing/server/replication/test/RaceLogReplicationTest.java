@@ -13,18 +13,17 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -358,8 +357,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         compareMarks(masterGate.getLeft(), replicatedGate.getLeft());
         compareMarks(masterGate.getRight(), replicatedGate.getRight());
         
-        assertEquals(masterCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
-        assertEquals(replicatedCourse.getLastWaypoint().getPassingInstructions(), NauticalSide.PORT);
+        assertEquals(masterCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(replicatedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(masterCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(replicatedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         

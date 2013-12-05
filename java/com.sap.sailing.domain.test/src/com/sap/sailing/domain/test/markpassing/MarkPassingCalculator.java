@@ -15,7 +15,6 @@ public class MarkPassingCalculator  {
     // TODO Prepare for Polars :(
     // TODO How should Edges between the proxy start and end be treated
     // TODO Make sure the functions return the right probability
-    // TODO Connection to rest of infrastructure
     // TODO Feldmann issue, also for marks
     // TODO Use Wind/Maneuver analysis
     // TODO Build good test framework that test incremental calculation, tricky cases, ...

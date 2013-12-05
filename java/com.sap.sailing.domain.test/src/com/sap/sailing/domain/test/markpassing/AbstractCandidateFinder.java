@@ -11,5 +11,5 @@ public interface AbstractCandidateFinder {
     
     public LinkedHashMap<Competitor, List<Candidate>> getAllCandidates();
     
-    public Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(List<GPSFix> fixes);
+    public LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> getCandidateDeltas(List<GPSFix> fixes);
 }
