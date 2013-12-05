@@ -106,7 +106,7 @@ For the RRS26 racing procedure you are able to signal individual recalls by defa
 
 ### Gate Start
 
-The Gate Start racing procedure should be used for races using a gate (or rabbit or gate launch) start. We've seen some variations of the implementation of a gate start, therefore you should double check with the administration team, that the Gate Start racing procedure is correctly configured fitting your regatta's sailing instructions.
+The Gate Start racing procedure should be used for races using a gate (or rabbit or gate launch) start. We've seen some variations of the implementation of a gate start, therefore you should double check with the administration team that the Gate Start racing procedure is correctly configured fitting your regatta's sailing instructions.
 
 1. At **any time** you are able to configure the following:
   * **Pathfinder:** If enabled for your regatta, you are able to set the pathfinder. You have to enter the pathfinder's sailing identifier.
