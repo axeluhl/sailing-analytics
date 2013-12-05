@@ -341,6 +341,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             return null;
         }
         @Override
+        public SpeedWithBearing add(SpeedWithBearing other) {
+            return null;
+        }
+        @Override
         public int compareTo(Speed o) {
             return 0;
         }

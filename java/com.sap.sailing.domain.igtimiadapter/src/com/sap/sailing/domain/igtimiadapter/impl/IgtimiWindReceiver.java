@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +59,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private final DynamicTrack<HDGM> hdgmTrack;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
-    private final Set<WindListener> listeners;
+    private final ConcurrentHashMap<WindListener, WindListener> listeners;
     
     private class FixReceiver extends IgtimiFixReceiverAdapter {
         @Override
@@ -102,7 +101,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     public IgtimiWindReceiver(String deviceSerialNumber) {
         receiver = new FixReceiver();
         declinationService = DeclinationService.INSTANCE;
-        listeners = new ConcurrentSkipListSet<>();
+        listeners = new ConcurrentHashMap<>();
         awaTrack = new DynamicTrackImpl<>("AWA Track for Igtimi wind track for device "+deviceSerialNumber);
         awsTrack = new DynamicTrackImpl<>("AWS Track for Igtimi wind track for device "+deviceSerialNumber);
         gpsTrack = new DynamicTrackImpl<>("GPS Track for Igtimi wind track for device "+deviceSerialNumber);
@@ -142,11 +141,11 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     }
 
     public void addListener(WindListener listener) {
-        listeners.add(listener);
+        listeners.put(listener, listener);
     }
     
     public void notifyListeners(Wind wind) {
-        for (WindListener listener : listeners) {
+        for (WindListener listener : listeners.keySet()) {
             listener.windDataReceived(wind);
         }
     }
@@ -165,12 +164,36 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         if (awa != null && aws != null && pos != null && heading != null) {
             Bearing apparentWindDirection = heading.add(awa);
             SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
+            /*
+             * Hint from Brent Russell from Igtimi, at 2013-12-05 on the question whether to use GpsLatLong to improve
+             * precision of boat speed / coarse over SOG/COG measurements:
+             * 
+             * "Personally I would use COG/SOG exclusively, and if unhappy with the result add a small amount of
+             * smoothing and consider dropping samples as outliers if they cause a SOG discontinuity. The latter might
+             * happen as a satellite is dropped/acquired - and I'd expect to see a time correlated position jump as
+             * well. Probably not though a direction/speed correlation :)
+             * 
+             * All our GPS systems are using Doppler to calculate COG/SOG and this should be the most accurate measure.
+             * I don't believe that delta position really adds any more "truth" to the measurement of physical reality,
+             * if that makes sense. I'd trust d-p even less at low speeds, where you'll see the most disagreement. Also
+             * there is a significant quantisation noise error in the d-p calculations from the GPS resolution too, so
+             * you'd have to smooth it before averaging - possibly in a speed dependent way.
+             * 
+             * Remember that Doppler COG/SOG is using the same raw satellite measurements that are being used to
+             * calculate position, just the algorithm is different. I suspect that merging the two might be, in
+             * practice, just a slightly indirect way of averaging. If you like the central limit theorem in action over
+             * the set of algorithms!
+             * 
+             * So again, my personal preference would be to work with the data that should be the most accurate
+             * (COG/SOG) and consider algorithms that handle smoothing of that data best."
+             */
             Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(), timePoint);
             Speed sog = getSOG(timePoint, sogPair);
             Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(), timePoint);
             Bearing cog = getCOG(timePoint, cogPair);
             SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
-            result = new WindImpl(pos, timePoint, new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection));
+            SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
+            result = new WindImpl(pos, timePoint, trueWindSpeedAndDirection);
         } else {
             result = null;
         }
@@ -194,7 +217,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                         new ScalableBearing(awaPair.getB().getApparentWindAngle()), awaPair.getB().getTimePoint());
             }
         }
-        return awaFrom.reverse();
+        return awaFrom == null ? null : awaFrom.reverse();
     }
 
     private Speed getAWS(TimePoint timePoint, Pair<AWS, AWS> awsPair) {
@@ -332,9 +355,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
 
     private <V, T> T timeBasedAgerage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
         final T acc;
-        long timeDiff1 = Math.abs(timePoint1.asMillis() - timePoint.asMillis());
-        long timeDiff2 = Math.abs(timePoint2.asMillis() - timePoint.asMillis());
-        acc = value1.multiply(timeDiff2).add(value2.multiply(timeDiff1)).divide(timeDiff1 + timeDiff2);
+        if (timePoint1.equals(timePoint2)) {
+            acc = value1.add(value2).divide(2);
+        } else {
+            long timeDiff1 = Math.abs(timePoint1.asMillis() - timePoint.asMillis());
+            long timeDiff2 = Math.abs(timePoint2.asMillis() - timePoint.asMillis());
+            acc = value1.multiply(timeDiff2).add(value2.multiply(timeDiff1)).divide(timeDiff1 + timeDiff2);
+        }
         return acc;
     }
 
