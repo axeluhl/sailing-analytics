@@ -31,9 +31,13 @@ Kuruh, Kuruh,...
 
 intro-text zu racestate, was ist das, wo kann ich es nutzen
 
-### Adding a new UI
+### Adding a new user interface
 
-text 
+text zu den listener
+
+#### Implementing a RacingProcedurePrerequisite.Resolver
+
+nun.
 
 ### Adding a new racing procedure
 
