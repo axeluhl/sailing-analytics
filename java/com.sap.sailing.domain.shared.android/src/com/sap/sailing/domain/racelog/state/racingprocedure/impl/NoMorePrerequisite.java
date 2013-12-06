@@ -14,16 +14,18 @@ public class NoMorePrerequisite extends BaseRacingProcedurePrerequisite implemen
 
     @Override
     public void resolve(Resolver resolver) {
+        this.resolver = resolver;
         setStartTime();
     }
 
     @Override
     public void fulfillWithDefault() {
-        setStartTime();
+        throw new UnsupportedOperationException("You should not be able to cal me!");
     }
 
     private void setStartTime() {
         function.execute();
+        resolver.onFulfilled();
     }
 
     @Override
