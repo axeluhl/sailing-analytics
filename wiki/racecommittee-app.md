@@ -31,7 +31,7 @@ Kuruh, Kuruh,...
 
 The _RaceState_ (and its read-only variation _ReadonlyRaceState_) should be the only way you query and change the state of race (i.e. the state of a _RaceLog_). The _RaceState_ analyzes the content of its underlying _RaceLog_ for you and provides a clear interface to several aspects of your race, including its start time, its finished time, the selected course design, etc.
 
-A _RaceState_ always has a _RacingProcedure_ attached to it. Whenever racing procedure type is set by a call to _RaceState#setRacingProcedureType# the _RacingProcedure_ object will be recreated (even when the type was not changed).
+A _RaceState_ always has a _RacingProcedure_ attached to it. Whenever racing procedure type is set by a call to _RaceState#setRacingProcedureType_ the _RacingProcedure_ object will be recreated (even when the type was not changed).
 
 See the code documentation for further details.
 
@@ -41,7 +41,7 @@ When writing a user interface for the state of a _RaceLog_ / race you should use
 
 Since your UI should get all updates, you should set a _RaceStateEventScheduler_ on the _RaceState_. This enables automatic events to be triggered by the _RacingProcedure_ (e.g. when the active flags of the starting sequence have changed). See below on how to implement a _RaceStateEventScheduler_.
 
-Using a _RaceState_ for your UI you want to leverage the callback mechanisms rather than re-creating one-shot _RaceState_s and querying their status over and over again. Register your _RaceStateChangedListener_ on the _RaceState_ and your _RacingProcedureChangedListener_ on its _RacingProcedure_. You should re-register your _RacingProcedure_ listener whenever _RaceStateChangedListener#onRacingProcedureChanged_ is called. Keep in mind that depending on the type of the _RacingProcedure_ there might be additional callback methods available (e.g. for a RRS26 race there is a _RRS26ChangedListener_).
+Using a _RaceState_ for your UI you want to leverage the callback mechanisms rather than re-creating one-shot _RaceStates_ and querying their status over and over again. Register your _RaceStateChangedListener_ on the _RaceState_ and your _RacingProcedureChangedListener_ on its _RacingProcedure_. You should re-register your _RacingProcedure_ listener whenever _RaceStateChangedListener#onRacingProcedureChanged_ is called. Keep in mind that depending on the type of the _RacingProcedure_ there might be additional callback methods available (e.g. for a RRS26 race there is a _RRS26ChangedListener_ ).
 
 The last step is to implement a _RacingProcedurePrerequisite.Resolver_ to support setting a new start time in your UI. See below for a walk-through.
 

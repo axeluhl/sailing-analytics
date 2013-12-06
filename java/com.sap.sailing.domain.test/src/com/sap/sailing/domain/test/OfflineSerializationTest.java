@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -97,7 +98,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     // see bug 1605
     @Test
     public void testSerializingOverallLeaderboardWithFactorOnColumn() throws ClassNotFoundException, IOException {
-        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", "Alpha"));
+        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
         final LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);

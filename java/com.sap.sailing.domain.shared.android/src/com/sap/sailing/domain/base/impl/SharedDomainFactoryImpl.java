@@ -251,7 +251,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
     
     @Override
-    public CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name) {
+    public CourseArea getOrCreateCourseArea(UUID courseAreaId, String name) {
         CourseArea result = getExistingCourseAreaById(courseAreaId);
         if (result == null) {
             result = new CourseAreaImpl(name, courseAreaId);
