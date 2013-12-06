@@ -4,12 +4,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
@@ -18,11 +13,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -32,11 +24,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
-import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -96,67 +84,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
             BundleContext context) {
         @SuppressWarnings("unchecked")
         ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = mock(ServiceTracker.class);
-        when(result.getService()).thenReturn(new TracTracAdapterFactory() {
-            @Override
-            public TracTracAdapter getOrCreateTracTracAdapter(DomainFactory baseDomainFactory) {
-                return new TracTracAdapter() {
-                    
-                    @Override
-                    public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL, boolean loadClientParams)
-                            throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public com.sap.sailing.domain.tractracadapter.DomainFactory getTracTracDomainFactory() {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
-                            throws Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
-                            String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public RacesHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
-                            URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
-                            TimePoint trackingEndTime, RaceLogStore raceLogStore, long timeoutForReceivingRaceDefinitionInMilliseconds,
-                            boolean simulateWithStartTimeNow, String tracTracUsername, String tracTracPassword)
-                            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public RacesHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
-                            URI courseDesignUpdateURI, RaceLogStore raceLogStore, long timeoutInMilliseconds, String tracTracUsername,
-                            String tracTracPassword) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                    
-                    @Override
-                    public Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI,
-                            URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
-                            String tracTracPassword, RaceLogStore raceLogStore) throws MalformedURLException, FileNotFoundException,
-                            URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException, Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                };
-            }
-        });
+        when(result.getService()).thenReturn(TracTracAdapterFactory.INSTANCE);
         return result;
     }
 
