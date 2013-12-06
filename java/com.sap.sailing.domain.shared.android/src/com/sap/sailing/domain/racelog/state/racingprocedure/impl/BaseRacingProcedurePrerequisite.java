@@ -32,7 +32,10 @@ public abstract class BaseRacingProcedurePrerequisite implements RacingProcedure
      */
     protected final TimePoint originalStartTime;
 
-    private Resolver resolver;
+    /**
+     * The resolver
+     */
+    protected Resolver resolver;
 
     public BaseRacingProcedurePrerequisite(FulfillmentFunction function, RacingProcedure procedure,
             TimePoint originalNow, TimePoint originalStartTime) {
