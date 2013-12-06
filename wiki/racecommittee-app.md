@@ -37,7 +37,19 @@ text zu den listener
 
 #### Implementing a RacingProcedurePrerequisite.Resolver
 
-nun.
+When writing a new user interface for the _RaceState_ your UI code has to be capable of fulfilling possible _RacingProcedurePrerequisites_. Such a Prerequisite may occur when you're requesting a new start time on the _RaceState_. The call to _RaceState#requestNewStartTime_ takes a _RacingProcedurePrerequisite.Resolver_, which will be in charge of fulfilling prerequisites.
+
+The _RacingProcedurePrerequisite.Resolver_ is an asynchronous interface passing you specific prerequisites demanding to be fulfilled. In your implementation of the interface show an appropiate dialog-window or something similar and be sure to call the specific _fulfilled_ method on the passed prerequisite when done. This will trigger the _RaceState_ to check for further prerequisites. When you've fulfilled everything your resolver's _onFulfilled_ method will be called. Afterwards the requested start time will be set.
+
+**How does the resolving work**
+
+On call to _RaceState#requestNewStartTime_ the _RaceState_ creates an anonymous function (called _FulfillmentFunction_) to be exected when all prerequistes are fulfilled. This function simply sets the start time on the _RaceState_ as requested.
+
+Next the _RaceState_ asks its _RacingProcedure_ for any prerequisites. It does so by calling _RacingProcedure#checkPrerequisitesForStart_ passing the requested start time and the _FulfillmentFunction_. The returned _RacingProcedurePrerequisite_ will be resolved by your resolver.
+
+To resolve a prerequisites against a resolver, _RacingProcedurePrerequisite#resolve_ is called passing the resolver. This method implements a simple double dispatch visitor pattern. Specific implementations will call their specific _fulfilment_ method on the resolver (see above). After the resolver has done its work for this prerequisite it will call the specific _fulfilled_ method. This will trigger the base _BaseRacingProcedurePrerequisite#fulfilled_ method, which checks for the next prerequisite on the _RacingProcedure_ (passing down the start time and the fulfillment function) and resolves it against the same resolver object.
+
+This chain continues until the _RacingProcedure_ detects that there are no further prerequisites. It will return a special type of _RacingProcedurePrerequisite_, the _NoMorePrerequisite_. On resolve a _NoMorePrerequisite_ executes the fulfillment function and won't call _BaseRacingProcedurePrerequisite#fulfilled_ - effectively breaking the chain of resolving. The start time is set and your resolver _RacingProcedurePrerequisite.Resolver#onFulfilled_ is called.
 
 ### Adding a new racing procedure
 
