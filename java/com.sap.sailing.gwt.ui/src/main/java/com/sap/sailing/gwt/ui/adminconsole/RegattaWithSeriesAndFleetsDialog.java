@@ -105,9 +105,9 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
     private void setCourseAreaInRegatta(RegattaDTO regatta) {
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {
-            regatta.defaultCourseAreaIdAsString = null;
+            regatta.defaultCourseAreaUuidAsString = null;
         } else {
-            regatta.defaultCourseAreaIdAsString = courseArea.id;
+            regatta.defaultCourseAreaUuidAsString = courseArea.uuidAsString;
             regatta.defaultCourseAreaName = courseArea.getName();
         }
     }
@@ -125,7 +125,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
             return false;
         }
         for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-            if (courseArea.id == courseAreaIdAsString) {
+            if (courseArea.uuidAsString == courseAreaIdAsString) {
                 return true;
             }
         }
@@ -136,7 +136,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         sailingEventsListBox.addItem(stringConstants.selectSailingEvent());
         for (EventDTO event : existingEvents) {
             sailingEventsListBox.addItem(event.getName());
-            if (isCourseAreaInEvent(event, regatta.defaultCourseAreaIdAsString)) {
+            if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuidAsString)) {
                 sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                 fillCourseAreaListBox(event);
             }
@@ -162,7 +162,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         courseAreaListBox.addItem(stringMessages.selectCourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
             courseAreaListBox.addItem(courseArea.getName());
-            if (courseArea.id == regatta.defaultCourseAreaIdAsString) {
+            if (courseArea.uuidAsString == regatta.defaultCourseAreaUuidAsString) {
                 courseAreaListBox.setSelectedIndex(courseAreaListBox.getItemCount() - 1);
             }
         }

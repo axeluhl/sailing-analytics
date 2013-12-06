@@ -429,7 +429,7 @@ public interface SailingServiceAsync {
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaUuidAsString, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 
