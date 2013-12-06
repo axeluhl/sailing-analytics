@@ -192,7 +192,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     
     private void compareMarkpasses() {
         double time = System.currentTimeMillis();
-        final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace());
+        final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), false);
         time = System.currentTimeMillis() - time;
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();

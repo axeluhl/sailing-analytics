@@ -9,6 +9,12 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
+/**
+ * A CandidateFinder converts the incoming GPSFixes of competitors and marks into Candidates for each competitor.
+ * @author Nicolas Klose
+ *
+ */
+
 public interface AbstractCandidateFinder {
 
     public LinkedHashMap<Competitor, List<Candidate>> getAllCandidates();
