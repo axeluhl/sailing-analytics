@@ -1,4 +1,4 @@
-# Minutes, December 2, 2013
+# Meeting Minutes, December 2, 2013
 
 ## Initial Brainstorming Meeting
 
