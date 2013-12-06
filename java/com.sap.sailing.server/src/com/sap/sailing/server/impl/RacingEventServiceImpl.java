@@ -1219,14 +1219,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
            RegattaConfiguration newRegattaConfiguration) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
-        synchronized (regatta) {
-            CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
-            if (newCourseArea != regatta.getDefaultCourseArea()) {
-                regatta.setDefaultCourseArea(newCourseArea);
-            }
-            regatta.setRegattaConfiguration(newRegattaConfiguration);
-            mongoObjectFactory.storeRegatta(regatta);
+        CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
+        if (newCourseArea != regatta.getDefaultCourseArea()) {
+            regatta.setDefaultCourseArea(newCourseArea);
         }
+        regatta.setRegattaConfiguration(newRegattaConfiguration);
+        mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }
 
