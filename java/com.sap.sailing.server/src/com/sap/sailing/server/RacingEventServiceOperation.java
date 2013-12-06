@@ -63,7 +63,7 @@ public interface RacingEventServiceOperation<ResultType> extends OperationWithTr
 
     RacingEventServiceOperation<?> transformMoveLeaderboardColumnUpServerOp(MoveLeaderboardColumnUp moveLeaderboardColumnUp);
 
-	RacingEventServiceOperation<?> transformCreatePersistentCompetitorClientOp(CreatePersistentCompetitor createPersistentCompetitor);
+    RacingEventServiceOperation<?> transformCreatePersistentCompetitorClientOp(CreatePersistentCompetitor createPersistentCompetitor);
 
-	RacingEventServiceOperation<?> transformCreatePersistentCompetitorServerOp(CreatePersistentCompetitor createPersistentCompetitor);
+    RacingEventServiceOperation<?> transformCreatePersistentCompetitorServerOp(CreatePersistentCompetitor createPersistentCompetitor);
 }
