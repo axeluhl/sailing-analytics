@@ -1691,7 +1691,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
             InterruptedException {
-
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
@@ -1784,7 +1783,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
 
-
+            logger.info("Reading device configurations...");
             configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
             logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
             for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
