@@ -56,7 +56,7 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
 
     /**
      * Creates a copied {@link RegattaConfiguration} with all 
-     * non-null fields taken from the passed {@link RegattaConfiguration}.
+     * non-<code>null</code> fields taken from the passed {@link RegattaConfiguration}.
      */
     RegattaConfiguration merge(RegattaConfiguration update);
 
