@@ -179,4 +179,14 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public boolean load(RaceLogEvent event) {
         return innerRaceLog.load(event);
     }
+
+    @Override
+    public Iterator<RaceLogEvent> getFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        return innerRaceLog.getFixesDescendingIterator(startingAt, inclusive);
+    }
+
+    @Override
+    public Iterator<RaceLogEvent> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        return innerRaceLog.getRawFixesDescendingIterator(startingAt, inclusive);
+    }
 }
