@@ -55,7 +55,7 @@ public class DeviceConfigurationImpl implements DeviceConfiguration {
     }
     
     public DeviceConfiguration copy() {
-        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(regattaConfiguration.copy());
+        DeviceConfigurationImpl copyConfiguration = new DeviceConfigurationImpl(regattaConfiguration.clone());
         copyConfiguration.setAllowedCourseAreaNames(allowedCourseAreaNames);
         copyConfiguration.setByNameDesignerCourseNames(byNameDesignerCourseNames);
         copyConfiguration.setResultsMailRecipient(resultsMailRecipient);

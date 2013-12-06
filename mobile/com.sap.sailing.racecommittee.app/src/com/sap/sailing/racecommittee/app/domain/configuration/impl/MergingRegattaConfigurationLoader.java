@@ -17,7 +17,7 @@ public class MergingRegattaConfigurationLoader implements ConfigurationLoader<Re
     @Override
     public RegattaConfiguration load() {
         RegattaConfiguration base = globalConfigurationLoader.load();
-        RegattaConfiguration update = localConfiguration.copy();
+        RegattaConfiguration update = localConfiguration.clone();
         return base.merge(update);
     }
 

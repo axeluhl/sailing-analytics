@@ -74,7 +74,8 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         this.basicConfiguration = basicConfiguration;
     }   
     
-    public RegattaConfiguration copy() {
+    @Override
+    public RegattaConfiguration clone() {
         RegattaConfigurationImpl copy = new RegattaConfigurationImpl();
         copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
         copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
@@ -87,7 +88,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     @Override
     public RegattaConfiguration merge(RegattaConfiguration update) {
-        RegattaConfigurationImpl target = (RegattaConfigurationImpl) this.copy();
+        RegattaConfigurationImpl target = (RegattaConfigurationImpl) this.clone();
 
         if (update.getDefaultCourseDesignerMode() != null) {
             target.setDefaultCourseDesignerMode(update.getDefaultCourseDesignerMode());

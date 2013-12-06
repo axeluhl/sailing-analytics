@@ -21,7 +21,7 @@ public class EmptyRegattaConfiguration extends RegattaConfigurationImpl implemen
         setGateStartConfiguration(new GateStartConfigurationImpl());
         setESSConfiguration(new ESSConfigurationImpl());
         setBasicConfiguration(new RacingProcedureConfigurationImpl());
-        return copy();
+        return clone();
     }
 
     @Override

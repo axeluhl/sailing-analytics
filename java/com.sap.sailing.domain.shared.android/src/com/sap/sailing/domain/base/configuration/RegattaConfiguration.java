@@ -13,7 +13,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
  * Interface holding configuration options for a Regatta, including configurations for 
  * all types of a {@link RacingProcedure}s.
  */
-public interface RegattaConfiguration extends Serializable {
+public interface RegattaConfiguration extends Serializable, Cloneable {
     
     /**
      * Gets the default {@link CourseDesignerMode} for races configured.
@@ -52,7 +52,7 @@ public interface RegattaConfiguration extends Serializable {
     /**
      * Copy me.
      */
-    RegattaConfiguration copy();
+    RegattaConfiguration clone();
 
     /**
      * Creates a copied {@link RegattaConfiguration} with all 

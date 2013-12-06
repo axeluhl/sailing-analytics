@@ -69,7 +69,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         basic.setHasInidividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
         configuration.setBasicConfiguration(basic);
 
-        return configuration.copy();
+        return configuration.clone();
     }
 
     @Override
