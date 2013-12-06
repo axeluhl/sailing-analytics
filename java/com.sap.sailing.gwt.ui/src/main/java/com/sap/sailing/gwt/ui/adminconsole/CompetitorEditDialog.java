@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.impl.HtmlColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
+    private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
     private final StringMessages stringMessages;
@@ -40,13 +42,18 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 .cancel(), new Validator<CompetitorDTO>() {
                     @Override
                     public String getErrorMessage(CompetitorDTO valueToValidate) {
-                        final String result;
+                        String result = null;
                         if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                             result = stringMessages.pleaseEnterAName();
                         } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
                             result = stringMessages.pleaseEnterASailNumber();
-                        } else {
-                            result = null;
+                        } else if(valueToValidate.getDisplayColor() != null) {
+                            String displayColor = valueToValidate.getDisplayColor();
+                            try {
+                                new HtmlColor(displayColor);
+                            } catch (IllegalArgumentException e) {
+                                result = "The display color must be in HTML color format, e.g. #ff0000";
+                            }
                         }
                         return result;
                     }
@@ -54,6 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         this.name = createTextBox(competitorToEdit.getName());
+        this.displayColorTextBox = createTextBox(competitorToEdit.getDisplayColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;
@@ -93,7 +101,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected CompetitorDTO getResult() {
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(),
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), displayColorTextBox.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */null, sailId.getText(), competitorToEdit.getIdAsString(),
@@ -103,13 +111,15 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(3, 2);
+        Grid result = new Grid(4, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
         result.setWidget(1, 1, sailId);
         result.setWidget(2, 0, new Label(stringMessages.nationality()));
         result.setWidget(2, 1, threeLetterIocCountryCode);
+        result.setWidget(3, 0, new Label(stringMessages.color()));
+        result.setWidget(3, 1, displayColorTextBox);
         return result;
     }
 

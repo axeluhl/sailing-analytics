@@ -12,9 +12,9 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 public class HSVColor implements Color {
     private static final long serialVersionUID = 7602013229606352246L;
 
-    float hue;
-    float saturation;
-    float brightness;
+    protected float hue;
+    protected float saturation;
+    protected float brightness;
 
     HSVColor() {
     } // for GWT serializability
@@ -121,5 +121,33 @@ public class HSVColor implements Color {
 
     public float getBrightness() {
         return brightness;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Float.floatToIntBits(brightness);
+        result = prime * result + Float.floatToIntBits(hue);
+        result = prime * result + Float.floatToIntBits(saturation);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HSVColor other = (HSVColor) obj;
+        if (Float.floatToIntBits(brightness) != Float.floatToIntBits(other.brightness))
+            return false;
+        if (Float.floatToIntBits(hue) != Float.floatToIntBits(other.hue))
+            return false;
+        if (Float.floatToIntBits(saturation) != Float.floatToIntBits(other.saturation))
+            return false;
+        return true;
     }
 }

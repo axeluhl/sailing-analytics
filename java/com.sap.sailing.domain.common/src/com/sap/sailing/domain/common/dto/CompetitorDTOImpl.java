@@ -13,18 +13,20 @@ import java.io.Serializable;
  */
 public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
     private static final long serialVersionUID = -4997852354821083154L;
+    private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
-    private String countryName;
+    private String displayColor;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
     
     CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, String displayColor, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
+        this.displayColor = displayColor;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
@@ -40,6 +42,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
+        result = prime * result + ((displayColor == null) ? 0 : displayColor.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         return result;
     }
@@ -72,6 +75,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.threeLetterIocCountryCode != null)
                 return false;
         } else if (!threeLetterIocCountryCode.equals(other.threeLetterIocCountryCode))
+            return false;
+        if (displayColor == null) {
+            if (other.displayColor != null)
+                return false;
+        } else if (!displayColor.equals(other.displayColor))
             return false;
         return true;
     }
@@ -111,4 +119,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
+    public String getDisplayColor() {
+        return displayColor;
+    }
 }

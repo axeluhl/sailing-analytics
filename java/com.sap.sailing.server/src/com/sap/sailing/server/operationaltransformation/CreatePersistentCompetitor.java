@@ -16,19 +16,21 @@ public class CreatePersistentCompetitor extends AbstractRacingEventServiceOperat
 
     private final Serializable id;
     private final String name;
+    private final String displayColor;
     private final DynamicTeam team;
     private final DynamicBoat boat;
 
-    public CreatePersistentCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {
+    public CreatePersistentCompetitor(Serializable id, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
+        this.displayColor = displayColor;
         this.team = team;
         this.boat = boat;
     }
 
     @Override
     public Competitor internalApplyTo(RacingEventService toState) {
-        return toState.getBaseDomainFactory().getOrCreateCompetitor(id, name, team, boat);
+        return toState.getBaseDomainFactory().getOrCreateCompetitor(id, name, displayColor, team, boat);
     }
 
     @Override

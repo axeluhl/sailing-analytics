@@ -209,7 +209,7 @@ public class PolarSheetGenerationServiceTest {
             waypoints.add(new WaypointImpl(null));
             waypoints.add(new WaypointImpl(null));
             ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null),
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", "#FF0000", new TeamImpl("SAP", null, null),
                     new BoatImpl("Schnelle Forelle", forelle, "GER000"));
             competitors.add(competitor);
             RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, competitors);

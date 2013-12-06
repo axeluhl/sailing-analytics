@@ -40,11 +40,11 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -77,7 +77,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
 
-    private final ColorMap<WindSource> colorMap;
+    private final ColorMapImpl<WindSource> colorMap;
 
 
     /**
@@ -96,7 +96,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
         overallDirectionMinMax = new Pair<Double, Double>(null, null);
-        colorMap = new ColorMap<WindSource>();
+        colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
                 .setZoomType(Chart.ZoomType.X)

@@ -135,7 +135,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
             result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceType),
-                    competitor.getName(), team, boat);
+                    competitor.getName(), null /* displayColor*/, team, boat);
         }
         return result;
     }

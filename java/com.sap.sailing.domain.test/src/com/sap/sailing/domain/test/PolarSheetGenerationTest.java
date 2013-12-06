@@ -85,7 +85,7 @@ public class PolarSheetGenerationTest {
                 settings, executor);
 
         BoatClass forelle = new BoatClassImpl("Forelle", true);
-        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null),
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", "#FF0000", new TeamImpl("SAP", null, null),
                 new BoatImpl("Schnelle Forelle", forelle, "GER000"));
 
         PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race,

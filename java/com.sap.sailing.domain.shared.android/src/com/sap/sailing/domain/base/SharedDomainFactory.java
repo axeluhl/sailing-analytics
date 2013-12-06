@@ -91,14 +91,14 @@ public interface SharedDomainFactory {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
     
     /**
      * Same as {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} but returns the writable
      * specialization of the {@link Competitor} interface. Use with care because the setters offered by the <code>Dynamic...</code>
      * subinterfaces don't automatically replicate or store the changes.
      */
-    DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
 
     CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
     

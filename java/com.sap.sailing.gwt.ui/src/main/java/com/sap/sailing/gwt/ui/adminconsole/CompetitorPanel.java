@@ -155,6 +155,21 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
 
+        Column<CompetitorDTO, SafeHtml> displayColorColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(CompetitorDTO competitor) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                if(competitor.getDisplayColor() != null) {
+                    sb.appendHtmlConstant("<span style=\"color: " + competitor.getDisplayColor() + ";\">");
+                    sb.appendHtmlConstant(competitor.getDisplayColor());
+                    sb.appendHtmlConstant("</span>");
+                } else {
+                    sb.appendHtmlConstant("&nbsp;");
+                }
+                return sb.toSafeHtml();
+            }
+        };
+        
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -204,6 +219,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
         competitorTable.addColumn(competitorNameColumn, stringMessages.name());
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
+        competitorTable.addColumn(displayColorColumn, stringMessages.color());
         competitorTable.addColumn(competitorIdColumn, stringMessages.id());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
@@ -216,6 +232,10 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
+        
+        if(leaderboardName != null) {
+            refreshCompetitorList();
+        }
     }
     
     private void allowUpdate(final Iterable<CompetitorDTO> competitors) {

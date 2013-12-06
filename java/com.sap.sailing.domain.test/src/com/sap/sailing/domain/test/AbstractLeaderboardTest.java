@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 
 public abstract class AbstractLeaderboardTest {
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(123, competitorName, "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

@@ -38,7 +38,7 @@ public interface CompetitorStore {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
     
     /**
      * When a competitor is queried using {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)}
@@ -75,7 +75,7 @@ public interface CompetitorStore {
      * 
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
      */
-    Competitor updateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality);
+    Competitor updateCompetitor(String idAsString, String newName, String newDisplayColor, String newSailId, Nationality newNationality);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 }

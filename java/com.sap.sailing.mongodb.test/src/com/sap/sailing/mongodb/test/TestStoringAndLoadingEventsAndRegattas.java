@@ -469,7 +469,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta regatta = createRegatta("Cologne Masters", boatClass, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl("Axel", "Axel Uhl", null, null));
+        competitors.add(new CompetitorImpl("Axel", "Axel Uhl", "#FF0000", null, null));
         Iterable<Waypoint> waypoints = Collections.emptyList();
         Course course = new CourseImpl("Course", waypoints);
         

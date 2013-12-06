@@ -66,7 +66,7 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public class DomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
-    
+
     /**
      * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
      * object's {@link Nationality#getThreeLetterIOCAcronym() IOC code}.
@@ -297,13 +297,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
-        return competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
+    public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+        return competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 
     @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat) {
-        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, team, boat);
+    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, displayColor, team, boat);
     }
 
     @Override
