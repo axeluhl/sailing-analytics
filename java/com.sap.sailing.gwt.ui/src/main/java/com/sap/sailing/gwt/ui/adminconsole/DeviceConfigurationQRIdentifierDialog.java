@@ -13,21 +13,21 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.impl.QRCodeUtils;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.QRCodeComposite;
 
 public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     
     public static final String rcAppApkPath = "/apps/com.sap.sailing.racecommittee.app.apk";
     
-    private static final String qrCodeDivId = "qr-code";
     private static final int qrCodeSize = 320;
     
     private final TextBox identifierBox;
     private final TextBox serverBox;
+    private final QRCodeComposite qrCodeComposite;
 
     protected static String getApkPath(String serverUrl) {
         if (serverUrl.endsWith("/")) {
@@ -66,10 +66,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         inputGrid.setWidget(1, 0, new Label("Server URL:"));
         inputGrid.setWidget(1, 1, serverBox);
         
-        SimplePanel qrCodeContainer = new SimplePanel();
-        qrCodeContainer.getElement().setId(qrCodeDivId);
-        qrCodeContainer.setHeight(qrCodeSize + "px");
-        qrCodeContainer.setWidth(qrCodeSize + "px");
+        qrCodeComposite = new QRCodeComposite(qrCodeSize);
         
         Button exitButton = new Button(stringMessages.close());
         exitButton.addClickHandler(new ClickHandler() {
@@ -84,8 +81,8 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         
         VerticalPanel panel = new VerticalPanel();
         panel.add(inputGrid);
-        panel.add(qrCodeContainer);
-        panel.setCellHorizontalAlignment(qrCodeContainer, HasHorizontalAlignment.ALIGN_CENTER);
+        panel.add(qrCodeComposite);
+        panel.setCellHorizontalAlignment(qrCodeComposite, HasHorizontalAlignment.ALIGN_CENTER);
         panel.add(actionPanel);
         setWidget(panel);
     }
@@ -93,35 +90,16 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     @Override
     protected void onAttach() {
         super.onAttach();
-        createQRCode(qrCodeDivId, qrCodeSize);
         generateQRCode();
     }
-    
-    public static native void createQRCode(String id, int size) /*-{
-        $wnd.qrcode = new $wnd.QRCode(id, {
-            text: "http://jindo.dev.naver.com/collie",
-            width: size,
-            height: size,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : $wnd.QRCode.CorrectLevel.H
-        });
-        $wnd.qrcode.clear();
-    }-*/;
 
     protected void generateQRCode() {
         if (identifierBox.getValue().contains("#")) {
             Window.alert("I'm not capable of generating a code for this identifier.");
         } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
             String encoded = QRCodeUtils.composeQRContent(identifierBox.getValue(), getApkPath(serverBox.getValue()));
-            generateQRImage(encoded);
+            qrCodeComposite.generateQRCode(encoded);
         }
     }
-    
-
-    public static native void generateQRImage(String content) /*-{
-        $wnd.qrcode.clear();
-        $wnd.qrcode.makeCode(content);
-}-*/;
     
 }
