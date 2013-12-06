@@ -896,6 +896,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        collection.ensureIndex(new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, 1), CompetitorJsonSerializer.FIELD_ID, /* unique */ true);
         JSONObject json = competitorSerializer.serialize(competitor);
         BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId());
         DBObject entry = (DBObject) JSON.parse(json.toString());
