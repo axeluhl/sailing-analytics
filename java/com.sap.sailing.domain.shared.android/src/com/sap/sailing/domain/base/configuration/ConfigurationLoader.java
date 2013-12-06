@@ -8,7 +8,7 @@ public interface ConfigurationLoader<ConfigurationType> {
     
     /**
      * Loads the configuration from its database.
-     * @return A final copy of {@link ConfigurationType} after loading.
+     * @return A immutable  {@link ConfigurationType}.
      */
     ConfigurationType load();
     

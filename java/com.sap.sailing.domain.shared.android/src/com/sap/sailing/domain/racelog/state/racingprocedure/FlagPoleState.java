@@ -7,6 +7,9 @@ import java.util.List;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 
+/**
+ * Allows you to query the current and state of displayed and remove flags.
+ */
 public class FlagPoleState {
     
     private final List<FlagPole> currentState;

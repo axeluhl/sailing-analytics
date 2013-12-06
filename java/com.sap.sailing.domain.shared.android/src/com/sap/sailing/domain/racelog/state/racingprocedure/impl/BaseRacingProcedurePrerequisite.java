@@ -4,11 +4,32 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
 
+/**
+ * Base class for all {@link RacingProcedurePrerequisite}.
+ * 
+ * Whenever your implementation of {@link RacingProcedurePrerequisite} is fulfilled call
+ * {@link BaseRacingProcedurePrerequisite#fulfilled()} to ensure that the next prerequisites is found and resolved.
+ */
 public abstract class BaseRacingProcedurePrerequisite implements RacingProcedurePrerequisite {
 
+    /**
+     * {@link FulfillmentFunction} that is passed to the next {@link RacingProcedurePrerequisite} until all prerequisites are fulfilled.
+     */
     protected final FulfillmentFunction function;
+    
+    /**
+     * The {@link RacingProcedure} setting the {@link RacingProcedurePrerequisite}s. 
+     */
     protected final RacingProcedure procedure;
+    
+    /**
+     * User-requested {@link TimePoint} depicting the current time.
+     */
     protected final TimePoint originalNow;
+    
+    /**
+     * User-requested new start time. 
+     */
     protected final TimePoint originalStartTime;
 
     private Resolver resolver;
@@ -28,18 +49,20 @@ public abstract class BaseRacingProcedurePrerequisite implements RacingProcedure
         RacingProcedurePrerequisite next = getNextPrerequisite();
         next.resolve(resolver);
     }
-    
+
     @Override
     public void resolve(Resolver resolver) {
         if (resolver == null) {
             throw new IllegalArgumentException("resolver must not be null");
         }
-        
+
         this.resolver = resolver;
         resolveOn(resolver);
     }
 
-
+    /**
+     * Implement in your derived type for double dispatch.
+     */
     protected abstract void resolveOn(Resolver resolver);
 
     private RacingProcedurePrerequisite getNextPrerequisite() {

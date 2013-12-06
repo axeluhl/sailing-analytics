@@ -5,6 +5,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrere
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedurePrerequisite;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.RRS26RacingProcedure;
 
+/**
+ * Easy access to the {@link RRS26RacingProcedure}.
+ */
 public abstract class BaseRRS26Prerequisite extends BaseRacingProcedurePrerequisite implements RacingProcedurePrerequisite {
 
     public BaseRRS26Prerequisite(FulfillmentFunction function, RRS26RacingProcedure procedure, TimePoint originalNow,

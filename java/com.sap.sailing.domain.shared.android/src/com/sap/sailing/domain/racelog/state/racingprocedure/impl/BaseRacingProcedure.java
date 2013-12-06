@@ -55,6 +55,10 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
      */
     public BaseRacingProcedure(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory factory,
             RacingProcedureConfiguration configuration) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("configuration must not be null");
+        }
+        
         this.raceLog = raceLog;
         this.author = author;
         this.factory = factory;

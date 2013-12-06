@@ -61,6 +61,18 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     }
     
     @Override
+    public boolean hasIndividualRecall() {
+        boolean hasRecall = super.hasIndividualRecall();
+        if (!hasRecall) {
+            return false;
+        } else if (startmodeFlagHasBeenSet) {
+            return cachedStartmodeFlag != Flags.BLACK;
+        } else {
+            return hasRecall;
+        }
+    }
+    
+    @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }

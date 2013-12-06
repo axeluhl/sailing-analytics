@@ -7,6 +7,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 public interface RacingProcedureFactory {
     
     ReadonlyRacingProcedure createRacingProcedure(RacingProcedureType type, RaceLog raceLog);
+    
     RegattaConfiguration getConfiguration();
 
 }

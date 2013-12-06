@@ -15,9 +15,11 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -73,7 +75,7 @@ public class RaceStateTest {
         assertNotNull(state.getRacingProcedure());
         assertEquals(defaultRacingProcedureType, state.getRacingProcedure().getType());
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, state.getStatus());
-        assertFalse(state.isFinishPositioningConfirmed());
+        assertNull(state.getConfirmedFinishPositioningList());
     }
     
     @Test
@@ -86,6 +88,7 @@ public class RaceStateTest {
     public void testInitialProcedureTypeConfiguration() throws Exception {
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultRacingProcedureType(RacingProcedureType.BASIC);
+        config.setBasicConfiguration(mock(RacingProcedureConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
         state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
@@ -98,6 +101,8 @@ public class RaceStateTest {
     public void testInitialProcedureTypeRaceLog() throws Exception {
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultRacingProcedureType(RacingProcedureType.BASIC);
+        config.setBasicConfiguration(mock(RacingProcedureConfiguration.class));
+        config.setESSConfiguration(mock(ESSConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
         raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, author, nowMock, "12", null, 0, RacingProcedureType.ESS));
@@ -138,7 +143,7 @@ public class RaceStateTest {
         
         state.setAborted(mock(TimePoint.class), false, Flags.NONE);
         
-        verify(listener).onAdvancePass(state);
+        // TODO: change test when interface is complete
         verifyNoMoreInteractions(listener);
     }
     
@@ -148,7 +153,7 @@ public class RaceStateTest {
         
         state.setGeneralRecall(mock(TimePoint.class));
         
-        verify(listener).onAdvancePass(state);
+        // TODO: change test when interface is complete
         verifyNoMoreInteractions(listener);
     }
     

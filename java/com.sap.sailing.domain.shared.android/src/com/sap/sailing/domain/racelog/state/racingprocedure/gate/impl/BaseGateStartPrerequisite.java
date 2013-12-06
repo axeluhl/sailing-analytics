@@ -5,6 +5,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrere
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProcedurePrerequisite;
 
+/**
+ * Easy access to the {@link GateStartRacingProcedure}.
+ */
 public abstract class BaseGateStartPrerequisite extends BaseRacingProcedurePrerequisite implements RacingProcedurePrerequisite {
 
     public BaseGateStartPrerequisite(FulfillmentFunction function, GateStartRacingProcedure procedure, TimePoint originalNow,

@@ -11,7 +11,7 @@ public interface RaceStateChangedListener {
     void onProtestTimeChanged(ReadonlyRaceState state);
     void onAdvancePass(ReadonlyRaceState state);
     /*
-     * We need to recheck the AbortFinder to enable these interface methods
+     * TODO: We need to recheck the AbortFinder to enable these interface methods
      * void onAborted(RaceState2 state);
      * void onGeneralRecall(RaceState2 state);*/
     void onFinishingPositioningsChanged(ReadonlyRaceState state);

@@ -20,6 +20,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrere
 import com.sap.sailing.domain.racelog.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
+/**
+ * Write-enabled {@link RaceState}.
+ */
 public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     private final RaceLogEventAuthor author;
@@ -46,7 +49,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
         this(raceLog, author, eventFactory, new RaceStatusAnalyzer.StandardClock(), procedureFactory);
     }
 
-    public RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
+    private RaceStateImpl(RaceLog raceLog, RaceLogEventAuthor author, RaceLogEventFactory eventFactory, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
         super(raceLog, analyzersClock, procedureFactory);
         this.author = author;
@@ -126,13 +129,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void setAborted(TimePoint timePoint, boolean isPostponed, Flags reasonFlag) {
         Flags markerFlag = isPostponed ? Flags.AP : Flags.NOVEMBER;
         raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), markerFlag, reasonFlag, true));
-        setAdvancePass(timePoint.plus(1));
     }
 
     @Override
     public void setGeneralRecall(TimePoint timePoint) {
         raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, true));
-        setAdvancePass(timePoint);
     }
 
     @Override
