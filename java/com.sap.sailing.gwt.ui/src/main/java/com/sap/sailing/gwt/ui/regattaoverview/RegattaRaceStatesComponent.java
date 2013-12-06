@@ -626,7 +626,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void fillVisibleCourseAreasInSettingsIfEmpty() {
         if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
             for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.getVisibleCourseAreas().add(courseArea.id);
+                settings.getVisibleCourseAreas().add(courseArea.uuidAsString);
             }
         }
     }

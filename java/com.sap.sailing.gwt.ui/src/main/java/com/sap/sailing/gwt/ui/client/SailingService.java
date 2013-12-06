@@ -160,7 +160,7 @@ public interface SailingService extends RemoteService {
 
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, RegattaConfigurationDTO regattaConfiguration);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaUuidAsString, RegattaConfigurationDTO regattaConfiguration);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 

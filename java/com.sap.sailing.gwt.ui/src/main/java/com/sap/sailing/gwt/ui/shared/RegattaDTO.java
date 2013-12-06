@@ -19,7 +19,7 @@ public class RegattaDTO extends NamedDTO {
     public List<RaceWithCompetitorsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
-    public String defaultCourseAreaIdAsString;
+    public String defaultCourseAreaUuidAsString;
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
 

@@ -643,7 +643,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
         }
         if (regatta.getDefaultCourseArea() != null) {
-            regattaDTO.defaultCourseAreaIdAsString = regatta.getDefaultCourseArea().getId().toString();
+            regattaDTO.defaultCourseAreaUuidAsString = regatta.getDefaultCourseArea().getId().toString();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
@@ -2813,7 +2813,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.id = courseArea.getId().toString();
+        courseAreaDTO.uuidAsString = courseArea.getId().toString();
         return courseAreaDTO;
     }
     
@@ -2899,9 +2899,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId, 
+    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaUuidAsString, 
             RegattaConfigurationDTO configurationDTO) {
-        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
+        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaUuidAsString);
         getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, convertToRegattaConfiguration(configurationDTO)));
     }
 
