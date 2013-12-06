@@ -4,7 +4,7 @@
 
 ## Introduction
 
-The RaceCommittee App is an Android 3.2 Tablet application.
+The RaceCommittee App is an Android 3.2 Tablet application. This document serves as the main information hub about the App and how to develop for it.
 
 * See the [[OnBoarding Information|wiki/onboarding]] on how to setup your local environment for building the app
 * See [[Mobile Development|wiki/mobile-development]] for general tipps on mobile development.
@@ -26,6 +26,32 @@ The Feedback a User gave to the Application and the Feedback the user gave to th
 ## Course Updates
 
 Kuruh, Kuruh,...
+
+## RaceState
+
+intro-text zu racestate, was ist das, wo kann ich es nutzen
+
+### Writing an UI
+
+text 
+
+### Adding a new racing procedure
+
+configuration!
+
+## Configuration
+
+intro-text verweis zu admin-guide
+
+### Adding a new configuration option
+
+DeviceConfiguration vs RegattaConfiguration
+merge
+PreferenceScreen and AppPreferences
+
+## RaceLog priorities and authors
+
+Bruuuum.
 
 ## Versioning
 
