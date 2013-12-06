@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -23,7 +24,7 @@ public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> 
         String name = object.get(CourseAreaJsonSerializer.FIELD_NAME).toString();
         Serializable id = (Serializable) object.get(CourseAreaJsonSerializer.FIELD_ID);
 
-        return factory.getOrCreateCourseArea(Helpers.tryUuidConversion(id), name);
+        return factory.getOrCreateCourseArea((UUID) Helpers.tryUuidConversion(id), name);
     }
 
 }

@@ -84,7 +84,7 @@ public interface SharedDomainFactory extends CompetitorFactory {
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
      * is created.
      */
-    CourseArea getOrCreateCourseArea(Serializable id, String name);
+    CourseArea getOrCreateCourseArea(UUID id, String name);
     
     /**
      * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
