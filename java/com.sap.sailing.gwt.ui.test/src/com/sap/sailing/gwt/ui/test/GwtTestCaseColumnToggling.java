@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.junit.Test;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -27,15 +30,15 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     //These objects should be created by calling GWT.create(Class c);
     private LeaderboardPanelMock leaderboardPanel;
     private MyTestSailingServiceAsync service;
-    private StringMessages sc;
+    private StringMessages stringMessages;
     
     //Test data.
     private final String LEADERBOARD_NAME = "test";
     private static final String DEFAULT_FLEET_NAME = "Default";
     private final String COLUMN1_NAME = "r1";
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
-    protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
-    protected static final String tractracTunnelHost = "10.18.206.73"; // System.getProperty("tractrac.tunnel.host", "localhost");
+    protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
+    protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private final String JSON_URL= "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
     private final String COURSE_DESIGN_UPDATE_URI = "http://tracms.traclive.dk/update_course";
@@ -52,18 +55,17 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     protected void gwtSetUp() throws Exception {
         super.gwtSetUp();
         service = GWT.create(MyTestSailingService.class);
-        sc = GWT.create(StringMessages.class);
+        stringMessages = GWT.create(StringMessages.class);
     }
 
+    @Test
     public void testColumnDeleting() {
         delayTestFinish(1000000);
-        
         listRacesInEvent();
-        
     }
     
     private void listRacesInEvent(){
-        service.listTracTracRacesInEvent(JSON_URL, false, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
+        service.listTracTracRacesInEvent(JSON_URL, /* hidden */ true, new AsyncCallback<Pair<String,List<TracTracRaceRecordDTO>>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -78,7 +80,6 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         rrDao = rr;
                     }
                 }
-                //assertNotNull("rrDao != null",rrDao);
                 assertNotNull(rrDao);
                 trackRace();
             }
@@ -86,7 +87,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.trackWithTracTrac(/* regattaToAddTo */null, Collections.singleton(rrDao), tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+        final Set<TracTracRaceRecordDTO> rrDAOs = new HashSet<TracTracRaceRecordDTO>();
+        rrDAOs.add(rrDao);
+        service.trackWithTracTrac(/* regattaToAddTo */null, rrDAOs, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                 + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
@@ -108,30 +111,39 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
-                new AsyncCallback<StrippedLeaderboardDTO>() {
-                    @Override
-                    public void onSuccess(StrippedLeaderboardDTO result) {
-                        System.out.println("Created Leaderboard "+result.name);
-                        addColumnToLeaderboard();
-                    }
+        service.removeLeaderboard(LEADERBOARD_NAME, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                fail("Failed to remove Leaderboard "+LEADERBOARD_NAME+": " + caught.getLocalizedMessage());
+                finishTest();
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        fail("Failed to create Leaderboard." + caught.getLocalizedMessage());
-                        finishTest();
-                    }
-                });
+            @Override
+            public void onSuccess(Void result) {
+                service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTO result) {
+                                System.out.println("Created Leaderboard "+result.name);
+                                addColumnToLeaderboard();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                fail("Failed to create Leaderboard." + caught.getLocalizedMessage());
+                            }
+                        });
+            }
+        });
     }
     
     private void addColumnToLeaderboard() {
-        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME, null, sc);
+        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME, null, stringMessages);
         service.addColumnToLeaderboard(COLUMN1_NAME, LEADERBOARD_NAME, false,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         fail("Failed to add column to leaderboard.");
-                        finishTest();
                     }
 
                     @Override
@@ -158,12 +170,12 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             @Override
             public void onSuccess(Boolean result) {
                 System.out.println("Success of linking race to column: "+result);
-                getLeaderboard();
+                getLeaderboardByNameAndDeleteColumn();
             }
         });
     }
     
-    private void getLeaderboard(){
+    private void getLeaderboardByNameAndDeleteColumn(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
         service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* previousLeaderboardId */ null, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
@@ -176,7 +188,6 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
             @Override
             public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
                 System.out.println("Got leaderboard.");
-                
                 leaderboard = result.getLeaderboardDTO(/* previousVersion */ null);
                 leaderboardPanel.updateLeaderboard(leaderboard);
                 for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
@@ -197,7 +208,6 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void removeColumnAndAssert(){
         service.removeLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME,
                 new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         fail("Failed to remoce column.");

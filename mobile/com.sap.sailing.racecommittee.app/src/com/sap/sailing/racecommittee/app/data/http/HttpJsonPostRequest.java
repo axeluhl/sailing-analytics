@@ -19,7 +19,7 @@ public class HttpJsonPostRequest extends HttpRequest {
     }
 
     @Override
-    protected BufferedInputStream execute(HttpURLConnection connection) throws IOException {
+    protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
         connection.setDoOutput(true);
         connection.setChunkedStreamingMode(0);
 

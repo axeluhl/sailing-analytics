@@ -58,20 +58,34 @@ public class FixFactoryTest {
                 "},\n"+
                 "\"13:100\": {\n"+
                     "\"1\": [\n"+
-                        "60\n"+
+                        "23766\n"+
+                        "24619\n"+
+                    "],\n"+
+                    "\"2\": [\n"+
+                        "105\n"+
+                        "106\n"+
+                    "],\n"+
+                    "\"3\": [\n"+
+                        "72\n"+
+                        "72\n"+
                     "],\n"+
                     "\"t\": [\n"+
-                        "12345678000\n"+
+                        "1385628380500\n"+
+                        "1385628381000\n"+
                     "]\n"+
                 "},\n"+
                 "\"13:201\": {\n"+
                     "\"1\": [\n"+
-                        "119,\n"+
-                        "120\n"+
+                        "24619\n"+
+                    "],\n"+
+                    "\"2\": [\n"+
+                        "106\n"+
+                    "],\n"+
+                    "\"3\": [\n"+
+                        "119\n"+
                     "],\n"+
                     "\"t\": [\n"+
-                        "12345677000,\n"+
-                        "12345677500\n"+
+                        "1385628381000\n"+
                     "]\n"+
                 "}\n"+
             "}\n"+
@@ -102,7 +116,7 @@ public class FixFactoryTest {
         assertEquals(21, satCount.getSatCount());
         fixIter.next();
         AntHrm hrm = (AntHrm) fixIter.next();
-        assertEquals("100", hrm.getSensor().getDeviceId());
-        assertEquals(60, hrm.getHeartRate());
+        assertEquals(100, hrm.getSensor().getSensorId());
+        assertEquals(72, hrm.getHeartRate());
     }
 }

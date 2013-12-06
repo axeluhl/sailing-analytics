@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -426,5 +427,9 @@ public abstract class DataEntryDialog<T> {
 
     public void ensureDebugId(String debugId) {
         dateEntryDialog.ensureDebugId(debugId);
+    }
+    
+    protected void addAutoHidePartner(Element element) {
+        dateEntryDialog.addAutoHidePartner(element);
     }
 }

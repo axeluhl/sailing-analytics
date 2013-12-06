@@ -76,10 +76,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         boolean allCheckboxesSelected = true;
         for (CourseAreaDTO courseAreaDTO : courseAreas) {
             CheckBox checkBox = dialog.createCheckbox(courseAreaDTO.getName());
-            boolean isCourseAreaVisible = Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.id);
+            boolean isCourseAreaVisible = Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.uuidAsString);
             allCheckboxesSelected &= isCourseAreaVisible;
             checkBox.setValue(isCourseAreaVisible);
-            courseAreaCheckBoxMap.put(courseAreaDTO.id, checkBox);
+            courseAreaCheckBoxMap.put(courseAreaDTO.uuidAsString, checkBox);
             
             courseAreaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxCourseAreasPerRow) {

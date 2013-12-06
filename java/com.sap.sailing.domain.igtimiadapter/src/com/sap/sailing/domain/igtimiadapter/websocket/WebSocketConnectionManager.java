@@ -5,10 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,14 +25,15 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
-import com.sap.sailing.domain.igtimiadapter.LiveDataListener;
+import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 
-public class WebSocketConnectionManager extends WebSocketAdapter {
+public class WebSocketConnectionManager extends WebSocketAdapter implements LiveDataConnection {
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
     private static enum TargetState { OPEN, CLOSED };
     private TargetState targetState;
     private final WebSocketClient client;
@@ -44,19 +44,19 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
-    private final Set<LiveDataListener> liveDataListeners;
+    private final ConcurrentHashMap<BulkFixReceiver, BulkFixReceiver> listeners;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactory connectionFactory, Iterable<String> deviceIds, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceIds+" and account "+account);
-        this.deviceIds = deviceIds;
+    public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
+        this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
-        this.liveDataListeners = new ConcurrentSkipListSet<>();
+        this.listeners = new ConcurrentHashMap<>();
         client = new WebSocketClient();
-        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceIds);
+        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
         client.start();
         reconnect();
@@ -71,6 +71,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
      *            use 0 to wait indefinitely
      * @return <code>true</code> if the connection is established before the timeout occurred
      */
+    @Override
     public boolean waitForConnection(long timeoutInMillis) throws InterruptedException {
         long startedToWait = System.currentTimeMillis();
         synchronized (this) {
@@ -79,10 +80,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
             }
             return igtimiServerTimepoint != null;
         }
-    }
-    
-    public void addLiveDataListener(LiveDataListener listener) {
-        liveDataListeners.add(listener);
     }
     
     public void disconnect() throws Exception {
@@ -141,9 +138,14 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
         return new Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
     
+    @Override
+    public void addListener(BulkFixReceiver listener) {
+        listeners.put(listener, listener);
+    }
+
     private void notifyListeners(List<Fix> fixes) {
-        for (LiveDataListener listener : liveDataListeners) {
-            listener.fixesReceived(fixes);
+        for (BulkFixReceiver listener : listeners.keySet()) {
+            listener.received(fixes);
         }
     }
 
@@ -198,7 +200,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter {
         }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
     }
 
-    public void reconnect() throws IOException, IllegalStateException, ParseException, URISyntaxException {
+    private void reconnect() throws IOException, IllegalStateException, ParseException, URISyntaxException {
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {

@@ -9,8 +9,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -29,7 +27,6 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -43,8 +40,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSteppingWithMaxDistance;
-import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
-import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -57,12 +52,9 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.replication.ReplicationService;
 
 public class PolarSheetGenerationServiceTest {
     
@@ -100,50 +92,12 @@ public class PolarSheetGenerationServiceTest {
     
     
     @SuppressWarnings("serial")
-    private class MockSailingServiceForPolarSheetGeneration extends SailingServiceImpl {
-        
+    private class MockSailingServiceForPolarSheetGeneration extends SailingServiceImplMock {
         @Override
         protected RacingEventService getService() {
             RacingEventService service = new MockRacingEventServiceForPolarSheetGeneration();
             return service;
         }
-        
-        @Override
-        protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
-                BundleContext context) {
-            return null;
-        }
-        
-        @Override
-        protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
-                BundleContext context) {
-            return null;
-        }
-        
-        @Override
-        protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
-                BundleContext bundleContext) {;
-            return null;
-        }
-
-        @Override
-        protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(
-                BundleContext context) {
-            return null;
-        }
-
-        @Override
-        protected ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> createAndOpenSwissTimingAdapterTracker(
-                BundleContext context) {
-            return null;
-        }
-
-        @Override
-        protected ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> createAndOpenSwissTimingReplayServiceTracker(
-                BundleContext context) {
-            return null;
-        }
-        
     }
     
     private class MockRacingEventServiceForPolarSheetGeneration extends RacingEventServiceImpl {

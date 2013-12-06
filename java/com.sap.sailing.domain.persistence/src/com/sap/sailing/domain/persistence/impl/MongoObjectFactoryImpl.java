@@ -29,6 +29,11 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -39,6 +44,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -51,6 +57,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -68,7 +75,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
@@ -467,6 +477,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } else {
             dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
         }
+        if (regatta.getRegattaConfiguration() != null) {
+            JsonSerializer<RegattaConfiguration> serializer = RegattaConfigurationJsonSerializer.create();
+            JSONObject json = serializer.serialize(regatta.getRegattaConfiguration());
+            DBObject configurationObject = (DBObject) JSON.parse(json.toString());
+            dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
+        }
 
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
     }
@@ -544,6 +560,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
         result.ensureIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
         return result;
+    }
+    
+    private void storeRaceLogEventAuthor(DBObject dbObject, RaceLogEventAuthor author) {
+        if (author != null) {
+            dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name(), author.getName());
+            dbObject.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), author.getPriority());
+        }
     }
 
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
@@ -702,11 +725,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
-        storeTimed(event, result);
+        // for compatibility reasons we reuse the field name of Timed
+        storeTimePoint(event.getLogicalTimePoint(), result, FieldNames.TIME_AS_MILLIS);
         storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
         result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedBoats()));
+        storeRaceLogEventAuthor(result, event.getAuthor());
     }
 
 
@@ -785,7 +810,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogGateLineOpeningTimeEvent.class.getSimpleName());
 
-        result.put(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTime());
+        result.put(FieldNames.RACE_LOG_GATE_LINE_OPENING_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTimes().getGateLaunchStopTime());
+        result.put(FieldNames.RACE_LOG_GOLF_DOWN_TIME.name(), gateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime());
         return result;
     }
     
@@ -890,4 +916,49 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
         collection.remove(query);
     }
+    @Override
+    public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+        DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
+        
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        
+        DBObject entryObject = new BasicDBObject();
+        entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
+        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
+        
+        configurationsCollections.update(query, entryObject, /* upsrt */ true, /* multi */ false);
+    }
+
+    private DBObject createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
+        DBObject matcherObject = new BasicDBObject();
+        matcherObject.put(FieldNames.CONFIGURATION_MATCHER_TYPE.name(), matcher.getMatcherType().name());
+        if (matcher instanceof DeviceConfigurationMatcherSingle) {
+            BasicDBList client = new BasicDBList();
+            client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
+            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
+        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
+            BasicDBList clients = new BasicDBList();
+            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
+            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), clients);
+        }
+        return matcherObject;
+    }
+
+    private DBObject createDeviceConfigurationObject(DeviceConfiguration configuration) {
+        JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
+        JSONObject json = serializer.serialize(configuration);
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        return entry;
+    }
+
+    @Override
+    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+        DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        configurationsCollections.remove(query);
+    }
+
 }
