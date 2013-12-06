@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -30,5 +31,10 @@ public class AWA extends Fix {
     @Override
     protected String localToString() {
         return "AWA: "+getApparentWindAngle();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

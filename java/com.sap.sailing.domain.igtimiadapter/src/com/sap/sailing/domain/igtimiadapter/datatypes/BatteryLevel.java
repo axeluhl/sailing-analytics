@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class BatteryLevel extends Fix {
@@ -21,5 +22,10 @@ public class BatteryLevel extends Fix {
     @Override
     protected String localToString() {
         return "Battery: "+getPercentage()+"%";
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }
