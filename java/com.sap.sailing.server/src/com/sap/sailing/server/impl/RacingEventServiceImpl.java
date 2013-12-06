@@ -146,7 +146,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOpe
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
-import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
