@@ -64,6 +64,39 @@ public interface IgtimiConnection {
             ParseException;
 
     /**
+     * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
+     * any type. The fixes received are forwarded to the {@link BulkFixReceiver} <code>bulkFixReceiver</code> in one call.
+     */
+    Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
+            throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+
+    /**
+     * Same as {@link #getResourceData(TimePoint, TimePoint, Iterable, Type...)}, but the resulting {@link Fix}es are
+     * grouped into {@link Track}s per fix type and per device.
+     * 
+     * @return a map whose keys are the devices' serial numbers and whose values are the fixes produced by the device
+     *         identified by the key, grouped in a map with the fix {@link Type} as its key. Note that if a device
+     *         didn't produce any fixes at all under the requested parameters, its serial number may not appear as a key
+     *         in the map. Note further that should a device not have produced fixes of a given type, that type won't
+     *         appear as a key in the map for that device.
+     */
+    Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
+            IOException, ParseException;
+
+    /**
+     * For the devices specified by <code>deviceSerialNumbers</code>, creates a live data connection. The <code>account</code>
+     * needs to be authorized to access the devices' data for the current time window. Fixes received through this connection
+     * are forwarded in the batches in which they are received to the listeners that can be added to the live connection
+     * using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
+     * 
+     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#disconnect()}.
+     */
+    LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
+    
+    /**
      * @param sessionIds
      *            the optional IDs of the sessions for which to obtain the metadata; if <code>null</code>, all available
      *            sessions will be returned
@@ -106,20 +139,6 @@ public interface IgtimiConnection {
             ParseException;
 
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    /**
-     * Same as {@link #getResourceData(TimePoint, TimePoint, Iterable, Type...)}, but the resulting {@link Fix}es are
-     * grouped into {@link Track}s per fix type and per device.
-     * 
-     * @return a map whose keys are the devices' serial numbers and whose values are the fixes produced by the device
-     *         identified by the key, grouped in a map with the fix {@link Type} as its key. Note that if a device
-     *         didn't produce any fixes at all under the requested parameters, its serial number may not appear as a key
-     *         in the map. Note further that should a device not have produced fixes of a given type, that type won't
-     *         appear as a key in the map for that device.
-     */
-    Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceSerialNumbers, Type... types) throws IllegalStateException, ClientProtocolException,
-            IOException, ParseException;
 
     Account getAccount();
 }

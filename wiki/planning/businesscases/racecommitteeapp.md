@@ -9,9 +9,9 @@ With this information the public can closely stay in touch with events and the r
 
 ## Purpose
 
-Provide the race committee with a native mobile implementation, that not only accepts input that is then fed into the analytics server but also helps users doing their job better by providing useful information about course layout, wind, competitors and time. This app should work for a professional race committee but also for a sailor executing a regatta on a sunday afternoon.
+Provide the race committee with a native mobile implementation, that not only accepts input that is then fed into the analytics server but also helps users doing their job better by providing useful information about course layout, wind, competitors and time. This app should work for a professional race committee but also for a sailor executing a regatta on a Sunday afternoon.
 
-The app should exist in two version:
+The app should exist in two versions:
 
 - The first one is dedicated to professionals that run big to mid-sized regattas. This version would heavily rely on tracking and wind measurement devices and the Sailing Analytics server. It would require professional support.
 
@@ -51,11 +51,11 @@ For each race provide the user with **tools to edit**
 
 ## Description
 
-As there currently exist an implementation that covers some of the features, the aim of this project is to re-design and re-implement some of the code of the prototype. This especially holds for the user interface that currently needs some revamp to be also accessible to the average user.
+As there currently exists an implementation that covers some of the features, the aim of this project is to re-design and re-implement some of the code of the prototype. This especially holds for the user interface that currently needs some revamp to be also accessible to the average user.
 
 This project can be divided into three major stages:
 
-- The first one is to design a user interface that one the one hand please the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide a mock-up like interface for both versions. It has been agreed that this step needs to be taken out by an external agency that has a mobile background, the skills and the experience. This step relies on a document that is yet to be built that describes the desired features and the clustering of these features with regards to the two versions. In addition to delivering this document, one or two members of our team need to plan for at least 4-6 one day workshops with the agency to make sure that they understand the domain.
+- The first one is to design a user interface that on the one hand pleases the eye and is tailored to a mobile touch device. This design should take into account all of the desired features and provide a mock-up like interface for both versions. It has been agreed that this step needs to be taken out by an external agency that has a mobile background, the skills and the experience. This step relies on a document that is yet to be built that describes the desired features and the clustering of these features with regards to the two versions. In addition to delivering this document, one or two members of our team need to plan for at least 4-6 one day workshops with the agency to make sure that they understand the domain.
 
 - The second step is about implementing and integrating the design with the Sailing Analytics server. This requires a major effort from the tech team and also team work between the external agency and our developers. Some work from the current prototype can be reused but a major part needs to be rewritten.
 
@@ -69,13 +69,13 @@ Providing the public with such an app could quickly raise synergies with other s
 
 It is currently unclear how much interest can be expected by the sailor community for the public version of the app. In contrast to that the efforts and risks that need to be taken into account developing such an app are big. Not only that we can't judge how much work such a complex application would require from the external agency, but also that the risks deploying and supporting an app that is downloadable by everyone can't just be numbered. 
 
-In addition to that it is unknown if the feature set a first public version would have then, really would meet the expectations of the target group. In the worst case the community just won't use the app and that could damage the brand.
+In addition to that it is unknown if the feature set that a first public version would have really would meet the expectations of the target group. In the worst case the community just won't use the app and that could damage the brand. Similarly, if the app is downloaded by hundreds or thousands of people, if it doesn't work properly or if we fail to support and maintain it adequately, harm to the brand may be caused.
 
 The development of the professional version has the same risk factors as the public version regarding the development of the interface. As the feature set is known the risks of failure are much lower than for the public version.
 
 ## Prototype
 
-A working prototype has been developed and has also been used quite successful in regattas all over the world.
+A working prototype has been developed and has also been used quite successfully in regattas all over the world.
 
 ## Estimation
 

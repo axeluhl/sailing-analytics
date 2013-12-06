@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public abstract class Fix implements Timed {
@@ -29,6 +30,8 @@ public abstract class Fix implements Timed {
     }
     
     abstract protected String localToString();
+    
+    abstract public void notify(IgtimiFixReceiver receiver);
     
     @Override
     public String toString() {

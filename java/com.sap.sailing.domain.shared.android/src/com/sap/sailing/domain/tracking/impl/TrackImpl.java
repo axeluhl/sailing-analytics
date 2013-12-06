@@ -253,6 +253,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return result;
     }
 
+    @Override
+    public Iterator<FixType> getFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
+        Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().headSet(
+                getDummyFix(startingAt), inclusive).descendingIterator();
+        return result;
+    }
+
     /**
      * Creates a dummy fix that conforms to <code>FixType</code>. This in particular means that subclasses
      * instantiating <code>FixType</code> with a specific class need to redefine this method so as to return
@@ -271,6 +279,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         assertReadLock();
         Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().tailSet(
                 getDummyFix(startingAt), inclusive).iterator();
+        return result;
+    }
+
+    @Override
+    public Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
+        Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().headSet(
+                getDummyFix(startingAt), inclusive).descendingIterator();
         return result;
     }
 

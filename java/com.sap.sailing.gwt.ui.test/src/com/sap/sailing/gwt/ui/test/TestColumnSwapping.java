@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -42,6 +43,7 @@ public class TestColumnSwapping {
     public void prepareColumnSwapping() {
         service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
+        service.removeLeaderboard(LEADERBOARDNAME);
         service.createFlexibleLeaderboard(LEADERBOARDNAME, null, disc, ScoringSchemeType.LOW_POINT, null);
         service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
@@ -59,9 +61,9 @@ public class TestColumnSwapping {
                     return UUID.randomUUID().toString();
                 }
             });
-            leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., DEFAULT_FLEET, true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,6 +81,7 @@ public class TestColumnSwapping {
         sailingService = new SailingServiceImplMock();
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
+        sailingService.removeLeaderboard(TEST_LEADERBOARD_NAME);
         sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, null, td, ScoringSchemeType.LOW_POINT, null);
         for (int i = 0; i < races.length; i++)
             sailingService.addColumnToLeaderboard(races[i], TEST_LEADERBOARD_NAME, isMedalRace[i]);
@@ -107,7 +110,7 @@ public class TestColumnSwapping {
         boolean[] medalRace = { true, false, false };
 
         for (int i = 0; i < lb.getRaceList().size(); i++) {
-            assertTrue("Race[" + i + "] == " + raceNames[i], lb.getRaceList().get(i).equals(raceNames[i]));
+            assertEquals("Race[" + i + "] == " + raceNames[i], raceNames[i], lb.getRaceList().get(i).getName());
             assertTrue("Race[" + i + "] is " + (medalRace[i] ? "" : "no ") + "medalrace.",
                     lb.raceIsMedalRace(races[i]) == medalRace[i]);
         }
@@ -127,8 +130,9 @@ public class TestColumnSwapping {
         lb.addRace("3", /* explicitFactor */ null, 1., DEFAULT_FLEET, true, null, null);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
-        for (int i = 0; i < lb.getRaceList().size(); i++)
-            assertTrue("Race[" + i + "] = " + s[i], lb.getRaceList().get(i).equals(s[i]));
+        for (int i = 0; i < lb.getRaceList().size(); i++) {
+            assertEquals("Race[" + i + "] = " + s[i], s[i], lb.getRaceList().get(i).getName());
+        }
     }
 
     @Test
