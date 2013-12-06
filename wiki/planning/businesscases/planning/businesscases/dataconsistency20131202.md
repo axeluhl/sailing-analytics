@@ -1,6 +1,6 @@
 # Minutes, December 2, 2013
 
-## Minutes from Initial Brainstorming Meeting
+## Initial Brainstorming Meeting
 
 ### Live-Delay Analysis
 * GPS per competitor
