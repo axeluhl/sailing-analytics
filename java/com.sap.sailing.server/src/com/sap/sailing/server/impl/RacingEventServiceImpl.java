@@ -218,6 +218,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final MediaLibrary mediaLibrary;
     
+    /**
+     * Currently valid pairs of {@link DeviceConfigurationMatcher}s and {@link DeviceConfiguration}s. 
+     * The contents of this map is persisted and replicated. See {@link DeviceConfigurationMapImpl}.
+     */
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;

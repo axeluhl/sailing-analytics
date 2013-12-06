@@ -28,6 +28,7 @@
   <inherits name="de.csenk.gwt.ws.WebSocket" />
   
   <!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
+  <!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
   <inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
   <inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   <stylesheet src="../AdminConsoleDateTimePicker.css" />

@@ -472,8 +472,16 @@ public interface SailingServiceAsync {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
 
+    /**
+     * Sets the a new start time.
+     * @param dto {@link RaceLogSetStartTimeDTO} identifying the race to set the start time on and the new start time.
+     */
     void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
 
+    /**
+     * Gets the race's current start time and current pass identifier. If no start time is set, the pass identifier will
+     * still be returned, but the start time field will be <code>null</code>.
+     */
     void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> callback);
     
