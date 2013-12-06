@@ -1226,9 +1226,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 regatta.setDefaultCourseArea(newCourseArea);
             }
             regatta.setRegattaConfiguration(newRegattaConfiguration);
-            
             mongoObjectFactory.storeRegatta(regatta);
-            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId, newRegattaConfiguration));
         }
         return regatta;
     }
