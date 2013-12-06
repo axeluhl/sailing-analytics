@@ -86,7 +86,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void requestStartTime(final TimePoint now, final TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver) {
+    public void requestNewStartTime(final TimePoint now, final TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver) {
         RacingProcedurePrerequisite.FulfillmentFunction function = new RacingProcedurePrerequisite.FulfillmentFunction() {
             @Override
             public void execute() {
@@ -98,7 +98,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
     
     @Override
-    public void forceStartTime(TimePoint now, TimePoint startTime) {
+    public void forceNewStartTime(TimePoint now, TimePoint startTime) {
         raceLog.add(factory.createStartTimeEvent(now, author, raceLog.getCurrentPassId(), startTime));
     }
 

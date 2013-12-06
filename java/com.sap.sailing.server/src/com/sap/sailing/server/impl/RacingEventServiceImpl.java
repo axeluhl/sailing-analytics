@@ -2054,7 +2054,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
-            state.forceStartTime(logicalTimePoint, startTime);
+            state.forceNewStartTime(logicalTimePoint, startTime);
             return state.getStartTime();
         }
         return null;

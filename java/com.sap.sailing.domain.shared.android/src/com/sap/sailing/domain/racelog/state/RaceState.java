@@ -19,8 +19,8 @@ public interface RaceState extends ReadonlyRaceState {
     <T extends RacingProcedure> T getTypedRacingProcedure(Class<T> clazz);
     void setRacingProcedure(TimePoint timePoint, RacingProcedureType racingProcedureType);
     
-    void forceStartTime(TimePoint now, TimePoint startTime);
-    void requestStartTime(TimePoint now, TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver);
+    void forceNewStartTime(TimePoint now, TimePoint startTime);
+    void requestNewStartTime(TimePoint now, TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver);
     void setFinishingTime(TimePoint timePoint);
     void setFinishedTime(TimePoint timePoint);
     void setProtestTime(TimePoint now, TimePoint timePoint);

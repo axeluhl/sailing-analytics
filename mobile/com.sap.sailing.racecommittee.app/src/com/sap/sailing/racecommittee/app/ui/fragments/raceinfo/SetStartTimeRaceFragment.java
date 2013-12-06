@@ -270,7 +270,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     }
 
     private void setStartTime(SetStartTimeState state) {
-        getRaceState().requestStartTime(state.now, state.startTime, resolver);
+        getRaceState().requestNewStartTime(state.now, state.startTime, resolver);
     }
 
     protected void showAPModeDialog() {

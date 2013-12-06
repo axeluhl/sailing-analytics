@@ -111,7 +111,7 @@ public class RaceStateTest {
         state.addChangedListener(listener);
         
         TimePoint startTime = MillisecondsTimePoint.now().plus(60 * 60 * 1000);
-        state.forceStartTime(nowMock, startTime);
+        state.forceNewStartTime(nowMock, startTime);
         
         assertEquals(startTime, state.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, state.getStatus());
@@ -156,7 +156,7 @@ public class RaceStateTest {
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
         
-        state.forceStartTime(nowMock, new MillisecondsTimePoint(1));
+        state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
         state.setCourseDesign(nowMock, mock(CourseBase.class));
