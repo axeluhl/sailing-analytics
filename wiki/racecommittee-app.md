@@ -31,7 +31,7 @@ Kuruh, Kuruh,...
 
 intro-text zu racestate, was ist das, wo kann ich es nutzen
 
-### Writing an UI
+### Adding a new UI
 
 text 
 
