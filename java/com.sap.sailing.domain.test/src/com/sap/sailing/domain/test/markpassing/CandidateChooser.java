@@ -10,9 +10,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
@@ -24,7 +24,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     boolean raceHasStartTime;
     Candidate start;
     Candidate end;
-    TrackedRace race;
+    DynamicTrackedRace race;
     PolarSheetDeliverer polar = new PolarSheetDeliverer() {
 
         @Override
@@ -44,7 +44,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     };
 
-    public CandidateChooser(TrackedRace race, LinkedHashMap<Competitor, List<Candidate>> candidates) {
+    public CandidateChooser(DynamicTrackedRace race, LinkedHashMap<Competitor, List<Candidate>> candidates) {
         this.race = race;
         raceHasStartTime = race.getStartOfRace() == null ? false : true;
         start = new Candidate(0, race.getStartOfRace(), 1);
@@ -68,18 +68,13 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     @Override
-    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getMarkPassDeltas(
+    public void calculateMarkPassDeltas(
             LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas) {
-        LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> markPassDeltas = new LinkedHashMap<>();
         for (Competitor c : candidateDeltas.keySet()) {
-            removeCandidates(candidateDeltas.get(c).first(), c);
-            addCandidates(candidateDeltas.get(c).second(), c);
-            LinkedHashMap<Waypoint, MarkPassing> deltas = findShortestPath(c);
-            if(deltas.values()!=null){
-                markPassDeltas.put(c, deltas);
-            }
+            removeCandidates(candidateDeltas.get(c).second(), c);
+            addCandidates(candidateDeltas.get(c).first(), c);
+            findShortestPath(c);
         }
-        return markPassDeltas;
     }
 
     private void createNewEdges(Competitor co, List<Candidate> newCans) {
@@ -112,8 +107,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
     }
 
-    private LinkedHashMap<Waypoint, MarkPassing> findShortestPath(Competitor co) {
-        LinkedHashMap<Waypoint, MarkPassing> markPassDeltas = new LinkedHashMap<>();
+    private void findShortestPath(Competitor co) {
+        boolean changed = false;
+        List<MarkPassing> markPassDeltas = null;
         ArrayList<Edge> all = new ArrayList<>();
         for (Edge e : allEdges.get(co)) {
             all.add(e);
@@ -144,12 +140,17 @@ public class CandidateChooser implements AbstractCandidateChooser {
                     || currentMarkPasses.get(co).get(marker.getWaypoint()).getTimePoint() != marker.getTimePoint()) {
                 currentMarkPasses.get(co).put(marker.getWaypoint(),
                         new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
-                markPassDeltas.put(marker.getWaypoint(),
-                        new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
+                changed = true;
             }
             marker = candidateWithParent.get(marker);
         }
-        return markPassDeltas;
+        if(changed){
+            markPassDeltas = new ArrayList<>();
+            for(MarkPassing m : currentMarkPasses.get(co).values()){
+                markPassDeltas.add(m);
+            }
+            race.updateMarkPassings(co, markPassDeltas);
+        }
     }
 
     private void reEvaluateStartingEdges() {

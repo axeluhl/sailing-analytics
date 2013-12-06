@@ -8,24 +8,37 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     private LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
-    
+
+    public MarkPassingUpdateListener(TrackedRace race) {
+        race.addListener(this);
+        queue = new LinkedBlockingQueue<>();
+    }
+
     public LinkedBlockingQueue<Pair<Object, GPSFix>> getQueue() {
         return queue;
+    }
+
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+            queue.add(new Pair<Object, GPSFix>(new Object(), null));
+        }
     }
 
     @Override
     public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
         queue.add(new Pair<Object, GPSFix>(item, fix));
     }
-    
+
     @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
         queue.add(new Pair<Object, GPSFix>(mark, fix));
     }
-
 }

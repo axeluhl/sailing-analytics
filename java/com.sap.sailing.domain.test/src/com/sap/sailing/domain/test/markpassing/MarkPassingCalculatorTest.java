@@ -180,7 +180,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             }
         }
     }
-    
+
     // TODO Start-analysis is wrong for gate starts
     // TODO Prepare for Polars :(
     // TODO How should Edges between the proxy start and end be treated
@@ -189,11 +189,9 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     // TODO Use Wind/Maneuver analysis
     // TODO Build good test framework that test incremental calculation, tricky cases, ...
     // TODO Document everything
-    
+
     private void compareMarkpasses() {
-        double time = System.currentTimeMillis();
-        final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), false);
-        time = System.currentTimeMillis() - time;
+
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
@@ -212,8 +210,13 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             }
             givenPasses.put(c, givenMarkPasses);
         }
-
-        // Get results
+        
+        
+        // Get calculatedMarkPasses
+        double time = System.currentTimeMillis();
+        final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), false);
+        time = System.currentTimeMillis() - time;
+        
         computedPasses = markPassCreator.getMarkPasses();
 
         // Compare computed and calculated MarkPassings
@@ -225,7 +228,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         int correctPasses = 0;
         int incorrectPasses = 0;
 
-        boolean printRight = false;
+        boolean printRight = true;
         boolean printWrong = true;
 
         for (Competitor c : getRace().getCompetitors()) {
