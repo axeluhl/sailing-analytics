@@ -45,7 +45,6 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
@@ -69,6 +68,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -1366,7 +1366,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(DBObject matcherObject) {
-        Type type = Type.valueOf(matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name()).toString());
+        DeviceConfigurationMatcherType type = DeviceConfigurationMatcherType.valueOf(
+                matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name()).toString());
         List<String> clientIdentifiers = new ArrayList<String>();
         BasicDBList clientIdentifiersObject = (BasicDBList) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
         if (clientIdentifiersObject != null) {

@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -35,7 +35,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreEmptyConfiguration() {
-        DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
+        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
         DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         mongoFactory.storeDeviceConfiguration(matcher, configuration);
 
@@ -52,7 +52,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
     
     @Test
     public void testStoreConfiguration() {
-        DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
+        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         configuration.setAllowedCourseAreaNames(Arrays.asList("a","b"));
         configuration.setByNameDesignerCourseNames(Arrays.asList("a", "c"));
@@ -75,7 +75,7 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
     
     @Test
     public void testRemoveConfiguration() {
-        DeviceConfigurationMatcher matcher = DeviceConfigurationMatcherAny.INSTANCE;
+        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
         DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         mongoFactory.storeDeviceConfiguration(matcher, configuration);
 

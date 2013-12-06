@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 /**
  * Matches a single {@link DeviceConfigurationIdentifier}.
@@ -26,8 +27,8 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
     }
 
     @Override
-    public Type getMatcherType() {
-        return Type.SINGLE;
+    public DeviceConfigurationMatcherType getMatcherType() {
+        return DeviceConfigurationMatcherType.SINGLE;
     }
 
     @Override

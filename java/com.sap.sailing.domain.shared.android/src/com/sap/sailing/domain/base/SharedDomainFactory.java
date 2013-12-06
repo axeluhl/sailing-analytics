@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 public interface SharedDomainFactory extends CompetitorFactory {
 
@@ -93,7 +94,7 @@ public interface SharedDomainFactory extends CompetitorFactory {
     /**
      * Hm.
      */
-    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type type, List<String> clientIdentifiers);
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers);
 
 
 }

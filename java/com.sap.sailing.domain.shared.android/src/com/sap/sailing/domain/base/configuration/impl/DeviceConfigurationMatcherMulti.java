@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 /**
  * Matches a set of {@link DeviceConfigurationIdentifier}s.
@@ -25,8 +26,8 @@ public class DeviceConfigurationMatcherMulti implements DeviceConfigurationMatch
     }
 
     @Override
-    public Type getMatcherType() {
-        return Type.MULTI;
+    public DeviceConfigurationMatcherType getMatcherType() {
+        return DeviceConfigurationMatcherType.MULTI;
     }
 
     @Override

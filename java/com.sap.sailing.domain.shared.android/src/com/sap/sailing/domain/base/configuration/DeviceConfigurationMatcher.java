@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 /**
  * <p>
@@ -12,33 +13,16 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
  * </p>
  * 
  * <p>The rank (see {@link DeviceConfigurationMatcher#getMatchingRank()}) is used as a priority when multiple matchers
- *  are matching a {@link DeviceConfigurationIdentifier} (see also {@link DeviceConfigurationMapImpl}).</p> 
+ *  are matching a {@link DeviceConfigurationIdentifier} (see also {@link DeviceConfigurationMapImpl}) (lower wins).</p> 
  */
 public interface DeviceConfigurationMatcher extends IsManagedBySharedDomainFactory, Serializable {
-    final static int RANK_SINGLE = 1;
-    final static int RANK_MULTI = 2;
-    final static int RANK_ANY = 3;
-
-    public enum Type {
-        SINGLE(RANK_SINGLE), MULTI(RANK_MULTI), ANY(RANK_ANY);
-
-        private int matchingRank;
-
-        private Type(int rank) {
-            this.matchingRank = rank;
-        }
-
-        public int getRank() {
-            return matchingRank;
-        }
-    }
 
     /**
      * Returns the kind of matching used by this matcher.
      * 
      * @return the {@link Type}.
      */
-    Type getMatcherType();
+    DeviceConfigurationMatcherType getMatcherType();
 
     /**
      * Gets the matcher's rank.

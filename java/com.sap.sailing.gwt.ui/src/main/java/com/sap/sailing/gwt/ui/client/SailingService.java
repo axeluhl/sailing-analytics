@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
@@ -347,7 +348,7 @@ public interface SailingService extends RemoteService {
     
     DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
 
-    boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds);
+    boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
 
     boolean setStartTime(RaceLogSetStartTimeDTO dto);
     

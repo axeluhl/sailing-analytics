@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
@@ -469,7 +470,7 @@ public interface SailingServiceAsync {
 
     void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
 
-    void removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+    void removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
 
     void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
 

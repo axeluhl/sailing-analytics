@@ -71,7 +71,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
@@ -116,6 +115,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -209,7 +209,6 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -3425,7 +3424,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds) {
+    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds) {
         DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
         getService().removeDeviceConfiguration(matcher);
         return true;
@@ -3433,36 +3432,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
         List<String> clients = new ArrayList<String>();
-        DeviceConfigurationMatcherDTO.Type type = Type.UNKNOWN;
         
         if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            type = Type.SINGLE;
             clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
         } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
-            type = Type.MULTI;
             Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
-        } else if (matcher instanceof DeviceConfigurationMatcherAny) {
-            type = Type.ANY;
         }
         
         DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
-                type,
+                matcher.getMatcherType(),
                 clients,  
                 matcher.getMatchingRank());
         return dto;
     }
 
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherDTO.Type type, List<String> clientIds) {
-        switch (type) {
-        case SINGLE:
-            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.SINGLE, clientIds);
-        case MULTI:
-            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.MULTI, clientIds);
-        case ANY:
-            return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcher.Type.ANY, clientIds);
-        default:
-            return null;
-        }
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIds) {
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIds);
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {

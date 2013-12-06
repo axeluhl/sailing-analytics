@@ -17,10 +17,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 
 public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
     
@@ -48,8 +48,6 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
                             return "There is already a configuration for such a matcher.";
                         }
                         break;
-                    case ANY:
-                        return "There is already a configuration matching all devices.";
                     default:
                         break;
                     }
@@ -83,9 +81,8 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
         
         valueGrid.setWidget(0, 0, createLabel("Matcher type"));
         typeBox = createListBox(false);
-        typeBox.addItem(DeviceConfigurationMatcherDTO.Type.SINGLE.name());
-        typeBox.addItem(DeviceConfigurationMatcherDTO.Type.MULTI.name());
-        typeBox.addItem(DeviceConfigurationMatcherDTO.Type.ANY.name());
+        typeBox.addItem(DeviceConfigurationMatcherType.SINGLE.name());
+        typeBox.addItem(DeviceConfigurationMatcherType.MULTI.name());
         valueGrid.setWidget(0, 1, typeBox);
         valueGrid.setWidget(1, 0, createLabel("Matching devices"));
 
@@ -112,7 +109,7 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
         typeBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                Type type = DeviceConfigurationMatcherDTO.Type.valueOf(typeBox.getValue(typeBox.getSelectedIndex()));
+                DeviceConfigurationMatcherType type = DeviceConfigurationMatcherType.valueOf(typeBox.getValue(typeBox.getSelectedIndex()));
                 switch (type) {
                 case SINGLE:
                     valueGrid.getWidget(1, 0).setVisible(true);
@@ -148,7 +145,7 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
     @Override
     protected DeviceConfigurationMatcherDTO getResult() {
         DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO();
-        dto.type = DeviceConfigurationMatcherDTO.Type.valueOf(typeBox.getValue(typeBox.getSelectedIndex()));
+        dto.type = DeviceConfigurationMatcherType.valueOf(typeBox.getValue(typeBox.getSelectedIndex()));
         switch (dto.type) {
         case SINGLE:
             dto.clients = Arrays.asList(devicesBoxes.get(0).getText());

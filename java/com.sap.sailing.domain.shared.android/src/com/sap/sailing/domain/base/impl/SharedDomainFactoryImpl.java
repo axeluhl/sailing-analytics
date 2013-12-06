@@ -24,13 +24,12 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher.Type;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherAny;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
@@ -293,7 +292,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(Type type, List<String> clientIdentifiers) {
+    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, 
+            List<String> clientIdentifiers) {
         DeviceConfigurationMatcher probe = createMatcher(type, clientIdentifiers);
         DeviceConfigurationMatcher matcher = configurationMatcherCache.get(probe.getMatcherIdentifier());
         if (matcher == null) {
@@ -303,7 +303,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         return matcher;
     }
     
-    private DeviceConfigurationMatcher createMatcher(Type type, List<String> clientIdentifiers) {
+    private DeviceConfigurationMatcher createMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers) {
         DeviceConfigurationMatcher matcher = null;
         switch (type) {
         case SINGLE:
@@ -312,9 +312,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         case MULTI:
             matcher = new DeviceConfigurationMatcherMulti(clientIdentifiers);
             break;
-        case ANY:
-            matcher = DeviceConfigurationMatcherAny.INSTANCE;
-            break;
+        default:
+            throw new IllegalArgumentException("Unknown matcher type: " + type);
         }
         return matcher;
     }

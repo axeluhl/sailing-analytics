@@ -5,10 +5,10 @@ import java.util.Arrays;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO.Type;
 
 public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
     
@@ -33,7 +33,7 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
     @Override
     protected DeviceConfigurationMatcherDTO getResult() {
         DeviceConfigurationMatcherDTO matcher = new DeviceConfigurationMatcherDTO();
-        matcher.type = Type.SINGLE;
+        matcher.type = DeviceConfigurationMatcherType.SINGLE;
         matcher.clients = Arrays.asList(identifierBox.getValue());
         return matcher;
     }
