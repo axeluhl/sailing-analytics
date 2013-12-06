@@ -31,7 +31,7 @@ Kuruh, Kuruh,...
 
 The _RaceState_ (and its read-only variation _ReadonlyRaceState_) should be the only way you query and change the state of race (i.e. the state of a _RaceLog_). The _RaceState_ analyzes the content of its underlying _RaceLog_ for you and provides a clear interface to several aspects of your race, including its start time, its finished time, the selected course design, etc.
 
-A _RaceState_ always has a _RacingProcedure_ attached to it. Whenever racing procedure type is set by a call to _RaceState#setRacingProcedureType# the _RacingProcedure_ object will be recreated (even when the type was not changed).
+A _RaceState_ always has a _RacingProcedure_ attached to it. Whenever racing procedure type is set by a call to _RaceState#setRacingProcedureType_ the _RacingProcedure_ object will be recreated (even when the type was not changed).
 
 See the code documentation for further details.
 
