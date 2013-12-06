@@ -318,7 +318,7 @@ public class RegattaDetailsComposite extends Composite {
         if (regatta != null) {
             regattaName.setText(regatta.getName());
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
-            defaultCourseArea.setText(regatta.defaultCourseAreaUuidAsString == null ? "" : regatta.defaultCourseAreaName);
+            defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {

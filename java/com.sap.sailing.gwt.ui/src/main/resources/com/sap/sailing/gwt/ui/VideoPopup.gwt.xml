@@ -4,6 +4,7 @@
 	<stylesheet src="../reset.css" />
 	<stylesheet src="../VideoPopup.css" />
 	<inherits name="com.google.gwt.user.User" />
+	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 
 	<entry-point

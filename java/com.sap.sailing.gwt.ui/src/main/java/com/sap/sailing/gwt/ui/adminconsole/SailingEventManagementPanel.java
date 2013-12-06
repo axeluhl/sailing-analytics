@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -195,7 +196,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private void removeEvents(Collection<EventDTO> events) {
         if (!events.isEmpty()) {
-            Collection<String> eventIds = new HashSet<String>();
+            Collection<UUID> eventIds = new HashSet<UUID>();
             for (EventDTO event : events) {
                 eventIds.add(event.id);
             }

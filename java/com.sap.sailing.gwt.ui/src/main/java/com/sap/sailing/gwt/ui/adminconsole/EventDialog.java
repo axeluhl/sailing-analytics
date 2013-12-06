@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,7 +26,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     protected TextBox venueEntryField;
     protected TextBox publicationUrlEntryField;
     protected CheckBox isPublicCheckBox;
-    protected String id;
+    protected UUID id;
     protected List<TextBox> courseAreaNameEntryFields;
 
     private EventDTO event;
