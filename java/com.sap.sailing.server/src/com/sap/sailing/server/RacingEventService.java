@@ -459,7 +459,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
 
     /**
-     * Sets a new start time on the RaceLog identified by the passed parameters.
+     * Forces a new start time on the RaceLog identified by the passed parameters.
      * @param leaderboardName name of the RaceLog's leaderboard.
      * @param raceColumnName name of the RaceLog's column
      * @param fleetName name of the RaceLog's fleet
