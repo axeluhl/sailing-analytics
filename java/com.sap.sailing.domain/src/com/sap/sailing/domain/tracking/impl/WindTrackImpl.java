@@ -41,7 +41,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
-    private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
+    protected final static double DEFAULT_BASE_CONFIDENCE = 0.9;
     
     private final double baseConfidence;
     
@@ -338,6 +338,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         @Override
         public Distance travel(TimePoint from, TimePoint to) {
+            return null;
+        }
+        @Override
+        public SpeedWithBearing add(SpeedWithBearing other) {
             return null;
         }
         @Override

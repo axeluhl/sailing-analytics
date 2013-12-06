@@ -4,17 +4,11 @@
 
 ## Introduction
 
-The RaceCommittee App is an Android 3.2 Tablet application.
+The RaceCommittee App is an Android 3.2 Tablet application. This document serves as the main information hub about the App and how to develop for it.
 
 * See the [[OnBoarding Information|wiki/onboarding]] on how to setup your local environment for building the app
 * See [[Mobile Development|wiki/mobile-development]] for general tipps on mobile development.
 * See [[Server Environment|wiki/racecommittee-app-environment]] on how the server's build environment is configured for building the RaceCommittee App.
-
-## Features
-A Feature List collected in September 2013 at the Testevent in Santander can be seen here:
-[Feature List RaceCommittee App](/doc/RaceCommittee Feature List.xlsx) (RaceCommittee Feature List, Sep. 2013, Julian Gimbel)
-The Feedback a User gave to the Application and the Feedback the user gave to the Applikation and Hardware of SwissTiming can be seen here:
-[Feature List RaceCommittee App](/doc/Swiss Timing Race Committee App.docx) (Swiss Timing App and Feedback for SAP RaceCommittee App, Sep. 2013, Julian Gimbel)
 
 ## User Guide
 
@@ -23,13 +17,53 @@ Have a look at the following user guides to get an idea how to work with the Rac
 * [[RaceCommittee App as an administrator|wiki/racecommittee-app-administrator]]
 * [[RaceCommittee App as a race officer|wiki/racecommittee-app-user]]
 
+## Features
+A Feature List collected in September 2013 at the Testevent in Santander can be seen here:
+[Feature List RaceCommittee App](/doc/RaceCommittee Feature List.xlsx) (RaceCommittee Feature List, Sep. 2013, Julian Gimbel)
+The Feedback a User gave to the Application and the Feedback the user gave to the Applikation and Hardware of SwissTiming can be seen here:
+[Feature List RaceCommittee App](/doc/Swiss Timing Race Committee App.docx) (Swiss Timing App and Feedback for SAP RaceCommittee App, Sep. 2013, Julian Gimbel)
+
 ## Course Updates
 
 Kuruh, Kuruh,...
 
+## RaceState
+
+intro-text zu racestate, was ist das, wo kann ich es nutzen
+
+### Adding a new user interface
+
+text zu den listener
+
+#### Implementing a RacingProcedurePrerequisite.Resolver
+
+nun.
+
+### Adding a new racing procedure
+
+configuration!
+
+## Configuration
+
+intro-text verweis zu admin-guide
+
+### Adding a new configuration option
+
+DeviceConfiguration vs RegattaConfiguration
+merge
+PreferenceScreen and AppPreferences
+
+## RaceLog priorities and authors
+
+Bruuuum.
+
+## Versioning
+
+Baruh
+
 ## Build and Auto-Update
 
-On Maven builds the resulting APK of the RaceCommittee App will be made available as a static content on the server's web page.
+On Maven builds the resulting APK of the RaceCommittee App will be made available as static content on the server's web page.
 
 The RaceCommittee App is set up as an optional dependency of the bundle **com.sap.sailing.www**. This way the app will be build before the www-bundle. After the install phase the RaceCommittee App bundle will copy its artifact APK into _com.sap.sailing.www/apps_. The contents of this folder are packaged into the **com.sap.sailing.www** plugin, which will be deployed as the server's web page. When build with _buildAndUpdateProduct.sh_ an additional version information file is stored alongside the APK. Version information is taken from the AndroidManifest.xml (**android:versionCode**).
 

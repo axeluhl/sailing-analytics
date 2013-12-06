@@ -11,7 +11,6 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -23,7 +22,7 @@ public class WebSocketServerListTest {
                 "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http://127.0.0.1:8888/igtimi/oauth/v1/authorizationcallback");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
-        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         Iterable<URI> serverUris = igtimiConnectionFactory.getWebsocketServers();
         assertFalse(Util.isEmpty(serverUris));

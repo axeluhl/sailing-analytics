@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class GpsQualityHdop extends Fix {
@@ -23,5 +24,10 @@ public class GpsQualityHdop extends Fix {
     @Override
     protected String localToString() {
         return "HDOP: "+getHdop();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

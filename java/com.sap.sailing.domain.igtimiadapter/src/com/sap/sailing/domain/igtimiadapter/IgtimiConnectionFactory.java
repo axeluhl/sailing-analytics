@@ -1,21 +1,13 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
 
 /**
@@ -26,6 +18,10 @@ import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
  * @author Axel Uhl (d043530)
  */
 public interface IgtimiConnectionFactory {
+    Iterable<Account> getAllAccounts();
+
+    IgtimiConnection connect(Account account);
+    
     /**
      * Obtains a URL that a user agent (e.g., a web browser) can be sent to in order to allow that user to authenticate
      * and then authorize this factory's {@link Client} for accessing the user's Igtimi data. The URL is chosen such that
@@ -47,73 +43,17 @@ public interface IgtimiConnectionFactory {
      * Matches <code>eMail</code> with the e-mail information retrieved from the "account" service earlier when an access
      * token was registered.
      */
-    Account getAccountByEmail(String eMail);
-    
-    IgtimiConnection connect(Account account);
+    Account getExistingAccountByEmail(String eMail);
     
     /**
-     * Uses the /oauth/token service to obtain and {@link #registerAccountForWhichClientIsAuthorized(String) register}
-     * an access token for an authorization code which encodes the authorization given by a user to this factory's
-     * client.
+     * Tries to authorize our client on behalf of a user identified by e-mail and password. If successful, the
+     * account data and the relevant OAuth access token will be stored persistently.
      * 
-     * @return the account encoding the application that is authorized for a user's account
-     * @throws RuntimeException in case there was an error while retrieving the token
+     * @return the account with which a caller can then {@link #connect obtain a connection} for the data that the user
+     *         identified by <code>userEmail</code> and <code>userPassword</code> shares with our client.
      */
-    Account obtainAccessTokenFromAuthorizationCode(String code) throws UnsupportedEncodingException,
-            ClientProtocolException, IOException, IllegalStateException, ParseException;
-
-    String getAccountUrl(Account account);
-
-    String getUsersUrl(Account account);
-
-    String getUserUrl(long id, Account account);
-
-    String getGroupsUrl(Account account);
-
-    String getGroupUrl(long id, Account account);
-
-    String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Iterable<String> streamIds, Account account);
-
-    String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
-            Map<Type, Double> typeAndCompression, Account account);
-
-    String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete,
-            Account account);
-
-    String getSessionUrl(long id, Account account);
-
-    String getOwnedDevicesUrl(Account account);
-
-    String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceSerialNumbers, Account account);
-
-    Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
-
-    HttpClient getHttpClient();
-
-    /**
-     * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
-     * live data from the units whose IDs are specified by <code>unitIds</code>. The sending units are expected to
-     * belong to the user account to which this factory's application client has been granted permission.
-     * 
-     * @param account
-     *            represents this factory's client's permissions to access a user account's data
-     * @param deviceIds
-     *            IDs of the transmitting units expected to be visible to the account's {@link Account#getUser() user's}
-     */
-    JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds);
-
-    Iterable<Account> getAllAccounts();
-
-    /**
-     * Tries to authorize our client on behalf of a user identified by e-mail and password.
-     * 
-     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
-     *         to access data owned by the user identified by e-mail and password.
-     */
-    String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword) throws ClientProtocolException,
+    Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException, ClassCastException;
+            InstantiationException, IllegalAccessException, ClassCastException, ParseException;
 
 }

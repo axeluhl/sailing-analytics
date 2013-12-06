@@ -104,4 +104,24 @@ public interface Track<FixType extends Timed> extends Serializable {
      */
     Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive);
 
+    /**
+     * Returns a descending iterator starting at the first fix before <code>startingAt</code> (or "at or before" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
+     * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     */
+    Iterator<FixType> getFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
+
+    /**
+     * Returns a descending iterator starting at the first raw fix before <code>startingAt</code> (or "at or before" in case
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also
+     * {@link #getRawFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     */
+    Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
+
 }

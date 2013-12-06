@@ -163,7 +163,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final ExpeditionWindTrackerFactory windTrackerFactory;
+    private final ExpeditionWindTrackerFactory expeditionWindTrackerFactory;
 
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
@@ -274,7 +274,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
+        expeditionWindTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -1334,12 +1334,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination)
             throws SocketException {
-        windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        expeditionWindTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+        WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
         if (windTracker != null) {
             windTracker.stop();
         }
@@ -1350,7 +1350,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
                 if (windTracker != null) {
                     result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
                 }
@@ -1572,7 +1572,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
-        UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+        UDPExpeditionReceiver receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
         receiver.addListener(listener, validMessagesOnly);
     }
 
@@ -1580,7 +1580,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void removeExpeditionListener(ExpeditionListener listener) {
         UDPExpeditionReceiver receiver;
         try {
-            receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+            receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
             receiver.removeListener(listener);
         } catch (SocketException e) {
             logger.info("Failed to remove expedition listener " + listener
