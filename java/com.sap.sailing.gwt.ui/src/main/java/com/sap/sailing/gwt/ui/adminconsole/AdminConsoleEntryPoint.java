@@ -148,9 +148,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 this, sailingEventManagementPanel, leaderboardGroupConfigPanel);
         addScrollableTab(tabPanel, masterDataImportPanel, stringMessages.masterDataImportPanel());
 
-        final DeviceConfigurationPanel deviceConfigurationAdminPanel = new DeviceConfigurationPanel(sailingService,
+        /*final DeviceConfigurationPanel deviceConfigurationAdminPanel = new DeviceConfigurationPanel(sailingService,
                 stringMessages, this);
-        addScrollableTab(tabPanel, deviceConfigurationAdminPanel, stringMessages.deviceConfiguration() + " (admin)");
+        addScrollableTab(tabPanel, deviceConfigurationAdminPanel, stringMessages.deviceConfiguration() + " (admin)");*/
         
         final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
                 stringMessages, this);

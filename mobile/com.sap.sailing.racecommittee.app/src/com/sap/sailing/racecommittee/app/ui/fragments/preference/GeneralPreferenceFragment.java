@@ -147,9 +147,11 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 Pair<String, String> connectionConfiguration = QRCodeUtils.splitQRContent(content);
                 
                 String identifier = connectionConfiguration.getA();
-                String serverUrl = connectionConfiguration.getB();
+                URL apkUrl = tryConvertToURL(connectionConfiguration.getB());
                 
-                if (isWellformedURL(serverUrl)) {
+                if (apkUrl != null) {
+                    String serverUrl = getServerUrl(apkUrl);
+                    
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
                     preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
@@ -168,13 +170,19 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             Toast.makeText(getActivity(), "Error scanning QRCode (" + resultCode + ")", Toast.LENGTH_LONG).show();
         }
     }
+
+    protected String getServerUrl(URL apkUrl) {
+        String protocol = apkUrl.getProtocol();
+        String host = apkUrl.getHost();
+        String port = apkUrl.getPort() == -1 ? "" : ":" + apkUrl.getPort();
+        return protocol + "://" + host + port;
+    }
     
-    private boolean isWellformedURL(String url) {
+    private URL tryConvertToURL(String url) {
         try {
-            new URL(url);
-            return true;
+            return new URL(url);
         } catch (MalformedURLException e) {
-            return false;
+            return null;
         }
     }
 }

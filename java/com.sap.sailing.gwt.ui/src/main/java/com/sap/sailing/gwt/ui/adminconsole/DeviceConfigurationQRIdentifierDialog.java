@@ -4,6 +4,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -19,12 +21,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     
+    public static final String rcAppApkPath = "/apps/com.sap.sailing.racecommittee.app.apk";
+    
     private static final String qrCodeDivId = "qr-code";
     private static final int qrCodeSize = 320;
     
     private final TextBox identifierBox;
     private final TextBox serverBox;
-    private final Button generateButton;
+
+    protected static String getApkPath(String serverUrl) {
+        if (serverUrl.endsWith("/")) {
+            return serverUrl.substring(0, serverUrl.length() - 1) + rcAppApkPath;
+        }
+        return serverUrl + rcAppApkPath;
+    }
 
     public DeviceConfigurationQRIdentifierDialog(String identifier, StringMessages stringMessages) {
         setText("Synchronize device with server");
@@ -33,12 +43,22 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         identifierBox.setValue(identifier);
         identifierBox.setReadOnly(true);
         identifierBox.setVisibleLength(40);
-        identifierBox.addKeyUpHandler(validationHandler);
         
         serverBox = new TextBox();
         serverBox.setVisibleLength(40);
-        serverBox.setValue(Window.Location.getProtocol() + "://" + Window.Location.getHost());
-        serverBox.addKeyUpHandler(validationHandler);
+        serverBox.setValue(Window.Location.getProtocol() + "//" + Window.Location.getHost());
+        serverBox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                generateQRCode();
+            }
+        });
+        serverBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                generateQRCode();
+            }
+        });
         
         Grid inputGrid = new Grid(2, 2);
         inputGrid.setWidget(0, 0, new Label("Identifier:"));
@@ -51,18 +71,6 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         qrCodeContainer.setHeight(qrCodeSize + "px");
         qrCodeContainer.setWidth(qrCodeSize + "px");
         
-        generateButton = new Button(stringMessages.generate());
-        generateButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (identifierBox.getValue().isEmpty() || serverBox.getValue().isEmpty()) {
-                    Window.alert("Enter values first!");
-                } else {
-                    generateQRCode();
-                }
-            }
-        });
-        
         Button exitButton = new Button(stringMessages.close());
         exitButton.addClickHandler(new ClickHandler() {
             @Override
@@ -72,7 +80,6 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         });
         
         HorizontalPanel actionPanel = new HorizontalPanel();
-        actionPanel.add(generateButton);
         actionPanel.add(exitButton);
         
         VerticalPanel panel = new VerticalPanel();
@@ -103,8 +110,12 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     }-*/;
 
     protected void generateQRCode() {
-        generateButton.setEnabled(false);
-        generateQRImage(QRCodeUtils.composeQRContent(identifierBox.getValue(), serverBox.getValue()));
+        if (identifierBox.getValue().contains("#")) {
+            Window.alert("I'm not capable of generating a code for this identifier.");
+        } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
+            String encoded = QRCodeUtils.composeQRContent(identifierBox.getValue(), getApkPath(serverBox.getValue()));
+            generateQRImage(encoded);
+        }
     }
     
 
@@ -112,12 +123,5 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         $wnd.qrcode.clear();
         $wnd.qrcode.makeCode(content);
 }-*/;
-
-    private KeyUpHandler validationHandler = new KeyUpHandler() {
-        @Override
-        public void onKeyUp(KeyUpEvent event) {
-            generateButton.setEnabled(!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty());
-        }
-    };
     
 }
