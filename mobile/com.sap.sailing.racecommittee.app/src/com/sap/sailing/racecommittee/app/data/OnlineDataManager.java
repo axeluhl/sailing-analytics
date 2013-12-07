@@ -232,9 +232,12 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
                 
+                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier());
+                encodedIdentifier = encodedIdentifier.replace("+", "%20");
+                
                 return new OnlineDataLoader<DeviceConfiguration>(
                         context, 
-                        new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ identifier.getClientIdentifier()), 
+                        new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ encodedIdentifier), 
                         parser, handler);
             }
         });

@@ -2,8 +2,10 @@ package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -27,14 +29,14 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     private static final String TAG = RaceLogEventsCallback.class.getName();
 
     @Override
-    public void onReply(Intent originalIntent, Context context, InputStream inputStream) {
+    public void processResponse(Intent originalIntent, Context context, InputStream responseStream, Set<Serializable> suppressedEvents) {
         ReadonlyDataManager dataManager = DataManager.create(context);
         final List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
         SharedDomainFactory domainFactory = DataManager.create(context).getDataStore().getDomainFactory();
         
         JSONParser parser = new JSONParser();
         try {
-            JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(inputStream));
+            JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(responseStream));
             for (Object o : eventsToAddAsJson) {
                 try {
                     RaceLogEvent eventToAdd = RaceLogEventDeserializer.create(domainFactory).deserialize((JSONObject) o);
@@ -45,7 +47,6 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             }
         } catch (Exception e) {
             ExLog.e(TAG, "Error parsing server response");
-            //ExLog.ex(TAG, e);
         }
         
         String raceId = originalIntent.getStringExtra(AppConstants.RACE_ID_KEY);
@@ -54,6 +55,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             if (raceLog != null) {
                 ExLog.i(TAG, "Successfully retrieved race log for race ID " + raceId);
                 for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
+                    suppressedEvents.add(eventToAddToRaceLog.getId());
                     raceLog.add(eventToAddToRaceLog);
                     ExLog.i(TAG, "added event " + eventToAddToRaceLog.toString() + " to client's race log");
                 }

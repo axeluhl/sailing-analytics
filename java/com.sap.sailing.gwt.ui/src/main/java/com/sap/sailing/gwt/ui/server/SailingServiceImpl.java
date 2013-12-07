@@ -3545,7 +3545,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (result == null) {
             return null;
         }
-        return new Pair<Date, Integer>(result.getA().asDate(), result.getB());
+        return new Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
     }
 
 }

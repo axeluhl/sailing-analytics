@@ -1,6 +1,8 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,5 +22,5 @@ public interface ServerReplyCallback {
     /**
      * The inputStream does not need to be closed by the implementing class.
      */
-    void onReply(Intent originalIntent, Context context, InputStream inputStream);
+    void processResponse(Intent originalIntent, Context context, InputStream inputStream, Set<Serializable> suppressedEvents);
 }

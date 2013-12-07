@@ -141,8 +141,10 @@ public class EventPersistenceManager {
                 }
             }
             
+            // We are passing no event id, because we know it used to suppress event sending and
+            // we want this event to be sent.
             Intent eventIntent = EventSendingService.createEventIntent(context, url, raceId,
-                    URLDecoder.decode(serializedEventAsUrlEncodedJson), callbackClass);
+                    null, URLDecoder.decode(serializedEventAsUrlEncodedJson), callbackClass);
             if (eventIntent != null) {
                 delayedIntents.add(eventIntent);
             }
@@ -168,9 +170,9 @@ public class EventPersistenceManager {
                 ExLog.i(TAG, "Event didn't need to be readded. Same event already in the log");
             }
         } catch (JsonDeserializationException e) {
-            ExLog.w(TAG, String.format("Error readding event to race log: %s", e.toString()));
+            ExLog.w(TAG, String.format("Error while readding event to race log: %s", e.toString()));
         } catch (ParseException e) {
-            ExLog.w(TAG, String.format("Error readding event to race log: %s", e.toString()));
+            ExLog.w(TAG, String.format("Error while readding event to race log: %s", e.toString()));
         }
     }
 

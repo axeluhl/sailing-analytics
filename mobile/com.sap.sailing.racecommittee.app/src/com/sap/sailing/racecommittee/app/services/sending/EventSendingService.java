@@ -6,7 +6,9 @@ import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import android.app.Service;
@@ -50,6 +52,8 @@ public class EventSendingService extends Service implements EventSendingListener
     private final IBinder mBinder = new EventSendingBinder();
     private EventPersistenceManager persistenceManager;
     private boolean isHandlerSet;
+    
+    private Set<Serializable> suppressedEventIds = new HashSet<Serializable>();
 
     private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
         @Override
@@ -116,7 +120,7 @@ public class EventSendingService extends Service implements EventSendingListener
      *            the class of the callback which should process the server reply
      * @return the intent that shall be sent to the EventSendingService
      */
-    public static Intent createEventIntent(Context context, ManagedRace race, String serializedEventAsJson,
+    public static Intent createEventIntent(Context context, ManagedRace race, Serializable eventId, String serializedEventAsJson,
             Class<? extends ServerReplyCallback> callbackClass) {
         String url = String.format("%s/sailingserver/rc/racelog?"+
                 RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
@@ -125,18 +129,29 @@ public class EventSendingService extends Service implements EventSendingListener
                 RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
                 AppPreferences.on(context).getServerBaseURL(), URLEncoder.encode(race.getRaceGroup().getName()),
                 URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
-        return createEventIntent(context, url, race.getId(), serializedEventAsJson, callbackClass);
+        return createEventIntent(context, url, race.getId(), eventId, serializedEventAsJson, callbackClass);
     }
 
-    public static Intent createEventIntent(Context context, String url, Serializable raceId, String serializedEventAsJson,
+    public static Intent createEventIntent(Context context, String url, Serializable raceId, Serializable eventId, String serializedEventAsJson,
             Class<? extends ServerReplyCallback> callbackClass) {
         Intent eventIntent = new Intent(AppConstants.INTENT_ACTION_SEND_EVENT);
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, raceId);
+        eventIntent.putExtra(EXTRAS_EVENT_ID, eventId);
         eventIntent.putExtra(AppConstants.EXTRAS_JSON_SERIALIZED_EVENT, serializedEventAsJson);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
         eventIntent.putExtra(AppConstants.EXTRAS_CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
-        ExLog.i(TAG, "Created event " + eventIntent + " for sending to backend");
         return eventIntent;
+    }
+    
+    private static final String EXTRAS_EVENT_ID = "_EXTRAS_EVENT_ID";
+
+    private Serializable getEventId(Intent intent) {
+        Serializable id = intent.getSerializableExtra(EXTRAS_EVENT_ID);
+        if (id != null) {
+            return id;
+        }
+        ExLog.w(TAG, "Unanble to extract event identifier from event intent.");
+        return null;
     }
 
     /*
@@ -213,13 +228,18 @@ public class EventSendingService extends Service implements EventSendingListener
         if (!AppPreferences.on(this).isSendingActive()) {
             ExLog.i(TAG, "Sending deactivated. Event will not be sent to server.");
         } else {
-            EventSenderTask task = new EventSenderTask(this);
-            task.execute(intent);
+            Serializable eventId = getEventId(intent);
+            if (eventId != null && suppressedEventIds.contains(eventId)) {
+                ExLog.i(TAG, String.format("Event %s is suppressed, won't be sent.", eventId));
+            } else {
+                EventSenderTask task = new EventSenderTask(this);
+                task.execute(intent);
+            }
         }
     }
 
     @Override
-    public void onResult(Intent intent, boolean success, InputStream inputStream) {
+    public void onEventSent(Intent intent, boolean success, InputStream inputStream) {
         if (!success) {
             ExLog.w(TAG, "Error while posting intent to server. Will persist intent...");
             persistenceManager.persistIntent(intent);
@@ -248,7 +268,7 @@ public class EventSendingService extends Service implements EventSendingListener
                 }
             }
             if (callback != null) {
-                callback.onReply(intent, this, inputStream);
+                callback.processResponse(intent, this, inputStream, suppressedEventIds);
             }
             try {
                 inputStream.close();

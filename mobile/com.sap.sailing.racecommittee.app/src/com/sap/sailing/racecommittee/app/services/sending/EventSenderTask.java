@@ -18,7 +18,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Triple<Intent, Bool
     private static String TAG = EventSenderTask.class.getName();
 
     public interface EventSendingListener {
-        public void onResult(Intent intent, boolean success, InputStream inputStream);
+        public void onEventSent(Intent intent, boolean success, InputStream inputStream);
     }
 
     private EventSendingListener listener;
@@ -56,7 +56,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Triple<Intent, Bool
     @Override
     protected void onPostExecute(Triple<Intent, Boolean, InputStream> resultTriple) {
         super.onPostExecute(resultTriple);
-        listener.onResult(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
+        listener.onEventSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
     }
 
 }
