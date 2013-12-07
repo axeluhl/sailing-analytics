@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
@@ -54,6 +53,10 @@ public class EventSendingService extends Service implements EventSendingListener
     private boolean isHandlerSet;
     
     private Set<Serializable> suppressedEventIds = new HashSet<Serializable>();
+    
+    public void registerEventForSuppression(Serializable eventId) {
+        suppressedEventIds.add(eventId);
+    }
 
     private EventSendingServiceLogger serviceLogger = new EventSendingServiceLogger() {
         @Override
@@ -106,6 +109,18 @@ public class EventSendingService extends Service implements EventSendingListener
         serviceLogger.onEventSentSuccessful();
     }
 
+    public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
+            final String raceName, final String fleetName) {
+        String url = String.format("%s/sailingserver/rc/racelog?"+
+                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
+                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+                AppPreferences.on(context).getServerBaseURL(), URLEncoder.encode(raceGroupName),
+                URLEncoder.encode(raceName), URLEncoder.encode(fleetName), uuid);
+        return url;
+    }
+
     /**
      * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end. See
      * constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.
@@ -122,13 +137,8 @@ public class EventSendingService extends Service implements EventSendingListener
      */
     public static Intent createEventIntent(Context context, ManagedRace race, Serializable eventId, String serializedEventAsJson,
             Class<? extends ServerReplyCallback> callbackClass) {
-        String url = String.format("%s/sailingserver/rc/racelog?"+
-                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
-                AppPreferences.on(context).getServerBaseURL(), URLEncoder.encode(race.getRaceGroup().getName()),
-                URLEncoder.encode(race.getName()), URLEncoder.encode(race.getFleet().getName()), uuid);
+        String url = getRaceLogEventSendAndReceiveUrl(context, 
+                race.getRaceGroup().getName(), race.getName(), race.getFleet().getName());
         return createEventIntent(context, url, race.getId(), eventId, serializedEventAsJson, callbackClass);
     }
 
@@ -150,7 +160,7 @@ public class EventSendingService extends Service implements EventSendingListener
         if (id != null) {
             return id;
         }
-        ExLog.w(TAG, "Unanble to extract event identifier from event intent.");
+        ExLog.w(TAG, "Unable to extract event identifier from event intent.");
         return null;
     }
 
@@ -230,6 +240,7 @@ public class EventSendingService extends Service implements EventSendingListener
         } else {
             Serializable eventId = getEventId(intent);
             if (eventId != null && suppressedEventIds.contains(eventId)) {
+                suppressedEventIds.remove(eventId);
                 ExLog.i(TAG, String.format("Event %s is suppressed, won't be sent.", eventId));
             } else {
                 EventSenderTask task = new EventSenderTask(this);
@@ -268,11 +279,9 @@ public class EventSendingService extends Service implements EventSendingListener
                 }
             }
             if (callback != null) {
-                callback.processResponse(intent, this, inputStream, suppressedEventIds);
+                String raceId = intent.getStringExtra(AppConstants.RACE_ID_KEY);
+                callback.processResponse(this, inputStream, raceId);
             }
-            try {
-                inputStream.close();
-            } catch (IOException e) {}
         }
     }
 

@@ -152,9 +152,18 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
         }
+        return getEventsToDeliver(clientId, event);
+    }
+    
+    @Override
+    public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
+        return getEventsToDeliver(clientId, null);
+    }
+
+    protected Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId, RaceLogEvent suppressedEvent) {
         // FIXME lock for read getInternalRawFixes?
         LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
-        stillToDeliverToClient.remove(event);
+        stillToDeliverToClient.remove(suppressedEvent);
         Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
         if (deliveredToClient != null) {
             stillToDeliverToClient.removeAll(deliveredToClient);
@@ -163,7 +172,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             eventsDeliveredToClient.put(clientId, deliveredToClient);
         }
         deliveredToClient.addAll(stillToDeliverToClient);
-        deliveredToClient.add(event);
+        deliveredToClient.add(suppressedEvent);
         return stillToDeliverToClient;
     }
 

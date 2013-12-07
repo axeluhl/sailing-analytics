@@ -189,4 +189,9 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Iterator<RaceLogEvent> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
         return innerRaceLog.getRawFixesDescendingIterator(startingAt, inclusive);
     }
+
+    @Override
+    public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
+        return innerRaceLog.getEventsToDeliver(clientId);
+    }
 }

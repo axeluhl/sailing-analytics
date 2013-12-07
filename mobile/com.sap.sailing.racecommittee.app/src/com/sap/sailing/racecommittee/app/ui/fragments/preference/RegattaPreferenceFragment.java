@@ -11,12 +11,18 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
 
+/**
+ * <p>This preference fragment can be redirected to display the {@link RegattaConfiguration} of a specifc regatta.</p>
+ *
+ * <p>See {@link SettingsActivity}.
+ */
 public class RegattaPreferenceFragment extends BasePreferenceFragment {
     
     private boolean isRedirected = false;

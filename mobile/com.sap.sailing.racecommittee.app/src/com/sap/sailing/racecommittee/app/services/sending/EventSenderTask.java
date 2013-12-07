@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -27,6 +28,7 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Triple<Intent, Bool
         this.listener = listener;
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected Triple<Intent, Boolean, InputStream> doInBackground(Intent... params) {
         Triple<Intent, Boolean, InputStream> result;
@@ -40,13 +42,19 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Triple<Intent, Bool
         if (serializedEventAsJson == null || url == null) {
             return new Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
+        InputStream responseStream = null;
         try {
             ExLog.i(TAG, "Posting event: " + serializedEventAsJson);
             HttpRequest post = new HttpJsonPostRequest(new URL(url), serializedEventAsJson);
-            final InputStream inputStream = post.execute();
+            responseStream = post.execute();
             ExLog.i(TAG, "Post successful for the following event: " + serializedEventAsJson);
-            result = new Triple<Intent, Boolean, InputStream>(intent, true, inputStream);
-        } catch (Exception e) {
+            result = new Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
+        } catch (IOException e) {
+            if (responseStream != null) {
+                try {
+                    responseStream.close();
+                } catch (IOException ie) { }
+            }
             ExLog.e(TAG, String.format("Post not successful, exception occured: %s", e.toString()));
             result = new Triple<Intent, Boolean, InputStream>(intent, false, null);
         }
