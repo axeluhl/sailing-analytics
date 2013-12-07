@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.io.Serializable;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -45,6 +46,12 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         this.teamJsonSerializer = teamJsonSerializer;
         this.boatJsonSerializer = teamBoatSerializer;
     }
+    
+    public JSONObject getCompetitorIdQuery(Competitor competitor) {
+        JSONObject result = new JSONObject();
+        result.put(FIELD_ID, getPersistentCompetitorId(competitor));
+        return result;
+    }
 
     @Override
     public JSONObject serialize(Competitor competitor) {
@@ -54,8 +61,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID becore
         // returning the ID as is.
         result.put(FIELD_ID_TYPE, competitor.getId().getClass().getName());
-        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
-        result.put(FIELD_ID, competitorId);
+        for (Entry<Object, Object> idKeyAndValue : getCompetitorIdQuery(competitor).entrySet()) {
+            result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
+        }
         result.put(FIELD_NAME, competitor.getName());
         result.put(FIELD_DISPLAY_COLOR, competitor.getDisplayColor());
         result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
@@ -71,5 +79,10 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
         }
         return result;
+    }
+
+    private Serializable getPersistentCompetitorId(Competitor competitor) {
+        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
+        return competitorId;
     }
 }
