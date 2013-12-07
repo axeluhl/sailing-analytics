@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.state.racingprocedure.basic.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -11,6 +12,8 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.state.RaceStateEvent;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEventImpl;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedurePrerequisite;
@@ -59,7 +62,7 @@ public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
-        return Collections.emptyList();
+        return Arrays.<RaceStateEvent>asList(new RaceStateEventImpl(startTime, RaceStateEvents.START));
     }
 
 }
