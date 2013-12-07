@@ -59,7 +59,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
-            public String getDisplayColor() {
+            public String getColor() {
                 return null;
             }
         };

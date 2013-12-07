@@ -21,7 +21,7 @@ public abstract class AbstractLeaderboardTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName, Serializable id) {
-        return new CompetitorImpl(id, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(id, competitorName, "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

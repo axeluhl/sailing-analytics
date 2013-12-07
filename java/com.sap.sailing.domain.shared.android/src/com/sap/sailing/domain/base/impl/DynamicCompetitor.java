@@ -7,5 +7,5 @@ public interface DynamicCompetitor extends Competitor, Renamable {
     DynamicBoat getBoat();
     DynamicTeam getTeam();
     
-    void setDisplayColor(String displayColor);
+    void setColor(String displayColor);
 }

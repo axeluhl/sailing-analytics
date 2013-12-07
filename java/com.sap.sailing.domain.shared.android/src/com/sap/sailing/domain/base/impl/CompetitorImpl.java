@@ -11,14 +11,14 @@ public class CompetitorImpl implements DynamicCompetitor {
     private final DynamicBoat boat;
     private final Serializable id;
     private String name;
-    private String displayColor;
+    private String color;
     
-    public CompetitorImpl(Serializable id, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, String color, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
         this.team = team;
         this.boat = boat;
-        this.displayColor = displayColor;
+        this.color = color;
     }
 
     @Override
@@ -53,15 +53,15 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getDisplayColor(), getName(), getTeam(), getBoat());
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getColor(), getName(), getTeam(), getBoat());
         return result;
     }
 
-    public String getDisplayColor() {
-        return displayColor;
+    public String getColor() {
+        return color;
     }
 
-    public void setDisplayColor(String displayColor) {
-        this.displayColor = displayColor;
+    public void setColor(String color) {
+        this.color = color;
     }
 }

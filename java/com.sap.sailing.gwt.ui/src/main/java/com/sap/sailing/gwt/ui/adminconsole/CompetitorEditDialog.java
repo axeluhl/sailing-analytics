@@ -47,8 +47,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                             result = stringMessages.pleaseEnterAName();
                         } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
                             result = stringMessages.pleaseEnterASailNumber();
-                        } else if(valueToValidate.getDisplayColor() != null) {
-                            String displayColor = valueToValidate.getDisplayColor();
+                        } else if(valueToValidate.getColor() != null) {
+                            String displayColor = valueToValidate.getColor();
                             try {
                                 new HtmlColor(displayColor);
                             } catch (IllegalArgumentException e) {
@@ -61,7 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         this.name = createTextBox(competitorToEdit.getName());
-        this.displayColorTextBox = createTextBox(competitorToEdit.getDisplayColor()); 
+        this.displayColorTextBox = createTextBox(competitorToEdit.getColor()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;

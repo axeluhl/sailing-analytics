@@ -68,7 +68,7 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     }
 
     @Override
-    public String getDisplayColor() {
+    public String getColor() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
     }

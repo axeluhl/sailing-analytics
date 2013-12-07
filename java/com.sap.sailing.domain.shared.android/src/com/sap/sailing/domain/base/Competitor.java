@@ -8,5 +8,5 @@ public interface Competitor extends Named, WithID, IsManagedBySharedDomainFactor
 
     Boat getBoat();
     
-    String getDisplayColor();
+    String getColor();
 }

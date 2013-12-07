@@ -65,7 +65,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
         result.put(FIELD_NAME, competitor.getName());
-        result.put(FIELD_DISPLAY_COLOR, competitor.getDisplayColor());
+        result.put(FIELD_DISPLAY_COLOR, competitor.getColor());
         result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam().getNationality();
         result.put(FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());

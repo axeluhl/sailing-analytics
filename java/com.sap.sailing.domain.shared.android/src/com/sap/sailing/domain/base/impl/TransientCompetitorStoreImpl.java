@@ -174,7 +174,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             LockUtil.lockForWrite(lock);
             try {
                 competitor.setName(newName);
-                competitor.setDisplayColor(newDisplayColor);
+                competitor.setColor(newDisplayColor);
                 competitor.getBoat().setSailId(newSailId);
                 competitor.getTeam().setNationality(newNationality);
                 weakCompetitorDTOCache.remove(competitor);
@@ -199,7 +199,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 if (competitorDTO == null) {
                     final Nationality nationality = c.getTeam().getNationality();
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-                    competitorDTO = new CompetitorDTOImpl(c.getName(), c.getDisplayColor(), countryCode == null ? ""
+                    competitorDTO = new CompetitorDTOImpl(c.getName(), c.getColor(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(), c
                             .getBoat().getSailID(), c.getId().toString(), new BoatClassDTO(c.getBoat().getBoatClass()

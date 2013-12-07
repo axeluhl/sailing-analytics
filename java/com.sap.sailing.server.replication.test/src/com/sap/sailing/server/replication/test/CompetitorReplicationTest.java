@@ -96,13 +96,13 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotSame(replicatedCompetitor, competitor);
         assertEquals(competitor.getId(), replicatedCompetitor.getId());
         assertEquals(competitor.getName(), replicatedCompetitor.getName());
-        assertEquals(competitor.getDisplayColor(), replicatedCompetitor.getDisplayColor());
+        assertEquals(competitor.getColor(), replicatedCompetitor.getColor());
         assertEquals(competitor.getBoat().getSailID(), replicatedCompetitor.getBoat().getSailID());
         assertEquals(competitor.getTeam().getNationality(), replicatedCompetitor.getTeam().getNationality());
         
         // now update competitor on master using replicating operation
         final String newCompetitorName = "Der Vogel, der mit dem Kiel zieht";
-        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getDisplayColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality()));
+        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getColor(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality()));
         Thread.sleep(1000);
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
         

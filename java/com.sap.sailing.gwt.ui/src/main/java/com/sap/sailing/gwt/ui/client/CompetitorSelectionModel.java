@@ -52,8 +52,8 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     private void add(CompetitorDTO competitor, boolean notifyListeners) {
-        if(competitor.getDisplayColor() != null) {
-            Color color = new HtmlColor(competitor.getDisplayColor());
+        if(competitor.getColor() != null) {
+            Color color = new HtmlColor(competitor.getColor());
             competitorsColorMap.addBlockedColor(color);
         }
         boolean changed = allCompetitors.add(competitor);
@@ -226,8 +226,8 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     public String getColor(CompetitorDTO competitor) {
         String result = null;
         if (allCompetitors.contains(competitor)) {
-            if(competitor.getDisplayColor() != null) {
-                result = competitor.getDisplayColor();
+            if(competitor.getColor() != null) {
+                result = competitor.getColor();
             } else {
                 result = competitorsColorMap.getColorByID(competitor); 
             }
