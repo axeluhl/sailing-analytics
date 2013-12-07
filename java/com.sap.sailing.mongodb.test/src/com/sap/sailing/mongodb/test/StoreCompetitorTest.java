@@ -3,6 +3,7 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -30,6 +31,20 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DB db = getMongoService().getDB();
         db.getCollection(CollectionNames.COMPETITORS.name()).drop();
         DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso");
+        mongoObjectFactory.storeCompetitor(c);
+        assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
+        c.setName("Hasso Plattner");
+        mongoObjectFactory.storeCompetitor(c);
+        assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
+    }
+
+    @Test
+    public void testStoreAndUpdateCompetitorWithUUIDAsId() {
+        MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DB db = getMongoService().getDB();
+        db.getCollection(CollectionNames.COMPETITORS.name()).drop();
+        DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso", UUID.randomUUID());
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
         c.setName("Hasso Plattner");
