@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 
 public class RegattaReplicationTest extends AbstractServerReplicationTest {
     @Test
@@ -65,7 +66,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId);
         
         // Test for 'null'
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, null);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -73,7 +74,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, null);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -81,7 +82,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, null);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -89,7 +90,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         // Test back to 'null'
         currentCourseAreaId = null;
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, null);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -110,7 +111,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId);
         
         // Test for 'null'
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, null);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, null));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -119,7 +120,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         // Test for values
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
-        master.updateRegatta(new RegattaName(masterRegatta.getName()), currentCourseAreaId, config);
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), currentCourseAreaId, config));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
