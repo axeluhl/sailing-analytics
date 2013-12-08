@@ -122,6 +122,8 @@ The app fetches its **DeviceConfiguration** on logon. This overall **DeviceConfi
 
 The following leads you to the process of adding a remote-configurable configuration option. The text assumes you are adding the configuration option to _DeviceConfiguration_. The process of adding an option to _RegattaConfiguration_ or one of the _RacingProcedureConfigurations_ is very similar.
 
+Estimated time: 1 hour. Main task: copy and paste.
+
 1. Device-Local Configuration
   1. res/xml/preference_xxx.xml add preference (check com.sap.sailing.racecommittee.app.ui.views) and define title and summary in localization files
   2. res/values/preferences.xml define key string and default value - this default value will be set on first start (or version change!)
