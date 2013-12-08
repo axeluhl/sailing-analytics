@@ -25,7 +25,13 @@ The Feedback a User gave to the Application and the Feedback the user gave to th
 
 ## Course Updates
 
-Kuruh, Kuruh,...
+The app has several course designer varying in their input method and output:
+
+* **By-Name** Course Designer: just setting the name of a _CourseBase_ object with no waypoints
+* **By-Map** Course Designer: just setting the name of a _CourseBase_ object with now waypoints
+* **By-Marks** Course Designer: full _CourseBase_ object with waypoints
+
+The _CourseBase_ is attached to a _RaceLogCourseDesignChangedEvent_. On the server the _TrackedRace_ attached to the race log will forward such events to the _TracTracCourseDesignUpdateHandler_. If activated this handler will forward the _CourseBase_ object (regardless of whether its has waypoints or not) to **TracTrac**.
 
 ## RaceState
 
@@ -69,30 +75,64 @@ This chain continues until the _RacingProcedure_ detects that there are no furth
 
 ### Adding a new racing procedure
 
-Ja.
+When adding a new racing procedure you should start by basing your work on one of the existing ones. Have a look at the basic countdown racing procedure to see the most simplest. The brave ones base their work on the gate start procedure.
 
-## Configuration
-
-intro-text verweis zu admin-guide
-
-### Adding a new configuration option
-
-DeviceConfiguration vs RegattaConfiguration
-merge
-PreferenceScreen and AppPreferences
+A working racing procedure needs the following:
+1. A new type in _RacingProcedureType_
+2. An implementation of _RacingProcedure_
+3. A _RacingProcedureConfiguration_ field in _RegattaConfiguration_ (see below on how to do this)
+4. App UI - just extend _RaceInfoFragmentChooser_ and you'll see what you need
 
 ## RaceLog priorities and authors
 
-Bruuuum.
-
-## Versioning
-
-Baruh
+TODO.
 
 ## Build and Auto-Update
 
-On Maven builds the resulting APK of the RaceCommittee App will be made available as static content on the server's web page.
+When build by Maven the resulting APK of the RaceCommittee App will be made available as static content on the server's web page.
 
 The RaceCommittee App is set up as an optional dependency of the bundle **com.sap.sailing.www**. This way the app will be build before the www-bundle. After the install phase the RaceCommittee App bundle will copy its artifact APK into _com.sap.sailing.www/apps_. The contents of this folder are packaged into the **com.sap.sailing.www** plugin, which will be deployed as the server's web page. When build with _buildAndUpdateProduct.sh_ an additional version information file is stored alongside the APK. Version information is taken from the AndroidManifest.xml (**android:versionCode**).
 
 On synchronizing the connection settings (see [[administrator's guide|racecommittee-app-administrator]]) the RaceCommittee App downloads the version file to determine whether it should update itself or not. The file is expected to be found on _{SERVER_URL}/apps/{APP_PACKAGE_NAME}.version_ (e.g. _http://ess2020.sapsailing.com/apps/com.sap.sailing.racecommittee.app.version_). If the version file is not found, no update will be performed.
+
+See the next section about versioning.
+
+## Versioning
+
+The app's version is defined in its AndroidManifest.xml in the **versionCode** attribute. This version code is used by several components:
+
+* Android OS for standard versioning operations
+* Helper-Class **PreferenceHelper** to determine whether a refresh of the stored preferences is needed
+* Auto-Update feature (see above)
+
+This leads to the following situations, in which one should bump the **versionCode**:
+
+1. You feel like you have achieved something remarkable.
+2. You have added or changed the type of a preference (see below for a walk-through on how to add a new preference option).
+3. You have made non-backwards-compatible changes to the app<->server interface. This includes changes to serializers/deserializers, changes to servlets,...
+4. You want to trigger the auto-update because you customized the app for the current event.
+
+## Configuration (or Preferences)
+
+Configuration of the app is crucial for the app to function properly. See the [[administration guide|wiki/racecommittee-app-administrator]] on how to it is done. The main idea is, that all configuration options are editable on the app via the Android standard preferences interfaces. Still most of the configuration should be configurable on the server.
+
+The app fetches its **DeviceConfiguration** on logon. This overall **DeviceConfiguration** is merged with configuration that is stored on device. Additionally each regatta can have a specific **RegattaConfiguration** attached to it. A regata-specific RegattaConfiguration is merged with the overall **DeviceConfiguration**.
+
+### Adding a new configuration option
+
+The following leads you to the process of adding a remote-configurable configuration option. The text assumes you are adding the configuration option to _DeviceConfiguration_. The process of adding an option to _RegattaConfiguration_ or one of the _RacingProcedureConfigurations_ is very similar.
+
+1. Device-Local Configuration
+  1. res/xml/preference_xxx.xml add preference (check com.sap.sailing.racecommittee.app.ui.views) and define title and summary in localization files
+  2. res/values/preferences.xml define key string and default value - this default value will be set on first start (or version change!)
+  3. If needed initialize your preference in _com.sap.sailing.racecommittee.app.ui.fragments.preference.YourPreferenceFragment_ (keep in mind: default value will be set automatically)
+  4. If your preference needs to accessed from app code this should be done through the helper class _AppPreferences_ -> create getter (and if needed setter) in _AppPreferences_
+2. Exposing the option on the server
+  1. Add a getter for your option to _DeviceConfiguration_
+  2. Implement the getter and a setter in _DeviceConfigurationImpl_
+  3. Modify the _DeviceConfigurationImpl#clone_ method (for _RegattaConfiguration_ or one of its items you need to extend the merge method too)
+  4. Teach the _com.sap.sailing.racecommittee.app.domain.configuration.PreferencesDeviceConfigurationLoader_ how to load and store your setting from/to AppPreferences (for RegattaConfiguration you should extend  com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration too)
+  5. Modify the configuration's serializer and deserializer (good news: they are used for persistence, but don't tell anyone)
+  6. Integrate your new option in the GWT UI (Extending the existing DTOs and Dialogs)
+
+If feel the need to add a new category of preferences (i.e. adding a new preference fragment in res/xml/preference_xxx) be sure to modify _PreferenceHelper#resetPreferences_ to incorporate your new screen.
