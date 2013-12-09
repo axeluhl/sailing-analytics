@@ -21,6 +21,9 @@ ssh $USER@$SERVER "rm -rf $REPO_HOME/sailing"
 echo "Uploading local repository to $REPO_HOME/sailing"
 scp -r ../../com.sap.sailing.targetplatform.base/gen/p2 $USER@$SERVER:$REPO_HOME/sailing
 
+ecoh "Making readable for everyone..."
+ssh $USER@SERVER "chmod -R a+r $REPO_HOME/sailing/*"
+
 echo "Remote files now available:"
 ssh $USER@$SERVER "ls -lah $REPO_HOME/sailing"
 
