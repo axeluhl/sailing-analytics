@@ -92,7 +92,7 @@ public interface IgtimiConnection {
      * are forwarded in the batches in which they are received to the listeners that can be added to the live connection
      * using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
      * 
-     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#disconnect()}.
+     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()}.
      */
     LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     

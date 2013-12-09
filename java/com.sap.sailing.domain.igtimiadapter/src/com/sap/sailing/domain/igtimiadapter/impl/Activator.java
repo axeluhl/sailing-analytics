@@ -12,6 +12,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 
 /**
  * Maintains data about a default {@link Client} that represents this application when interacting with the Igtimi
@@ -49,6 +50,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
         context.registerService(IgtimiConnectionFactory.class, connectionFactory, /* properties */ null);
+        context.registerService(WindTrackerFactory.class, new IgtimiWindTrackerFactory(connectionFactory), /* properties */ null);
+        context.registerService(IgtimiWindTrackerFactory.class, new IgtimiWindTrackerFactory(connectionFactory), /* properties */ null);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {

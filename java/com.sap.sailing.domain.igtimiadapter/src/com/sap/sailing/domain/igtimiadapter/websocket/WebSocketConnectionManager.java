@@ -82,7 +82,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         }
     }
     
-    public void disconnect() throws Exception {
+    public void stop() throws Exception {
         targetState = TargetState.CLOSED;
         client.stop();
     }

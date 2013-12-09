@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class WindReceiverTest {
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(deviceSerialNumber);
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
         receiver.addListener(new WindListener() {
             @Override
             public void windDataReceived(Wind wind) {

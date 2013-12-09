@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import java.net.SocketException;
-
 import com.sap.sailing.domain.base.RaceDefinition;
 
 /**
@@ -12,7 +10,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
  */
 public interface WindTrackerFactory {
     WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race, boolean correctByDeclination)
-            throws SocketException;
+            throws Exception;
 
     /**
      * Returns a {@link WindTracker} is one has been previously created for <code>race</code> and hasn't been
