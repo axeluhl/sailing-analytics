@@ -10,11 +10,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -30,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
+    private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
     private final StringMessages stringMessages;
@@ -40,13 +44,16 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 .cancel(), new Validator<CompetitorDTO>() {
                     @Override
                     public String getErrorMessage(CompetitorDTO valueToValidate) {
-                        final String result;
+                        String result = null;
                         if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                             result = stringMessages.pleaseEnterAName();
                         } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
                             result = stringMessages.pleaseEnterASailNumber();
-                        } else {
-                            result = null;
+                        } else if (valueToValidate.getColor() != null) {
+                            Color displayColor = valueToValidate.getColor();
+                            if (displayColor instanceof InvalidColor) {
+                                result = displayColor.getAsHtml();
+                            }
                         }
                         return result;
                     }
@@ -54,6 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         this.name = createTextBox(competitorToEdit.getName());
+        this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;
@@ -90,26 +98,64 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         super.show();
         name.setFocus(true);
     }
+    
+    /**
+     * Encodes an invalid color; can be used 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class InvalidColor implements Color {
+        private static final long serialVersionUID = 4012986110898149543L;
+        private final Exception exception;
+        
+        protected InvalidColor(Exception exception) {
+            this.exception = exception;
+        }
+
+        @Override
+        public Triple<Integer, Integer, Integer> getAsRGB() {
+            return null;
+        }
+
+        @Override
+        public Triple<Float, Float, Float> getAsHSV() {
+            return null;
+        }
+
+        @Override
+        public String getAsHtml() {
+            return stringMessages.invalidColor(exception.getMessage());
+        }
+        
+    }
 
     @Override
     protected CompetitorDTO getResult() {
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(),
+        Color color;
+        try {
+            color = new RGBColor(displayColorTextBox.getText());
+        } catch (IllegalArgumentException iae) {
+            color = new InvalidColor(iae);
+        }
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
-                /* countryName */null, sailId.getText(), competitorToEdit.getIdAsString(),
+                /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
                 competitorToEdit.getBoatClass());
         return result;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(3, 2);
+        Grid result = new Grid(4, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
         result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
         result.setWidget(1, 1, sailId);
         result.setWidget(2, 0, new Label(stringMessages.nationality()));
         result.setWidget(2, 1, threeLetterIocCountryCode);
+        result.setWidget(3, 0, new Label(stringMessages.color()));
+        result.setWidget(3, 1, displayColorTextBox);
         return result;
     }
 

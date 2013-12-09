@@ -9,10 +9,11 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 
 public abstract class AbstractLeaderboardTest {
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
@@ -21,7 +22,7 @@ public abstract class AbstractLeaderboardTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName, Serializable id) {
-        return new CompetitorImpl(id, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(id, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

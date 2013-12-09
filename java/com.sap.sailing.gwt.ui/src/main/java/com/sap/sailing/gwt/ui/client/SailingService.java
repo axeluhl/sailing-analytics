@@ -338,6 +338,8 @@ public interface SailingService extends RemoteService {
 
     Iterable<CompetitorDTO> getCompetitors();
 
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
+
     CompetitorDTO updateCompetitor(CompetitorDTO competitor);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);

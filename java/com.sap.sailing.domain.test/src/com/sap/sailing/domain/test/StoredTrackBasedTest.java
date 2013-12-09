@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -116,7 +117,7 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         for (String competitorName : getCompetitorNamesOfStoredTracks(KIELER_WOCHE)) {
             DynamicPerson p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
             DynamicTeam t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
-            Competitor c = new CompetitorImpl(competitorName, competitorName, t, new BoatImpl(competitorName,
+            Competitor c = new CompetitorImpl(competitorName, competitorName, Color.RED, t, new BoatImpl(competitorName,
                     new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
             if (track != null) {

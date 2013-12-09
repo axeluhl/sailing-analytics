@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 /**
@@ -58,7 +59,7 @@ public interface CompetitorStore extends CompetitorFactory {
      * 
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
      */
-    Competitor updateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality);
+    Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 }

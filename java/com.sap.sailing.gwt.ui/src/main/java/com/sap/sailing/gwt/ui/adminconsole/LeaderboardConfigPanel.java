@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -168,7 +169,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         }
     }
 
-    public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
+    public LeaderboardConfigPanel(final SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
@@ -347,6 +348,19 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
+                    EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
+                            errorReporter, new DialogCallback<List<CompetitorDTO>>() {
+                        @Override
+                        public void cancel() {
+                        }
+
+                        @Override
+                        public void ok(final List<CompetitorDTO> result) {
+                        }
+                    });
+                    editCompetitorsDialog.show();
+                    
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 }
