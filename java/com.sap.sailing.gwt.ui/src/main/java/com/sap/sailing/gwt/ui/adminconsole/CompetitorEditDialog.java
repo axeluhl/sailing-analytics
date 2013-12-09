@@ -47,7 +47,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                             result = stringMessages.pleaseEnterAName();
                         } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
                             result = stringMessages.pleaseEnterASailNumber();
-                        } else if(valueToValidate.getColor() != null) {
+                        } else if(valueToValidate.getColor() != null && !valueToValidate.getColor().isEmpty()) {
                             String displayColor = valueToValidate.getColor();
                             try {
                                 new HtmlColor(displayColor);
