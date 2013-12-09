@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -161,8 +164,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final WindTrackerFactory windTrackerFactory;
-
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
      * {@link Event} objects that exist outside this service for events not (yet) registered here.
@@ -222,6 +223,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final WindStore windStore;
 
     /**
+     * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
+     * object so that service lookups become possible.
+     */
+    private BundleContext bundleContext;
+
+    /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
      * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
@@ -234,6 +241,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     public RacingEventServiceImpl(WindStore windStore) {
         this(true, windStore);
+    }
+    
+    void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
     
     /**
@@ -272,7 +283,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -287,7 +297,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
-        
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -310,7 +319,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadMediaLibary();
         loadStoredDeviceConfigurations();
     }
-
+    
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
@@ -1329,14 +1338,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
-        windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        }
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
-        if (windTracker != null) {
-            windTracker.stop();
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+            if (windTracker != null) {
+                windTracker.stop();
+            }
         }
     }
 
@@ -1345,9 +1358,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
-                if (windTracker != null) {
-                    result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+                    WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                    if (windTracker != null) {
+                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                    }
                 }
             }
         }
@@ -2056,6 +2071,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
         }
         return null;
+    }
+
+    private Iterable<WindTrackerFactory> getWindTrackerFactories() {
+        final Set<WindTrackerFactory> result;
+        if (bundleContext == null) {
+            result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+        } else {
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+                    bundleContext, WindTrackerFactory.class.getName(), null);
+            tracker.open();
+            result = new HashSet<>();
+            for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
+                result.add(factory);
+            }
+        }
+        return result;
     }
 
 }
