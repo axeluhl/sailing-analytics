@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum Type {
-
     gps_latlong(1, GpsLatLong.class),
     gps_quality_indicator(2, GpsQualityIndicator.class),
     gps_quality_sat_count(3, GpsQualitySatCount.class),
@@ -37,15 +36,21 @@ public enum Type {
     private final int code;
     private final Class<? extends Fix> fixClass;
     private final static Map<Integer, Type> typeByCode = new HashMap<>();
+    private final static Map<Class<? extends Fix>, Type> typeByClass = new HashMap<>();
 
     private Type(int code, Class<? extends Fix> fixClass) {
         this.code = code;
         this.fixClass = fixClass;
     }
     
+    public static Type getType(Class<? extends Fix> fixClass) {
+        return typeByClass.get(fixClass);
+    }
+    
     static {
         for (Type type : Type.values()) {
             typeByCode.put(type.getCode(), type);
+            typeByClass.put(type.getFixClass(), type);
         }
     }
 }

@@ -3,9 +3,11 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 public class File extends Fix {
+    private static final long serialVersionUID = 7580174784400926003L;
     private final TimePoint start;
     private final TimePoint end;
     private final String fileName;
@@ -50,5 +52,10 @@ public class File extends Fix {
     @Override
     protected String localToString() {
         return "File: "+getFileName()+", MD5: "+getMd5()+" content type "+getContentType()+", "+getSize()+" bytes";
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

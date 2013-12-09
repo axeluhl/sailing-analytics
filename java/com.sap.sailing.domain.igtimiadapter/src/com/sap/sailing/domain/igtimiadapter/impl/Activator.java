@@ -33,7 +33,7 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_ID_PROPERTY_NAME = "igtimi.client.id";
     private static final String CLIENT_SECRET_PROPERTY_NAME = "igtimi.client.secret";
     private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
-    private IgtimiConnectionFactory connectionFactory;
+    private IgtimiConnectionFactoryImpl connectionFactory;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
@@ -58,7 +58,7 @@ public class Activator implements BundleActivator {
         return INSTANCE;
     }
     
-    public IgtimiConnectionFactory getConnectionFactory() {
+    public IgtimiConnectionFactoryImpl getConnectionFactory() {
         return connectionFactory;
     }
 

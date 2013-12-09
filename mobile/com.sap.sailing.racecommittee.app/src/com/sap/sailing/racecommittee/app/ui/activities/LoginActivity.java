@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
@@ -11,9 +14,16 @@ import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -23,11 +33,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-public class LoginActivity extends BaseActivity implements EventSelectedListenerHost,
-        CourseAreaSelectedListenerHost, DialogListenerHost {
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
+        DialogListenerHost {
     private final static String TAG = LoginActivity.class.getName();
-    
+
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
 
     private LoginDialog loginDialog;
@@ -37,7 +48,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         this.loginDialog = new LoginDialog();
         this.selectedCourseArea = null;
     }
-    
+
     @Override
     protected boolean onReset() {
         Fragment courseAreaFragment = getFragmentManager().findFragmentByTag(CourseAreaListFragmentTag);
@@ -53,9 +64,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     public void onCreate(Bundle savedInstanceState) {
         // features must be requested before anything else
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        
+
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.login_view);
         setProgressBarIndeterminateVisibility(false);
 
@@ -64,6 +75,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             ExLog.i(TAG, "Seems to be first start. Creating event fragment.");
             addEventListFragment();
         }
+
+        new AutoUpdater(this).notifyAfterUpdate();
     }
 
     private void addEventListFragment() {
@@ -82,16 +95,61 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.login_view_right_container, fragment, CourseAreaListFragmentTag);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         ExLog.i("LoginActivity", "CourseFragment created.");
     }
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
-            Serializable eventId = event.getId();
+            final Serializable eventId = event.getId();
             ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
-            showCourseAreaListFragment(eventId);
+
+            setProgressBarIndeterminateVisibility(true);
+            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog.setMessage(getString(R.string.loading_configuration));
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(true);
+            progressDialog.show();
+
+            ReadonlyDataManager dataManager = OnlineDataManager.create(LoginActivity.this);
+            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(
+                    getApplicationContext()).getDeviceIdentifier());
+            
+            LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, 
+                    new LoadClient<DeviceConfiguration>() {
+
+                        @Override
+                        public void onLoadSucceded(DeviceConfiguration configuration, boolean isCached) {
+                            setProgressBarIndeterminateVisibility(false);
+                            progressDialog.dismiss();
+
+                            // this is our 'global' configuration, let's store it in app preferences
+                            PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_succeded),
+                                    Toast.LENGTH_LONG).show();
+                            showCourseAreaListFragment(eventId);
+                        }
+
+                        @Override
+                        public void onLoadFailed(Exception reason) {
+                            setProgressBarIndeterminateVisibility(false);
+                            progressDialog.dismiss();
+
+                            if (reason instanceof FileNotFoundException) {
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
+                                ExLog.w(TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
+                            } else {
+                                Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
+                                ExLog.ex(TAG, reason);
+                            }
+
+                            showCourseAreaListFragment(eventId);
+                        }
+                    });
+            // always reload the configuration...
+            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         }
     };
 
@@ -124,21 +182,25 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     @Override
     public DialogResultListener getListener() {
         return new DialogResultListener() {
-            
+
             @Override
             public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-                switch (loginDialog.getSelectedLoginType()) {
+                // We have to take the passed instance, LoginActivity.this might be a new instance!
+                LoginDialog localLoginDialog = (LoginDialog) dialog;
+                preferences.setAuthor(localLoginDialog.getAuthor());
+                switch (localLoginDialog.getSelectedLoginType()) {
                 case OFFICER:
                     ExLog.i(TAG, "Communication with backend is active.");
-                    AppPreferences.setSendingActive(LoginActivity.this, true);
+                    preferences.setSendingActive(true);
                     break;
                 case VIEWER:
                     ExLog.i(TAG, "Communication with backend is inactive.");
-                    AppPreferences.setSendingActive(LoginActivity.this, false);
+                    preferences.setSendingActive(false);
                     break;
                 default:
                     ExLog.i(TAG, "An invalid log type, e.g. NONE, was selected");
-                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type), Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.please_select_a_login_type),
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -152,7 +214,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourseArea.getId());
                 fadeActivity(message);
             }
-            
+
             @Override
             public void onDialogNegativeButton(AttachedDialogFragment dialog) {
                 /* nothing here... */

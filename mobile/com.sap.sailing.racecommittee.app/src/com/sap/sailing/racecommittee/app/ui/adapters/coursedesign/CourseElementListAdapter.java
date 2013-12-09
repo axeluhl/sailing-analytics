@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
-import com.sap.sailing.racecommittee.app.utils.MarkImageHelper;
+import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 
 public class CourseElementListAdapter extends ArrayAdapter<CourseListDataElement> {
 

@@ -1,21 +1,12 @@
 package com.sap.sailing.domain.igtimiadapter;
 
-import com.sap.sailing.domain.common.TimePoint;
 
-public interface Resource {
+public interface Resource extends HasId, HasPermissions, HasStartAndEndTime {
 
-    long getId();
+    boolean isBlob();
 
-    public abstract boolean isBlob();
+    int[] getDataTypes();
 
-    public abstract Iterable<Permission> getPermissions();
-
-    public abstract int[] getDataTypes();
-
-    public abstract String getDeviceSerialNumber();
-
-    public abstract TimePoint getEndTime();
-
-    public abstract TimePoint getStartTime();
+    String getDeviceSerialNumber();
 
 }

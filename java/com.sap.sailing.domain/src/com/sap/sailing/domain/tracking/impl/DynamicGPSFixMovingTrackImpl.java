@@ -19,9 +19,10 @@ import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
-public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<ItemType, GPSFixMoving> {
+public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving>{
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
@@ -42,7 +43,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      */
     @Override
     public void addGPSFix(GPSFixMoving gpsFix) {
-        super.addGPSFix(new CompactGPSFixMovingImpl(gpsFix));
+        add(gpsFix);
+    }
+    
+    @Override
+    public boolean add(GPSFixMoving fix) {
+        return super.add(new CompactGPSFixMovingImpl(fix));
     }
 
     @Override
@@ -163,4 +169,10 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
         return isValid;
     }
+
+    @Override
+    public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
+        super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
+    }
+    
 }

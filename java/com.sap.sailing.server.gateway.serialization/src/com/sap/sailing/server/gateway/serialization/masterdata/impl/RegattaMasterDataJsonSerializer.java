@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -28,6 +29,7 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
     public static final String FIELD_REGATTAS = "regattas";
     public static final String FIELD_BOAT_CLASS_NAME = "boatClass";
     public static final String FIELD_DEFAULT_COURSE_AREA_ID = "defaultCourseAreaId";
+    public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
     public static final String FIELD_SCORING_SCHEME_TYPE = "scoringSchemeType";
     public static final String FIELD_SERIES = "series";
     public static final String FIELD_RACE_COLUMNS = "raceColumns";
@@ -41,12 +43,16 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
 
     private final JsonSerializer<Fleet> fleetSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
+    private final JsonSerializer<RegattaConfiguration> configurationSerializer;
     private final ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings;
 
-    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer,
-            JsonSerializer<RaceColumn> raceColumnSerializer, ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
+    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer, 
+            JsonSerializer<RaceColumn> raceColumnSerializer, 
+            JsonSerializer<RegattaConfiguration> configurationSerializer, 
+            ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
         this.fleetSerializer = fleetSerializer;
         this.raceColumnSerializer = raceColumnSerializer;
+        this.configurationSerializer = configurationSerializer;
         this.regattaForRaceIdStrings = regattaForRaceIdStrings;
     }
 
@@ -73,6 +79,11 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         } else {
             result.put(FIELD_DEFAULT_COURSE_AREA_ID, null);
         }
+        if (regatta.getRegattaConfiguration() != null) {
+            result.put(FIELD_REGATTA_CONFIGURATION, 
+                    configurationSerializer.serialize(regatta.getRegattaConfiguration()));
+        }
+        
         result.put(FIELD_SCORING_SCHEME_TYPE, regatta.getScoringScheme().getType().toString());
         result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
         result.put(FIELD_IS_PERSISTENT, regatta.isPersistent());

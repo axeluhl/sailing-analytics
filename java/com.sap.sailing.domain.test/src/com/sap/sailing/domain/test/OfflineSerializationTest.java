@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -97,7 +98,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     // see bug 1605
     @Test
     public void testSerializingOverallLeaderboardWithFactorOnColumn() throws ClassNotFoundException, IOException {
-        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", "Alpha"));
+        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
         final LeaderboardGroupMetaLeaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(), new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
@@ -156,7 +157,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),

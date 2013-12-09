@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -128,6 +129,9 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
         try {
             currentState = operation.applyTo(currentState);
             updatePeers(operation, /* except */null);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception during executing task in peer "+PeerImpl.this, e);
+            throw e;
         } finally {
             taskFinished();
         }
@@ -136,41 +140,60 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     @Override
     public synchronized void apply(final Peer<O, S> source, O operation,
 	    final int numberOfOperationsSourceHasMergedFromThis) {
-	taskScheduled();
-	if (!getPeers().contains(source)) {
-	    throw new RuntimeException("Peer "+source+" not registered with peer "+this);
-	}
-	// Starting from base up to current, compute transformed operation sequence to send
-	// to client; this will create a sequence of states for the client which eventually
-	// leads up to a state that equals the server's current state.
-	O transformedOp = operation;
-	UnmergedOperationsQueue<O, S> unmergedOperationsForSource = unmergedOperationsForPeer.get(source);
-	int localOpNumber = numberOfOperationsSourceHasMergedFromThis;
-	for (O unconfirmedOperation : unmergedOperationsForSource.getUnmergedOperations(numberOfOperationsSourceHasMergedFromThis)) {
-	    if (role == Role.SERVER) {
-		ClientServerOperationPair<O> pair = getTransformer().transform(transformedOp, unconfirmedOperation);
-		transformedOp = pair.getClientOp();
-		unmergedOperationsForSource.updateWithTransformed(localOpNumber, pair.getServerOp());
-	    } else {
-		ClientServerOperationPair<O> pair = getTransformer().transform(unconfirmedOperation, transformedOp);
-		transformedOp = pair.getServerOp();
-		unmergedOperationsForSource.updateWithTransformed(localOpNumber, pair.getClientOp());
-	    }
-	    localOpNumber++;
-	}
-	currentState = transformedOp.applyTo(currentState); // produce a new current state
-	final int numberOfMergedOperationsFromSource = numberOfMergedOperations.get(source)+1;
-	numberOfMergedOperations.put(source, numberOfMergedOperationsFromSource);
-	// It's important that the following call to confirm is synchronized with the
-	// sending of updates to the source peer. Therefore, the confirm call is executed
-	// in the same serializing background thread:
-	scheduleTask(new Runnable() {
-	    public void run() {
-		source.confirm(PeerImpl.this, numberOfMergedOperationsFromSource);
-	    }
-	});
-	updatePeers(transformedOp, /* except */source);
-	taskFinished();
+        taskScheduled();
+        try {
+            if (!getPeers().contains(source)) {
+                throw new RuntimeException("Peer " + source + " not registered with peer " + this);
+            }
+            // Starting from base up to current, compute transformed operation sequence to send
+            // to client; this will create a sequence of states for the client which eventually
+            // leads up to a state that equals the server's current state.
+            O transformedOp = operation;
+            UnmergedOperationsQueue<O, S> unmergedOperationsForSource = unmergedOperationsForPeer.get(source);
+            int localOpNumber = numberOfOperationsSourceHasMergedFromThis;
+            for (O unconfirmedOperation : unmergedOperationsForSource
+                    .getUnmergedOperations(numberOfOperationsSourceHasMergedFromThis)) {
+                if (role == Role.SERVER) {
+                    final ClientServerOperationPair<O> pair;
+                    if (transformedOp == null || unconfirmedOperation == null) {
+                        pair = new ClientServerOperationPair<>(transformedOp, unconfirmedOperation);
+                    } else {
+                        pair = getTransformer().transform(transformedOp, unconfirmedOperation);
+                    }
+                    transformedOp = pair.getClientOp();
+                    unmergedOperationsForSource.updateWithTransformed(localOpNumber, pair.getServerOp());
+                } else {
+                    final ClientServerOperationPair<O> pair;
+                    if (transformedOp == null || unconfirmedOperation == null) {
+                        pair = new ClientServerOperationPair<>(unconfirmedOperation, transformedOp);
+                    } else {
+                        pair = getTransformer().transform(unconfirmedOperation, transformedOp);
+                    }
+                    transformedOp = pair.getServerOp();
+                    unmergedOperationsForSource.updateWithTransformed(localOpNumber, pair.getClientOp());
+                }
+                localOpNumber++;
+            }
+            if (transformedOp != null) {
+                currentState = transformedOp.applyTo(currentState); // produce a new current state
+            }
+            final int numberOfMergedOperationsFromSource = numberOfMergedOperations.get(source) + 1;
+            numberOfMergedOperations.put(source, numberOfMergedOperationsFromSource);
+            // It's important that the following call to confirm is synchronized with the
+            // sending of updates to the source peer. Therefore, the confirm call is executed
+            // in the same serializing background thread:
+            scheduleTask(new Runnable() {
+                public void run() {
+                    source.confirm(PeerImpl.this, numberOfMergedOperationsFromSource);
+                }
+            });
+            updatePeers(transformedOp, /* except */source);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception during executing task in peer "+PeerImpl.this, e);
+            throw e;
+        } finally {
+            taskFinished();
+        }
     }
 
     /**
@@ -228,6 +251,9 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	    public void run() {
 	        try {
 	            runnable.run();
+	        } catch (Exception e) {
+	            logger.log(Level.SEVERE, "Exception during executing task in peer "+PeerImpl.this, e);
+	            throw e;
 	        } finally {
 	            taskFinished();
 	        }

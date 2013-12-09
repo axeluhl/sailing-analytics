@@ -100,7 +100,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (leaderboard != null) {
             Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
             RaceLog raceLog = raceColumn.getRaceLog(fleet);
-            checkNeedForScoreCorrectionByResultsOfRaceCommittee(leaderboard, raceColumn, fleet, raceLog, event.getTimePoint());
+            checkNeedForScoreCorrectionByResultsOfRaceCommittee(leaderboard, raceColumn, fleet, raceLog, event.getCreatedAt());
         }
     }
 

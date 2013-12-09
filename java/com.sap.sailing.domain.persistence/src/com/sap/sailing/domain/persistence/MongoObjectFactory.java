@@ -9,6 +9,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -101,5 +103,9 @@ public interface MongoObjectFactory {
     void removeCompetitor(Competitor competitor);
 
     DB getDatabase();
+
+    void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+
+    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
 
 }

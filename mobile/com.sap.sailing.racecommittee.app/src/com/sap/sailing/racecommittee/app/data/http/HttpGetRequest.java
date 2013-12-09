@@ -12,8 +12,14 @@ public class HttpGetRequest extends HttpRequest {
         super(requestUrl);
     }
 
+    public HttpGetRequest(URL url, HttpRequestProgressListener listener) {
+        super(url, listener);
+    }
+
+
+
     @Override
-    protected BufferedInputStream execute(HttpURLConnection connection) throws IOException {
+    protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {
         InputStream stream = connection.getInputStream();
         return new BufferedInputStream(stream);
     }

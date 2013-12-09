@@ -20,6 +20,7 @@ public class CompetitorMasterDataJsonSerializer implements JsonSerializer<Compet
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_ID_TYPE = "idType";
+    public static final String FIELD_DISPLAY_COLOR = "displayColor";
     private final JsonSerializer<BoatClass> boatClassSerializer;
     private final JsonSerializer<Team> teamSerializer;
     
@@ -40,6 +41,7 @@ public class CompetitorMasterDataJsonSerializer implements JsonSerializer<Compet
         }
         JSONObject jsonCompetitor = new JSONObject();
         jsonCompetitor.put(FIELD_NAME, competitor.getName());
+        jsonCompetitor.put(FIELD_DISPLAY_COLOR, competitor.getColor());
         // Special treatment for UUIDs. They are represented as String because JSON doesn't have a way to represent them
         // otherwise. However, other, e.g., numeric, types used to encode a serializable ID must be preserved according
         // to JSON semantics.
