@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
@@ -59,7 +60,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
-            public String getColor() {
+            public Color getColor() {
                 return null;
             }
         };

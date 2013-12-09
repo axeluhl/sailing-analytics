@@ -10,12 +10,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
-import com.sap.sailing.domain.common.impl.HtmlColor;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -47,12 +49,10 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                             result = stringMessages.pleaseEnterAName();
                         } else if (valueToValidate.getSailID() == null || valueToValidate.getSailID().isEmpty()) {
                             result = stringMessages.pleaseEnterASailNumber();
-                        } else if(valueToValidate.getColor() != null && !valueToValidate.getColor().isEmpty()) {
-                            String displayColor = valueToValidate.getColor();
-                            try {
-                                new HtmlColor(displayColor);
-                            } catch (IllegalArgumentException e) {
-                                result = "The display color must be in HTML color format, e.g. #ff0000";
+                        } else if (valueToValidate.getColor() != null) {
+                            Color displayColor = valueToValidate.getColor();
+                            if (displayColor instanceof InvalidColor) {
+                                result = displayColor.getAsHtml();
                             }
                         }
                         return result;
@@ -61,7 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         this.name = createTextBox(competitorToEdit.getName());
-        this.displayColorTextBox = createTextBox(competitorToEdit.getColor()); 
+        this.displayColorTextBox = createTextBox(competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;
@@ -98,13 +98,49 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         super.show();
         name.setFocus(true);
     }
+    
+    /**
+     * Encodes an invalid color; can be used 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class InvalidColor implements Color {
+        private static final long serialVersionUID = 4012986110898149543L;
+        private final Exception exception;
+        
+        protected InvalidColor(Exception exception) {
+            this.exception = exception;
+        }
+
+        @Override
+        public Triple<Integer, Integer, Integer> getAsRGB() {
+            return null;
+        }
+
+        @Override
+        public Triple<Float, Float, Float> getAsHSV() {
+            return null;
+        }
+
+        @Override
+        public String getAsHtml() {
+            return stringMessages.invalidColor(exception.getMessage());
+        }
+        
+    }
 
     @Override
     protected CompetitorDTO getResult() {
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), displayColorTextBox.getText(),
+        Color color;
+        try {
+            color = new RGBColor(displayColorTextBox.getText());
+        } catch (IllegalArgumentException iae) {
+            color = new InvalidColor(iae);
+        }
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
-                /* countryName */null, sailId.getText(), competitorToEdit.getIdAsString(),
+                /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
                 competitorToEdit.getBoatClass());
         return result;
     }

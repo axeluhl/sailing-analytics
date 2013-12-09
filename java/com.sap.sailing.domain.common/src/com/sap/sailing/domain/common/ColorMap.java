@@ -9,7 +9,7 @@ package com.sap.sailing.domain.common;
  *            the type of the objects to which a color is assigned
  */
 public interface ColorMap<T> {
-    String getColorByID(T object);
+    Color getColorByID(T object);
     
     boolean addBlockedColor(Color color);
     boolean removeBlockedColor(Color color);

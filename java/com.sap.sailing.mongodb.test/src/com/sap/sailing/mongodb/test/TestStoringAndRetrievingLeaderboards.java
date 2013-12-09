@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -68,7 +69,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         Competitor wolfgang = createCompetitor();
-        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "#FF0000", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -290,7 +291,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     private Competitor createCompetitor() {
-        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "#FF0000", new TeamImpl("STG", Collections.singleton(
+        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));

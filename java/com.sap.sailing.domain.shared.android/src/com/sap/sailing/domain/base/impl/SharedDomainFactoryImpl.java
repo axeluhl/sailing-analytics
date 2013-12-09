@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.WithID;
@@ -281,8 +282,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String rgbDisplayColor, DynamicTeam team, DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, rgbDisplayColor, team, boat);
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 
     @Override

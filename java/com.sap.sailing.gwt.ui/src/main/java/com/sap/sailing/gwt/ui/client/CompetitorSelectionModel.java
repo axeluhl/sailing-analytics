@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
-import com.sap.sailing.domain.common.impl.HtmlColor;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     private final Set<CompetitorDTO> allCompetitors;
@@ -52,8 +51,8 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     private void add(CompetitorDTO competitor, boolean notifyListeners) {
-        if(competitor.getColor() != null) {
-            Color color = new HtmlColor(competitor.getColor());
+        if (competitor.getColor() != null) {
+            Color color = competitor.getColor();
             competitorsColorMap.addBlockedColor(color);
         }
         boolean changed = allCompetitors.add(competitor);
@@ -61,7 +60,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             fireListChanged(getAllCompetitors());
         }
     }
-    
+
     @Override
     public boolean hasMultiSelection() {
         return hasMultiSelection;
@@ -223,10 +222,10 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     @Override
-    public String getColor(CompetitorDTO competitor) {
-        String result = null;
+    public Color getColor(CompetitorDTO competitor) {
+        Color result = null;
         if (allCompetitors.contains(competitor)) {
-            if(competitor.getColor() != null) {
+            if (competitor.getColor() != null) {
                 result = competitor.getColor();
             } else {
                 result = competitorsColorMap.getColorByID(competitor); 

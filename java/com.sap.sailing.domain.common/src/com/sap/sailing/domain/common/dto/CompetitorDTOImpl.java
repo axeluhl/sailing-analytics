@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Color;
+
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
  * {@link #getBoatClass() boat class} (whose equality and hash code, in turn, depends on its name) and the
@@ -16,14 +18,14 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
-    private String color;
+    private Color color;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
     
     CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, String color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
         this.color = color;
@@ -119,7 +121,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 }

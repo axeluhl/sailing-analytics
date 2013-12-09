@@ -161,7 +161,7 @@ public class CompetitorPanel extends SimplePanel {
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 if(competitor.getColor() != null) {
                     sb.appendHtmlConstant("<span style=\"color: " + competitor.getColor() + ";\">");
-                    sb.appendHtmlConstant(competitor.getColor());
+                    sb.appendHtmlConstant(competitor.getColor().getAsHtml());
                     sb.appendHtmlConstant("</span>");
                 } else {
                     sb.appendHtmlConstant("&nbsp;");

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.Color;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -12,17 +13,14 @@ public class CompetitorImpl implements DynamicCompetitor {
     private final Serializable id;
     private String name;
     
-    /**
-     * Example: "#FF00FF"
-     */
-    private String rgbColor;
+    private Color color;
     
-    public CompetitorImpl(Serializable id, String name, String rgbColor, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, Color color, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
         this.team = team;
         this.boat = boat;
-        this.rgbColor = rgbColor;
+        this.color = color;
     }
 
     @Override
@@ -61,17 +59,11 @@ public class CompetitorImpl implements DynamicCompetitor {
         return result;
     }
 
-    /**
-     * Competitor color, to use, e.g., for tail visualization, as RGB color, such as "#FF00FF"
-     */
-    public String getColor() {
-        return rgbColor;
+    public Color getColor() {
+        return color;
     }
 
-    /**
-     * Competitor color, to use, e.g., for tail visualization, as RGB color, such as "#FF00FF"
-     */
-    public void setRgbColor(String color) {
-        this.rgbColor = color;
+    public void setColor(Color color) {
+        this.color = color;
     }
 }

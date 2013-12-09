@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -163,7 +164,7 @@ public class PolarSheetGenerationServiceTest {
             waypoints.add(new WaypointImpl(null));
             waypoints.add(new WaypointImpl(null));
             ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", "#FF0000", new TeamImpl("SAP", null, null),
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", Color.RED, new TeamImpl("SAP", null, null),
                     new BoatImpl("Schnelle Forelle", forelle, "GER000"));
             competitors.add(competitor);
             RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", waypoints), forelle, competitors);

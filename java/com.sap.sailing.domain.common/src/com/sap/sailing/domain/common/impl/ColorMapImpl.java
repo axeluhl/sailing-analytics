@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
  *            the type of the objects to which a color is assigned
  */
 public class ColorMapImpl<T> implements ColorMap<T> {
-    private final HashMap<T, String> idColor;
+    private final HashMap<T, Color> idColor;
 
     private int colorCounter;
 
@@ -40,7 +40,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         baseColors[8] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
         baseColors[9] = new HSVColor(330.0f, 1.0f, 1.0f); 
 
-        idColor = new HashMap<T, String>();
+        idColor = new HashMap<T, Color>();
         blockedColors = new ArrayList<HSVColor>();
     }
 
@@ -52,9 +52,9 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      *            object's {@link Object#equals(Object)} and {@link Object#hashCode()}.
      * @return A color in hex/html-format (e.g. #ff0000)
      */
-    public String getColorByID(T object) {
-        String color = idColor.get(object);
-        if (color == null || color.isEmpty()) {
+    public Color getColorByID(T object) {
+        Color color = idColor.get(object);
+        if (color == null) {
             color = createHexColor(colorCounter++);
             idColor.put(object, color);
         }
@@ -90,7 +90,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      *            The index of e.g. a competitor. Make sure, that each competitor has a unique index.
      * @return A color computed using the {@code index}.
      */
-    private String createHexColor(int index) {
+    private Color createHexColor(int index) {
         int baseColorCount = baseColors.length;
         int baseColorsIndex = index % baseColorCount;
         int factor = index / (baseColorCount*3);
@@ -118,6 +118,6 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         HSVColor hsvColor = baseColors[baseColorsIndex];
         HSVColor newColor = new HSVColor(hsvColor.getHue(), hsvColor.getSaturation() - saturationDecrease,
                 hsvColor.getBrightness() - brightnessDecrease);
-        return newColor.getAsHtml();
+        return newColor;
     }
 }

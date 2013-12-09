@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -93,7 +94,7 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, String newRgbDisplayColor, String newSailId, Nationality newNationality) {
+    public Competitor updateCompetitor(String idAsString, String newName, Color newRgbDisplayColor, String newSailId, Nationality newNationality) {
         Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newSailId, newNationality);
         storeTo.storeCompetitor(result);
         return result;
