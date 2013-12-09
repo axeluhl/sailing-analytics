@@ -95,8 +95,6 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
     
     @Override
     protected T createDataEntry(WebElement element) {
-        T entry = this.factory.createEntry(this, element);
-        System.out.println(entry.getColumnContent(0));
-        return entry;
+        return this.factory.createEntry(this, element);
     }
 }
