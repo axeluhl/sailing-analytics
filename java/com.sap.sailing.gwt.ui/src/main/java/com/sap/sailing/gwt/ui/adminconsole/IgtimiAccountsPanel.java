@@ -1,23 +1,26 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Iterator;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class IgtimiAccountsPanel extends SimplePanel {
+public class IgtimiAccountsPanel extends FlowPanel {
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private Iterable<String> allAccountEmails;
+    private final Label allAccountEmails;
     private final TextBox userEmail;
     private final PasswordTextBox password;
     
@@ -29,6 +32,9 @@ public class IgtimiAccountsPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         userEmail = new TextBox();
         password = new PasswordTextBox();
+        allAccountEmails = new Label();
+        add(new Label(stringMessages.igtimiAccounts()+":"));
+        add(allAccountEmails);
         add(userEmail);
         add(password);
         updateAllAccounts(stringMessages);
@@ -46,6 +52,7 @@ public class IgtimiAccountsPanel extends SimplePanel {
                     @Override
                     public void onSuccess(Boolean result) {
                         Window.alert(IgtimiAccountsPanel.this.stringMessages.successfullyAuthorizedAccessToIgtimiUser(userEmail.getText()));
+                        updateAllAccounts(IgtimiAccountsPanel.this.stringMessages);
                     }
                 });
             }
@@ -57,7 +64,14 @@ public class IgtimiAccountsPanel extends SimplePanel {
         this.sailingService.getAllIgtimiAccountEmailAddresses(new AsyncCallback<Iterable<String>>() {
             @Override
             public void onSuccess(Iterable<String> result) {
-                allAccountEmails = result;
+                StringBuilder sb = new StringBuilder();
+                for (Iterator<String> i=result.iterator(); i.hasNext(); ) {
+                    sb.append(i.next());
+                    if (i.hasNext()) {
+                        sb.append(", ");
+                    }
+                }
+                allAccountEmails.setText(sb.toString());
             }
             
             @Override
