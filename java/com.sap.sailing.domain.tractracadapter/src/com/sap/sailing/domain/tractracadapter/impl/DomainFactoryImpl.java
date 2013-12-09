@@ -250,7 +250,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
-            result = competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitorId, name, null /*displayColor*/, team, boat);
         }
         return result;
     }

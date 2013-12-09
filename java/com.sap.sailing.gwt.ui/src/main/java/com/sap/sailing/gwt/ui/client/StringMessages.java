@@ -179,6 +179,7 @@ public interface StringMessages extends Messages {
     String filterRacesByName();
     String actionEdit();
     String actionEditScores();
+    String actionEditCompetitors();
     String actionOpenBrowser();
     String actionRemove();
     String actionEditSeries();

@@ -17,6 +17,8 @@ public interface CompetitorDTO extends Serializable {
     BoatClassDTO getBoatClass();
     
     String getName();
+    
+    String getColor();
 
     /**
      * A regular instance will simply return this object. A compacted version may compute the result by looking it up

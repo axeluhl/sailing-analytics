@@ -29,6 +29,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     public static final String FIELD_NATIONALITY_ISO3 = "nationalityISO3";
     public static final String FIELD_TEAM = "team";
     public static final String FIELD_BOAT = "boat";
+    public static final String FIELD_DISPLAY_COLOR = "displayColor";
 
     private final JsonSerializer<Team> teamJsonSerializer;
     private final JsonSerializer<Boat> boatJsonSerializer;
@@ -64,6 +65,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
         result.put(FIELD_NAME, competitor.getName());
+        result.put(FIELD_DISPLAY_COLOR, competitor.getColor());
         result.put(FIELD_SAILID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
         final Nationality nationality = competitor.getTeam().getNationality();
         result.put(FIELD_NATIONALITY, nationality == null ? "" : nationality.getThreeLetterIOCAcronym());

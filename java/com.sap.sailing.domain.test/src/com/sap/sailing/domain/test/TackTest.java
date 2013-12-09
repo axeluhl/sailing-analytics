@@ -33,7 +33,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Override
     @Before
     public void setUp() {
-        competitor = new CompetitorImpl(123, "Wolfgang Hunger", new TeamImpl("STG", Collections.singleton(
+        competitor = new CompetitorImpl(123, "Wolfgang Hunger", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),

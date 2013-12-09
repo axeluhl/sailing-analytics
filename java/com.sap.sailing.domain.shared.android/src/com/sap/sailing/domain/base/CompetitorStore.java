@@ -58,7 +58,7 @@ public interface CompetitorStore extends CompetitorFactory {
      * 
      * If no competitor with the ID requested is found, the call is a no-op, doing nothing, not even throwing an exception.
      */
-    Competitor updateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality);
+    Competitor updateCompetitor(String idAsString, String newName, String newDisplayColor, String newSailId, Nationality newNationality);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
 }

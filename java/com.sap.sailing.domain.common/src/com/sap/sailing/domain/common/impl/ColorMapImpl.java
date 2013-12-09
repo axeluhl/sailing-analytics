@@ -1,8 +1,13 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sailing.domain.common.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import com.sap.sailing.domain.common.impl.HSVColor;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.ColorMap;
+import com.sap.sailing.domain.common.impl.Util.Triple;
+
 
 /**
  * Manages color assignments to objects.
@@ -12,14 +17,17 @@ import com.sap.sailing.domain.common.impl.HSVColor;
  * @param <T>
  *            the type of the objects to which a color is assigned
  */
-public class ColorMap<T> {
+public class ColorMapImpl<T> implements ColorMap<T> {
     private final HashMap<T, String> idColor;
 
     private int colorCounter;
 
     private HSVColor[] baseColors;
 
-    public ColorMap() {
+    /** a list of already used colors which should be excluded from the automatic color assignment */
+    private List<HSVColor> blockedColors;
+    
+    public ColorMapImpl() {
         baseColors = new HSVColor[10];
         baseColors[0] = new HSVColor(0.0f, 1.0f, 1.0f); // Red
         baseColors[1] = new HSVColor(30.0f, 1.0f, 1.0f); // Orange
@@ -33,6 +41,7 @@ public class ColorMap<T> {
         baseColors[9] = new HSVColor(330.0f, 1.0f, 1.0f); 
 
         idColor = new HashMap<T, String>();
+        blockedColors = new ArrayList<HSVColor>();
     }
 
     /**
@@ -50,6 +59,28 @@ public class ColorMap<T> {
             idColor.put(object, color);
         }
         return color;
+    }
+
+    public boolean addBlockedColor(Color color) {
+        boolean result = false;
+        if(color != null) {
+            Triple<Float, Float, Float> asHSV = color.getAsHSV();
+            result = blockedColors.add(new HSVColor(asHSV.getA(), asHSV.getB(), asHSV.getC()));
+        }
+        return result; 
+    }
+    
+    public boolean removeBlockedColor(Color color) {
+        boolean result = false;
+        if(color != null) {
+            Triple<Float, Float, Float> asHSV = color.getAsHSV();
+            result = blockedColors.remove(new HSVColor(asHSV.getA(), asHSV.getB(), asHSV.getC()));
+        }
+        return result;
+    }
+    
+    public void clearBlockedColors() {
+        blockedColors.clear();
     }
 
     /**

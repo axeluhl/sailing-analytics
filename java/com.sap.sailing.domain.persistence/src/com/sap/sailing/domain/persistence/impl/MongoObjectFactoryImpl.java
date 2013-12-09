@@ -915,9 +915,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeCompetitor(Competitor competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
+        DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
         collection.remove(query);
     }
+    
     @Override
     public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());

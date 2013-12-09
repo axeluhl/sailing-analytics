@@ -9,9 +9,9 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
  */
 public class RGBColor implements Color {
     private static final long serialVersionUID = -4091876840771631308L;
-    private int red;
-    private int green;
-    private int blue;
+    protected int red;
+    protected int green;
+    protected int blue;
 
     RGBColor() {
     } // for GWT serializability
@@ -22,7 +22,7 @@ public class RGBColor implements Color {
         this.blue = ensureValidRange(blue);
     }
 
-    private int ensureValidRange(int value) {
+    protected int ensureValidRange(int value) {
         int result = value;
         if (value < 0) {
             result = 0;

@@ -9,6 +9,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private static final long serialVersionUID = 1172181354320184263L;
     private final String idAsString;
     private final String newName;
+    private final String newDisplayColor;
     private final String newSailId;
     private final Nationality newNationality;
     
@@ -16,17 +17,18 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
      * @param idAsString Identified the competitor to update
      * @param newNationality if <code>null</code>, the competitor obtains the "NONE" nationality, usually represented by a white flag
      */
-    public UpdateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality) {
+    public UpdateCompetitor(String idAsString, String newName, String newDisplayColor, String newSailId, Nationality newNationality) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
+        this.newDisplayColor = newDisplayColor;
         this.newSailId = newSailId;
         this.newNationality = newNationality;
     }
 
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newSailId, newNationality);
+        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality);
     }
 
     @Override
