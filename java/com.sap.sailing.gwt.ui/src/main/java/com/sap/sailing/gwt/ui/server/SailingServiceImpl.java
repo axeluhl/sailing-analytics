@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,6 +67,17 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -101,6 +115,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -128,9 +143,9 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -146,17 +161,11 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.ProtestStartTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RRS26StartModeFlagFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartProcedureTypeAnalyzer;
-import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
+import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -197,6 +206,9 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -214,6 +226,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -324,9 +337,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
 
     private final Executor executor;
-
+    
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
-
     
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
@@ -355,10 +367,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
-        tracTracAdapter = createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
+        tracTracAdapter = getTracTracAdapter(context);
+        // TODO what about passing on the mongo/domain object factory to obtain an according SwissTimingAdapterPersistence instance similar to how the tractracDomainObjectFactory etc. are created below?
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        swissTimingAdapter = createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
-        swissTimingReplayService = createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
+        swissTimingAdapter = getSwissTimingAdapter(context);
+        swissTimingReplayService = getSwissTimingReplayService(context);
         scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE.createDomainObjectFactory(mongoObjectFactory.getDatabase(), tracTracAdapter.getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
@@ -386,6 +399,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+    }
+
+    protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
+        return createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
+    }
+
+    protected SwissTimingAdapter getSwissTimingAdapter(BundleContext context) {
+        return createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
+    }
+
+    protected TracTracAdapter getTracTracAdapter(BundleContext context) {
+        return createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
     }
 
     protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
@@ -618,9 +643,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
         }
         if (regatta.getDefaultCourseArea() != null) {
-            regattaDTO.defaultCourseAreaIdAsString = regatta.getDefaultCourseArea().getId().toString();
+            regattaDTO.defaultCourseAreaUuidAsString = regatta.getDefaultCourseArea().getId().toString();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
+        regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         return regattaDTO;
     }
 
@@ -657,32 +683,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
             
-            StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            TimePoint startTime = startTimeFinder.analyze();
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            
+            TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
             }
 
-            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            raceInfoDTO.lastStatus = raceStatusAnalyzer.analyze();
+            raceInfoDTO.lastStatus = state.getStatus();
             
             if (raceLog.getLastRawFix() != null) {
-                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getTimePoint().asDate();
+                raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
             
-            FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            TimePoint finishedTime = finishedTimeFinder.analyze();
+            TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
             }
 
-            LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);
-
-            RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
-            if (lastFlagEvent != null) {
-                raceInfoDTO.lastUpperFlag = lastFlagEvent.getUpperFlag();
-                raceInfoDTO.lastLowerFlag = lastFlagEvent.getLowerFlag();
-                raceInfoDTO.isLastFlagDisplayed = lastFlagEvent.isDisplayed();
+            if (startTime != null) {
+                FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now());
+                List<FlagPole> activeFlags = activeFlagState.getCurrentState();
+                // TODO: adapt the LastFlagFinder#getMostRecent method!
+                if (!activeFlags.isEmpty()) {
+                    raceInfoDTO.lastUpperFlag = activeFlags.get(0).getUpperFlag();
+                    raceInfoDTO.lastLowerFlag = activeFlags.get(0).getLowerFlag();
+                    raceInfoDTO.isLastFlagDisplayed = activeFlags.get(0).isDisplayed();
+                }
             }
             
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
@@ -698,17 +725,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             
-            LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            CourseBase lastCourse = courseDesignFinder.analyze();
-            raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
+            CourseBase lastCourse = state.getCourseDesign();
             if (lastCourse != null) {
+                raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(lastCourse);
                 raceInfoDTO.lastCourseName = lastCourse.getName();
             }
             
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                ProtestStartTimeFinder protestStartTimeFinder = new ProtestStartTimeFinder(raceLog);
-                
-                TimePoint protestStartTime = protestStartTimeFinder.analyze();
+                TimePoint protestStartTime = state.getProtestTime();
                 if (protestStartTime != null) {
                     long protestDuration = 90 * 60 * 1000; // 90 min protest duration
                     raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
@@ -718,13 +742,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
             
-            LastWindFixFinder windFinder = new LastWindFixFinder(raceLog);
-            Wind wind = windFinder.analyze();
+            Wind wind = state.getWindFix();
             if (wind != null) {
                 raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, MillisecondsTimePoint.now());
             }
 
-            fillStartProcedureSpecifics(raceInfoDTO, raceLog);
+            fillStartProcedureSpecifics(raceInfoDTO, state);
         }
         raceInfoDTO.seriesName = seriesName;
         raceInfoDTO.raceName = raceColumn.getName();
@@ -736,27 +759,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceInfoDTO;
     }    
     
-    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, RaceLog raceLog) {
-        StartProcedureTypeAnalyzer procedureAnalyzer = new StartProcedureTypeAnalyzer(raceLog);
-        StartProcedureType type = procedureAnalyzer.analyze();
-        if (type != null) {
-            raceInfoDTO.startProcedure = type;
-            RaceInfoExtensionDTO info = null;
-            switch (type) {
-            case RRS26:
-                RRS26StartModeFlagFinder startModeFinder = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
-                info = new RRS26InfoDTO(startModeFinder.analyze());
-                break;
-            case GateStart:
-                PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-                GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-                info = new GateStartInfoDTO(pathfinderFinder.analyze(), gateLineOpeningTimeFinder.analyze());
-                break;
-            default:
-                break;
-            }
-            raceInfoDTO.startProcedureDTO = info;
+    private void fillStartProcedureSpecifics(RaceInfoDTO raceInfoDTO, ReadonlyRaceState state) {
+        RaceInfoExtensionDTO info = null;
+        raceInfoDTO.startProcedure = state.getRacingProcedure().getType();
+        switch (raceInfoDTO.startProcedure) {
+        case GateStart:
+            ReadonlyGateStartRacingProcedure gateStart = state.getTypedReadonlyRacingProcedure();
+            info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchStopTime());
+            break;
+        case RRS26:
+            ReadonlyRRS26RacingProcedure rrs26 = state.getTypedReadonlyRacingProcedure();
+            info = new RRS26InfoDTO(rrs26.getStartModeFlag());
+        case UNKNOWN:
+        default:
+            break;
         }
+        raceInfoDTO.startProcedureDTO = info;
     }
 
     private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
@@ -2795,7 +2813,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.id = courseArea.getId().toString();
+        courseAreaDTO.uuidAsString = courseArea.getId().toString();
         return courseAreaDTO;
     }
     
@@ -2881,9 +2899,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaId) {
-        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
-        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid));
+    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaUuidAsString, 
+            RegattaConfigurationDTO configurationDTO) {
+        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaUuidAsString);
+        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, convertToRegattaConfiguration(configurationDTO)));
     }
 
     @Override
@@ -3289,7 +3308,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 port = Integer.parseInt(split[1]);
             }
         }
-        String query = createLeaderboardQuery(groupNames);
+        String query;
+        try {
+            query = createLeaderboardQuery(groupNames, compress);
+        } catch (UnsupportedEncodingException e1) {
+            throw new RuntimeException(e1);
+        }
         HttpURLConnection connection = null;
 
         URL serverAddress = null;
@@ -3309,9 +3333,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BufferedReader rd;
             if (compress) {
                 gzip = new GZIPInputStream(connection.getInputStream());
-                rd  = new BufferedReader(new InputStreamReader(gzip));
+                rd = new BufferedReader(new InputStreamReader(gzip, Charset.forName("UTF-8")));
             } else {
-                rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
             }
             StringBuilder sb = new StringBuilder();
             String line;
@@ -3337,7 +3361,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URI("http", null, host, port, "/sailingserver/api/v1/masterdata/leaderboardgroups", query, null).toURL();
+        return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
@@ -3345,12 +3369,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return importer.importMasterData(string, override);
     }
 
-    private String createLeaderboardQuery(String[] groupNames) {
+    private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
-            queryStringBuffer.append("names[]=" + groupNames[i] + "&");
+            String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
+            queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        queryStringBuffer.append("compress=true");
+        if (compress) {
+            queryStringBuffer.append("compress=true");
+        } else {
+            queryStringBuffer.deleteCharAt(queryStringBuffer.length() - 1);
+        }
         return queryStringBuffer.toString();
     }
 
@@ -3375,6 +3404,172 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             competitorIdsAsStrings.add(competitor.getIdAsString());
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
+    }
+
+    @Override
+    public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
+        List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();
+        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : 
+            getService().getAllDeviceConfigurations().entrySet()) {
+            DeviceConfigurationMatcher matcher = entry.getKey();
+            configs.add(convertToDeviceConfigurationMatcherDTO(matcher));
+        }
+        return configs;
+    }
+
+    @Override
+    public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.type, matcherDto.clients);
+        DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
+        if (configuration == null) {
+            return null;
+        } else {
+            return convertToDeviceConfigurationDTO(configuration);
+        }
+    }
+
+    @Override
+    public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.type, matcherDTO.clients);
+        DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+        getService().createOrUpdateDeviceConfiguration(matcher, configuration);
+        return convertToDeviceConfigurationMatcherDTO(matcher);
+    }
+
+    @Override
+    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
+        getService().removeDeviceConfiguration(matcher);
+        return true;
+    }
+
+    private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
+        List<String> clients = new ArrayList<String>();
+        
+        if (matcher instanceof DeviceConfigurationMatcherSingle) {
+            clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
+        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
+            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
+        }
+        
+        DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
+                matcher.getMatcherType(),
+                clients,  
+                matcher.getMatchingRank());
+        return dto;
+    }
+
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIds) {
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIds);
+    }
+
+    private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
+        DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
+        dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
+        dto.resultsMailRecipient = configuration.getResultsMailRecipient();
+        dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        if (configuration.getRegattaConfiguration() != null) {
+            dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
+        }
+        return dto;
+    }
+
+    private DeviceConfigurationDTO.RegattaConfigurationDTO convertToRegattaConfigurationDTO(
+            RegattaConfiguration configuration) {
+        if (configuration == null) {
+            return null;
+        }
+        DeviceConfigurationDTO.RegattaConfigurationDTO dto = new DeviceConfigurationDTO.RegattaConfigurationDTO();
+        
+        dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
+        dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
+        
+        if (configuration.getRRS26Configuration() != null) {
+            dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
+            dto.rrs26Configuration.classFlag = configuration.getRRS26Configuration().getClassFlag();
+            dto.rrs26Configuration.hasInidividualRecall = configuration.getRRS26Configuration().hasInidividualRecall();
+            dto.rrs26Configuration.startModeFlags = configuration.getRRS26Configuration().getStartModeFlags();
+        }
+        if (configuration.getGateStartConfiguration() != null) {
+            dto.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
+            dto.gateStartConfiguration.classFlag = configuration.getGateStartConfiguration().getClassFlag();
+            dto.gateStartConfiguration.hasInidividualRecall = configuration.getGateStartConfiguration().hasInidividualRecall();
+            dto.gateStartConfiguration.hasPathfinder = configuration.getGateStartConfiguration().hasPathfinder();
+            dto.gateStartConfiguration.hasAdditionalGolfDownTime = configuration.getGateStartConfiguration().hasAdditionalGolfDownTime();
+        }
+        if (configuration.getESSConfiguration() != null) {
+            dto.essConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.ESSConfigurationDTO();
+            dto.essConfiguration.classFlag = configuration.getESSConfiguration().getClassFlag();
+            dto.essConfiguration.hasInidividualRecall = configuration.getESSConfiguration().hasInidividualRecall();
+        }
+        if (configuration.getBasicConfiguration() != null) {
+            dto.basicConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO();
+            dto.basicConfiguration.classFlag = configuration.getBasicConfiguration().getClassFlag();
+            dto.basicConfiguration.hasInidividualRecall = configuration.getBasicConfiguration().hasInidividualRecall();
+        }
+        return dto;
+    }
+
+    private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration));
+        configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
+        configuration.setResultsMailRecipient(dto.resultsMailRecipient);
+        configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
+        return configuration;
+    }
+
+    private RegattaConfiguration convertToRegattaConfiguration(RegattaConfigurationDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
+        configuration.setDefaultRacingProcedureType(dto.defaultRacingProcedureType);
+        configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
+        if (dto.rrs26Configuration != null) {
+            RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
+            config.setClassFlag(dto.rrs26Configuration.classFlag);
+            config.setHasInidividualRecall(dto.rrs26Configuration.hasInidividualRecall);
+            config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
+            configuration.setRRS26Configuration(config);
+        }
+        if (dto.gateStartConfiguration != null) {
+            GateStartConfigurationImpl config = new GateStartConfigurationImpl();
+            config.setClassFlag(dto.gateStartConfiguration.classFlag);
+            config.setHasInidividualRecall(dto.gateStartConfiguration.hasInidividualRecall);
+            config.setHasPathfinder(dto.gateStartConfiguration.hasPathfinder);
+            config.setHasAdditionalGolfDownTime(dto.gateStartConfiguration.hasAdditionalGolfDownTime);
+            configuration.setGateStartConfiguration(config);
+        }
+        if (dto.essConfiguration != null) {
+            ESSConfigurationImpl config = new ESSConfigurationImpl();
+            config.setClassFlag(dto.essConfiguration.classFlag);
+            config.setHasInidividualRecall(dto.essConfiguration.hasInidividualRecall);
+            configuration.setESSConfiguration(config);
+        }
+        if (dto.basicConfiguration != null) {
+            RacingProcedureConfigurationImpl config = new RacingProcedureConfigurationImpl();
+            config.setClassFlag(dto.basicConfiguration.classFlag);
+            config.setHasInidividualRecall(dto.basicConfiguration.hasInidividualRecall);
+            configuration.setBasicConfiguration(config);
+        }
+        return configuration;
+    }
+
+    @Override
+    public boolean setStartTime(RaceLogSetStartTimeDTO dto) {
+        TimePoint newStartTime = getService().setStartTime(dto.leaderboardName, dto.raceColumnName, 
+                dto.fleetName, dto.authorName, dto.authorPriority,
+                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime));
+        return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
+    }
+
+    @Override
+    public Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+        Pair<TimePoint, Integer> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
+        if (result == null) {
+            return null;
+        }
+        return new Pair<Date, Integer>(result.getA().asDate(), result.getB());
     }
 
 }

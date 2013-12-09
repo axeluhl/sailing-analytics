@@ -137,28 +137,6 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
         return createPersistentCompetitor;
     }
     public static RacingEventServiceOperation<Void> getNoOp() {
-        return new AbstractRacingEventServiceOperation<Void>() {
-            private static final long serialVersionUID = -7203280393485688834L;
-
-            @Override
-            public Void internalApplyTo(RacingEventService toState) {
-                return null;
-            }
-
-            @Override
-            public RacingEventServiceOperation<Void> transformClientOp(RacingEventServiceOperation<?> serverOp) {
-                return this;
-            }
-
-            @Override
-            public RacingEventServiceOperation<Void> transformServerOp(RacingEventServiceOperation<?> clientOp) {
-                return this;
-            }
-            
-            @Override
-            public String toString() {
-                return "noop";
-            }
-        };
+        return null;
     }
 }

@@ -8,28 +8,19 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
-import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogPathfinderEvent;
-import com.sap.sailing.domain.racelog.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.WindFixesFinder;
+import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
+public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
@@ -37,7 +28,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     
     private final WindSource raceCommitteeWindSource;
 
-    private RaceStatusAnalyzer statusAnalyzer;
     private LastPublishedCourseDesignFinder courseDesignFinder;
     private StartTimeFinder startTimeFinder;
 
@@ -51,7 +41,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
         trackedRace.invalidateStartTime();
         trackedRace.invalidateEndTime();
         courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-        statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         startTimeFinder = new StartTimeFinder(raceLog);
         initializeWindTrack(raceLog);
         analyze();
@@ -99,7 +88,7 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     }
 
     private void analyzeStatus() {
-        /* RaceLogRaceStatus newStatus = */statusAnalyzer.analyze();
+        /* RaceLogRaceStatus newStatus = statusAnalyzer.analyze();*/
 
         // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
@@ -157,46 +146,6 @@ public class DynamicTrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         analyzeCourseDesign(event.getCourseDesign());
-    }
-
-    @Override
-    public void visit(RaceLogFlagEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogFinishPositioningListChangedEvent event) {
-        // score correction is handled by the leaderboard
-    }
-
-    @Override
-    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-        // score correction is handled by the leaderboard
-    }
-
-    @Override
-    public void visit(RaceLogPathfinderEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogGateLineOpeningTimeEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogStartProcedureChangedEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogProtestStartTimeEvent event) {
-        
     }
 
     @Override

@@ -1,13 +1,34 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.chooser;
 
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
-public class RaceInfoFragmentChooser {
+public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();
+    
+    public static RaceInfoFragmentChooser on(RacingProcedureType racingProcedureType) {
+        switch (racingProcedureType) {
+        case RRS26:
+            return new RRS26RaceInfoFragmentChooser();
+        case GateStart:
+            return new GateStartRaceInfoFragmentChooser();
+        case ESS:
+            return new ESSRaceInfoFragmentChooser();
+        case BASIC:
+            return new BasicRaceInfoFragmentChooser();
+        default:
+            throw new UnsupportedOperationException(racingProcedureType.toString());
+        }
+    }
+    
+    protected abstract Class<? extends RaceFragment> getStartphaseFragment();
+    protected abstract Class<? extends RaceFragment> getRunningFragment();
+    protected abstract Class<? extends RaceFragment> getFinishingFragment();
+    protected abstract Class<? extends RaceFragment> getFinishedFragment();
 
     public RaceFragment choose(ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
@@ -15,21 +36,21 @@ public class RaceInfoFragmentChooser {
             return createInfoFragment(SetStartTimeRaceFragment.class, managedRace);
         case SCHEDULED:
         case STARTPHASE:
-            return createInfoFragment(managedRace.getState().getStartProcedure().getStartphaseFragment(), managedRace);
+            return createInfoFragment(getStartphaseFragment(), managedRace);
         case RUNNING:
-            return createInfoFragment(managedRace.getState().getStartProcedure().getRunningRaceFragment(), managedRace);
+            return createInfoFragment(getRunningFragment(), managedRace);
         case FINISHING:
-            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishingRaceFragment(), managedRace);
+            return createInfoFragment(getFinishingFragment(), managedRace);
         case FINISHED:
-            return createInfoFragment(managedRace.getState().getStartProcedure().getFinishedRaceFragment(), managedRace);
+            return createInfoFragment(getFinishedFragment(), managedRace);
         default:
             return createInfoFragment(ErrorRaceFragment.class, managedRace);
         }
     }
+    
 
-    private RaceFragment createInfoFragment(Class<? extends RaceFragment> fragmentClass, ManagedRace managedRace) {
+    protected RaceFragment createInfoFragment(Class<? extends RaceFragment> fragmentClass, ManagedRace managedRace) {
         try {
-            ExLog.i(TAG, String.format("Fragment %s is chosen.", fragmentClass.getName()));
             RaceFragment fragment = fragmentClass.newInstance();
             fragment.setArguments(RaceFragment.createArguments(managedRace));
             return fragment;

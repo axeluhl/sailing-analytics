@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +7,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class AbortTypeSelectionDialog extends RaceDialogFragment {
     private ImageButton apFlag;

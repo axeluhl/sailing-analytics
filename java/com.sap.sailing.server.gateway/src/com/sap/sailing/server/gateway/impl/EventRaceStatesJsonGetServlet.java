@@ -26,11 +26,11 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastFlagsFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.PathfinderFinder;
-import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
 public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
@@ -128,26 +128,31 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
+            
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            RaceLogRaceStatus status = state.getStatus();
+            TimePoint startTime = state.getStartTime();
+            TimePoint finishedTime = state.getFinishedTime();
+            
             JSONObject raceLogStateJson = new JSONObject();
             result.put("raceState", raceLogStateJson);
-            StartTimeFinder startTimeFinder = new StartTimeFinder(raceLog);
-            raceLogStateJson.put("startTime", startTimeFinder.analyze() != null ? startTimeFinder.analyze().toString() : null);
-            FinishedTimeFinder finishedTimeFinder = new FinishedTimeFinder(raceLog);
-            raceLogStateJson.put("endTime", finishedTimeFinder.analyze() != null ? finishedTimeFinder.analyze().toString() : null);
-            RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(raceLog);
-            RaceLogRaceStatus lastStatus = raceStatusAnalyzer.analyze();
-            raceLogStateJson.put("lastStatus", lastStatus.name());
-            PathfinderFinder pathfinderFinder = new PathfinderFinder(raceLog);
-            raceLogStateJson.put("pathfinderId", pathfinderFinder.analyze());
-            GateLineOpeningTimeFinder gateLineOpeningTimeFinder = new GateLineOpeningTimeFinder(raceLog);
-            raceLogStateJson.put("gateLineOpeningTime", gateLineOpeningTimeFinder.analyze());
+            raceLogStateJson.put("startTime", startTime != null ? startTime.toString() : null);
+            raceLogStateJson.put("endTime", finishedTime != null ? finishedTime.toString() : null);
+            raceLogStateJson.put("lastStatus", status.name());
+            
+            ReadonlyGateStartRacingProcedure procedure = state.getTypedReadonlyRacingProcedure(ReadonlyGateStartRacingProcedure.class);
+            if (procedure != null) {
+                raceLogStateJson.put("pathfinderId", procedure.getPathfinder());
+                raceLogStateJson.put("gateLineOpeningTime", procedure.getGateLaunchStopTime());
+            }
+            
             AbortingFlagFinder abortingFlagFinder = new AbortingFlagFinder(raceLog);
             RaceLogFlagEvent abortingFlagEvent = abortingFlagFinder.analyze();
             LastFlagsFinder lastFlagFinder = new LastFlagsFinder(raceLog);
             RaceLogFlagEvent lastFlagEvent = LastFlagsFinder.getMostRecent(lastFlagFinder.analyze());
             if (lastFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, lastFlagEvent.getUpperFlag().name(), lastFlagEvent.getLowerFlag().name(), lastFlagEvent.isDisplayed());
-            } else if (lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {
+            } else if (status.equals(RaceLogRaceStatus.UNSCHEDULED) && abortingFlagEvent != null) {
                 setLastFlagField(raceLogStateJson, abortingFlagEvent.getUpperFlag().name(), abortingFlagEvent.getLowerFlag().name(), abortingFlagEvent.isDisplayed());
             } else {
                 setLastFlagField(raceLogStateJson, null, null, null);

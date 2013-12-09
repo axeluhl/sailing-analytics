@@ -80,7 +80,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         if (courseArea == null) {
             leaderboard.setCourseAreaIdAsString(null);
         } else {
-            leaderboard.setCourseAreaIdAsString(getSelectedCourseArea().id);
+            leaderboard.setCourseAreaIdAsString(getSelectedCourseArea().uuidAsString);
         }
     }
 

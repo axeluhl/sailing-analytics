@@ -12,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
@@ -25,10 +26,13 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
     
     private final JsonDeserializer<Fleet> fleetDeserializer;
     private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer;
+    private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
-    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer) {
+    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer,
+            JsonDeserializer<RegattaConfiguration> configurationDeserializer) {
         this.fleetDeserializer = fleetDeserializer;
         this.raceColumnDeserializer = raceColumnDeserializer;
+        this.configurationDeserializer = configurationDeserializer;
     }
 
     @Override
@@ -63,7 +67,15 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
         Iterable<String> raceIdsAsStrings = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIdsAsStrings);
+        
+        RegattaConfiguration regattaConfiguration = null;
+        if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
+            regattaConfiguration = configurationDeserializer.deserialize(
+                    Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION));
+        }
+        
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 
+                series, isPersistent, regattaName, raceIdsAsStrings, regattaConfiguration);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {

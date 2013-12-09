@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class SOG extends Fix {
+    private static final long serialVersionUID = 6926121760778539823L;
     private final Speed speedOverGround;
     
     public SOG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
@@ -28,5 +30,10 @@ public class SOG extends Fix {
     @Override
     protected String localToString() {
         return "SOG: "+getSpeedOverGround();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

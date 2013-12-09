@@ -38,8 +38,10 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -65,6 +67,7 @@ public class WindByRaceLogTest {
     private Fleet defaultFleet;
     
     private RacingEventService service;
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
     
     @Before
     public void setup() throws Exception {
@@ -125,8 +128,8 @@ public class WindByRaceLogTest {
                 new KnotSpeedWithBearingImpl(15, new DegreeBearingImpl(234)));
         Wind wind2 = new WindImpl(new DegreePosition(49, 3), timeMinus2,
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, 0, wind1);
-        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, 0, wind2);
+        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1);
+        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, author, 0, wind2);
         raceLog.add(windEvent1);
         raceLog.add(windEvent2);
         
@@ -155,7 +158,7 @@ public class WindByRaceLogTest {
         
         Wind wind1 = new WindImpl(new DegreePosition(50, 4), timeMinus3,
                 new KnotSpeedWithBearingImpl(15, new DegreeBearingImpl(234)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, 0, wind1);
+        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1);
         raceLog.add(windEvent1);
         
         WindSource source = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
@@ -184,9 +187,9 @@ public class WindByRaceLogTest {
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         Wind wind3 = new WindImpl(new DegreePosition(48, 1), timeMinus2,
                 new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(270)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, 0, wind1);
-        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, 0, wind2);
-        RaceLogWindFixEvent windEvent3 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus1, 0, wind3);
+        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1);
+        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, author, 0, wind2);
+        RaceLogWindFixEvent windEvent3 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus1, author, 0, wind3);
         raceLog.add(windEvent1);
         raceLog.add(windEvent2);
         

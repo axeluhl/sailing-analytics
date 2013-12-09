@@ -120,7 +120,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public Account getAccountByEmail(String eMail) {
+    public Account getExistingAccountByEmail(String eMail) {
         return accountsByEmail.get(eMail);
     }
     
@@ -138,12 +138,20 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return accessTokensByAccount.get(account);
     }
     
-    @Override
     public String getAccountUrl(Account account) {
         return getApiV1BaseUrl()+"account?"+getAccessTokenUrlParameter(account);
     }
     
-    @Override
+    /**
+     * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
+     * live data from the units whose IDs are specified by <code>unitIds</code>. The sending units are expected to
+     * belong to the user account to which this factory's application client has been granted permission.
+     * 
+     * @param account
+     *            represents this factory's client's permissions to access a user account's data
+     * @param deviceIds
+     *            IDs of the transmitting units expected to be visible to the account's {@link Account#getUser() user's}
+     */
     public JSONObject getWebSocketConfigurationMessage(Account account, Iterable<String> deviceIds) {
         JSONObject result = new JSONObject();
         result.put("access_token", getAccessTokenForAccount(account));
@@ -155,12 +163,54 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return result;
     }
     
-    @Override
     public String getUsersUrl(Account account) {
         return getApiV1BaseUrl()+"users?"+getAccessTokenUrlParameter(account);
     }
     
-    @Override
+    public String getUserUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"users/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    public String getGroupsUrl(Account account) {
+        return getApiV1BaseUrl()+"groups?"+getAccessTokenUrlParameter(account);
+    }
+    
+    public String getGroupUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"groups/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    public String getSessionUrl(long id, Account account) {
+        return getApiV1BaseUrl()+"sessions/"+id+"?"+getAccessTokenUrlParameter(account);
+    }
+
+    public String getOwnedDevicesUrl(Account account) {
+        return getApiV1BaseUrl()+"devices/?"+getAccessTokenUrlParameter(account);
+    }
+
+    public String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("devices/data_access_windows?type=");
+        url.append(permission.name());
+        if (startTime != null) {
+            url.append("&start_time=");
+            url.append(startTime.asMillis());
+        }
+        if (endTime != null) {
+            url.append("&end_time=");
+            url.append(endTime.asMillis());
+        }
+        if (deviceSerialNumbers != null) {
+            for (String serialNumber : deviceSerialNumbers) {
+                url.append("&serial_numbers[]=");
+                url.append(serialNumber);
+            }
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
@@ -180,7 +230,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
-    @Override
     public String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> serialNumbers, Iterable<String> streamIds, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
@@ -212,6 +261,32 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
+    
+    public String getSessionsUrl(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("sessions?");
+        url.append(getAccessTokenUrlParameter(account));
+        if (sessionIds != null) {
+            for (Long sessionId : sessionIds) {
+                url.append("&ids[]=");
+                url.append(sessionId);
+            }
+        }
+        if (isPublic != null) {
+            url.append("&public=");
+            url.append(isPublic.toString().toLowerCase());
+        }
+        if (limit != null) {
+            url.append("&limit=");
+            url.append(limit);
+        }
+        if (includeIncomplete != null) {
+            url.append("&include_incomplete");
+            url.append(includeIncomplete.toString().toLowerCase());
+        }
+        return url.toString();
+    }
+
     private String getAccessTokenUrlParameter(Account account) {
         return "access_token="+getAccessTokenForAccount(account);
     }
@@ -225,7 +300,14 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return client;
     }
 
-    @Override
+    /**
+     * Uses the /oauth/token service to obtain and {@link #registerAccountForWhichClientIsAuthorized(String) register}
+     * an access token for an authorization code which encodes the authorization given by a user to this factory's
+     * client.
+     * 
+     * @return the account encoding the application that is authorized for a user's account
+     * @throws RuntimeException in case there was an error while retrieving the token
+     */
     public Account obtainAccessTokenFromAuthorizationCode(String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
         HttpClient client = new SystemDefaultHttpClient();
         HttpPost post = new HttpPost(getOauthTokenUrl());
@@ -248,7 +330,12 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return result;
     }
 
-    @Override
+    /**
+     * Tries to authorize our client on behalf of a user identified by e-mail and password.
+     * 
+     * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
+     *         to access data owned by the user identified by e-mail and password.
+     */
     public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword)
             throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException,
             SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
@@ -260,6 +347,20 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         HttpGet get = new HttpGet(getOauthAuthorizeUrl());
         HttpResponse responseForAuthorize = client.execute(get);
         return signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
+    }
+    
+    @Override
+    public Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+            IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
+            InstantiationException, IllegalAccessException, ClassCastException, ParseException {
+        final Account result;
+        String code = authorizeAndReturnAuthorizedCode(userEmail, userPassword);
+        if (code != null) {
+            result = obtainAccessTokenFromAuthorizationCode(code);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private String signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
@@ -314,10 +415,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * Parses the form in the <code>autorizationForm</code> response and posts it by submitting the form that contains
      * the commit button with the value "Authorize". If a redirect strategy is set on the <code>client</code> it will
      * see the redirect URL in the <code>Location</code> header. The redirection target is closed immediately.
-     * @throws ClassCastException 
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
-     * @throws ClassNotFoundException 
      */
     private void authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client)
             throws IllegalStateException, SAXException, IOException, ParserConfigurationException,
@@ -364,13 +461,11 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         authorizationResponse.getEntity().getContent().close();
     }
 
-    @Override
     public HttpClient getHttpClient() {
         HttpClient client = new SystemDefaultHttpClient();
         return client;
     }
     
-    @Override
     public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         HttpClient client = getHttpClient();
         HttpGet getWebsocketServers = new HttpGet("https://www.igtimi.com/server_listers/web_sockets");
