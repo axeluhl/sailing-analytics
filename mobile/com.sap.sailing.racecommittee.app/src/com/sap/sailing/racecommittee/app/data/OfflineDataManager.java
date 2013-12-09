@@ -79,11 +79,11 @@ public class OfflineDataManager extends DataManager {
                 medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", "#0000FF", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", "#3333FF", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", "#FF0000", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", "#00FF00", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", "#00FFFF", null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
