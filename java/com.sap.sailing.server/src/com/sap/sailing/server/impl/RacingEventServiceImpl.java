@@ -111,10 +111,9 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
@@ -162,7 +161,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private final ExpeditionWindTrackerFactory expeditionWindTrackerFactory;
+    private final WindTrackerFactory windTrackerFactory;
 
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
@@ -273,7 +272,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        expeditionWindTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
+        windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -1329,14 +1328,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination)
-            throws SocketException {
-        expeditionWindTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+        windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
+        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
         if (windTracker != null) {
             windTracker.stop();
         }
@@ -1347,7 +1345,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
+                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
                 if (windTracker != null) {
                     result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
                 }
@@ -1565,24 +1563,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-    }
-
-    @Override
-    public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
-        UDPExpeditionReceiver receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-        receiver.addListener(listener, validMessagesOnly);
-    }
-
-    @Override
-    public void removeExpeditionListener(ExpeditionListener listener) {
-        UDPExpeditionReceiver receiver;
-        try {
-            receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-            receiver.removeListener(listener);
-        } catch (SocketException e) {
-            logger.info("Failed to remove expedition listener " + listener
-                    + "; exception while trying to retrieve wind receiver: " + e.getMessage());
-        }
     }
 
     private ScheduledExecutorService getScheduler() {
