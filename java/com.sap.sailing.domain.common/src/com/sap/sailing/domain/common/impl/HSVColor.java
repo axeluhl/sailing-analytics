@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 
 /**
@@ -9,7 +8,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
  * 
  * @author Frank
  */
-public class HSVColor implements Color {
+public class HSVColor extends AbstractColor {
     private static final long serialVersionUID = 7602013229606352246L;
 
     protected float hue;
@@ -84,21 +83,6 @@ public class HSVColor implements Color {
         Triple<Integer, Integer, Integer> RGBColor = new Triple<Integer, Integer, Integer>(Math.round(r * 255),
                 Math.round(g * 255), Math.round(b * 255));
         return RGBColor;
-    }
-
-    @Override
-    public String getAsHtml() {
-        Triple<Integer, Integer, Integer> asRGB = getAsRGB();
-        return "#" + toBrowserHexValue(asRGB.getA()) + toBrowserHexValue(asRGB.getB())
-                + toBrowserHexValue(asRGB.getC());
-    }
-
-    private static String toBrowserHexValue(int number) {
-        StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
-        while (builder.length() < 2) {
-            builder.append("0");
-        }
-        return builder.toString().toUpperCase();
     }
 
     @Override

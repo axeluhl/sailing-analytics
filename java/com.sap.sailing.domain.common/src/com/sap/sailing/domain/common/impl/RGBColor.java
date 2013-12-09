@@ -1,13 +1,12 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 
 /**
  * A color defined in the RGB color schema
  * @author Frank
  */
-public class RGBColor implements Color {
+public class RGBColor extends AbstractColor {
     private static final long serialVersionUID = -4091876840771631308L;
     protected int red;
     protected int green;
@@ -76,19 +75,6 @@ public class RGBColor implements Color {
 
         Triple<Float, Float, Float> HSVColor = new Triple<Float, Float, Float>(hue, saturation, brightness);
         return HSVColor;
-    }
-
-    @Override
-    public String getAsHtml() {
-        return "#" + toBrowserHexValue(red) + toBrowserHexValue(green) + toBrowserHexValue(blue);
-    }
-
-    private static String toBrowserHexValue(int number) {
-        StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
-        while (builder.length() < 2) {
-            builder.append("0");
-        }
-        return builder.toString().toUpperCase();
     }
 
     @Override
