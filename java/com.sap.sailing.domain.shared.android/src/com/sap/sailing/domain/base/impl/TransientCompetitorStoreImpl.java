@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -91,11 +90,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         return result;
     }
     
-    @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
-        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, displayColor, team, boat);
-    }
-
     private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {
         competitorsToUpdateDuringGetOrCreate.remove(result);
     }

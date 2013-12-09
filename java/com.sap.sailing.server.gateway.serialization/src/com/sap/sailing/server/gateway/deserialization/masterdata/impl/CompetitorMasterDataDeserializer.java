@@ -35,7 +35,7 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Compet
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         String name = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_NAME);
-        String displayColor = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_DISPLAY_COLOR);
+        String rgbDisplayColor = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_DISPLAY_COLOR);
         Object idClassName = object.get(CompetitorMasterDataJsonSerializer.FIELD_ID_TYPE);
         Serializable id = (Serializable) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
         if (idClassName != null) {
@@ -61,11 +61,7 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Compet
         DynamicBoat boat = createBoatFromJson((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_BOAT));
         DynamicTeam team = teamDeserializer.deserialize((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_TEAM));
         Competitor competitor;
-        if (id instanceof UUID) {
-            competitor = domainFactory.getOrCreateDynamicCompetitor((UUID) id, name, displayColor, team, boat);
-        } else {
-            competitor = domainFactory.getOrCreateCompetitor(id, name, displayColor, team, boat);
-        }
+        competitor = domainFactory.getOrCreateCompetitor(id, name, rgbDisplayColor, team, boat);
         return competitor;
         
     }

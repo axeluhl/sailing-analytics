@@ -286,12 +286,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, String displayColor, DynamicTeam team,
-            DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateDynamicCompetitor(competitorId, name, displayColor, team, boat);
-    }
-
-    @Override
     public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, 
             List<String> clientIdentifiers) {
         DeviceConfigurationMatcher probe = createMatcher(type, clientIdentifiers);
