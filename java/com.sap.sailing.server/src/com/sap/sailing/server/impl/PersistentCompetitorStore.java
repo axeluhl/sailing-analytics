@@ -93,8 +93,8 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, String newDisplayColor, String newSailId, Nationality newNationality) {
-        Competitor result = super.updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality);
+    public Competitor updateCompetitor(String idAsString, String newName, String newRgbDisplayColor, String newSailId, Nationality newNationality) {
+        Competitor result = super.updateCompetitor(idAsString, newName, newRgbDisplayColor, newSailId, newNationality);
         storeTo.storeCompetitor(result);
         return result;
     }
