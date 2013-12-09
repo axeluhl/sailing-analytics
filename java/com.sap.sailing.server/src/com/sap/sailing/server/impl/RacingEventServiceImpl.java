@@ -1776,7 +1776,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
                 competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
-            logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
+            logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
             logger.info("Reading device configurations...");
             configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());

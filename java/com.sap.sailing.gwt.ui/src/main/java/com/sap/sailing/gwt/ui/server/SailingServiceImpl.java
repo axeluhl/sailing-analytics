@@ -146,6 +146,8 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -325,6 +327,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final MongoObjectFactory mongoObjectFactory;
 
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
+    
+    private final ServiceTracker<SwissTimingAdapterFactory, SwissTimingAdapterFactory> swissTimingAdapterTracker;
+
+    private final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterTracker;
+
+    private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
 
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -354,26 +362,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * {@link #LEADERBOARD_DIFFERENCE_CACHE_SIZE}.
      */
     private final LinkedHashMap<Pair<String, String>, IncrementalLeaderboardDTO> leaderboardDifferenceCacheByIdPair;
-    private final TracTracAdapter tracTracAdapter;
-
-    private final SwissTimingAdapter swissTimingAdapter;
 
     private final SwissTimingReplayService swissTimingReplayService;
 
+    private final BundleContext context;
+
     public SailingServiceImpl() {
-        BundleContext context = Activator.getDefault();
+        context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
+        tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
+        igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
-        tracTracAdapter = getTracTracAdapter(context);
         // TODO what about passing on the mongo/domain object factory to obtain an according SwissTimingAdapterPersistence instance similar to how the tractracDomainObjectFactory etc. are created below?
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        swissTimingAdapter = getSwissTimingAdapter(context);
         swissTimingReplayService = getSwissTimingReplayService(context);
         scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
-        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE.createDomainObjectFactory(mongoObjectFactory.getDatabase(), tracTracAdapter.getTracTracDomainFactory());
+        tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
+                .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
+                        .getTracTracDomainFactory());
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
@@ -402,20 +412,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
-        return createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(swissTimingAdapter.getSwissTimingDomainFactory());
+        return createAndOpenSwissTimingReplayServiceTracker(context).getService().createSwissTimingReplayService(getSwissTimingAdapter().getSwissTimingDomainFactory());
     }
 
-    protected SwissTimingAdapter getSwissTimingAdapter(BundleContext context) {
-        return createAndOpenSwissTimingAdapterTracker(context).getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
+    protected SwissTimingAdapter getSwissTimingAdapter() {
+        return swissTimingAdapterTracker.getService().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
     }
 
-    protected TracTracAdapter getTracTracAdapter(BundleContext context) {
-        return createAndOpenTracTracAdapterTracker(context).getService().getOrCreateTracTracAdapter(baseDomainFactory);
+    protected TracTracAdapter getTracTracAdapter() {
+        return tractracAdapterTracker.getService().getOrCreateTracTracAdapter(baseDomainFactory);
+    }
+
+    protected IgtimiConnectionFactory getIgtimiConnectionFactory(BundleContext context) {
+        return createAndOpenIgtimiTracker(context).getService();
     }
 
     protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
         ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
                 context, TracTracAdapterFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> createAndOpenIgtimiTracker(BundleContext context) {
+        ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> result = new ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory>(
+                context, IgtimiConnectionFactory.class.getName(), null);
         result.open();
         return result;
     }
@@ -891,14 +912,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private TracTracAdapter getTracTracAdapter() {
-        return tracTracAdapter;
-    }
-    
-    private SwissTimingAdapter getSwissTimingAdapter() {
-        return swissTimingAdapter;
-    }
-    
     private SwissTimingReplayService getSwissTimingReplayService() {
         return swissTimingReplayService;
     }
@@ -917,7 +930,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
-        tractracMongoObjectFactory.storeTracTracConfiguration(tracTracAdapter.createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
+        tractracMongoObjectFactory.storeTracTracConfiguration(getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
                 courseDesignUpdateURI, tracTracUsername, tracTracPassword));
     }
 
@@ -2129,7 +2142,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<SwissTimingRaceRecordDTO> result = new ArrayList<SwissTimingRaceRecordDTO>();
         for (com.sap.sailing.domain.swisstimingadapter.RaceRecord rr : getSwissTimingAdapter().getSwissTimingRaceRecords(hostname, port, canSendRequests)) {
             SwissTimingRaceRecordDTO swissTimingRaceRecordDTO = new SwissTimingRaceRecordDTO(rr.getRaceID(), rr.getDescription(), rr.getStartTime());
-            BoatClass boatClass = swissTimingAdapter.getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
+            BoatClass boatClass = getSwissTimingAdapter().getSwissTimingDomainFactory().getRaceTypeFromRaceID(rr.getRaceID()).getBoatClass();
             swissTimingRaceRecordDTO.boatClass = boatClass != null ? boatClass.getName() : null;
             swissTimingRaceRecordDTO.discipline = rr.getRaceID().length() >= 3 ? rr.getRaceID().substring(2, 3) : null;
             swissTimingRaceRecordDTO.hasCourse = rr.hasCourse();
@@ -3576,6 +3589,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
         return new Pair<Date, Integer>(result.getA().asDate(), result.getB());
+    }
+
+    @Override
+    public Iterable<String> getAllIgtimiAccountEmailAddresses() {
+        List<String> result = new ArrayList<String>();
+        for (Account account : getIgtimiConnectionFactory().getAllAccounts()) {
+            result.add(account.getUser().getEmail());
+        }
+        return result;
+    }
+
+    private IgtimiConnectionFactory getIgtimiConnectionFactory() {
+        return igtimiAdapterTracker.getService();
+    }
+
+    @Override
+    public String getIgtimiAuthorizationUrl() {
+        return getIgtimiConnectionFactory().getAuthorizationUrl();
+    }
+
+    @Override
+    public boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception {
+        Account account = getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password);
+        return account != null;
     }
 
 }

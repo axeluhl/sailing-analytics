@@ -355,4 +355,10 @@ public interface SailingService extends RemoteService {
     boolean setStartTime(RaceLogSetStartTimeDTO dto);
     
     Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+
+    Iterable<String> getAllIgtimiAccountEmailAddresses();
+
+    String getIgtimiAuthorizationUrl();
+
+    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 }

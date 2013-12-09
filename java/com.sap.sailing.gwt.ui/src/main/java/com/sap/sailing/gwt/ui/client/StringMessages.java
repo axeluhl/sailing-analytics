@@ -881,4 +881,10 @@ public interface StringMessages extends Messages {
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
+    String createSwissTimingRace();
+    String igtimiAccounts();
+    String errorFetchingIgtimiAccounts(String message);
+    String addIgtimiAccount();
+    String errorAuthorizingAccessToIgtimiUser(String text, String message);
+    String successfullyAuthorizedAccessToIgtimiUser(String username);
 }
