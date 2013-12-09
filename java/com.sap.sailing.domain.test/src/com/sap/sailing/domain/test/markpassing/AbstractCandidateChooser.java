@@ -12,6 +12,6 @@ public interface AbstractCandidateChooser {
     
     public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllMarkPasses();
     
-    public void calculateMarkPassDeltas(LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas);
+    public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas);
 
 }

@@ -69,12 +69,10 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(
-            LinkedHashMap<Competitor, Pair<List<Candidate>, List<Candidate>>> candidateDeltas) {
-        for (Competitor c : candidateDeltas.keySet()) {
-            removeCandidates(candidateDeltas.get(c).second(), c);
-            addCandidates(candidateDeltas.get(c).first(), c);
+            Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
+            removeCandidates(candidateDeltas.second(), c);
+            addCandidates(candidateDeltas.first(), c);
             findShortestPath(c);
-        }
     }
 
     private void createNewEdges(Competitor co, List<Candidate> newCans) {

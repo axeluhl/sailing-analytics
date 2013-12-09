@@ -181,12 +181,17 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         }
     }
 
-    // TODO Start-analysis is wrong for gate starts
-    // TODO Prepare for Polars :(
     // TODO How should Edges between the proxy start and end be treated
-    // TODO Make sure the functions return the right probability
+    // TODO No Start Time
+    // TODO Start-analysis is wrong for gate starts
+    
     // TODO Feldmann issue, also for marks
+
+    // TODO Make sure the functions return the right probability
+
     // TODO Use Wind/Maneuver analysis
+    // TODO Splining
+
     // TODO Build good test framework that test incremental calculation, tricky cases, ...
     // TODO Document everything
 
@@ -210,14 +215,21 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
             }
             givenPasses.put(c, givenMarkPasses);
         }
-        
-        
+
         // Get calculatedMarkPasses
         double time = System.currentTimeMillis();
+        @SuppressWarnings("unused")
         final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), false);
         time = System.currentTimeMillis() - time;
-        
-        computedPasses = markPassCreator.getMarkPasses();
+
+        for (Competitor c : getRace().getCompetitors()) {
+            LinkedHashMap<Waypoint, MarkPassing> newMarkPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+            for (Waypoint wp : waypoints) {
+                MarkPassing markPassing = getTrackedRace().getMarkPassing(c, wp);
+                newMarkPasses.put(wp, markPassing);
+            }
+            computedPasses.put(c, newMarkPasses);
+        }
 
         // Compare computed and calculated MarkPassings
         final int tolerance = 20000;
