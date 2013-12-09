@@ -51,9 +51,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
         tabPanel.add(sailingEventManagementPanel, stringMessages.events(), false);
-
+        
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
-        //eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
+        eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
         tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);
         
@@ -80,7 +80,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
         
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this, this, stringMessages);
-        //trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
         regattaDisplayers.add(trackedRacesManagementPanel);
@@ -105,7 +105,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
         
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
-        //leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
+        leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), /*asHTML*/ false);
         regattaDisplayers.add(leaderboardGroupConfigPanel);

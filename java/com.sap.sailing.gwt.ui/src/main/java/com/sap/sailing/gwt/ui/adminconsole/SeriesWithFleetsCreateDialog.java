@@ -108,24 +108,39 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 new SeriesParameterValidator(stringMessages, existingSeries), callback);
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
+        
         nameEntryField = createTextBox(null);
+        nameEntryField.ensureDebugId("SeriesNameTextField");
         nameEntryField.setVisibleLength(40);
+        
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
+        isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
+        
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        startsWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
+        
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
+        
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
+        
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         discardThresholdBoxes.getWidget().setVisible(false);
+        
         fleetNameEntryFields = new ArrayList<TextBox>();
         fleetColorEntryFields = new ArrayList<ListBox>();
-        fleetOrderNoEntryFields = new ArrayList<IntegerBox>(); 
+        fleetOrderNoEntryFields = new ArrayList<IntegerBox>();
+        
         fleetsGrid = new Grid(0, 0);
+        fleetsGrid.ensureDebugId("FleetsPanel");
+        
         // create at least one fleet
         addFleetWidget("Default", 0, null);
     }
@@ -236,7 +251,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
         panel.add(createHeadlineLabel(stringMessages.fleets()));
         panel.add(fleetsGrid);
+        
         Button addFleetButton = new Button(stringMessages.addFleet());
+        addFleetButton.ensureDebugId("AddFleetButton");
         addFleetButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

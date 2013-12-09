@@ -100,6 +100,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         this.seriesGrid = new Grid(0, 0);
+        this.seriesGrid.ensureDebugId("SeriesPanel");
     }
 
     @Override
@@ -107,6 +108,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         panel.add(createHeadlineLabel(stringMessages.series()));
         panel.add(seriesGrid);
         Button addSeriesButton = new Button(stringMessages.addSeries());
+        addSeriesButton.ensureDebugId("AddSeriesButton");
         addSeriesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -123,6 +125,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                         updateSeriesGrid(panel);
                     }
                 });
+                dialog.ensureDebugId("SeriesCreateDialog");
                 dialog.show();
             }
         });
@@ -135,6 +138,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
         int seriesCount = series.size();
         seriesGrid = new Grid(seriesCount * 2, 3);
+        seriesGrid.ensureDebugId("SeriesPanel");
         seriesGrid.setCellSpacing(3);
 
         for (int i = 0; i < seriesCount; i++) {
