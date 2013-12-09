@@ -2,6 +2,30 @@
 
 . `pwd`/env.sh
 
+DEPLOY_TO=server
+DATE_OF_EXECUTION=`date`
+
+find_project_home () 
+{
+    if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
+        echo ""
+        return 0
+    fi
+
+    if [ ! -d "$1/.git" ]; then
+        PARENT_DIR=`cd $1/..;pwd`
+        OUTPUT=$(find_project_home $PARENT_DIR)
+
+        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
+            OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
+        fi
+        echo $OUTPUT
+        return 0
+    fi
+
+    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+}
+
 checks ()
 {
     USER_HOME=~
@@ -26,50 +50,46 @@ checks ()
     fi
 }
 
-find_project_home () 
+activate_user_data ()
 {
-    if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
-        echo ""
-        return 0
+    # make backup of original file
+    cp $USER_HOME/servers/server/env.sh $USER_HOME/servers/server/environment/env.sh.backup
+
+    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+
+    VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
+    for var in $VARS; do
+        echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    done
+    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+}
+
+install_environment ()
+{
+    if [[ $USE_ENVIRONMENT != "" ]]; then
+        # clean up directory to really make sure that there are no files left
+        rm -rf $USER_HOME/servers/server/environment
+        mkdir $USER_HOME/servers/server/environment
+        echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
+        wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+        echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+        cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $USER_HOME/servers/server/env.sh
+        echo "# Environment: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     fi
-
-    if [ ! -d "$1/.git" ]; then
-        PARENT_DIR=`cd $1/..;pwd`
-        OUTPUT=$(find_project_home $PARENT_DIR)
-
-        if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
-            OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
-        fi
-        echo $OUTPUT
-        return 0
-    fi
-
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
 }
 
 load_from_release_file ()
 {
-    cd $USER_HOME/servers/server
-    rm -rf $USER_HOME/servers/server/environment
-    mkdir $USER_HOME/servers/server/environment
+    cd $USER_HOME/servers/$DEPLOY_TO
     rm -f $USER_HOME/servers/server/$INSTALL_FROM_RELEASE.tar.gz*
     rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
     echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
-    `which wget` http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
-    `which tar` xvzf $INSTALL_FROM_RELEASE.tar.gz
-    echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
-    `which wget` http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-    mv $USER_HOME/servers/server/$USE_ENVIRONMENT $USER_HOME/servers/server/environment/
-    chmod a+x environment/$USE_ENVIRONMENT
-    source $USER_HOME/servers/server/environment/$USE_ENVIRONMENT
-    echo "Configuration for this server is:"
-    echo "SERVER_NAME: $SERVER_NAME"
-    echo "SERVER_PORT: $SERVER_PORT"
-    echo "MEMORY: $MEMORY"
-    echo "TELNET_PORT: $TELNET_PORT"
-    echo "MONGODB_PORT: $MONGODB_PORT"
-    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+    wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
+    tar xvzf $INSTALL_FROM_RELEASE.tar.gz
 }
 
 checkout_code ()
@@ -115,12 +135,21 @@ deploy ()
     $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install
 }
 
-checks
+if [[ ! -z "$ON_AMAZON" ]]; then
+    checks
 
-if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-    load_from_release_file
+    # first check and activate everything found in user data
+    # then download and install environment
+    activate_user_data
+    install_environment
+
+    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+        load_from_release_file
+    else
+        checkout_code
+        build
+        deploy
+    fi
 else
-    checkout_code
-    build
-    deploy
+    echo "This server does not seem to be running on Amazon!"
 fi
