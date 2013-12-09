@@ -44,15 +44,16 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     };
 
-    public CandidateChooser(DynamicTrackedRace race, LinkedHashMap<Competitor, List<Candidate>> candidates) {
+    public CandidateChooser(DynamicTrackedRace race) {
         this.race = race;
         raceHasStartTime = race.getStartOfRace() == null ? false : true;
         start = new Candidate(0, race.getStartOfRace(), 1);
         end = new Candidate(
                 race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null,
                 1);
-        this.candidates = candidates;
-        for (Competitor c : candidates.keySet()) {
+        candidates = new LinkedHashMap<>();;
+        for (Competitor c : race.getRace().getCompetitors()) {
+            candidates.put(c, new ArrayList<Candidate>());
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
             allEdges.put(c, new ArrayList<Edge>());
             this.candidates.get(c).add(start);
@@ -115,10 +116,10 @@ public class CandidateChooser implements AbstractCandidateChooser {
         LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
         candidateWithParent.put(start, start);
         Edge newMostLikelyEdge = null;
-        while (!candidateWithParent.keySet().contains(end)) {
+        while (!candidateWithParent.containsKey(end)) {
             newMostLikelyEdge = null;
             for (Edge e : all) {
-                if (candidateWithParent.keySet().contains(e.getStart())) {
+                if (candidateWithParent.containsKey(e.getStart())) {
                     if (newMostLikelyEdge == null) {
                         newMostLikelyEdge = e;
                     } else if (e.getProbability() < newMostLikelyEdge.getProbability()) {
@@ -126,7 +127,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
                     }
                 }
             }
-            if (!candidateWithParent.keySet().contains(newMostLikelyEdge.getEnd())) {
+            if (!candidateWithParent.containsKey(newMostLikelyEdge.getEnd())) {
                 candidateWithParent.put(newMostLikelyEdge.getEnd(), newMostLikelyEdge.getStart());
             }
             all.remove(newMostLikelyEdge);

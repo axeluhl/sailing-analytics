@@ -37,6 +37,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
 
     private boolean forceReload = true;
 
+    
     @Test
     public void testStarMedal() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("Star Medal");
@@ -48,6 +49,8 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
         System.out.println("Tornado Race 4");
         testRace("5291b3ea-9934-11e0-85be-406186cbf87c");
     }
+
+
 
     /*
      * @Test public void testTornado16() throws IOException, InterruptedException, URISyntaxException {
@@ -184,7 +187,7 @@ public class MarkPassingCalculatorTest extends OnlineTracTracBasedTest {
     // TODO How should Edges between the proxy start and end be treated
     // TODO No Start Time
     // TODO Start-analysis is wrong for gate starts
-    
+
     // TODO Feldmann issue, also for marks
 
     // TODO Make sure the functions return the right probability
