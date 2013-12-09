@@ -61,7 +61,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         this.name = createTextBox(competitorToEdit.getName());
-        this.displayColorTextBox = createTextBox(competitorToEdit.getColor().getAsHtml()); 
+        this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
         int i=0;

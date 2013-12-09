@@ -48,7 +48,7 @@ public class RGBColor extends AbstractColor {
             r = g = b = Integer.parseInt(htmlColor.substring(0, 1), 16);
             break;
         default:
-            throw new IllegalArgumentException("Invalid color: " + htmlColor);
+            throw new IllegalArgumentException(htmlColor);
         }
         this.red = ensureValidRange(r);
         this.green = ensureValidRange(g);
