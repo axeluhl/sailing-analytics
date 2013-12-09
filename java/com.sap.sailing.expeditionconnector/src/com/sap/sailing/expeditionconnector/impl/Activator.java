@@ -35,6 +35,7 @@ public class Activator implements BundleActivator {
             logger.log(Level.INFO, "found "+EXPEDITION_UDP_PORT_PROPERTY_NAME+"="+port+" in OSGi context");
         }
         // register the Expedition wind tracker factory as an OSGi service
+        context.registerService(ExpeditionWindTrackerFactory.class, ExpeditionWindTrackerFactory.getInstance(), /* properties */null);
         context.registerService(WindTrackerFactory.class, ExpeditionWindTrackerFactory.getInstance(), /* properties */null);
     }
     
