@@ -11,11 +11,15 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.expeditionconnector.UDPMirror;
 
 public class UDPMirrorTest {
+    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    
     private static final int MIRROR_PORT = 33795;
     private static final int RECEIVING_PORT = 33796;
     private Thread mirrorThread;

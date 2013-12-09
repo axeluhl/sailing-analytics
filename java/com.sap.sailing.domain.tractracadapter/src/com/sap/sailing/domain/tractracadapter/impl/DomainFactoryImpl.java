@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -235,8 +236,9 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName) {
-        Competitor result = baseDomainFactory.getExistingCompetitorById(competitorId);
-        if (result == null || baseDomainFactory.isCompetitorToUpdateDuringGetOrCreate(result)) {
+        CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
+        Competitor result = competitorStore.getExistingCompetitorById(competitorId);
+        if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
             BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
             Nationality nationality;
             try {
@@ -248,7 +250,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
-            result = baseDomainFactory.getOrCreateCompetitor(competitorId, name, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
         }
         return result;
     }

@@ -839,4 +839,45 @@ public interface StringMessages extends Messages {
     String id();
     String compress();
     String compressTooltip();
+
+    String addConfiguration();
+    String noConfigurations();
+    String errorRetrievingConfiguration();
+    String allowedCourseAreas();
+    String minimumRoundsForCourse();
+    String maximumRoundsForCourse();
+    String resultsMailRecipient();
+    String deviceConfiguration();
+    
+    String none();
+    String courseDesignerMode();
+    String racingProcedure();
+    String courseNames();
+    String generate();
+    String dontoverwrite();
+    
+    String setRacingProcedureConfiguration();
+    String racingProcedureConfiguration();
+    String activateIndividualRecall();
+    String rrs26Start();
+    String setConfiguration();
+    String classFlag();
+    String classFlagHelpText(String procedure);
+    String individualRecallHelpText();
+    String startmodeFlags(); 
+    String startmodeFlagsHelpText();
+    String gateStart();
+    String activatePathfinder();
+    String pathfinderHelpText();
+    String essStart();
+    String basicStart();
+    String configured();
+    String overwriteRacingProceduresConfiguration();
+    String overwriteRacingProceduresConfigurationHelpText();
+    
+    String setStartTime();
+    String currentPass();
+    String setStartTimeDescription();
+    String hasAdditionalGolfDownTime();
+    String additionalGolfDownTimeHelpText();
 }

@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogGateLineOpeningTimeEventSerializer;
@@ -20,10 +21,13 @@ public class RaceLogGateLineOpeningTimeEventDeserializer extends BaseRaceLogEven
     }
 
     @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, TimePoint timePoint, int passId,
-            List<Competitor> competitors) throws JsonDeserializationException {
-        Long gateLineOpeningTime = (Long) object.get(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_LINE_OPENING_TIME);
-        return factory.createGateLineOpeningTimeEvent(timePoint, id, competitors, passId, gateLineOpeningTime);
+    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint,
+            int passId, List<Competitor> competitors) throws JsonDeserializationException {
+        Number gateLaunchTime = (Number) object.get(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_LAUNCH_STOP_TIME);
+        Number golfDownTime = 0;
+        if (object.containsKey(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_GOLF_DOWN_TIME)) {
+            golfDownTime = (Number) object.get(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_GOLF_DOWN_TIME);
+        }
+        return factory.createGateLineOpeningTimeEvent(timePoint, author, id, competitors, passId, gateLaunchTime.longValue(), golfDownTime.longValue());
     }
-
 }

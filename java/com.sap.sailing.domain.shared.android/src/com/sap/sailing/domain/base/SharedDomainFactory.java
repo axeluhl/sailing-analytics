@@ -1,15 +1,15 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
-public interface SharedDomainFactory {
+public interface SharedDomainFactory extends CompetitorFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -76,33 +76,25 @@ public interface SharedDomainFactory {
     BoatClass getOrCreateBoatClass(String name);
 
     /**
-     * If a valid competitor is returned and the caller has information available that could be used to update the competitor,
-     * the caller must check the result of {@link #isCompetitorToUpdateDuringGetOrCreate(Competitor)}, and if <code>true</code>,
-     * must call {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} to cause an update of the
-     * competitor's values.
+     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
      */
-    Competitor getExistingCompetitorById(Serializable competitorId);
-
+    CompetitorStore getCompetitorStore();
+   
     /**
-     * Checks if the <code>competitor</code> shall be updated from the default provided by, e.g., a tracking infrastructure.
-     * Callers of {@link #getExistingCompetitorById(Serializable)} or {@link #getExistingCompetitorByIdAsString(String)}
-     * must call this method in case they retrieve a valid competitor by ID and have data available that can be used to update
-     * the competitor.
+     * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
+     * is created.
      */
-    boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
-
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    CourseArea getOrCreateCourseArea(UUID id, String name);
     
     /**
-     * Same as {@link #getOrCreateCompetitor(Serializable, String, DynamicTeam, DynamicBoat)} but returns the writable
-     * specialization of the {@link Competitor} interface. Use with care because the setters offered by the <code>Dynamic...</code>
-     * subinterfaces don't automatically replicate or store the changes.
+     * Gets the {@link CourseArea} with passed id; if there is no such {@link CourseArea} <code>null</code> will be returned.
      */
-    DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team, DynamicBoat boat);
-
-    CourseArea getOrCreateCourseArea(Serializable courseAreaId, String name);
-    
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
+    
+    /**
+     * Hm.
+     */
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers);
 
 
 }

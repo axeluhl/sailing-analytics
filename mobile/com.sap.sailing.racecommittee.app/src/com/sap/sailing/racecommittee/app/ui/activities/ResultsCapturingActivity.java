@@ -11,7 +11,6 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -96,7 +95,7 @@ public class ResultsCapturingActivity extends SessionActivity {
         sendButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-				String recipient = AppPreferences.getMailRecipient(ResultsCapturingActivity.this);
+				String recipient = AppPreferences.on(ResultsCapturingActivity.this).getMailRecipient();
                 MailHelper.send(new String[] { recipient }, getSubjectText(), getBodyText(), photoList.getItems(),
                         ResultsCapturingActivity.this);
                 finish();
@@ -179,9 +178,7 @@ public class ResultsCapturingActivity extends SessionActivity {
     }
 
     private static File createFinisherImageFile(int index) {
-        File imageDirectory = new File(Environment.getExternalStorageDirectory() + AppConstants.ApplicationFolder);
-        imageDirectory.mkdirs();
-        return new File(imageDirectory, String.format("image_%d.jpg", index));
+        return new File(AppConstants.getExternalApplicationFolder(), String.format("image_%d.jpg", index));
     }
 
     private PictureCallback pictureHandler = new PictureCallback() {

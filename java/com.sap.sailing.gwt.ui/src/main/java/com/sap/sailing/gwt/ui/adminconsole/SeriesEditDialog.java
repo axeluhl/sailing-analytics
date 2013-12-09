@@ -1,18 +1,20 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -24,19 +26,17 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
-    private final ListBox addRacesListBox;
-    private Button addRacesBtn;
+
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
-    private final List<TextBox> raceNameEntryFields;
-    private final List<Button> raceNameDeleteButtons;
     private final StringMessages stringMessages;
-    private final TextBox raceNamePrefixTextBox;
-    private Grid raceColumnsGrid;
     private VerticalPanel additionalWidgetPanel;
     private final SeriesDTO selectedSeries;
     private final DiscardThresholdBoxes discardThresholdBoxes;
@@ -107,56 +107,18 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 new RaceDialogValidator(regatta, stringMessages), callback);
         this.selectedSeries = selectedSeries;
         this.stringMessages = stringMessages;
-        addRacesListBox = createListBox(false);
-        raceNamePrefixTextBox = createTextBox(null);
-        raceNameEntryFields = new ArrayList<TextBox>();
-        raceNameDeleteButtons = new ArrayList<Button>();
-        raceColumnsGrid = new Grid(0, 0);
         discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds(), stringMessages);
-    }
-
-    private Widget createRaceNameWidget(String defaultName, boolean enabled) {
-        TextBox textBox = createTextBox(defaultName); 
-        textBox.setVisibleLength(40);
-        textBox.setEnabled(enabled);
-        raceNameEntryFields.add(textBox);
-        return textBox; 
-    }
-
-    private Widget createRaceNameDeleteButtonWidget() {
-        final Button raceNameDeleteBtn = new Button(stringMessages.delete()); 
-        raceNameDeleteBtn.addStyleName("inlineButton");
-        raceNameDeleteButtons.add(raceNameDeleteBtn);
-        raceNameDeleteBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                int index = 0;
-                for(Button btn: raceNameDeleteButtons) {
-                    if(raceNameDeleteBtn == btn) {
-                        break;
-                    }
-                    index++;
-                }
-                raceNameEntryFields.remove(index);
-                raceNameDeleteButtons.remove(index);
-                updateRaceColumnsGrid(additionalWidgetPanel);
-                validate();
-            }
-        });
-        return raceNameDeleteBtn; 
     }
     
     @Override
     protected SeriesDescriptor getResult() {
         SeriesDTO selectedSeries = getSelectedSeries();
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
-        int racesCount = raceNameEntryFields.size();
-        for (int i = 0; i < racesCount; i++) {
-            String raceColumnName = raceNameEntryFields.get(i).getValue();
-            RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, raceColumnName);
+        for (String name : raceNamesEditor.getValue()) {
+            RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, name);
             if (raceColumnDTO == null) {
                 raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here; not in scope of a leaderboard */ null);
-                raceColumnDTO.setName(raceColumnName);
+                raceColumnDTO.setName(name);
             }
             races.add(raceColumnDTO);
         }
@@ -211,96 +173,85 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
         additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
         discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
-        // add races controls
-        HorizontalPanel addRacesPanel = new HorizontalPanel();
-        addRacesPanel.setSpacing(3);
-        addRacesPanel.add(new Label(stringMessages.add()));
-        addRacesPanel.add(addRacesListBox);
-        for(int i = 1; i <= 50; i++) {
-            addRacesListBox.addItem("" + i);
-        }
-        addRacesListBox.setSelectedIndex(0);
-        if ("Default".equals(seriesName)) {
-            raceNamePrefixTextBox.setText("R");
-        } else {
-            raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
-        }
-        raceNamePrefixTextBox.setWidth("20px");
-        addRacesPanel.add(raceNamePrefixTextBox);
-        addRacesBtn = new Button(stringMessages.add());
-        addRacesBtn.addStyleName("inlineButton");
-        addRacesBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SeriesDTO selectedSeries = getSelectedSeries();
-                if(selectedSeries != null) {
-                    String racePrefix = raceNamePrefixTextBox.getText();
-                    int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
-                    int currentSize = raceNameEntryFields.size();
-                    for(int i = 1; i <= racesCountToCreate; i++) {
-                        String raceName = racePrefix;
-                        if(racesCountToCreate != 1 || selectedSeries.getRaceColumns().size() > 0) {
-                            raceName += (currentSize + i);
-                        }
-                        createRaceNameWidget(raceName, true);
-                        createRaceNameDeleteButtonWidget();
-                    }
-                    updateRaceColumnsGrid(additionalWidgetPanel);
-                    validate();
-                } else {
-                    Window.alert("Please select a series first.");
-                }
-            }
-        });
-        addRacesPanel.add(addRacesBtn);
-        additionalWidgetPanel.add(addRacesPanel);
-        
-        additionalWidgetPanel.add(createHeadlineLabel(stringMessages.races()));
-        additionalWidgetPanel.add(raceColumnsGrid);
-
-        fillExistingRacesOfSeries();
-
+        raceNamesEditor = new StringListEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(stringMessages, resources.removeIcon(), seriesName));
+        additionalWidgetPanel.add(raceNamesEditor);
         return additionalWidgetPanel;
     }
+    
+    private StringListEditorComposite raceNamesEditor;
 
-    private void fillExistingRacesOfSeries() {
+    private List<String> getExistingRacesOfSeries() {
+        List<String> names = new ArrayList<String>();
         SeriesDTO selectedSeries = getSelectedSeries();
-        raceNameEntryFields.clear();
-        raceNameDeleteButtons.clear();
         if(selectedSeries != null && !selectedSeries.getRaceColumns().isEmpty()) {
             for(RaceColumnDTO raceColumn: selectedSeries.getRaceColumns()) {
-                createRaceNameWidget(raceColumn.getName(), false);
-                createRaceNameDeleteButtonWidget();
+                names.add(raceColumn.getName());
             }
         }
-        updateRaceColumnsGrid(additionalWidgetPanel);
-    }
-    
-    private void updateRaceColumnsGrid(VerticalPanel parentPanel) {
-        int widgetIndex = parentPanel.getWidgetIndex(raceColumnsGrid);
-        parentPanel.remove(raceColumnsGrid);
-        int raceNamesCount = raceNameEntryFields.size();
-        if(raceNamesCount > 0) {
-            raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
-            raceColumnsGrid.setCellSpacing(4);
-            raceColumnsGrid.setHTML(0, 0, stringMessages.name());
-            for(int i = 0; i < raceNamesCount; i++) {
-                raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
-                raceColumnsGrid.setWidget(i+1, 1, raceNameDeleteButtons.get(i));
-            }
-        } else {
-            raceColumnsGrid = new Grid(0, 0);
-        }
-
-        parentPanel.insert(raceColumnsGrid, widgetIndex);
+        return names;
     }
 
     private SeriesDTO getSelectedSeries() {
         return selectedSeries;
     }
-
-    @Override
-    public void show() {
-        super.show();
+    
+    private class RaceNamesEditorUi extends StringListEditorComposite.ExpandedUi {
+        
+        private final ListBox addRacesListBox;
+        private final TextBox raceNamePrefixTextBox;
+        private final Button addRacesBtn;
+        
+        private final String seriesName;
+        
+        public RaceNamesEditorUi(StringMessages stringMessages, ImageResource removeImage, String seriesName) {
+            super(stringMessages, removeImage, Collections.<String>emptyList());
+            this.addRacesListBox = createListBox(false);
+            this.raceNamePrefixTextBox = createTextBox(null);
+            this.addRacesBtn = new Button(stringMessages.add());
+            this.seriesName = seriesName;
+        }
+        
+        @Override
+        protected Widget createAddWidget() {
+            HorizontalPanel addRacesPanel = new HorizontalPanel();
+            addRacesPanel.setSpacing(3);
+            addRacesPanel.add(new Label(stringMessages.add()));
+            addRacesPanel.add(addRacesListBox);
+            for(int i = 1; i <= 50; i++) {
+                addRacesListBox.addItem("" + i);
+            }
+            addRacesListBox.setSelectedIndex(0);
+            if ("Default".equals(seriesName)) {
+                raceNamePrefixTextBox.setText("R");
+            } else {
+                raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
+            }
+            raceNamePrefixTextBox.setWidth("20px");
+            addRacesPanel.add(raceNamePrefixTextBox);
+            addRacesBtn.addStyleName("inlineButton");
+            addRacesBtn.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    SeriesDTO selectedSeries = getSelectedSeries();
+                    if(selectedSeries != null) {
+                        String racePrefix = raceNamePrefixTextBox.getText();
+                        int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
+                        int currentSize = context.getValue().size();
+                        for(int i = 1; i <= racesCountToCreate; i++) {
+                            String raceName = racePrefix;
+                            if(racesCountToCreate != 1 || selectedSeries.getRaceColumns().size() > 0) {
+                                raceName += (currentSize + i);
+                            }
+                            addValue(raceName);
+                        }
+                        validate();
+                    } else {
+                        Window.alert("Please select a series first.");
+                    }
+                }
+            });
+            addRacesPanel.add(addRacesBtn);
+            return addRacesPanel;
+        }
     }
 }

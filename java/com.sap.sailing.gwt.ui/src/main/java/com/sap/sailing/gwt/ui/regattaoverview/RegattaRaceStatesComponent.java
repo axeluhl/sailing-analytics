@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
@@ -415,13 +416,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                if (object.raceInfo.lastCourseDesign.waypoints.size() > 0) {
+                RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+                if (courseDTO != null && courseDTO.waypoints.size() > 0) {
                     DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
                     courseViewDialogBox.center();
                     courseViewDialogBox.setGlassEnabled(true);
                     courseViewDialogBox.setAnimationEnabled(true);
                     courseViewDialogBox.show();
-                } 
+                }
             }
         });
         raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -624,7 +626,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void fillVisibleCourseAreasInSettingsIfEmpty() {
         if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
             for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.getVisibleCourseAreas().add(courseArea.id);
+                settings.getVisibleCourseAreas().add(courseArea.uuidAsString);
             }
         }
     }

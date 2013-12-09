@@ -221,7 +221,9 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
-        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString, new AsyncCallback<Void>() {
+        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuidAsString,
+                editedRegatta.configuration,
+                new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());

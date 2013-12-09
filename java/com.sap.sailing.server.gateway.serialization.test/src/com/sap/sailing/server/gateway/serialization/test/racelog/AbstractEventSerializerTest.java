@@ -16,6 +16,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 
@@ -29,6 +31,7 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
     private JsonSerializer<Competitor> competitorSerializer;
     protected JsonSerializer<RaceLogEvent> serializer;
     protected EventType event;
+    protected final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test author", 1);
 
     protected abstract EventType createMockEvent();
 
@@ -49,9 +52,10 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
 
         when(event.getId()).thenReturn(expectedId);
         when(event.getCreatedAt()).thenReturn(createdAtTimePoint);
-        when(event.getTimePoint()).thenReturn(logicalTimePoint);
+        when(event.getLogicalTimePoint()).thenReturn(logicalTimePoint);
         when(event.getPassId()).thenReturn(expectedPassId);
         when(event.getInvolvedBoats()).thenReturn(Collections.<Competitor> emptyList());
+        when(event.getAuthor()).thenReturn(author);
     }
 
     @Test

@@ -3,17 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dip" >
+    android:padding="10dip">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal" >
-
-        <EditText
-            android:id="@+id/lineOpeningTimeText"
-            android:layout_width="150dip"
+        
+        <TextView 
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
+            android:text="@string/gate_launch"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel"/>
+        
+        <EditText
+            android:id="@+id/gateLaunchStopTimeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:inputType="number"
             android:text="@string/empty"
             android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" >
@@ -26,13 +33,41 @@
             android:layout_height="wrap_content"
             android:text="@string/choose_line_open_min"
             android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/golfDownTimeContainer" >
+        
+	<TextView 
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/golf_down"
+            android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+        
+        <EditText
+            android:id="@+id/golfDownTimeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:text="@string/empty"
+            android:textAppearance="@style/TextAppearance.Welter.ExtraBigTitleLabel" >
+        </EditText>
 
-        <Button
-            android:id="@+id/chooseLineOpeningTimeButton"
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/choose"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_line_open_min"
             android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/chooseLineOpeningTimeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/choose"
+        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
 </LinearLayout>

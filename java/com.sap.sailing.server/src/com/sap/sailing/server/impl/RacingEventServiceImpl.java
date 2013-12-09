@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +43,11 @@ import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -84,6 +90,11 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.state.RaceState;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -116,10 +127,12 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -133,7 +146,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackTitleOpe
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackUrlOperation;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
-import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
@@ -175,7 +187,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     /**
      * Leaderboards managed by this racing event service
-     */
+    */
     private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
 
     private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
@@ -205,6 +217,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final MediaDB mediaDB;
 
     private final MediaLibrary mediaLibrary;
+    
+    protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
 
@@ -283,6 +297,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             } 
         }
         this.windStore = windStore;
+        this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -294,6 +309,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
+        loadStoredDeviceConfigurations();
     }
 
     @Override
@@ -349,6 +365,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url,
                     dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
             mediaTrackAdded(mediaTrack);
+        }
+    }
+    
+    private void loadStoredDeviceConfigurations() {
+        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : domainObjectFactory.loadAllDeviceConfigurations()) {
+            synchronized (configurationMap) {
+                configurationMap.put(entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -1191,17 +1215,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId) {
+    public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
+           RegattaConfiguration newRegattaConfiguration) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         synchronized (regatta) {
             CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
             if (newCourseArea != regatta.getDefaultCourseArea()) {
                 regatta.setDefaultCourseArea(newCourseArea);
-                mongoObjectFactory.storeRegatta(regatta);
             }
-
-            replicate(new UpdateSpecificRegatta(regattaIdentifier, newDefaultCourseAreaId));
+            regatta.setRegattaConfiguration(newRegattaConfiguration);
+            mongoObjectFactory.storeRegatta(regatta);
         }
         return regatta;
     }
@@ -1652,14 +1676,21 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         oos.writeObject(competitorStore);
         logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
         logger.info(logoutput.toString());
-    }
+        
+        logger.info("Serializing configuration map...");
+        oos.writeObject(configurationMap);
+        logoutput.append("Serialized " + configurationMap.size() + " configuration entries\n");
+        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+            logoutput.append(String.format("%3s\n", matcher.toString()));
+        }
+        
+        logger.info(logoutput.toString());    }
 
     @SuppressWarnings("unchecked")
     // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException,
             InterruptedException {
-
         logger.info("Performing initial replication load on " + this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
@@ -1741,6 +1772,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             for (MediaTrack mediatrack : mediaLibrary.allTracks()) {
                 logoutput.append(String.format("%3s\n", mediatrack.toString()));
             }
+            
 
             // only copy the competitors from the deserialized competitor store; don't use it because it will have set
             // a default Mongo object factory
@@ -1751,7 +1783,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
 
-            logger.info("Done with initial replication on " + this);
+            logger.info("Reading device configurations...");
+            configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
+            logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
+            for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
+                logoutput.append(String.format("%3s\n", matcher.toString()));
+            }
             logger.info(logoutput.toString());
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
@@ -1979,4 +2016,66 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public WindStore getWindStore() {
         return windStore;
     }
+    @Override
+    public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {
+        return configurationMap.getByMatch(identifier);
+    }
+
+    @Override
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+        synchronized (configurationMap) {
+            configurationMap.put(matcher, configuration);
+        }
+        mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
+        replicate(new CreateOrUpdateDeviceConfiguration(matcher, configuration));
+    }
+
+    @Override
+    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+        synchronized (configurationMap) {
+            configurationMap.remove(matcher);
+        }
+        mongoObjectFactory.removeDeviceConfiguration(matcher);
+        replicate(new RemoveDeviceConfiguration(matcher));
+    }
+
+    @Override
+    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations() {
+        return new HashMap<DeviceConfigurationMatcher, DeviceConfiguration>(configurationMap);
+    }
+    
+    @Override
+    public TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            state.forceNewStartTime(logicalTimePoint, startTime);
+            return state.getStartTime();
+        }
+        return null;
+    }
+    
+    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                return raceColumn.getRaceLog(fleetImpl);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        if (raceLog != null) {
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
+        }
+        return null;
+    }
+
 }

@@ -12,10 +12,12 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 /**
- * Analyzation returns the most recent {@link RaceLogFlagEvent}s.
+ * Analysis returns the most recent {@link RaceLogFlagEvent}s.
+ * <p>
  * 
  * If there is no {@link RaceLogFlagEvent} in the current pass, <code>null</code> is returned. Otherwise a {@link List}
- * of {@link RaceLogFlagEvent} is returned containing all {@link RaceLogEvent}s with the most recent {@link TimePoint}.
+ * of {@link RaceLogFlagEvent} is returned containing all {@link RaceLogEvent}s with the most recent (logical)
+ * {@link TimePoint}.
  * 
  */
 public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
@@ -38,9 +40,9 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
     private List<RaceLogFlagEvent> collectAllWithSameTimePoint(Iterator<RaceLogEvent> iterator,
             RaceLogFlagEvent flagEvent) {
         List<RaceLogFlagEvent> result = new ArrayList<RaceLogFlagEvent>();
-        TimePoint lastFlagsTime = flagEvent.getTimePoint();
+        TimePoint logicalTime = flagEvent.getLogicalTimePoint();
 
-        while (flagEvent.getTimePoint().equals(lastFlagsTime)) {
+        while (flagEvent.getLogicalTimePoint().equals(logicalTime)) {
             result.add(flagEvent);
             flagEvent = getNextFlagEvent(iterator);
             if (flagEvent == null) {
@@ -62,11 +64,11 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
     }
 
     /**
-     * Use this method the obtain the most "interesting" {@link RaceLogFlagEvent} of the {@link LastFlagsFinder}'s
-     * analyzation result.
+     * Use this method to obtain the most "interesting" {@link RaceLogFlagEvent} of the {@link LastFlagsFinder}'s
+     * analysis result.
      * 
      * If an empty list or <code>null</code> is passed, this method returns <code>null</code>. Otherwise the (most
-     * recent) {@link RaceLogFlagEvent} with the highest ID is returned favoring events with
+     * recent by logical timestamp) {@link RaceLogFlagEvent} with the highest ID is returned favoring events with
      * {@link RaceLogFlagEvent#isDisplayed()} returning <code>true</code>.
      * 
      * @param events
@@ -82,7 +84,7 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
         Collections.sort(sortedEvents, new Comparator<RaceLogFlagEvent>() {
             @Override
             public int compare(RaceLogFlagEvent left, RaceLogFlagEvent right) {
-                int result = right.getTimePoint().compareTo(left.getTimePoint());
+                int result = right.getLogicalTimePoint().compareTo(left.getLogicalTimePoint());
                 if (result == 0) {
                     result = Boolean.valueOf(right.isDisplayed()).compareTo(left.isDisplayed());
                     if (result == 0) {
