@@ -7,4 +7,6 @@ public interface Competitor extends Named, WithID, IsManagedBySharedDomainFactor
     Team getTeam();
 
     Boat getBoat();
+    
+    String getColor();
 }

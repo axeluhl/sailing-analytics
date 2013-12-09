@@ -53,15 +53,23 @@ public class CompetitorPanel extends SimplePanel {
     private MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
     private ListDataProvider<CompetitorDTO> competitorProvider;
     private List<CompetitorDTO> allCompetitors;
+    private final String leaderboardName;
     private AbstractFilterablePanel<CompetitorDTO> filterField;
+
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+            final ErrorReporter errorReporter) {
+        this(sailingService, null, stringMessages, errorReporter);
+    }
+
+    public CompetitorPanel(final SailingServiceAsync sailingService, String leaderboardName, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.leaderboardName = leaderboardName;
         competitorProvider = new ListDataProvider<CompetitorDTO>();
         ListHandler<CompetitorDTO> competitorColumnListHandler = new ListHandler<CompetitorDTO>(competitorProvider.getList());
         VerticalPanel mainPanel = new VerticalPanel();
@@ -147,6 +155,21 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
 
+        Column<CompetitorDTO, SafeHtml> displayColorColumn = new Column<CompetitorDTO, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(CompetitorDTO competitor) {
+                SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                if(competitor.getColor() != null) {
+                    sb.appendHtmlConstant("<span style=\"color: " + competitor.getColor() + ";\">");
+                    sb.appendHtmlConstant(competitor.getColor());
+                    sb.appendHtmlConstant("</span>");
+                } else {
+                    sb.appendHtmlConstant("&nbsp;");
+                }
+                return sb.toSafeHtml();
+            }
+        };
+        
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -196,6 +219,7 @@ public class CompetitorPanel extends SimplePanel {
         competitorTable.addColumn(sailIdColumn, stringMessages.sailNumber());
         competitorTable.addColumn(competitorNameColumn, stringMessages.name());
         competitorTable.addColumn(boatClassColumn, stringMessages.boatClass());
+        competitorTable.addColumn(displayColorColumn, stringMessages.color());
         competitorTable.addColumn(competitorIdColumn, stringMessages.id());
         competitorTable.addColumn(competitorActionColumn, stringMessages.actions());
         competitorSelectionModel = new MultiSelectionModel<CompetitorDTO>();
@@ -208,6 +232,10 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
+        
+        if(leaderboardName != null) {
+            refreshCompetitorList();
+        }
     }
     
     private void allowUpdate(final Iterable<CompetitorDTO> competitors) {
@@ -255,22 +283,38 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     void refreshCompetitorList() {
-        sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                allCompetitors = new ArrayList<CompetitorDTO>();
-                for (CompetitorDTO c : result) {
-                    allCompetitors.add(c);
+        if(leaderboardName != null) {
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
                 }
-                filterField.updateAll(allCompetitors);
-            }
-        });
+
+                @Override
+                public void onSuccess(Iterable<CompetitorDTO> result) {
+                    getFilteredCompetitors(result);
+                }
+            });
+        } else {
+            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Iterable<CompetitorDTO> result) {
+                    getFilteredCompetitors(result);
+                }
+            });
+        }
     }
 
-
+    private void getFilteredCompetitors(Iterable<CompetitorDTO> result) {
+        allCompetitors = new ArrayList<CompetitorDTO>();
+        for (CompetitorDTO c : result) {
+            allCompetitors.add(c);
+        }
+        filterField.updateAll(allCompetitors);
+    }
 }

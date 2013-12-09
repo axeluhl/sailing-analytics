@@ -108,11 +108,11 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
     @Test
     public void testStoringAndRetrievingLeaderboardGroupWithOverallLeaderboardWithScoreCorrection() throws NoWindException {
         RacingEventService racingEventService = new RacingEventServiceImpl();
-        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                                 /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -164,11 +164,11 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
     @Test
     public void testStoringAndRetrievingLeaderboardGroupWithSuppressedCompetitorsInOverallLeaderboard() {
-        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                                 /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -221,11 +221,11 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
     @Test
     public void testStoringAndRetrievingLeaderboardGroupWithTwoSuppressedCompetitorsInOverallLeaderboard() {
-        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                                 /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is Patty, the coach")),

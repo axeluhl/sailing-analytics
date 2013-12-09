@@ -57,6 +57,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
                 return this;
             }
+
+            @Override
+            public String getColor() {
+                return null;
+            }
         };
     }
 

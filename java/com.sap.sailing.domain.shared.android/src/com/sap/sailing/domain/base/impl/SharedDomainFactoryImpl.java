@@ -281,14 +281,14 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, team, boat);
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 
     @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team,
+    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, String displayColor, DynamicTeam team,
             DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateDynamicCompetitor(competitorId, name, team, boat);
+        return getCompetitorStore().getOrCreateDynamicCompetitor(competitorId, name, displayColor, team, boat);
     }
 
     @Override

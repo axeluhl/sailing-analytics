@@ -68,7 +68,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         Competitor wolfgang = createCompetitor();
-        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -290,7 +290,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     private Competitor createCompetitor() {
-        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+        Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "#FF0000", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));

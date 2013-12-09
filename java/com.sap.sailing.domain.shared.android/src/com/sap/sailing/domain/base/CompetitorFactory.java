@@ -27,8 +27,8 @@ public interface CompetitorFactory {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat);
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
 
-    DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat);
+    DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
 
 }
