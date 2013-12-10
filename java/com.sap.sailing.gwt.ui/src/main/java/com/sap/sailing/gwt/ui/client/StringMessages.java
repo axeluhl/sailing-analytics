@@ -887,4 +887,5 @@ public interface StringMessages extends Messages {
     String addIgtimiAccount();
     String errorAuthorizingAccessToIgtimiUser(String text, String message);
     String successfullyAuthorizedAccessToIgtimiUser(String username);
+    String couldNotAuthorizedAccessToIgtimiUser(String text);
 }

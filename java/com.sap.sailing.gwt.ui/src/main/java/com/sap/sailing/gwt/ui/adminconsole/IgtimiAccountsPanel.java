@@ -51,8 +51,12 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        Window.alert(IgtimiAccountsPanel.this.stringMessages.successfullyAuthorizedAccessToIgtimiUser(userEmail.getText()));
-                        updateAllAccounts(IgtimiAccountsPanel.this.stringMessages);
+                        if (result) {
+                            Window.alert(IgtimiAccountsPanel.this.stringMessages.successfullyAuthorizedAccessToIgtimiUser(userEmail.getText()));
+                            updateAllAccounts(IgtimiAccountsPanel.this.stringMessages);
+                        } else {
+                            Window.alert(IgtimiAccountsPanel.this.stringMessages.couldNotAuthorizedAccessToIgtimiUser(userEmail.getText()));
+                        }
                     }
                 });
             }
