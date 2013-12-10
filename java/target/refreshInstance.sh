@@ -169,14 +169,14 @@ deploy ()
         DEPLOY="-s $DEPLOY_TO"
     fi
 
-    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install
+    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install > $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | mail -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+        echo "OK - check the attachment for more information." | mail -a $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
     else
         echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | mail -a last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        echo "ERROR - check the attachment for more information." | mail -a $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
     fi 
 }
 
