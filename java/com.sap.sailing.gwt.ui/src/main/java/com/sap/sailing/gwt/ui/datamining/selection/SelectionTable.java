@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 
 import com.google.gwt.user.cellview.client.DataGrid;
@@ -11,7 +12,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.SharedDimension;
 
-public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel {
+public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel implements Comparator<ContentType> {
     
     private SharedDimension dimension;
     
@@ -45,6 +46,10 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
         return dimension;
     }
     
+    public Collection<ContentType> getContent() {
+        return dataProvider.getList();
+    }
+    
     public void setContent(Collection<ContentType> content) {
         dataProvider.getList().clear();
         dataProvider.getList().addAll(content);
@@ -71,6 +76,11 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
     
     public void clearSelection() {
         selectionModel.clear();
+    }
+    
+    @Override
+    public int compare(ContentType content1, ContentType content2) {
+        return getValueAsString(content1).compareTo(getValueAsString(content2));
     }
 
     public abstract ValueType getValue(ContentType content);

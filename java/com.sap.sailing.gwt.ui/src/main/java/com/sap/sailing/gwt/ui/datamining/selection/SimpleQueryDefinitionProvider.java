@@ -26,13 +26,14 @@ import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
 
 public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvider {
 
     private FlowPanel mainPanel;
 
-    private SelectionTablesPanel selectionTablesPanel;
+    private SelectionProvider selectionTablesPanel;
     
     private StatisticsProvider statisticsProvider;
     private ValueListBox<ResultCalculationInformation> statisticsListBox;
@@ -45,14 +46,14 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         mainPanel = new FlowPanel();
         statisticsProvider = new SimpleStatisticsProvider();
 
-        selectionTablesPanel = new SelectionTablesPanel(stringMessages, sailingService, errorReporter);
+        selectionTablesPanel = new AsyncSelectionTablesPanel(stringMessages, sailingService, errorReporter);
         selectionTablesPanel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 notifyQueryDefinitionChanged();
             }
         });
-        mainPanel.add(selectionTablesPanel);
+        mainPanel.add(selectionTablesPanel.getWidget());
         mainPanel.add(createFunctionsPanel());
     }
     
