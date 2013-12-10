@@ -240,19 +240,31 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
 
-        createWindImportPanel(mainPanel, stringMessages);
+        mainPanel.add(createExpeditionWindImportPanel(stringMessages));
+        mainPanel.add(createIgtimiWindImportPanel(mainPanel, stringMessages));
 
     }
 
-    private void createWindImportPanel(Panel mainPanel, final StringMessages stringMessages) {
+    private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel, StringMessages stringMessages2) {
+        CaptionPanel igtimiWindImportRootPanel = new CaptionPanel(stringMessages.igtimiWindImport());
+        VerticalPanel contentPanel = new VerticalPanel();
+        igtimiWindImportRootPanel.add(contentPanel);
+        contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
+        trackedRacesListComposite.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
+            @Override
+            public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+                // TODO Auto-generated method stub
+            }
+        });
+        return igtimiWindImportRootPanel;
+    }
 
+    private CaptionPanel createExpeditionWindImportPanel(final StringMessages stringMessages) {
         /*
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
          */
-
         CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
-        mainPanel.add(windImportRootPanel);
         VerticalPanel windImportContentPanel = new VerticalPanel();
         windImportRootPanel.add(windImportContentPanel);
         final FormPanel form = new FormPanel();
@@ -369,7 +381,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 }
             }
         });
-
+        return windImportRootPanel;
     }
 
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {

@@ -900,4 +900,6 @@ public interface StringMessages extends Messages {
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
     String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
+    String igtimiWindImport();
+    String seeIgtimiTabForAccountSettings();
 }
