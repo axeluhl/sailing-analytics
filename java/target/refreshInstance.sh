@@ -2,10 +2,6 @@
 
 source `pwd`/env.sh
 
-if [[ $DEPLOY_TO == "" ]]; then
-    DEPLOY_TO=server
-fi
-
 DATE_OF_EXECUTION=`date`
 
 find_project_home () 
@@ -60,6 +56,10 @@ checks ()
     if [[ $SERVER_STARTUP_NOTIFY == "" ]]; then
         export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
     fi
+
+    if [[ $DEPLOY_TO == "" ]]; then
+        DEPLOY_TO=server
+    fi
 }
 
 activate_user_data ()
@@ -73,7 +73,6 @@ activate_user_data ()
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
 
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     for var in $VARS; do
@@ -84,6 +83,12 @@ activate_user_data ()
     
     # make sure to reload data
     source `pwd`/env.sh
+    if [[ $DEPLOY_TO == "" ]]; then
+        DEPLOY_TO=server
+        echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
+    fi
+
+    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "Updated env.sh with data from user-data field!"
     echo ""
 }
@@ -102,6 +107,11 @@ install_environment ()
 
         # make sure to reload data
         source `pwd`/env.sh
+        if [[ $DEPLOY_TO == "" ]]; then
+            DEPLOY_TO=server
+            echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
+        fi
+
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
