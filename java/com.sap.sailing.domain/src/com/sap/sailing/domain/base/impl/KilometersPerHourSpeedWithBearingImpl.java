@@ -30,6 +30,11 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     }
 
     @Override
+    public SpeedWithBearing add(SpeedWithBearing other) {
+        return AbstractSpeedWithBearingImpl.add(this, other);
+    }
+
+    @Override
     public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
         return AbstractSpeedWithBearingImpl.applyCourseChange(this, courseChange);
     }

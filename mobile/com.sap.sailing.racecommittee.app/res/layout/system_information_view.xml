@@ -11,6 +11,20 @@
         android:layout_height="wrap_content"
         android:text="@string/application_information"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+    
+    <TextView
+        android:id="@+id/system_information_application_identifier_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:text="@string/application_identifier"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/system_information_application_identifier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/empty" />
 
     <TextView
         android:id="@+id/system_information_application_version_header"
@@ -66,7 +80,14 @@
     <ListView
         android:id="@+id/system_information_persistence_waiting"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="300dp"
         android:fadeScrollbars="false" />
+    
+    <Button 
+        android:id="@+id/system_information_persistence_clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/persistence_waiting_clear_events"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

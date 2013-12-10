@@ -18,12 +18,15 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
     private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
-
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    
     public TestStoringAndRetrievingRaceLogEventData() throws UnknownHostException, MongoException {
         super();
     }
@@ -68,7 +71,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
     @Test
     public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException {
         TimePoint now = MillisecondsTimePoint.now();
-        RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, 0, Flags.AP, Flags.ALPHA, true);
+        RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, author, 0, Flags.AP, Flags.ALPHA, true);
         {
             DBObject rcEventForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory())
                     .storeRaceLogFlagEvent(rcEvent);
@@ -81,7 +84,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             assertNotNull(coll);
             DBObject object = coll.findOne();
             RaceLogFlagEvent readRcEvent = (RaceLogFlagEvent) ((DomainObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()).loadRaceLogEvent(object);
-            assertEquals(rcEvent.getTimePoint(), readRcEvent.getTimePoint());
+            assertEquals(rcEvent.getLogicalTimePoint(), readRcEvent.getLogicalTimePoint());
             assertEquals(rcEvent.getId(), readRcEvent.getId());
             assertEquals(rcEvent.getPassId(), readRcEvent.getPassId());
             assertEquals(rcEvent.getUpperFlag(), readRcEvent.getUpperFlag());

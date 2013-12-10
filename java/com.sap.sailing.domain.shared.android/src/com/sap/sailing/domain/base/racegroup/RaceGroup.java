@@ -3,7 +3,9 @@ package com.sap.sailing.domain.base.racegroup;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.racelog.state.racingprocedure.RacingProcedure;
 
 /**
  * A {@link RaceGroup} is an abstract representation of a set of races managed in fleets and series.
@@ -40,4 +42,9 @@ public interface RaceGroup extends Named {
      * Gets the collection of series.
      */
     public Iterable<SeriesWithRows> getSeries();
+    
+    /**
+     * Gets configuration objects for {@link RacingProcedure}s of this {@link RaceGroup}'s races.
+     */
+    public RegattaConfiguration getRegattaConfiguration();
 }

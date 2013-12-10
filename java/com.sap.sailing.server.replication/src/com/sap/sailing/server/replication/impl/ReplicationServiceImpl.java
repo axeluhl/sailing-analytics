@@ -85,8 +85,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
-                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
+        racingEventServiceTracker = getRacingEventServiceTracker();
         racingEventServiceTracker.open();
         localService = null;
         this.exchangeName = exchangeName;
@@ -94,6 +93,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicator = null;
         serverUUID = UUID.randomUUID();
         logger.info("Setting " + serverUUID.toString() + " as unique replication identifier.");
+    }
+
+    protected ServiceTracker<RacingEventService, RacingEventService> getRacingEventServiceTracker() {
+        return new ServiceTracker<RacingEventService, RacingEventService>(
+                Activator.getDefaultContext(), RacingEventService.class.getName(), null);
     }
     
     /**

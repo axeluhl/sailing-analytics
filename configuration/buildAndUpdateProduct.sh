@@ -1,6 +1,7 @@
 #!/bin/bash
 set -o functrace
 
+
 find_project_home () 
 {
     if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
@@ -76,15 +77,19 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
+android=1
+reporting=0
 suppress_confirmation=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-b -u -g -t -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
+    echo "buildAndUpdateProduct [-b -u -g -t -a -o -c -m <config> -n <package> -l <port>] [build|install|all|hot-deploy|remote-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
+    echo "-a Disable mobile projects (RaceCommittee App)"
+    echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo "-p Enable proxy mode (overwrites file specified by -m)"
@@ -126,16 +131,18 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocpm:n:l:s:w:u'
+options=':bgtocparm:n:l:s:w:u'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
         t) testing=0;;
-	    b) onegwtpermutationonly=1;;
+        b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
+        a) android=0;;
+        r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
@@ -206,8 +213,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
-    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
-    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
@@ -417,6 +423,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="-Pdebug.no-gwt-compile"
 	fi
 
+    # back to root!
+    cd $PROJECT_HOME
+
 	if [ $testing -eq 0 ]; then
 	    echo "INFO: Skipping tests"
 	    extra="$extra -Dmaven.test.skip=true -DskipTests=true"
@@ -437,6 +446,30 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
+    if [ $android -eq 1 ]; then
+        if [[ $ANDROID_HOME == "" ]]; then
+            echo "Environment variable ANDROID_HOME not found. Aborting."
+            echo "Deactivate mobile build with parameter -a."
+            exit
+        fi
+        echo "ANDROID_HOME=$ANDROID_HOME"
+        PATH=$PATH:$ANDROID_HOME/tools
+        PATH=$PATH:$ANDROID_HOME/platform-tools
+
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        echo "RC_APPVERSION=$RC_APP_VERSION"
+        extra="$extra -Drc-app-api-version=$RC_APP_VERSION"
+        
+    else
+        echo "INFO: Deactivating mobile modules"
+        extra="$extra -P !with-mobile"
+    fi
+
+    if [ $reporting -eq 1 ]; then
+        echo "INFO: Activating reporting"
+        extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+    fi
+
     # make sure to honour the service configuration
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
@@ -445,6 +478,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	echo "Maven version used: `mvn --version`"
 	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
+    if [ $reporting -eq 1 ]; then
+        echo "INFO: Generating reports"
+        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
+        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+        tar -xzf configuration/surefire-reports-resources.tar.gz
+        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
+        echo "INFO: Be sure to check the result of the actual BUILD run!"
+    fi
+
+    cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
 		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
@@ -506,8 +549,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
-    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
-    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/

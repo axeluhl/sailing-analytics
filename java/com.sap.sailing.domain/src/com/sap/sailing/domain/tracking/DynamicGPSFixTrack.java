@@ -10,8 +10,7 @@ import java.util.ConcurrentModificationException;
  * 
  * @author Axel Uhl (d043530)
  */
-public interface DynamicGPSFixTrack<ItemType, FixType extends GPSFix> extends
-        GPSFixTrack<ItemType, FixType> {
+public interface DynamicGPSFixTrack<ItemType, FixType extends GPSFix> extends GPSFixTrack<ItemType, FixType>, DynamicTrack<FixType> {
     /**
      * Adds the <code>gpsFix</code> (or an object equal to it) to this track. Note: depending on the implementation,
      * it's not the <em>same</em> object actually added to the track but only an equal one. This is particularly

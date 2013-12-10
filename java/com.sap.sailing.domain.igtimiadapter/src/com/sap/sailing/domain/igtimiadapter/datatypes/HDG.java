@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -14,11 +15,12 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  * 
  */
 public class HDG extends Fix {
+    private static final long serialVersionUID = -2400420107580758551L;
     private final Bearing trueHeading;
     
     public HDG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
         super(sensor, timePoint);
-        trueHeading = new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        trueHeading = new DegreeBearingImpl((((Number) valuesPerSubindex.get(1)).doubleValue()+360.)%360.);
     }
 
     public Bearing getTrueHeading() {
@@ -28,5 +30,10 @@ public class HDG extends Fix {
     @Override
     protected String localToString() {
         return "HDG: "+getTrueHeading();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

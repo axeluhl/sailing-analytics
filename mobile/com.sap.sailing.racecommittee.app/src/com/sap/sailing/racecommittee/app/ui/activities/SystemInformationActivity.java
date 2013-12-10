@@ -3,14 +3,19 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.util.Date;
 
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 
 public class SystemInformationActivity extends BaseActivity {
 
@@ -20,6 +25,7 @@ public class SystemInformationActivity extends BaseActivity {
         setContentView(R.layout.system_information_view);
         setupVersionView();
         setupInstalledView();
+        setupPersistenceView();
     }
 
     @Override
@@ -40,9 +46,27 @@ public class SystemInformationActivity extends BaseActivity {
         
     }
 
+    private void setupPersistenceView() {
+        // status and list view is updated by updateSendingServiceInformation
+        Button clearButton = (Button) findViewById(R.id.system_information_persistence_clear);
+        clearButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (boundSendingService) {
+                    sendingService.clearDelayedIntents();
+                } else {
+                    Toast.makeText(getApplicationContext(), "", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void setupVersionView() {
+        TextView identifierView = (TextView) findViewById(R.id.system_information_application_identifier);
+        identifierView.setText(AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
+        
         TextView versionView = (TextView) findViewById(R.id.system_information_application_version);
-        PackageInfo info = getPackageInfo();
+        PackageInfo info = RaceApplication.getPackageInfo(getApplication());
         if (info == null) {
             versionView.setText(getString(R.string.generic_error));
         } else {
@@ -52,21 +76,13 @@ public class SystemInformationActivity extends BaseActivity {
 
     private void setupInstalledView() {
         TextView installView = (TextView) findViewById(R.id.system_information_application_install);
-        PackageInfo info = getPackageInfo();
+        PackageInfo info = RaceApplication.getPackageInfo(getApplication());
         if (info == null) {
             installView.setText(getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
             installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(this).format(installDate),
                     DateFormat.getTimeFormat(this).format(installDate)));
-        }
-    }
-
-    private PackageInfo getPackageInfo() {
-        try {
-            return getPackageManager().getPackageInfo(getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            return null;
         }
     }
 

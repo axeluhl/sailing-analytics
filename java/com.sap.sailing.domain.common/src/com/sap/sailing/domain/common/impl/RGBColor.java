@@ -1,13 +1,12 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 
 /**
  * A color defined in the RGB color schema
  * @author Frank
  */
-public class RGBColor implements Color {
+public class RGBColor extends AbstractColor {
     private static final long serialVersionUID = -4091876840771631308L;
     private int red;
     private int green;
@@ -20,6 +19,40 @@ public class RGBColor implements Color {
         this.red = ensureValidRange(red);
         this.green = ensureValidRange(green);
         this.blue = ensureValidRange(blue);
+    }
+    
+    /**
+     * Constructs an RGB color from a string such as "#FF00FF"
+     */
+    public RGBColor(String htmlColor) {
+        if (htmlColor.startsWith("#")) {
+            htmlColor = htmlColor.substring(1);
+        }
+        if (htmlColor.endsWith(";")) {
+            htmlColor = htmlColor.substring(0, htmlColor.length() - 1);
+        }
+
+        int r, g, b;
+        switch (htmlColor.length()) {
+        case 6:
+            r = Integer.parseInt(htmlColor.substring(0, 2), 16);
+            g = Integer.parseInt(htmlColor.substring(2, 4), 16);
+            b = Integer.parseInt(htmlColor.substring(4, 6), 16);
+            break;
+        case 3:
+            r = Integer.parseInt(htmlColor.substring(0, 1), 16);
+            g = Integer.parseInt(htmlColor.substring(1, 2), 16);
+            b = Integer.parseInt(htmlColor.substring(2, 3), 16);
+            break;
+        case 1:
+            r = g = b = Integer.parseInt(htmlColor.substring(0, 1), 16);
+            break;
+        default:
+            throw new IllegalArgumentException(htmlColor);
+        }
+        this.red = ensureValidRange(r);
+        this.green = ensureValidRange(g);
+        this.blue = ensureValidRange(b);
     }
 
     private int ensureValidRange(int value) {
@@ -76,19 +109,6 @@ public class RGBColor implements Color {
 
         Triple<Float, Float, Float> HSVColor = new Triple<Float, Float, Float>(hue, saturation, brightness);
         return HSVColor;
-    }
-
-    @Override
-    public String getAsHtml() {
-        return "#" + toBrowserHexValue(red) + toBrowserHexValue(green) + toBrowserHexValue(blue);
-    }
-
-    private static String toBrowserHexValue(int number) {
-        StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
-        while (builder.length() < 2) {
-            builder.append("0");
-        }
-        return builder.toString().toUpperCase();
     }
 
     @Override
