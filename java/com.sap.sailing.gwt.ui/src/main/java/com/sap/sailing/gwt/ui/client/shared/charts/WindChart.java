@@ -289,7 +289,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
                 .setOption("turboThreshold", MAX_SERIES_POINTS)
-                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
+                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource).getAsHtml()).setSelected(true));
         return newSeries;
     }
 
@@ -306,7 +306,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                 .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
-                        .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
+                        .setColor(colorMap.getColorByID(windSource).getAsHtml()).setSelected(true)); // show only the markers, not the connecting lines
         return newSeries;
     }
 

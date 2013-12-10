@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.Color;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -11,9 +12,10 @@ public class CompetitorImpl implements DynamicCompetitor {
     private final DynamicBoat boat;
     private final Serializable id;
     private String name;
-    private String color;
     
-    public CompetitorImpl(Serializable id, String name, String color, DynamicTeam team, DynamicBoat boat) {
+    private Color color;
+    
+    public CompetitorImpl(Serializable id, String name, Color color, DynamicTeam team, DynamicBoat boat) {
         this.id = id;
         this.name = name;
         this.team = team;
@@ -53,15 +55,15 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getColor(), getName(), getTeam(), getBoat());
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getTeam(), getBoat());
         return result;
     }
 
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 
-    public void setColor(String color) {
+    public void setColor(Color color) {
         this.color = color;
     }
 }

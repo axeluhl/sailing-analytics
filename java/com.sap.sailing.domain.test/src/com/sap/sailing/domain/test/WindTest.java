@@ -15,10 +15,10 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -255,7 +256,7 @@ public class WindTest {
         Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
         Waypoint w2 = domainFactory.createWaypoint(top, /*passingInstruction*/ null);
         Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingInstruction*/ null);
-        Competitor competitor = new CompetitorImpl(123, "Test Competitor", "#FF0000", new TeamImpl("STG", Collections.singleton(
+        Competitor competitor = new CompetitorImpl(123, "Test Competitor", Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Test Competitor", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
                 new NationalityImpl("NED"),
