@@ -1,4 +1,0 @@
-#!/bin/sh
-cd plugins
-ssh trac@kielweek.web4sap.com "rm git/java/target/plugins/*"
-scp * trac@kielweek.web4sap.com:git/java/target/plugins

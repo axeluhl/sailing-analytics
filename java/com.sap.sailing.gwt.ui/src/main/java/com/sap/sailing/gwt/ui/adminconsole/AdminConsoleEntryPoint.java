@@ -62,7 +62,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(
                 sailingService, this, stringMessages, this);
-        // eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
+        eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
         eventStructureManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);
@@ -100,19 +100,19 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, stringMessages);
-        // trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, trackedRacesManagementPanel, stringMessages.trackedRaces());
         regattaDisplayers.add(trackedRacesManagementPanel);
 
         final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, stringMessages, this);
-        // trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        competitorPanel.ensureDebugId("CompetitorManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, competitorPanel, stringMessages.competitors());
 
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this,
                 stringMessages);
-        // raceCourseManagementPanel.ensureDebugId("RaceCourseManagement");
+        raceCourseManagementPanel.ensureDebugId("RaceCourseManagement");
         raceCourseManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, raceCourseManagementPanel, stringMessages.courseLayout());
         regattaDisplayers.add(raceCourseManagementPanel);
@@ -120,14 +120,14 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
-        // windPanel.ensureDebugId("WindManagement");
+        windPanel.ensureDebugId("WindManagement");
         regattaDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, windPanel, stringMessages.wind());
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService,
                 this, this, stringMessages);
-        // leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
+        leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration());
         regattaDisplayers.add(leaderboardGroupConfigPanel);
