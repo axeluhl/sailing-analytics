@@ -33,11 +33,14 @@ BUILD_FROM=master
 COMPILE_GWT=True
 RUN_TESTS=False
 CODE_DIRECTORY=code
+
+# Specify an email adress that should be notified
+# whenever a build or install has been completed
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 
 # Specify an email address that should be notified
 # whenever the server has been started
-SERVER_STARTUP_NOTIFY=
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 
 # Specify filename that is usually located at
 # http://release.sapsailing.com/ that should
