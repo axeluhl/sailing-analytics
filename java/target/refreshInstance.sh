@@ -210,6 +210,11 @@ if [[ $OPERATION == "auto-install" ]]; then
         activate_user_data
         install_environment
 
+        if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
+            echo "It could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
+            exit 1
+        fi
+
         echo ""
         echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
         echo "DEPLOY_TO: $DEPLOY_TO"
