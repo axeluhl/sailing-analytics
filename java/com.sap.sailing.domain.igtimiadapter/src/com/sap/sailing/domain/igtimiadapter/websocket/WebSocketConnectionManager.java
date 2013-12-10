@@ -84,6 +84,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     
     public void stop() throws Exception {
         targetState = TargetState.CLOSED;
+        timer.cancel();
         client.stop();
     }
 
