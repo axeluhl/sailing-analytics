@@ -1,42 +1,24 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.google.common.base.Function;
-
 import com.sap.sailing.selenium.core.WebDriverWindow;
 import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialog;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
-
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaCreateDialog;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetails;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaList.RegattaDescriptor;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
-import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialog;
-
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.Status;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel.TrackableRaceDescriptor;
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
-
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -50,8 +32,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     
     private static final String REGATTA = "TestLeaderboardConfiguration Regatta"; //$NON-NLS-1$
-    
-    private static final String LEADERBOARD = "TestLeaderboardConfiguration Leaderboard"; //$NON-NLS-1$
     
     private static final String EVENT = "BMW Cup"; //$NON-NLS-1$
     private static final String RACE = "BMW Cup Race %d"; //$NON-NLS-1$
@@ -111,7 +91,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
 //        seriesDialog.addRaces(5);
 //        seriesDialog.pressOk();
 //        
-        LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        adminConsole.goToLeaderboardConfiguration();
 //        leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
 //        
 //        WebDriverWindow leaderboardWindow = manager.openNewWindow();
@@ -158,7 +138,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         });
         
         // TODO: Link the races and check the leaderboard
-        leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        adminConsole.goToLeaderboardConfiguration();
         
     }
 }

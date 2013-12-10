@@ -38,12 +38,12 @@
         <name>webdriver.chrome.driver</name>
         <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
      </system-property>
-     
+     <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
         <value>D:/Internet/Firefox/firefox.exe</value>
      </system-property>
-     
+     -->
      <system-property>
         <name>webdriver.firefox.profile</name>
         <value>Selenium</value>
