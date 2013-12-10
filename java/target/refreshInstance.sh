@@ -2,7 +2,10 @@
 
 source `pwd`/env.sh
 
-DEPLOY_TO=server
+if [[ $DEPLOY_TO == "" ]]; then
+    DEPLOY_TO=server
+fi
+
 DATE_OF_EXECUTION=`date`
 
 find_project_home () 
@@ -61,6 +64,8 @@ checks ()
 
 activate_user_data ()
 {
+    echo "Reading user-data provided by Amazon instance data..."
+
     # make backup of original file
     cp $USER_HOME/servers/server/env.sh $USER_HOME/servers/server/environment/env.sh.backup
 
@@ -80,6 +85,7 @@ activate_user_data ()
     # make sure to reload data
     source `pwd`/env.sh
     echo "Updated env.sh with data from user-data field!"
+    echo ""
 }
 
 install_environment ()
@@ -91,7 +97,7 @@ install_environment ()
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
         echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-        cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $USER_HOME/servers/server/env.sh
+        cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $USER_HOME/servers/$DEPLOY_TO/env.sh
         echo "# Environment: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
 
         # make sure to reload data
@@ -193,6 +199,13 @@ if [[ $OPERATION == "auto-install" ]]; then
         # then download and install environment
         activate_user_data
         install_environment
+
+        echo ""
+        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+        echo "DEPLOY_TO: $DEPLOY_TO"
+        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo ""
 
         if [[ $INSTALL_FROM_RELEASE != "" ]]; then
             load_from_release_file
