@@ -209,7 +209,13 @@ elif [[ $OPERATION == "install-release" ]]; then
         echo "You need to provide the name of a release from http://releases.sapsailing.com/"
         exit 1
     fi
-    load_from_release_file
+
+    # Honor the no-overrite setting if there is one
+    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+        echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
+    else
+        load_from_release_file
+    fi
 
 elif [[ $OPERATION == "update-environment" ]]; then
     USE_ENVIRONMENT=$PARAM
@@ -217,29 +223,33 @@ elif [[ $OPERATION == "update-environment" ]]; then
         echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
         exit 1
     fi
-    install_environment
 
-    echo "Configuration for this server is now:"
-    echo ""
-    echo "SERVER_NAME: $SERVER_NAME"
-    echo "MEMORY: $MEMORY"
-    echo "SERVER_PORT: $SERVER_PORT"
-    echo "TELNET_PORT: $TELNET_PORT"
-    echo "MONGODB_HOST: $MONGODB_HOST"
-    echo "MONGODB_PORT: $MONGODB_PORT"
-    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-    echo "REPLICATION_HOST: $REPLICATION_HOST"
-    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
-    echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS"
-    echo ""
-    echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
-    echo "DEPLOY_TO: $DEPLOY_TO"
-    echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-    echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
-    echo ""
-    echo "JAVA_HOME: $JAVA_HOME"
-    echo "INSTANCE_ID: $INSTANCE_ID"
-    echo ""
+    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+        echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
+    else
+        install_environment
+        echo "Configuration for this server is now:"
+        echo ""
+        echo "SERVER_NAME: $SERVER_NAME"
+        echo "MEMORY: $MEMORY"
+        echo "SERVER_PORT: $SERVER_PORT"
+        echo "TELNET_PORT: $TELNET_PORT"
+        echo "MONGODB_HOST: $MONGODB_HOST"
+        echo "MONGODB_PORT: $MONGODB_PORT"
+        echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+        echo "REPLICATION_HOST: $REPLICATION_HOST"
+        echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+        echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS"
+        echo ""
+        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+        echo "DEPLOY_TO: $DEPLOY_TO"
+        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo ""
+        echo "JAVA_HOME: $JAVA_HOME"
+        echo "INSTANCE_ID: $INSTANCE_ID"
+        echo ""
+    fi
 else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
