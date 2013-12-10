@@ -26,12 +26,14 @@ import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
 
-public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvider {
+public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
     private FlowPanel mainPanel;
+    private HorizontalPanel controlsPanel;
 
     private SelectionProvider selectionTablesPanel;
     
@@ -40,13 +42,17 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
 
     private GroupBySelectionPanel groupBySelectionPanel;
 
-    public SimpleQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
+        
+        
         mainPanel = new FlowPanel();
         statisticsProvider = new SimpleStatisticsProvider();
 
-        selectionTablesPanel = new AsyncSelectionTablesPanel(stringMessages, sailingService, errorReporter);
+        mainPanel.add(createFunctionsPanel());
+
+        selectionTablesPanel = new RefreshingSelectionTablesPanel(stringMessages, sailingService, errorReporter);
         selectionTablesPanel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -54,7 +60,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
             }
         });
         mainPanel.add(selectionTablesPanel.getWidget());
-        mainPanel.add(createFunctionsPanel());
+        
     }
     
     @Override
@@ -104,7 +110,7 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         return statisticsListBox.getValue().getDataType();
     }
 
-    private HorizontalPanel createFunctionsPanel() {
+    private Widget createFunctionsPanel() {
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
 
@@ -153,8 +159,17 @@ public class SimpleQueryDefinitionProvider extends AbstractQueryDefinitionProvid
         statisticsListBox.setValue(statisticsProvider.getStatistic(StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix), false);
         statisticsListBox.setAcceptableValues(statisticsProvider.getAllStatistics());
         functionsPanel.add(statisticsListBox);
+        
+        controlsPanel = new HorizontalPanel();
+        controlsPanel.setSpacing(5);
+        functionsPanel.add(controlsPanel);
 
         return functionsPanel;
+    }
+
+    @Override
+    public void addControl(Widget controlWidget) {
+        controlsPanel.add(controlWidget);
     }
 
     @Override

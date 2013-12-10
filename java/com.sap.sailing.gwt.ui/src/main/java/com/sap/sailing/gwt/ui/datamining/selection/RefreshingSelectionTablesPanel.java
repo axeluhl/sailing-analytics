@@ -35,12 +35,14 @@ import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class SelectionTablesPanel implements SelectionProvider {
+public class RefreshingSelectionTablesPanel implements SelectionProvider {
     
     private static final int resizeDelay = 100;
     private static final double relativeWidthInPercent = 1;
     private static final int widthMargin = 17;
     private static final double relativeHeightInPercent = 0.35;
+
+    private static final int refreshRate = 5000;
     
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
@@ -48,15 +50,25 @@ public class SelectionTablesPanel implements SelectionProvider {
     
     private SimplePanel widget;
 
+    private Timer timer;
     private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
     
-    public SelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public RefreshingSelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        
+
+        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?,?>>();
         widget = new SimplePanel();
+        widget.setWidget(createTables());
+        
+        timer = new Timer() {
+            @Override
+            public void run() {
+                updateTables();
+            }
+        };
 
         Window.addResizeHandler(new ResizeHandler() {
             private final Timer timer = new Timer() {
@@ -70,11 +82,8 @@ public class SelectionTablesPanel implements SelectionProvider {
                 timer.schedule(resizeDelay);
             }
         });
-        
-        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?,?>>();
-        widget.setWidget(createTables());
-        fillTables();
-        
+
+        updateTables();
         doLayout(Window.getClientWidth(), Window.getClientHeight());
     }
     
@@ -140,7 +149,7 @@ public class SelectionTablesPanel implements SelectionProvider {
         return widget;
     }
 
-    private void fillTables() {
+    private void updateTables() {
         sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -197,28 +206,30 @@ public class SelectionTablesPanel implements SelectionProvider {
                 });
 
                 SelectionTable<RegattaDTO, ?> regattaTable = getTable(SharedDimension.RegattaName);
-                regattaTable.setContent(sortedRegattas);
+                regattaTable.updateContent(sortedRegattas);
                 
                 SelectionTable<BoatClassDTO, ?> boatClassTable = getTable(SharedDimension.BoatClassName);
-                boatClassTable.setContent(sortedBoatClasses);
+                boatClassTable.updateContent(sortedBoatClasses);
                 
                 SelectionTable<RaceDTO, ?> raceNameTable = getTable(SharedDimension.RaceName);
-                raceNameTable.setContent(sortedRaces);
+                raceNameTable.updateContent(sortedRaces);
                 
                 SelectionTable<Integer, ?> legNumberTable = getTable(SharedDimension.LegNumber);
-                legNumberTable.setContent(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                legNumberTable.updateContent(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 
                 SelectionTable<LegType, ?> legTypeTable = getTable(SharedDimension.LegType);
-                legTypeTable.setContent(Arrays.asList(LegType.values()));
+                legTypeTable.updateContent(Arrays.asList(LegType.values()));
                 
                 SelectionTable<CompetitorDTO, ?> competitorNameTable = getTable(SharedDimension.CompetitorName);
-                competitorNameTable.setContent(competitors);
+                competitorNameTable.updateContent(competitors);
                 
                 SelectionTable<CompetitorDTO, ?> competitorSailIDTable = getTable(SharedDimension.SailID);
-                competitorSailIDTable.setContent(competitors);
+                competitorSailIDTable.updateContent(competitors);
                 
                 SelectionTable<String, ?> nationalityTable = getTable(SharedDimension.Nationality);
-                nationalityTable.setContent(nationalities);
+                nationalityTable.updateContent(nationalities);
+                
+                timer.schedule(refreshRate);
             }
         });
     }

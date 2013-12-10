@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining.presentation;
+package com.sap.sailing.gwt.ui.datamining;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;

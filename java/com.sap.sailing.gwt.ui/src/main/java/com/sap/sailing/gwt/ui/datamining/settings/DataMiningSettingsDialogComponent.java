@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining;
+package com.sap.sailing.gwt.ui.datamining.settings;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;

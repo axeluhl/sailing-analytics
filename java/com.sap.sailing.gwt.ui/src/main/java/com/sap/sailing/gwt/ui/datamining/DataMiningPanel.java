@@ -1,31 +1,74 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
-import com.sap.sailing.gwt.ui.datamining.presentation.QueryResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
-import com.sap.sailing.gwt.ui.datamining.selection.SimpleQueryDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
+import com.sap.sailing.gwt.ui.datamining.settings.DataMiningSettings;
 
 public class DataMiningPanel extends FlowPanel {
 
-    public DataMiningPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, boolean showBenchmark) {
+    private static DataMiningResources resources = GWT.create(DataMiningResources.class);
+
+    private StringMessages stringMessages;
+
+    private final QueryDefinitionProvider queryDefinitionProvider;
+    private final ResultsPresenter<Number> resultsPresenter;
+    private final QueryRunner queryRunner;
+
+    public DataMiningPanel(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter, boolean showBenchmark) {
+        this.stringMessages = stringMessages;
         this.addStyleName("dataMiningPanel");
-        
-        QueryDefinitionProvider selectionPanel = new SimpleQueryDefinitionProvider(stringMessages, sailingService, errorReporter);
-        this.add(selectionPanel.getWidget());
-        
-        ResultsPresenter<Number> resultsChart = new ResultsChart(stringMessages);
-        QueryResultsPanel queryPanel = new QueryResultsPanel(stringMessages, sailingService, errorReporter, selectionPanel, resultsChart);
-        this.add(queryPanel);
-        
+
+        QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, errorReporter);
+        queryDefinitionProvider = queryDefinitionProviderWithControls;
+        resultsPresenter = new ResultsChart(stringMessages);
+        queryRunner = new SimpleQueryRunner(stringMessages, sailingService, errorReporter, queryDefinitionProvider, resultsPresenter);
+
+        queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
+        queryDefinitionProviderWithControls.addControl(createSettingsControlWidget());
+
+        this.add(queryDefinitionProvider.getWidget());
+        this.add(resultsPresenter.getWidget());
+
+        queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+
         if (showBenchmark) {
-            BenchmarkResultsPanel benchmarkPanel = new BenchmarkResultsPanel(stringMessages, sailingService, errorReporter, selectionPanel);
+            BenchmarkResultsPanel benchmarkPanel = new BenchmarkResultsPanel(stringMessages, sailingService, errorReporter, queryDefinitionProvider);
             this.add(benchmarkPanel);
         }
+    }
+
+    private Widget createSettingsControlWidget() {
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setSpacing(5);
+        
+        Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
+        panel.add(runnerSettingsLabel);
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        settingsAnchor.setTitle(stringMessages.settings());
+        settingsAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<DataMiningSettings>(queryRunner, stringMessages).show();
+            }
+        });
+        panel.add(settingsAnchor);
+
+        return panel;
     }
 
 }

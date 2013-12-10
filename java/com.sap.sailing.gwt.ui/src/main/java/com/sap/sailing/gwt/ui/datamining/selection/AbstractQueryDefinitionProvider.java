@@ -82,12 +82,12 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
     }
 
     @Override
-    public void addListener(QueryDefinitionChangedListener listener) {
+    public void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeListener(QueryDefinitionChangedListener listener) {
+    public void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener) {
         listeners.remove(listener);
     }
 

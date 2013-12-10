@@ -9,8 +9,8 @@ public interface QueryDefinitionProvider {
     public QueryDefinition getQueryDefinition();
     public void applyQueryDefinition(QueryDefinition queryDefinition);
 
-    public void addListener(QueryDefinitionChangedListener listener);
-    public void removeListener(QueryDefinitionChangedListener listener);
+    public void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
+    public void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
 
     public Widget getWidget();
 

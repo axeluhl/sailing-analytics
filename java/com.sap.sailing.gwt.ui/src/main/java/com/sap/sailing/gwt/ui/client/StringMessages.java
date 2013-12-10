@@ -867,4 +867,5 @@ public interface StringMessages extends Messages {
     String id();
     String compress();
     String compressTooltip();
+    String queryRunner();
 }
