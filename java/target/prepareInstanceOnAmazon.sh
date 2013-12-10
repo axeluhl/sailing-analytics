@@ -98,6 +98,7 @@ load_from_release_file ()
     mv env.sh env.sh.preserved
     tar xvzf $INSTALL_FROM_RELEASE.tar.gz
     mv env.sh.preserved env.sh
+    echo "Configuration for this server is unchanged - just binaries have been changed."
 }
 
 checkout_code ()
@@ -178,6 +179,28 @@ if [[ ! -z "$ON_AMAZON" ]]; then
             exit 1
         fi
         install_environment
+
+        echo "Configuration for this server is now:"
+        echo ""
+        echo "SERVER_NAME: $SERVER_NAME"
+        echo "MEMORY: $MEMORY"
+        echo "SERVER_PORT: $SERVER_PORT"
+        echo "TELNET_PORT: $TELNET_PORT"
+        echo "MONGODB_HOST: $MONGODB_HOST"
+        echo "MONGODB_PORT: $MONGODB_PORT"
+        echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+        echo "REPLICATION_HOST: $REPLICATION_HOST"
+        echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+        echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS"
+        echo ""
+        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+        echo "DEPLOY_TO: $DEPLOY_TO"
+        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo ""
+        echo "JAVA_HOME: $JAVA_HOME"
+        echo "INSTANCE_ID: $INSTANCE_ID"
+        echo ""
     else
         echo "Script to prepare a Java instance running on Amazon."
         echo ""
