@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -62,6 +63,28 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         add(addAccountButton);
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updateAllAccounts(stringMessages);
+            }
+        });
+        add(refreshButton);
+        this.sailingService.getIgtimiAuthorizationUrl(new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(IgtimiAccountsPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),
+                        /* silentMode */ true);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), result); 
+                add(addIgtimiUserLink);
+            }
+        });
     }
 
     private void updateAllAccounts(final StringMessages stringMessages) {

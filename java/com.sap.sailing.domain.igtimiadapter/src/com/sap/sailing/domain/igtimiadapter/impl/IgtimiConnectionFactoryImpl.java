@@ -293,7 +293,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth";
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
     }
 
     private Client getClient() {

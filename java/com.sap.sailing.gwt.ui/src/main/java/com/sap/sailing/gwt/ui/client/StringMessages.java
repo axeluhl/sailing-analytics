@@ -888,4 +888,6 @@ public interface StringMessages extends Messages {
     String errorAuthorizingAccessToIgtimiUser(String text, String message);
     String successfullyAuthorizedAccessToIgtimiUser(String username);
     String couldNotAuthorizedAccessToIgtimiUser(String text);
+    String errorGettingIgtimiAuthorizationUrl(String message);
+    String addIgtimiUser();
 }
