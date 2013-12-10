@@ -73,11 +73,13 @@ activate_user_data ()
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     for var in $VARS; do
         echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+        echo "Activated: $var"
     done
     echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     
     # make sure to reload data
     source `pwd`/env.sh
+    echo "Updated env.sh with data from user-data field!"
 }
 
 install_environment ()
@@ -94,8 +96,9 @@ install_environment ()
 
         # make sure to reload data
         source `pwd`/env.sh
+        echo "Updated env.sh with data from environment file!"
     else
-        echo "No environment specified!"
+        echo "No environment file specified!"
     fi
 }
 
@@ -138,7 +141,7 @@ build ()
         echo "Could not start build process with less than 1GB of RAM!"
         echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
     else
-        if [[ $BUILD_BEFORE_START == "True" ]] 
+        if [[ $BUILD_BEFORE_START == "True" ]]; then
             cd $PROJECT_HOME
             TESTS="-t"
             if [[ $RUN_TESTS == "True" ]]; then
