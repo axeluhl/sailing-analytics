@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -33,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
@@ -50,6 +53,8 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     private CellTable<EventDTO> eventTable;
     private MultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
+    private List<EventDTO> allEvents;
+    private AbstractFilterablePanel<EventDTO> filterTextbox;
     private Button removeEventsButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -189,7 +194,15 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         eventProvider = new ListDataProvider<EventDTO>();
         eventProvider.addDataDisplay(eventTable);
         mainPanel.add(eventTable);
-
+        allEvents = new ArrayList<EventDTO>();
+        filterTextbox = new AbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents, eventTable, eventProvider) {
+            
+            @Override
+            public Iterable<String> getSearchableStrings(EventDTO t) {
+                return Arrays.asList(t.venue.getName(), t.getName());
+            }
+        };
+        eventsPanel.add(filterTextbox);
         fillEvents();
     }
 
@@ -365,8 +378,9 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
             @Override
             public void onSuccess(List<EventDTO> result) {
-                eventProvider.getList().clear();
-                eventProvider.getList().addAll(result);
+                allEvents.clear();
+                allEvents.addAll(result);
+                filterTextbox.updateAll(allEvents);
             }
         });
     }
