@@ -40,10 +40,12 @@
         <name>webdriver.chrome.driver</name>
         <value>[path to]\chromedriver.exe</value>
      </system-property>
+     <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
         <value>[path to]\firefox.exe</value>
      </system-property>
+     -->
   </system-properties>
   -->
   
