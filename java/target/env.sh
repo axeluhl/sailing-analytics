@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This file contains the configuration for the Java server
+# Make sure to always also check the variables at the end
+# of this file as there could be overwritten ones.
+
 SERVER_NAME=MASTER
 
 MEMORY="1024m"

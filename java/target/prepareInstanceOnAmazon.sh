@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. `pwd`/env.sh
+source `pwd`/env.sh
 
 DEPLOY_TO=server
 DATE_OF_EXECUTION=`date`
@@ -66,6 +66,9 @@ activate_user_data ()
         echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     done
     echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    
+    # make sure to reload data
+    source `pwd`/env.sh
 }
 
 install_environment ()
@@ -79,6 +82,9 @@ install_environment ()
         echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
         cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $USER_HOME/servers/server/env.sh
         echo "# Environment: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+
+        # make sure to reload data
+        source `pwd`/env.sh
     fi
 }
 
@@ -89,7 +95,9 @@ load_from_release_file ()
     rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
     echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
     wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
+    mv env.sh env.sh.preserved
     tar xvzf $INSTALL_FROM_RELEASE.tar.gz
+    mv env.sh.preserved env.sh
 }
 
 checkout_code ()
@@ -135,21 +143,49 @@ deploy ()
     $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install
 }
 
+OPERATION=$1
+PARAM=$2
+
 if [[ ! -z "$ON_AMAZON" ]]; then
     checks
 
-    # first check and activate everything found in user data
-    # then download and install environment
-    activate_user_data
-    install_environment
+    if [[ $OPERATION == "auto-install" ]]; then
+        # first check and activate everything found in user data
+        # then download and install environment
+        activate_user_data
+        install_environment
 
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+        if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+            load_from_release_file
+        else
+            checkout_code
+            build
+            deploy
+        fi
+
+    elif [[ $OPERATION == "install-release" ]]; then
+        INSTALL_FROM_RELEASE=$PARAM
+        if [[ $INSTALL_FROM_RELEASE == "" ]]; then
+            echo "You need to provide the name of a release from http://releases.sapsailing.com/"
+            exit 1
+        fi
         load_from_release_file
+
+    elif [[ $OPERATION == "update-environment" ]]; then
+        USE_ENVIRONMENT=$PARAM
+        if [[ $USE_ENVIRONMENT == "" ]]; then
+            echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
+            exit 1
+        fi
+        install_environment
     else
-        checkout_code
-        build
-        deploy
+        echo "Script to prepare a Java instance running on Amazon."
+        echo ""
+        echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
+        echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option."
+        exit 0
     fi
+
 else
     echo "This server does not seem to be running on Amazon!"
 fi
