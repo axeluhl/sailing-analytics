@@ -1,4 +1,0 @@
-#!/bin/sh
-rm -rf plugins/*.*
-rm -rf org.eclipse.*
-rm -rf configuration/org.eclipse.*
