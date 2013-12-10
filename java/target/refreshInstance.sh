@@ -1,7 +1,6 @@
 #!/bin/sh
 
 source `pwd`/env.sh
-
 DATE_OF_EXECUTION=`date`
 
 find_project_home () 
