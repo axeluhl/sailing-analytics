@@ -64,10 +64,10 @@ checks ()
 
 activate_user_data ()
 {
-    echo "Reading user-data provided by Amazon instance data..."
+    echo "Reading user-data provided by Amazon instance data to $USER_HOME/servers/$DEPLOY_TO/env.sh"
 
     # make backup of original file
-    cp $USER_HOME/servers/server/env.sh $USER_HOME/servers/server/environment/env.sh.backup
+    cp $USER_HOME/servers/$DEPLOY_TO/env.sh $USER_HOME/servers/$DEPLOY_TO/environment/env.sh.backup
 
     echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
@@ -97,8 +97,8 @@ install_environment ()
 {
     if [[ $USE_ENVIRONMENT != "" ]]; then
         # clean up directory to really make sure that there are no files left
-        rm -rf $USER_HOME/servers/server/environment
-        mkdir $USER_HOME/servers/server/environment
+        rm -rf $USER_HOME/servers/$DEPLOY_TO/environment
+        mkdir $USER_HOME/servers/$DEPLOY_TO/environment
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
         echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
@@ -220,9 +220,11 @@ if [[ $OPERATION == "auto-install" ]]; then
         if [[ $INSTALL_FROM_RELEASE != "" ]]; then
             load_from_release_file
         else
-            checkout_code
-            build
-            deploy
+            if [[ $BUILD_BEFORE_START == "True" ]]; then
+                checkout_code
+                build
+                deploy
+            fi
         fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
