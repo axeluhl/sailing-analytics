@@ -484,5 +484,7 @@ public interface SailingServiceAsync {
     void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
     
     void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 }
 

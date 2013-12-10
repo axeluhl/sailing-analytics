@@ -890,4 +890,14 @@ public interface StringMessages extends Messages {
     String couldNotAuthorizedAccessToIgtimiUser(String text);
     String errorGettingIgtimiAuthorizationUrl(String message);
     String addIgtimiUser();
+    String doYouReallyWantToRemoveLeaderboards();
+    String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
+    String successfullyRemoveIgtimiAccount(String eMailOfAccountToRemove);
+    String eMailMustNotBeEmpty();
+    String emailAddress();
+    String password();
+    String doYouReallyWantToRemoveLeaderboard(String name);
+    String metaLeaderboardCannotBeChanged();
+    String failedToSetNewStartTime();
+    String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
 }

@@ -361,4 +361,6 @@ public interface SailingService extends RemoteService {
     String getIgtimiAuthorizationUrl();
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove);
 }

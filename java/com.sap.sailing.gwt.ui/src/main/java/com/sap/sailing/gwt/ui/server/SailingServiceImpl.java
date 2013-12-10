@@ -3615,4 +3615,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return account != null;
     }
 
+    @Override
+    public void removeIgtimiAccount(String eMailOfAccountToRemove) {
+        getIgtimiConnectionFactory().removeAccount(eMailOfAccountToRemove);
+    }
+
 }
