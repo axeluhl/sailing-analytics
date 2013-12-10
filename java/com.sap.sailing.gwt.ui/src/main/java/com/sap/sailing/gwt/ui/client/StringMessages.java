@@ -880,4 +880,5 @@ public interface StringMessages extends Messages {
     String setStartTimeDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
+    String invalidColor(String message);
 }

@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -50,7 +50,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
     }
     
-    private Competitor createCompetitor(Serializable id, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+    private Competitor createCompetitor(Serializable id, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
         Competitor result = new CompetitorImpl(id, name, displayColor, team, boat);
         addNewCompetitor(id, result);
         return result;
@@ -72,7 +72,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
         Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
@@ -91,11 +91,6 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         return result;
     }
     
-    @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, String displayColor, DynamicTeam team, DynamicBoat boat) {
-        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, displayColor, team, boat);
-    }
-
     private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {
         competitorsToUpdateDuringGetOrCreate.remove(result);
     }
@@ -168,7 +163,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, String newDisplayColor, String newSailId, Nationality newNationality) {
+    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality) {
         DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);

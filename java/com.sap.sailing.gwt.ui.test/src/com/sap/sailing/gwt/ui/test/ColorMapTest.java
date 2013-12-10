@@ -14,11 +14,11 @@ public class ColorMapTest {
     @Test
     public void testHundredDistinctColors() {
         ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>();
-        List<String> existingColors = new ArrayList<String>(); 
+        List<String> existingColors = new ArrayList<String>();
         int amountOfDistinctColorsToCreate = 100;
-        for(int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
-            String colorByID = colorMap.getColorByID(i);
-            if(!existingColors.contains(colorByID)) {
+        for (int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
+            String colorByID = colorMap.getColorByID(i).getAsHtml();
+            if (!existingColors.contains(colorByID)) {
                 existingColors.add(colorByID);
             }
         }

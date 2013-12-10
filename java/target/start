@@ -5,12 +5,6 @@
 
 PARAM=$@
 
-# enable special environment configuration
-if [[ $USE_ENVIRONMENT != "" ]]; then
-    echo "Using environment $USE_ENVIRONMENT"
-    source ./environment/$USE_ENVIRONMENT
-fi
-
 # make some checks
 JAVA_BINARY=$JAVA_HOME/bin/java
 if [[ ! -d "$JAVA_HOME" ]]; then
@@ -62,6 +56,15 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
+    echo "SERVER_NAME: $SERVER_NAME"
+    echo "SERVER_PORT: $SERVER_PORT"
+    echo "MEMORY: $MEMORY"
+    echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_HOST: $MONGODB_HOST"
+    echo "MONGODB_PORT: $MONGODB_PORT"
+    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
+    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
+
     echo $JAVA_PID > server.pid
     if [[ ! -z "$ON_AMAZON" ]]; then
         # give instances on amazon more time to start because
@@ -83,15 +86,6 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
             exit
     fi
 
-    echo "Configuration for this server is:"
-    echo "SERVER_NAME: $SERVER_NAME"
-    echo "SERVER_PORT: $SERVER_PORT"
-    echo "MEMORY: $MEMORY"
-    echo "TELNET_PORT: $TELNET_PORT"
-    echo "MONGODB_HOST: $MONGODB_HOST"
-    echo "MONGODB_PORT: $MONGODB_PORT"
-    echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-    echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo "Started $SERVER_NAME - use telnet localhost $TELNET_PORT to connect to the OSGi console. Logs should be found in logs/sailing0.log.0"
 
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
@@ -102,10 +96,12 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
         fi
     fi
 elif [[ $PARAM == "debug" ]]; then
-    echo "Starting remote debugging session on port 8000 - make sure this port is open"
+    echo "Starting remote debugging session on port 8000 - make sure this port is open and reachable from the outside"
     $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
+
 elif [[ $PARAM == "fg" ]]; then
     $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir=`pwd`/tmp -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar -console -configuration ./ -clean
+
 fi
 
 
