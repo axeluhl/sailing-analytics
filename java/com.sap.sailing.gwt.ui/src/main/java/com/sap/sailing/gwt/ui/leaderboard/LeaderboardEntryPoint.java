@@ -168,6 +168,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, stringMessages, userAgent,
                     showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
         }
+        leaderboardViewer.ensureDebugId("LeaderboardViewerWidget");
         contentScrollPanel.setWidget(leaderboardViewer);
         mainPanel.add(contentScrollPanel);
     }

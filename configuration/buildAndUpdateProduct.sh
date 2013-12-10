@@ -53,7 +53,7 @@ fi
 cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 if [[ $active_branch == "" ]]; then
-    active_branch="unknown"
+    active_branch="build"
 else
     active_branch=`basename $active_branch`
 fi
