@@ -79,7 +79,6 @@ activate_user_data ()
         echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
         echo "Activated: $var"
     done
-    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     
     # make sure to reload data
     source `pwd`/env.sh
@@ -89,6 +88,7 @@ activate_user_data ()
     fi
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "Updated env.sh with data from user-data field!"
     echo ""
 }
@@ -248,7 +248,7 @@ elif [[ $OPERATION == "install-release" ]]; then
         load_from_release_file
     fi
 
-elif [[ $OPERATION == "update-environment" ]]; then
+elif [[ $OPERATION == "update-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
         echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
@@ -285,7 +285,7 @@ else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
-    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option."
+    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
     exit 0
 fi
 
