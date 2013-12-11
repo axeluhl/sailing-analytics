@@ -111,14 +111,14 @@ install_environment ()
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
         echo "# Environment: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
-        cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
+        cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> $SERVER_HOME/env.sh
 
         # make sure to reload data
         source `pwd`/env.sh
         if [[ $DEPLOY_TO == "" ]]; then
             DEPLOY_TO=server
-            echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
+            echo "DEPLOY_TO=server" >> $SERVER_HOME/env.sh
         fi
 
         echo "Updated env.sh with data from environment file!"
@@ -132,7 +132,7 @@ load_from_release_file ()
     if [[ $INSTALL_FROM_RELEASE != "" ]]; then
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
         cd $SERVER_HOME
-        rm -f $USER_HOME/servers/server/$INSTALL_FROM_RELEASE.tar.gz*
+        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
         rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
         echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
         wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
