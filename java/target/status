@@ -25,7 +25,12 @@ echo "JAVA_HOME: $JAVA_HOME"
 echo "INSTANCE_ID: $INSTANCE_ID"
 echo ""
 
-TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+if [[ `uname` != "Darwin" ]]; then
+    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
+else
+    TELNET_ACTIVE=`netstat -an 2>/dev/null | grep ".$SERVER_PORT"`
+fi
+
 if [[ $TELNET_ACTIVE != "" ]]; then
     echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"
 else
