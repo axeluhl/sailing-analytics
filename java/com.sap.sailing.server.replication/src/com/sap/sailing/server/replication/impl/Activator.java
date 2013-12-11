@@ -53,7 +53,8 @@ public class Activator implements BundleActivator {
     }
     
     private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService) {
-        if (System.getenv(REPLICATE_ON_START).equals("True")) {
+        String replicateOnStart = System.getenv(REPLICATE_ON_START);
+        if (replicateOnStart != null && replicateOnStart.equals("True")) {
             logger.info("Configuration requested automatic replication. Starting up...");
             ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
                     System.getenv(REPLICATE_MASTER_QUEUE_HOST),
