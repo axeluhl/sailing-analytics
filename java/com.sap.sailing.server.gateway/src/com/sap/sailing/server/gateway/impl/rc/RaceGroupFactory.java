@@ -12,7 +12,9 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -40,15 +42,18 @@ public class RaceGroupFactory {
         String name = leaderboard.getName();
 
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
-
         BoatClass boatClass = null;
+        RegattaConfiguration configuration = null;
+        
         if (leaderboard instanceof RegattaLeaderboard) {
-            boatClass = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass();
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            boatClass = regatta.getBoatClass();
+            configuration = regatta.getRegattaConfiguration();
         }
 
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
 
-        return new RaceGroupImpl(name, boatClass, courseArea, series);
+        return new RaceGroupImpl(name, boatClass, courseArea, series, configuration);
     }
 
     public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {

@@ -5,9 +5,10 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
 public class SensorImpl implements Sensor {
     private final String deviceSerialNumber;
     private final long subDeviceId;
-    protected SensorImpl(String eviceSerialNumber, long subDeviceId) {
+    
+    protected SensorImpl(String deviceSerialNumber, long subDeviceId) {
         super();
-        this.deviceSerialNumber = eviceSerialNumber;
+        this.deviceSerialNumber = deviceSerialNumber;
         this.subDeviceId = subDeviceId;
     }
     
@@ -23,7 +24,7 @@ public class SensorImpl implements Sensor {
     
     @Override
     public String toString() {
-        return "Transmitter "+getDeviceSerialNumber()+", device "+getSensorId();
+        return "Device "+getDeviceSerialNumber()+", sensor "+getSensorId();
     }
 
     @Override

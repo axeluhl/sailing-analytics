@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  *
  */
 public class AntHrm extends Fix {
+    private static final long serialVersionUID = 94260324289901500L;
     private final int eventTime;
     private final int heartBeatCount;
     private final int heartRate;
@@ -38,5 +40,10 @@ public class AntHrm extends Fix {
     @Override
     protected String localToString() {
         return "heart rate "+getHeartRate()+"/min";
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

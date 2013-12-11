@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
+import com.sap.sailing.domain.common.Color;
+
 /**
  * Equality and hash code are based on the index pointing into a previous leaderboard's competitors list.
  * 
@@ -63,6 +65,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
 
     @Override
     public String getSailID() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public Color getColor() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
     }

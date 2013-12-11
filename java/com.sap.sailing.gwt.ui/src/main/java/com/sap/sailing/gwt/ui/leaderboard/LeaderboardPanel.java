@@ -503,7 +503,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor);
+            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
             String competitorColorBarStyle;
             if (LeaderboardPanel.this.isEmbedded) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
@@ -1393,6 +1393,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
+        
         totalRankColumn = new TotalRankColumn();
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
@@ -1401,9 +1402,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
-        /* pageSize */10000, tableResources);
-        getLeaderboardTable().setWidth("100%");
+        
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
@@ -1416,6 +1415,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 updateLeaderboard(getLeaderboard());
             }
         });
+        
+        this.leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
+        /* pageSize */10000, tableResources);
+        this.leaderboardTable.ensureDebugId("LeaderboardTable");
+        this.leaderboardTable.setWidth("100%");
+
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             //Setting up the toggle selection
             leaderboardTable.addCellPreviewHandler(new ToggleSelectionCellPreviewHandler<LeaderboardRowDTO>());
@@ -1424,6 +1429,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
+        
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         if (this.preSelectedRace == null) {
@@ -1449,9 +1455,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         liveRaceLabel.setVisible(false);
         informationPanel.add(liveRaceLabel);
         
-        // the toolbar panel
+     // the toolbar panel
         DockPanel toolbarPanel = new DockPanel();
-		toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
+                toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);

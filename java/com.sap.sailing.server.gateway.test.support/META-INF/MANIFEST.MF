@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test Support
+Bundle-SymbolicName: com.sap.sailing.server.gateway.test.support
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Require-Bundle: javax.servlet;bundle-version="2.5.0",
+ org.eclipse.osgi;bundle-version="3.7.1",
+ com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.server;bundle-version="1.0.0",
+ com.sap.sailing.mongodb;bundle-version="1.0.0"
+Bundle-ClassPath: .
+Web-ContextPath: /sailingserver/test-support

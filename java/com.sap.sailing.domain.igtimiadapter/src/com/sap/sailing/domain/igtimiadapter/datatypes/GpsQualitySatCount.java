@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 
 /**
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.igtimiadapter.Sensor;
  * 
  */
 public class GpsQualitySatCount extends Fix {
+    private static final long serialVersionUID = -5507100027164944068L;
     private final int satCount;
     
     public GpsQualitySatCount(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
@@ -41,5 +43,10 @@ public class GpsQualitySatCount extends Fix {
     @Override
     protected String localToString() {
         return ""+getSatCount()+" satellites";
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
     }
 }

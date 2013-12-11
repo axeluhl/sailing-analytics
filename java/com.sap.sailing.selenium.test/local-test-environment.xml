@@ -13,7 +13,7 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  <context-root>http://riccardo:riccardo@localhost:8889/</context-root>
   
   <!--
   <screenshots-folder>file:///C:/Users/D049941/screenshots/</screenshots-folder>
@@ -38,11 +38,16 @@
         <name>webdriver.chrome.driver</name>
         <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
      </system-property>
-     
+     <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
-        <value>c:/Program Files (x86)/Mozilla Firefox/firefox.exe</value>
+        <value>D:/Internet/Firefox/firefox.exe</value>
      </system-property>
+     -->
+     <system-property>
+		<name>webdriver.firefox.profile</name>
+		<value>Selenium</value>
+	 </system-property>
   </system-properties>
   
   
@@ -54,9 +59,9 @@
     The capabilities section can be used for fine tuning of the driver (e.g. version). For more informations see the
     pages mentioned above.
   -->
-  <!-- 
+  <!-- -->
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
-   -->
+  <!-- -->
      <!--
      <capabilities>
         <capability>
@@ -65,11 +70,11 @@
         </capability>
      </capabilities>
      -->
-  <!--
+  <!-- -->
   </driver-definition>
-   -->
+  <!-- -->
   
-  <!-- -->
+  <!--
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver" />
-  <!-- -->
+   -->
 </test-environment>

@@ -1716,7 +1716,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setGeodesic(true);
         options.setStrokeWeight(1);
         options.setStrokeOpacity(0.5);
-        options.setStrokeColor(competitorSelection.getColor(competitor));
+        options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
         options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         Polyline result = Polyline.newInstance(options);
 

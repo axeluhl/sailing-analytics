@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -57,7 +58,7 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                 new NationalityImpl("NED"),

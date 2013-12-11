@@ -12,6 +12,8 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -35,6 +37,13 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Compet
     @Override
     public Competitor deserialize(JSONObject object) throws JsonDeserializationException {
         String name = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_NAME);
+        String rgbDisplayColor = (String) object.get(CompetitorMasterDataJsonSerializer.FIELD_DISPLAY_COLOR);
+        final Color displayColor;
+        if (rgbDisplayColor == null || rgbDisplayColor.isEmpty()) {
+            displayColor = null;
+        } else {
+            displayColor = new RGBColor(rgbDisplayColor);
+        }
         Object idClassName = object.get(CompetitorMasterDataJsonSerializer.FIELD_ID_TYPE);
         Serializable id = (Serializable) object.get(CompetitorMasterDataJsonSerializer.FIELD_ID);
         if (idClassName != null) {
@@ -60,11 +69,7 @@ public class CompetitorMasterDataDeserializer implements JsonDeserializer<Compet
         DynamicBoat boat = createBoatFromJson((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_BOAT));
         DynamicTeam team = teamDeserializer.deserialize((JSONObject) object.get(CompetitorMasterDataJsonSerializer.FIELD_TEAM));
         Competitor competitor;
-        if (id instanceof UUID) {
-            competitor = domainFactory.getOrCreateDynamicCompetitor((UUID) id, name, team, boat);
-        } else {
-            competitor = domainFactory.getOrCreateCompetitor(id, name, team, boat);
-        }
+        competitor = domainFactory.getOrCreateCompetitor(id, name, displayColor, team, boat);
         return competitor;
         
     }

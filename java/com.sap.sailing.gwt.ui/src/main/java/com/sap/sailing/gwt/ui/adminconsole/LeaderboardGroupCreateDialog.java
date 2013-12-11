@@ -12,7 +12,9 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         super(new LeaderboardGroupDTO(), stringMessages,
                 callback, existingGroups);
         nameEntryField = createTextBox(null, 50);
-        descriptionEntryField = createTextArea(null);      
+        nameEntryField.ensureDebugId("NameTextBox");
+        descriptionEntryField = createTextArea(null);
+        descriptionEntryField.ensureDebugId("DescriptionTextBox");
         displayLeaderboardsInReverseOrderCheckBox.setValue(false);
         useOverallLeaderboardCheckBox.setValue(false);     
     }

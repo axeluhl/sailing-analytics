@@ -2,6 +2,8 @@
 
 See [On Boarding](onboarding#Additional-steps-required-for-Android-projects) how to set up your build environment for mobile development.
 
+## Emulation
+
 Besides running the application on a plugged-in device there are multiple options for using an emulator:
 
 * Android Virtual Device (AVD)
@@ -16,3 +18,15 @@ Besides running the application on a plugged-in device there are multiple option
  * Register at http://www.genymotion.com/, download and install virtual device "WXGA 10.1 Tablet - 4.1.1 - with Google Apps - API 16 - 1280x800" with 160dpi
  * If you want to run the app against your locally-running server, check the IP address of your host machine for the VirtualBox network interface. Use this IP when you are configuring the app.
  * Use virtual device as described in [[On Boarding|wiki/onboarding]]
+
+## Mocking the server
+
+For rapid development of the mobile applications using a mocked server has proven to work best. One can use [Fiddler](http://fiddler2.com/)'s AutoResponder feature to quickly try out new mobile features and easily test some edge cases.
+
+## Android Studio
+
+At the time of writing there is no way to develop in Eclipse and Android Studio simultaneously. This due to different project file formats and expected project directory structure. Although Android Studio will be the number one platform for Android development in the future, currently it is not feasible to switch, because of
+
+* Android Studio's build system Gradle is still in beta
+* OSGi support in the free version of Android Studio is far from completed
+* Android Studio is in Alpha (December 2013)

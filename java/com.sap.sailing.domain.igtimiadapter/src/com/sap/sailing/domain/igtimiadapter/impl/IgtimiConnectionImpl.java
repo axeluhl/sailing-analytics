@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,25 +15,34 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
     private final Account account;
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
     
-    public IgtimiConnectionImpl(IgtimiConnectionFactory connectionFactory, Account account) {
+    public IgtimiConnectionImpl(IgtimiConnectionFactoryImpl connectionFactory, Account account) {
         this.connectionFactory = connectionFactory;
         this.account = account;
+    }
+    
+    @Override
+    public Account getAccount() {
+        return account;
     }
     
     @Override
@@ -111,11 +121,65 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
 
     @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+            Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpClient client = connectionFactory.getHttpClient();
-        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, serialNumbers, typeAndCompression, account));
+        HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
         return new FixFactory().createFixes(resourceDataJson);
+    }
+
+    @Override
+    public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Map<Type, Double> typeAndCompression = new HashMap<>();
+        for (Type type : types) {
+            typeAndCompression.put(type, 0.0);
+        }
+        return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
+    }
+
+    @Override
+    public Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
+            throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> result = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        bulkFixReceiver.received(result);
+        return result;
+    }
+
+    @Override
+    public Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
+            Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
+        for (Fix fix : fixes) {
+            String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();
+            Type type = fix.getType();
+            DynamicTrack<Fix> track = (DynamicTrack<Fix>) getOrCreateTrack(result, deviceSerialNumber, type);
+            track.add(fix);
+        }
+        return result;
+    }
+    
+
+    @Override
+    public LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception {
+        return new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, getAccount());
+    }
+
+    private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,
+            String deviceSerialNumber, Type type) {
+        Map<Type, DynamicTrack<Fix>> mapForDevice = result.get(deviceSerialNumber);
+        if (mapForDevice == null) {
+            mapForDevice = new HashMap<>();
+            result.put(deviceSerialNumber, mapForDevice);
+        }
+        DynamicTrack<Fix> track = mapForDevice.get(type);
+        if (track == null) {
+            track = new DynamicTrackImpl<Fix>("Track for Igtimi fixes of type "+type.name()+" for "+this);
+            mapForDevice.put(type, track);
+        }
+        return track;
     }
 
     @Override
