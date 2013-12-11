@@ -59,6 +59,17 @@ checks ()
     if [[ $DEPLOY_TO == "" ]]; then
         DEPLOY_TO=server
     fi
+
+    SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
+
+    if [[ ! -d $SERVER_HOME ]]; then
+        SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
+        if [[ ! -d $SERVER_HOME ]]; then
+            echo "Could not find the correct directory for servers - assumed $SERVER_HOME. Adapt DEPLOY_TO in env.sh to point to the right server directory."
+            exit 10
+        fi
+    fi
+
 }
 
 activate_user_data ()
