@@ -27,6 +27,14 @@ fi
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 
+if [[ ! -d `pwd`/logs ]]; then
+    mkdir logs
+fi
+
+if [[ ! -d `pwd`/tmp ]]; then
+    mkdir tmp
+fi
+
 echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
 
 # Make really sure that parameters from config.ini are not used
@@ -70,6 +78,8 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
         # give instances on amazon more time to start because
         # they may be influenced by the server's boot process
         echo "Be aware of the fact that starting amazon instances takes up to two minutes!"
+        sleep 15
+        echo "Your instance should now be ready - waiting some more minutes before checking state..."
         sleep 120
     else
         sleep 10

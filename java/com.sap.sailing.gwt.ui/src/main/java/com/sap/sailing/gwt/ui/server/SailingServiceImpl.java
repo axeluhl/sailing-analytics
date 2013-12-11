@@ -3305,7 +3305,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
         long startTime = System.currentTimeMillis();
         String hostname;
-        Integer port = -1;
+        Integer port = 80;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
