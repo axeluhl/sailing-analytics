@@ -247,6 +247,7 @@ elif [[ $OPERATION == "install-release" ]]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         load_from_release_file
+        echo "ATTENTION: This new release code is not active yet. Make sure to restart the server if it is running!"
     fi
 
 elif [[ $OPERATION == "update-env" ]]; then
@@ -281,6 +282,7 @@ elif [[ $OPERATION == "update-env" ]]; then
         echo "JAVA_HOME: $JAVA_HOME"
         echo "INSTANCE_ID: $INSTANCE_ID"
         echo ""
+        echo "ATTENTION: This new configuration is not active yet. Make sure to restart the server if it is running!"
     fi
 else
     echo "Script to prepare a Java instance running on Amazon."
