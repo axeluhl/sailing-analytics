@@ -243,7 +243,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             getAndNotifyResourceData(startOfWindow, endOfWindow, deviceSerialNumbers, windReceiver,
                     windReceiver.getFixTypes());
         } else {
-            logger.info("No Igtimi devices found for time window "+startOfWindow+".."+endOfWindow);
+            logger.info("No Igtimi devices that measure wind found for time window "+startOfWindow+".."+endOfWindow);
         }
     }
 
