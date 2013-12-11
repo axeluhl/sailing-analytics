@@ -1,7 +1,6 @@
 #!/bin/sh
 
 source `pwd`/env.sh
-
 DATE_OF_EXECUTION=`date`
 
 find_project_home () 
@@ -64,10 +63,10 @@ checks ()
 
 activate_user_data ()
 {
-    echo "Reading user-data provided by Amazon instance data..."
+    echo "Reading user-data provided by Amazon instance data to $USER_HOME/servers/$DEPLOY_TO/env.sh"
 
     # make backup of original file
-    cp $USER_HOME/servers/server/env.sh $USER_HOME/servers/server/environment/env.sh.backup
+    cp $USER_HOME/servers/$DEPLOY_TO/env.sh $USER_HOME/servers/$DEPLOY_TO/environment/env.sh.backup
 
     echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
@@ -79,7 +78,6 @@ activate_user_data ()
         echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
         echo "Activated: $var"
     done
-    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     
     # make sure to reload data
     source `pwd`/env.sh
@@ -89,6 +87,7 @@ activate_user_data ()
     fi
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
     echo "Updated env.sh with data from user-data field!"
     echo ""
 }
@@ -97,8 +96,8 @@ install_environment ()
 {
     if [[ $USE_ENVIRONMENT != "" ]]; then
         # clean up directory to really make sure that there are no files left
-        rm -rf $USER_HOME/servers/server/environment
-        mkdir $USER_HOME/servers/server/environment
+        rm -rf $USER_HOME/servers/$DEPLOY_TO/environment
+        mkdir $USER_HOME/servers/$DEPLOY_TO/environment
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
         echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
@@ -210,6 +209,11 @@ if [[ $OPERATION == "auto-install" ]]; then
         activate_user_data
         install_environment
 
+        if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
+            echo "It could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
+            exit 1
+        fi
+
         echo ""
         echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
         echo "DEPLOY_TO: $DEPLOY_TO"
@@ -220,9 +224,11 @@ if [[ $OPERATION == "auto-install" ]]; then
         if [[ $INSTALL_FROM_RELEASE != "" ]]; then
             load_from_release_file
         else
-            checkout_code
-            build
-            deploy
+            if [[ $BUILD_BEFORE_START == "True" ]]; then
+                checkout_code
+                build
+                deploy
+            fi
         fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
@@ -243,7 +249,7 @@ elif [[ $OPERATION == "install-release" ]]; then
         load_from_release_file
     fi
 
-elif [[ $OPERATION == "update-environment" ]]; then
+elif [[ $OPERATION == "update-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
         echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
@@ -280,7 +286,7 @@ else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
-    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option."
+    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
     exit 0
 fi
 
