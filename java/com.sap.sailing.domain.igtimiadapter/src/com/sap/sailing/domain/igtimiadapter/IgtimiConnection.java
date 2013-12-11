@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
 
 /**
@@ -141,4 +142,12 @@ public interface IgtimiConnection {
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     Account getAccount();
+
+    /**
+     * Finds all data access windows that have wind data for the time span around the race, loads their wind data and
+     * {@link DynamicTrackedRace#recordWind(com.sap.sailing.domain.tracking.Wind, com.sap.sailing.domain.common.WindSource)
+     * records it} in the tracked races.
+     */
+    void importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException,
+            ClientProtocolException, IOException, ParseException;
 }

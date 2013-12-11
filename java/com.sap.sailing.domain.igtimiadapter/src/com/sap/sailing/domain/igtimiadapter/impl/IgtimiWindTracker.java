@@ -8,11 +8,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -21,8 +18,6 @@ import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.tracking.AbstractWindTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTracker;
 
 public class IgtimiWindTracker extends AbstractWindTracker implements WindTracker {
@@ -34,7 +29,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private boolean stopping;
 
     protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnectionFactory connectionFactory,
-            IgtimiWindTrackerFactory windTrackerFactory) throws Exception {
+            final IgtimiWindTrackerFactory windTrackerFactory) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
@@ -55,25 +50,11 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 for (DataAccessWindow daw : dataAccessWindows) {
                                     if (!stopping) {
                                         final String deviceSerialNumber = daw.getDeviceSerialNumber();
-                                        final WindSource windSource = getWindSource(deviceSerialNumber);
                                         LiveDataConnection liveConnection = connection.createLiveConnection(Collections.singleton(deviceSerialNumber));
                                         IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
                                         liveConnection.addListener(windReceiver);
-                                        windReceiver.addListener(new WindListener() {
-                                            @Override
-                                            public void windDataReceived(Wind wind) {
-                                                getTrackedRace().recordWind(wind, windSource);
-                                            }
-
-                                            @Override
-                                            public void windDataRemoved(Wind wind) {
-                                            }
-
-                                            @Override
-                                            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage,
-                                                    long newMillisecondsOverWhichToAverage) {
-                                            }
-                                        });
+                                        windReceiver.addListener(new WindListenerSendingToTrackedRace(
+                                                Collections.singleton(getTrackedRace()), windTrackerFactory));
                                         liveConnectionsAndDeviceSerialNumber.put(liveConnection,
                                                 new Pair<String, Account>(deviceSerialNumber, account));
                                     }
@@ -89,7 +70,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         }.start();
     }
 
-    private TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {
+    public static TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {
         TimePoint endOfRace = trackedRace.getEndOfRace();
         TimePoint endOfTracking = trackedRace.getEndOfTracking();
         final TimePoint endTime;
@@ -109,18 +90,15 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         return endTime;
     }
 
-    private WindSource getWindSource(String deviceSerialNumber) {
-        return new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, deviceSerialNumber);
-    }
-
     /**
      * Based on the tracked race's time parameters and the current time, decides for a good start time for receiving
      * live wind data. Get all devices that have been sending during the last 10 minutes before start of race, start of
      * tracking or now, whichever came first.
      */
-    private TimePoint getReceivingStartTime(DynamicTrackedRace trackedRace) {
-        return Collections.min(Arrays.asList(new TimePoint[] { trackedRace.getStartOfRace(), trackedRace.getStartOfTracking(), MillisecondsTimePoint.now() })).
-                minus(TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS);
+    public static TimePoint getReceivingStartTime(DynamicTrackedRace trackedRace) {
+        return Collections.min(
+                Arrays.asList(new TimePoint[] { trackedRace.getStartOfRace(), trackedRace.getStartOfTracking(),
+                        MillisecondsTimePoint.now() })).minus(TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS);
     }
 
     @Override

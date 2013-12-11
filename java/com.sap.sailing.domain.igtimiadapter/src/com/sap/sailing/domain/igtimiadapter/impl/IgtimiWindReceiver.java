@@ -23,7 +23,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiverAdapter;
+import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
@@ -65,7 +68,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private final DynamicTrack<HDGM> hdgmTrack;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
-    private final ConcurrentHashMap<WindListener, WindListener> listeners;
+    private final ConcurrentHashMap<IgtimiWindListener, IgtimiWindListener> listeners;
     
     private class FixReceiver extends IgtimiFixReceiverAdapter {
         @Override
@@ -138,7 +141,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             try {
                 final Wind wind = getWind(aws.getTimePoint());
                 if (wind != null) {
-                    notifyListeners(wind);
+                    notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
                 }
             } catch (ClassNotFoundException | IOException | ParseException e) {
                 logger.log(Level.INFO, "Exception while trying to construct Wind fix from Igtimi fix " + aws, e);
@@ -146,13 +149,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public void addListener(WindListener listener) {
+    public void addListener(IgtimiWindListener listener) {
         listeners.put(listener, listener);
     }
     
-    public void notifyListeners(Wind wind) {
-        for (WindListener listener : listeners.keySet()) {
-            listener.windDataReceived(wind);
+    public void notifyListeners(Wind wind, String deviceSerialNumber) {
+        for (IgtimiWindListener listener : listeners.keySet()) {
+            listener.windDataReceived(wind, deviceSerialNumber);
         }
     }
     
@@ -404,5 +407,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
 
     private DynamicTrack<HDGM> getHdgmTrack() {
         return hdgmTrack;
+    }
+
+    /**
+     * Tells the set of types that this wind receiver is interested in. Can be used to subscribe for fixes from
+     * resource data. See {@link IgtimiConnection#getResourceData(TimePoint, TimePoint, Iterable, Type...)}.
+     */
+    public Type[] getFixTypes() {
+        return new Type[] { Type.AWA, Type.AWS, Type.HDG, Type.HDGM, Type.gps_latlong, Type.COG, Type.SOG };
     }
 }

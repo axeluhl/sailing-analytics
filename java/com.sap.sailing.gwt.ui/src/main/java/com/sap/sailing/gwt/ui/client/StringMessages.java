@@ -902,4 +902,5 @@ public interface StringMessages extends Messages {
     String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
     String igtimiWindImport();
     String seeIgtimiTabForAccountSettings();
+    String importWindFromIgtimi();
 }

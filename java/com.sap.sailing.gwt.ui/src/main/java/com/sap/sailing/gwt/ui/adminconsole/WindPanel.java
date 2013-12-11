@@ -250,6 +250,32 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         VerticalPanel contentPanel = new VerticalPanel();
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
+        final Button importButton = new Button(stringMessages.importWindFromIgtimi());
+        importButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final String warningMessage;
+                if (trackedRacesListComposite.getSelectedRaces().isEmpty()) {
+                    warningMessage = stringMessages.windImport_AllRacesWarning();
+                } else {
+                    warningMessage = stringMessages.windImport_SelectedRacesWarning(trackedRacesListComposite.getSelectedRaces().size());
+                }
+                if (Window.confirm(warningMessage)) {
+                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(), new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO Auto-generated method stub
+                            
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            // TODO show how many fixes were imported into which race in a pop-up
+                        }
+                    });
+                }
+            }
+        });
         trackedRacesListComposite.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
             @Override
             public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {

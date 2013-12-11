@@ -4,6 +4,9 @@ import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -38,6 +41,10 @@ public class IgtimiWindTrackerFactory implements WindTrackerFactory {
         if (removedTracker != igtimiWindTracker) {
             logger.warning("Expected to remove wind tracker "+igtimiWindTracker+" but did remove "+removedTracker);
         }
+    }
+
+    WindSource getWindSource(String deviceSerialNumber) {
+        return new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, deviceSerialNumber);
     }
 
 }

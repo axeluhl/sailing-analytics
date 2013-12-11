@@ -2,6 +2,8 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -29,6 +33,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
@@ -208,5 +213,38 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             result.add(dataAccessWindow);
         }
         return result;
+    }
+
+    @Override
+    public void importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        TimePoint startOfWindow = new MillisecondsTimePoint(Long.MAX_VALUE);
+        TimePoint endOfWindow = new MillisecondsTimePoint(Long.MIN_VALUE);
+        for (DynamicTrackedRace trackedRace : trackedRaces) {
+            startOfWindow = Collections.min(Arrays.asList(startOfWindow, IgtimiWindTracker.getReceivingStartTime(trackedRace)));
+            endOfWindow = Collections.max(Arrays.asList(endOfWindow, IgtimiWindTracker.getReceivingEndTime(trackedRace)));
+        }
+        Iterable<DataAccessWindow> daws = getDataAccessWindows(Permission.read, startOfWindow, endOfWindow, /* find all deviceSerialNumbers for window */ null);
+        List<String> deviceSerialNumbers = new ArrayList<>();
+        for (DataAccessWindow daw : daws) {
+            String deviceSerialNumber = daw.getDeviceSerialNumber();
+            // now filter for the wind-providing devices
+            Iterable<Resource> resources = getResources(Permission.read, startOfWindow, endOfWindow,
+                    Collections.singleton(deviceSerialNumber), /* streamIds */ null);
+            if (hasWind(resources)) {
+                deviceSerialNumbers.add(deviceSerialNumber);
+            }
+        }
+        IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers);
+        windReceiver.addListener(new WindListenerSendingToTrackedRace(trackedRaces, Activator.getInstance().getWindTrackerFactory()));
+        getAndNotifyResourceData(startOfWindow, endOfWindow, deviceSerialNumbers, windReceiver, windReceiver.getFixTypes());
+    }
+
+    private boolean hasWind(Iterable<Resource> resources) {
+        for (Resource resource : resources) {
+            if (Util.contains(resource.getDataTypes(), Type.AWS)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

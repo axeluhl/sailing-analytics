@@ -47,6 +47,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
 
+import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -147,6 +148,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -178,6 +180,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -2585,10 +2588,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public TrackedRace getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
+    public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
         Regatta regatta = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
         RaceDefinition race = getRaceByName(regatta, regattaNameAndRaceName.getRaceName());
-        TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
+        DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
         return trackedRace;
     }
 
@@ -3620,4 +3623,37 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getIgtimiConnectionFactory().removeAccount(eMailOfAccountToRemove);
     }
 
+    @Override
+    public void importWindFromIgtimi(List<RaceDTO> selectedRaces) throws IllegalStateException,
+            ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
+        final Iterable<DynamicTrackedRace> trackedRaces;
+        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+            List<DynamicTrackedRace> myTrackedRaces = new ArrayList<DynamicTrackedRace>();
+            trackedRaces = myTrackedRaces;
+            for (RaceDTO raceDTO : selectedRaces) {
+                DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
+                myTrackedRaces.add(trackedRace);
+            }
+        } else {
+            trackedRaces = getAllTrackedRaces();
+        }
+        for (Account account : igtimiConnectionFactory.getAllAccounts()) {
+            IgtimiConnection conn = igtimiConnectionFactory.connect(account);
+            conn.importWindIntoRace(trackedRaces);
+        }
+    }
+
+    private Set<DynamicTrackedRace> getAllTrackedRaces() {
+        Set<DynamicTrackedRace> result = new HashSet<DynamicTrackedRace>();
+        Iterable<Regatta> allRegattas = getService().getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
+            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                result.add((DynamicTrackedRace) trackedRace);
+            }
+        }
+        return result;
+    }
 }

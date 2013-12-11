@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -363,4 +367,7 @@ public interface SailingService extends RemoteService {
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 
     void removeIgtimiAccount(String eMailOfAccountToRemove);
+
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces) throws IllegalStateException,
+            ClientProtocolException, IOException, ParseException;
 }
