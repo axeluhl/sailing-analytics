@@ -250,7 +250,7 @@ elif [[ $OPERATION == "install-release" ]]; then
         echo "ATTENTION: This new release code is not active yet. Make sure to restart the server if it is running!"
     fi
 
-elif [[ $OPERATION == "update-env" ]]; then
+elif [[ $OPERATION == "install-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
         echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
@@ -288,7 +288,7 @@ else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
-    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
+    echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
     exit 0
 fi
 
