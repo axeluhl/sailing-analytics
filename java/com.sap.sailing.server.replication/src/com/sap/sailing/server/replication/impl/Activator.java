@@ -1,7 +1,6 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
