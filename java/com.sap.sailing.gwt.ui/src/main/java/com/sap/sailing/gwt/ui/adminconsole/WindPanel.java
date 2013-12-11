@@ -276,6 +276,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 }
             }
         });
+        contentPanel.add(importButton);
         trackedRacesListComposite.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
             @Override
             public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
+    private static final Logger logger = Logger.getLogger(IgtimiConnectionImpl.class.getName());
     private final Account account;
     private final IgtimiConnectionFactoryImpl connectionFactory;
     
@@ -218,7 +220,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     @Override
     public void importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         TimePoint startOfWindow = new MillisecondsTimePoint(Long.MAX_VALUE);
-        TimePoint endOfWindow = new MillisecondsTimePoint(Long.MIN_VALUE);
+        TimePoint endOfWindow = new MillisecondsTimePoint(0);
         for (DynamicTrackedRace trackedRace : trackedRaces) {
             startOfWindow = Collections.min(Arrays.asList(startOfWindow, IgtimiWindTracker.getReceivingStartTime(trackedRace)));
             endOfWindow = Collections.max(Arrays.asList(endOfWindow, IgtimiWindTracker.getReceivingEndTime(trackedRace)));
@@ -234,9 +236,15 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
                 deviceSerialNumbers.add(deviceSerialNumber);
             }
         }
-        IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers);
-        windReceiver.addListener(new WindListenerSendingToTrackedRace(trackedRaces, Activator.getInstance().getWindTrackerFactory()));
-        getAndNotifyResourceData(startOfWindow, endOfWindow, deviceSerialNumbers, windReceiver, windReceiver.getFixTypes());
+        if (!deviceSerialNumbers.isEmpty()) {
+            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers);
+            windReceiver.addListener(new WindListenerSendingToTrackedRace(trackedRaces, Activator.getInstance()
+                    .getWindTrackerFactory()));
+            getAndNotifyResourceData(startOfWindow, endOfWindow, deviceSerialNumbers, windReceiver,
+                    windReceiver.getFixTypes());
+        } else {
+            logger.info("No Igtimi devices found for time window "+startOfWindow+".."+endOfWindow);
+        }
     }
 
     private boolean hasWind(Iterable<Resource> resources) {
