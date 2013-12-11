@@ -241,7 +241,7 @@ elif [[ $OPERATION == "install-release" ]]; then
     fi
 
     # Honor the no-overrite setting if there is one
-    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+    if [ -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         load_from_release_file
@@ -254,7 +254,7 @@ elif [[ $OPERATION == "update-env" ]]; then
         exit 1
     fi
 
-    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+    if [ -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         install_environment
