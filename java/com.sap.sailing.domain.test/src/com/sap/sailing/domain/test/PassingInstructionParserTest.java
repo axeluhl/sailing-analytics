@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -8,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -16,11 +19,10 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class PassingInstructionImportTest extends OnlineTracTracBasedTest {
+public class PassingInstructionParserTest extends OnlineTracTracBasedTest {
 
-    public PassingInstructionImportTest() throws URISyntaxException, MalformedURLException {
+    public PassingInstructionParserTest() throws URISyntaxException, MalformedURLException {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     @Before
@@ -41,9 +43,13 @@ public class PassingInstructionImportTest extends OnlineTracTracBasedTest {
 
     @Test
     public void test() {
+        int i = 0;
         for(Waypoint w : getRace().getCourse().getWaypoints()){
-            System.out.println(w.getPassingSide());
+            if(w.getPassingInstructions()==PassingInstruction.Starboard){
+                i++;
+            }
         }
+        assertEquals(2,i);
     }
 
 }
