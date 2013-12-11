@@ -1,18 +1,18 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
-public class DataMiningSettings {
+public class QueryRunnerSettings {
     
     private boolean runAutomatically;
     
-    public DataMiningSettings() {
+    public QueryRunnerSettings() {
         this(true);
     }
 
-    public DataMiningSettings(boolean runAutomatically) {
+    public QueryRunnerSettings(boolean runAutomatically) {
         this.runAutomatically = runAutomatically;
     }
 
-    public DataMiningSettings(DataMiningSettings settings) {
+    public QueryRunnerSettings(QueryRunnerSettings settings) {
         this(settings.isRunAutomatically());
     }
 
@@ -20,7 +20,7 @@ public class DataMiningSettings {
         return runAutomatically;
     }
 
-    public void setRunAutomatically(boolean runAutomatically) {
+    protected void setRunAutomatically(boolean runAutomatically) {
         this.runAutomatically = runAutomatically;
     }
 

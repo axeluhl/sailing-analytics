@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
@@ -27,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
+import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
 
@@ -35,7 +35,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private FlowPanel mainPanel;
     private HorizontalPanel controlsPanel;
 
-    private SelectionProvider selectionTablesPanel;
+    private SelectionProvider<?> selectionProvider;
     
     private StatisticsProvider statisticsProvider;
     private ValueListBox<ResultCalculationInformation> statisticsListBox;
@@ -46,20 +46,19 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
         
-        
         mainPanel = new FlowPanel();
         statisticsProvider = new SimpleStatisticsProvider();
 
         mainPanel.add(createFunctionsPanel());
 
-        selectionTablesPanel = new RefreshingSelectionTablesPanel(stringMessages, sailingService, errorReporter);
-        selectionTablesPanel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        selectionProvider = new RefreshingSelectionTablesPanel(stringMessages, sailingService, errorReporter);
+        selectionProvider.addSelectionChangedListener(new SelectionChangedListener() {
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
+            public void selectionChanged() {
                 notifyQueryDefinitionChanged();
             }
         });
-        mainPanel.add(selectionTablesPanel.getWidget());
+        mainPanel.add(selectionProvider.getEntryWidget());
         
     }
     
@@ -77,7 +76,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             }
             break;
         }
-        for (Entry<SharedDimension, Collection<?>> selectionEntry : selectionTablesPanel.getSelection().entrySet()) {
+        for (Entry<SharedDimension, Collection<?>> selectionEntry : selectionProvider.getSelection().entrySet()) {
             queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
         }
         return queryDTO;
@@ -86,7 +85,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
         setBlockChangeNotification(true);
-        selectionTablesPanel.applySelection(queryDefinition);
+        selectionProvider.applySelection(queryDefinition);
         groupBySelectionPanel.apply(queryDefinition);
         applyStatistic(queryDefinition);
         setBlockChangeNotification(false);
@@ -118,7 +117,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                selectionTablesPanel.clearSelection();
+                selectionProvider.clearSelection();
             }
         });
         functionsPanel.add(clearSelectionButton);
@@ -175,6 +174,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     @Override
     public Widget getWidget() {
         return mainPanel;
+    }
+
+    @Override
+    public SelectionProvider<?> getSelectionProvider() {
+        return selectionProvider;
     }
 
 }

@@ -14,8 +14,8 @@ import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.QueryRunner;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.settings.DataMiningSettings;
-import com.sap.sailing.gwt.ui.datamining.settings.DataMiningSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
+import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
 
 public class SimpleQueryRunner implements QueryRunner {
 
@@ -23,7 +23,7 @@ public class SimpleQueryRunner implements QueryRunner {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
-    private DataMiningSettings settings;
+    private QueryRunnerSettings settings;
     private final QueryDefinitionProvider queryDefinitionProvider;
     private final ResultsPresenter<Number> resultsPresenter;
     
@@ -36,7 +36,7 @@ public class SimpleQueryRunner implements QueryRunner {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         
-        this.settings = new DataMiningSettings();
+        this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
         
@@ -48,7 +48,9 @@ public class SimpleQueryRunner implements QueryRunner {
             }
         });
         
-        updateSettings(this.settings);
+        if (this.settings.isRunAutomatically()) {
+            queryDefinitionProvider.addQueryDefinitionChangedListener(this);
+        }
     }
 
     @Override
@@ -75,13 +77,14 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void updateSettings(DataMiningSettings newSettings) {
-        settings.setRunAutomatically(newSettings.isRunAutomatically());
-        
-        if (settings.isRunAutomatically()) {
-            queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-        } else {
-            queryDefinitionProvider.removeQueryDefinitionChangedListener(this);
+    public void updateSettings(QueryRunnerSettings newSettings) {
+        if (settings.isRunAutomatically() != newSettings.isRunAutomatically()) {
+            settings = newSettings;
+            if (settings.isRunAutomatically()) {
+                queryDefinitionProvider.addQueryDefinitionChangedListener(this);
+            } else {
+                queryDefinitionProvider.removeQueryDefinitionChangedListener(this);
+            }
         }
     }
 
@@ -116,9 +119,9 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public SettingsDialogComponent<DataMiningSettings> getSettingsDialogComponent() {
-        DataMiningSettings dataMiningSettings = new DataMiningSettings(settings);
-        return new DataMiningSettingsDialogComponent(dataMiningSettings, stringMessages);
+    public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
+        QueryRunnerSettings dataMiningSettings = new QueryRunnerSettings(settings);
+        return new QueryRunnerSettingsDialogComponent(dataMiningSettings, stringMessages);
     }
 
 }

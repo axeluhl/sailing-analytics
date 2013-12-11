@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SharedDimension;
@@ -31,37 +32,43 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
+import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
+import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class RefreshingSelectionTablesPanel implements SelectionProvider {
+public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings> {
     
     private static final int resizeDelay = 100;
     private static final double relativeWidthInPercent = 1;
     private static final int widthMargin = 17;
     private static final double relativeHeightInPercent = 0.35;
 
-    private static final int refreshRate = 5000;
-    
     private StringMessages stringMessages;
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     
-    private SimplePanel widget;
+    private SimplePanel entryWidget;
 
+    private RefreshingSelectionTablesSettings settings;
     private Timer timer;
     private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
+    private Set<SelectionChangedListener> listeners;
     
     public RefreshingSelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        settings = new RefreshingSelectionTablesSettings();
+        listeners = new HashSet<SelectionChangedListener>();
 
         tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?,?>>();
-        widget = new SimplePanel();
-        widget.setWidget(createTables());
+        entryWidget = new SimplePanel();
+        entryWidget.setWidget(createTables());
         
         timer = new Timer() {
             @Override
@@ -91,8 +98,8 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider {
         int absoluteWidth = (int) ((newWindowWidth - widthMargin) * relativeWidthInPercent);
         int absoluteHeight = (int) (newWindowHeight * relativeHeightInPercent);
         
-        widget.setWidth(absoluteWidth + "px");
-        widget.setHeight(absoluteHeight + "px");
+        entryWidget.setWidth(absoluteWidth + "px");
+        entryWidget.setHeight(absoluteHeight + "px");
         
         Collection<SelectionTable<?, ?>> tables = tablesMappedByDimension.values();
         for (SelectionTable<?, ?> table : tables) {
@@ -102,9 +109,21 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider {
     }
 
     @Override
-    public void addSelectionChangeHandler(Handler handler) {
+    public void addSelectionChangedListener(SelectionChangedListener listener) {
+        listeners.add(listener);
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            table.addSelectionChangeHandler(handler);
+            table.addSelectionChangeHandler(new Handler() {
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    notifySelectionChanged();
+                }
+            });
+        }
+    }
+
+    private void notifySelectionChanged() {
+        for (SelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
         }
     }
 
@@ -112,7 +131,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider {
     public Map<SharedDimension, Collection<?>> getSelection() {
         Map<SharedDimension, Collection<?>> selection = new HashMap<SharedDimension, Collection<?>>();
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
-            Collection<?> specificSelection = table.getSelection();
+            Collection<?> specificSelection = table.getSelectionAsValues();
             if (!specificSelection.isEmpty()) {
                 selection.put(table.getDimension(), specificSelection);
             }
@@ -143,10 +162,55 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider {
             return null;
         }
     }
-    
+
     @Override
-    public Widget getWidget() {
-        return widget;
+    public String getLocalizedShortName() {
+        return stringMessages.selectionTables();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return entryWidget;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return entryWidget.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        entryWidget.setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<RefreshingSelectionTablesSettings> getSettingsDialogComponent() {
+        return new RefreshingSelectionTablesSettingsDialogComponent(settings, stringMessages);
+    }
+
+    @Override
+    public void updateSettings(RefreshingSelectionTablesSettings newSettings) {
+        if (settings.isRefreshAutomatically() != newSettings.isRefreshAutomatically()) {
+            if (newSettings.isRefreshAutomatically()) {
+                updateTables();
+            } else {
+                timer.cancel();
+            }
+        }
+        
+        if (settings.getRefreshIntervalInMilliseconds() != newSettings.getRefreshIntervalInMilliseconds()) {
+            if (newSettings.isRefreshAutomatically()) {
+                timer.cancel();
+                timer.schedule(newSettings.getRefreshIntervalInMilliseconds());
+            }
+        }
+        
+        settings = newSettings;
     }
 
     private void updateTables() {
@@ -158,80 +222,86 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider {
 
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
-                Set<RegattaDTO> regattasWithData = new HashSet<RegattaDTO>();
-                Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
-                Set<RaceDTO> races = new HashSet<RaceDTO>();
-                Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
-                Set<String> nationalities = new HashSet<String>();
-                for (RegattaDTO regatta : regattas) {
-                    if (regattaContainsData(regatta)) {
-                        regattasWithData.add(regatta);
-                        boatClasses.add(regatta.boatClass);
-                        for (RaceWithCompetitorsDTO race : regatta.races) {
-                            if (race != null) {
-                                races.add(race);
-                                for (CompetitorDTO competitor : race.competitors) {
-                                    if (competitor != null) {
-                                        competitors.add(competitor);
-                                        nationalities.add(competitor.getThreeLetterIocCountryCode());
-                                    }
-                                }
+                boolean tableContentChanged = false;
+                Map<SharedDimension, Collection<?>> content = extractContent(regattas);
+                for (Entry<SharedDimension, Collection<?>> contentEntry : content.entrySet()) {
+                    boolean currentTableContentChanged = getTable(contentEntry.getKey()).updateContent(contentEntry.getValue());
+                    if (!tableContentChanged) {
+                        tableContentChanged = currentTableContentChanged;
+                    }
+                }
+                
+                if (settings.isRerunQueryAfterRefresh() && tableContentChanged) {
+                    notifySelectionChanged();
+                    // TODO query is executed, before the data is ready to be analyzed
+                }
+                if (settings.isRefreshAutomatically()) {
+                    timer.schedule(settings.getRefreshIntervalInMilliseconds());
+                }
+            }
+        });
+    }
+    
+    private Map<SharedDimension, Collection<?>> extractContent(Collection<RegattaDTO> regattas) {
+        Map<SharedDimension, Collection<?>> content = new HashMap<SharedDimension, Collection<?>>();
+        
+        Set<RegattaDTO> regattasWithData = new HashSet<RegattaDTO>();
+        Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
+        Set<RaceDTO> races = new HashSet<RaceDTO>();
+        Set<CompetitorDTO> competitors = new HashSet<CompetitorDTO>();
+        Set<String> nationalities = new HashSet<String>();
+        for (RegattaDTO regatta : regattas) {
+            if (regattaContainsData(regatta)) {
+                regattasWithData.add(regatta);
+                boatClasses.add(regatta.boatClass);
+                for (RaceWithCompetitorsDTO race : regatta.races) {
+                    if (race != null) {
+                        races.add(race);
+                        for (CompetitorDTO competitor : race.competitors) {
+                            if (competitor != null) {
+                                competitors.add(competitor);
+                                nationalities.add(competitor.getThreeLetterIocCountryCode());
                             }
                         }
                     }
                 }
+            }
+        }
 
-                List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattasWithData);
-                Collections.sort(sortedRegattas, new Comparator<RegattaDTO>() {
-                    @Override
-                    public int compare(RegattaDTO o1, RegattaDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                List<BoatClassDTO> sortedBoatClasses = new ArrayList<BoatClassDTO>(boatClasses);
-                Collections.sort(sortedBoatClasses, new Comparator<BoatClassDTO>() {
-                    @Override
-                    public int compare(BoatClassDTO o1, BoatClassDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                List<RaceDTO> sortedRaces = new ArrayList<RaceDTO>(races);
-                Collections.sort(sortedRaces, new Comparator<RaceDTO>() {
-                    @Override
-                    public int compare(RaceDTO o1, RaceDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                SelectionTable<RegattaDTO, ?> regattaTable = getTable(SharedDimension.RegattaName);
-                regattaTable.updateContent(sortedRegattas);
-                
-                SelectionTable<BoatClassDTO, ?> boatClassTable = getTable(SharedDimension.BoatClassName);
-                boatClassTable.updateContent(sortedBoatClasses);
-                
-                SelectionTable<RaceDTO, ?> raceNameTable = getTable(SharedDimension.RaceName);
-                raceNameTable.updateContent(sortedRaces);
-                
-                SelectionTable<Integer, ?> legNumberTable = getTable(SharedDimension.LegNumber);
-                legNumberTable.updateContent(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                
-                SelectionTable<LegType, ?> legTypeTable = getTable(SharedDimension.LegType);
-                legTypeTable.updateContent(Arrays.asList(LegType.values()));
-                
-                SelectionTable<CompetitorDTO, ?> competitorNameTable = getTable(SharedDimension.CompetitorName);
-                competitorNameTable.updateContent(competitors);
-                
-                SelectionTable<CompetitorDTO, ?> competitorSailIDTable = getTable(SharedDimension.SailID);
-                competitorSailIDTable.updateContent(competitors);
-                
-                SelectionTable<String, ?> nationalityTable = getTable(SharedDimension.Nationality);
-                nationalityTable.updateContent(nationalities);
-                
-                timer.schedule(refreshRate);
+        List<RegattaDTO> sortedRegattas = new ArrayList<RegattaDTO>(regattasWithData);
+        Collections.sort(sortedRegattas, new Comparator<RegattaDTO>() {
+            @Override
+            public int compare(RegattaDTO o1, RegattaDTO o2) {
+                return o1.getName().compareTo(o2.getName());
             }
         });
+
+        List<BoatClassDTO> sortedBoatClasses = new ArrayList<BoatClassDTO>(boatClasses);
+        Collections.sort(sortedBoatClasses, new Comparator<BoatClassDTO>() {
+            @Override
+            public int compare(BoatClassDTO o1, BoatClassDTO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+
+        List<RaceDTO> sortedRaces = new ArrayList<RaceDTO>(races);
+        Collections.sort(sortedRaces, new Comparator<RaceDTO>() {
+            @Override
+            public int compare(RaceDTO o1, RaceDTO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        
+        content.put(SharedDimension.RegattaName, sortedRegattas);
+        content.put(SharedDimension.BoatClassName, sortedBoatClasses);
+        content.put(SharedDimension.RaceName, sortedRaces);
+        content.put(SharedDimension.LegNumber, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        content.put(SharedDimension.LegType, Arrays.asList(LegType.values()));
+        content.put(SharedDimension.CompetitorName, competitors);
+        content.put(SharedDimension.SailID, competitors);
+        content.put(SharedDimension.Nationality, nationalities);
+        
+        return content;
     }
 
     private boolean regattaContainsData(RegattaDTO regatta) {

@@ -9,14 +9,14 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 
-public class DataMiningSettingsDialogComponent implements SettingsDialogComponent<DataMiningSettings> {
+public class QueryRunnerSettingsDialogComponent implements SettingsDialogComponent<QueryRunnerSettings> {
     
-    private DataMiningSettings initialSettings;
+    private QueryRunnerSettings initialSettings;
     private StringMessages stringMessages;
     
     private CheckBox runAutimaticallyBox;
 
-    public DataMiningSettingsDialogComponent(DataMiningSettings initialSettings, StringMessages stringMessages) {
+    public QueryRunnerSettingsDialogComponent(QueryRunnerSettings initialSettings, StringMessages stringMessages) {
         super();
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
@@ -34,12 +34,12 @@ public class DataMiningSettingsDialogComponent implements SettingsDialogComponen
     }
 
     @Override
-    public DataMiningSettings getResult() {
-        return new DataMiningSettings(runAutimaticallyBox.getValue());
+    public QueryRunnerSettings getResult() {
+        return new QueryRunnerSettings(runAutimaticallyBox.getValue());
     }
 
     @Override
-    public Validator<DataMiningSettings> getValidator() {
+    public Validator<QueryRunnerSettings> getValidator() {
         return null;
     }
 

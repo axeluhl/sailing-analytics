@@ -868,4 +868,7 @@ public interface StringMessages extends Messages {
     String compress();
     String compressTooltip();
     String queryRunner();
+    String rerunQueryAfterRefresh();
+    String refreshIntervalMustntBeEmpty();
+    String selectionTables();
 }

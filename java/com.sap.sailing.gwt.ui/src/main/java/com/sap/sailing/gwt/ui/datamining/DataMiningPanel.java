@@ -12,12 +12,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.BenchmarkResultsPanel;
 import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
-import com.sap.sailing.gwt.ui.datamining.settings.DataMiningSettings;
+import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
+import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 
 public class DataMiningPanel extends FlowPanel {
 
@@ -58,15 +60,28 @@ public class DataMiningPanel extends FlowPanel {
         
         Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
         panel.add(runnerSettingsLabel);
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
-        settingsAnchor.setTitle(stringMessages.settings());
-        settingsAnchor.addClickHandler(new ClickHandler() {
+        Anchor runnerSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        runnerSettingsAnchor.setTitle(stringMessages.settings());
+        runnerSettingsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<DataMiningSettings>(queryRunner, stringMessages).show();
+                new SettingsDialog<QueryRunnerSettings>(queryRunner, stringMessages).show();
             }
         });
-        panel.add(settingsAnchor);
+        panel.add(runnerSettingsAnchor);
+        
+        Label selectionTablesSettingsLabel = new Label("SelectionTables:");
+        panel.add(selectionTablesSettingsLabel);
+        Anchor selectionTablesSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
+        selectionTablesSettingsAnchor.setTitle(stringMessages.settings());
+        selectionTablesSettingsAnchor.addClickHandler(new ClickHandler() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onClick(ClickEvent event) {
+                new SettingsDialog<RefreshingSelectionTablesSettings>((Component<RefreshingSelectionTablesSettings>) queryDefinitionProvider.getSelectionProvider(), stringMessages).show();
+            }
+        });
+        panel.add(selectionTablesSettingsAnchor);
 
         return panel;
     }
