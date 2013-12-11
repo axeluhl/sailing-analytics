@@ -7,10 +7,17 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Export-Package: 
- com.sap.sailing.polars
+ com.sap.sailing.polars,
+ com.sap.sailing.polars.aggregation,
+ com.sap.sailing.polars.data,
+ com.sap.sailing.polars.data.impl,
+ com.sap.sailing.polars.factory,
+ com.sap.sailing.polars.generation
 Bundle-ActivationPolicy: lazy
 Require-Bundle: 
- com.sap.sailing.domain.common;bundle-version="1.0.0"
+ com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain
 Import-Package: com.sap.sailing.domain.base,
- com.sap.sailing.domain.polarsheets,
+ com.sap.sailing.domain.confidence,
+ com.sap.sailing.domain.tracking,
  com.sap.sailing.util

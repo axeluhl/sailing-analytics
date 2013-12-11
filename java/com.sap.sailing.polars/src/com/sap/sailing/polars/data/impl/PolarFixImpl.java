@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.polarsheets;
+package com.sap.sailing.polars.data.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -17,8 +17,9 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.polars.data.PolarFix;
 
-public class PolarFix {
+public class PolarFixImpl implements PolarFix {
 
     private SpeedWithBearing boatSpeed;
     private Speed windSpeed;
@@ -26,7 +27,7 @@ public class PolarFix {
     private String gaugeIdString;
     private String dayString;
 
-    public PolarFix(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
+    public PolarFixImpl(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
             PolarSheetGenerationSettings settings, String gaugeIdString) {
         boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
@@ -93,22 +94,27 @@ public class PolarFix {
         return windSourcesToExclude;
     }
 
+    @Override
     public SpeedWithBearing getBoatSpeed() {
         return boatSpeed;
     }
 
+    @Override
     public Speed getWindSpeed() {
         return windSpeed;
     }
 
+    @Override
     public double getAngleToWind() {
         return angleToWind;
     }
 
+    @Override
     public String getGaugeIdString() {
         return gaugeIdString;
     }  
     
+    @Override
     public String getDayString() {
         return dayString;
     }

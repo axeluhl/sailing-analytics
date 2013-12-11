@@ -1,6 +1,7 @@
-package com.sap.sailing.domain.polarsheets;
+package com.sap.sailing.polars.data.impl;
 
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.polars.data.BoatAndWindSpeedWithOriginInfo;
 
 public class BoatAndWindSpeedWithOriginInfoImpl implements BoatAndWindSpeedWithOriginInfo {
 

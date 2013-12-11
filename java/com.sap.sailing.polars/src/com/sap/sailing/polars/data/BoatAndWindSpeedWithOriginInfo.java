@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.polarsheets;
+package com.sap.sailing.polars.data;
 
 import com.sap.sailing.domain.common.Speed;
 

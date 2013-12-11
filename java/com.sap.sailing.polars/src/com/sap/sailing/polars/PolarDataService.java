@@ -1,9 +1,16 @@
 package com.sap.sailing.polars;
 
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public interface PolarDataService {
 
@@ -72,5 +79,20 @@ public interface PolarDataService {
      * @return The average speed of the given boat class at the given bearing difference to the wind.
      */
     Speed getAverageReachingSpeedFor(BoatClass boatClass, Speed windSpeed, Bearing bearingDifferenceToWind);
+
+    /**
+     * Generates a polar sheet for geven races and settings using the provided executor for the worker threads. This
+     * method does not access a cache for now.
+     * 
+     * @param trackedRaces
+     *            The set of races to generate the diagram for.
+     * @param settings
+     *            Settings as supplied by the user.
+     * @param executor
+     *            The executor to run the worker threads with.
+     * @return The generated polar sheet with meta data.
+     */
+    PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
+            Executor executor) throws InterruptedException, ExecutionException;
 
 }

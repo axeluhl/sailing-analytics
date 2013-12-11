@@ -156,7 +156,6 @@ import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
@@ -252,6 +251,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -360,6 +361,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final SwissTimingReplayService swissTimingReplayService;
 
+    private PolarDataService polarDataService;
+
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
@@ -399,6 +402,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
+        polarDataService = PolarDataServiceFactory.createStandardPolarDataService();
     }
 
     protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
@@ -3097,12 +3101,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, settings, executor);
-        genWorker.startPolarSheetGeneration();
         if (name == null || name.isEmpty()) {
             name = getCommonBoatClass(trackedRaces);
         }
-        PolarSheetsData result = genWorker.get();
+        PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
         return new PolarSheetGenerationResponseImpl(id, name, result);
     }
 

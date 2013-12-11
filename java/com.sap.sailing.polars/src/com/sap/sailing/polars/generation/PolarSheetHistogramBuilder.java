@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.polarsheets;
+package com.sap.sailing.polars.generation;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
+import com.sap.sailing.polars.data.DataPointWithOriginInfo;
 
 public class PolarSheetHistogramBuilder {
 
@@ -17,10 +18,10 @@ public class PolarSheetHistogramBuilder {
         this.settings = settings;
     }
 
-    public PolarSheetsHistogramData build(List<DataPointWithOriginInfo> dataPointsWithOriginInfo, int angleIndex,
+    public PolarSheetsHistogramData build(List<DataPointWithOriginInfo> rawData, int angleIndex,
             double coefficiantOfVariation) {
-        DataPointWithOriginInfo minPoint = Collections.min(dataPointsWithOriginInfo);
-        DataPointWithOriginInfo maxPoint = Collections.max(dataPointsWithOriginInfo);
+        DataPointWithOriginInfo minPoint = Collections.min(rawData);
+        DataPointWithOriginInfo maxPoint = Collections.max(rawData);
 
         Double min = minPoint.getRawData();
         Double max = maxPoint.getRawData();
@@ -39,7 +40,7 @@ public class PolarSheetHistogramBuilder {
         for (int i = 0; i < yValues.length; i++) {
             yValues[i] = 0;
         }
-        for (DataPointWithOriginInfo dataPoint : dataPointsWithOriginInfo) {
+        for (DataPointWithOriginInfo dataPoint : rawData) {
             double notRoundedYet = (dataPoint.getRawData() - min) / range;
             int u = (int) notRoundedYet;
             if (u == numberOfColumns) {
@@ -61,7 +62,7 @@ public class PolarSheetHistogramBuilder {
         
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues,
-                yValuesByGaugeIds, yValuesByDay, yValuesByDayAndGaugeId, dataPointsWithOriginInfo.size(), coefficiantOfVariation);
+                yValuesByGaugeIds, yValuesByDay, yValuesByDayAndGaugeId, rawData.size(), coefficiantOfVariation);
         return histogramData;
     }
 

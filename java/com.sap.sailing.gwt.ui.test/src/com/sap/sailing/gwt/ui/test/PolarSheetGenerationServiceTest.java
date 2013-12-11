@@ -81,7 +81,6 @@ public class PolarSheetGenerationServiceTest {
         
         PolarSheetsData results = triggerData.getData();
         
-        Assert.assertTrue(results.isComplete());
         Assert.assertNotNull(results);
         
         Assert.assertEquals(4, results.getDataCount());

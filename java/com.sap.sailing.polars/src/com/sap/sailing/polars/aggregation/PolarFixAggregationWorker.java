@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.polarsheets;
+package com.sap.sailing.polars.aggregation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,21 +20,21 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.polars.data.PolarFix;
+import com.sap.sailing.polars.data.impl.PolarFixImpl;
 
 /**
- * Iterates through the fixes of one competitor in one tracked race and fills the {@link PolarSheetGenerationWorker}
+ * Iterates through the fixes of one competitor in one tracked race and fills the {@link PolarFixAggregator}
  * with datapoints that are found for the speed of the boat and its angle to the wind
  * 
  * @author D054528 Frederik Petersen
  * 
  */
-public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable {
-    
-    // private static final Logger logger = Logger.getLogger(PerRaceAndCompetitorPolarSheetGenerationWorker.class.getName());
+public class PolarFixAggregationWorker implements Runnable {
 
     private final TrackedRace race;
 
-    private final PolarSheetGenerationWorker polarSheetGenerationWorker;
+    private final PolarFixAggregator polarSheetGenerationWorker;
 
     private TimePoint startTime;
 
@@ -50,8 +50,8 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
 
     private PolarSheetGenerationSettings settings;
 
-    public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race,
-            PolarSheetGenerationWorker polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
+    public PolarFixAggregationWorker(TrackedRace race,
+            PolarFixAggregator polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
             Competitor competitor, PolarSheetGenerationSettings settings) {
         super();
         this.race = race;
@@ -157,9 +157,9 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable 
                         .getB();
                 if (windWithConfidence != null && windWithConfidence.useSpeed()
                         && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
-                    PolarFix polarFix = new PolarFix(fix, race, track, windWithConfidence.getObject(),
+                    PolarFix polarFix = new PolarFixImpl(fix, race, track, windWithConfidence.getObject(),
                             settings, windWithSourceIdStringPair.getA());
-                    polarSheetGenerationWorker.addPolarData(polarFix);
+                    polarSheetGenerationWorker.addPolarFix(polarFix);
                 }
             }
         }
