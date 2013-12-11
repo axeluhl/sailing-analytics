@@ -64,10 +64,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
     }
 
-    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllMarkPasses() {
-        return currentMarkPasses;
-    }
-
     @Override
     public void calculateMarkPassDeltas(
             Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
