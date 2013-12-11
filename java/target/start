@@ -27,6 +27,14 @@ fi
 scriptdir=`dirname "$0"`
 LIB_DIR=`pwd`/native-libraries
 
+if [[ ! -d `pwd`/logs ]]; then
+    mkdir logs
+fi
+
+if [[ ! -d `pwd`/tmp ]]; then
+    mkdir tmp
+fi
+
 echo "Script directory is $scriptdir and LIB_DIR is $LIB_DIR"
 
 # Make really sure that parameters from config.ini are not used
