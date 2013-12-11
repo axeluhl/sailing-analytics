@@ -78,6 +78,8 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
         # give instances on amazon more time to start because
         # they may be influenced by the server's boot process
         echo "Be aware of the fact that starting amazon instances takes up to two minutes!"
+        sleep 15
+        echo "Your instance should now be ready - waiting some more minutes before checking state..."
         sleep 120
     else
         sleep 10
