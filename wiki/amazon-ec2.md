@@ -251,11 +251,6 @@ Here are the steps to create a load balanced setup:
 - Associate all your instances
 - Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
 
-Two things are still needed before this setup can be executed:
-
-- Make it possible to configure instances that way that they automatically connect to a master upon start
-- Check what happens if the ELB acts as a transparent proxy not revealing the underlying instance name and address (should be)
-
 Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 ### Access MongoDB database
