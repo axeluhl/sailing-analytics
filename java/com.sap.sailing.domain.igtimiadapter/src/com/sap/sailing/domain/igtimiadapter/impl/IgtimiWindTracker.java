@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,9 +98,17 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
      * tracking or now, whichever came first.
      */
     public static TimePoint getReceivingStartTime(DynamicTrackedRace trackedRace) {
-        return Collections.min(
-                Arrays.asList(new TimePoint[] { trackedRace.getStartOfRace(), trackedRace.getStartOfTracking(),
-                        MillisecondsTimePoint.now() })).minus(TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS);
+        List<TimePoint> startCandidates = new ArrayList<>();
+        final TimePoint startOfRace = trackedRace.getStartOfRace();
+        if (startOfRace != null) {
+            startCandidates.add(startOfRace);
+        }
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking != null) {
+            startCandidates.add(startOfTracking);
+        }
+        startCandidates.add(MillisecondsTimePoint.now());
+        return Collections.min(startCandidates).minus(TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS);
     }
 
     @Override
