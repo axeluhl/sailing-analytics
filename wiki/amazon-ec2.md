@@ -57,7 +57,7 @@ USE_ENVIRONMENT=
 - Fire up a master with the following configuration. There is a preconfigured master environment at http://releases.sapsailing.com/environments/live-master-server that you should use.
 
 <pre>
-INSTALL_FROM_RELEASE=<name-of-release>
+INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
@@ -66,11 +66,11 @@ SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
 - After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data!
 
 <pre>
-INSTALL_FROM_RELEASE=<name-of-release>
+INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
-REPLICATE_MASTER_SERVLET_HOST=<IP of your master server>
-BUILD_COMPLETE_NOTIFY=
+REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=
 </pre>
 
 ## Costs per month
