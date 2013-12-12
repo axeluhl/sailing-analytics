@@ -245,7 +245,7 @@ A closer look reveals that an ELB instance consists itself of many other invisib
 
 Here are the steps to create a load balanced setup:
 
-- Create a master instance holding all data
+- Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
 - Create `n` instances that are configured to connect to the master server
 - Create a load balancer that redirects everything from port 80 to let's say port 8888.
 - Associate all your instances
