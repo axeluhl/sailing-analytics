@@ -110,7 +110,7 @@ install_environment ()
         mkdir $SERVER_HOME/environment
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-        echo "# Environment: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+        echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> $SERVER_HOME/env.sh
 
