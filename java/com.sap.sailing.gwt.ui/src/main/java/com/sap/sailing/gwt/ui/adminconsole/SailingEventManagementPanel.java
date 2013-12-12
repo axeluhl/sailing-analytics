@@ -43,9 +43,8 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 /**
- * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event is not
- * connected with any regatta and it used only to manage of basic attributes of the an event.
- * 
+ * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
+ * is not connected with any regatta and it used only to manage of basic attributes of the an event.
  * @author Frank Mittag (C5163974)
  * 
  */
@@ -277,7 +276,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove the events:" + caught.getMessage());
                 }
-
                 @Override
                 public void onSuccess(Void result) {
                     fillEvents();
@@ -290,8 +288,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         sailingService.removeEvent(event.id, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove event " + event.getName() + ": "
-                        + caught.getMessage());
+                errorReporter.reportError("Error trying to remove event " + event.getName() + ": " + caught.getMessage());
             }
 
             @Override
@@ -303,71 +300,70 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private void openCreateEventDialog() {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
-        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
-                stringMessages, new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), stringMessages,
+                new DialogCallback<EventDTO>() {
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(EventDTO newEvent) {
-                        createNewEvent(newEvent);
-                    }
-                });
+            @Override
+            public void ok(EventDTO newEvent) {
+                createNewEvent(newEvent);
+            }
+        });
         dialog.show();
     }
 
     private void openEditEventDialog(final EventDTO selectedEvent) {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
         existingEvents.remove(selectedEvent);
-        EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),
-                stringMessages, new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+        EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents), stringMessages,
+                new DialogCallback<EventDTO>() {
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(EventDTO updatedEvent) {
-                        updateEvent(selectedEvent, updatedEvent);
-                    }
-                });
+            @Override
+            public void ok(EventDTO updatedEvent) {
+                updateEvent(selectedEvent, updatedEvent);
+            }
+        });
         dialog.show();
     }
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
         List<String> regattaNames = new ArrayList<String>();
-        // for(RegattaDTO regatta: updatedEvent.regattas) {
-        // regattaNames.add(regatta.name);
-        // }
+        //      for(RegattaDTO regatta: updatedEvent.regattas) {
+        //          regattaNames.add(regatta.name);
+        //      }
         List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
 
         sailingService.updateEvent(oldEvent.getName(), oldEvent.id, updatedEvent.venue, updatedEvent.publicationUrl,
                 updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": "
-                                + t.getMessage());
-                    }
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
+            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        fillEvents();
-                        if (!oldEvent.getName().equals(updatedEvent.getName())) {
-                            sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void result) {
-                                    fillEvents();
-                                }
-
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    errorReporter.reportError("Error trying to rename sailing event "
-                                            + oldEvent.getName() + ": " + t.getMessage());
-                                }
-                            });
+            @Override
+            public void onSuccess(Void result) {
+                fillEvents();
+                if (!oldEvent.getName().equals(updatedEvent.getName())) {
+                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            fillEvents();
                         }
-                    }
-                });
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
+                                            
+                        }
+                    });
+                }
+            }
+        });
 
         if (courseAreasToAdd.size() > 0) {
             for (CourseAreaDTO courseArea : courseAreasToAdd) {
@@ -375,8 +371,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
                     @Override
                     public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to add course area to sailing event "
-                                + oldEvent.getName() + ": " + t.getMessage());
+                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName() + ": " + t.getMessage());
                     }
 
                     @Override
@@ -422,19 +417,18 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingService.createEvent(newEvent.getName(), newEvent.venue.getName(), newEvent.publicationUrl,
-                newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": "
-                                + t.getMessage());
-                    }
+        sailingService.createEvent(newEvent.getName(), newEvent.venue.getName(), newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
+                                
+            }
 
-                    @Override
-                    public void onSuccess(EventDTO newEvent) {
-                        fillEvents();
-                    }
-                });
+            @Override
+            public void onSuccess(EventDTO newEvent) {
+                fillEvents();
+            }
+        });
     }
 
     public void fillEvents() {
