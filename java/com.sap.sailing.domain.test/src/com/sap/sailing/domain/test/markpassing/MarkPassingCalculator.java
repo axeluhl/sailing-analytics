@@ -41,7 +41,8 @@ public class MarkPassingCalculator {
         finder = new CandidateFinder(race);
         chooser = new CandidateChooser(race);
         for (Competitor c : race.getRace().getCompetitors()) {
-            executor.execute(new ComputeMarkPassings(c, true));
+            finder.reCalculateAllFixes(c);
+            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
         }
         if (listen) {
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();

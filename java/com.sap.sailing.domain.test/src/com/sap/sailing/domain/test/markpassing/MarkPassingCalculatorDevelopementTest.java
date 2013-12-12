@@ -37,9 +37,6 @@ public class MarkPassingCalculatorDevelopementTest extends OnlineTracTracBasedTe
 
     private boolean forceReload = true;
 
-    
-   
-
     @Test
     public void testTornado4() throws IOException, InterruptedException, URISyntaxException {
         System.out.println("Tornado Race 4");
