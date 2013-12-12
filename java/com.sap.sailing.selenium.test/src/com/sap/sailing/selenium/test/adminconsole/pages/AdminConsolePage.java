@@ -38,9 +38,6 @@ public class AdminConsolePage extends HostPage {
     
     private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
 
-    
-    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
-    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
