@@ -56,11 +56,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
             candidates.put(c, new ArrayList<Candidate>());
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
             allEdges.put(c, new ArrayList<Edge>());
-            this.candidates.get(c).add(start);
-            this.candidates.get(c).add(end);
+            candidates.get(c).add(start);
+            candidates.get(c).add(end);
             allEdges.get(c).add(new Edge(start, end, 0));
-            createNewEdges(c, this.candidates.get(c));
-            findShortestPath(c);
         }
     }
 

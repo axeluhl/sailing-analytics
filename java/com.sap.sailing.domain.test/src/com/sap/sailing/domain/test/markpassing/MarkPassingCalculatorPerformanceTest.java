@@ -1,0 +1,83 @@
+package com.sap.sailing.domain.test.markpassing;
+
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
+
+public class MarkPassingCalculatorPerformanceTest {
+
+    private Competitor bob = new CompetitorImpl("Bob", "bob", null, null, null);
+    private Mark m = new MarkImpl("black");
+    private Mark m2 = new MarkImpl("white 1");
+    private Mark m3 = new MarkImpl("white 2");
+    private ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(m2, m3, "cp");
+    private Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
+    private Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);
+    private Waypoint w3 = new WaypointImpl(cp, PassingInstruction.Gate);
+    private Waypoint w4 = new WaypointImpl(m, PassingInstruction.Port);
+    private Waypoint w5 = new WaypointImpl(cp, PassingInstruction.Line);
+
+    private DynamicTrackedRace trackedRace;
+    private CandidateFinder finder;
+    private CandidateChooser chooser;
+
+    @Before
+    public void setUp() throws Exception {
+        Regatta r = new RegattaImpl("regatta", new BoatClassImpl("boat", true), Arrays.asList(new SeriesImpl("Series",
+                true, Arrays.asList(new FleetImpl("fleet")), new ArrayList<String>(), null)), true, new HighPoint(),
+                "ID", new CourseAreaImpl("area", new UUID(5, 5)));
+        Course course = new CourseImpl("course", Arrays.asList(w1, w2, w3, w4, w5));
+        RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true),
+                Arrays.asList(bob));
+        trackedRace = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), race, new ArrayList<Sideline>(),
+                new EmptyWindStore(), 0, 10000, 10000);
+
+        finder = new CandidateFinder(trackedRace);
+        chooser = new CandidateChooser(trackedRace);
+        trackedRace.recordFix(m, new GPSFixImpl(new DegreePosition(37.888796,-122.279602), new MillisecondsTimePoint(System.currentTimeMillis())));
+        trackedRace.recordFix(m2, new GPSFixImpl(new DegreePosition(37.889653,-122.268991), new MillisecondsTimePoint(System.currentTimeMillis())));
+        trackedRace.recordFix(m3, new GPSFixImpl(new DegreePosition(37.887936,-122.268841), new MillisecondsTimePoint(System.currentTimeMillis())));
+
+    }
+
+    @Test
+    public void test() {
+        
+
+    }
+
+}
