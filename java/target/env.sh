@@ -1,8 +1,11 @@
 #!/bin/sh
 
 # This file contains the configuration for the Java server
-# Make sure to always also check the variables at the end
-# of this file as there could be overwritten ones.
+
+# *******************************************************
+# ATTENTION: Make sure to always also check the variables at the end
+# of this file as there could be overwritten ones!
+# *******************************************************
 
 SERVER_NAME=MASTER
 
@@ -19,10 +22,19 @@ MONGODB_HOST=localhost
 MONGODB_PORT=27017
 EXPEDITION_PORT=2010
 
-# Start replication upon startup
+# Start replication upon startup?
+# If you activate this make sure to
+# set the REPLICATION_CHANNEL to the
+# same channel the master is using
 REPLICATE_ON_START=False
+
+# Host where the master Java instance is running
+# Make sure firewall configurations allow access
 REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
+
+# Host and port where RabbitMQ is running 
+# (port is normally something like 5672)
 REPLICATE_MASTER_QUEUE_HOST=
 REPLICATE_MASTER_QUEUE_PORT=
 
@@ -36,11 +48,11 @@ CODE_DIRECTORY=code
 
 # Specify an email adress that should be notified
 # whenever a build or install has been completed
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=
 
 # Specify an email address that should be notified
 # whenever the server has been started
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=
 
 # Specify filename that is usually located at
 # http://release.sapsailing.com/ that should

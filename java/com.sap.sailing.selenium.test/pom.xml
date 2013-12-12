@@ -73,13 +73,6 @@
                             </dependencies>
                             
                             <bundleStartLevel>
-                                <!-- This bundle should only be deployed in a test environment! -->
-                                <bundle>
-                                    <id>com.sap.sailing.server.gatway.test.support</id>
-                                    <level>5</level>
-                                    <autoStart>true</autoStart>
-                                </bundle>
-                                
                                 <bundle>
                                     <id>com.sap.sailing.ess40.resultimport</id>
                                     <level>3</level>

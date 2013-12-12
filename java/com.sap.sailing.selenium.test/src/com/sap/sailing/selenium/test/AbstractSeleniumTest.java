@@ -3,7 +3,6 @@ package com.sap.sailing.selenium.test;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -29,7 +28,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.Selenium;
 import com.sap.sailing.selenium.core.TestEnvironment;
-import com.sap.sailing.selenium.core.WindowManager;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -41,16 +39,12 @@ import com.sap.sailing.selenium.core.WindowManager;
  */
 @RunWith(Selenium.class)
 public abstract class AbstractSeleniumTest {
-    private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
-    
-    private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
-    
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     
     // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
-    //private class ScreenShotRule extends TestWatcher {
+    //private class ScreenShotRule2 extends TestWatcher {
     //    
     //}
     
@@ -62,29 +56,6 @@ public abstract class AbstractSeleniumTest {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-        }
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * @param contextRoot
-     * 
-     * @return
-     *   <code>true</code> if the state was reseted successfully and <code>false</code> otherwise.
-     */
-    protected static void clearState(String contextRoot) {
-        try {
-            URL url = new URL(contextRoot + CLEAR_STATE_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.connect();
-            
-            if(connection.getResponseCode() != CLEAR_STATE_SUCCESFUL_STATUS_CODE) {
-                throw new RuntimeException(connection.getResponseMessage());
-            }
-        } catch(IOException exception) {
-            throw new RuntimeException(exception);
         }
     }
     
@@ -120,18 +91,7 @@ public abstract class AbstractSeleniumTest {
     protected WebDriver getWebDriver() {
         return this.environment.getWebDriver();
     }
-    
-    /**
-     * <p>Returns the window manager for the used web driver, which can be used to open new windows and switching
-     *   between multiple windows.</p>
-     * 
-     * @return
-     *   The window manager for the used web driver.
-     */
-    protected WindowManager getWindowManager() {
-        return this.environment.getWindowManager();
-    }
-    
+        
     /**
      * <p>Captures a screen shot and saves the picture as an PNG file under the given file name. The complete path to
      *   the stored picture consists of the screenshot folder, as defined in the test environment, and the given

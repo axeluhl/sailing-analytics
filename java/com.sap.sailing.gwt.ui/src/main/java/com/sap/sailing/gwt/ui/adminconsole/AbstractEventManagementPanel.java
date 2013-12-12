@@ -28,7 +28,6 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         // TrackedEventsComposite should exist in every *ManagementPanel. 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, /* multiselection */ true);
-        trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
     
     @Override

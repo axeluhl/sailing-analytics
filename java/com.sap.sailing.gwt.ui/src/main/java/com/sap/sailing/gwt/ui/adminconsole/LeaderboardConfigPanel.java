@@ -1120,7 +1120,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 });
             }
         });
-        dialog.ensureDebugId("FlexibleLeaderboardCreateDialog");
+        dialog.ensureDebugId("CreateFlexibleLeaderboardDialog");
         dialog.show();
     }
 

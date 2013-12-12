@@ -234,11 +234,9 @@ if [[ $OPERATION == "auto-install" ]]; then
         if [[ $INSTALL_FROM_RELEASE != "" ]]; then
             load_from_release_file
         else
-            if [[ $BUILD_BEFORE_START == "True" ]]; then
-                checkout_code
-                build
-                deploy
-            fi
+            checkout_code
+            build
+            deploy
         fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."

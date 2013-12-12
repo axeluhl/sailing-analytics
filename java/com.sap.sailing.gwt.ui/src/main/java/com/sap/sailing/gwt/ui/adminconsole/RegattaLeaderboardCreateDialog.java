@@ -16,17 +16,14 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
         super(stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringMessages, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
 
         nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("LeaderboardNameField");
         displayNameTextBox = createTextBox(null);
-        displayNameTextBox.ensureDebugId("DisplayNameField");
-        
+
         // the name of the regatta leaderboard will be derived from the selected regatta
         nameTextBox.setEnabled(false);
         nameTextBox.setVisibleLength(50);
         displayNameTextBox.setVisibleLength(50);
 
         regattaListBox = createSortedRegattaListBox(existingRegattas, null);
-        regattaListBox.ensureDebugId("RegattaDropDown");
         regattaListBox.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event) {
                 int selectedIndex = regattaListBox.getSelectedIndex();
