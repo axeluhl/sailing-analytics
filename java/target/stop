@@ -2,7 +2,12 @@
 
 . `pwd`/env.sh
 
-TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
+if [[ `uname` != "Darwin" ]]; then
+    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$TELNET_PORT"`
+else
+    TELNET_ACTIVE=`netstat -an 2>/dev/null | grep ".$TELNET_PORT"`
+fi
+
 if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         echo "Could not find server on telnet port $TELNET_PORT. Perhaps server is not running?"
         if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then

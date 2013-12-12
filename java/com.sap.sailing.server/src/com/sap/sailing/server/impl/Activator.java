@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -35,8 +34,7 @@ public class Activator implements BundleActivator {
 
         // register the racing service in the OSGi registry
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
-        context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
-        
+
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }

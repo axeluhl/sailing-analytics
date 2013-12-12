@@ -25,7 +25,7 @@ public class BySeleniumId extends By {
     private String id;
     
     /**
-     * <p>Creates a new location mechanism which searches for an element or a list of elements with the given
+     * <p>Creates a new location mechanism which search for an element or a list of elements with the given
      *   identifier.</p>
      * 
      * @param id

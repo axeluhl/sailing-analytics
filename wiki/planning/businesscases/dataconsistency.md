@@ -50,6 +50,9 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
   * Remove outliers from calculation
   * Remove incomplete entities from calculation (if possible, otherwise return "n/a")
   * Adapt to missing data or changed sampling rate
+* Overall Measures of System State
+  * Overall Consistency
+  * Overall Confidence
 
 ### Description
 
@@ -84,6 +87,8 @@ For time series data, like GPS-tracks and wind measurements, detected faulty raw
 #### Robustness of Aggregate Calculations
 
 Aggregate calculations depend on a set of raw data and are influenced by intermittent faulty raw data as determined by outlier state, as well as, incomplete raw data as determined by the completeness state. In order to do automatically identify constellations in which parts of the raw data due to faultiness or incompleteness should be ignored, all aggregate calculations have to incorporate outlier state and completeness state to compute plausible results also in special raw data constellations.
+
+#### Overall Measures of System State
 
 ### Synergies
 

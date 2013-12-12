@@ -72,6 +72,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -116,6 +117,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -147,10 +149,9 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 
-public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, Replicator {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -273,7 +274,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         expeditionWindTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
-        this.competitorStore = competitorStore;
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -298,55 +298,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         this.windStore = windStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
-        
-        loadStoredData();
+
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        this.competitorStore = competitorStore;
+        loadStoredEvents();
+        loadStoredRegattas();
+        loadRaceIDToRegattaAssociations();
+        loadStoredLeaderboardsAndGroups();
+        loadMediaLibary();
         loadStoredDeviceConfigurations();
-    }
-    
-    /**
-     * <p>Wipes out the complete state including all persisted data. Note that this method is only used or testing.</p>
-     * 
-     *  <p>The clearing of the state consists of multiple steps which have to be execute in the specified order:</p>
-     * 
-     * <ol>
-     *   <li>Removing of all leaderboard groups, which removes all overall leaderboards of the leaderboards implicit.</li>
-     *   <li>Removing of all remaining leaderboards.</li>
-     *   <li>Stopping of the tracking for all regattas and removing the regattas, which also removes all races.</li>
-     *   <li>Removing all events.</li>
-     *   <li>Removing all media tracks.</li>
-     * </ol>
-     * 
-     * 
-     * <p><b>ATTENTION: This method should only be called in an isolated test environment and never in a productive
-     *   system since all stored data will be lost!</b></p>
-     * 
-     * @throws Exception
-     *   
-     */
-    @Override
-    public void clearState() throws Exception {
-        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
-            removeLeaderboardGroup(leaderboardGroupName);
-        }
-        
-        for(String leaderboardName : this.leaderboardsByName.keySet()) {
-            removeLeaderboard(leaderboardName);
-        }
-        
-        for(Regatta regatta : this.regattasByName.values()) {
-            stopTracking(regatta);
-            removeRegatta(regatta);
-        }
-        
-        for(Event event : this.eventsById.values()) {
-            removeEvent(event.getId());
-        }
-        
-        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
-            mediaTrackDeleted(mediaTrack);
-        }
-        
-        loadStoredData();
     }
 
     @Override
@@ -2047,18 +2010,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
             }
         }
-    }
-    
-    private void loadStoredData() {
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
-        loadStoredRegattas();
-        loadRaceIDToRegattaAssociations();
-        loadStoredLeaderboardsAndGroups();
-        loadMediaLibary();
     }
 
     @Override
