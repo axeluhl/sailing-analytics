@@ -1,8 +1,13 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -45,6 +50,8 @@ public class AdminConsolePage extends HostPage {
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
     
+    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
+    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -57,7 +64,14 @@ public class AdminConsolePage extends HostPage {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
-        
+        try {
+            Alert alert = driver.switchTo().alert();
+            if (alert != null) {
+                alert.accept();
+            }
+        } catch (NoAlertPresentException e) {
+            logger.log(Level.SEVERE, "Exception during switchTo", e);
+        }
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
 //        FluentWait<WebDriver> wait = createFluentWait<>(driver);
 //        wait.withTimeout(5, TimeUnit.SECONDS);
@@ -128,13 +142,25 @@ public class AdminConsolePage extends HostPage {
     private WebElement goToTab(String label, final String id) {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
-        
+        int maxScrollActions = 20;
+        while (!tab.isDisplayed() && maxScrollActions-- > 0) {
+            FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
+            wait.withTimeout(10, TimeUnit.SECONDS);
+            wait.pollingEvery(2, TimeUnit.SECONDS);
+            WebElement scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
+                    By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
+            scroller = scroller.findElement(By.tagName("img"));
+
+            scroller.click();
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        }
+        logger.log(Level.INFO, String.format("Scrolled %d times.", 20 - maxScrollActions));
         tab.click();
-        
         // Wait for the tab content to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
+        wait.withTimeout(30, TimeUnit.SECONDS);
+        wait.pollingEvery(5, TimeUnit.SECONDS);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
-                
         return content;
     }
 }
