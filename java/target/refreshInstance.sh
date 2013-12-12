@@ -59,23 +59,33 @@ checks ()
     if [[ $DEPLOY_TO == "" ]]; then
         DEPLOY_TO=server
     fi
+
+    SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
+
+    if [[ ! -d $SERVER_HOME ]]; then
+        SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
+        if [[ ! -d $SERVER_HOME ]]; then
+            echo "Could not find the correct directory for the server - assumed $SERVER_HOME. Adapt DEPLOY_TO in env.sh to point to the right server directory."
+            exit 10
+        fi
+    fi
 }
 
 activate_user_data ()
 {
-    echo "Reading user-data provided by Amazon instance data to $USER_HOME/servers/$DEPLOY_TO/env.sh"
+    echo "Reading user-data provided by Amazon instance data to $SERVER_HOME/env.sh"
 
     # make backup of original file
-    cp $USER_HOME/servers/$DEPLOY_TO/env.sh $USER_HOME/servers/$DEPLOY_TO/environment/env.sh.backup
+    cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
-    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-    echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-    echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-    echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
 
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     for var in $VARS; do
-        echo $var >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+        echo $var >> $SERVER_HOME/env.sh
         echo "Activated: $var"
     done
     
@@ -86,8 +96,8 @@ activate_user_data ()
         echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
     fi
 
-    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-    echo "# User-Data: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
+    echo "# User-Data: END" >> $SERVER_HOME/env.sh
     echo "Updated env.sh with data from user-data field!"
     echo ""
 }
@@ -96,19 +106,19 @@ install_environment ()
 {
     if [[ $USE_ENVIRONMENT != "" ]]; then
         # clean up directory to really make sure that there are no files left
-        rm -rf $USER_HOME/servers/$DEPLOY_TO/environment
-        mkdir $USER_HOME/servers/$DEPLOY_TO/environment
+        rm -rf $SERVER_HOME/environment
+        mkdir $SERVER_HOME/environment
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
-        echo "# Environment: START ($DATE_OF_EXECUTION)" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-        cat $USER_HOME/servers/server/environment/$USE_ENVIRONMENT >> $USER_HOME/servers/$DEPLOY_TO/env.sh
-        echo "# Environment: END" >> $USER_HOME/servers/$DEPLOY_TO/env.sh
+        echo "# Environment: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+        cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
+        echo "# Environment: END" >> $SERVER_HOME/env.sh
 
         # make sure to reload data
         source `pwd`/env.sh
         if [[ $DEPLOY_TO == "" ]]; then
             DEPLOY_TO=server
-            echo "DEPLOY_TO=server" >> $USER_HOME/servers/server/env.sh
+            echo "DEPLOY_TO=server" >> $SERVER_HOME/env.sh
         fi
 
         echo "Updated env.sh with data from environment file!"
@@ -121,8 +131,8 @@ load_from_release_file ()
 {
     if [[ $INSTALL_FROM_RELEASE != "" ]]; then
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID starting" $BUILD_COMPLETE_NOTIFY
-        cd $USER_HOME/servers/$DEPLOY_TO
-        rm -f $USER_HOME/servers/server/$INSTALL_FROM_RELEASE.tar.gz*
+        cd $SERVER_HOME
+        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
         rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
         echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
         wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
@@ -187,14 +197,14 @@ deploy ()
         DEPLOY="-s $DEPLOY_TO"
     fi
 
-    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install > $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt
+    $PROJECT_HOME/configuration/buildAndUpdateProduct.sh -u $DEPLOY install > $SERVER_HOME/last_automatic_build.txt
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | mail -a $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+        echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
     else
         echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | mail -a $USER_HOME/servers/$DEPLOY_TO/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
     fi 
 }
 
@@ -224,11 +234,9 @@ if [[ $OPERATION == "auto-install" ]]; then
         if [[ $INSTALL_FROM_RELEASE != "" ]]; then
             load_from_release_file
         else
-            if [[ $BUILD_BEFORE_START == "True" ]]; then
-                checkout_code
-                build
-                deploy
-            fi
+            checkout_code
+            build
+            deploy
         fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
@@ -243,20 +251,21 @@ elif [[ $OPERATION == "install-release" ]]; then
     fi
 
     # Honor the no-overrite setting if there is one
-    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+    if [ -f $SERVER_HOME/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         load_from_release_file
+        echo "ATTENTION: This new release code is not active yet. Make sure to restart the server if it is running!"
     fi
 
-elif [[ $OPERATION == "update-env" ]]; then
+elif [[ $OPERATION == "install-env" ]]; then
     USE_ENVIRONMENT=$PARAM
     if [[ $USE_ENVIRONMENT == "" ]]; then
         echo "You need to provide the name of an environment from http://releases.sapsailing.com/environments"
         exit 1
     fi
 
-    if [ ! -f $USER_HOME/servers/$DEPLOY_TO/no-overwrite ]; then
+    if [ -f $SERVER_HOME/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
     else
         install_environment
@@ -281,12 +290,13 @@ elif [[ $OPERATION == "update-env" ]]; then
         echo "JAVA_HOME: $JAVA_HOME"
         echo "INSTANCE_ID: $INSTANCE_ID"
         echo ""
+        echo "ATTENTION: This new configuration is not active yet. Make sure to restart the server if it is running!"
     fi
 else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
-    echo "update-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
+    echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
     exit 0
 fi
 

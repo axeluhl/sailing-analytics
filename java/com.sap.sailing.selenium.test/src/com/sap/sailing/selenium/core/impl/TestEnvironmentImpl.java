@@ -5,7 +5,6 @@ import java.net.URL;
 import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.core.TestEnvironment;
-import com.sap.sailing.selenium.core.WindowManager;
 
 /**
  * <p>Default implementation of the test environment.</p>
@@ -15,7 +14,6 @@ import com.sap.sailing.selenium.core.WindowManager;
  */
 public class TestEnvironmentImpl implements TestEnvironment {
     private WebDriver driver;
-    private WindowManager manager;
     private String root;
     private URL screenshots;
     
@@ -33,18 +31,11 @@ public class TestEnvironmentImpl implements TestEnvironment {
         this.driver = driver;
         this.root = root;
         this.screenshots = screenshots;
-        
-        this.manager = new WindowManager(driver);
     }
     
     @Override
     public WebDriver getWebDriver() {
         return this.driver;
-    }
-
-    @Override
-    public WindowManager getWindowManager() {
-        return this.manager;
     }
 
     @Override
