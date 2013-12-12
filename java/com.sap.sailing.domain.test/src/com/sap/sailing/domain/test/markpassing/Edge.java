@@ -4,7 +4,7 @@ public class Edge {
     private Candidate start;
     private Candidate end;
     private final double penaltyForSkipped;
-    double timeEstimationOrCloseStartsProbability;
+    private double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
         this.start = start;

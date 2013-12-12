@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.maptrack.utils.Pair;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -18,14 +18,14 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 public class CandidateChooser implements AbstractCandidateChooser {
 
-    LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
-    LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
-    LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
-    boolean raceHasStartTime;
-    Candidate start;
-    Candidate end;
-    DynamicTrackedRace race;
-    PolarSheetDeliverer polar = new PolarSheetDeliverer() {
+    private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
+    private LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
+    private LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
+    private boolean raceHasStartTime;
+    private Candidate start;
+    private Candidate end;
+    private DynamicTrackedRace race;
+    private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
 
         @Override
         public double getReaching(Wind w) {
@@ -65,8 +65,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
     @Override
     public void calculateMarkPassDeltas(
             Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
-            removeCandidates(candidateDeltas.second(), c);
-            addCandidates(candidateDeltas.first(), c);
+            removeCandidates(candidateDeltas.getB(), c);
+            addCandidates(candidateDeltas.getA(), c);
             findShortestPath(c);
     }
 
@@ -243,7 +243,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private void addCandidates(List<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
             candidates.get(co).add(c);
-            if (c.getID() == 1) {
+            if (c.getID() == 1&&race.getStartOfRace()==null) {
                 reEvaluateStartingEdges();
             }
         }

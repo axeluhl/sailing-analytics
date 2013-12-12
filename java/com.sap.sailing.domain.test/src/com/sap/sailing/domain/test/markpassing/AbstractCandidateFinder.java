@@ -2,7 +2,8 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.List;
 
-import com.maptrack.utils.Pair;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.tracking.GPSFix;

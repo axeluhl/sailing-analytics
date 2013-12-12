@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeSet;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
-import com.maptrack.utils.Pair;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -22,7 +22,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private LinkedHashMap<Competitor, List<GPSFix>> affectedFixes = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, List<GPSFix>>> candidates = new LinkedHashMap<>();
-    TrackedRace race;
+    private TrackedRace race;
 
     // Calculate for some Waypoints instead of all?
 

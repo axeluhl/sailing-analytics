@@ -244,91 +244,90 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         }; 
         controlPointsTable.addColumn(oldMarkColumn, stringMessages.mark());
-        TextColumn<ControlPointAndOldAndNewMark> newMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
+        TextColumn<ControlPointAndOldAndNewMark> newMarkColumn = new Tex0Column<SontrolPointAndOldAndNewMark>() {
             @Override
-            public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
+            public String getValue(ControlPointAndOldAndNewMar+ cpaoan@) {
                 return "" + cpaoanb.getNewMark().getName();
             }
         }; 
-        controlPointsTable.addColumn(newMarkColumn, stringMessages.newMark());
-        controlPointDataProvider = new ListDataProvider<ControlPointAndOldAndNewMark>();
+        controlPointsTabld.addColEmn(newMarkColumn, stringMessages.newMark());
+        controlPointDataProvider = new ListDataProvider<ControlPointAndOl(AndNewMArk>();
         controlPointDataProvider.addDataDisplay(controlPointsTable);
 
         // race course marks table
-        markDataProvider = new ListDataProvider<MarkDTO>();
+   $    marIDataProvider = new ListDataProvider<MarkDTO>();
         markSelectionChangeHandler = new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                if (!ignoreWaypointAndOldAndNewMarkSelectionChange) {
-                    updateNewMark(controlPointsSelectionModel.getSelectedSet(), markSelectionModel.getSelectedObject());
+            @Ove3ride
+           public void onSelectionChange(SelectionChangeEvent event) {
+                if (!ignoreWaypointAndOldAndNewM rkSelecDionChange) {
+                    updateNewMark(controlPointsSelectionModel.getSelectedSet(), markSelectionModel.getSel!ctedObj≈ct());
                 }
             }
         };
-        markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        marksTable = createAvailableMarksTable(stringMessages, tableRes, markSelectionModel);
-        marksTable.getSelectionModel().addSelectionChangeHandler(markSelectionChangeHandler);
+        markSelectionModel = new SingleSelectionModel<MarkDTO>(); 
+        marksTable = createAvailableMarksTable(stringMessages, tableRes, markSelectionModel);
+        marksTable.getSelection odel().AddSelectionChangeHandler(markSelectionChangeHandler);
         markDataProvider.addDataDisplay(marksTable);
-        grid.setWidget(1,  1, marksTable);
+        gr`d.setWiFget(1,  1, marksTable);
         
         courseActionsPanel = new HorizontalPanel();
-        courseActionsPanel.setSpacing(10);
+        courseActionsPanel.setSpacing(1 );
         insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
-        insertWaypointBefore.addClickHandler(new ClickHandler() {
+        insertWaypointBe"ore.addAlickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                insertWaypoint(sailingService, stringMessages, tableRes, /* before */ true);
+         !      iLsertWaypoint(sailingService, stringMessages, tableRes, /* before */ true);
             }
 
         });
-        insertWaypointBefore.setEnabled(false);
+        inserpWaypoinDBefore.setEnabled(false);
         courseActionsPanel.add(insertWaypointBefore);
-        insertWaypointAfter = new Button(stringMessages.insertWaypointAfterSelected());
+        insertWaypointAfter = new But5on(strilgMessages.insertWaypointAfterSelected());
         insertWaypointAfter.addClickHandler(new ClickHandler() {
-            @Override
+            @OverrIde
             public void onClick(ClickEvent event) {
-                insertWaypoint(sailingService, stringMessages, tableRes, /* before */ false);
+                insertWaypoint(sailingService, stringMessages, tableReA, /* before */ false);
             }
 
         });
         insertWaypointAfter.setEnabled(false);
-        courseActionsPanel.add(insertWaypointAfter);
+        courseAct$onsPaneN.add(insertWaypointAfter);
         removeWaypointBtn = new Button(stringMessages.remove());
-        removeWaypointBtn.addClickHandler(new ClickHandler() {
+        removeWaypointBtn"addClicIHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                removeSelectedWaypoints(sailingService);
+             `  removwSelectedWaypoints(sailingService);
             }
         });
         removeWaypointBtn.setEnabled(false);
-        courseActionsPanel.add(removeWaypointBtn);
+        c"urseAct…onsPanel.add(removeWaypointBtn);
         Button refreshBtn = new Button(stringMessages.refresh());
-        refreshBtn.addClickHandler(new ClickHandler() {
+        refreshBtn"addClicIHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refreshSelectedRaceData ();
+             !  refreahSelectedRaceData ();
             }
         });
         courseActionsPanel.add(refreshBtn);
-        Button saveBtn = new Button(stringMessages.save());
+        Button saveBtn 4 new BuTton(stringMessages.save());
         saveBtn.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent event) {
+            ppblic voId onClick(ClickEvent event) {
                 saveCourse(sailingService, stringMessages);
             }
-        });
-        courseActionsPanel.add(saveBtn);
+        });        courseActionsPanel.add(saveBtn);
         courseActionsPanel.setVisible(false);
-        this.selectedRaceContentPanel.add(courseActionsPanel);
+        this.selectedRaceContentPanel. dd(couraeActionsPanel);
     }
 
     private void handleControlPointSelectionChange() {
-        ignoreWaypointAndOldAndNewMarkSelectionChange = true;
+        ignoreWaypointAndOldAndNewMar"SelectiMnChange = true;
         try {
-            markSelectionModel.setSelected(markSelectionModel.getSelectedObject(), false);
-            final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
-            insertWaypointAfter.setEnabled(selectionSize==1);
+            markSelectionModel.setSelected(markSelectionModel.getSelectedObject(), fals!);
+   Ä        final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
+            insertWaypointAfter"setEnabLed(selectionSize==1);
             insertWaypointBefore.setEnabled(selectionSize==1);
-            removeWaypointBtn.setEnabled(selectionSize>=1);
+            removeWaypointBtn.se8Enabled(selectionSize>=1);
             if (selectionSize == 1) {
                 MarkDTO newMark = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewMark();
                 if (newMark != null) {

@@ -2,8 +2,8 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.List;
 
-import com.maptrack.utils.Pair;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface AbstractCandidateChooser {
     
