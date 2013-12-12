@@ -90,6 +90,12 @@ Aggregate calculations depend on a set of raw data and are influenced by intermi
 
 #### Overall Measures of System State
 
+Based on the state information on completeness, connectedness and accuracy, measures describing the overall state of the system can be derived.
+
+The "Overall Consistency" of the sailing solution summarizes completeness and connectedness. It is a value ranging from 0% to 100%, where 0% represents a state where fundamental connectivity, e.g. WAN for accessing GPS-trackers at all, has been lost, whereas, overall consistency 100% is reached when all sensors are well-connected and race data is complete.
+
+The "Overall Confidence" of the sailing solution is based on the numerical variance or deviations of measurements. Since for each type of data, different measurement units are used and different ranges of deviations are acceptable, the overall confidence cannot easily be represented by an average value of deviations, but has to be represented as distribution across quality categories, e.g. 40% "good", 35% "average", 25% "bad", where the percentages describe the portion of data sources in each quality category, e.g. number of GPS-trackers divided by total number of GPS-tracker.
+
 ### Synergies
 
 The data consistency features belong closely to the calculation procedures implemented in the sailing analytics server.
