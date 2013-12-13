@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing;
+package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,8 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.markpassingcalculation.Candidate;
+import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -79,8 +81,8 @@ public class CandidateChooserPerformanceTest {
     }
 
     @Test
-    public void test1() {
-        testAddingCandidatesToChooser(100, 1);
+    public void test4() {
+        testAddingCandidatesToChooser(400, 1);
     }
 
     private void testAddingCandidatesToChooser(int numberOfCandidates, int numberToAdd) {
@@ -91,10 +93,10 @@ public class CandidateChooserPerformanceTest {
         time = System.currentTimeMillis();
         CandidateChooser c = new CandidateChooser(trackedRace);
         c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans, new ArrayList<Candidate>()));
-        Assert.assertTrue((System.currentTimeMillis() - time) < 2000);
+       time = System.currentTimeMillis() - time;
 
         ArrayList<Long> times = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             ArrayList<Candidate> old = new ArrayList<>();
             ArrayList<Candidate> ne = new ArrayList<>();
             for (int j = 0; j < numberToAdd; j++) {
@@ -109,7 +111,7 @@ public class CandidateChooserPerformanceTest {
         for (long l : times) {
             total = total + l;
         }
-        Assert.assertTrue(total / times.size() < 50);
+        Assert.assertTrue(total / times.size()<500);
     }
 
     private Candidate randomCan() {
