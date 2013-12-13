@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
@@ -137,6 +138,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 }
             });
         }
+        logger.info("Received "+Util.size(awsFixes)+" wind fixes");
         for (AWS aws : awsFixes) {
             try {
                 final Wind wind = getWind(aws.getTimePoint());

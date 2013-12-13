@@ -903,4 +903,6 @@ public interface StringMessages extends Messages {
     String igtimiWindImport();
     String seeIgtimiTabForAccountSettings();
     String importWindFromIgtimi();
+    String errorImportingIgtimiWind(String message);
+    String resultFromIgtimiWindImport(String string);
 }

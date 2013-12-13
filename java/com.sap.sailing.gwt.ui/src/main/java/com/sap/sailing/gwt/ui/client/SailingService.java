@@ -364,5 +364,5 @@ public interface SailingService extends RemoteService {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
-    void importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
+    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
 }

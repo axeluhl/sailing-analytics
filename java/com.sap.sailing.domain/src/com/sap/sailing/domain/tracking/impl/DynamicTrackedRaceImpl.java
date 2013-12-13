@@ -640,6 +640,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public boolean recordWind(Wind wind, WindSource windSource) {
+        final boolean result;
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfRace = getStartOfRace();
         TimePoint startOfTracking = getStartOfTracking();
@@ -654,10 +655,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
-            return true;
+            result = true;
         } else {
-            return false;
+            result = false;
         }
+        return result;
     }
 
     @Override

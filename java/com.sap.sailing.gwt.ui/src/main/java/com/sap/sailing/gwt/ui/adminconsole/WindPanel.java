@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.cell.client.ActionCell;
@@ -21,6 +22,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -240,17 +242,18 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
 
-        mainPanel.add(createExpeditionWindImportPanel(stringMessages));
-        mainPanel.add(createIgtimiWindImportPanel(mainPanel, stringMessages));
+        mainPanel.add(createExpeditionWindImportPanel());
+        mainPanel.add(createIgtimiWindImportPanel(mainPanel));
 
     }
 
-    private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel, StringMessages stringMessages2) {
+    private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {
         CaptionPanel igtimiWindImportRootPanel = new CaptionPanel(stringMessages.igtimiWindImport());
         VerticalPanel contentPanel = new VerticalPanel();
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
+        final HTML resultReport = new HTML();
         importButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -261,32 +264,38 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                     warningMessage = stringMessages.windImport_SelectedRacesWarning(trackedRacesListComposite.getSelectedRaces().size());
                 }
                 if (Window.confirm(warningMessage)) {
-                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(), new AsyncCallback<Void>() {
+                    resultReport.setText(stringMessages.loading());
+                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
-                            
+                            errorReporter.reportError(stringMessages.errorImportingIgtimiWind(caught.getMessage()));
+                            resultReport.setText(stringMessages.errorImportingIgtimiWind(caught.getMessage()));
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
-                            // TODO show how many fixes were imported into which race in a pop-up
+                        public void onSuccess(Map<RegattaAndRaceIdentifier, Integer> result) {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("\n");
+                            for (Entry<RegattaAndRaceIdentifier, Integer> e : result.entrySet()) {
+                                sb.append(e.getKey().getRegattaName());
+                                sb.append('/');
+                                sb.append(e.getKey().getRaceName());
+                                sb.append(": ");
+                                sb.append(e.getValue());
+                                sb.append("\n");
+                            }
+                            resultReport.setHTML(new SafeHtmlBuilder().appendEscapedLines(stringMessages.resultFromIgtimiWindImport(sb.toString())).toSafeHtml());
                         }
                     });
                 }
             }
         });
         contentPanel.add(importButton);
-        trackedRacesListComposite.addRaceSelectionChangeListener(new RaceSelectionChangeListener() {
-            @Override
-            public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-                // TODO Auto-generated method stub
-            }
-        });
+        contentPanel.add(resultReport);
         return igtimiWindImportRootPanel;
     }
 
-    private CaptionPanel createExpeditionWindImportPanel(final StringMessages stringMessages) {
+    private CaptionPanel createExpeditionWindImportPanel() {
         /*
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
@@ -571,7 +580,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             @Override
             public void onSuccess(WindInfoForRaceDTO result) {
                 windFixPanel.clear();
-
                 for (WindSourceType input : new WindSourceType[] { WindSourceType.COMBINED }) {
                     windFixPanel.add(new HTML("&nbsp;"));
                     windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));

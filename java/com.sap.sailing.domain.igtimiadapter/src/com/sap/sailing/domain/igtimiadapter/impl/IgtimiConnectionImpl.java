@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
@@ -35,6 +37,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class IgtimiConnectionImpl implements IgtimiConnection {
@@ -129,6 +132,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     @Override
     public Iterable<Fix> getResourceData(TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        logger.info("Obtaining resource data from "+startTime+" to "+endTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
         HttpClient client = connectionFactory.getHttpClient();
         HttpGet getResourceData = new HttpGet(connectionFactory.getResourceDataUrl(startTime, endTime, deviceSerialNumbers, typeAndCompression, account));
         JSONObject resourceDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getResourceData));
@@ -150,6 +154,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         Iterable<Fix> result = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        logger.info("Received "+Util.size(result)+" fixes; will pass them to BulkFixReceiver for further processing now.");
         bulkFixReceiver.received(result);
         return result;
     }
@@ -218,7 +223,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
 
     @Override
-    public void importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+    public Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        logger.info("Importing Igtimi wind for tracked races "+trackedRaces);
         TimePoint startOfWindow = new MillisecondsTimePoint(Long.MAX_VALUE);
         TimePoint endOfWindow = new MillisecondsTimePoint(0);
         for (DynamicTrackedRace trackedRace : trackedRaces) {
@@ -226,25 +232,33 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             endOfWindow = Collections.max(Arrays.asList(endOfWindow, IgtimiWindTracker.getReceivingEndTime(trackedRace)));
         }
         Iterable<DataAccessWindow> daws = getDataAccessWindows(Permission.read, startOfWindow, endOfWindow, /* find all deviceSerialNumbers for window */ null);
-        List<String> deviceSerialNumbers = new ArrayList<>();
+        logger.info("Found "+Util.size(daws)+" data access windows. Analyzing which ones contain wind data...");
+        Set<String> deviceSerialNumbers = new HashSet<>();
         for (DataAccessWindow daw : daws) {
             String deviceSerialNumber = daw.getDeviceSerialNumber();
             // now filter for the wind-providing devices
             Iterable<Resource> resources = getResources(Permission.read, startOfWindow, endOfWindow,
                     Collections.singleton(deviceSerialNumber), /* streamIds */ null);
             if (hasWind(resources)) {
+                logger.info("  Resource for device "+deviceSerialNumber+" contains wind data");
                 deviceSerialNumbers.add(deviceSerialNumber);
             }
         }
+        final Map<TrackedRace, Integer> result;
         if (!deviceSerialNumbers.isEmpty()) {
             IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(deviceSerialNumbers);
-            windReceiver.addListener(new WindListenerSendingToTrackedRace(trackedRaces, Activator.getInstance()
-                    .getWindTrackerFactory()));
+            final WindListenerSendingToTrackedRace windListener = new WindListenerSendingToTrackedRace(
+                    trackedRaces, Activator.getInstance().getWindTrackerFactory());
+            windReceiver.addListener(windListener);
             getAndNotifyResourceData(startOfWindow, endOfWindow, deviceSerialNumbers, windReceiver,
                     windReceiver.getFixTypes());
+            result = windListener.getFixesAppliedPerTrackedRace();
+            logger.info("Imported the following number of wind fixes for the following list of races: "+result);
         } else {
             logger.info("No Igtimi devices that measure wind found for time window "+startOfWindow+".."+endOfWindow);
+            result = new HashMap<>();
         }
+        return result;
     }
 
     private boolean hasWind(Iterable<Resource> resources) {

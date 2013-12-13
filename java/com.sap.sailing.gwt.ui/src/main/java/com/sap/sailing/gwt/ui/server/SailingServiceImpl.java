@@ -3624,7 +3624,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void importWindFromIgtimi(List<RaceDTO> selectedRaces) throws IllegalStateException,
+    public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws IllegalStateException,
             ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
         final Iterable<DynamicTrackedRace> trackedRaces;
@@ -3638,10 +3638,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             trackedRaces = getAllTrackedRaces();
         }
+        Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-            conn.importWindIntoRace(trackedRaces);
+            Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces);
+            for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
+                RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
+                Integer i = numberOfWindFixesImportedPerRace.get(key);
+                if (i == null) {
+                    i = 0;
+                }
+                numberOfWindFixesImportedPerRace.put(key, i+resultForAccount.getValue());
+            }
         }
+        return numberOfWindFixesImportedPerRace;
     }
 
     private Set<DynamicTrackedRace> getAllTrackedRaces() {

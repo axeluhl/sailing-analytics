@@ -487,6 +487,6 @@ public interface SailingServiceAsync {
 
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
-    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Void> asyncCallback);
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 }
 
