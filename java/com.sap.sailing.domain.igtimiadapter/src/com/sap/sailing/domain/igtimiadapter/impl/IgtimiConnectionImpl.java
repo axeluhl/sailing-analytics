@@ -240,7 +240,17 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
             Iterable<Resource> resources = getResources(Permission.read, startOfWindow, endOfWindow,
                     Collections.singleton(deviceSerialNumber), /* streamIds */ null);
             if (hasWind(resources)) {
-                logger.info("  Resource for device "+deviceSerialNumber+" contains wind data");
+                StringBuilder resourceIDs = new StringBuilder();
+                boolean first = true;
+                for (Resource resource : resources) {
+                    if (!first) {
+                        resourceIDs.append(", ");
+                    } else {
+                        first = false;
+                    }
+                    resourceIDs.append(resource.getId());
+                }
+                logger.info("  Resources ["+resourceIDs+"] for device "+deviceSerialNumber+" contain wind data");
                 deviceSerialNumbers.add(deviceSerialNumber);
             }
         }
