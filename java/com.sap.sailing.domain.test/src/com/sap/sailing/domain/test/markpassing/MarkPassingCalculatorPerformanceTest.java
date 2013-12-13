@@ -3,9 +3,9 @@ package com.sap.sailing.domain.test.markpassing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -45,8 +45,10 @@ public class MarkPassingCalculatorPerformanceTest {
     private Mark m2 = new MarkImpl("white 1");
     private Mark m3 = new MarkImpl("white 2");
 
+    private List<Waypoint> waypoints = new ArrayList<>();
     private DynamicTrackedRace trackedRace;
-    private long time;
+    private double time;
+    Random rnd = new Random();
 
     public MarkPassingCalculatorPerformanceTest() {
         ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(m2, m3, "cp");
@@ -70,74 +72,60 @@ public class MarkPassingCalculatorPerformanceTest {
                 System.currentTimeMillis())));
         trackedRace.recordFix(m3, new GPSFixImpl(new DegreePosition(37.887936, -122.268841), new MillisecondsTimePoint(
                 System.currentTimeMillis())));
-    }
-
-    @Before
-    public void clearMarkPasses() {
-
-    }
-
-    @Test
-    public void testTimeOfAddingManyCandidatesToChooser() {
-        int numberOfCandidates = 500;
-        List<Waypoint> waypoints = new ArrayList<>();
         for (Waypoint w : trackedRace.getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
         }
-        ArrayList<Candidate> newCans = new ArrayList<>();
-        int id = 0;
-        for (int i = 0; i < numberOfCandidates; i++) {
-            newCans.add(new Candidate(id + 1, new MillisecondsTimePoint(
-                    (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math
-                    .random(), waypoints.get(id)));
-            if (id == 4) {
-                id = 0;
-            } else {
-                id++;
-            }
-        }
-        time = System.currentTimeMillis();
-        new CandidateChooser(trackedRace).calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(
-                newCans, new ArrayList<Candidate>()));
-        System.out.println(System.currentTimeMillis() - time);
     }
 
+    
     @Test
-    public void testTimeOfAddingOneCandidateToChooser() {
-        int numberOfCandidatesInChooser = 500;
-
-        
-
-            List<Waypoint> waypoints = new ArrayList<>();
-            for (Waypoint w : trackedRace.getRace().getCourse().getWaypoints()) {
-                waypoints.add(w);
-            }
-            ArrayList<Candidate> newCans = new ArrayList<>();
-            int id = 0;
-            for (int i = 0; i < numberOfCandidatesInChooser; i++) {
-                newCans.add(new Candidate(id + 1, new MillisecondsTimePoint(
-                        (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math
-                        .random(), waypoints.get(id)));
-                if (id == 4) {
-                    id = 0;
-                } else {
-                    id++;
-                }
-            }
-
-            CandidateChooser c = new CandidateChooser(trackedRace);
-            c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans,
-                    new ArrayList<Candidate>()));
-            while (true) {
-            newCans.clear(); //Remove old Candidate!!
-            newCans.add(new Candidate(id + 1, new MillisecondsTimePoint(
-                    (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math
-                    .random(), waypoints.get(id)));
-
-            time = System.currentTimeMillis();
-            c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans,
-                    new ArrayList<Candidate>()));
-            System.out.println(System.currentTimeMillis() - time);
+    public void Cans500(){
+        testAddingCandidatesToChooser(500);
+    }
+    @Test
+    public void Cans1000(){
+        testAddingCandidatesToChooser(1000);
+    }
+    @Test
+    public void Cans2000(){
+        testAddingCandidatesToChooser(2000);
+    }
+    
+    
+    private void testAddingCandidatesToChooser(int numberOfCandidates) {
+        ArrayList<Candidate> newCans = new ArrayList<>();
+        for (int i = 0; i < numberOfCandidates; i++) {
+            newCans.add(randomCan());
         }
+        time = System.currentTimeMillis();
+        CandidateChooser c = new CandidateChooser(trackedRace);
+        c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(
+                newCans, new ArrayList<Candidate>()));
+        System.out.println(System.currentTimeMillis() - time + " ms to add " + numberOfCandidates
+                + " Candidates to Chooser.");
+        
+        ArrayList<Double> times = new ArrayList<>();
+        Candidate old = newCans.get(0);
+        for (int i = 0; i < 100; i++) {
+            Candidate ne;
+            ne = randomCan();
+            time = System.currentTimeMillis();
+            c.calculateMarkPassDeltas(bob,
+                    new Pair<List<Candidate>, List<Candidate>>(Arrays.asList(ne), Arrays.asList(old)));
+            times.add(System.currentTimeMillis() - time);
+            old = ne;
+        }
+        double total = 0;
+        for (double d : times) {
+            total = total + d;
+        }
+        System.out.println("On average " + total / times.size() + " ms to add and remove one Candidate.");
+    }
+
+    private Candidate randomCan() {
+        int id = rnd.nextInt(5);
+        return new Candidate(id + 1, new MillisecondsTimePoint(
+                (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
+                waypoints.get(id));
     }
 }
