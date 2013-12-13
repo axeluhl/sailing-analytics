@@ -14,9 +14,11 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 public class MarkPassingCalculator {
@@ -160,4 +162,7 @@ public class MarkPassingCalculator {
         suspended = false;
     }
 
+    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses(){
+        return chooser.getAllPasses();
+    }
 }

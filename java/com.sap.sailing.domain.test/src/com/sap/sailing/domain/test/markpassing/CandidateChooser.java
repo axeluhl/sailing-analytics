@@ -25,6 +25,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate start;
     private Candidate end;
     private DynamicTrackedRace race;
+    private double penaltyForSkipping = 1-Edge.penaltyForSkipped;
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
 
         @Override
@@ -51,7 +52,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
         end = new Candidate(
                 race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null,
                 1);
-        candidates = new LinkedHashMap<>();;
+        candidates = new LinkedHashMap<>();
+        ;
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new ArrayList<Candidate>());
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
@@ -61,13 +63,17 @@ public class CandidateChooser implements AbstractCandidateChooser {
             allEdges.get(c).add(new Edge(start, end, 0));
         }
     }
+    
+    @Override
+    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses(){
+        return currentMarkPasses;
+    }
 
     @Override
-    public void calculateMarkPassDeltas(
-            Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
-            removeCandidates(candidateDeltas.getB(), c);
-            addCandidates(candidateDeltas.getA(), c);
-            findShortestPath(c);
+    public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
+        removeCandidates(candidateDeltas.getB(), c);
+        addCandidates(candidateDeltas.getA(), c);
+        findShortestPath(c);
     }
 
     private void createNewEdges(Competitor co, List<Candidate> newCans) {
@@ -84,15 +90,18 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (early == start && early.getTimePoint().before(late.getTimePoint())) {
                         allEdges.get(co).add(new Edge(early, late, 1)); // timeestimtion???
-                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())) {
+                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())
+                            && estimatedTime(early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
                     }
                 } else {
-                    if (early == start && late.getID() == 1) {
+                    if (early == start && late.getID() == 1
+                            && numberOfCloseStarts(late.getTimePoint()) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
                     } else if (late == end || early == start) {
                         allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())) {
+                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())
+                            && estimatedTime(early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
                     }
                 }
@@ -137,9 +146,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
             }
             marker = candidateWithParent.get(marker);
         }
-        if(changed){
+        if (changed) {
             markPassDeltas = new ArrayList<>();
-            for(MarkPassing m : currentMarkPasses.get(co).values()){
+            for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
             }
             race.updateMarkPassings(co, markPassDeltas);
@@ -243,7 +252,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private void addCandidates(List<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
             candidates.get(co).add(c);
-            if (c.getID() == 1&&race.getStartOfRace()==null) {
+            if (c.getID() == 1 && race.getStartOfRace() == null) {
                 reEvaluateStartingEdges();
             }
         }

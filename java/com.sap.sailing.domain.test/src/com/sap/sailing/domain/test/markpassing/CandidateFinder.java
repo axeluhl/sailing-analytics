@@ -23,6 +23,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, List<GPSFix>>> candidates = new LinkedHashMap<>();
     private TrackedRace race;
+    private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
 
     // Calculate for some Waypoints instead of all?
 
@@ -37,6 +38,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
         }
     }
+
     @Override
     public void calculateFixesAffectedByNewCompetitorFixes(List<GPSFix> fixes, Competitor c) {
         if (!affectedFixes.containsKey(c)) {
@@ -57,6 +59,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
         }
     }
+
     @Override
     public void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps) {
         TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(new Comparator<GPSFix>() {
@@ -89,6 +92,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
             calculateDistances(c);
         }
     }
+
     @Override
     public void reCalculateAllFixes(Competitor c) {
         try {
@@ -117,16 +121,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 if (fixIsACandidate(gps, w, c) && !candidates.get(c).get(w).contains(gps)) {
                     candidates.get(c).get(w).add(gps);
                     Candidate newCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                            gps.getTimePoint(), getLikelyhood(distances.get(c).get(gps).get(w),
-                                    getLegLength(gps.getTimePoint(), w)), w);
+                            gps.getTimePoint(), getLikelyhood(c, w, gps), w);
                     newCans.add(newCandidate);
                 }
 
                 if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
                     candidates.get(c).get(w).remove(gps);
                     Candidate badCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                            gps.getTimePoint(), getLikelyhood(distances.get(c).get(gps).get(w),
-                                    getLegLength(gps.getTimePoint(), w)), w);
+                            gps.getTimePoint(), getLikelyhood(c, w, gps), w);
                     wrongCans.add(badCandidate);
                 }
             }
@@ -205,13 +207,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
         GPSFix fixAfter = race.getTrack(c).getFirstFixAfter(fix.getTimePoint());
         if (distances.get(c).get(fix) != null && !(fixBefore == null)
                 && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) && !(fixAfter == null)
-                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)) {
+                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
+                && getLikelyhood(c, w, fix) > penaltyForSkipping) {
             return true;
         }
         return false;
     }
 
-    private double getLikelyhood(Double distance, Double legLength) {
-        return 1 / (500 * Math.abs(distance / legLength) + 1);
+    private double getLikelyhood(Competitor c, Waypoint w, GPSFix fix) {
+        return 1 / (10 * Math.abs(distances.get(c).get(fix).get(w) / getLegLength(fix.getTimePoint(), w)) + 1);
     }
 }

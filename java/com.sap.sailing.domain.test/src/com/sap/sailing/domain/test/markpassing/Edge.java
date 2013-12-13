@@ -3,13 +3,12 @@ package com.sap.sailing.domain.test.markpassing;
 public class Edge {
     private Candidate start;
     private Candidate end;
-    private final double penaltyForSkipped;
+    final static double penaltyForSkipped = 0.6;
     private double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
         this.start = start;
         this.end = end;
-        penaltyForSkipped = 0.45;
         this.timeEstimationOrCloseStartsProbability = timeEstimationOrStartAnalysis;
     }
     public String getIDs(){
