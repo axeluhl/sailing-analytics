@@ -1210,7 +1210,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
-            if(fromTimePoint != null && toTimePoint != null) {
+            if (fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
                 result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
             }
@@ -2268,51 +2268,61 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
         try {
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
-            if (trackedLeg != null) {
-                switch (dataType) {
-                case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                    SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
+            switch (dataType) {
+            case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+                final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                if (track != null) {
+                    SpeedWithBearing speedOverGround = track.getEstimatedSpeed(timePoint);
                     result = (speedOverGround == null) ? null : speedOverGround.getKnots();
-                    break;
-                case VELOCITY_MADE_GOOD_IN_KNOTS:
+                }
+                break;
+            case VELOCITY_MADE_GOOD_IN_KNOTS:
+                if (trackedLeg != null) {
                     Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
                     result = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
-                    break;
-                case DISTANCE_TRAVELED:
+                }
+                break;
+            case DISTANCE_TRAVELED:
+                if (trackedLeg != null) {
                     Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
                     result = distanceTraveled == null ? null : distanceTraveled.getMeters();
-                    break;
-                case GAP_TO_LEADER_IN_SECONDS:
+                }
+                break;
+            case GAP_TO_LEADER_IN_SECONDS:
+                if (trackedLeg != null) {
                     result = trackedLeg.getGapToLeaderInSeconds(timePoint);
-                    break;
-                case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+                }
+                break;
+            case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+                if (trackedLeg != null) {
                     Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
-                    break;
-                case RACE_RANK:
-                    result = (double) trackedLeg.getRank(timePoint);
-                    break;
-                case REGATTA_RANK:
-                    if (leaderboardName == null || leaderboardName.isEmpty()) {
-                        break;
-                    }
-
-                    Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-                    result = leaderboard == null ? null : (double) leaderboard.getTotalRankOfCompetitor(competitor, timePoint);
-                    break;
-                case OVERALL_RANK:
-                    if (leaderboardGroupName == null || leaderboardGroupName.isEmpty()) {
-                        break;
-                    }
-
-                    LeaderboardGroup group = getService().getLeaderboardGroupByName(leaderboardGroupName);
-                    Leaderboard overall = group.getOverallLeaderboard();
-                    result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Theres currently no support for the enum value '"
-                            + dataType + "' in this method.");
                 }
+                break;
+            case RACE_RANK:
+                if (trackedLeg != null) {
+                    result = (double) trackedLeg.getRank(timePoint);
+                }
+                break;
+            case REGATTA_RANK:
+                if (leaderboardName == null || leaderboardName.isEmpty()) {
+                    break;
+                }
+                Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+                result = leaderboard == null ? null : (double) leaderboard.getTotalRankOfCompetitor(competitor,
+                        timePoint);
+                break;
+            case OVERALL_RANK:
+                if (leaderboardGroupName == null || leaderboardGroupName.isEmpty()) {
+                    break;
+                }
+                LeaderboardGroup group = getService().getLeaderboardGroupByName(leaderboardGroupName);
+                Leaderboard overall = group.getOverallLeaderboard();
+                result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
+                break;
+            default:
+                throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType
+                        + "' in this method.");
             }
             return result;
         } finally {

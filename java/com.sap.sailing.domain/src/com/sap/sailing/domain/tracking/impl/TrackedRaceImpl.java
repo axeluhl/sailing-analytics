@@ -110,6 +110,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
+    public static final long TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = 4000l;
+
     private TrackedRaceStatus status;
 
     private final Object statusNotifier;
