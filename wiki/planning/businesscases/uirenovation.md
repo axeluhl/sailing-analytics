@@ -78,9 +78,9 @@ So far you can access the prototype for smartphone via:<br/>
 
 # Estimation
 This estimation is very rough as we have no experience with mobile design and implementation.
-- Homepage (1 week design, 1 week implementation)
-- Mobile Support (4-6 weeks design, 12 weeks implementation)
+- Homepage (1 week design, 2 weeks implementation)
+- Mobile Support (another 4-6 weeks design, 12 weeks implementation)
 - Sailing Analytics
- - Raceboard: Simple race viewer for spectators (UID concept to be defined by Anna's master thesis)
- - Raceboard: Analytical race viewer for professionals (UID concept to be defined by Anna's master thesis)
+ - Raceboard: Simple race viewer for spectators (UID concept to be supported by Anna's master thesis)
+ - Raceboard: Analytical race viewer for professionals (UID concept to be supported by Anna's master thesis)
  - Event/Regatta structure navigation (2 weeks design, 3 weeks implementation)
