@@ -905,4 +905,5 @@ public interface StringMessages extends Messages {
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);
     String resultFromIgtimiWindImport(String string);
+    String countDownInMillis(String timeToStartInFractionalSeconds);
 }
