@@ -98,6 +98,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
+        logListener = new DynamicTrackedRaceLogListener(this);
+        courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
+        startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
     }
 
     /**
