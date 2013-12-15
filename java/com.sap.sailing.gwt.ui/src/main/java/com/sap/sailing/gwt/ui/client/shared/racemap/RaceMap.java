@@ -173,7 +173,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * html5 canvases used for competitor info display on the map
      */
-    private final Map<CompetitorDTO, CompetitorInfoOverlay> competitorInfoOverlays;
+    private final Map<CompetitorDTO, SmallTransparentInfoOverlay> competitorInfoOverlays;
 
     /**
      * Map overlays with html5 canvas used to display wind sensors
@@ -268,7 +268,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<SidelineDTO, Polygon>();
         boatOverlays = new HashMap<CompetitorDTO, BoatOverlay>();
-        competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
+        competitorInfoOverlays = new HashMap<CompetitorDTO, SmallTransparentInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         this.competitorSelection = competitorSelection;
@@ -637,7 +637,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     if (fixesAndTails.hasFixesFor(competitorDTO)) {
                         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
                         if (lastBoatFix != null) {
-                            CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
+                            SmallTransparentInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
@@ -652,13 +652,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                 }
                 for (CompetitorDTO toRemoveCompetorDTO : toRemoveCompetorInfoOverlays) {
-                    CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
+                    SmallTransparentInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
                     competitorInfoOverlay.removeFromMap();
                     competitorInfoOverlays.remove(toRemoveCompetorDTO);
                 }
             } else {
                 // remove all overlays
-                for (CompetitorInfoOverlay competitorInfoOverlay : competitorInfoOverlays.values()) {
+                for (SmallTransparentInfoOverlay competitorInfoOverlay : competitorInfoOverlays.values()) {
                     competitorInfoOverlay.removeFromMap();
                 }
                 competitorInfoOverlays.clear();
@@ -1058,8 +1058,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return courseMarkOverlay;
     }
 
-    private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
-        return new CompetitorInfoOverlay(map, zIndex, competitorDTO, raceMapImageManager);
+    private SmallTransparentInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
+        return new SmallTransparentInfoOverlay(map, zIndex,
+                /* infoText */ (competitorDTO.getSailID() == null || competitorDTO.getSailID().isEmpty()) ? competitorDTO.getName() : competitorDTO.getSailID(),
+                        raceMapImageManager);
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
