@@ -898,8 +898,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.getPath().insertAt(0, startLinePoint1);
                     startLine.getPath().insertAt(1, startLinePoint2);
                 }
-            }
-            else {
+            } else {
                 if (startLine != null) {
                     startLine.setMap(null);
                     startLine = null;
