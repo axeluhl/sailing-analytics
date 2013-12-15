@@ -641,10 +641,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position);
                                 competitorInfoOverlay.addToMap();
                             } else {
-                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position);
                                 competitorInfoOverlay.draw();
                             }
                             toRemoveCompetorInfoOverlays.remove(competitorDTO);
