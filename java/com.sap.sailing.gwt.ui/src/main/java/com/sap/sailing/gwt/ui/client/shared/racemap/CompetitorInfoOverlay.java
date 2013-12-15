@@ -110,10 +110,6 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
         context.fill();
     }
 
-    public GPSFixDTO getBoatFix() {
-        return boatFix;
-    }
-
     public void setBoatFix(GPSFixDTO boatFix) {
         this.boatFix = boatFix;
     }
