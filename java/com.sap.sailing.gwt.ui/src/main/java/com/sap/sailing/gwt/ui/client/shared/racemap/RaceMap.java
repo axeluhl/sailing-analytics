@@ -174,6 +174,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * html5 canvases used for competitor info display on the map
      */
     private final Map<CompetitorDTO, SmallTransparentInfoOverlay> competitorInfoOverlays;
+    
+    private SmallTransparentInfoOverlay countDownOverlay;
 
     /**
      * Map overlays with html5 canvas used to display wind sensors
@@ -639,7 +641,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         if (lastBoatFix != null) {
                             SmallTransparentInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             if (competitorInfoOverlay == null) {
-                                competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX, competitorDTO);
+                                competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
                                 competitorInfoOverlay.setPosition(lastBoatFix.position);
                                 competitorInfoOverlay.addToMap();
@@ -851,6 +853,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             int legOfLeadingCompetitor = leadingVisibleCompetitorInfo == null ? -1 : leadingVisibleCompetitorInfo.getA();
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
             // draw the start line
+            updateCountdownCanvas(courseDTO.startMarkPositions);
             if (legOfLeadingCompetitor <= 1 && 
                     settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startMarkPositions != null && courseDTO.startMarkPositions.size() == 2) {
                 LatLng startLinePoint1 = LatLng.newInstance(courseDTO.startMarkPositions.get(0).latDeg, courseDTO.startMarkPositions.get(0).lngDeg); 
@@ -1010,6 +1013,33 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
+    /**
+     * If, according to {@link #lastRaceTimesInfo} and {@link #timer} the race is
+     * still in the pre-start phase, show a {@link SmallTransparentInfoOverlay} at the
+     * start line that shows the count down.
+     */
+    private void updateCountdownCanvas(List<PositionDTO> startMarkPositions) {
+        if (!settings.isShowSelectedCompetitorsInfo() || startMarkPositions == null || startMarkPositions.isEmpty()
+                || lastRaceTimesInfo.startOfRace == null || timer.getTime().after(lastRaceTimesInfo.startOfRace)) {
+            if (countDownOverlay != null) {
+                countDownOverlay.removeFromMap();
+                countDownOverlay = null;
+            }
+        } else {
+            final String countDownText = stringMessages.countDownInMillis(NumberFormat.getFormat("0.00").format(
+                    ((double) lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime()) / 1000.));
+            if (countDownOverlay == null) {
+                countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
+                        countDownText, raceMapImageManager);
+                countDownOverlay.addToMap();
+            } else {
+                countDownOverlay.setInfoText(countDownText);
+            }
+            countDownOverlay.setPosition(startMarkPositions.get(startMarkPositions.size() - 1));
+            countDownOverlay.draw();
+        }
+    }
+
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
@@ -1214,9 +1244,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (rank != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
         }
+        SpeedWithBearingDTO speedWithBearing = lastFix.speedWithBearing;
+        if (speedWithBearing == null) {
+            // TODO should we show the boat at all?
+            speedWithBearing = new SpeedWithBearingDTO(0, 0);
+        }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
-                NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
-        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
+                NumberFormatterFactory.getDecimalFormat(1).format(speedWithBearing.speedInKnots) + " "+stringMessages.knotsUnit()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         if (lastFix.degreesBoatToTheWind != null) {
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
