@@ -1026,8 +1026,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 countDownOverlay = null;
             }
         } else {
-            final String countDownText = stringMessages.countDownInMillis(NumberFormat.getFormat("0.00").format(
-                    ((double) lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime()) / 1000.));
+            final String countDownText = "-"+NumberFormat.getFormat("0.0").format(
+                    Math.round(((double) lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime()) / 100.)/10.);
             if (countDownOverlay == null) {
                 countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
                         countDownText, raceMapImageManager);
