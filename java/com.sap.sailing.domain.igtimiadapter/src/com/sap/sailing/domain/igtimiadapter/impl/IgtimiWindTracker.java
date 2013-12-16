@@ -49,10 +49,9 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         try {
                             if (!stopping) {
                                 IgtimiConnection connection = connectionFactory.connect(account);
-                                final TimePoint endTime = getReceivingEndTime(trackedRace);
                                 // find all the devices from which we may read
                                 Iterable<DataAccessWindow> dataAccessWindows = connection.getDataAccessWindows(
-                                        Permission.read, getReceivingStartTime(trackedRace), endTime,
+                                        Permission.read, /* start time */ null, /* end time */ null,
                                         /* get data for all available deviceSerialNumbers */null);
                                 Set<String> deviceSerialNumbersWeCanRead = new HashSet<>();
                                 for (DataAccessWindow daw : dataAccessWindows) {
@@ -71,7 +70,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 devicesWeShouldListenTo.addAll(devicesThatHaveNeverSentGpsNorWind);
                                 logger.info("Will listen to devices "
                                         + devicesWeShouldListenTo
-                                        + " because for "
+                                        + " because from all devices "+deviceSerialNumbersWeCanRead+" for "
                                         + devicesThatHaveNeverSentGpsNorWind
                                         + " we don't know what they are as they never sent anything we can access, and for "
                                         + devicesWithWind + " we know they sent wind");
