@@ -49,8 +49,8 @@ import com.sap.sailing.server.RacingEventService;
 public class RegattaDataPerRaceAction extends HttpAction {
     private static final Logger logger = Logger.getLogger(RegattaDataPerRaceAction.class.getName());
     
-    public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
-        super(req, res, service, maxRows);
+    public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+        super(req, res, service);
     }
 	
 

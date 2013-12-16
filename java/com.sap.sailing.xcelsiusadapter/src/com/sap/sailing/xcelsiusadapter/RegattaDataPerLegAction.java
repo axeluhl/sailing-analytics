@@ -39,8 +39,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaDataPerLegAction extends HttpAction {
-    public RegattaDataPerLegAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
-        super(req, res, service, maxRows);
+    public RegattaDataPerLegAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+        super(req, res, service);
     }
 	
 
