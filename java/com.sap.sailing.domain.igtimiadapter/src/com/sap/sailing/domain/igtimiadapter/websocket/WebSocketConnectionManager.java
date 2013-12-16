@@ -2,7 +2,6 @@ package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -58,8 +57,9 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         client = new WebSocketClient();
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
-        client.start();
         reconnect();
+        startClientHeartbeat();
+        startListeningForServerHeartbeat();
     }
     
     /**
@@ -94,8 +94,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         logger.info("received connection "+session+" for "+this);
         try {
             getRemote().sendString(configurationMessage.toString());
-            startClientHeartbeat();
-            startListeningForServerHeartbeat();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Could not send configuration package to Igtimi web socket server in "+this, e);
             throw new RuntimeException(e);
@@ -108,7 +106,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
             logger.finest("Received "+message+" in "+this);
         }
         if (message.equals("1")) {
-            logger.fine("Received server heartbeat");
+            logger.fine("Received server heartbeat for "+this);
             receivedServerHeartbeatInInterval = true;
         } else if (message.startsWith("[")) {
             List<Fix> fixes = new ArrayList<>();
@@ -118,7 +116,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                     Util.addAll(fixFactory.createFixes((JSONObject) o), fixes);
                 }
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Received fixes"+fixes);
+                    logger.finest("Received fixes"+fixes+" for "+this);
                 }
                 notifyListeners(fixes);
             } catch (ParseException e) {
@@ -177,8 +175,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
             public void run() {
                 try {
                     if (!receivedServerHeartbeatInInterval) {
-                        logger.info("Didn't receive server heartbeat in interval for "+this+". Reconnecting...");
+                        logger.info("Didn't receive server heartbeat in interval for "+WebSocketConnectionManager.this+". Reconnecting...");
+                        client.stop();
                         reconnect();
+                    } else {
+                        receivedServerHeartbeatInInterval = false;
                     }
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Error with server heartbeat in "+this, e);
@@ -192,22 +193,25 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
             @Override
             public void run() {
                 try {
-                    logger.fine("Sending client heartbeat");
-                    getRemote().sendString("1");
-                } catch (IOException e) {
-                    logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+this, e);
+                    if (getRemote() != null) {
+                        logger.fine("Sending client heartbeat for " + WebSocketConnectionManager.this);
+                        getRemote().sendString("1");
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+WebSocketConnectionManager.this+". Will continue to try...", e);
                 }
             }
         }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
     }
 
-    private void reconnect() throws IOException, IllegalStateException, ParseException, URISyntaxException {
+    private void reconnect() throws Exception {
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
                 if (uri.getScheme().equals("ws")) { // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
                                                     // look for ws connectivity
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
+                    client.start();
                     client.connect(this, uri, request);
                     logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
                     lastException = null;

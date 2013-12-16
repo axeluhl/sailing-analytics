@@ -211,6 +211,19 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
+    public String getLatestDatumUrl(Iterable<String> deviceSerialNumbers, Type type, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("resources/data/latest?type=");
+        url.append(type.getCode());
+        for (String deviceSerialNumber : deviceSerialNumbers) {
+            url.append("&serial_numbers[]=");
+            url.append(deviceSerialNumber);
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
@@ -487,4 +500,5 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             mongoObjectFactory.removeAccessToken(accessToken);
         }
     }
+
 }
