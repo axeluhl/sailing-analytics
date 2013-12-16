@@ -17,13 +17,13 @@ import com.sap.sailing.domain.tracking.GPSFix;
 
 public interface AbstractCandidateFinder {
 
-    public Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c);
+    Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c);
 
-    public Iterable<Competitor> getAffectedCompetitors();
+    Iterable<Competitor> getAffectedCompetitors();
 
-    public void calculateFixesAffectedByNewCompetitorFixes(List<GPSFix> fixes, Competitor c);
-
-    void reCalculateAllFixes(Competitor c);
+    void calculateFixesAffectedByNewCompetitorFixes(List<GPSFix> fixes, Competitor c);
 
     void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
+
+    void reCalculateAllFixes(Competitor c);
 }

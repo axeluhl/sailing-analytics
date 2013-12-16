@@ -21,6 +21,12 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
+// TODO 3 steps not 2: 
+// 1.Choose fixes that might be candidates (eg local minimum) (Also when suspended?)
+// 2.Evaluate them (eg probability of distance in ratio to leg length)
+// 3. Find Passings (eg take candidates and somehow chose which ones to use)
+// => much simpler in calculator (?)
+
 public class MarkPassingCalculator {
     private AbstractCandidateFinder finder;
     private AbstractCandidateChooser chooser;
@@ -161,7 +167,7 @@ public class MarkPassingCalculator {
         suspended = false;
     }
 
-    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses(){
+    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses() {
         return chooser.getAllPasses();
     }
 }
