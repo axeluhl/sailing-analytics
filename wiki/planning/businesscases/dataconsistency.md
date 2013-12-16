@@ -52,7 +52,7 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
   * Adapt to missing data or changed sampling rate
 * Overall Measures of System State
   * Overall Consistency: measure for connectedness and completeness of sailing solution
-  * Overall Confidence: profile describing accuracies of numerical quantities compared to reference limits
+  * Overall Confidence: profile describing accuracies of numerical quantities compared to reference ranges
 
 ### Description
 
