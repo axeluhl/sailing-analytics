@@ -51,8 +51,8 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
   * Remove incomplete entities from calculation (if possible, otherwise return "n/a")
   * Adapt to missing data or changed sampling rate
 * Overall Measures of System State
-  * Overall Consistency
-  * Overall Confidence
+  * Overall Consistency: measure for connectedness and completeness of sailing solution
+  * Overall Confidence: profile describing accuracies of numerical quantities compared to reference limits
 
 ### Description
 
