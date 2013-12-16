@@ -16,6 +16,7 @@ import org.jdom.Element;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NoWindException;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
@@ -270,7 +272,7 @@ public class LeaderboardData {
         raceElement.addContent(createTimedXML("end_time_", race.getEndOfRace()));
         raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMinutes*/ 5)));
         
-        for (Competitor competitor : race.getCompetitorsFromBestToWorst(null)) {
+        for (Competitor competitor : race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace())) {
             Element competitorElement = createCompetitorXML(competitor, /*shortVersion*/ true);
             // TODO: race_final_rank, race_final_score, ...
             raceElement.addContent(competitorElement);
@@ -297,8 +299,42 @@ public class LeaderboardData {
         return competitorElement;
     }
     
-    private Element createLegXML(TrackedLeg leg) {
+    private Element createLegXML(TrackedLeg trackedLeg, int legCounter) throws NoWindException {
+        Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
+        addNamedElementWithValue(legElement, "position", legCounter);
+        addNamedElementWithValue(legElement, "mark_from", leg.getFrom().getName());
+        addNamedElementWithValue(legElement, "mark_to", leg.getTo().getName());
+        addNamedElementWithValue(legElement, "leg_type", trackedLeg.getLegType(trackedLeg.getTrackedRace().getStartOfRace()).name());
+        
+        int raceRank = 0;
+        for (Competitor competitor : trackedLeg.getTrackedRace().getCompetitorsFromBestToWorst(/*timePoint*/ trackedLeg.getTrackedRace().getEndOfRace())) {
+            Element competitorElement = createCompetitorXML(competitor, /*shortVersion*/ true);
+            TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
+            TimePoint legFinishTime = competitorLeg.getFinishTime();
+            // TODO: Plausability checks here
+            addNamedElementWithValue(competitorElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
+            addNamedElementWithValue(competitorElement, "leg_started_time_as_millis", handleValue(competitorLeg.getStartTime()));
+            addNamedElementWithValue(competitorElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
+            addNamedElementWithValue(competitorElement, "time_spend_in_this_leg_as_millis", competitorLeg.getTimeInMilliSeconds(legFinishTime));
+            addNamedElementWithValue(competitorElement, "leg_rank_at_finish_time", competitorLeg.getRank(legFinishTime));
+            addNamedElementWithValue(competitorElement, "rank_gain_for_this_leg", competitorLeg.getRank(competitorLeg.getStartTime())-competitorLeg.getRank(legFinishTime));
+            addNamedElementWithValue(competitorElement, "final_race_rank", ++raceRank);
+            addNamedElementWithValue(competitorElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime));
+            addNamedElementWithValue(competitorElement, "windward_distance_to_overall_leader_in_meters", competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime).getMeters());
+            addNamedElementWithValue(competitorElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
+            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", competitorLeg.getMaximumSpeedOverGround(legFinishTime).getB().getKnots());
+            addNamedElementWithValue(competitorElement, "average_velocity_made_good_in_knots", competitorLeg.getAverageVelocityMadeGood(legFinishTime).getKnots());
+            addNamedElementWithValue(competitorElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
+            addNamedElementWithValue(competitorElement, "number_of_jibes", competitorLeg.getNumberOfJibes(legFinishTime));
+            addNamedElementWithValue(competitorElement, "number_of_tacks", competitorLeg.getNumberOfTacks(legFinishTime));
+            addNamedElementWithValue(competitorElement, "maneuver_count", competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false).size());
+            addNamedElementWithValue(competitorElement, "number_of_penalty_circles", competitorLeg.getNumberOfPenaltyCircles(legFinishTime));
+            addNamedElementWithValue(competitorElement, "average_cross_track_error_in_meters", competitorLeg.getAverageCrossTrackError(legFinishTime, /*waitForLatestAnalysis*/ false).getMeters());
+            
+            legElement.addContent(competitorElement);
+        }
+        
         return legElement;
     }
     
@@ -317,8 +353,9 @@ public class LeaderboardData {
                 TrackedRace trackedRace = r.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
                     final List<Element> legs = new ArrayList<Element>();
+                    int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
-                        legs.add(createLegXML(leg));
+                        legs.add(createLegXML(leg, ++legCounter));
                     }
                     racesElements.add(createRaceXML(trackedRace, fleet, legs));
                 }
