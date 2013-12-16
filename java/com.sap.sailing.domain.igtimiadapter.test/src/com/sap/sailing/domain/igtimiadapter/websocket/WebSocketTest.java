@@ -165,6 +165,6 @@ public class WebSocketTest {
         });
         assertNotNull(liveDataConnection);
         assertTrue("Connection handshake not successful within 5s", liveDataConnection.waitForConnection(5000l));
-        liveDataConnection.disconnect();
+        liveDataConnection.stop();
     }
 }

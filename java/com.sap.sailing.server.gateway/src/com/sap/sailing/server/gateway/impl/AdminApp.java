@@ -406,7 +406,7 @@ public class AdminApp extends SailingServerHttpServlet {
         }
     }
 
-    private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void startReceivingExpeditionWindForRace(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Regatta regatta = getRegatta(req);
         if (regatta == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");

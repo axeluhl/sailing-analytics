@@ -293,7 +293,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth";
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
     }
 
     private Client getClient() {
@@ -476,5 +476,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             result.add(uri);
         }
         return result;
+    }
+
+    @Override
+    public void removeAccount(String eMail) {
+        Account account = getExistingAccountByEmail(eMail);
+        if (account != null) {
+            String accessToken = accessTokensByAccount.remove(account);
+            accountsByEmail.remove(eMail);
+            mongoObjectFactory.removeAccessToken(accessToken);
+        }
     }
 }

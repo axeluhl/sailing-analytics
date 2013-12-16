@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +23,12 @@ public class Util {
         }
     }
 
+    public static <T> T[] toArray(Iterable<T> what, T[] arr) {
+        List<T> list = new ArrayList<T>();
+        addAll(what, list);
+        return list.toArray(arr);
+    }
+    
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();

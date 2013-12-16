@@ -12,6 +12,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 
 /**
  * Maintains data about a default {@link Client} that represents this application when interacting with the Igtimi
@@ -33,7 +34,8 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_ID_PROPERTY_NAME = "igtimi.client.id";
     private static final String CLIENT_SECRET_PROPERTY_NAME = "igtimi.client.secret";
     private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
-    private IgtimiConnectionFactoryImpl connectionFactory;
+    private final IgtimiConnectionFactoryImpl connectionFactory;
+    private final IgtimiWindTrackerFactory windTrackerFactory;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
@@ -43,12 +45,15 @@ public class Activator implements BundleActivator {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         connectionFactory = new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
+        windTrackerFactory = new IgtimiWindTrackerFactory(connectionFactory);
     }
 
     @Override
     public void start(BundleContext context) throws Exception {
         INSTANCE = this;
         context.registerService(IgtimiConnectionFactory.class, connectionFactory, /* properties */ null);
+        context.registerService(WindTrackerFactory.class, windTrackerFactory, /* properties */ null);
+        context.registerService(IgtimiWindTrackerFactory.class, windTrackerFactory, /* properties */ null);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -60,6 +65,10 @@ public class Activator implements BundleActivator {
     
     public IgtimiConnectionFactoryImpl getConnectionFactory() {
         return connectionFactory;
+    }
+    
+    public IgtimiWindTrackerFactory getWindTrackerFactory() {
+        return windTrackerFactory;
     }
 
     @Override

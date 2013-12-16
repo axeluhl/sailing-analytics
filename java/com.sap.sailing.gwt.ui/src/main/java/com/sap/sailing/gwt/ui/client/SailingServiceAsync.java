@@ -478,6 +478,15 @@ public interface SailingServiceAsync {
 
     void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> callback);
+
+    void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
     
+    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    
+    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 }
 

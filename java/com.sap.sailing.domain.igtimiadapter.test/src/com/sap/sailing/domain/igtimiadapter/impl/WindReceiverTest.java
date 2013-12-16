@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
@@ -23,23 +25,18 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindListener;
 
 public class WindReceiverTest {
     @Test
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
         final String deviceSerialNumber = "Non-Existing Test Device";
-        IgtimiWindReceiver receiver = new IgtimiWindReceiver(deviceSerialNumber);
-        receiver.addListener(new WindListener() {
+        IgtimiWindReceiver receiver = new IgtimiWindReceiver(Collections.singleton(deviceSerialNumber));
+        receiver.addListener(new IgtimiWindListener() {
             @Override
-            public void windDataReceived(Wind wind) {
+            public void windDataReceived(Wind wind, String deviceSerialNumber) {
                 windReceived.add(wind);
             }
-            @Override
-            public void windDataRemoved(Wind wind) {}
-            @Override
-            public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {}
         });
         TimePoint timePoint = MillisecondsTimePoint.now();
         Map<Integer, Object> awaMap = new HashMap<>(); awaMap.put(1, 123. /* degrees from */);

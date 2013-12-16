@@ -640,24 +640,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public boolean recordWind(Wind wind, WindSource windSource) {
+        final boolean result;
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfRace = getStartOfRace();
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
+        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
             &&
         (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
-            getOrCreateWindTrack(windSource).add(wind);
+            result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
-            return true;
         } else {
-            return false;
+            result = false;
         }
+        return result;
     }
 
     @Override
