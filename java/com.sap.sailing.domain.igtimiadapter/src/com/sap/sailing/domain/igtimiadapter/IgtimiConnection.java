@@ -154,4 +154,11 @@ public interface IgtimiConnection {
      */
     Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException,
             ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Returns the latest datum for the specified devices that contains a fix of the <code>type</code> requested. The
+     * result contains entries only for those devices that have actually produced a fix of the <code>type</code> requested
+     * that is readable by the {@link #getAccount()} used by this connection.
+     */
+    Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }
