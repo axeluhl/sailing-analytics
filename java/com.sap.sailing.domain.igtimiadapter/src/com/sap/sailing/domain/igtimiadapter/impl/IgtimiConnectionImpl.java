@@ -105,6 +105,14 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     }
     
     @Override
+    public Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        HttpClient client = connectionFactory.getHttpClient();
+        HttpGet getLatestData = new HttpGet(connectionFactory.getLatestDatumUrl(deviceSerialNumbers, type, account));
+        JSONObject latestDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getLatestData));
+        return new FixFactory().createFixesFromLastDatum(latestDataJson, type);
+    }
+    
+    @Override
     public Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit,
             Boolean includeIncomplete) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException {
