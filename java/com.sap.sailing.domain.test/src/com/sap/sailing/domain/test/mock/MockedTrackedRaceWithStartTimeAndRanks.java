@@ -576,4 +576,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -892,4 +892,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

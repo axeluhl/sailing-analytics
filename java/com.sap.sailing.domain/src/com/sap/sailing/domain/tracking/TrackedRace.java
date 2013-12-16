@@ -614,5 +614,10 @@ public interface TrackedRace extends Serializable {
     LineLengthAndAdvantage getStartLine(TimePoint at);
     
     LineLengthAndAdvantage getFinishLine(TimePoint at);
+    
+    /**
+     * The average wind speed with confidence for this race
+     */
+    Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes);
 
 }

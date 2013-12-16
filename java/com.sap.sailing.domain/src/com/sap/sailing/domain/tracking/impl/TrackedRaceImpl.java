@@ -63,6 +63,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -2569,6 +2570,48 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public LineLengthAndAdvantage getFinishLine(TimePoint at) {
         return getLineLengthAndAdvantage(at, getRace().getCourse().getLastWaypoint());
+    }
+
+    @Override
+    public Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes) {
+        Pair<Speed, Double> result = null;
+        if (getEndOfRace() != null) {
+            TimePoint fromTimePoint = getStartOfRace();
+            TimePoint toTimePoint = getEndOfRace();
+            long resolutionInMilliseconds = 60 * 1000 * resolutionInMinutes;
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
+            WindTrack windTrack = getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+            }
+            if (speedCounter > 0) {
+                Speed averageWindSpeed = new KnotSpeedImpl(sumWindSpeed / speedCounter);
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+                result = new Pair<Speed, Double>(averageWindSpeed, averageWindSpeedConfidence);
+            }
+        } 
+        return result;
     }
 
 }
