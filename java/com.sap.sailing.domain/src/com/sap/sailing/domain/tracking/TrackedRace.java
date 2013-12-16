@@ -616,6 +616,11 @@ public interface TrackedRace extends Serializable {
     LineLengthAndAdvantage getFinishLine(TimePoint at);
     
     /**
+     * Length of course if there are mark passings for competitors.
+     */
+    Distance getCourseLength();
+    
+    /**
      * The average wind speed with confidence for this race
      */
     Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes);
