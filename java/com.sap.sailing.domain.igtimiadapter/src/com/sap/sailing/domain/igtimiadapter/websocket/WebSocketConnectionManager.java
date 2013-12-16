@@ -178,6 +178,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                 try {
                     if (!receivedServerHeartbeatInInterval) {
                         logger.info("Didn't receive server heartbeat in interval for "+this+". Reconnecting...");
+                        client.stop();
                         reconnect();
                     }
                 } catch (Exception e) {
