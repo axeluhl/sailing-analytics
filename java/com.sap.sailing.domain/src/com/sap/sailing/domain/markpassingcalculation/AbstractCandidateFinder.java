@@ -21,9 +21,9 @@ public interface AbstractCandidateFinder {
 
     Iterable<Competitor> getAffectedCompetitors();
 
-    void calculateFixesAffectedByNewCompetitorFixes(List<GPSFix> fixes, Competitor c);
+    void calculateFixesAffectedByNewCompetitorFixes(Competitor c, List<GPSFix> fixes);
 
     void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 
-    void reCalculateAllFixes(Competitor c);
+    Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c);
 }

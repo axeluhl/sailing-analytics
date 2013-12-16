@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeSet;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -40,7 +40,22 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public void calculateFixesAffectedByNewCompetitorFixes(List<GPSFix> fixes, Competitor c) {
+    public Pair<List<Candidate>,List<Candidate>> getAllCandidates(Competitor c) {
+        try {
+            race.getTrack(c).lockForRead();
+            for (GPSFix fix : race.getTrack(c).getFixes()) {
+                affectedFixes.get(c).add(fix);
+            }
+        } finally {
+            race.getTrack(c).unlockAfterRead();
+        }
+        calculateDistances(c);
+        candidates.get(c).clear();
+        return getCandidateDeltas(c);
+    }
+
+    @Override
+    public void calculateFixesAffectedByNewCompetitorFixes(Competitor c, List<GPSFix> fixes) {
         if (!affectedFixes.containsKey(c)) {
             affectedFixes.put(c, new ArrayList<GPSFix>());
         }
@@ -91,19 +106,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
             calculateDistances(c);
         }
-    }
-
-    @Override
-    public void reCalculateAllFixes(Competitor c) {
-        try {
-            race.getTrack(c).lockForRead();
-            for (GPSFix fix : race.getTrack(c).getFixes()) {
-                affectedFixes.get(c).add(fix);
-            }
-        } finally {
-            race.getTrack(c).unlockAfterRead();
-        }
-        calculateDistances(c);
     }
 
     @Override

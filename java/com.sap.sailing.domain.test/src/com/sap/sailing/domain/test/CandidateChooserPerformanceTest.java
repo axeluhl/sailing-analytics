@@ -30,7 +30,7 @@ public class CandidateChooserPerformanceTest extends AbstractMarkPassingTest {
         time = System.currentTimeMillis();
         CandidateChooser c = new CandidateChooser(trackedRace);
         c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans, new ArrayList<Candidate>()));
-       time = System.currentTimeMillis() - time;
+        time = System.currentTimeMillis() - time;
 
         ArrayList<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {

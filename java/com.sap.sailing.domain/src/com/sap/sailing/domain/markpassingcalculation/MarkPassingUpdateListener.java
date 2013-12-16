@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     private LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
     private final Pair<Object, GPSFix> end;
+    int i = 0;
     
     public MarkPassingUpdateListener(TrackedRace race, Pair<Object, GPSFix> end) {
         race.addListener(this);

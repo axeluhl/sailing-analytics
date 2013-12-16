@@ -3,6 +3,8 @@ package com.sap.sailing.domain.markpassingcalculation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
@@ -242,6 +244,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         / polar.getUpwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
             }
         } catch (NoWindException e) {
+            Logger.getLogger(CandidateChooser.class.getName()).log(Level.SEVERE, "CandidateChooser threw exception " + e.getMessage()
+                            + " while estimating the Time between two Candidates.");
         }
 
         return leg.getGreatCircleDistance(t).getNauticalMiles()

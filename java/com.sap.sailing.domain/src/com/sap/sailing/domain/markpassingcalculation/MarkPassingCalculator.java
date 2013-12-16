@@ -21,11 +21,13 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
-// TODO 3 steps not 2: 
-// 1.Choose fixes that might be candidates (eg local minimum) (Also when suspended?)
-// 2.Evaluate them (eg probability of distance in ratio to leg length)
-// 3. Find Passings (eg take candidates and somehow chose which ones to use)
-// => much simpler in calculator (?)
+/**
+ * TODO
+ * @author Nicolas Klose
+ *
+ */
+
+
 
 public class MarkPassingCalculator {
     private AbstractCandidateFinder finder;
@@ -49,10 +51,10 @@ public class MarkPassingCalculator {
         finder = new CandidateFinder(race);
         chooser = new CandidateChooser(race);
         for (Competitor c : race.getRace().getCompetitors()) {
-            finder.reCalculateAllFixes(c);
-            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
+            chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
         }
         if (listen) {
+            suspended = false;
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
         }
     }
@@ -107,11 +109,11 @@ public class MarkPassingCalculator {
             }
             tasks.clear();
             for (Competitor c : finder.getAffectedCompetitors()) {
-                FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c, false), true);
+                FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c), true);
                 tasks.add(task);
-                executor.execute(task);
             }
             for (FutureTask<Boolean> task : tasks) {
+                executor.execute(task);
                 try {
                     task.get();
                 } catch (InterruptedException | ExecutionException e) {
@@ -134,7 +136,7 @@ public class MarkPassingCalculator {
         @Override
         public void run() {
             if (o instanceof Competitor) {
-                finder.calculateFixesAffectedByNewCompetitorFixes(fixes, (Competitor) o);
+                finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o,fixes);
             } else if (o instanceof Mark) {
                 finder.calculateFixesAffectedByNewMarkFixes((Mark) o, fixes);
             }
@@ -143,18 +145,12 @@ public class MarkPassingCalculator {
 
     private class ComputeMarkPassings implements Runnable {
         Competitor c;
-        boolean reCalculateAllFixes;
-
-        public ComputeMarkPassings(Competitor c, boolean reCalculateAllFixes) {
+        public ComputeMarkPassings(Competitor c) {
             this.c = c;
-            this.reCalculateAllFixes = reCalculateAllFixes;
         }
 
         @Override
         public void run() {
-            if (reCalculateAllFixes) {
-                finder.reCalculateAllFixes(c);
-            }
             chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
         }
     }
