@@ -151,7 +151,7 @@ def compute_branch(branch_name)
                 branch.shared_size += blob.size
                 branch.shared_packed_size += blob.packed_size
             else
-                if dependable_blob_shas.include?(blob.sha)
+                if $dependable_blob_shas.include?(blob.sha)
                     branch.non_shared_dependable_size += blob.size
                     branch.non_shared_dependable_packed_size += blob.packed_size
                 else
