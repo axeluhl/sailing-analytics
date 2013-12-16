@@ -78,6 +78,9 @@ public class BoatClassImageData {
 
     public ImageTransformer getBoatImageTransformerByLegTypeAndTack(LegType legType, Tack tack, boolean isSelected) {
         ImageTransformer result = null;
+        if (tack == null) {
+            tack = Tack.STARBOARD; // TODO this is just a fallback / workaround for not having a good image resource for unknown tack
+        }
         switch (tack) {
         case PORT:
             switch (legType) {
@@ -135,6 +138,9 @@ public class BoatClassImageData {
 
     public ImageTransformer getBoatImageTransformerByTack(Tack tack, boolean isSelected) {
         ImageTransformer result = null;
+        if (tack == null) {
+            tack = Tack.STARBOARD; // TODO defaulting to a tack to avoid NPE; need to find a default representation for boats in unknown wind conditions
+        }
         switch (tack) {
         case STARBOARD:
             if (isSelected) {

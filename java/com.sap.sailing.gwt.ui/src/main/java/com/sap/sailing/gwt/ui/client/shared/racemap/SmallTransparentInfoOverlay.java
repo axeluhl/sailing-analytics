@@ -6,24 +6,27 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
- * A google map overlay based on a HTML5 canvas for drawing competitor information close to the boat
+ * A google map overlay based on a HTML5 canvas for drawing a short textual information close to some object on a map
+ * with a given position.
+ * 
+ * @author Frank Mittag
+ * @author Axel Uhl
  */
-public class CompetitorInfoOverlay extends CanvasOverlayV3 {
+public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
 
     /**
-     * The competitor.
+     * The text to display in the canvas
      */
-    private final CompetitorDTO competitorDTO;
+    private String infoText;
 
     /**
      * The current GPS fix of the boat position of the competitor.
      */
-    private GPSFixDTO boatFix;
+    private PositionDTO position;
 
     private int canvasWidth;
     private int canvasHeight;
@@ -31,10 +34,9 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     private int infoBoxWidth;
     private double cornerRadius;
 
-    public CompetitorInfoOverlay(MapWidget map, int zIndex, CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
+    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText, RaceMapImageManager raceMapImageManager) {
         super(map, zIndex);
-        this.competitorDTO = competitorDTO;
-
+        this.infoText = infoText;
         canvasWidth = 20;
         canvasHeight = 45;
         infoBoxWidth = 20;
@@ -51,18 +53,13 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     @Override
     protected void draw() {
-        if (mapProjection != null && boatFix != null) {
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            String infoText = competitorDTO.getSailID();
-            if (infoText == null || infoText.isEmpty()) {
-                infoText = competitorDTO.getName();
-            }
-
+        if (mapProjection != null && position != null) {
+            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
             Context2d context2d = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
             context2d.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = context2d.measureText(competitorDTO.getSailID());
+            TextMetrics measureText = context2d.measureText(infoText);
             double textWidth = measureText.getWidth();
 
             canvasWidth = (int) textWidth + 17;
@@ -87,11 +84,11 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
             context2d.beginPath();
             context2d.setFillStyle("black");
-            context2d.fillText(competitorDTO.getSailID(), 8, 14);
+            context2d.fillText(infoText, 8, 14);
             context2d.stroke();
 
-            Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
-            setCanvasPosition(boatPositionInPx.getX(), boatPositionInPx.getY() - canvasHeight);
+            Point objectPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
+            setCanvasPosition(objectPositionInPx.getX(), objectPositionInPx.getY() - canvasHeight);
         }
     }
 
@@ -110,11 +107,15 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
         context.fill();
     }
 
-    public GPSFixDTO getBoatFix() {
-        return boatFix;
+    public void setPosition(PositionDTO position) {
+        this.position = position;
     }
-
-    public void setBoatFix(GPSFixDTO boatFix) {
-        this.boatFix = boatFix;
+    
+    /**
+     * Updates the text to show and re-draws the canvas
+     */
+    public void setInfoText(String infoText) {
+        this.infoText = infoText;
+        draw();
     }
 }
