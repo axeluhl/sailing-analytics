@@ -39,7 +39,7 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Iterable<User> users = connection.getUsers();
-        assertEquals(1, Util.size(users));
+        assertEquals(2, Util.size(users));
         assertEquals(connection.getAccount().getUser().getId(), users.iterator().next().getId());
     }
 
