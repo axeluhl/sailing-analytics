@@ -50,7 +50,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
             race.getTrack(c).unlockAfterRead();
         }
         calculateDistances(c);
-        candidates.get(c).clear();
+        for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
+        candidates.get(c).get(w).clear();
+        }
         return getCandidateDeltas(c);
     }
 
