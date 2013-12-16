@@ -4,8 +4,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
- * A possible passing of a Waypoint. It contains the Waypoint it might be passing, the ID of this Waypoint, a Timepoint
- * and the proability that this candidate is a passing (e.g. based on the distance to the mark).
+ * A possible passing of a {@link Waypoint}. It contains the {@link Waypoint} that it might be passing, a
+ * {@link TimePoint}, the probability that this candidate is a passing (e.g. based on the distance to the
+ * {@link Waypoint}) and the one-based(!) ID of this Waypoint. The ID is one based because the standard implemantation
+ * of {@link AbstractCandidateChooser} (see {@link CandidateChooser}) uses a proxy Candidates at the end and the
+ * beginning of the race, the one at the beginning recieves the ID 0. Candidates are created in an
+ * {@link AbstractCandidateFinder}, which determines where a passing could be and assigns them 
  * 
  * @author Nicolas Klose
  * 

@@ -17,6 +17,14 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
+/**
+ * The standard implemantation of {@link AbstractCandidateFinder}. The fixes are evaluated for their distance to each
+ * Waypoint. Every local minimum is a Candidate, and the probability depends on its ratio to the average lengths of the
+ * {@link Leg}s before and after it.
+ * 
+ * @author Nicolas Klose
+ * 
+ */
 public class CandidateFinder implements AbstractCandidateFinder {
 
     private LinkedHashMap<Competitor, List<GPSFix>> affectedFixes = new LinkedHashMap<>();
@@ -40,7 +48,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public Pair<List<Candidate>,List<Candidate>> getAllCandidates(Competitor c) {
+    public Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c) {
         try {
             race.getTrack(c).lockForRead();
             for (GPSFix fix : race.getTrack(c).getFixes()) {
@@ -51,7 +59,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
         calculateDistances(c);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-        candidates.get(c).get(w).clear();
+            candidates.get(c).get(w).clear();
         }
         return getCandidateDeltas(c);
     }
@@ -128,7 +136,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
                             gps.getTimePoint(), getLikelyhood(c, w, gps), w);
                     newCans.add(newCandidate);
                 }
-
                 if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
                     candidates.get(c).get(w).remove(gps);
                     Candidate badCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
@@ -148,7 +155,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 double distance = 0;
                 PassingInstruction p = w.getPassingInstructions();
                 if (p == null) {
-
                     if (w.equals(race.getRace().getCourse().getFirstWaypoint())
                             || w.equals(race.getRace().getCourse().getLastWaypoint())) {
                         p = PassingInstruction.Line;

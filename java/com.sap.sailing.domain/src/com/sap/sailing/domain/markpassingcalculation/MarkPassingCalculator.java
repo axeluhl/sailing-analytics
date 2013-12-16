@@ -22,12 +22,21 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
- * TODO
+ * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using a {@link AbstractCandidateFinder} and a
+ * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s.
+ * The chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
+ * this sequence. 
+ * If <code>listen</code> is true, a {@link MarkPassingUpdateListener} is initialized which puts new
+ * fixes into a queue. Additionally a new Thread is started, which takes the fixes out of the queue and sorts them so
+ * that each object (Competitor or Mark) has a list of Fixes in <code>combinedFixes</code>. If <code>suspended</code> is
+ * false, the new Fixes are handed to the <code>executor</code> as FutureTasks, first to calculate the affected Fixes
+ * and then the actual MarkPassings (See {@link CandidateFinder} and {@link CandidateChooser}). Then the listening
+ * process begins again with the queue being emptied. This continues until the <code>end</code> Object is put in the
+ * queue by the {@link MarkPassingUpdateListener}, signalising that the race is over.
+ * 
  * @author Nicolas Klose
- *
+ * 
  */
-
-
 
 public class MarkPassingCalculator {
     private AbstractCandidateFinder finder;
@@ -136,7 +145,7 @@ public class MarkPassingCalculator {
         @Override
         public void run() {
             if (o instanceof Competitor) {
-                finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o,fixes);
+                finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o, fixes);
             } else if (o instanceof Mark) {
                 finder.calculateFixesAffectedByNewMarkFixes((Mark) o, fixes);
             }
@@ -145,6 +154,7 @@ public class MarkPassingCalculator {
 
     private class ComputeMarkPassings implements Runnable {
         Competitor c;
+
         public ComputeMarkPassings(Competitor c) {
             this.c = c;
         }

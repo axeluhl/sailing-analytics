@@ -18,6 +18,15 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
+/**
+ * The standard implementation of {@link AbstractCandidateChooser}. It creates {@link Edge}s out of the
+ * {@link Candidate}s for each competitor and than uses a shortest path-algorithm to find the most likely sequence of
+ * {@link MarkPassing}s. An estimation of the time between two {@link Candidate}s and the distance between their
+ * {@link Waypoint}s is used to further increase the edges correctness.
+ * 
+ * @author Nicolas Klose
+ * 
+ */
 public class CandidateChooser implements AbstractCandidateChooser {
 
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
@@ -27,7 +36,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate start;
     private Candidate end;
     private DynamicTrackedRace race;
-    private double penaltyForSkipping = 1-Edge.penaltyForSkipped;
+    private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
 
         @Override
@@ -65,9 +74,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
             allEdges.get(c).add(new Edge(start, end, 0));
         }
     }
-    
+
     @Override
-    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses(){
+    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses() {
         return currentMarkPasses;
     }
 
@@ -244,7 +253,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         / polar.getUpwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
             }
         } catch (NoWindException e) {
-            Logger.getLogger(CandidateChooser.class.getName()).log(Level.SEVERE, "CandidateChooser threw exception " + e.getMessage()
+            Logger.getLogger(CandidateChooser.class.getName()).log(
+                    Level.SEVERE,
+                    "CandidateChooser threw exception " + e.getMessage()
                             + " while estimating the Time between two Candidates.");
         }
 
