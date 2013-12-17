@@ -25,7 +25,7 @@ public class EventImpl extends EventBaseImpl implements Event {
         super(name, venue, publicationUrl, isPublic, id);
         this.regattas = new HashSet<Regatta>();
     }
-
+    
     @Override
     public Iterable<Regatta> getRegattas() {
         return Collections.unmodifiableSet(regattas);

@@ -2806,8 +2806,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getEventById(eventUuid);
     }
 
-    @Override
-    public EventDTO getEventById(Serializable id) {
+    private EventDTO getEventById(UUID id) {
         EventDTO result = null;
         Event event = getService().getEvent(id);
         if (event != null) {
