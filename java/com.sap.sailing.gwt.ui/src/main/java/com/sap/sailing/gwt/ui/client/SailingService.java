@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -308,8 +307,6 @@ public interface SailingService extends RemoteService {
 
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
-    
-    EventDTO getEventById(Serializable id);
     
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
