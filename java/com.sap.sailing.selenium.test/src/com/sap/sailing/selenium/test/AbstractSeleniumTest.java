@@ -28,6 +28,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.Selenium;
 import com.sap.sailing.selenium.core.TestEnvironment;
+import com.sap.sailing.selenium.core.WindowManager;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -90,6 +91,17 @@ public abstract class AbstractSeleniumTest {
      */
     protected WebDriver getWebDriver() {
         return this.environment.getWebDriver();
+    }
+    
+    /**
+     * <p>Returns the window manager for the used web driver, which can be used to open new windows and switching
+     *   between multiple windows.</p>
+     * 
+     * @return
+     *   The window manager for the used web driver.
+     */
+    protected WindowManager getWindowManager() {
+        return this.environment.getWindowManager();
     }
         
     /**
