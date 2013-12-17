@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.adminconsole.pages;
+package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.Iterator;
 import java.util.List;
@@ -10,10 +10,10 @@ import org.openqa.selenium.WebElement;
 //import org.openqa.selenium.support.FindBy;
 //import org.openqa.selenium.support.How;
 
+
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
-
-import com.sap.sailing.selenium.test.PageArea;
+import com.sap.sailing.selenium.pages.PageArea;
 
 /**
  * <p>The page object representing the TracTrac Events tab.</p>
@@ -49,7 +49,7 @@ public class TracTracEventManagementPanel extends PageArea {
      * @param element
      *   
      */
-    protected TracTracEventManagementPanel(WebDriver driver, WebElement element) {
+    public TracTracEventManagementPanel(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

@@ -2,10 +2,9 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import org.junit.Test;
 
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
-
-import com.sap.sailing.selenium.test.adminconsole.pages.AdminConsolePage;
-import com.sap.sailing.selenium.test.adminconsole.pages.TracTracEventManagementPanel;
 
 /**
  * <p>Test for starting and stopping the tracking of TracTrac races.</p>

@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.adminconsole.pages;
+package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +15,9 @@ import org.openqa.selenium.support.ui.FluentWait;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.test.HostPage;
+import com.sap.sailing.selenium.pages.HostPage;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content

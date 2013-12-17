@@ -3,12 +3,11 @@ package com.sap.sailing.selenium.test.adminconsole;
 import org.junit.Test;
 
 import static org.hamcrest.core.Is.*;
-
 import static org.junit.Assert.*;
 
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
-import com.sap.sailing.selenium.test.adminconsole.pages.AdminConsolePage;
-import com.sap.sailing.selenium.test.adminconsole.pages.TracTracEventManagementPanel;
 
 /**
  * <p>Tests for filtering of trackable TracTrac races.</p>

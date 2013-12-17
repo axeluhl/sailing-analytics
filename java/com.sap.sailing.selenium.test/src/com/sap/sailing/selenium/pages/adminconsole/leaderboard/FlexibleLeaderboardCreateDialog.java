@@ -1,13 +1,13 @@
-package com.sap.sailing.selenium.test.adminconsole.pages;
+package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.test.PageArea;
+import com.sap.sailing.selenium.pages.PageArea;
 
-public class FlexibleLeaderboardCreationDialog extends PageArea {
+public class FlexibleLeaderboardCreateDialog extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
     @FindBy(how = BySeleniumId.class, using = "CancelButton")
@@ -17,7 +17,7 @@ public class FlexibleLeaderboardCreationDialog extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "StatusLabel")
     private WebElement statusLabel;
 
-    public FlexibleLeaderboardCreationDialog(WebDriver driver, WebElement element) {
+    public FlexibleLeaderboardCreateDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

@@ -9,7 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.sap.sailing.selenium.test.PageObject;
+import com.sap.sailing.selenium.pages.PageObject;
 
 /**
  * <p></p>
