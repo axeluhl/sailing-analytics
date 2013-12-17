@@ -1,5 +1,8 @@
 package com.sap.sailing.selenium.pages;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import java.util.concurrent.TimeUnit;
@@ -17,6 +20,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
+import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
 
 /**
  * <p>Within a web app's UI there are areas that tests interact with. A page object simply models these as objects
@@ -42,10 +46,14 @@ import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
  *   D049941
  */
 public class PageObject {
+    public static final int DEFAULT_WAIT_TIMEOUT = 30;
+    
+    public static final int DEFAULT_WAIT_POLLING = 5;
+    
     /**
      * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
      */
-    protected static final int DEFAULT_TIMEOUT = 60;
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
     
     /**
      * <p>The web driver to use.</p>
@@ -56,6 +64,107 @@ public class PageObject {
      * <p>The context for the locating of elements.</p>
      */
     protected final SearchContext context;
+    
+    /**
+     * <p>Creates a FluentWait with the given input and the default timeout and polling interval.</p>
+     * 
+     * @param input
+     *   
+     * @return
+     *   
+     */
+    public static <T> FluentWait<T> createFluentWait(T input) {
+        return createFluentWait(input, Collections.<Class<? extends Throwable>>emptyList());
+    }
+    
+    /**
+     * <p></p>
+     * 
+     * @param input
+     *   
+     * @param exceptions
+     *   
+     * @return
+     *   
+     */
+    @SafeVarargs
+    public static <T> FluentWait<T> createFluentWait(T input, Class<? extends Throwable>... exceptions) {
+        return createFluentWait(input, Arrays.asList(exceptions));
+    }
+    
+    /**
+     * <p></p>
+     * 
+     * @param input
+     *   
+     * @param exceptions
+     *   
+     * @return
+     *   
+     */
+    public static <T> FluentWait<T> createFluentWait(T input, Collection<Class<? extends Throwable>> exceptions) {
+        return createFluentWait(input, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING, exceptions);
+    }
+    
+    /**
+     * <p>Creates a FluentWait with the given input and the specified timeout and polling interval.</p>
+     * 
+     * @param input
+     *   
+     * @param timeout
+     *   
+     * @param polling
+     *   
+     * @return
+     *   
+     */
+    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling) {
+        return createFluentWait(input, timeout, polling, Collections.<Class<? extends Throwable>>emptyList());
+    }
+    
+    /**
+     * <p></p>
+     * 
+     * @param input
+     *   
+     * @param timeout
+     *   
+     * @param polling
+     *   
+     * @param exceptions
+     *   
+     * @return
+     *   
+     */
+    @SafeVarargs
+    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
+            Class<? extends Throwable>... exceptions) {
+        return createFluentWait(input, timeout, polling, Arrays.asList(exceptions));
+    }
+    
+    /**
+     * <p></p>
+     * 
+     * @param input
+     *   
+     * @param timeout
+     *   
+     * @param polling
+     *   
+     * @param exceptions
+     *   
+     * @return
+     *   
+     */
+    public static <T> FluentWait<T> createFluentWait(T input, int timeout, int polling,
+            Collection<Class<? extends Throwable>> exceptions) {
+        FluentWait<T> wait = new FluentWait<>(input);
+        wait.withTimeout(timeout, TimeUnit.SECONDS);
+        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        wait.ignoreAll(exceptions);
+        
+        return wait;
+    }
     
     /**
      * <p>Creates a new page object with the given web driver. This constructor is equivalent to the two argument
@@ -93,10 +202,10 @@ public class PageObject {
     
     /**
      * <p>Initialize the page object. The default implementation use a factory to lazily initialize the elements
-     *   (annotated fields) of the page object using the timeout duration returned by {@link #getTimeOut()}. To get a
-     *   field lazily initialized you have to annotate the field either with {@link FindBy} or with {@link FindBys}.
-     *   If the element never changes (that is, that the same instance in the DOM can always be used) it is also
-     *   possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
+     *   (annotated fields) of the page object using the timeout duration returned by {@link #getPageLoadTimeOut()}.
+     *   To get a field lazily initialized you have to annotate the field either with {@link FindBy} or with
+     *   {@link FindBys}. If the element never changes (that is, that the same instance in the DOM can always be used)
+     *   it is also possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
      * 
      * <p>A simple example for the implementation of a page object can look as follows:</p>
      * 
@@ -132,7 +241,10 @@ public class PageObject {
      *   the default implementation.</p>
      */
     protected void initElements() {
-        PageFactory.initElements(new SeleniumElementLocatorFactory(this.context, getTimeOut()), this);
+        SeleniumElementLocatorFactory factory = new SeleniumElementLocatorFactory(this.context, getPageLoadTimeOut());
+        SeleniumFieldDecorator decorator = new SeleniumFieldDecorator(factory);
+        
+        PageFactory.initElements(decorator, this);
     }
     
     /**
@@ -141,8 +253,8 @@ public class PageObject {
      * @return
      *   The timeout duration for the initialization of the page object.
      */
-    protected int getTimeOut() {
-        return DEFAULT_TIMEOUT;
+    protected int getPageLoadTimeOut() {
+        return DEFAULT_PAGE_LOAD_TIMEOUT;
     }
     
     /**
@@ -211,7 +323,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests() {
-        waitForAjaxRequests(30, 5);
+        waitForAjaxRequests(DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING);
     }
     
     /**
@@ -260,9 +372,7 @@ public class PageObject {
      *   if the timeout expires.
      */
     protected void waitForAjaxRequests(String category, int timeout, int polling) {
-        FluentWait<WebDriver> wait = new FluentWait<>(this.driver);
-        wait.withTimeout(timeout, TimeUnit.SECONDS);
-        wait.pollingEvery(polling, TimeUnit.SECONDS);
+        FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
         
         wait.until(new AjaxCallsComplete(category));
     }

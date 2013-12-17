@@ -28,7 +28,7 @@ public class HostPage extends PageObject {
      */
     @Override
     protected void initElements() {
-        waitForAjaxRequests(super.getTimeOut(), 5);
+        waitForAjaxRequests(super.getPageLoadTimeOut(), 5);
         
         super.initElements();
     }
