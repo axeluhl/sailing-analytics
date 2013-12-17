@@ -338,7 +338,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests(String category) {
-        waitForAjaxRequests(category, 30, 5);
+        waitForAjaxRequests(category, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING);
     }
     
     /**
