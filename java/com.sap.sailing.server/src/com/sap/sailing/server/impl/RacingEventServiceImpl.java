@@ -20,9 +20,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,6 +64,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -115,9 +119,12 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.operationaltransformation.Operation;
+import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -222,6 +229,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final WindStore windStore;
 
+    private final PolarDataService polarDataService;
+
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
      * object so that service lookups become possible.
@@ -293,6 +302,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         operationExecutionListeners = new ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener>();
         courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        // TODO find out how many executors we have on server side and how to manage them
+        Executor polarExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
+        /* maximumPoolSize */THREAD_POOL_SIZE,
+        /* keepAliveTime */60, TimeUnit.SECONDS,
+        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        polarDataService = PolarDataServiceFactory.createStandardPolarDataService(polarExecutor);
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
@@ -318,6 +334,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
+    }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
     }
 
     @Override
@@ -1390,9 +1411,32 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
+                addRaceTrackingFinishedListenerForPolarFixCache(result);
             }
             return result;
         }
+    }
+
+    private void addRaceTrackingFinishedListenerForPolarFixCache(DynamicTrackedRegatta result) {
+        RaceListener raceListenerForPolarFixCacheUpdate = new RaceListener() {
+            @Override
+            public void raceRemoved(TrackedRace trackedRace) {
+                // TODO remove fixes from polar fix cache
+            }
+
+            @Override
+            public void raceAdded(final TrackedRace trackedRace) {
+                trackedRace.addListener(new AbstractRaceChangeListener() {
+                    @Override
+                    public void statusChanged(TrackedRaceStatus newStatus) {
+                        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                            polarDataService.newRaceFinishedTracking(trackedRace);
+                        }
+                    }
+                });
+            }
+        };
+        result.addRaceListener(raceListenerForPolarFixCacheUpdate);
     }
 
     @Override

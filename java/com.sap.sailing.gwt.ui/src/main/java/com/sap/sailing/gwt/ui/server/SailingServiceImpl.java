@@ -257,7 +257,6 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.factory.PolarDataServiceFactory;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
@@ -369,9 +368,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final SwissTimingReplayService swissTimingReplayService;
 
-    private PolarDataService polarDataService;
     private final BundleContext context;
-
     public SailingServiceImpl() {
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
@@ -414,7 +411,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
-        polarDataService = PolarDataServiceFactory.createStandardPolarDataService();
     }
 
     protected SwissTimingReplayService getSwissTimingReplayService(BundleContext context) {
@@ -3128,6 +3124,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (name == null || name.isEmpty()) {
             name = getCommonBoatClass(trackedRaces);
         }
+        PolarDataService polarDataService = service.getPolarDataService();
         PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
         return new PolarSheetGenerationResponseImpl(id, name, result);
     }

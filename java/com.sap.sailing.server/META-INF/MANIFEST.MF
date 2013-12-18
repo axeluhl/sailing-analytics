@@ -6,7 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.sap.sailing.server.gateway.deserialization,
+Import-Package: com.sap.sailing.polars,
+ com.sap.sailing.polars.factory,
+ com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.masterdata.impl,
  com.sap.sailing.server.gateway.serialization.masterdata.impl,
  org.json.simple,

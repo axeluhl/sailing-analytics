@@ -58,6 +58,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.polars.PolarDataService;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -478,4 +479,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DomainObjectFactory getDomainObjectFactory();
     
     WindStore getWindStore();
+
+    PolarDataService getPolarDataService();
 }

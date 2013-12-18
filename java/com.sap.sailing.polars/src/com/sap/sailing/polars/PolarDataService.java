@@ -95,4 +95,6 @@ public interface PolarDataService {
     PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
             Executor executor) throws InterruptedException, ExecutionException;
 
+    void newRaceFinishedTracking(TrackedRace trackedRace);
+
 }

@@ -3,30 +3,26 @@ package com.sap.sailing.polars.caching;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 
 public class PolarFixCacheRaceInterval implements UpdateInterval<PolarFixCacheRaceInterval> {
 
-    private final Set<RegattaAndRaceIdentifier> races;
+    private final Set<TrackedRace> races;
 
-    public PolarFixCacheRaceInterval(Set<RegattaAndRaceIdentifier> races) {
+    public PolarFixCacheRaceInterval(Set<TrackedRace> races) {
         this.races = races;
     }
 
-    public Set<RegattaAndRaceIdentifier> getRaces() {
+    public Set<TrackedRace> getRaces() {
         return races;
     }
 
     @Override
     public PolarFixCacheRaceInterval join(PolarFixCacheRaceInterval otherUpdateInterval) {
-        Set<RegattaAndRaceIdentifier> joined = new HashSet<RegattaAndRaceIdentifier>();
-        for (RegattaAndRaceIdentifier race : races) {
-            joined.add(race);
-        }
-        for (RegattaAndRaceIdentifier race : otherUpdateInterval.getRaces()) {
-            joined.add(race);
-        }
+        Set<TrackedRace> joined = new HashSet<TrackedRace>();
+        joined.addAll(races);
+        joined.addAll(otherUpdateInterval.getRaces());
         return new PolarFixCacheRaceInterval(joined);
     }
 
