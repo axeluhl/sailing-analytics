@@ -37,6 +37,9 @@ import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class AbstractMarkPassingTest {
     protected Competitor bob = new CompetitorImpl("Bob", "Bob", null, null, null);
+    protected Competitor joe = new CompetitorImpl("Joe", "Joe", null, null, null);
+    protected Competitor mike = new CompetitorImpl("Mike", "Mike", null, null, null);
+    
     protected Mark m = new MarkImpl("black");
     protected Mark m2 = new MarkImpl("white 1");
     protected Mark m3 = new MarkImpl("white 2");

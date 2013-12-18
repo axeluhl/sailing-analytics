@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -166,6 +167,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
+        if(!Activator.getInstance().isUseTracTracMarkPassings()){
+            new MarkPassingCalculator(trackedRace, true);
+        }
     }
 
 }

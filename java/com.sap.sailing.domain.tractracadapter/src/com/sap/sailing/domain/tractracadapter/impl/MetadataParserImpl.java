@@ -93,7 +93,7 @@ public class MetadataParserImpl implements MetadataParser {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            int i=1;
+            int i = 1;
             for (TracTracControlPoint controlPoint : controlPoints) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (!controlPoint.getHasTwoPoints() && seqValue != null) {

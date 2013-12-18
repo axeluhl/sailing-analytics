@@ -51,6 +51,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -402,8 +403,9 @@ public class DomainFactoryImpl implements DomainFactory {
                         trackedRegatta, tractracEvent, this, simulator));
                 break;
             case MARKPASSINGS:
-                result.add(new MarkPassingReceiver(
-                        trackedRegatta, tractracEvent, simulator, this));
+                if (Activator.getInstance().isUseTracTracMarkPassings()) {
+                    result.add(new MarkPassingReceiver(trackedRegatta, tractracEvent, simulator, this));
+                }
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
@@ -518,6 +520,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 }
             } else {
                 logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
+            }
+            if(!Activator.getInstance().isUseTracTracMarkPassings()){
+                new MarkPassingCalculator(trackedRace, true);
             }
             return trackedRace;
         }
