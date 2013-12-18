@@ -43,7 +43,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
      * If the competitor is already contained, the data will be overwritten.
      */
     public void setCompetitorData(CompetitorDTO competitor, CompetitorRaceDataDTO competitorData) {
-        if (detailType == competitorData.getDetailType()) {
+        if (competitorData != null && detailType == competitorData.getDetailType()) {
             this.competitorsData.put(competitor, competitorData);
         }
     }
