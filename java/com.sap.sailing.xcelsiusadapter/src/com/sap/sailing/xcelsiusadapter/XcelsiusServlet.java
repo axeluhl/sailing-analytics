@@ -23,10 +23,8 @@ public class XcelsiusServlet extends SailingServerHttpServlet {
                     return;
                 }
                 throw new ServletException("Unknown action " + action);
-                return;
             }
-            throw new ServletException("Please use the action= parameter to specify an action.", res);
-            return;
+            throw new ServletException("Please use the action= parameter to specify an action.");
         } catch (Exception e) {
             throw (new ServletException(e));
         }
