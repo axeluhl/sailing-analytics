@@ -5,11 +5,11 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
+import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
@@ -37,14 +37,14 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private final BoatClassImageData boatClassImageData;
 
-    /**
-     * Used to decide transition speed for smooth position updates.
-     */
-    private final Timer timer;    
-
-    public BoatOverlay(MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Timer timer) {
+    public BoatOverlay(MapWidget map, int zIndex, final CompetitorDTO competitorDTO) {
         super(map, zIndex);
-        this.timer = timer;
+        map.addZoomChangeHandler(new ZoomChangeMapHandler() {
+            @Override
+            public void onEvent(ZoomChangeMapEvent event) {
+                removeCanvasPositionTransition(); // re-activate upon next position change if player is in correct state
+            }
+        });
         this.boatClass = competitorDTO.getBoatClass();
         this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
     }
@@ -76,13 +76,13 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
     
-    public void setBoatFix(GPSFixDTO boatFix) {
-        this.boatFix = boatFix;
-        if (timer.getPlayState() == PlayStates.Playing) {
-            setCanvasPositionTransition((long) (1.3*timer.getRefreshInterval()));
-        } else {
+    public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
             removeCanvasPositionTransition();
+        } else {
+            setCanvasPositionTransition(timeForPositionTransitionMillis);
         }
+        this.boatFix = boatFix;
     }
     
     public double getRealBoatSizeScaleFactor(Size imageSize) {

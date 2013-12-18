@@ -340,7 +340,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                       Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
                       for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                              boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime());
+                              boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime(),
+                                      /* timeForPositionTransitionMillis; don't animate during zoom */ -1);
                               if (usedExistingMarker) {
                                   competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                               }
@@ -684,7 +685,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date, 
+                            timer.getPlayState() == PlayStates.Playing ? // animate when playing
+                                1300*timer.getRefreshInterval()/1000 : -1);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
@@ -1050,7 +1053,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date) {
+    /**
+     * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
+     */
+    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date, long timeForPositionTransitionMillis) {
         boolean usedExistingCanvas = false;
         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
         if (lastBoatFix != null) {
@@ -1059,12 +1065,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 boatOverlay = createBoatOverlay(RaceMapOverlaysZIndexes.BOATS_ZINDEX, competitorDTO, displayHighlighted(competitorDTO));
                 boatOverlays.put(competitorDTO, boatOverlay);
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.addToMap();
             } else {
                 usedExistingCanvas = true;
                 boatOverlay.setSelected(displayHighlighted(competitorDTO));
-                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.setBoatFix(lastBoatFix, timeForPositionTransitionMillis);
                 boatOverlay.draw();
             }
         }
@@ -1094,7 +1100,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, timer);
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override

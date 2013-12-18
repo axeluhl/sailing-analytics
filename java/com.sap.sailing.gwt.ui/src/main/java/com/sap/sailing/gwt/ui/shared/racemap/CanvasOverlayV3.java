@@ -77,8 +77,16 @@ public abstract class CanvasOverlayV3 {
     protected int zIndex;
 
     protected MapCanvasProjection mapProjection;
+    
+    /**
+     * The time in milliseconds that will be used to move the boat from its old position to the next.
+     * <code>-1</code> means that currently no transition is set. Invariant: this field's value corresponds
+     * with the time set on the canvas element style's <code>transition</code> CSS property.
+     */
+    private long transitionTimeInMilliseconds;
 
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
+        this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
         this.mapProjection = null;
         
@@ -252,11 +260,17 @@ public abstract class CanvasOverlayV3 {
     }
     
     protected void setCanvasPositionTransition(long durationInMilliseconds) {
-        setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+        if (durationInMilliseconds != transitionTimeInMilliseconds) {
+            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+            transitionTimeInMilliseconds = durationInMilliseconds;
+        }
     }
     
     protected void removeCanvasPositionTransition() {
-        setProperty(canvas.getElement().getStyle(), "transition", "none");
+        if (transitionTimeInMilliseconds != -1) {
+            setProperty(canvas.getElement().getStyle(), "transition", "none");
+            transitionTimeInMilliseconds = -1;
+        }
     }
 
     private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
