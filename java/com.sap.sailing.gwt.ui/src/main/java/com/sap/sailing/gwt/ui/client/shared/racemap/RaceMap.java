@@ -1094,12 +1094,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO, timer);
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                if(lastInfoWindow != null) {
+                if (lastInfoWindow != null) {
                     lastInfoWindow.close();
                 }
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());

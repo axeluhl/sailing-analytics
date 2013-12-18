@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -249,6 +250,34 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
+    protected void setCanvasPositionTransition(long durationInMilliseconds) {
+        setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+    }
+    
+    protected void removeCanvasPositionTransition() {
+        setProperty(canvas.getElement().getStyle(), "transition", "none");
+    }
+
+    private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
+        for (String browserTypePrefix : getBrowserTypePrefixes()) {
+                style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
+        }
+    }
+    
+    private String[] getBrowserTypePrefixes() {
+        return new String[] { "", /* Firefox */ "moz", /* IE */ "ms", /* Opera */ "o", /* Chrome and Mobile */ "webkit" };
+    }
+
+    private String getBrowserSpecificPropertyName(String browserType, String basePropertyName) {
+        final String result;
+        if (browserType == null || browserType.isEmpty()) {
+                result = basePropertyName;
+        } else {
+                result = browserType+basePropertyName.substring(0, 1).toUpperCase()+basePropertyName.substring(1);
+        }
+        return result;
+    }
+
     protected void setCanvasPosition(double x, double y) {
         canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
         canvas.getElement().getStyle().setLeft(x, Unit.PX);
