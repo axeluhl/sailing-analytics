@@ -1,13 +1,12 @@
 package com.sap.sailing.xcelsiusadapter;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.Callable;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
@@ -72,13 +72,15 @@ public class LeaderboardData extends ExportAction {
         super(req, res, service);
     }
 
-    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races) {
+    private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
         addNamedElementWithValue(leaderboardElement, "display_name", leaderboard.getDisplayName());
         addNamedElementWithValue(leaderboardElement, "delay_to_live_in_millis", leaderboard.getDelayToLiveInMillis());
         addNamedElementWithValue(leaderboardElement, "scoring_scheme", leaderboard.getScoringScheme().getType().name());
         addNamedElementWithValue(leaderboardElement, "boat_class", getBoatClassName(leaderboard));
+        leaderboardElement.addContent(createTimedXML("last_modification_", leaderboard.getTimePointOfLatestModification()));
+        leaderboardElement.addContent(createDataConfidenceXML(leaderboardConfidenceAndErrorMessages));
         leaderboardElement.addContent(competitors);
         leaderboardElement.addContent(races);
         return leaderboardElement;
@@ -87,18 +89,27 @@ public class LeaderboardData extends ExportAction {
     private List<Element> createTimedXML(String prefix, TimePoint timepoint) {
         List<Element> timedElements = new ArrayList<Element>();
         Calendar timedDate = Calendar.getInstance();
-        timedDate.setTime(timepoint.asDate());
-        
-        timedElements.add(createNamedElementWithValue(prefix+"year", timedDate.get(Calendar.YEAR)));
-        timedElements.add(createNamedElementWithValue(prefix+"month", timedDate.get(Calendar.MONTH)));
-        timedElements.add(createNamedElementWithValue(prefix+"day", timedDate.get(Calendar.DAY_OF_MONTH)));
-        timedElements.add(createNamedElementWithValue(prefix+"hour", timedDate.get(Calendar.HOUR_OF_DAY)));
-        timedElements.add(createNamedElementWithValue(prefix+"minute", timedDate.get(Calendar.MINUTE)));
-        timedElements.add(createNamedElementWithValue(prefix+"second", timedDate.get(Calendar.SECOND)));
-        
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy HH:MM:SS");
-        timedElements.add(createNamedElementWithValue(prefix+"second", dateFormatter.format(timedDate)));
-        
+        if (timepoint != null) {
+            timedDate.setTime(timepoint.asDate());
+            
+            timedElements.add(createNamedElementWithValue(prefix+"year", timedDate.get(Calendar.YEAR)));
+            timedElements.add(createNamedElementWithValue(prefix+"month", timedDate.get(Calendar.MONTH)));
+            timedElements.add(createNamedElementWithValue(prefix+"day", timedDate.get(Calendar.DAY_OF_MONTH)));
+            timedElements.add(createNamedElementWithValue(prefix+"hour", timedDate.get(Calendar.HOUR_OF_DAY)));
+            timedElements.add(createNamedElementWithValue(prefix+"minute", timedDate.get(Calendar.MINUTE)));
+            timedElements.add(createNamedElementWithValue(prefix+"second", timedDate.get(Calendar.SECOND)));
+            
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy HH:MM:SS");
+            timedElements.add(createNamedElementWithValue(prefix+"second", dateFormatter.format(timedDate)));
+        } else {
+            timedElements.add(createNamedElementWithValue(prefix+"year", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"month", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"day", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"hour", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"minute", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"second", ""));
+            timedElements.add(createNamedElementWithValue(prefix+"second", ""));
+        }
         return timedElements;
     }
     
@@ -110,6 +121,7 @@ public class LeaderboardData extends ExportAction {
         windElements.add(createNamedElementWithValue(prefix+"speed_in_knots", windInformation.getA().getKnots()));
         windElements.add(createNamedElementWithValue(prefix+"speed_in_meters_per_second", windInformation.getA().getMetersPerSecond()));
         windElements.add(createNamedElementWithValue(prefix+"confidence", windInformation.getB()));
+        
         double speedInKnots = windInformation.getA().getKnots();
         String windSpeedAsHumanReadableString = "";
         if (speedInKnots <= 4) {
@@ -127,8 +139,7 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
-    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex) throws NoWindException {
-        // TODO: Plausibility checks (race has start time, ...)
+    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException {
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "fleet_name", fleet.getName());
@@ -152,11 +163,11 @@ public class LeaderboardData extends ExportAction {
         raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMinutes*/ 5)));
         
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
-        addNamedElementWithValue(raceElement, "race_participants_count", allCompetitors.size());
+        addNamedElementWithValue(raceElement, "race_participant_count", allCompetitors.size());
         
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
-            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true);
+            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
             addNamedElementWithValue(raceElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
             addNamedElementWithValue(raceElement, "start_advantage_in_meters", start.getAdvantage().getMeters());
@@ -179,31 +190,53 @@ public class LeaderboardData extends ExportAction {
         return raceElement;
     }
     
-    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion) throws NoWindException {
+    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException {
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
         if (shortVersion)
             return competitorElement;
         
+        createDataConfidenceXML(competitorConfidenceAndErrorMessages);
+        
         addNamedElementWithValue(competitorElement, "name", competitor.getName());
-        addNamedElementWithValue(competitorElement, "nationality_name", competitor.getTeam().getNationality().getName());
-        addNamedElementWithValue(competitorElement, "nationality_ioc", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
-        addNamedElementWithValue(competitorElement, "boat_name", competitor.getBoat().getName());
-        addNamedElementWithValue(competitorElement, "boat_class", competitor.getBoat().getBoatClass().getName());
         
-        addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, leaderboard.getTimePointOfLatestModification()));
-        addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, leaderboard.getTimePointOfLatestModification()).getMeters());
-        addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, leaderboard.getTimePointOfLatestModification()).getB().getKnots());
+        if (competitor.getBoat() != null) {
+            addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
+            addNamedElementWithValue(competitorElement, "boat_class", competitor.getBoat().getBoatClass().getName());
+            addNamedElementWithValue(competitorElement, "boat_name", competitor.getBoat().getName());
+        } else {
+            addNamedElementWithValue(competitorElement, "sail_id", "");
+            addNamedElementWithValue(competitorElement, "boat_class", "");
+            addNamedElementWithValue(competitorElement, "boat_name", "");
+        }
         
-        addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, leaderboard.getTimePointOfLatestModification()));
-        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, leaderboard.getTimePointOfLatestModification()));
+        if (competitor.getTeam() != null && competitor.getTeam().getNationality() != null) {
+            addNamedElementWithValue(competitorElement, "nationality_name", competitor.getTeam().getNationality().getName());
+            addNamedElementWithValue(competitorElement, "nationality_ioc", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
+        } else {
+            addNamedElementWithValue(competitorElement, "nationality_name", "");
+            addNamedElementWithValue(competitorElement, "nationality_ioc", "");
+        }
         
-        // TODO: average_speed, max_speed, distance sailed
+        if (leaderboard.getTimePointOfLatestModification() != null) {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, leaderboard.getTimePointOfLatestModification()));
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, leaderboard.getTimePointOfLatestModification()).getMeters());
+            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, leaderboard.getTimePointOfLatestModification()).getB().getKnots());
+            
+            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, leaderboard.getTimePointOfLatestModification()));
+            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, leaderboard.getTimePointOfLatestModification()));
+        } else {
+            addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, leaderboard.getTimePointOfLatestModification()));
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, leaderboard.getTimePointOfLatestModification()).getMeters());
+            addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, leaderboard.getTimePointOfLatestModification()).getB().getKnots());
+            
+            addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, leaderboard.getTimePointOfLatestModification()));
+            addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, leaderboard.getTimePointOfLatestModification()));
+        }
         return competitorElement;
     }
     
-    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter) throws NoWindException {
+    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException {
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
         addNamedElementWithValue(legElement, "position", legCounter);
@@ -213,7 +246,7 @@ public class LeaderboardData extends ExportAction {
         
         int raceRank = 0;
         for (Competitor competitor : trackedLeg.getTrackedRace().getCompetitorsFromBestToWorst(/*timePoint*/ trackedLeg.getTrackedRace().getEndOfRace())) {
-            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true);
+            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
             TimePoint legFinishTime = competitorLeg.getFinishTime();
             // TODO: Plausability checks here
@@ -242,30 +275,112 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
-    private int getSameDayGroupIndex(TrackedRace currentRace, TrackedRace raceBefore) {
-        if (!raceBefore.equals(currentRace)) {
-            Calendar timedDateForCurrentRace = Calendar.getInstance();
-            timedDateForCurrentRace.setTime(currentRace.getStartOfRace().asDate());
-            Calendar timedDateForRaceBefore = Calendar.getInstance();
-            timedDateForRaceBefore.setTime(raceBefore.getStartOfRace().asDate());
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy");
-            if (dateFormatter.format(timedDateForCurrentRace).equals(dateFormatter.format(timedDateForRaceBefore))) {
-                return 0;
-            } else {
-                return 1;
-            }
+    private Element createDataConfidenceXML(Pair<Double, Vector<String>> confidenceAndMessages) {
+        Element confidenceDataElement = new Element("confidence");
+        addNamedElementWithValue(confidenceDataElement, "simple_confidence_value", confidenceAndMessages.getA().doubleValue());
+        Element messagesElement = new Element("messages");
+        for (String message : confidenceAndMessages.getB()) {
+            addNamedElementWithValue(messagesElement, "message", message);
         }
-        return 0;
+        confidenceDataElement.addContent(messagesElement);
+        return confidenceDataElement;
     }
     
-    public void perform() throws ServletException, IOException, NoWindException {
+    private Pair<Double, Vector<String>> checkData(TrackedRace race) throws Exception {
+        double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
+        TimePoint dateAtYear2000 = new MillisecondsTimePoint(946681200000l);
+        if (race.getStartOfRace() == null || race.getStartOfRace().before(dateAtYear2000)) {
+            messages.add("Start time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+            simpleConfidence -= 1;
+        }
+        if (race.getEndOfRace() == null || race.getEndOfRace().before(dateAtYear2000)) {
+            messages.add("End time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+            simpleConfidence -= 1;
+        }
+        if (race.getStartOfTracking() == null || race.getStartOfTracking().before(dateAtYear2000)) {
+            messages.add("Start tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+            simpleConfidence -= 0.2;
+        }
+        if (race.getEndOfTracking() == null || race.getEndOfTracking().before(dateAtYear2000)) {
+            messages.add("End tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
+            simpleConfidence -= 0.2;
+        }
+        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+    }
+    
+    private Pair<Double, Vector<String>> checkData(Competitor competitor) throws Exception {
+        double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
+        if (competitor.getName() == null || competitor.getName().equals("")) {
+            messages.add("Competitor " + competitor.getId() + " has no name!");
+            simpleConfidence -= 1;
+        }
+        if (competitor.getBoat() == null || competitor.getBoat().getSailID() == null || competitor.getBoat().getSailID().equals("")) {
+            messages.add("Competitor " + competitor.getId() + " has no sail id that can be used!");
+            simpleConfidence -= 1;
+        }
+        if (competitor.getTeam() == null || competitor.getTeam().getNationality() == null) {
+            messages.add("Either team for "+ competitor.getId() + " is null or nationality could not be determined");
+            simpleConfidence -= 0.2;
+        }
+        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+    }
+    
+    private Pair<Double, Vector<String>> checkData(Leaderboard leaderboard) throws Exception {
+        double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
+        int raceColumnCount = 0;
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (raceColumn.hasTrackedRaces()) {
+                raceColumnCount++;
+            }
+        }
+        if (raceColumnCount == 0) {
+            messages.add("Could not find any race columns or none of the race columns has tracked races attached!");
+            simpleConfidence -= 1.0;
+        }
+        int competitorCount = 0;
+        for (Competitor competitor : leaderboard.getAllCompetitors()) {
+            competitorCount++;
+        }
+        if (competitorCount == 0) {
+            messages.add("Could not find any competitors in this leaderboard!");
+            simpleConfidence -= 1.0;
+        }
+        TimePoint dateAtYear2000 = new MillisecondsTimePoint(946681200000l);
+        if (leaderboard.getTimePointOfLatestModification().before(dateAtYear2000)) {
+            messages.add("The time point of the last modification for this leaderboard is very old.");
+            simpleConfidence -= 0.4;
+        }
+        return new Pair<Double, Vector<String>>(simpleConfidence, messages);
+    }
+    
+    private int getSameDayGroupIndex(TrackedRace currentRace, TrackedRace raceBefore) {
+        if (!raceBefore.equals(currentRace)) {
+            if (currentRace.getStartOfRace() != null && raceBefore.getStartOfRace() != null) {
+                Calendar timedDateForCurrentRace = Calendar.getInstance();
+                timedDateForCurrentRace.setTime(currentRace.getStartOfRace().asDate());
+                Calendar timedDateForRaceBefore = Calendar.getInstance();
+                timedDateForRaceBefore.setTime(raceBefore.getStartOfRace().asDate());
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy");
+                if (dateFormatter.format(timedDateForCurrentRace).equals(dateFormatter.format(timedDateForRaceBefore))) {
+                    return 0;
+                } 
+            }
+        } else {
+            return 0;
+        }
+        return 1;
+    }
+    
+    public void perform() throws Exception {
         final Leaderboard leaderboard = getLeaderboard();
+        Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
         
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
         
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false));
+            Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
+            competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
         
         TrackedRace raceBefore = null; int sameDayGroupIndex = 0;
@@ -274,18 +389,19 @@ public class LeaderboardData extends ExportAction {
                 sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
+                    Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
-                        legs.add(createLegXML(leg, leaderboard, ++legCounter));
+                        legs.add(createLegXML(leg, leaderboard, ++legCounter, raceConfidenceAndErrorMessages));
                     }
-                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex));
+                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, raceConfidenceAndErrorMessages));
                     raceBefore = trackedRace;
                 }
             }
         }
         
-        Element leaderboardElement = createLeaderboardXML(leaderboard, competitorElements, racesElements);
+        Element leaderboardElement = createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages);
     }
     
 
