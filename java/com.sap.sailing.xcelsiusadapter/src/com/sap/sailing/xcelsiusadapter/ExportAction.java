@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -26,7 +28,9 @@ import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -64,6 +68,43 @@ public abstract class ExportAction {
             throw new ServletException("Leaderboard " + leaderboardName + " not found.");
         }
         return leaderboard;
+    }
+    
+    protected String cleanRaceName(String raceName) {
+        String newRaceName = raceName;
+        if (raceName.matches("[A-Za-z ]*\\d")) {
+            Pattern regex = Pattern.compile("([A-Za-z ]*)(\\d)");
+            Matcher matcher = regex.matcher(raceName);
+            String raceNameFirstPart = matcher.replaceAll("$1");
+            String raceNumber = matcher.replaceAll("$2");
+            try {
+                if (Integer.parseInt(raceNumber) < 10) {
+                    raceNumber = "0" + raceNumber;
+                    newRaceName = raceNameFirstPart + raceNumber;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return newRaceName;
+    }
+    
+    protected String cleanSailId(String sailId, Competitor competitor) {
+        if (sailId.matches("^[A-Z]{3}\\s[0-9]*")) {                                        
+            Pattern regex = Pattern.compile("(^[A-Z]{3})\\s([0-9]*)");
+            Matcher regexMatcher = regex.matcher(sailId);
+            try {
+                return regexMatcher.replaceAll("$1$2");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (sailId.matches("^[A-Z]{3}\\S[0-9]*")) {
+            return sailId;
+        } else if (sailId.matches("[0-9]*")){
+            Nationality nationality = competitor.getTeam().getNationality();
+            return (nationality==null ? "" : nationality.getThreeLetterIOCAcronym() + sailId);
+        } 
+        return sailId;
     }
 
     public void sendDocument(Document doc, String fileName) {

@@ -125,7 +125,7 @@ public class LeaderboardData extends ExportAction {
     private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard) throws NoWindException {
         // TODO: Plausibility checks (race has start time, ...)
         Element raceElement = new Element("race");
-        addNamedElementWithValue(raceElement, "name", race.getRace().getName());
+        addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "fleet_name", fleet.getName());
         
         addNamedElementWithValue(raceElement, "delay_to_live_in_millis", race.getDelayToLiveInMillis());
@@ -182,7 +182,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(competitorElement, "name", competitor.getName());
         addNamedElementWithValue(competitorElement, "nationality_name", competitor.getTeam().getNationality().getName());
         addNamedElementWithValue(competitorElement, "nationality_ioc", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        addNamedElementWithValue(competitorElement, "sail_id", competitor.getBoat().getSailID());
+        addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
         addNamedElementWithValue(competitorElement, "boat_name", competitor.getBoat().getName());
         addNamedElementWithValue(competitorElement, "boat_class", competitor.getBoat().getBoatClass().getName());
         
