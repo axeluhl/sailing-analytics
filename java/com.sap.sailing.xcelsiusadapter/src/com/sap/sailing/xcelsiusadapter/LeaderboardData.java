@@ -22,7 +22,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -60,7 +59,7 @@ import com.sap.sailing.server.RacingEventService;
  * 
  * @author Simon Marcel Pamies
  */
-public class LeaderboardData {
+public class LeaderboardData extends ExportAction {
     
     private static final String VERY_LIGHT_WIND_DESCRIPTION = "Very Light";
     private static final String LIGHT_WIND_DESCRIPTION = "Light";
@@ -68,111 +67,10 @@ public class LeaderboardData {
     private static final String STRONG_WIND_DESCRIPTION = "Strong";
     private static final String VERY_STRONG_WIND_DESCRIPTION = "Very Strong";
     
-    private final HttpServletRequest req;
-    private final HttpServletResponse res;
-    private final RacingEventService service;
-    
     public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
-        this.req = req;
-        this.res = res;
-        this.service = service;
-    }
-    
-    private String getAttribute(String name) {
-        return this.req.getParameter(name);
+        super(req, res, service);
     }
 
-    private RacingEventService getService() {
-        return service;
-    }
-
-    private Leaderboard getLeaderboard() throws IOException, ServletException {
-        final String leaderboardName = getAttribute("leaderboard");
-        if (leaderboardName == null) {
-            throw new ServletException("Use the leaderboard= parameter to specify the leaderboard");
-        }
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
-        if (leaderboard == null) {
-            throw new ServletException("Leaderboard " + leaderboardName + " not found.");
-        }
-        return leaderboard;
-    }
-    
-    private long handleValue(TimePoint timepoint) {
-        if (timepoint != null) {
-            return timepoint.asMillis();
-        }
-        return 0;
-    }
-    
-    private String getBoatClassName(final Leaderboard leaderboard) {
-        String result = null;
-        if (leaderboard instanceof RegattaLeaderboard) { 
-            result = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass().getName();
-        } else {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                    if (trackedRace != null) {
-                        result = trackedRace.getRace().getBoatClass().getName();
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    private void addNamedElementWithValue(Element parent, String newChildName, Integer i) {
-        if (i == null) {
-            addNamedElementWithValue(parent, newChildName, "0");
-        } else {
-            addNamedElementWithValue(parent, newChildName, i.toString());
-        }
-
-    }
-
-    private void addNamedElementWithValue(Element parent, String newChildName, Double dbl) {
-        if (dbl == null) {
-            addNamedElementWithValue(parent, newChildName, "0");
-        } else {
-            addNamedElementWithValue(parent, newChildName, dbl.toString());
-        }
-
-    }
-
-    private void addNamedElementWithValue(Element parent, String newChildName, Long l) {
-        if (l == null) {
-            addNamedElementWithValue(parent, newChildName, "0");
-        } else {
-            addNamedElementWithValue(parent, newChildName, l.toString());
-        }
-    }
-
-    private Element addNamedElementWithValue(Element parent, String newChildName, String value) {
-        final Element newChild = new Element(newChildName);
-        newChild.addContent(value);
-        parent.addContent(newChild);
-        return newChild;
-    }
-
-    private Element createNamedElementWithValue(String elementName, String value) {
-        final Element element = new Element(elementName);
-        element.addContent(value);
-        return element;
-    }
-
-    private Element createNamedElementWithValue(String elementName, int value) {
-        final Element element = new Element(elementName);
-        element.addContent(String.valueOf(value));
-        return element;
-    }
-
-    private Element createNamedElementWithValue(String elementName, double value) {
-        final Element element = new Element(elementName);
-        element.addContent(String.valueOf(value));
-        return element;
-    }
-    
     private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races) {
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());

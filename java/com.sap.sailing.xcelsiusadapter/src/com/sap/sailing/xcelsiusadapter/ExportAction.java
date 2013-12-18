@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,20 +26,21 @@ import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.util.InvalidDateException;
 
-public abstract class HttpAction {
+public abstract class ExportAction {
     private HttpServletRequest req;
     private HttpServletResponse res;
 
     private RacingEventService service;
 
-    public HttpAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+    public ExportAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
         this.req = req;
         this.res = res;
         this.service = service;
@@ -52,63 +54,16 @@ public abstract class HttpAction {
         return service;
     }
 
-    public Leaderboard getLeaderboard() throws IOException {
-        final String leaderboardName = getAttribute("leaderboard");
+    public Leaderboard getLeaderboard() throws IOException, ServletException {
+        final String leaderboardName = getAttribute("name");
         if (leaderboardName == null) {
-            say("Use the leaderboard= parameter to specify the leaderboard");
-            return null;
+            throw new ServletException("Use the name= parameter to specify the leaderboard");
         }
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
         if (leaderboard == null) {
-            say("Leaderboard " + leaderboardName + " not found.");
-            return null;
+            throw new ServletException("Leaderboard " + leaderboardName + " not found.");
         }
         return leaderboard;
-    }
-
-    public TimePoint getTimePoint(TrackedRace race) throws IOException, InvalidDateException {
-        final TimePoint start = race.getStartOfRace();
-        final String time = getAttribute("time");
-        if (time == null) {
-            return start;
-        }
-        if ((time != null) && (time.length() > 0)) {
-            if (start == null) {
-                return null;
-            }
-            final long mTime = start.asMillis() + (stringToInteger(time, 0) * 1000 * 60);
-            final TimePoint bTimePoint = new MillisecondsTimePoint(mTime);
-            return bTimePoint;
-        }
-        return null;
-    }
-
-    private int stringToInteger(String strString, int intDefault) {
-        try {
-            return Integer.parseInt(strString);
-        } catch (NumberFormatException e) {
-            return intDefault;
-        }
-    }
-
-    public static void say(String msg, HttpServletResponse res) throws IOException {
-        final Document doc = new Document();
-
-        final Element el = new Element("message");
-        el.setText(msg);
-
-        doc.addContent(el);
-        res.setCharacterEncoding("UTF-8");
-        res.getWriter().print(getXMLAsString(doc));
-    }
-
-    public void say(Document doc) throws IOException {
-        this.res.setCharacterEncoding("UTF-8");
-        this.res.getWriter().print(getXMLAsString(doc));
-    }
-
-    public void say(String msg) throws IOException {
-        say(msg, this.res);
     }
 
     public void sendDocument(Document doc, String fileName) {
@@ -192,5 +147,81 @@ public abstract class HttpAction {
         }
 
         return "";
+    }    
+    
+    protected long handleValue(TimePoint timepoint) {
+        if (timepoint != null) {
+            return timepoint.asMillis();
+        }
+        return 0;
     }
+    
+    protected String getBoatClassName(final Leaderboard leaderboard) {
+        String result = null;
+        if (leaderboard instanceof RegattaLeaderboard) { 
+            result = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass().getName();
+        } else {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        result = trackedRace.getRace().getBoatClass().getName();
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    protected void addNamedElementWithValue(Element parent, String newChildName, Integer i) {
+        if (i == null) {
+            addNamedElementWithValue(parent, newChildName, "0");
+        } else {
+            addNamedElementWithValue(parent, newChildName, i.toString());
+        }
+
+    }
+
+    protected void addNamedElementWithValue(Element parent, String newChildName, Double dbl) {
+        if (dbl == null) {
+            addNamedElementWithValue(parent, newChildName, "0");
+        } else {
+            addNamedElementWithValue(parent, newChildName, dbl.toString());
+        }
+
+    }
+
+    protected void addNamedElementWithValue(Element parent, String newChildName, Long l) {
+        if (l == null) {
+            addNamedElementWithValue(parent, newChildName, "0");
+        } else {
+            addNamedElementWithValue(parent, newChildName, l.toString());
+        }
+    }
+
+    protected Element addNamedElementWithValue(Element parent, String newChildName, String value) {
+        final Element newChild = new Element(newChildName);
+        newChild.addContent(value);
+        parent.addContent(newChild);
+        return newChild;
+    }
+
+    protected Element createNamedElementWithValue(String elementName, String value) {
+        final Element element = new Element(elementName);
+        element.addContent(value);
+        return element;
+    }
+
+    protected Element createNamedElementWithValue(String elementName, int value) {
+        final Element element = new Element(elementName);
+        element.addContent(String.valueOf(value));
+        return element;
+    }
+
+    protected Element createNamedElementWithValue(String elementName, double value) {
+        final Element element = new Element(elementName);
+        element.addContent(String.valueOf(value));
+        return element;
+    }
+    
 }
