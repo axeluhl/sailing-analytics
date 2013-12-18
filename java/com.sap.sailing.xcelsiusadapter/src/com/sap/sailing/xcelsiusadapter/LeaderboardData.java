@@ -1,6 +1,7 @@
 package com.sap.sailing.xcelsiusadapter;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -87,13 +88,17 @@ public class LeaderboardData extends ExportAction {
         List<Element> timedElements = new ArrayList<Element>();
         Calendar timedDate = Calendar.getInstance();
         timedDate.setTime(timepoint.asDate());
+        
         timedElements.add(createNamedElementWithValue(prefix+"year", timedDate.get(Calendar.YEAR)));
         timedElements.add(createNamedElementWithValue(prefix+"month", timedDate.get(Calendar.MONTH)));
         timedElements.add(createNamedElementWithValue(prefix+"day", timedDate.get(Calendar.DAY_OF_MONTH)));
         timedElements.add(createNamedElementWithValue(prefix+"hour", timedDate.get(Calendar.HOUR_OF_DAY)));
         timedElements.add(createNamedElementWithValue(prefix+"minute", timedDate.get(Calendar.MINUTE)));
         timedElements.add(createNamedElementWithValue(prefix+"second", timedDate.get(Calendar.SECOND)));
-        // TODO: Format date to a special format with leading zeros
+        
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy HH:MM:SS");
+        timedElements.add(createNamedElementWithValue(prefix+"second", dateFormatter.format(timedDate)));
+        
         return timedElements;
     }
     
@@ -122,7 +127,7 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
-    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard) throws NoWindException {
+    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex) throws NoWindException {
         // TODO: Plausibility checks (race has start time, ...)
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
@@ -140,6 +145,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "end_time_as_millis", handleValue(race.getEndOfRace()));
         raceElement.addContent(createTimedXML("end_time_", race.getEndOfRace()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
+        addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
         
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
         
@@ -236,6 +242,22 @@ public class LeaderboardData extends ExportAction {
         return legElement;
     }
     
+    private int getSameDayGroupIndex(TrackedRace currentRace, TrackedRace raceBefore) {
+        if (!raceBefore.equals(currentRace)) {
+            Calendar timedDateForCurrentRace = Calendar.getInstance();
+            timedDateForCurrentRace.setTime(currentRace.getStartOfRace().asDate());
+            Calendar timedDateForRaceBefore = Calendar.getInstance();
+            timedDateForRaceBefore.setTime(raceBefore.getStartOfRace().asDate());
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.mm.yyyy");
+            if (dateFormatter.format(timedDateForCurrentRace).equals(dateFormatter.format(timedDateForRaceBefore))) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    
     public void perform() throws ServletException, IOException, NoWindException {
         final Leaderboard leaderboard = getLeaderboard();
         
@@ -246,16 +268,19 @@ public class LeaderboardData extends ExportAction {
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false));
         }
         
-        for (RaceColumn r : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : r.getFleets()) {
-                TrackedRace trackedRace = r.getTrackedRace(fleet);
+        TrackedRace raceBefore = null; int sameDayGroupIndex = 0;
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         legs.add(createLegXML(leg, leaderboard, ++legCounter));
                     }
-                    racesElements.add(createRaceXML(trackedRace, fleet, legs, r, leaderboard));
+                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex));
+                    raceBefore = trackedRace;
                 }
             }
         }
