@@ -2320,6 +2320,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 Leaderboard overall = group.getOverallLeaderboard();
                 result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
                 break;
+            case DISTANCE_TO_START_LINE:
+                TimePoint startOfRace = trackedRace.getStartOfRace();
+                if (startOfRace == null || timePoint.before(startOfRace) || timePoint.equals(startOfRace)) {
+                    Distance distanceToStartLine = trackedRace.getDistanceToStartLine(competitor, timePoint);
+                    result = distanceToStartLine == null ? null : distanceToStartLine.getMeters();
+                }
+                break;
+            case BEAT_ANGLE:
+                if (trackedLeg != null) {
+                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint);
+                    result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
+                }
+                break;
             default:
                 throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType
                         + "' in this method.");
