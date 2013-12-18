@@ -46,7 +46,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
 
-public class RegattaDataPerRaceAction extends HttpAction {
+public class RegattaDataPerRaceAction extends ExportAction {
     private static final Logger logger = Logger.getLogger(RegattaDataPerRaceAction.class.getName());
     
     public RegattaDataPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {

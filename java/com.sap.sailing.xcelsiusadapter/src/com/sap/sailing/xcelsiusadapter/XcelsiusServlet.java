@@ -22,10 +22,10 @@ public class XcelsiusServlet extends SailingServerHttpServlet {
                     leaderboardData.perform();
                     return;
                 }
-                HttpAction.say("Unknown action", res);
+                throw new ServletException("Unknown action " + action);
                 return;
             }
-            HttpAction.say("Please use the action= parameter to specify an action.", res);
+            throw new ServletException("Please use the action= parameter to specify an action.", res);
             return;
         } catch (Exception e) {
             throw (new ServletException(e));
