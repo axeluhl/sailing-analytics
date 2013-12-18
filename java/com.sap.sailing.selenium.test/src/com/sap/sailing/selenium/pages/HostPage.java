@@ -10,6 +10,19 @@ import org.openqa.selenium.WebDriver;
  *   D049941
  */
 public class HostPage extends PageObject {
+    protected static final String GWT_CODE_SERVER_PARAMETER_NAME = "gwt.codesvr"; //$NON-NLS-1$
+    
+    protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
+    
+    protected static final String getGWTCodeServer() {
+        String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
+        
+        if(codeServer == null)
+            return NO_CODE_SERVER_PARAMTER_VALUE;
+        
+        return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
+    }
+    
     /**
      * <p>Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in
      *   which the code for the application is executed, whereby the page is represented by the web driver.</p>
