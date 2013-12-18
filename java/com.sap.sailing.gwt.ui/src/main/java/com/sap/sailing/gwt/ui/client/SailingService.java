@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -309,8 +308,6 @@ public interface SailingService extends RemoteService {
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
     
-    EventDTO getEventById(Serializable id);
-    
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
     EventDTO getEventByIdAsString(String eventIdAsString);
@@ -355,4 +352,14 @@ public interface SailingService extends RemoteService {
     boolean setStartTime(RaceLogSetStartTimeDTO dto);
     
     Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+
+    Iterable<String> getAllIgtimiAccountEmailAddresses();
+
+    String getIgtimiAuthorizationUrl();
+
+    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove);
+
+    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
 }

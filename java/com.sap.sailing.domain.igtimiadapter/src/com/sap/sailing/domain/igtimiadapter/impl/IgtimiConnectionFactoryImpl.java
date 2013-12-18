@@ -211,6 +211,19 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return url.toString();
     }
 
+    public String getLatestDatumUrl(Iterable<String> deviceSerialNumbers, Type type, Account account) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("resources/data/latest?type=");
+        url.append(type.getCode());
+        for (String deviceSerialNumber : deviceSerialNumbers) {
+            url.append("&serial_numbers[]=");
+            url.append(deviceSerialNumber);
+        }
+        url.append("&");
+        url.append(getAccessTokenUrlParameter(account));
+        return url.toString();
+    }
+
     public String getResourceDataUrl(TimePoint startTime, TimePoint endTime, Iterable<String> serialNumbers,
             Map<Type, Double> typeAndCompression, Account account) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
@@ -293,7 +306,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
 
     @Override
     public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth";
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
     }
 
     private Client getClient() {
@@ -477,4 +490,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         }
         return result;
     }
+
+    @Override
+    public void removeAccount(String eMail) {
+        Account account = getExistingAccountByEmail(eMail);
+        if (account != null) {
+            String accessToken = accessTokensByAccount.remove(account);
+            accountsByEmail.remove(eMail);
+            mongoObjectFactory.removeAccessToken(accessToken);
+        }
+    }
+
 }

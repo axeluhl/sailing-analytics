@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -20,7 +19,7 @@ public class Activator implements BundleActivator {
     
     private static ExtenderBundleTracker extenderBundleTracker;
 
-    private final RacingEventService racingEventService;
+    private final RacingEventServiceImpl racingEventService;
 
     public Activator() {
         boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
@@ -34,9 +33,9 @@ public class Activator implements BundleActivator {
         extenderBundleTracker.open();
 
         // register the racing service in the OSGi registry
+        racingEventService.setBundleContext(context);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
-        context.registerService(RacingEventServiceWithTestSupport.class.getName(), racingEventService, null);
-        
+
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }

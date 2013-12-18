@@ -50,6 +50,9 @@ In the "Data Consistency" project, we take the new approach to gain higher stabi
   * Remove outliers from calculation
   * Remove incomplete entities from calculation (if possible, otherwise return "n/a")
   * Adapt to missing data or changed sampling rate
+* Overall Measures of System State
+  * Overall Consistency: measure for connectedness and completeness of sailing solution
+  * Overall Confidence: profile describing accuracies of numerical quantities compared to reference ranges
 
 ### Description
 
@@ -85,13 +88,21 @@ For time series data, like GPS-tracks and wind measurements, detected faulty raw
 
 Aggregate calculations depend on a set of raw data and are influenced by intermittent faulty raw data as determined by outlier state, as well as, incomplete raw data as determined by the completeness state. In order to do automatically identify constellations in which parts of the raw data due to faultiness or incompleteness should be ignored, all aggregate calculations have to incorporate outlier state and completeness state to compute plausible results also in special raw data constellations.
 
+#### Overall Measures of System State
+
+Based on the state information on completeness, connectedness and accuracy, measures describing the overall state of the system can be derived.
+
+The "Overall Consistency" of the sailing solution summarizes completeness and connectedness. It is a value ranging from 0% to 100%, where 0% represents a state where fundamental connectivity, e.g. WAN for accessing GPS-trackers has been lost completely, whereas, overall consistency 100% is reached when all sensors are well-connected and race data is complete.
+
+The "Overall Confidence" of the sailing solution is based on the numerical variance or deviations of measurements. Since for each type of data, different measurement units are used and different ranges of deviations are acceptable, the overall confidence cannot easily be represented by an average value of deviations, but has to be represented as distribution across quality categories, e.g. 40% "good", 35% "average", 25% "bad", where the percentages describe the portion of data sources in each quality category, e.g. number of GPS-trackers divided by total number of GPS-tracker.
+
 ### Synergies
 
 The data consistency features belong closely to the calculation procedures implemented in the sailing analytics server.
 
 ### Risks
 
-Since this project targets at increasing the robustness of SAP sailing solutions, the overall risk of failures should be reduced as an outcome.
+It may be hard to get access to domain experts who can tell us what exactly the inconsistencies are and which ones are important for which type of analysis.
 
 ### Prototype
 

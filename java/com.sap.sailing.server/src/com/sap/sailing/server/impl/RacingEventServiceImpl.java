@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -72,6 +75,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -110,12 +114,12 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -147,10 +151,9 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 
-public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, Replicator {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -160,8 +163,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
-
-    private final ExpeditionWindTrackerFactory expeditionWindTrackerFactory;
 
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
@@ -222,6 +223,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private final WindStore windStore;
 
     /**
+     * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
+     * object so that service lookups become possible.
+     */
+    private BundleContext bundleContext;
+
+    /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
      * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
@@ -234,6 +241,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     public RacingEventServiceImpl(WindStore windStore) {
         this(true, windStore);
+    }
+    
+    void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
     
     /**
@@ -272,8 +283,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        expeditionWindTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
-        this.competitorStore = competitorStore;
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -288,7 +297,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
-        
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -298,55 +306,18 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         }
         this.windStore = windStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
-        
-        loadStoredData();
+
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        this.competitorStore = competitorStore;
+        loadStoredEvents();
+        loadStoredRegattas();
+        loadRaceIDToRegattaAssociations();
+        loadStoredLeaderboardsAndGroups();
+        loadMediaLibary();
         loadStoredDeviceConfigurations();
-    }
-    
-    /**
-     * <p>Wipes out the complete state including all persisted data. Note that this method is only used or testing.</p>
-     * 
-     *  <p>The clearing of the state consists of multiple steps which have to be execute in the specified order:</p>
-     * 
-     * <ol>
-     *   <li>Removing of all leaderboard groups, which removes all overall leaderboards of the leaderboards implicit.</li>
-     *   <li>Removing of all remaining leaderboards.</li>
-     *   <li>Stopping of the tracking for all regattas and removing the regattas, which also removes all races.</li>
-     *   <li>Removing all events.</li>
-     *   <li>Removing all media tracks.</li>
-     * </ol>
-     * 
-     * 
-     * <p><b>ATTENTION: This method should only be called in an isolated test environment and never in a productive
-     *   system since all stored data will be lost!</b></p>
-     * 
-     * @throws Exception
-     *   
-     */
-    @Override
-    public void clearState() throws Exception {
-        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
-            removeLeaderboardGroup(leaderboardGroupName);
-        }
-        
-        for(String leaderboardName : this.leaderboardsByName.keySet()) {
-            removeLeaderboard(leaderboardName);
-        }
-        
-        for(Regatta regatta : this.regattasByName.values()) {
-            stopTracking(regatta);
-            removeRegatta(regatta);
-        }
-        
-        for(Event event : this.eventsById.values()) {
-            removeEvent(event.getId());
-        }
-        
-        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
-            mediaTrackDeleted(mediaTrack);
-        }
-        
-        loadStoredData();
     }
 
     @Override
@@ -1366,16 +1337,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination)
-            throws SocketException {
-        expeditionWindTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        }
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
-        if (windTracker != null) {
-            windTracker.stop();
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+            if (windTracker != null) {
+                windTracker.stop();
+            }
         }
     }
 
@@ -1384,9 +1358,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
-                if (windTracker != null) {
-                    result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+                    WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                    if (windTracker != null) {
+                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                    }
                 }
             }
         }
@@ -1604,24 +1580,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
-    @Override
-    public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
-        UDPExpeditionReceiver receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-        receiver.addListener(listener, validMessagesOnly);
-    }
-
-    @Override
-    public void removeExpeditionListener(ExpeditionListener listener) {
-        UDPExpeditionReceiver receiver;
-        try {
-            receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-            receiver.removeListener(listener);
-        } catch (SocketException e) {
-            logger.info("Failed to remove expedition listener " + listener
-                    + "; exception while trying to retrieve wind receiver: " + e.getMessage());
-        }
-    }
-
     private ScheduledExecutorService getScheduler() {
         return scheduler;
     }
@@ -1818,7 +1776,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
                 competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
-            logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
+            logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
             logger.info("Reading device configurations...");
             configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
@@ -2048,18 +2006,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         }
     }
-    
-    private void loadStoredData() {
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        loadStoredEvents();
-        loadStoredRegattas();
-        loadRaceIDToRegattaAssociations();
-        loadStoredLeaderboardsAndGroups();
-        loadMediaLibary();
-    }
 
     @Override
     public WindStore getWindStore() {
@@ -2125,6 +2071,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
         }
         return null;
+    }
+
+    private Iterable<WindTrackerFactory> getWindTrackerFactories() {
+        final Set<WindTrackerFactory> result;
+        if (bundleContext == null) {
+            result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+        } else {
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+                    bundleContext, WindTrackerFactory.class.getName(), null);
+            tracker.open();
+            result = new HashSet<>();
+            for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
+                result.add(factory);
+            }
+        }
+        return result;
     }
 
 }

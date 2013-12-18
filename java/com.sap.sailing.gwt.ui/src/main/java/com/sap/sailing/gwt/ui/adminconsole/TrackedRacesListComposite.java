@@ -102,7 +102,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
         btnRemoveRace = new Button(stringMessages.remove());
-        btnRemoveRace.ensureDebugId("RemoveButton");
+        btnRemoveRace.ensureDebugId("RemoveRave");
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -112,7 +112,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
         btnUntrack = new Button(stringMessages.stopTracking());
-        btnUntrack.ensureDebugId("StopTrackingButton");
+        btnUntrack.ensureDebugId("UntrackRace");
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -124,7 +124,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
         
         btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
-        btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
+        btnSetDelayToLive.ensureDebugId("SetDelayToLive");
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -134,9 +134,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         trackedRacesButtonPanel.add(btnSetDelayToLive);
 
         exportPopup = new ExportPopup(stringMessages);
-        exportPopup.ensureDebugId("ExportPopup");
         btnExport = new Button(stringMessages.export());
-        btnExport.ensureDebugId("ExportButton");
         btnExport.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

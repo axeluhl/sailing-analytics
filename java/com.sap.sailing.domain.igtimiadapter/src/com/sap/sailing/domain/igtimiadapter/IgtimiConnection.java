@@ -10,7 +10,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
@@ -92,7 +94,7 @@ public interface IgtimiConnection {
      * are forwarded in the batches in which they are received to the listeners that can be added to the live connection
      * using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
      * 
-     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#disconnect()}.
+     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()}.
      */
     LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
@@ -141,4 +143,22 @@ public interface IgtimiConnection {
     Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     Account getAccount();
+
+    /**
+     * Finds all data access windows that have wind data for the time span around the race, loads their wind data and
+     * {@link DynamicTrackedRace#recordWind(com.sap.sailing.domain.tracking.Wind, com.sap.sailing.domain.common.WindSource)
+     * records it} in the tracked races.
+     * 
+     * @return the number of wind fixes imported per tracked race; contains an entry for all elements in
+     *         <code>trackedRaces</code>
+     */
+    Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException,
+            ClientProtocolException, IOException, ParseException;
+
+    /**
+     * Returns the latest datum for the specified devices that contains a fix of the <code>type</code> requested. The
+     * result contains entries only for those devices that have actually produced a fix of the <code>type</code> requested
+     * that is readable by the {@link #getAccount()} used by this connection.
+     */
+    Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }

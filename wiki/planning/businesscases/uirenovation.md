@@ -68,6 +68,8 @@ no idea...
 The hardest decision we have to take is whether we should go for native apps for mobile devices or if we can survive with a HTML5 based UI. Development of native apps is cost intensive as if have to support several platforms in parallel. Furthermore we lack the right knowledge for this task in our team. One way we could go is to try first how far we can go with HTML5 and only move to native apps when we can't achieve the expected user experience in any other way.<br/>
 All UI-Renovation projects will have similar phases like "user interaction design", "prototype", "visual design", "implementation", "test" and so on. As we don't have all skills for all phases in our team we will need additional external resources.
 
+There may be additional efforts for keeping the landing page up to date with news, noteworthy, upcoming events, etc. This may have to be handled by an agency of some sort.
+
 # Prototype
 We already started (together with the SAP AppHouse Heidelberg) to develop 3 clickable prototypes for different device types: Smartphone, Tablet and Desktop.<br/>
 So far you can access the prototype for smartphone via:<br/>
@@ -76,9 +78,9 @@ So far you can access the prototype for smartphone via:<br/>
 
 # Estimation
 This estimation is very rough as we have no experience with mobile design and implementation.
-- Homepage (1 week design, 1 week implementation)
-- Mobile Support (4-6 weeks design, 12 weeks implementation)
+- Homepage (1 week design, 2 weeks implementation)
+- Mobile Support (another 4-6 weeks design, 12 weeks implementation)
 - Sailing Analytics
- - Raceboard: Simple race viewer for spectators (UID concept to be defined by Anna's master thesis)
- - Raceboard: Analytical race viewer for professionals (UID concept to be defined by Anna's master thesis)
+ - Raceboard: Simple race viewer for spectators (UID concept to be supported by Anna's master thesis)
+ - Raceboard: Analytical race viewer for professionals (UID concept to be supported by Anna's master thesis)
  - Event/Regatta structure navigation (2 weeks design, 3 weeks implementation)

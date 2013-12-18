@@ -9,6 +9,7 @@ import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
@@ -51,7 +52,11 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByTack(boatFix.tack, isSelected());
             }
             double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-            double boatDrawingAngle = boatFix.speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
+            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
+            if (speedWithBearing == null) {
+                speedWithBearing = new SpeedWithBearingDTO(0, 0);
+            }
+            double boatDrawingAngle = speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
             if (boatDrawingAngle < 0) {
                 boatDrawingAngle += 360;
             }
