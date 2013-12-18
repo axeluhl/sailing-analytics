@@ -119,7 +119,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -151,9 +150,10 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
+public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -320,6 +320,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredDeviceConfigurations();
     }
 
+    @Override
+    public void clearState() throws Exception {
+        // TODO [D049941]: Auto-generated method stub
+        
+    }
+    
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
