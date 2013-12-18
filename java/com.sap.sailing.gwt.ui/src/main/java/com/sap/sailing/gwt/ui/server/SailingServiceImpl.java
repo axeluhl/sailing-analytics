@@ -426,10 +426,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return tractracAdapterTracker.getService().getOrCreateTracTracAdapter(baseDomainFactory);
     }
 
-    protected IgtimiConnectionFactory getIgtimiConnectionFactory(BundleContext context) {
-        return createAndOpenIgtimiTracker(context).getService();
-    }
-
     protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
         ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
                 context, TracTracAdapterFactory.class.getName(), null);
