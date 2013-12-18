@@ -85,6 +85,7 @@ public abstract class CanvasOverlayV3 {
         canvas = Canvas.createIfSupported();
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
         if(canvasId != null) {
             canvas.getElement().setId(canvasId);
         }
@@ -264,6 +265,10 @@ public abstract class CanvasOverlayV3 {
         }
     }
     
+    /**
+     * @return the prefixes required for new CSS3-style elements such as "transition" or "@keyframe", including the
+     *         empty string, "moz" and "webkit" as well as others
+     */
     private String[] getBrowserTypePrefixes() {
         return new String[] { "", /* Firefox */ "moz", /* IE */ "ms", /* Opera */ "o", /* Chrome and Mobile */ "webkit" };
     }
@@ -279,7 +284,6 @@ public abstract class CanvasOverlayV3 {
     }
 
     protected void setCanvasPosition(double x, double y) {
-        canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
         canvas.getElement().getStyle().setLeft(x, Unit.PX);
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
