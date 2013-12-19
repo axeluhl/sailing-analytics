@@ -88,6 +88,7 @@ public class MarkPassingCalculator {
                 for (Pair<Object, GPSFix> fix : allNewFixes) {
                     if (fix == end) {
                         finished = true;
+                        continue;
                     } else if (!combinedFixes.containsKey(fix.getA())) {
                         combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
                     }

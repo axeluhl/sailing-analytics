@@ -24,8 +24,8 @@ public class Activator implements BundleActivator {
         // register the racing service in the OSGi registry
         context.registerService(TracTracAdapterFactory.class.getName(), tracTracAdapterFactory, null);
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
-        useTracTracMarkPassings = context.getProperty("tractrac.usemarkpassing") == null ? true : context.getProperty(
-                "tractrac.usemarkpassing").equals("false") ? false : true;
+        useTracTracMarkPassings = context.getProperty("tractrac.usemarkpassings") == null ? true : context.getProperty(
+                "tractrac.usemarkpassings").equals("false") ? false : true;
     }
     
     public void stop(BundleContext context) throws Exception {
