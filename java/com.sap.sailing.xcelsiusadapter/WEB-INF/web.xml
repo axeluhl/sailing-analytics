@@ -9,6 +9,6 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>XmlExportServlet</servlet-name>
-		<url-pattern>/xml-export</url-pattern>
+		<url-pattern>/xml</url-pattern>
 	</servlet-mapping>
 </web-app>
