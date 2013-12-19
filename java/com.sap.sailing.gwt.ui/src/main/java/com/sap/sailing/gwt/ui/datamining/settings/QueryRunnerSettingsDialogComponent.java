@@ -27,6 +27,7 @@ public class QueryRunnerSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel additionalWidget = new FlowPanel();
         
         runAutimaticallyBox = dialog.createCheckbox(stringMessages.runAutomatically());
+        runAutimaticallyBox.setTitle(stringMessages.runAutomaticallyTooltip());
         runAutimaticallyBox.setValue(initialSettings.isRunAutomatically());
         additionalWidget.add(runAutimaticallyBox);
         

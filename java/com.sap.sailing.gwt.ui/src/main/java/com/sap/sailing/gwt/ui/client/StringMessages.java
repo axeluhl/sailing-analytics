@@ -943,4 +943,6 @@ public interface StringMessages extends Messages {
     String distanceToLine();
     String beatAngleTooltip();
     String beatAngle();
+    String runAutomaticallyTooltip();
+    String rerunQueryAfterRefreshTooltip();
 }

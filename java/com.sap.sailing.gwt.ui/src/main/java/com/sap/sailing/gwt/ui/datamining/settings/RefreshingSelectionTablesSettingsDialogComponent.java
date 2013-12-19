@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -33,6 +35,12 @@ public class RefreshingSelectionTablesSettingsDialogComponent implements Setting
         
         refreshAutomatically = dialog.createCheckbox(stringMessages.refresh());
         refreshAutomatically.setValue(initialSettings.isRefreshAutomatically());
+        refreshAutomatically.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                setSubSettingsEnabled(event.getValue());
+            }
+        });
         additionalWidget.add(refreshAutomatically);
         
         FlowPanel subSettingsPanel = new FlowPanel();
@@ -45,13 +53,20 @@ public class RefreshingSelectionTablesSettingsDialogComponent implements Setting
         refreshIntervalPanel.add(dialog.createLabel(stringMessages.refreshInterval()));
         refreshIntervalInSeconds = dialog.createIntegerBox(initialSettings.getRefreshIntervalInMilliseconds() / 1000, 4);
         refreshIntervalPanel.add(refreshIntervalInSeconds);
-        refreshIntervalPanel.add(dialog.createLabel(stringMessages.secondsUnit()));
         
         rerunQueryAfterRefresh = dialog.createCheckbox(stringMessages.rerunQueryAfterRefresh());
+        rerunQueryAfterRefresh.setTitle(stringMessages.rerunQueryAfterRefreshTooltip());
         rerunQueryAfterRefresh.setValue(initialSettings.isRerunQueryAfterRefresh());
         subSettingsPanel.add(rerunQueryAfterRefresh);
         
+        setSubSettingsEnabled(initialSettings.isRefreshAutomatically());
+        
         return additionalWidget;
+    }
+
+    private void setSubSettingsEnabled(boolean enabled) {
+        refreshIntervalInSeconds.setEnabled(enabled);
+        rerunQueryAfterRefresh.setEnabled(enabled);
     }
 
     @Override
