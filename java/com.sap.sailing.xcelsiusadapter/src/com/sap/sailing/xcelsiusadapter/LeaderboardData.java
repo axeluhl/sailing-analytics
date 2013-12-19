@@ -288,8 +288,6 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
             addNamedElementWithValue(competitorLegDataElement, "time_spend_in_this_leg_as_millis", competitorLeg.getTimeInMilliSeconds(legFinishTime));
-            addNamedElementWithValue(competitorLegDataElement, "leg_rank_at_finish_time", competitorLeg.getRank(legFinishTime));
-            addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg", competitorLeg.getRank(competitorLeg.getStartTime())-competitorLeg.getRank(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "gap_to_leader_at_finish_in_seconds", competitorLeg.getGapToLeaderInSeconds(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
@@ -298,6 +296,14 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "number_of_tacks", competitorLeg.getNumberOfTacks(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "number_of_penalty_circles", competitorLeg.getNumberOfPenaltyCircles(legFinishTime));
             
+            addNamedElementWithValue(competitorLegDataElement, "leg_rank_at_finish_time", competitorLeg.getRank(legFinishTime));
+            if (legCounter != 0) {
+                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg", competitorLeg.getRank(competitorLeg.getStartTime())-competitorLeg.getRank(legFinishTime));
+            } else {
+                // for the first leg a rank gain never makes sense
+                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg", 0.0);
+            }
+            
             List<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
             addNamedElementWithValue(competitorLegDataElement, "maneuver_count", maneuvers.size());
             Element maneuversElement = new Element("maneuvers");
@@ -305,7 +311,8 @@ public class LeaderboardData extends ExportAction {
                 Element maneuverInformation = new Element("maneuver");
                 addNamedElementWithValue(maneuverInformation, "type", man.getType().toString());
                 addNamedElementWithValue(maneuverInformation, "direction_change_in_degrees", man.getDirectionChangeInDegrees());
-                addNamedElementWithValue(maneuverInformation, "loss_in_meters", man.getManeuverLoss().getMeters());
+                Distance maneuverLoss = man.getManeuverLoss();
+                addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : -1.0);
                 addNamedElementWithValue(maneuverInformation, "speed_before_in_knots", man.getSpeedWithBearingBefore().getKnots());
                 addNamedElementWithValue(maneuverInformation, "speed_after_in_knots", man.getSpeedWithBearingAfter().getKnots());
                 maneuversElement.addContent(maneuverInformation);
