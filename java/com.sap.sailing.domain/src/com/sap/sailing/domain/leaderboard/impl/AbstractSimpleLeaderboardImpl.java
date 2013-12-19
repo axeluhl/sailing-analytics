@@ -916,11 +916,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                             // stop counting when competitor finished the race
                             to = markPassings.last().getTimePoint();
                         } else {
-                            if (trackedRace.getEndOfTracking() != null
-                                    && timePoint.after(trackedRace.getEndOfTracking())) {
-                                result = null; // race not finished until end of tracking; no reasonable value can be
-                                               // computed for competitor
-                                break;
+                            // seems that the last mark passing is not the finish - that means that
+                            // the competitor did not finish the race - we still want to count
+                            // the time until the last mark passing
+                            if (timePoint.after(markPassings.last().getTimePoint())) {
+                                to = markPassings.last().getTimePoint();
                             } else {
                                 to = timePoint;
                             }
