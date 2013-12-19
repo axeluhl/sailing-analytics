@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -179,6 +181,43 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox);
         return textBox;
+    }
+    
+    /**
+     * Creates a password text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     */
+    public PasswordTextBox createPasswordTextBox(String initialValue) {
+        return createPasswordTextBoxInternal(initialValue, 30);
+    }
+
+    /**
+     * Creates a password text box with a key-up listener attached which ensures the value is updated after each
+     * key-up event and the entire dialog is {@link #validate() validated} in this case.
+     * 
+     * @param initialValue initial value to show in text box; <code>null</code> is permissible
+     * @param visibleLength the visible length of the text box
+     */
+    public PasswordTextBox createPasswordTextBox(String initialValue, int visibleLength) {
+        return createPasswordTextBoxInternal(initialValue, visibleLength);
+    }
+        
+    private PasswordTextBox createPasswordTextBoxInternal(String initialValue, int visibleLength) {
+        PasswordTextBox parrwordTextBox = new PasswordTextBox();
+        parrwordTextBox.setVisibleLength(visibleLength);
+        parrwordTextBox.setText(initialValue == null ? "" : initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(parrwordTextBox);
+        parrwordTextBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), parrwordTextBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), parrwordTextBox);
+        return parrwordTextBox;
     }
     
     /**
@@ -426,5 +465,9 @@ public abstract class DataEntryDialog<T> {
 
     public void ensureDebugId(String debugId) {
         dateEntryDialog.ensureDebugId(debugId);
+    }
+    
+    protected void addAutoHidePartner(Element element) {
+        dateEntryDialog.addAutoHidePartner(element);
     }
 }

@@ -4,6 +4,6 @@ import java.io.Reader;
 
 public interface DataParser<T> {
 
-	T parse(Reader reader) throws Exception;
+    T parse(Reader reader) throws Exception;
 
 }

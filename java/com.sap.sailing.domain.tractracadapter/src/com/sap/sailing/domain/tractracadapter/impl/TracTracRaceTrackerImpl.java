@@ -585,7 +585,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     
     @Override
     public void stop() throws InterruptedException {
-        stop(/* stop receivers preemtively */ true);
+        stop(/* stop receivers preemtively */ false);
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {

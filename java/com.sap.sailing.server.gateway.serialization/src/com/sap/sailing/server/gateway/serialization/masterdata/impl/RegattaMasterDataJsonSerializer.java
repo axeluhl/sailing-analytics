@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.io.Serializable;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.simple.JSONArray;
@@ -12,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -20,11 +23,13 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> {
 
     public static final String FIELD_ID = "id";
+    public static final String FIELD_ID_TYPE = "idType";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_BASE_NAME = "baseName";
     public static final String FIELD_REGATTAS = "regattas";
     public static final String FIELD_BOAT_CLASS_NAME = "boatClass";
     public static final String FIELD_DEFAULT_COURSE_AREA_ID = "defaultCourseAreaId";
+    public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
     public static final String FIELD_SCORING_SCHEME_TYPE = "scoringSchemeType";
     public static final String FIELD_SERIES = "series";
     public static final String FIELD_RACE_COLUMNS = "raceColumns";
@@ -38,12 +43,16 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
 
     private final JsonSerializer<Fleet> fleetSerializer;
     private final JsonSerializer<RaceColumn> raceColumnSerializer;
+    private final JsonSerializer<RegattaConfiguration> configurationSerializer;
     private final ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings;
 
-    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer,
-            JsonSerializer<RaceColumn> raceColumnSerializer, ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
+    public RegattaMasterDataJsonSerializer(JsonSerializer<Fleet> fleetSerializer, 
+            JsonSerializer<RaceColumn> raceColumnSerializer, 
+            JsonSerializer<RegattaConfiguration> configurationSerializer, 
+            ConcurrentHashMap<String, Regatta> regattaForRaceIdStrings) {
         this.fleetSerializer = fleetSerializer;
         this.raceColumnSerializer = raceColumnSerializer;
+        this.configurationSerializer = configurationSerializer;
         this.regattaForRaceIdStrings = regattaForRaceIdStrings;
     }
 
@@ -54,7 +63,14 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
 
     private JSONObject createJsonForRegatta(Regatta regatta) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, regatta.getId().toString());
+        // Special treatment for UUIDs. They are represented as String because JSON doesn't have a way to represent them
+        // otherwise. However, other, e.g., numeric, types used to encode a serializable ID must be preserved according
+        // to JSON semantics.
+        // Also see the corresponding case distinction in the deserialized which first tries to parse a string as a UUID
+        // becore returning the ID as is.
+        result.put(FIELD_ID_TYPE, regatta.getId().getClass().getName());
+        Serializable regattaId = regatta.getId() instanceof UUID ? regatta.getId().toString() : regatta.getId();
+        result.put(FIELD_ID, regattaId);
         result.put(FIELD_BASE_NAME, regatta.getBaseName());
         result.put(FIELD_BOAT_CLASS_NAME, regatta.getBoatClass().getName());
         CourseArea defaultCourseArea = regatta.getDefaultCourseArea();
@@ -63,6 +79,11 @@ public class RegattaMasterDataJsonSerializer implements JsonSerializer<Regatta> 
         } else {
             result.put(FIELD_DEFAULT_COURSE_AREA_ID, null);
         }
+        if (regatta.getRegattaConfiguration() != null) {
+            result.put(FIELD_REGATTA_CONFIGURATION, 
+                    configurationSerializer.serialize(regatta.getRegattaConfiguration()));
+        }
+        
         result.put(FIELD_SCORING_SCHEME_TYPE, regatta.getScoringScheme().getType().toString());
         result.put(FIELD_SERIES, createJsonArrayForSeries(regatta.getSeries()));
         result.put(FIELD_IS_PERSISTENT, regatta.isPersistent());

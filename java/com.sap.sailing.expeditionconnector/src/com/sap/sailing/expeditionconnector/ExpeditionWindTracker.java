@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.tracking.AbstractWindTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -25,10 +26,8 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
+public class ExpeditionWindTracker extends AbstractWindTracker implements ExpeditionListener, WindTracker {
     private static final Logger logger = Logger.getLogger(ExpeditionWindTracker.class.getName());
-    
-    private final DynamicTrackedRace race;
     
     private final DeclinationService declinationService;
     
@@ -49,9 +48,8 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
      */
     public ExpeditionWindTracker(DynamicTrackedRace race, DeclinationService declinationService,
             UDPExpeditionReceiver receiver, ExpeditionWindTrackerFactory factory) {
-        super();
+        super(race);
         this.lastKnownPositionPerBoatID = new HashMap<Integer, Position>();
-        this.race = race;
         this.declinationService = declinationService;
         this.receiver = receiver;
         this.factory = factory;
@@ -62,7 +60,7 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
     public void stop() {
         synchronized (factory) {
             receiver.removeListener(this);
-            factory.windTrackerStopped(race.getRace(), this);
+            factory.windTrackerStopped(getTrackedRace().getRace(), this);
         }
     }
     
@@ -115,9 +113,13 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
             if (windSpeed != null && lastKnownPositionPerBoatID.get(message.getBoatID()) != null) {
                 Wind wind = new WindImpl(lastKnownPositionPerBoatID.get(message.getBoatID()), message.getTimePoint(), windSpeed);
                 String windSourceID = Integer.valueOf(message.getBoatID()).toString();
-                race.recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceID));
+                sendWindToRace(wind, windSourceID);
             }
         }
+    }
+
+    protected void sendWindToRace(Wind wind, String windSourceID) {
+        getTrackedRace().recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceID));
     }
 
 }

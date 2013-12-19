@@ -179,6 +179,7 @@ public interface StringMessages extends Messages {
     String filterRacesByName();
     String actionEdit();
     String actionEditScores();
+    String actionEditCompetitors();
     String actionOpenBrowser();
     String actionRemove();
     String actionEditSeries();
@@ -854,6 +855,7 @@ public interface StringMessages extends Messages {
     String exchangeHost();
     String explainExchangeHostName();
     String errorRunningDataMiningQuery();
+
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);
@@ -871,4 +873,74 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefresh();
     String refreshIntervalMustntBeEmpty();
     String selectionTables();
+
+    String addConfiguration();
+    String noConfigurations();
+    String errorRetrievingConfiguration();
+    String allowedCourseAreas();
+    String minimumRoundsForCourse();
+    String maximumRoundsForCourse();
+    String resultsMailRecipient();
+    String deviceConfiguration();
+    
+    String none();
+    String courseDesignerMode();
+    String racingProcedure();
+    String courseNames();
+    String generate();
+    String dontoverwrite();
+    
+    String setRacingProcedureConfiguration();
+    String racingProcedureConfiguration();
+    String activateIndividualRecall();
+    String rrs26Start();
+    String setConfiguration();
+    String classFlag();
+    String classFlagHelpText(String procedure);
+    String individualRecallHelpText();
+    String startmodeFlags(); 
+    String startmodeFlagsHelpText();
+    String gateStart();
+    String activatePathfinder();
+    String pathfinderHelpText();
+    String essStart();
+    String basicStart();
+    String configured();
+    String overwriteRacingProceduresConfiguration();
+    String overwriteRacingProceduresConfigurationHelpText();
+    
+    String setStartTime();
+    String currentPass();
+    String setStartTimeDescription();
+    String hasAdditionalGolfDownTime();
+    String additionalGolfDownTimeHelpText();
+    String invalidColor(String message);
+    String createSwissTimingRace();
+    String igtimiAccounts();
+    String errorFetchingIgtimiAccounts(String message);
+    String addIgtimiAccount();
+    String errorAuthorizingAccessToIgtimiUser(String text, String message);
+    String successfullyAuthorizedAccessToIgtimiUser(String username);
+    String couldNotAuthorizedAccessToIgtimiUser(String text);
+    String errorGettingIgtimiAuthorizationUrl(String message);
+    String addIgtimiUser();
+    String doYouReallyWantToRemoveLeaderboards();
+    String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
+    String successfullyRemoveIgtimiAccount(String eMailOfAccountToRemove);
+    String eMailMustNotBeEmpty();
+    String emailAddress();
+    String password();
+    String doYouReallyWantToRemoveLeaderboard(String name);
+    String metaLeaderboardCannotBeChanged();
+    String failedToSetNewStartTime();
+    String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
+    String igtimiWindImport();
+    String seeIgtimiTabForAccountSettings();
+    String importWindFromIgtimi();
+    String errorImportingIgtimiWind(String message);
+    String resultFromIgtimiWindImport(String string);
+    String countDownInMillis(String timeToStartInFractionalSeconds);
+    String distanceToLine();
+    String beatAngleTooltip();
+    String beatAngle();
 }

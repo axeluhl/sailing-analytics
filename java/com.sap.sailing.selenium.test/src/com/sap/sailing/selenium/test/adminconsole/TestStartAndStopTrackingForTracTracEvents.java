@@ -21,13 +21,6 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
 //    private static final String BMW_CUP_REGATTA = "BMW Cup (J80)";
 //    private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     
-    /**
-     * <p>Test for start tracking with an incorrect regatta selected, which should lead to an dialog with a warning.</p>
-     */
-    @Test
-    public void testStartTrackingWithoutCorrectRegatta() {
-        
-    }
     
     /**
      * <p>Test for the correct start and stop of a tracking.</p>

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
@@ -39,12 +39,16 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -318,8 +322,6 @@ public interface SailingServiceAsync {
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
 
-    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
-
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
@@ -426,6 +428,8 @@ public interface SailingServiceAsync {
     
     void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
+
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaUuidAsString, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 
@@ -433,8 +437,6 @@ public interface SailingServiceAsync {
             AsyncCallback<List<Pair<String, String>>> callback);
 
     void checkLeaderboardName(String leaderboardName, AsyncCallback<Pair<String, LeaderboardType>> callback);
-
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId, AsyncCallback<Void> callback);
 
     void getBuildVersion(AsyncCallback<String> callback);
 
@@ -466,8 +468,33 @@ public interface SailingServiceAsync {
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
+    void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+
     void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
+
+    void getDeviceConfigurationMatchers(AsyncCallback<List<DeviceConfigurationMatcherDTO>> asyncCallback);
+
+    void getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher, AsyncCallback<DeviceConfigurationDTO> callback);
+
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
+
+    void removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+
+    void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
+
+    void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<Date, Integer>> callback);
+
+    void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
+    
+    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    
+    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 }
 

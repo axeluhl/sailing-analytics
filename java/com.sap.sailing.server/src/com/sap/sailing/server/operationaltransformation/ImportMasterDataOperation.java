@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -340,7 +341,7 @@ public class ImportMasterDataOperation extends
                     continue;
                 }
             }
-            String id = singleRegattaData.getId();
+            Serializable id = singleRegattaData.getId();
             Iterable<Series> series = createSeries(singleRegattaData.getSeries(), toState);
             String baseName = singleRegattaData.getBaseName();
             String boatClassName = singleRegattaData.getBoatClassName();
@@ -348,10 +349,10 @@ public class ImportMasterDataOperation extends
             String scoringSchemeType = singleRegattaData.getScoringSchemeType();
             boolean isPersistent = singleRegattaData.isPersistent();
             UUID courseAreaUUID = defaultCourseAreaId != null ? UUID.fromString(defaultCourseAreaId) : null;
-            Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName,
-                    UUID.fromString(id), series, isPersistent,
-                    baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
+            Regatta createdRegatta = toState.getOrCreateRegattaWithoutReplication(baseName, boatClassName, id, series,
+                    isPersistent, baseDomainFactory.createScoringScheme(ScoringSchemeType.valueOf(scoringSchemeType)),
                     courseAreaUUID).getA();
+            createdRegatta.setRegattaConfiguration(singleRegattaData.getRegattaConfiguration());
             toState.setPersistentRegattaForRaceIDs(createdRegatta, singleRegattaData.getRaceIdsAsStrings(), override);
             creationCount.addOneRegatta(createdRegatta.getId().toString());
         }

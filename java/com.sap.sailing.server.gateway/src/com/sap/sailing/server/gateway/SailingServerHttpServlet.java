@@ -30,9 +30,11 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     protected static final String PARAM_NAME_TIME = "time";
 
     protected static final String PARAM_NAME_TIME_MILLIS = "timeasmillis";
-
+    
     private static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
 
+    private BundleContext context;
+    
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     private ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tracTracAdapterFactoryTracker;
@@ -43,13 +45,16 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {  
        super.init(config);  
-       
-       BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);  
+       context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);  
        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
        racingEventServiceTracker.open();
        tracTracAdapterFactoryTracker = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(context, TracTracAdapterFactory.class.getName(), null);
        tracTracAdapterFactoryTracker.open();
    }
+    
+    protected BundleContext getContext() {
+        return context;
+    }
 
     @Override
     public void destroy() {

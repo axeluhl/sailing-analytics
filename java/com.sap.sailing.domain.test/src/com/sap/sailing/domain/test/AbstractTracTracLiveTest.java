@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -50,6 +52,8 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     private Thread ioThread;
     private DataController controller;
+    
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();

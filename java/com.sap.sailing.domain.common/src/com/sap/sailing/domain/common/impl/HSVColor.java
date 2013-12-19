@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 
 /**
@@ -9,12 +8,12 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
  * 
  * @author Frank
  */
-public class HSVColor implements Color {
+public class HSVColor extends AbstractColor {
     private static final long serialVersionUID = 7602013229606352246L;
 
-    float hue;
-    float saturation;
-    float brightness;
+    protected float hue;
+    protected float saturation;
+    protected float brightness;
 
     HSVColor() {
     } // for GWT serializability
@@ -87,21 +86,6 @@ public class HSVColor implements Color {
     }
 
     @Override
-    public String getAsHtml() {
-        Triple<Integer, Integer, Integer> asRGB = getAsRGB();
-        return "#" + toBrowserHexValue(asRGB.getA()) + toBrowserHexValue(asRGB.getB())
-                + toBrowserHexValue(asRGB.getC());
-    }
-
-    private static String toBrowserHexValue(int number) {
-        StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
-        while (builder.length() < 2) {
-            builder.append("0");
-        }
-        return builder.toString().toUpperCase();
-    }
-
-    @Override
     public Triple<Float, Float, Float> getAsHSV() {
         return new Triple<Float, Float, Float>(hue, saturation, brightness);
     }
@@ -121,5 +105,33 @@ public class HSVColor implements Color {
 
     public float getBrightness() {
         return brightness;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Float.floatToIntBits(brightness);
+        result = prime * result + Float.floatToIntBits(hue);
+        result = prime * result + Float.floatToIntBits(saturation);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HSVColor other = (HSVColor) obj;
+        if (Float.floatToIntBits(brightness) != Float.floatToIntBits(other.brightness))
+            return false;
+        if (Float.floatToIntBits(hue) != Float.floatToIntBits(other.hue))
+            return false;
+        if (Float.floatToIntBits(saturation) != Float.floatToIntBits(other.saturation))
+            return false;
+        return true;
     }
 }

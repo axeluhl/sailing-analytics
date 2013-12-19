@@ -33,6 +33,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -99,6 +100,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         Label connection = new Label(stringMessages.historyOfConnections());
         grid.setWidget(2, 0, connection);
         jsonUrlBox = new TextBox();
+        jsonUrlBox.setWidth("50em");
         grid.setWidget(3, 0, jsonUrlBox);
         Button btnListRaces = new Button(stringMessages.listRaces());
         grid.setWidget(3, 1, btnListRaces);
@@ -257,13 +259,13 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         result.setComparator(nameColumn, new Comparator<SwissTimingReplayRaceDTO>() {
             @Override
             public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
-                return o1.name.compareTo(o2.name);
+                return new NaturalComparator().compare(o1.name, o2.name);
             }
         });
         result.setComparator(boatClassColumn, new Comparator<SwissTimingReplayRaceDTO>() {
             @Override
             public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
-                return getBoatClassNamesAsString(o1).compareTo(getBoatClassNamesAsString(o2));
+                return new NaturalComparator(false).compare(getBoatClassNamesAsString(o1), getBoatClassNamesAsString(o2));
             }
         });
         result.setComparator(startTimeColumn, new Comparator<SwissTimingReplayRaceDTO>() {

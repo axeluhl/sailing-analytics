@@ -3,11 +3,16 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
@@ -18,6 +23,7 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
+    private SharedDomainFactory domainFactory;
 
     private InMemoryDataStore() {
         reset();
@@ -29,6 +35,12 @@ public enum InMemoryDataStore implements DataStore {
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
         this.courseData = null;
+        this.domainFactory = new SharedDomainFactoryImpl();
+    }
+
+    @Override
+    public SharedDomainFactory getDomainFactory() {
+        return domainFactory;
     }
 
     /*
@@ -82,8 +94,9 @@ public enum InMemoryDataStore implements DataStore {
     public CourseArea getCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id))
+                if (courseArea.getId().equals(id)) {
                     return courseArea;
+                }
             }
         }
         return null;
@@ -92,8 +105,9 @@ public enum InMemoryDataStore implements DataStore {
     public boolean hasCourseArea(Serializable id) {
         for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
-                if (courseArea.getId().equals(id))
+                if (courseArea.getId().equals(id)) {
                     return true;
+                }
             }
         }
         return false;
@@ -161,5 +175,24 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void setLastPublishedCourseDesign(CourseBase courseData) {
         this.courseData = courseData;
+    }
+
+    @Override
+    public Set<RaceGroup> getRaceGroups() {
+        Set<RaceGroup> raceGroups = new HashSet<RaceGroup>();
+        for (ManagedRace race : getRaces()) {
+            raceGroups.add(race.getRaceGroup());
+        }
+        return raceGroups;
+    }
+    
+    @Override
+    public RaceGroup getRaceGroup(String name) {
+        for (RaceGroup group : getRaceGroups()) {
+            if (group.getName().equals(name)) {
+                return group;
+            }
+        }
+        return null;
     }
 }

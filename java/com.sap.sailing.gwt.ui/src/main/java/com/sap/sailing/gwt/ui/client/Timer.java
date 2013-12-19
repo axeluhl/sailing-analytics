@@ -210,6 +210,9 @@ public class Timer {
         }
     }
     
+    /**
+     * @return the refresh interval in milliseconds
+     */
     public long getRefreshInterval() {
         return refreshInterval;
     }

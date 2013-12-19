@@ -1,19 +1,24 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.masterdataimport.RaceColumnMasterData;
 import com.sap.sailing.domain.masterdataimport.RegattaMasterData;
 import com.sap.sailing.domain.masterdataimport.SeriesMasterData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.RegattaMasterDataJsonSerializer;
 
@@ -21,15 +26,39 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
     
     private final JsonDeserializer<Fleet> fleetDeserializer;
     private final JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer;
+    private final JsonDeserializer<RegattaConfiguration> configurationDeserializer;
 
-    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer) {
+    public RegattaMasterDataJsonDeserializer(JsonDeserializer<Fleet> fleetDeserializer, JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer,
+            JsonDeserializer<RegattaConfiguration> configurationDeserializer) {
         this.fleetDeserializer = fleetDeserializer;
         this.raceColumnDeserializer = raceColumnDeserializer;
+        this.configurationDeserializer = configurationDeserializer;
     }
 
     @Override
     public RegattaMasterData deserialize(JSONObject object) throws JsonDeserializationException {
-        String id = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_ID);
+        Object idClassName = object.get(RegattaMasterDataJsonSerializer.FIELD_ID_TYPE);
+        Serializable id = (Serializable) object.get(RegattaMasterDataJsonSerializer.FIELD_ID);
+        if (idClassName != null) {
+            try {
+                Class<?> idClass = Class.forName((String) idClassName);
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    id = (Serializable) constructorFromString.newInstance(id.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    id = Helpers.tryUuidConversion(id);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            // To ensure some kind of a backward compability.
+            try {
+                id = UUID.fromString(id.toString());
+            } catch (IllegalArgumentException e) {
+                id = id.toString();
+            }
+        }
         String regattaName = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_NAME);
         String baseName = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_BASE_NAME);
         String defaultCourseAreaId = (String) object.get(RegattaMasterDataJsonSerializer.FIELD_DEFAULT_COURSE_AREA_ID);
@@ -38,7 +67,15 @@ public class RegattaMasterDataJsonDeserializer implements JsonDeserializer<Regat
         boolean isPersistent = (Boolean) object.get(RegattaMasterDataJsonSerializer.FIELD_IS_PERSISTENT);
         Iterable<SeriesMasterData> series = deserializeSeries((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_SERIES));
         Iterable<String> raceIdsAsStrings = deserializeRaceIds((JSONArray) object.get(RegattaMasterDataJsonSerializer.FIELD_REGATTA_RACE_IDS));
-        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, series, isPersistent, regattaName, raceIdsAsStrings);
+        
+        RegattaConfiguration regattaConfiguration = null;
+        if (object.containsKey(RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
+            regattaConfiguration = configurationDeserializer.deserialize(
+                    Helpers.getNestedObjectSafe(object, RegattaMasterDataJsonSerializer.FIELD_REGATTA_CONFIGURATION));
+        }
+        
+        return new RegattaMasterData(id, baseName, defaultCourseAreaId, boatClassName, scoringSchemeType, 
+                series, isPersistent, regattaName, raceIdsAsStrings, regattaConfiguration);
     }
 
     private Iterable<String> deserializeRaceIds(JSONArray jsonArray) {

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
@@ -39,12 +39,16 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -158,7 +162,7 @@ public interface SailingService extends RemoteService {
 
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaId);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaUuidAsString, RegattaConfigurationDTO regattaConfiguration);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
@@ -307,8 +311,6 @@ public interface SailingService extends RemoteService {
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
     
-    EventDTO getEventById(Serializable id);
-    
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
     EventDTO getEventByIdAsString(String eventIdAsString);
@@ -340,7 +342,31 @@ public interface SailingService extends RemoteService {
 
     GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy();
     
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
+
     CompetitorDTO updateCompetitor(CompetitorDTO competitor);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
+    
+    List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers();
+    
+    DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher);
+    
+    DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
+
+    boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
+
+    boolean setStartTime(RaceLogSetStartTimeDTO dto);
+    
+    Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+
+    Iterable<String> getAllIgtimiAccountEmailAddresses();
+
+    String getIgtimiAuthorizationUrl();
+
+    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove);
+
+    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
 }

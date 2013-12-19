@@ -34,6 +34,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -392,13 +393,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
-                return o1.name.compareTo(o2.name);
+                return new NaturalComparator().compare(o1.name, o2.name);
             }
         });
         result.setComparator(boatClassColumn, new Comparator<TracTracRaceRecordDTO>() {
             @Override
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
-                return getBoatClassNamesAsString(o1).compareTo(getBoatClassNamesAsString(o2));
+                return new NaturalComparator(false).compare(getBoatClassNamesAsString(o1), getBoatClassNamesAsString(o2));
             }
         });
         result.setComparator(trackingStartColumn, new Comparator<TracTracRaceRecordDTO>() {

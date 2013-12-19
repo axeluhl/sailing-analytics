@@ -38,13 +38,14 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             groupName = null;
         } else {
             groupName = groupParamValue;
+            Window.setTitle(groupName);
             sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
                 }
                 @Override
-                public void onSuccess(LeaderboardGroupDTO group) {}
+                public void onSuccess(LeaderboardGroupDTO group) {                }
             });
         }
         String root = Window.Location.getParameter("root");

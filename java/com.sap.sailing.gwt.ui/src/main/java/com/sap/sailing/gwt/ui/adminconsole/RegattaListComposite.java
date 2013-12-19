@@ -26,6 +26,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -132,7 +133,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.getName().compareTo(r2.getName());
+                return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
 
@@ -146,7 +147,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
-                return r1.boatClass.getName().compareTo(r2.boatClass.getName());
+                return new NaturalComparator(false).compare(r1.boatClass.getName(), r2.boatClass.getName());
             }
         });
 
@@ -220,7 +221,9 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
-        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaIdAsString, new AsyncCallback<Void>() {
+        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuidAsString,
+                editedRegatta.configuration,
+                new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());

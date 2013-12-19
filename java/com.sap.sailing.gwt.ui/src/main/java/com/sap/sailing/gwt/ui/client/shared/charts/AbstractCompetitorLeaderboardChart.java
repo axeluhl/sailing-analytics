@@ -189,7 +189,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
             .setLineWidth(LINE_WIDTH)
             .setMarker(new Marker().setEnabled(true).setRadius(4).setSymbol(Symbol.DIAMOND))
             .setShadow(true).setHoverStateLineWidth(LINE_WIDTH)
-            .setColor(competitorSelectionProvider.getColor(competitor)).setSelected(true));
+            .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml()).setSelected(true));
             competitorSeries.put(competitor, result);
         }
         return result;

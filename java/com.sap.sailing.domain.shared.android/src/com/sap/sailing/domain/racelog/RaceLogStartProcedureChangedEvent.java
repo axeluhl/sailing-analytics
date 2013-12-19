@@ -1,9 +1,10 @@
 package com.sap.sailing.domain.racelog;
 
-import com.sap.sailing.domain.common.racelog.StartProcedureType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+
 
 public interface RaceLogStartProcedureChangedEvent extends RaceLogEvent {
     
-    StartProcedureType getStartProcedureType();
+    RacingProcedureType getStartProcedureType();
 
 }

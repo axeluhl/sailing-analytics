@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -185,4 +186,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
 
     TrackedLeg getTrackedLeg();
+
+    /**
+     * Computes the angle between the competitors direction and the wind.
+     */
+    Bearing getBeatAngle(TimePoint at) throws NoWindException;
 }

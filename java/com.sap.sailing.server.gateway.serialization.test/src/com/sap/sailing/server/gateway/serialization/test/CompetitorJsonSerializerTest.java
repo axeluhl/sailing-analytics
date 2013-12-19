@@ -30,7 +30,7 @@ public class CompetitorJsonSerializerTest {
         competitor = mock(Competitor.class);
         when(competitor.getTeam()).thenReturn(mock(Team.class));
         serializer = new CompetitorJsonSerializer();
-        deserializer = new CompetitorJsonDeserializer(DomainFactory.INSTANCE);
+        deserializer = new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorStore());
     }
 
     /**

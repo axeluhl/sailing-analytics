@@ -1,0 +1,33 @@
+package com.sap.sailing.domain.igtimiadapter.datatypes;
+
+import java.util.Map;
+
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.Sensor;
+
+public class GpsLatLong extends Fix {
+    private static final long serialVersionUID = 5056284867725893553L;
+    private final Position position;
+    
+    public GpsLatLong(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        super(sensor, timePoint);
+        position = new DegreePosition(((Number) valuesPerSubindex.get(2)).doubleValue(), ((Number) valuesPerSubindex.get(1)).doubleValue());
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    @Override
+    protected String localToString() {
+        return position.toString();
+    }
+
+    @Override
+    public void notify(IgtimiFixReceiver receiver) {
+        receiver.received(this);
+    }
+}

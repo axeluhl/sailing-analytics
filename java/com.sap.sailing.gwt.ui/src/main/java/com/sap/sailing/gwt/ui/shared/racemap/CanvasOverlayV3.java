@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -76,14 +77,23 @@ public abstract class CanvasOverlayV3 {
     protected int zIndex;
 
     protected MapCanvasProjection mapProjection;
+    
+    /**
+     * The time in milliseconds that will be used to move the boat from its old position to the next.
+     * <code>-1</code> means that currently no transition is set. Invariant: this field's value corresponds
+     * with the time set on the canvas element style's <code>transition</code> CSS property.
+     */
+    private long transitionTimeInMilliseconds;
 
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
+        this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
         this.mapProjection = null;
         
         canvas = Canvas.createIfSupported();
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
         if(canvasId != null) {
             canvas.getElement().setId(canvasId);
         }
@@ -249,8 +259,45 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
+    protected void setCanvasPositionTransition(long durationInMilliseconds) {
+        if (durationInMilliseconds != transitionTimeInMilliseconds) {
+            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+            transitionTimeInMilliseconds = durationInMilliseconds;
+        }
+    }
+    
+    protected void removeCanvasPositionTransition() {
+        if (transitionTimeInMilliseconds != -1) {
+            setProperty(canvas.getElement().getStyle(), "transition", "none");
+            transitionTimeInMilliseconds = -1;
+        }
+    }
+
+    private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
+        for (String browserTypePrefix : getBrowserTypePrefixes()) {
+                style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
+        }
+    }
+    
+    /**
+     * @return the prefixes required for new CSS3-style elements such as "transition" or "@keyframe", including the
+     *         empty string, "moz" and "webkit" as well as others
+     */
+    private String[] getBrowserTypePrefixes() {
+        return new String[] { "", /* Firefox */ "moz", /* IE */ "ms", /* Opera */ "o", /* Chrome and Mobile */ "webkit" };
+    }
+
+    private String getBrowserSpecificPropertyName(String browserType, String basePropertyName) {
+        final String result;
+        if (browserType == null || browserType.isEmpty()) {
+                result = basePropertyName;
+        } else {
+                result = browserType+basePropertyName.substring(0, 1).toUpperCase()+basePropertyName.substring(1);
+        }
+        return result;
+    }
+
     protected void setCanvasPosition(double x, double y) {
-        canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
         canvas.getElement().getStyle().setLeft(x, Unit.PX);
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }

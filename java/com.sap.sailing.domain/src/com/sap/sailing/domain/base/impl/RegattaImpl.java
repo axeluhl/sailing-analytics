@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -50,8 +51,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Serializable id;
     private transient RaceLogStore raceLogStore;
     
-    // Can be changed...
     private CourseArea defaultCourseArea;
+    private RegattaConfiguration configuration;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -108,7 +109,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.defaultCourseArea = courseArea;       
+        this.defaultCourseArea = courseArea;
+        this.configuration = null;
     }
 
     private void registerRaceLogsOnRaceColumns(Series series) {
@@ -355,6 +357,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void setDefaultCourseArea(CourseArea newCourseArea) {
         this.defaultCourseArea = newCourseArea;
+    }
+    
+    @Override
+    public RegattaConfiguration getRegattaConfiguration() {
+        return configuration;
+    }
+    
+    @Override
+    public void setRegattaConfiguration(RegattaConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     /**

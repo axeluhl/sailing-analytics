@@ -11,11 +11,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.Color;
@@ -32,6 +33,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardGroupMasterDataJsonSerializer;
@@ -51,7 +53,7 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         JsonDeserializer<Nationality> nationalityDeserializer = new NationalityJsonDeserializer(domainFactory);
         JsonDeserializer<DynamicPerson> personDeserializer = new PersonJsonDeserializer(nationalityDeserializer);
         JsonDeserializer<DynamicTeam> teamDeserializer = new TeamJsonDeserializer(personDeserializer);
-        JsonDeserializer<DynamicCompetitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorMasterDataDeserializer(
                 boatClassDeserializer, teamDeserializer, domainFactory);
         JsonDeserializer<RaceLogEvent> raceLogEventDeserializer = RaceLogEventDeserializer.create(domainFactory);
         JsonDeserializer<LeaderboardMasterData> leaderboardDeserializer = new LeaderboardMasterDataJsonDeserializer(
@@ -59,9 +61,10 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         JsonDeserializer<EventMasterData> eventDeserializer = new EventMasterDataJsonDeserializer();
         JsonDeserializer<Color> colorDeserializer = new ColorDeserializer();
         JsonDeserializer<Fleet> fleetDeserializer = new FleetDeserializer(colorDeserializer);
+        JsonDeserializer<RegattaConfiguration> configurationDeserializer = RegattaConfigurationJsonDeserializer.create();
         JsonDeserializer<RaceColumnMasterData> raceColumnDeserializer = new RaceColumnMasterDataJsonDeserializer();
         JsonDeserializer<RegattaMasterData> regattaDeserializer = new RegattaMasterDataJsonDeserializer(
-                fleetDeserializer, raceColumnDeserializer);
+                fleetDeserializer, raceColumnDeserializer, configurationDeserializer);
         JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer = new LeaderboardGroupMasterDataJsonDeserializer(
                 leaderboardDeserializer, eventDeserializer, regattaDeserializer, domainFactory);
         return leaderboardGroupMasterDataDeserializer;

@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,21 +17,22 @@ import android.widget.TextView;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racelog.analyzing.impl.LastWindFixFinder;
+import com.sap.sailing.domain.racelog.state.RaceStateChangedListener;
+import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
+import com.sap.sailing.domain.racelog.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.state.RaceState;
-import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.WindActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 
-public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener, RaceInfoListener {
+public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
     private final static String TAG = RaceInfoFragment.class.getName();
     
     private static int WIND_ACTIVITY_REQUEST_CODE = 7331;
@@ -61,8 +61,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // decide on start procedure...
-        this.infoFragmentChooser = new RaceInfoFragmentChooser();
+        this.infoFragmentChooser = RaceInfoFragmentChooser.on(getRaceState().getRacingProcedure().getType());
 
         this.fleetInfoHeader = (TextView) getView().findViewById(R.id.regattaGroupInfoHeader);
         this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
@@ -79,6 +78,12 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
             @Override
             public void onClick(View v) {
+/*                getRace().getRaceLog().add(
+                        RaceLogEventFactory.INSTANCE.createStartTimeEvent(
+                                MillisecondsTimePoint.now(), 
+                                AppPreferences.getAuthor(getActivity()), 
+                                getRace().getRaceLog().getCurrentPassId(),
+                                MillisecondsTimePoint.now().plus(3000000)));*/
                 showCourseDesignDialog();
             }
         });
@@ -111,13 +116,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onStart() {
         super.onStart();
-        getRace().getState().registerStateChangeListener(this);
+        getRace().getState().addChangedListener(stateChangedListener);
         switchToInfoFragment();
     }
 
     @Override
     public void onStop() {
-        getRace().getState().unregisterStateChangeListener(this);
+        getRace().getState().removeChangedListener(stateChangedListener);
         super.onStop();
     }
 
@@ -132,11 +137,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         }
     }
 
-    protected void switchToInfoFragment(RaceFragment choosenFragment) {
-        ExLog.i(TAG, String.format("Switched to %s fragment for race %s with status %s", choosenFragment.getClass()
+    protected void switchToInfoFragment(RaceFragment chosenFragment) {
+        ExLog.i(TAG, String.format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass()
                 .getName(), getRace().getId(), getRace().getStatus()));
 
-        this.infoFragment = choosenFragment;
+        this.infoFragment = chosenFragment;
         displayInfoFragment();
     }
 
@@ -149,20 +154,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     private void showCourseDesignDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-
-        RaceDialogFragment fragment;
-        try {
-            fragment = getRace().getState().getStartProcedure().getCourseDesignDialog().newInstance();
-            Bundle args = getRecentArguments();
-            fragment.setArguments(args);
-
-            fragment.show(fragmentManager, "courseDesignDialogFragment");
-        } catch (java.lang.InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "courseDesignDialogFragment");
     }
 
     private void showRaceResetConfirmationDialog() {
@@ -175,7 +169,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
                         ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
                         ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
 
-                        getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
+                        getRace().getState().setAdvancePass(MillisecondsTimePoint.now());
                     }
                 }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -199,9 +193,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     private void updateCourseDesignLabel() {
-        if (getRace().getState().getCourseDesign() != null) {
-
-            CourseBase courseDesign = getRace().getState().getCourseDesign();
+        CourseBase courseDesign = getRaceState().getCourseDesign();
+        if (courseDesign != null) {
             if (Util.isEmpty(courseDesign.getWaypoints())) {
                 String courseName = courseDesign.getName();
                 courseInfoHeader.setText(String.format(getString(R.string.running_on_course), courseName));
@@ -215,9 +208,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
     
     private void updateWindLabel() {
-        LastWindFixFinder windFinder = new LastWindFixFinder(getRace().getState().getRaceLog());
-        if (windFinder.analyze()!=null){
-            Wind wind = windFinder.analyze();
+        Wind wind = getRaceState().getWindFix();
+        if (wind != null){
             windInfoHeader.setText(String.format(getString(R.string.wind_info), wind.getKnots(), wind.getBearing().reverse().toString()));
         }
     }
@@ -228,8 +220,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             if (resultCode == Activity.RESULT_OK) {
                 if (data.getExtras().containsKey(AppConstants.EXTRAS_WIND_FIX)) {
                     Wind windFix = (Wind) data.getSerializableExtra(AppConstants.EXTRAS_WIND_FIX);
-                    getRace().getState().setWindFix(windFix);
-                    updateWindLabel();
+                    getRaceState().setWindFix(MillisecondsTimePoint.now(), windFix);
                 }
             }
         }
@@ -239,20 +230,34 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     public void onResetTime() {
         switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
-
-    @Override
-    public void onRaceStateStatusChanged(RaceState state) {
-        switchToInfoFragment();
-    }
-
-    @Override
-    public void onRaceStateCourseDesignChanged(RaceState state) {
-        updateCourseDesignLabel();
-    }
-
-    @Override
-    public void onRaceStateProtestStartTimeChanged(RaceState state) {
-        // not interested...
-    }
+    
+    private RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
+        
+        @Override
+        public void onRacingProcedureChanged(ReadonlyRaceState state) {
+            infoFragmentChooser = RaceInfoFragmentChooser.on(state.getRacingProcedure().getType());
+            switchToInfoFragment();
+        };
+        
+        @Override
+        public void onStatusChanged(ReadonlyRaceState state) {
+            switchToInfoFragment();
+        };
+        
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            switchToInfoFragment();
+        };
+        
+        @Override
+        public void onCourseDesignChanged(ReadonlyRaceState state) {
+            updateCourseDesignLabel();
+        };
+        
+        @Override
+        public void onWindFixChanged(ReadonlyRaceState state) {
+            updateWindLabel();
+        };
+    };
 
 }

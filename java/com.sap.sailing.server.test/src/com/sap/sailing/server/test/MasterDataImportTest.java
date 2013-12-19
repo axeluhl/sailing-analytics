@@ -1,5 +1,8 @@
 package com.sap.sailing.server.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -32,6 +35,7 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -45,9 +49,15 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -61,12 +71,19 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.racelog.CompetitorResults;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
@@ -78,10 +95,13 @@ public class MasterDataImportTest {
 
     private static final String TEST_GROUP_NAME = "testGroup";
     private static final String TEST_EVENT_NAME = "testEvent";
+    private static final String TEST_REGATTA_NAME = "testRegatta";
+    private static final String TEST_BOAT_CLASS_NAME = "29er";
     private static final String TEST_LEADERBOARD_NAME = "testRegatta (29er)";
     private static final String TEST_GROUP_NAME2 = "testGroup2";
 
     private final UUID eventUUID = UUID.randomUUID();
+    private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
 
     /**
      * Log Events created when running test. Will be removed from db at teardown
@@ -165,7 +185,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -183,7 +203,7 @@ public class MasterDataImportTest {
         sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
 
         // Set tracked Race with competitors
-        Set<Competitor> competitors = new HashSet<Competitor>();
+        List<Competitor> competitors = new ArrayList<Competitor>();
         UUID competitorUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors = new HashSet<DynamicPerson>();
         sailors.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(645487200000L),
@@ -193,7 +213,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -203,7 +223,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -214,10 +234,18 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+        TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1,
                 logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
+        Position p = new DegreePosition(3, 3);
+        Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
+        RaceLogWindFixEvent windEvent = factory.createWindFixEvent(logTimePoint2, author, UUID.randomUUID(),
+                new ArrayList<Competitor>(), 2,
+                wind);
+        raceColumn.getRaceLog(testFleet1).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
+        storedLogUUIDs.add(windEvent.getId());
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -300,7 +328,7 @@ public class MasterDataImportTest {
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
-        Competitor suppressedCompetitorOnTarget = domainFactory.getExistingCompetitorById(competitorToSuppressUUID);
+        Competitor suppressedCompetitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(competitorToSuppressUUID);
         Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
                 .next());
 
@@ -308,8 +336,11 @@ public class MasterDataImportTest {
         Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
 
         // Check for race log event
-        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFix());
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFixAtOrAfter(logTimePoint));
         Assert.assertEquals(logEvent.getId(), raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstRawFixAtOrAfter(logTimePoint).getId());
+        Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstFixAtOrAfter(logTimePoint2));
+        Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(fleet1OnTarget)
+                .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
     }
     
     @Test
@@ -335,7 +366,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -360,7 +391,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -368,7 +399,7 @@ public class MasterDataImportTest {
         Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
-        CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", team2, boat2);
+        CompetitorImpl competitor2 = new CompetitorImpl(competitor2UUID, "Froderik", Color.RED, team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -379,16 +410,16 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
         
         // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
         TimePoint logTimePoint2 = logTimePoint.plus(10);
-        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
+        CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
         positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor.getName(), MaxPointsReason.BFD));
         positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor2.getId(), competitor2.getName(), MaxPointsReason.NONE));
-        RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory.createFinishPositioningConfirmedEvent(logTimePoint2, 1, positionedCompetitors);
+        RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory.createFinishPositioningConfirmedEvent(logTimePoint2, author, 1, positionedCompetitors);
         raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
         storedLogUUIDs.add(finishPositioningConfirmedEvent.getId());
 
@@ -434,7 +465,7 @@ public class MasterDataImportTest {
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
-        Competitor competitorOnTarget2 = domainFactory.getExistingCompetitorById(competitor2UUID);
+        Competitor competitorOnTarget2 = domainFactory.getCompetitorStore().getExistingCompetitorById(competitor2UUID);
         Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
@@ -508,7 +539,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
@@ -596,7 +627,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -621,7 +652,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        Competitor competitor = sourceDomainFactory.getOrCreateCompetitor(competitorUUID, "Froderik", team, boat);
+        Competitor competitor = sourceDomainFactory.getOrCreateCompetitor(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitor2UUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -629,7 +660,7 @@ public class MasterDataImportTest {
         Person coach2 = new PersonImpl("Max Test", new NationalityImpl("GER"), new Date(645487200000L), "desc");
         DynamicTeam team2 = new TeamImpl("Pros2", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("FastBoat", boatClass, "GER70133");
-        Competitor competitor2 = sourceDomainFactory.getOrCreateCompetitor(competitor2UUID, "Froderik", team2, boat2);
+        Competitor competitor2 = sourceDomainFactory.getCompetitorStore().getOrCreateCompetitor(competitor2UUID, "Froderik", Color.RED, team2, boat2);
         competitors.add(competitor2);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -640,16 +671,16 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
         
         // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
         TimePoint logTimePoint2 = logTimePoint.plus(10);
-        List<Triple<Serializable, String, MaxPointsReason>> positionedCompetitors = new ArrayList<Triple<Serializable, String, MaxPointsReason>>();
+        CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
         positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor.getName(), MaxPointsReason.DNS));
         positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor2.getId(), competitor2.getName(), MaxPointsReason.NONE));
-        RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory.createFinishPositioningConfirmedEvent(logTimePoint2, 1, positionedCompetitors);
+        RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory.createFinishPositioningConfirmedEvent(logTimePoint2, author, 1, positionedCompetitors);
         raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
         storedLogUUIDs.add(finishPositioningConfirmedEvent.getId());
 
@@ -688,7 +719,7 @@ public class MasterDataImportTest {
         Assert.assertNotNull(raceColumnOnTarget);
 
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
-        Competitor competitorOnTarget = domainFactory.getExistingCompetitorById(competitorUUID);
+        Competitor competitorOnTarget = domainFactory.getCompetitorStore().getExistingCompetitorById(competitorUUID);
         Set<Competitor> competitorsCreatedOnTarget = new HashSet<Competitor>();
         competitorsCreatedOnTarget.add(competitorOnTarget);
 
@@ -729,7 +760,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -755,7 +786,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -765,7 +796,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -776,7 +807,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1,
                 logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
@@ -827,7 +858,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1NotToOverride = new FleetImpl("testFleet1");
         fleetsNotToOverride.add(testFleet1NotToOverride);
         seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, emptyRaceColumnNamesList, destService));
-        Regatta regattaNotToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesNotToOverride, true, new LowPoint(),
+        Regatta regattaNotToOverride = destService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, seriesNotToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaNotToOverride);
         for (String name : raceColumnNamesNotToOverride) {
@@ -906,7 +937,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -932,7 +963,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -942,7 +973,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -953,7 +984,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1,
                 logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
@@ -1004,7 +1035,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1ToOverride = new FleetImpl("testFleet1");
         fleetsToOverride.add(testFleet1ToOverride);
         seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, emptyRaceColumnNamesList, destService));
-        Regatta regattaToOverride = destService.createRegatta("testRegatta", "29er", regattaUUID, seriesToOverride, true, new LowPoint(),
+        Regatta regattaToOverride = destService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, seriesToOverride, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regattaToOverride);
         for (String name : raceColumnNamesToOverride) {
@@ -1063,6 +1094,48 @@ public class MasterDataImportTest {
     }
     
     @Test
+    public void testMasterDataImportForRegattaDefaultProcedureAndDesigner() throws MalformedURLException, IOException, InterruptedException {
+        RacingEventService sourceService = new RacingEventServiceImpl();
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, UUID.randomUUID(), 
+                new ArrayList<Series>(), true, new LowPoint(), null);
+        // Let's use the setters directly because we are not testing replication
+        RegattaConfigurationImpl configuration = new RegattaConfigurationImpl();
+        configuration.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MAP);
+        regatta.setRegattaConfiguration(configuration);
+        
+        
+        Leaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
+                "testDisplayName", new int[] { 1, 2, 3, 4 });
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboard.getName());
+        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        
+        // Serialize
+        TopLevelMasterDataSerializer serializer = new TopLevelMasterDataSerializer(
+                sourceService.getLeaderboardGroups(), sourceService.getAllEvents(), sourceService.getPersistentRegattasForRaceIDs(),
+                sourceService.getAllMediaTracks());
+        Set<String> names = new HashSet<String>();
+        names.add(TEST_GROUP_NAME);
+        JSONObject masterDataOverallObject = serializer.serialize(names);
+        Assert.assertNotNull(masterDataOverallObject);
+
+        // Delete all data above from the database, to allow recreating all of it on target server
+        deleteCreatedDataFromDatabase();
+        
+        RacingEventService destService = new RacingEventServiceImplMock();
+        
+        // Deserialization copied from SailingServiceImpl
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+        importer.importMasterData(masterDataOverallObject.toString(), false);
+        
+        Regatta importedRegatta = destService.getRegattaByName(regatta.getName());
+        
+        assertNotNull(importedRegatta.getRegattaConfiguration());
+        assertEquals(CourseDesignerMode.BY_MAP, importedRegatta.getRegattaConfiguration().getDefaultCourseDesignerMode());
+    }
+    
+    @Test
     public void testMasterDataImportForRegattaWithoutCourseArea() throws MalformedURLException, IOException, InterruptedException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
@@ -1080,7 +1153,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 null);
         for (String name : raceColumnNames) {
             series.get(0).addRaceColumn(name, sourceService);
@@ -1103,7 +1176,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1113,7 +1186,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -1124,7 +1197,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1,
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1,
                 logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
@@ -1203,7 +1276,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -1229,7 +1302,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1239,7 +1312,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
@@ -1254,7 +1327,7 @@ public class MasterDataImportTest {
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
-        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, 1, logTimePoint);
+        RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
 
@@ -1378,7 +1451,7 @@ public class MasterDataImportTest {
         fleets.add(new FleetImpl("testFleet2"));
         series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
-        Regatta regatta = sourceService.createRegatta("testRegatta", "29er", regattaUUID, series, true, new LowPoint(),
+        Regatta regatta = sourceService.createRegatta(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME, regattaUUID, series, true, new LowPoint(),
                 courseAreaUUID);
         event.addRegatta(regatta);
         for (String name : raceColumnNames) {
@@ -1404,7 +1477,7 @@ public class MasterDataImportTest {
         DynamicTeam team = new TeamImpl("Pros", sailors, coach);
         BoatClass boatClass = new BoatClassImpl("H16", true);
         DynamicBoat boat = new BoatImpl("Wingy", boatClass, "GER70133");
-        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", team, boat);
+        CompetitorImpl competitor = new CompetitorImpl(competitorUUID, "Froderik", Color.RED, team, boat);
         competitors.add(competitor);
         UUID competitorToSuppressUUID = UUID.randomUUID();
         Set<DynamicPerson> sailors2 = new HashSet<DynamicPerson>();
@@ -1414,7 +1487,7 @@ public class MasterDataImportTest {
                 "Bester Coach");
         DynamicTeam team2 = new TeamImpl("Noobs", sailors2, coach2);
         DynamicBoat boat2 = new BoatImpl("LahmeEnte", boatClass, "GER1337");
-        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", team2, boat2);
+        CompetitorImpl competitorToSuppress = new CompetitorImpl(competitorToSuppressUUID, "Merkel", Color.RED, team2, boat2);
         competitors.add(competitorToSuppress);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
 

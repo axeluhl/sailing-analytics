@@ -9,7 +9,6 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -741,5 +741,28 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         }
         return bestSpeedMinimum;
+    }
+    
+    @Override
+    public Bearing getBeatAngle(TimePoint at) throws NoWindException {
+        Bearing beatAngle = null;
+        
+        Bearing projectToBearing;
+        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
+            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+            if (wind == null) {
+                throw new NoWindException("Need at least wind direction to determine windward speed");
+            }
+            projectToBearing = wind.getBearing();
+        } else {
+            projectToBearing = getTrackedLeg().getLegBearing(at);
+        }
+        
+        SpeedWithBearing speed = getSpeedOverGround(at);
+        if (speed != null) {
+            beatAngle = projectToBearing.getDifferenceTo(speed.getBearing());
+        }
+        
+        return beatAngle;
     }
 }

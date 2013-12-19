@@ -5,10 +5,13 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
+import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
@@ -32,10 +35,16 @@ public class BoatOverlay extends CanvasOverlayV3 {
      */
     private static double ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE = 90.0;
 
-    private final BoatClassImageData boatClassImageData;    
+    private final BoatClassImageData boatClassImageData;
 
     public BoatOverlay(MapWidget map, int zIndex, final CompetitorDTO competitorDTO) {
         super(map, zIndex);
+        map.addZoomChangeHandler(new ZoomChangeMapHandler() {
+            @Override
+            public void onEvent(ZoomChangeMapEvent event) {
+                removeCanvasPositionTransition(); // re-activate upon next position change if player is in correct state
+            }
+        });
         this.boatClass = competitorDTO.getBoatClass();
         this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
     }
@@ -51,7 +60,11 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByTack(boatFix.tack, isSelected());
             }
             double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-            double boatDrawingAngle = boatFix.speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
+            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
+            if (speedWithBearing == null) {
+                speedWithBearing = new SpeedWithBearingDTO(0, 0);
+            }
+            double boatDrawingAngle = speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
             if (boatDrawingAngle < 0) {
                 boatDrawingAngle += 360;
             }
@@ -63,11 +76,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
     
-    public GPSFixDTO getBoatFix() {
-        return boatFix;
-    }
-
-    public void setBoatFix(GPSFixDTO boatFix) {
+    public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionTransition();
+        } else {
+            setCanvasPositionTransition(timeForPositionTransitionMillis);
+        }
         this.boatFix = boatFix;
     }
     
