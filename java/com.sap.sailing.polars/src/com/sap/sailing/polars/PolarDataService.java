@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.data.PolarFix;
 
 public interface PolarDataService {
 
@@ -96,5 +97,9 @@ public interface PolarDataService {
             Executor executor) throws InterruptedException, ExecutionException;
 
     void newRaceFinishedTracking(TrackedRace trackedRace);
+
+    Set<PolarFix> getPolarFixesForBoatClass(BoatClass key);
+
+    public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
 
 }

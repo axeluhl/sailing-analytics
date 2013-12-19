@@ -1,6 +1,8 @@
 package com.sap.sailing.polars.impl;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -9,28 +11,35 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.caching.PolarFixCache;
 import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
+import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
 
 public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarFixCache polarFixCache;
+    private final PolarSheetPerBoatClassCache polarSheetPerBoatClassCache;
+    private final PolarSheetAnalyzer polarSheetAnalyzer;
 
     public PolarDataServiceImpl(Executor executor) {
         this.polarFixCache = new PolarFixCache(executor);
+        this.polarSheetPerBoatClassCache = new PolarSheetPerBoatClassCache(this);
+        polarFixCache.addListener(polarSheetPerBoatClassCache);
+        this.polarSheetAnalyzer = new PolarSheetAnalyzer(this);
     }
 
     @Override
     public SpeedWithBearing getOptimalUpwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
-        // TODO Auto-generated method stub
-        return null;
+        return polarSheetAnalyzer.getOptimalUpwindSpeedWithBearingFor(boatClass, windSpeed);
     }
 
     @Override
@@ -78,6 +87,21 @@ public class PolarDataServiceImpl implements PolarDataService {
         HashSet<TrackedRace> set = new HashSet<TrackedRace>();
         set.add(trackedRace);
         polarFixCache.triggerUpdate(trackedRace.getRace().getBoatClass(), new PolarFixCacheRaceInterval(set));
+    }
+
+    @Override
+    public Set<PolarFix> getPolarFixesForBoatClass(BoatClass key) {
+        Map<RegattaAndRaceIdentifier, List<PolarFix>> fixesInMap = polarFixCache.get(key, false);
+        Set<PolarFix> resultSet = new HashSet<PolarFix>();
+        for (List<PolarFix> value : fixesInMap.values()) {
+            resultSet.addAll(value);
+        }
+        return resultSet;
+    }
+
+    @Override
+    public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass) {
+        return polarSheetPerBoatClassCache.get(boatClass, false);
     }
 
 }
