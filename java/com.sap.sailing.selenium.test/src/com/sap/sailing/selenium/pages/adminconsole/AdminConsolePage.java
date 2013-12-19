@@ -1,22 +1,29 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.openqa.selenium.Alert;
+import java.util.List;
+
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import org.openqa.selenium.support.CacheLookup;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
+
 import com.sap.sailing.selenium.pages.HostPage;
+
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanel;
+
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
+
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
 
 /**
@@ -27,19 +34,43 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
  *   D049941
  */
 public class AdminConsolePage extends HostPage {
+    private enum ScrollDirection {
+        Left {
+            @Override
+            public By getBy() {
+                return By.className("gwt-ScrolledTabLayoutPanel-scrollLeft");
+            }
+        },
+        Rigth {
+            @Override
+            public By getBy() {
+                return By.className("gwt-ScrolledTabLayoutPanel-scrollRight");
+            }
+        };
+        
+        public abstract By getBy();
+    }
+    
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/*[text()=\"{0}\"]");
+            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
+    private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
+    private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
     
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
-
-    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration";
-    private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration";
     
-    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
-
+    private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
+    
+    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration"; //$NON-NLS-1$
+    
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
+    private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
+    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -54,7 +85,7 @@ public class AdminConsolePage extends HostPage {
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
-//        FluentWait<WebDriver> wait = new FluentWait<>(driver);
+//        FluentWait<WebDriver> wait = createFluentWait(driver);
 //        wait.withTimeout(5, TimeUnit.SECONDS);
 //        wait.pollingEvery(100, TimeUnit.MILLISECONDS);
 //        
@@ -74,8 +105,17 @@ public class AdminConsolePage extends HostPage {
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
     private WebElement tabPanel;
     
+    @CacheLookup
+    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/..")
+    private List<WebElement> tabs;
+    
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+    }
+    
+    public RegattaStructureManagementPanel goToRegattaStructure() {
+        return new RegattaStructureManagementPanel(this.driver, goToTab(REGATTA_STRUCTURE_TAB_LABEL,
+                REGATTA_STRUCTURE_TAB_IDENTIFIER));
     }
     
     /**
@@ -90,11 +130,21 @@ public class AdminConsolePage extends HostPage {
                 TRACTRAC_EVENTS_TAB_IDENTIFIER));
     }
     
+    public TrackedRacesManagementPanel goToTrackedRaces() {
+        return new TrackedRacesManagementPanel(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
+                TRACKED_RACES_TAB_IDENTIFIER));
+    }
+    
     public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {
         return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
     }
-
+    
+    public LeaderboardGroupConfigurationPanel goToLeaderboardGroupConfiguration() {
+        return new LeaderboardGroupConfigurationPanel(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
+                LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER));
+    }
+    
     /**
      * <p>Verifies that the current page is the administration console by checking the title of the page.</p>
      */
@@ -108,27 +158,71 @@ public class AdminConsolePage extends HostPage {
     private WebElement goToTab(String label, final String id) {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
-        int maxScrollActions = 20;
-        while (!tab.isDisplayed() && maxScrollActions-- > 0) {
-            FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
-            wait.withTimeout(10, TimeUnit.SECONDS);
-            wait.pollingEvery(2, TimeUnit.SECONDS);
-            WebElement scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
-                    By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
-            scroller = scroller.findElement(By.tagName("img"));
-
-            scroller.click();
-            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        
+        ScrollDirection direction = getScrollDirection(tab);
+        
+        if(direction != null) {
+            WebElement scroller = this.tabPanel.findElement(direction.getBy());
+            
+            while(!tab.isDisplayed() && scroller.isDisplayed()) {
+                WebElement arrow = scroller.findElement(By.tagName("img"));
+                arrow.click();
+                
+                // QUESTION: Do we need some kind of delay because of the scrolling?
+//                FluentWait<WebElement> wait = createFluentWait(tab, 2, 1, TimeoutException.class);
+//                wait.until(new Function<WebElement, Boolean>() {
+//                    int counter = 0;
+//                    @Override
+//                    public Boolean apply(WebElement tab) {
+//                        System.out.println(counter++);
+//                        return Boolean.valueOf(tab.isDisplayed());
+//                    }
+//                });
+            }
         }
-        logger.log(Level.INFO, String.format("Scrolled %d times.", 20 - maxScrollActions));
         
         tab.click();
-        // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
-        wait.withTimeout(30, TimeUnit.SECONDS);
-        wait.pollingEvery(5, TimeUnit.SECONDS);
         
+        // Wait for the tab to become visible due to the used animations.
+        FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        
         return content;
+    }
+    
+    private ScrollDirection getScrollDirection(WebElement tab) {
+        int tabIndex = getTabIndex(tab);
+        
+        if(tabIndex < getFirstVisibleTabIndex())
+            return ScrollDirection.Left;
+        
+        if(tabIndex > getLastVisibleTabIndex())
+            return ScrollDirection.Rigth;
+        
+        return null;
+    }
+    
+    private int getTabIndex(WebElement tab) {
+        return tab.findElements(By.xpath("./preceding-sibling::div")).size();
+    }
+    
+    private int getFirstVisibleTabIndex() {
+        for(int i = 0; i <= this.tabs.size() - 1; i++) {
+            if(this.tabs.get(i).isDisplayed()) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
+    private int getLastVisibleTabIndex() {
+        for(int i = this.tabs.size() - 1; i >= 0; i--) {
+            if(this.tabs.get(i).isDisplayed()) {
+                return i;
+            }
+        }
+        
+        return -1;
     }
 }
