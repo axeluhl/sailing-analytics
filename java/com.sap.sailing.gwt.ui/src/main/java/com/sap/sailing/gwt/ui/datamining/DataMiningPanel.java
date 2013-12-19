@@ -58,7 +58,7 @@ public class DataMiningPanel extends FlowPanel {
         HorizontalPanel panel = new HorizontalPanel();
         panel.setSpacing(5);
         
-        Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName() + ":");
+        Label runnerSettingsLabel = new Label(queryRunner.getLocalizedShortName());
         panel.add(runnerSettingsLabel);
         Anchor runnerSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
         runnerSettingsAnchor.setTitle(stringMessages.settings());
@@ -70,7 +70,7 @@ public class DataMiningPanel extends FlowPanel {
         });
         panel.add(runnerSettingsAnchor);
         
-        Label selectionTablesSettingsLabel = new Label("SelectionTables:");
+        Label selectionTablesSettingsLabel = new Label(queryDefinitionProvider.getSelectionProvider().getLocalizedShortName());
         panel.add(selectionTablesSettingsLabel);
         Anchor selectionTablesSettingsAnchor = new Anchor(AbstractImagePrototype.create(resources.settingsIcon()).getSafeHtml());
         selectionTablesSettingsAnchor.setTitle(stringMessages.settings());
@@ -82,7 +82,7 @@ public class DataMiningPanel extends FlowPanel {
             }
         });
         panel.add(selectionTablesSettingsAnchor);
-
+        
         return panel;
     }
 
