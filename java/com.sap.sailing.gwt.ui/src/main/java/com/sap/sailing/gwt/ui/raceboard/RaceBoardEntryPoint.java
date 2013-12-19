@@ -146,6 +146,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
             return;
         }
+        
+        Window.setTitle(selectedRace.getName());
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
