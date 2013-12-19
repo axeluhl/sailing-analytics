@@ -588,4 +588,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

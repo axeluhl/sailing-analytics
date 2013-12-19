@@ -903,4 +903,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

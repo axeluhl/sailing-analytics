@@ -1812,7 +1812,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
@@ -1867,7 +1867,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
@@ -2635,5 +2635,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             raceDistance = raceDistance.add(legDistance);
         }
         return raceDistance;
+    }
+    
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+        Speed competitorSpeedWhenPassingStart = null;
+        lockForRead(competitorMarkPassings);
+        try {
+            if (!competitorMarkPassings.isEmpty()) {
+                TimePoint competitorStartTime = competitorMarkPassings.first().getTimePoint();
+                competitorSpeedWhenPassingStart = getTrack(competitor).getEstimatedSpeed(
+                        competitorStartTime);
+            }
+        } finally {
+            unlockAfterRead(competitorMarkPassings);
+        }
+        return competitorSpeedWhenPassingStart;
     }
 }

@@ -536,4 +536,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
