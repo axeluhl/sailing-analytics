@@ -742,4 +742,27 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         return bestSpeedMinimum;
     }
+    
+    @Override
+    public Bearing getBeatAngle(TimePoint at) throws NoWindException {
+        Bearing beatAngle = null;
+        
+        Bearing projectToBearing;
+        if (getTrackedLeg().isUpOrDownwindLeg(at)) {
+            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+            if (wind == null) {
+                throw new NoWindException("Need at least wind direction to determine windward speed");
+            }
+            projectToBearing = wind.getBearing();
+        } else {
+            projectToBearing = getTrackedLeg().getLegBearing(at);
+        }
+        
+        SpeedWithBearing speed = getSpeedOverGround(at);
+        if (speed != null) {
+            beatAngle = projectToBearing.getDifferenceTo(speed.getBearing());
+        }
+        
+        return beatAngle;
+    }
 }

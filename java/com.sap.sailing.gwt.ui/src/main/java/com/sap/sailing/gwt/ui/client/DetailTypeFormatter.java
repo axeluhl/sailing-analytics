@@ -117,6 +117,10 @@ public class DetailTypeFormatter {
             return stringMessages.timeReaching();
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.timeUpwind();
+        case DISTANCE_TO_START_LINE:
+            return stringMessages.distanceToLine();
+        case BEAT_ANGLE:
+            return stringMessages.beatAngle();
         }
         return null;
     }
@@ -157,6 +161,7 @@ public class DetailTypeFormatter {
         case TOTAL_DISTANCE_TRAVELED:
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
+        case DISTANCE_TO_START_LINE:
             return stringMessages.metersUnit();
 
         case GAP_TO_LEADER_IN_SECONDS:
@@ -193,6 +198,7 @@ public class DetailTypeFormatter {
         case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case RACE_TRACKING_QUALITY:
+        case BEAT_ANGLE:
             return "";
         }
         // Throwing an exception to get notified if an implementation of
@@ -314,6 +320,10 @@ public class DetailTypeFormatter {
             return stringMessages.raceTimeReachingTooltip();
         case RACE_TIME_TRAVELED_UPWIND:
             return stringMessages.raceTimeUpwindTooltip();
+        case BEAT_ANGLE:
+            return stringMessages.beatAngleTooltip();
+        case DISTANCE_TO_START_LINE:
+            return "";
         }
         
         return "";

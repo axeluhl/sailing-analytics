@@ -5,9 +5,7 @@ Bundle-SymbolicName: com.tractrac.clientmodule
 Bundle-Version: 2.0.6.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/TracTracClientModule.jar,
- .,
- lib/TracCommon.jar,
- lib/TracDataLib.jar
+ .
 Export-Package: com.maptrack.asio,
  com.maptrack.asio.record,
  com.maptrack.asio.session,

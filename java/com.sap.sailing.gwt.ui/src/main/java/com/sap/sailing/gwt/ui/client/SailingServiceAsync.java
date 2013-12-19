@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -319,8 +318,6 @@ public interface SailingServiceAsync {
      * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
-
-    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
 
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />

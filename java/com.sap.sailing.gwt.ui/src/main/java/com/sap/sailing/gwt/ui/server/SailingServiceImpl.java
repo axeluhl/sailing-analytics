@@ -426,10 +426,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return tractracAdapterTracker.getService().getOrCreateTracTracAdapter(baseDomainFactory);
     }
 
-    protected IgtimiConnectionFactory getIgtimiConnectionFactory(BundleContext context) {
-        return createAndOpenIgtimiTracker(context).getService();
-    }
-
     protected ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> createAndOpenTracTracAdapterTracker(BundleContext context) {
         ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> result = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(
                 context, TracTracAdapterFactory.class.getName(), null);
@@ -2268,9 +2264,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
         try {
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, timePoint);
+            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             switch (dataType) {
             case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                 if (track != null) {
                     SpeedWithBearing speedOverGround = track.getEstimatedSpeed(timePoint);
                     result = (speedOverGround == null) ? null : speedOverGround.getKnots();
@@ -2283,8 +2279,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case DISTANCE_TRAVELED:
-                if (trackedLeg != null) {
-                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
+                if (track != null && trackedRace.getStartOfTracking() != null) {
+                    Distance distanceTraveled = track.getDistanceTraveled(trackedRace.getStartOfTracking(), timePoint);
                     result = distanceTraveled == null ? null : distanceTraveled.getMeters();
                 }
                 break;
@@ -2319,6 +2315,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 LeaderboardGroup group = getService().getLeaderboardGroupByName(leaderboardGroupName);
                 Leaderboard overall = group.getOverallLeaderboard();
                 result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
+                break;
+            case DISTANCE_TO_START_LINE:
+                TimePoint startOfRace = trackedRace.getStartOfRace();
+                if (startOfRace == null || timePoint.before(startOfRace) || timePoint.equals(startOfRace)) {
+                    Distance distanceToStartLine = trackedRace.getDistanceToStartLine(competitor, timePoint);
+                    result = distanceToStartLine == null ? null : distanceToStartLine.getMeters();
+                }
+                break;
+            case BEAT_ANGLE:
+                if (trackedLeg != null) {
+                    Bearing beatAngle = trackedLeg.getBeatAngle(timePoint);
+                    result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
+                }
                 break;
             default:
                 throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType
@@ -2806,8 +2815,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getEventById(eventUuid);
     }
 
-    @Override
-    public EventDTO getEventById(Serializable id) {
+    private EventDTO getEventById(UUID id) {
         EventDTO result = null;
         Event event = getService().getEvent(id);
         if (event != null) {

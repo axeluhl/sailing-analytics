@@ -346,7 +346,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     echo -n "Connecting to OSGi server..."
     NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
     echo "OK"
-    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    OLD_BUNDLE_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
@@ -361,11 +361,11 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # stop and uninstall
-    echo -n stop $BUNDLE_ID | $NC_CMD > /dev/null
-    echo -n uninstall $BUNDLE_ID | $NC_CMD > /dev/null
+    echo stop $BUNDLE_ID | $NC_CMD > /dev/null
+    echo uninstall $BUNDLE_ID | $NC_CMD > /dev/null
 
     # make sure bundle is removed
-    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    UNINSTALL_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     if [[ $UNINSTALL_INFORMATION == "" ]]; then
         echo "Uninstall procedure sucessful!"
     else
@@ -374,14 +374,14 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # now reinstall bundle
-    NEW_BUNDLE_ID=`echo -n install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
-    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    NEW_BUNDLE_ID=`echo install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
+    NEW_BUNDLE_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     NEW_BUNDLE_ID=`echo $NEW_BUNDLE_INFORMATION | cut -d " " -f 1`
     echo "Installed new bundle file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar with id $NEW_BUNDLE_ID"
 
     # and start
-    echo -n start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
-    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
+    echo start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
+    NEW_BUNDLE_STATUS=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
     if [[ $NEW_BUNDLE_STATUS == "" ]]; then
         echo "ERROR: Something went wrong with start of bundle. Please check if everything went ok."
         exit
