@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
@@ -25,6 +26,7 @@ import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
@@ -42,11 +44,18 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private GroupBySelectionPanel groupBySelectionPanel;
 
-    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService,
-            ErrorReporter errorReporter) {
+    public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
         
-        mainPanel = new FlowPanel();
+        mainPanel = new ResizingFlowPanel() {
+            @Override
+            public void onResize() {
+                Widget selectionWidget = selectionProvider.getEntryWidget();
+                if (selectionWidget instanceof RequiresResize) {
+                    ((RequiresResize) selectionWidget).onResize();
+                }
+            }
+        };
         statisticsProvider = new SimpleStatisticsProvider();
 
         mainPanel.add(createFunctionsPanel());

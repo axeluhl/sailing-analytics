@@ -22,16 +22,16 @@ import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.UnitFormatter;
 
-public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
+public class ResultsChart implements ResultsPresenter<Number> {
 
     private StringMessages stringMessages;
     private SimplePanel mainPanel;
@@ -47,7 +47,13 @@ public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
     public ResultsChart(StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
-        mainPanel = new SimplePanel();
+        mainPanel = new ResizingSimplePanel() {
+            @Override
+            public void onResize() {
+                chart.setSizeToMatchContainer();
+                chart.redraw();
+            }
+        };
         series = new HashMap<GroupKey, Series>();
         errorLabel = new HTML();
         errorLabel.setStyleName("chart-importantMessage");
@@ -218,12 +224,6 @@ public class ResultsChart implements ResultsPresenter<Number>, RequiresResize {
     @Override
     public Widget getWidget() {
         return mainPanel;
-    }
-    
-    @Override
-    public void onResize() {
-        chart.setSizeToMatchContainer();
-        chart.redraw();
     }
 
 }
