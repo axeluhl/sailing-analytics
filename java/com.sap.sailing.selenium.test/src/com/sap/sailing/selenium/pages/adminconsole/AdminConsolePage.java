@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
-
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -9,7 +8,10 @@ import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import org.openqa.selenium.interactions.Actions;
+
 import org.openqa.selenium.support.CacheLookup;
+
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -181,9 +183,11 @@ public class AdminConsolePage extends HostPage {
             }
         }
         
-        // TODO: Maybe we need a more complex algorithm here, to determine where to click on the tab. This
-        //       implementation tries to click at the center of the element. We have to keep an eye on this for a while!
-        tab.click();
+        // We have to determine the location where we have to click at the tab for the case its not completely visible.
+        org.openqa.selenium.interactions.Actions actions = new Actions(this.driver);
+        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
+        actions.click();
+        actions.perform();
         
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(this.tabPanel);
@@ -226,5 +230,17 @@ public class AdminConsolePage extends HostPage {
         }
         
         return -1;
+    }
+    
+    private int determineOffsetForClick(WebElement tab) {
+        int tabIndex = getTabIndex(tab);
+        
+        if(tabIndex == getFirstVisibleTabIndex())
+            return -1;
+        
+        if(tabIndex == getLastVisibleTabIndex())
+            return +1;
+        
+        return tab.getSize().width / 2;
     }
 }
