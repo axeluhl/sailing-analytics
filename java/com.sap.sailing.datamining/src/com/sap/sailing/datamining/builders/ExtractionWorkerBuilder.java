@@ -20,7 +20,7 @@ public class ExtractionWorkerBuilder<DataType, ExtractedType> implements WorkerB
         switch (statisticType) {
         case Speed:
             return (ExtractionWorker<DataType, ExtractedType>) new SpeedInKnotsExtractionWorker();
-        case Distance_TrackedLegOfCompetitor:
+        case Distance:
             return (ExtractionWorker<DataType, ExtractedType>) new DistanceTraveledExtractionWorker();
         }
         throw new IllegalArgumentException("Not yet implemented for the given statistic type: "

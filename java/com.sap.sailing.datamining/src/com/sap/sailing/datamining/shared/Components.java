@@ -30,7 +30,7 @@ public final class Components {
     public enum StatisticType {
 
         Speed(ValueType.Double, Unit.Knots, 2),
-        Distance_TrackedLegOfCompetitor(ValueType.Double, Unit.Meters, 2);
+        Distance(ValueType.Double, Unit.Meters, 2);
 
         private final ValueType valueType;
         private final Unit unit;
@@ -48,7 +48,7 @@ public final class Components {
         
         public Message getSignifierMessage() {
             switch (this) {
-            case Distance_TrackedLegOfCompetitor:
+            case Distance:
                 return Message.Distance;
             case Speed:
                 return Message.Speed;
