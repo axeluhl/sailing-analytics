@@ -29,6 +29,8 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
  */
 public class CandidateChooser implements AbstractCandidateChooser {
 
+    private static final Logger logger = Logger.getLogger(CandidateChooser.class.getName());
+    
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
@@ -57,6 +59,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     };
 
     public CandidateChooser(DynamicTrackedRace race) {
+        logger.setLevel(Level.INFO);
         this.race = race;
         raceHasStartTime = race.getStartOfRace() == null ? false : true;
         start = new Candidate(0, race.getStartOfRace(), 1);
@@ -122,7 +125,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     private void findShortestPath(Competitor co) {
         boolean changed = false;
-        List<MarkPassing> markPassDeltas = null;
+        
         ArrayList<Edge> all = new ArrayList<>();
         for (Edge e : allEdges.get(co)) {
             all.add(e);
@@ -158,7 +161,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
             marker = candidateWithParent.get(marker);
         }
         if (changed) {
-            markPassDeltas = new ArrayList<>();
+            logger.info("New MarkPasses for"+ co);
+            List<MarkPassing> markPassDeltas = new ArrayList<>();
+            //TODO This doesn't allow holes in the sequence!!
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
             }

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.base.Competitor;
@@ -26,6 +28,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public class CandidateFinder implements AbstractCandidateFinder {
+
+    private static final Logger logger = Logger.getLogger(CandidateFinder.class.getName());
 
     private LinkedHashMap<Competitor, List<GPSFix>> affectedFixes = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
@@ -126,6 +130,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
     @Override
     public Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c) {
         // CreateCandidate method?
+        if (logger.getLevel() == Level.FINEST) {
+            logger.finest("Reevaluating " + affectedFixes.get(c).size() + " fixes for" + c);
+        }
         ArrayList<Candidate> newCans = new ArrayList<>();
         ArrayList<Candidate> wrongCans = new ArrayList<>();
         for (GPSFix gps : affectedFixes.get(c)) {
@@ -145,6 +152,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
         }
         affectedFixes.get(c).clear();
+        logger.fine(newCans.size() + "new Cans, old cans: "+ wrongCans.size());
         return new Pair<List<Candidate>, List<Candidate>>(newCans, wrongCans);
     }
 

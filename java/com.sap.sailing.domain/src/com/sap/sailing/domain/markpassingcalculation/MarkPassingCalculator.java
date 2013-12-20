@@ -23,10 +23,9 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using a {@link AbstractCandidateFinder} and a
- * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s.
- * The chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
- * this sequence. 
- * If <code>listen</code> is true, a {@link MarkPassingUpdateListener} is initialized which puts new
+ * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}
+ * s. The chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
+ * this sequence. If <code>listen</code> is true, a {@link MarkPassingUpdateListener} is initialized which puts new
  * fixes into a queue. Additionally a new Thread is started, which takes the fixes out of the queue and sorts them so
  * that each object (Competitor or Mark) has a list of Fixes in <code>combinedFixes</code>. If <code>suspended</code> is
  * false, the new Fixes are handed to the <code>executor</code> as FutureTasks, first to calculate the affected Fixes
@@ -72,7 +71,7 @@ public class MarkPassingCalculator {
 
         @Override
         public void run() {
-
+            logger.fine("MarkPassingCalculator is listening for new Fixes.");
             boolean finished = false;
             LinkedHashMap<Object, List<GPSFix>> combinedFixes = new LinkedHashMap<>();
 
@@ -95,6 +94,7 @@ public class MarkPassingCalculator {
                     combinedFixes.get(fix.getA()).add(fix.getB());
                 }
                 if (!suspended) {
+                    logger.finest("MarkPassingCalculator evaluating fixes for " + combinedFixes.size() + " objects.");
                     computeMarkPasses(combinedFixes);
                     combinedFixes.clear();
                 }
@@ -114,7 +114,7 @@ public class MarkPassingCalculator {
                     task.get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + "while waiting for the calculation of affected Fixes");
+                            + " while waiting for the calculation of affected Fixes");
                 }
             }
             tasks.clear();
