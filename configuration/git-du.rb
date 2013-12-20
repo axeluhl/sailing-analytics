@@ -160,20 +160,18 @@ def compute_branch(branch_name)
                 end
             end
         end
-        Mutex.new.synchronize do
-            puts "\tbranch: %s" % branch_name
-            puts "\tblobs: %s" % branch.blobs.count
-            puts "\tnon shared:"
-            puts "\t\tpacked: %s kb" % (branch.non_shared_packed_size / 1000)
-            puts "\t\tnon packed: %s kb" % (branch.non_shared_size / 1000)
-            puts "\t\tall: %s kb" % ((branch.non_shared_packed_size + branch.non_shared_size) / 1000)
-            puts "\tnon shared but with dependencies on it:"
-            puts "\t\tpacked: %s kb" % (branch.non_shared_dependable_packed_size / 1000)
-            puts "\t\tnon packed: %s kb" % (branch.non_shared_dependable_size / 1000)
-            puts "\tshared:"
-            puts "\t\tpacked: %s kb" % (branch.shared_packed_size / 1000)
-            puts "\t\tnon packed: %s kb" % (branch.shared_size / 1000), ""
-        end
+        puts "\tbranch: %s" % branch_name
+        puts "\tblobs: %s" % branch.blobs.count
+        puts "\tnon shared:"
+        puts "\t\tpacked: %s kb" % (branch.non_shared_packed_size / 1000)
+        puts "\t\tnon packed: %s kb" % (branch.non_shared_size / 1000)
+        puts "\t\tall: %s kb" % ((branch.non_shared_packed_size + branch.non_shared_size) / 1000)
+        puts "\tnon shared but with dependencies on it:"
+        puts "\t\tpacked: %s kb" % (branch.non_shared_dependable_packed_size / 1000)
+        puts "\t\tnon packed: %s kb" % (branch.non_shared_dependable_size / 1000)
+        puts "\tshared:"
+        puts "\t\tpacked: %s kb" % (branch.shared_packed_size / 1000)
+        puts "\t\tnon packed: %s kb" % (branch.shared_size / 1000), ""
     end
 end
 
