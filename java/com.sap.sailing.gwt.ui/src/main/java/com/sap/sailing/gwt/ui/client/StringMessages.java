@@ -949,4 +949,5 @@ public interface StringMessages extends Messages {
     String statisticProvider();
     String calculate();
     String basedOn();
+    String groupingProvider();
 }

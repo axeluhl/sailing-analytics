@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.datamining.selection;
+package com.sap.sailing.gwt.ui.client.shared.components;
 
 import java.io.IOException;
 

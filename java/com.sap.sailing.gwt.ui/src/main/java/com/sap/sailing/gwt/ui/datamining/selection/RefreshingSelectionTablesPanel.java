@@ -349,15 +349,20 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesPanel.add(raceNameTable);
         tablesMappedByDimension.put(raceNameTable.getDimension(), raceNameTable);
 
+        SelectionTable<LegType, LegType> legTypeTable = new SimpleSelectionTable<LegType>(stringMessages.legType(),
+                SharedDimension.LegType);
+        tablesPanel.add(legTypeTable);
+        tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
+
         SelectionTable<Integer, Integer> legNumberTable = new SimpleSelectionTable<Integer>(stringMessages.legLabel(),
                 SharedDimension.LegNumber);
         tablesPanel.add(legNumberTable);
         tablesMappedByDimension.put(legNumberTable.getDimension(), legNumberTable);
 
-        SelectionTable<LegType, LegType> legTypeTable = new SimpleSelectionTable<LegType>(stringMessages.legType(),
-                SharedDimension.LegType);
-        tablesPanel.add(legTypeTable);
-        tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
+        SelectionTable<String, String> nationalityTable = new SimpleSelectionTable<String>(stringMessages
+                .nationality(), SharedDimension.Nationality);
+        tablesPanel.add(nationalityTable);
+        tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
 
         SelectionTable<CompetitorDTO, String> competitorNameTable = new SelectionTable<CompetitorDTO, String>(stringMessages
                 .competitor(), SharedDimension.CompetitorName) {
@@ -378,11 +383,6 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         };
         tablesPanel.add(competitorSailIDTable);
         tablesMappedByDimension.put(competitorSailIDTable.getDimension(), competitorSailIDTable);
-
-        SelectionTable<String, String> nationalityTable = new SimpleSelectionTable<String>(stringMessages
-                .nationality(), SharedDimension.Nationality);
-        tablesPanel.add(nationalityTable);
-        tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
         
         return tablesPanel;
     }

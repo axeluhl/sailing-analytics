@@ -20,6 +20,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
+import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
+import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
@@ -36,7 +38,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private StatisticsManager statisticsManager;
     private StatisticProvider statisticProvider;
 
-    private GroupBySelectionPanel groupBySelectionPanel;
+    private GroupingProvider groupBySelectionPanel;
 
     public QueryDefinitionProviderWithControls(StringMessages stringMessages, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         super(stringMessages, sailingService, errorReporter);
@@ -94,7 +96,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
         setBlockChangeNotification(true);
         selectionProvider.applySelection(queryDefinition);
-        groupBySelectionPanel.apply(queryDefinition);
+        groupBySelectionPanel.applyQueryDefinition(queryDefinition);
         statisticProvider.applyQueryDefinition(queryDefinition);
         setBlockChangeNotification(false);
         
@@ -114,13 +116,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         functionsPanel.add(clearSelectionButton);
 
-        groupBySelectionPanel = new GroupBySelectionPanel(getStringMessages()) {
+        groupBySelectionPanel = new RestrictedGroupingProvider(getStringMessages());
+        groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
             @Override
-            protected void finishValueChangedHandling() {
+            public void groupingChanged() {
                 notifyQueryDefinitionChanged();
             }
-        };
-        functionsPanel.add(groupBySelectionPanel);
+        });
+        functionsPanel.add(groupBySelectionPanel.getEntryWidget());
 
         statisticProvider = new ComplexStatisticProvider(getStringMessages(), statisticsManager);
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
