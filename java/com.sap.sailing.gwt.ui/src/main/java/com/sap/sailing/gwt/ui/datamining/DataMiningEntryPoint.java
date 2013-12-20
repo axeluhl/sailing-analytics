@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -13,6 +14,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.datamining.shared.Components.AggregatorType;
+import com.sap.sailing.datamining.shared.Components.GrouperType;
+import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.DataTypes;
+import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -56,6 +63,10 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, sailingService, this, queryDefinitionProvider, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
+        
+        SimpleQueryDefinition queryDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        queryDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
+        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
         queryRunner.run(queryDefinitionProvider.getQueryDefinition());
     }
 
