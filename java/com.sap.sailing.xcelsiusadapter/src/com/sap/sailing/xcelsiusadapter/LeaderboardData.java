@@ -308,7 +308,7 @@ public class LeaderboardData extends ExportAction {
                 addNamedElementWithValue(maneuverInformation, "type", man.getType().toString());
                 addNamedElementWithValue(maneuverInformation, "direction_change_in_degrees", man.getDirectionChangeInDegrees());
                 Distance maneuverLoss = man.getManeuverLoss();
-                addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : -1.0);
+                addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : 0.0);
                 addNamedElementWithValue(maneuverInformation, "speed_before_in_knots", man.getSpeedWithBearingBefore().getKnots());
                 addNamedElementWithValue(maneuverInformation, "speed_after_in_knots", man.getSpeedWithBearingAfter().getKnots());
                 maneuversElement.addContent(maneuverInformation);
@@ -400,15 +400,20 @@ public class LeaderboardData extends ExportAction {
     
     private Pair<Double, Vector<String>> checkData(Leaderboard leaderboard) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
-        int raceColumnCount = 0;
+        int raceColumnCount = 0; int attachedRaceToColumnCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (raceColumn.hasTrackedRaces()) {
-                raceColumnCount++;
+                attachedRaceToColumnCount++;
             }
+            raceColumnCount++;
         }
         if (raceColumnCount == 0) {
             messages.add("Could not find any race columns or none of the race columns has tracked races attached!");
             simpleConfidence -= 1.0;
+        }
+        if (attachedRaceToColumnCount < raceColumnCount) {
+            messages.add("Not all race columns contain attached races! Data being aggregated over all races could be wrong!");
+            simpleConfidence -= 0.3;
         }
         int competitorCount = 0;
         for (Iterator<Competitor> iterator = leaderboard.getAllCompetitors().iterator(); iterator.hasNext();) {
