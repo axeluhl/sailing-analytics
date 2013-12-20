@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
-public class CandidateFinderPerformanceTest extends AbstractMarkPassingTest implements RaceChangeListener {
+public class CandidateFinderPerformanceTest extends AbstractMockedRaceMarkPassingTest implements RaceChangeListener {
 
     public CandidateFinderPerformanceTest() {
         super();

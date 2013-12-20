@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing.old;
+package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertEquals;
 
@@ -50,7 +50,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  * @author Martin Hanysz
  *
  */
-public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
+public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	/**
 	 * How many milliseconds may the given and computed mark passings drift apart before being counted as a miss.
 	 */
@@ -61,7 +61,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 */
 	private boolean forceReload = false;
 
-	public AbstractMarkPassingTest() throws MalformedURLException,
+	public MartinAbstractMarkPassingTest() throws MalformedURLException,
 			URISyntaxException {
 		super();
 	}
@@ -194,7 +194,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
 	/**
 	 * This method starts the actual mark passing detection algorithm by handing a sequence of {@link GPSFix}es of each {@link Competitor}
-	 * into the {@link AbstractMarkPassingTest#computeMarkPassings(Competitor, GPSFixMoving)} method.
+	 * into the {@link MartinAbstractMarkPassingTest#computeMarkPassings(Competitor, GPSFixMoving)} method.
 	 * For every competitor, sequences of mark passings for each waypoint of the course can be calculated.
 	 * One sequence may contain multiple possible mark passings for the same waypoint that may represent the same passing of that specific waypoint.
 	 * The list of sequences returned in the result should contain one sequence for each time the waypoint has to be passed to complete the course.
