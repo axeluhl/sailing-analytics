@@ -24,7 +24,10 @@
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter</module>
 		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
+		<!-- The Igtimi server is currently down; need to negotiate with Brent Russell what's up and when it's back online; skip
+                     Igtimi tests for now
 		<module>com.sap.sailing.domain.igtimiadapter.test</module>
+		-->
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
