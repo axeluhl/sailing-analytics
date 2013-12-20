@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing.old;
+package com.sap.sailing.domain.test.markpassing;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.test.markpassing.MartinAbstractMarkPassingTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -32,7 +33,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
  * @author Martin Hanysz
  *
  */
-public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
+public class MartinMarkPassingBearingBasedTest extends MartinAbstractMarkPassingTest {
 
 	/**
 	 * Controls the size of the hot zone around buoys. It is multiplied with the boat length.
@@ -41,7 +42,7 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 
 	private Map<Competitor, Entry<MarkPassing, Position>> lastCompetitorPassings;
 	
-	public MarkPassingBearingBasedTest() throws MalformedURLException, URISyntaxException {
+	public MartinMarkPassingBearingBasedTest() throws MalformedURLException, URISyntaxException {
 		super();
 		lastCompetitorPassings = new HashMap<Competitor, Entry<MarkPassing, Position>>();
 	}

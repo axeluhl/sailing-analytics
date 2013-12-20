@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class AbstractMarkPassingTest {
+public class AbstractMockedRaceMarkPassingTest {
     protected Competitor bob = new CompetitorImpl("Bob", "Bob", null, null, null);
     protected Competitor joe = new CompetitorImpl("Joe", "Joe", null, null, null);
     protected Competitor mike = new CompetitorImpl("Mike", "Mike", null, null, null);
@@ -49,7 +49,7 @@ public class AbstractMarkPassingTest {
     protected long time;
     protected Random rnd = new Random();
     
-    public AbstractMarkPassingTest(){
+    public AbstractMockedRaceMarkPassingTest(){
         ControlPointWithTwoMarks cp = new ControlPointWithTwoMarksImpl(m2, m3, "cp");
         Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
         Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);

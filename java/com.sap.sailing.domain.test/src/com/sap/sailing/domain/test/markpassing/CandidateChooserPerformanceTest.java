@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 
-public class CandidateChooserPerformanceTest extends AbstractMarkPassingTest {
+public class CandidateChooserPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
     public CandidateChooserPerformanceTest() {
         super();

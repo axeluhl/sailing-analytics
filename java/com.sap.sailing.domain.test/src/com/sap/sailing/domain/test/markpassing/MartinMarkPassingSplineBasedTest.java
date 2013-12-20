@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.markpassing.old;
+package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,6 +21,9 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.markpassingcalculation.old.HermiteCurve;
+import com.sap.sailing.domain.markpassingcalculation.old.StraightLine;
+import com.sap.sailing.domain.markpassingcalculation.old.Vector2D;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -32,13 +35,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
  * @author Martin Hanysz
  *
  */
-public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
+public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingTest {
 	
 	// a factor to scale the tangents calculated from boat speed and bearing
 	private static double TANGENT_SCALING_FACTOR = 100;
 	private Map<Competitor, Entry<MarkPassing, Position>> lastCompetitorPassings;
 
-	public MarkPassingSplineBasedTest() throws MalformedURLException, URISyntaxException {
+	public MartinMarkPassingSplineBasedTest() throws MalformedURLException, URISyntaxException {
 		super();
 		lastCompetitorPassings = new HashMap<Competitor, Entry<MarkPassing, Position>>();
 	}
@@ -54,7 +57,7 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 		double s = 100.0;
 		double div = 10.0;
 		while (s > 0.000000001) {
-			MarkPassingSplineBasedTest.TANGENT_SCALING_FACTOR = s;
+			MartinMarkPassingSplineBasedTest.TANGENT_SCALING_FACTOR = s;
 			List<MarkPassing> markPassings = computeAllMarkPassings();
 			// compare computed mark passings to given ones
 			int overallMisses = compareCalculatedAndGivenPassings(markPassings, false);
