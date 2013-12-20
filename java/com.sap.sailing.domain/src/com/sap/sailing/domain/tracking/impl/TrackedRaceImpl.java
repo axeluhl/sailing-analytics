@@ -2610,7 +2610,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (speedCounter > 0) {
                 Speed averageWindSpeed = new KnotSpeedImpl(sumWindSpeed / speedCounter);
                 double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
-                result = new SpeedWithConfidenceImpl<TimePoint>(averageWindSpeed, averageWindSpeedConfidence, timePoint);
+                result = new SpeedWithConfidenceImpl<TimePoint>(averageWindSpeed, averageWindSpeedConfidence, toTimePoint);
             }
         } 
         return result;

@@ -608,7 +608,8 @@ public interface TrackedRace extends Serializable {
     Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);
     
     /**
-     * The speed of the competitor when crossing the start line
+     * The speed of the competitor when crossing the start line. It will return null if there are no recorded
+     * mark passings for this competitor (competitor did not yet or never pass the start line).
      */
     Speed getSpeedWhenCrossingStartLine(Competitor competitor);
 
@@ -627,7 +628,8 @@ public interface TrackedRace extends Serializable {
     Distance getCourseLength();
     
     /**
-     * The average wind speed with confidence for this race
+     * The average wind speed with confidence for this race. It uses the timepoint of the race end as
+     * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
 
