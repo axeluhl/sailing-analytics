@@ -519,6 +519,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (currentRace != null) {
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
             if (trackedRace != null) {
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(simulator == null ? raceStartTime : simulator.advanceStartTime(raceStartTime));
+                }
                 TimePoint startOfTracking = clientParams.getRace().getTrackingStartTime();
                 if (startOfTracking != null) {
                     trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
@@ -528,10 +532,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
-                }
-                TimePoint raceStartTime = clientParams.getRace().getStartTime();
-                if (raceStartTime != null) {
-                    trackedRace.setStartTimeReceived(raceStartTime);
                 }
             }
         }
