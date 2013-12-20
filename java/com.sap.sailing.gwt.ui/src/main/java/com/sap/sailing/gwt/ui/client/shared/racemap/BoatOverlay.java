@@ -48,7 +48,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
         map.getMap().addBoundsChangeHandler(new BoundsChangeMapHandler() {
             @Override
             public void onEvent(BoundsChangeMapEvent event) {
-                if (!map.getMap().getBounds().equals(currentMapBounds)) {
+                if (!map.isAutoZoomInProgress() && !map.getMap().getBounds().equals(currentMapBounds)) {
                     for (BoatOverlay boatOverlay : map.getBoatOverlays().values()) {
                         boatOverlay.removeCanvasPositionTransition();
                     }
