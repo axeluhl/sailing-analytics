@@ -181,6 +181,8 @@ public class AdminConsolePage extends HostPage {
             }
         }
         
+        // TODO: Maybe we need a more complex algorithm here, to determine where to click on the tab. This
+        //       implementation tries to click at the center of the element. We have to keep an eye on this for a while!
         tab.click();
         
         // Wait for the tab to become visible due to the used animations.
