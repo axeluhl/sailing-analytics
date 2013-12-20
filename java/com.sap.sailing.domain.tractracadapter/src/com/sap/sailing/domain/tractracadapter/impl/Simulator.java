@@ -104,12 +104,16 @@ public class Simulator {
      * {@link #setAdvanceInMillis(long)}.
      */
     private synchronized long getAdvanceInMillis() {
-        while (advanceInMillis == -1) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
-                // ignore; try again
+        while (!isAdvanceInMilliseSet()) {
+            if (trackedRace.getStartOfRace() != null) {
+                setAdvanceInMillis(System.currentTimeMillis() - trackedRace.getStartOfRace().asMillis());
+            } else {
+                try {
+                    wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
+                } catch (InterruptedException e) {
+                    logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
+                    // ignore; try again
+                }
             }
         }
         return advanceInMillis;
