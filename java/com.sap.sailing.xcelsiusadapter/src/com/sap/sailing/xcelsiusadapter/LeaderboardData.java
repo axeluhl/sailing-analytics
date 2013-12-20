@@ -17,6 +17,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
@@ -119,17 +121,17 @@ public class LeaderboardData extends ExportAction {
         return timedElements;
     }
     
-    public List<Element> createWindXML(String prefix, Pair<Speed, Double> windInformation) {
+    public List<Element> createWindXML(String prefix, SpeedWithConfidence<TimePoint> speedWithConfidence) {
         List<Element> windElements = new ArrayList<Element>();
-        if (windInformation.getA() == null) {
-            windInformation = new Pair<Speed, Double>(new KnotSpeedImpl(0.0), 0.0);
+        if (speedWithConfidence == null) {
+            speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(0.0), 0, MillisecondsTimePoint.now());
         }
-        windElements.add(createNamedElementWithValue(prefix+"speed_in_knots", windInformation.getA().getKnots()));
-        windElements.add(createNamedElementWithValue(prefix+"speed_in_meters_per_second", windInformation.getA().getMetersPerSecond()));
-        windElements.add(createNamedElementWithValue(prefix+"speed_in_beaufort", windInformation.getA().getBeaufort()));
-        windElements.add(createNamedElementWithValue(prefix+"confidence", windInformation.getB()));
+        windElements.add(createNamedElementWithValue(prefix+"speed_in_knots", speedWithConfidence.getObject().getKnots()));
+        windElements.add(createNamedElementWithValue(prefix+"speed_in_meters_per_second", speedWithConfidence.getObject().getMetersPerSecond()));
+        windElements.add(createNamedElementWithValue(prefix+"speed_in_beaufort", speedWithConfidence.getObject().getBeaufort()));
+        windElements.add(createNamedElementWithValue(prefix+"confidence", speedWithConfidence.getConfidence()));
         
-        double speedInKnots = windInformation.getA().getKnots();
+        double speedInKnots = speedWithConfidence.getObject().getKnots();
         String windSpeedAsHumanReadableString = "";
         String windSpeedAsInterval = "";
         if (speedInKnots <= 4) {

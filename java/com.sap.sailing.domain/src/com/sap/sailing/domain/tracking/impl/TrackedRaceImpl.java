@@ -39,10 +39,12 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
@@ -2574,12 +2576,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Pair<Speed, Double> getAverageWindSpeedWithConfidence(int resolutionInMinutes) {
-        Pair<Speed, Double> result = null;
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
+        SpeedWithConfidence<TimePoint> result = null;
         if (getEndOfRace() != null) {
             TimePoint fromTimePoint = getStartOfRace();
             TimePoint toTimePoint = getEndOfRace();
-            long resolutionInMilliseconds = 60 * 1000 * resolutionInMinutes;
 
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
@@ -2589,7 +2590,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             double sumWindSpeedConfidence = 0.0;
             int speedCounter = 0;
 
-            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMillis);
             WindTrack windTrack = getOrCreateWindTrack(windSource);
             TimePoint timePoint = fromTimePoint;
             for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
@@ -2604,12 +2605,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
                     speedCounter++;
                 }
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMillis);
             }
             if (speedCounter > 0) {
                 Speed averageWindSpeed = new KnotSpeedImpl(sumWindSpeed / speedCounter);
                 double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
-                result = new Pair<Speed, Double>(averageWindSpeed, averageWindSpeedConfidence);
+                result = new SpeedWithConfidenceImpl<TimePoint>(averageWindSpeed, averageWindSpeedConfidence, timePoint);
             }
         } 
         return result;
