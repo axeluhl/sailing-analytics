@@ -52,8 +52,8 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         dockPanel.addNorth(createLogoAndTitlePanel(), 68);
         QueryDefinitionProviderWithControls queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(stringMessages, sailingService, this);
         QueryDefinitionProvider queryDefinitionProvider = queryDefinitionProviderWithControls;
-        queryDefinitionProvider.getWidget().addStyleName("dataMiningPanel");
-        dockPanel.add(queryDefinitionProvider.getWidget());
+        queryDefinitionProvider.getEntryWidget().addStyleName("dataMiningPanel");
+        dockPanel.add(queryDefinitionProvider.getEntryWidget());
         
         ResultsPresenter<Number> resultsPresenter = new ResultsChart(stringMessages);
         splitPanel.addSouth(resultsPresenter.getWidget(), 400);

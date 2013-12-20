@@ -7,13 +7,13 @@ import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
+import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
 
-public class SimpleStatisticsProvider implements StatisticsProvider {
+public class SimpleStatisticsManager implements StatisticsManager {
     
     private HashMap<Triple<StatisticType, AggregatorType, DataTypes>, ResultCalculationInformation> statisticsMap;
 
-    public SimpleStatisticsProvider() {
+    public SimpleStatisticsManager() {
         statisticsMap = new HashMap<Triple<StatisticType, AggregatorType, DataTypes>, ResultCalculationInformation>();
     }
 

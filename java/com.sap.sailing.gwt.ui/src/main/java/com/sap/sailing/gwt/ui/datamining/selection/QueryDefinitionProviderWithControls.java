@@ -26,11 +26,12 @@ import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingFlowPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticsProvider;
+import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -39,7 +40,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private SelectionProvider<?> selectionProvider;
     
-    private StatisticsProvider statisticsProvider;
+    private StatisticsManager statisticsProvider;
     private ValueListBox<ResultCalculationInformation> statisticsListBox;
 
     private GroupBySelectionPanel groupBySelectionPanel;
@@ -56,7 +57,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 }
             }
         };
-        statisticsProvider = new SimpleStatisticsProvider();
+        statisticsProvider = new SimpleStatisticsManager();
 
         mainPanel.add(createFunctionsPanel());
 
@@ -181,7 +182,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget getEntryWidget() {
         return mainPanel;
     }
 
@@ -189,5 +190,33 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     public SelectionProvider<?> getSelectionProvider() {
         return selectionProvider;
     }
+
+    @Override
+    public String getLocalizedShortName() {
+        return getStringMessages().queryDefinitionProvider();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Object> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Object newSettings) { }
 
 }

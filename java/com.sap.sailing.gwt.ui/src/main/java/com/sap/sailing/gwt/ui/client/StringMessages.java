@@ -945,4 +945,5 @@ public interface StringMessages extends Messages {
     String beatAngle();
     String runAutomaticallyTooltip();
     String rerunQueryAfterRefreshTooltip();
+    String queryDefinitionProvider();
 }

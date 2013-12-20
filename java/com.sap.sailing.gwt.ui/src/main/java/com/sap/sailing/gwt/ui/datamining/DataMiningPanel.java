@@ -43,7 +43,7 @@ public class DataMiningPanel extends FlowPanel {
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget());
 
-        this.add(queryDefinitionProvider.getWidget());
+        this.add(queryDefinitionProvider.getEntryWidget());
         this.add(resultsPresenter.getWidget());
 
         queryRunner.run(queryDefinitionProvider.getQueryDefinition());
