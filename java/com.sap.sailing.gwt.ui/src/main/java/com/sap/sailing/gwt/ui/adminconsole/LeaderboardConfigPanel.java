@@ -364,7 +364,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
-                    Window.open("/xml-export?domain=leaderboard?name=" + leaderboardDTO.name, "", null);
+                    Window.open("/export/xml?domain=leaderboard?name=" + leaderboardDTO.name, "", null);
                 }
             }
         });
