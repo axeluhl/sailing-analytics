@@ -76,7 +76,7 @@ testing=1
 clean="clean"
 offline=0
 proxy=0
-android=1
+android=0
 reporting=0
 suppress_confirmation=0
 extra=''
@@ -87,7 +87,7 @@ if [ $# -eq 0 ]; then
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
-    echo "-a Disable mobile projects (RaceCommittee App)"
+    echo "-a Enable mobile projects (RaceCommittee App, needs AndroidSDK installed)"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -103,8 +103,8 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
-    echo "install: installs product files to $SERVERS_HOME/$active_branch. Does NOT overwrite any configuration in env.sh! If you want to
-    echo "         overwrite the configuration then use the refreshInstance.sh script that comes with the instance. ""
+    echo "install: installs product files to $SERVERS_HOME/$active_branch. Does NOT overwrite any configuration in env.sh! If you want to"
+    echo "         overwrite the configuration then use the refreshInstance.sh script that comes with the instance. "
     echo ""
     echo "all: invokes build and then install"
     echo ""
@@ -141,7 +141,7 @@ do
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
-        a) android=0;;
+        a) android=1;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
