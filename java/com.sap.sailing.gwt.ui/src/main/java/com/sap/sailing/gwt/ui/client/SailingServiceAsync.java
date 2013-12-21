@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.GenericGroupKey;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
@@ -464,7 +464,7 @@ public interface SailingServiceAsync {
      * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />
      * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
      */
-    void pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy(AsyncCallback<GenericGroupKey<String>> asyncCallback);
+    void pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<DataMiningSerializationDummy> asyncCallback);
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 

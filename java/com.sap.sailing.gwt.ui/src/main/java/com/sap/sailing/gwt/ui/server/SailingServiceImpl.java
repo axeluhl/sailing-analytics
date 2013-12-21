@@ -53,7 +53,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.shared.GenericGroupKey;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
@@ -3459,7 +3459,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public GenericGroupKey<String> pseudoMethodSoThatGenericGroupKeyIsAddedToTheGWTSerializationPolicy() {
+    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }
     
