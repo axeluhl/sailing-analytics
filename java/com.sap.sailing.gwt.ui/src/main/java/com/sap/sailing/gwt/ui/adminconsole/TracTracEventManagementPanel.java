@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
@@ -80,7 +80,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
 
-    private AbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
+    private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private CellTable<TracTracRaceRecordDTO> racesTable;
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -288,7 +288,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
-        this.racesFilterablePanel = new AbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
+        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
