@@ -7,23 +7,27 @@ import java.util.Set;
 
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 
-public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel {
+public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
     
     private SharedDimension dimension;
-    
+    private Collection<ContentType> allData;
+
+    private AbstractFilterablePanel<ContentType> filterPanel;
     private DataGrid<ContentType> table;
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
     public SelectionTable(String title, SharedDimension dimension) {
         this.dimension = dimension;
+        allData = new ArrayList<ContentType>();
         
         table = new DataGrid<ContentType>();
         table.setAutoHeaderRefreshDisabled(true);
@@ -46,7 +50,19 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
         });
         dataProvider.addDataDisplay(table);
         
-        setWidget(table);
+        filterPanel = new AbstractFilterablePanel<ContentType>(allData, table, dataProvider) {
+            @Override
+            public Iterable<String> getSearchableStrings(ContentType content) {
+                Collection<String> searchableStrings = new ArrayList<String>();
+                searchableStrings.add(getValueAsString(content));
+                return searchableStrings;
+            }
+        };
+        filterPanel.setWidth("100%");
+        filterPanel.getTextBox().setWidth("90%");
+        
+        add(filterPanel);
+        add(table);
     }
 
     public SharedDimension getDimension() {
@@ -78,6 +94,9 @@ public abstract class SelectionTable<ContentType, ValueType> extends SimplePanel
         
         dataProvider.getList().clear();
         dataProvider.getList().addAll(specificNewContent);
+        allData.clear();
+        allData.addAll(specificNewContent);
+        filterPanel.updateAll(allData);
         
         return selection.isEmpty() ? elementsHaveBeenAddedOrRemoved(oldContent, specificNewContent) : selectedElementsHaveBeenRemoved(selection, specificNewContent);
     }
