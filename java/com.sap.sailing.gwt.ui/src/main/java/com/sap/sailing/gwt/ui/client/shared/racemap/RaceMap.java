@@ -255,7 +255,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final CombinedWindPanel combinedWindPanel;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
-
+    
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
@@ -335,28 +335,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                   @Override
                   public void onEvent(ZoomChangeMapEvent event) {
-                      map.triggerResize();
+                      // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-                      Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatOverlays.keySet());
-                      for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                              boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime(),
-                                      /* timeForPositionTransitionMillis; don't animate during zoom */ -1);
-                              if (usedExistingMarker) {
-                                  competitorDTOsOfUnusedMarkers.remove(competitorDTO);
-                              }
-                      }
-                      for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
-                          BoatOverlay boatOverlay = boatOverlays.get(unusedMarkerCompetitorDTO);
-                          boatOverlay.removeFromMap();
-                          boatOverlays.remove(unusedMarkerCompetitorDTO);
-                      }
                   }
               });
-              
               map.addDragEndHandler(new DragEndMapHandler() {
                   @Override
                   public void onEvent(DragEndMapEvent event) {
+                      // stop automatic zoom after a manual drag event
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
@@ -377,6 +364,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         
     public void redraw() {
         timeChanged(timer.getTime());
+    }
+    
+    Map<CompetitorDTO, BoatOverlay> getBoatOverlays() {
+        return Collections.unmodifiableMap(boatOverlays);
+    }
+    
+    MapWidget getMap() {
+        return map;
     }
     
     @Override
@@ -850,6 +845,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     final StringBuilder startLineAdvantageText = new StringBuilder();
     final StringBuilder finishLineAdvantageText = new StringBuilder();
 
+    /**
+     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
+     * active while auto-zooming whereas stopping them seems the better option for manual zooms.
+     */
+    private boolean autoZoomInProgress;
+
     private void showStartAndFinishLines(final CoursePositionsDTO courseDTO) {
         if (map != null && courseDTO != null && lastRaceTimesInfo != null) {
             Pair<Integer, CompetitorDTO> leadingVisibleCompetitorInfo = getLeadingVisibleCompetitorInfo(getCompetitorsToShow());
@@ -1046,11 +1047,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             List<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+            setAutoZoomInProgress(true);
             map.setCenter(newBounds.getCenter());
-            //map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
             map.fitBounds(newBounds);
             settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+            setAutoZoomInProgress(false);
         }
+    }
+    
+    private void setAutoZoomInProgress(boolean autoZoomInProgress) {
+        this.autoZoomInProgress = autoZoomInProgress;
+    }
+    
+    boolean isAutoZoomInProgress() {
+        return autoZoomInProgress;
     }
     
     /**
@@ -1100,7 +1110,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
+        final BoatOverlay boatCanvas = new BoatOverlay(this, zIndex, competitorDTO);
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override

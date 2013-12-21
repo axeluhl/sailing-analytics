@@ -36,7 +36,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 
 public class IgtimiAccountsPanel extends FlowPanel {
 
@@ -44,7 +44,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final CellTable<String> allAccounts;
-    private final AbstractFilterablePanel<String> filterAccountsPanel;
+    private final LabeledAbstractFilterablePanel<String> filterAccountsPanel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -81,7 +81,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
-        filterAccountsPanel = new AbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()), emptyList, allAccounts, filteredAccounts) {
+        filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()), emptyList, allAccounts, filteredAccounts) {
             @Override
             public Iterable<String> getSearchableStrings(String t) {
                 Set<String> strings = Collections.singleton(t);
@@ -185,7 +185,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         private TextBox eMail;
         private PasswordTextBox password;
         
-        public AddAccountDialog(final AbstractFilterablePanel<String> filterAccountsPanel, final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+        public AddAccountDialog(final LabeledAbstractFilterablePanel<String> filterAccountsPanel, final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
             super(stringMessages.addIgtimiUser(), stringMessages.addIgtimiUser(), stringMessages.ok(), stringMessages.cancel(),
                     new Validator<UserData>() {
                         @Override
@@ -251,7 +251,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
     }
     
-    private static void updateAllAccounts(SailingServiceAsync sailingService, final AbstractFilterablePanel<String> filterAccountsPanel,
+    private static void updateAllAccounts(SailingServiceAsync sailingService, final LabeledAbstractFilterablePanel<String> filterAccountsPanel,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         sailingService.getAllIgtimiAccountEmailAddresses(new AsyncCallback<Iterable<String>>() {
             @Override

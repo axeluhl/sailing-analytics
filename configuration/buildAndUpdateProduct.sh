@@ -1,7 +1,6 @@
 #!/bin/bash
 set -o functrace
 
-
 find_project_home () 
 {
     if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
@@ -88,7 +87,7 @@ if [ $# -eq 0 ]; then
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
-    echo "-a Disable mobile projects (RaceCommittee App)"
+    echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -104,7 +103,8 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
-    echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
+    echo "install: installs product files to $SERVERS_HOME/$active_branch. Does NOT overwrite any configuration in env.sh! If you want to"
+    echo "         overwrite the configuration then use the refreshInstance.sh script that comes with the instance. "
     echo ""
     echo "all: invokes build and then install"
     echo ""
@@ -553,9 +553,6 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-    fi
-
-    if [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
 
         mkdir -p configuration/jetty/etc
@@ -564,11 +561,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-        cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
-        cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
     fi
@@ -581,7 +575,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    # make sure to save the information from env.sh
+    # make sure to read the information from env.sh
     . $ACDIR/env.sh
 
     echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
@@ -612,9 +606,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo ""
 
-    if [ -f $ACDIR/no-overwrite ]; then
-        echo "ATTENTION: I found the file $ACDIR/no-overwrite. This means that I did NOT use env.sh from this branch."
-    fi
+    echo "I did NOT overwrite env.sh if it already existed! Use the refreshInstance.sh script to update your configuration!"
     echo "Installation complete. You may now start the server using ./start"
 fi
 
