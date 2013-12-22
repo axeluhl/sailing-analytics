@@ -9,17 +9,15 @@
 
 SERVER_NAME=MASTER
 
-MEMORY="1024m"
+MEMORY="2048m"
 
-# Queue Host and Name of the queue where to
-# send messages for replicas (this server is master)
 REPLICATION_HOST=localhost
-REPLICATION_CHANNEL=sapsailinganalytics-master
+REPLICATION_CHANNEL=sapsailinganalytics-dev
 
-TELNET_PORT=14888
-SERVER_PORT=8888
+TELNET_PORT=14886
+SERVER_PORT=8886
 MONGODB_HOST=localhost
-MONGODB_PORT=27017
+MONGODB_PORT=10200
 EXPEDITION_PORT=2010
 
 # Start replication upon startup?
