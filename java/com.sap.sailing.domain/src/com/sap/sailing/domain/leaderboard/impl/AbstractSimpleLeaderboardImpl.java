@@ -950,6 +950,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     } else {
                         result = result.add(distanceSailedInRace);
                     }
+                } else {
+                    // if competitor has not finished one single race in the whole
+                    // series then we can not return a meaningful value for all
+                    // all races
+                    return null;
                 }
             }
         }
