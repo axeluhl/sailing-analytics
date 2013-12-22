@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -161,6 +162,37 @@ public abstract class ExportAction {
         return result;
     }
 
+    public Speed getAverageSpeedOverGround(Leaderboard leaderboard, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {
+        Speed result = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = markPassings.first().getTimePoint();
+                    TimePoint to;
+                    if (timePoint.after(markPassings.last().getTimePoint()) &&
+                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                        // stop counting when competitor finished the race
+                        to = markPassings.last().getTimePoint();
+                    } else {
+                        if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
+                                timePoint.after(markPassings.last().getTimePoint()) &&
+                                !alsoIncludeNonFinishedRaces) {
+                            result = null;
+                            break;
+                        }
+                        to = timePoint;
+                    }
+                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
+                    if (distanceTraveled != null) {
+                        result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
     protected String cleanSailId(String sailId, Competitor competitor) {
         if (sailId.matches("^[A-Z]{3}\\s[0-9]*")) {                                        
             Pattern regex = Pattern.compile("(^[A-Z]{3})\\s([0-9]*)");
@@ -213,6 +245,7 @@ public abstract class ExportAction {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     if (trackedRace != null) {
                         result = trackedRace.getRace().getBoatClass().getName();
+                        break;
                     }
                 }
             }
@@ -271,4 +304,9 @@ public abstract class ExportAction {
         return element;
     }
     
+    protected Element createNamedElementWithValue(String elementName, long value) {
+        final Element element = new Element(elementName);
+        element.addContent(String.valueOf(value));
+        return element;
+    }
 }
