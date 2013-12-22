@@ -1,5 +1,6 @@
 package com.sap.sailing.xcelsiusadapter;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -155,7 +157,7 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
-    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException {
+    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
@@ -178,7 +180,7 @@ public class LeaderboardData extends ExportAction {
         
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
         
-        raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMinutes*/ 5)));
+        raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMillis*/ 5*60*1000)));
         
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
         addNamedElementWithValue(raceElement, "race_participant_count", allCompetitors.size());
@@ -213,7 +215,7 @@ public class LeaderboardData extends ExportAction {
         return raceElement;
     }
     
-    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException {
+    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
         if (shortVersion)
@@ -245,7 +247,10 @@ public class LeaderboardData extends ExportAction {
             TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
             Long totalTimeSailed = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification);
             addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", totalTimeSailed);
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification).getMeters());
+            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, timePointOfLatestModification, true));
+            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification).getMeters());
             addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification).getB().getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
@@ -253,7 +258,9 @@ public class LeaderboardData extends ExportAction {
         } else {
             TimePoint now = MillisecondsTimePoint.now();
             addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, now));
+            addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, now, true));
             addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, now).getMeters());
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, now).getMeters());
             addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, now).getB().getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
@@ -262,7 +269,7 @@ public class LeaderboardData extends ExportAction {
         return competitorElement;
     }
     
-    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException {
+    private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
         legElement.addContent(createDataConfidenceXML(legConfidenceAndErrorMessages));

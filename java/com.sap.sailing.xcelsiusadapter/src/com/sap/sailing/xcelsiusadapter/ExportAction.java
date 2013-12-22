@@ -1,6 +1,7 @@
 package com.sap.sailing.xcelsiusadapter;
 
 import java.io.IOException;
+import java.util.NavigableSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,9 +17,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
@@ -72,7 +76,91 @@ public abstract class ExportAction {
         }
         return newRaceName;
     }
+
+    public Long getTotalTimeSailedInMilliseconds(final Competitor competitor, final TimePoint timePoint, boolean alsoReturnTimeIfCompetitorHasNotFinishedRace) throws IOException, ServletException {
+        Long result = null;
+        for (TrackedRace trackedRace : getLeaderboard().getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
+                    if (from != null && !timePoint.before(from)) { // but only if the race started after timePoint
+                        TimePoint to;
+                        if (timePoint.after(markPassings.last().getTimePoint())
+                                && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
+                                        .getLastWaypoint()) {
+                            // stop counting when competitor finished the race
+                            to = markPassings.last().getTimePoint();
+                        } else {
+                            // in contrary to AbstractSimpleLeaderboardImpl#getTotalTimeSailedInMilliseconds
+                            // this method will not return null if a competitor did not finish the race but
+                            // will return all data until here
+                            if (!alsoReturnTimeIfCompetitorHasNotFinishedRace) {
+                                if (trackedRace.getEndOfTracking() != null
+                                        && timePoint.after(trackedRace.getEndOfTracking())) {
+                                        result = null; // race not finished until end of tracking; no reasonable value can be
+                                        // computed for competitor
+                                        break;
+                                } else {
+                                    to = timePoint;
+                                }
+                            } else {
+                                // count until last mark passing - we can not find
+                                // any time point later than that because the competitor
+                                // could have sailed away from the race course
+                                to = markPassings.last().getTimePoint();
+                            }
+                        }
+                        long timeSpent = to.asMillis() - from.asMillis();
+                        if (result == null) {
+                            result = timeSpent;
+                        } else {
+                            result += timeSpent;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
     
+    public Distance getDistanceTraveled(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, boolean alsoReturnDistanceIfCompetitorHasNotFinishedRace) {
+        NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+        if (markPassings.isEmpty()) {
+            return null;
+        } else {
+            TimePoint end = timePoint;
+            if (markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()
+                    && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
+                // competitor has finished race; use time point of crossing the finish line
+                end = markPassings.last().getTimePoint();
+            } else {
+                if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
+                        alsoReturnDistanceIfCompetitorHasNotFinishedRace) {
+                    end = markPassings.last().getTimePoint();
+                }
+            }
+            return trackedRace.getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+        }
+    }
+
+    public Distance getTotalDistanceTraveled(Leaderboard leaderboard, Competitor competitor, TimePoint timePoint) {
+        Distance result = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                Distance distanceSailedInRace = getDistanceTraveled(trackedRace, competitor, timePoint, true);
+                if (distanceSailedInRace != null) {
+                    if (result == null) {
+                        result = distanceSailedInRace;
+                    } else {
+                        result = result.add(distanceSailedInRace);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     protected String cleanSailId(String sailId, Competitor competitor) {
         if (sailId.matches("^[A-Z]{3}\\s[0-9]*")) {                                        
             Pattern regex = Pattern.compile("(^[A-Z]{3})\\s([0-9]*)");
