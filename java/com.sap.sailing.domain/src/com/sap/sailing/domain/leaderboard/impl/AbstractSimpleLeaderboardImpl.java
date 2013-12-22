@@ -852,6 +852,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Speed result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = markPassings.first().getTimePoint();
+                    TimePoint to;
+                    if (timePoint.after(markPassings.last().getTimePoint()) &&
+                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                        // stop counting when competitor finished the race
+                        to = markPassings.last().getTimePoint();
+                    } else {
+                        if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
+                                timePoint.after(markPassings.last().getTimePoint())) {
+                            result = null;
+                            break;
+                        }
+                        to = timePoint;
+                    }
+                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
+                    if (distanceTraveled != null) {
+                        result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Override
     public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
         Long result = null;
         // TODO should we ensure that competitor participated in all race columns?
