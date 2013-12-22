@@ -283,6 +283,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
+        this.mediaDB = mediaDb;
+        this.competitorStore = competitorStore;
+        this.windStore = windStore;
+        
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -295,7 +299,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
-        this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
         if (windStore == null) {
             try {
@@ -304,14 +307,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                 throw new RuntimeException(e);
             } 
         }
-        this.windStore = windStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        this.competitorStore = competitorStore;
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -322,8 +323,33 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     @Override
     public void clearState() throws Exception {
-        // TODO [D049941]: Auto-generated method stub
+        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
+            removeLeaderboardGroup(leaderboardGroupName);
+        }
         
+        for(String leaderboardName : this.leaderboardsByName.keySet()) {
+            removeLeaderboard(leaderboardName);
+        }
+        
+        for(Regatta regatta : this.regattasByName.values()) {
+            stopTracking(regatta);
+            removeRegatta(regatta);
+        }
+        
+        for(Event event : this.eventsById.values()) {
+            removeEvent(event.getId());
+        }
+        
+        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
+            mediaTrackDeleted(mediaTrack);
+        }
+        
+        this.competitorStore.clear();
+        
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
     }
     
     @Override
