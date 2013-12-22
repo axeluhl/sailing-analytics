@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
@@ -53,7 +53,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
  */
 public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
-    private final AbstractFilterablePanel<SwissTimingReplayRaceDTO> filterablePanelEvents;
+    private final LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
     private final CellTable<SwissTimingReplayRaceDTO> raceTable;
     private final Map<String, SwissTimingArchiveConfigurationDTO> previousConfigurations;
@@ -202,7 +202,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
 
-        filterablePanelEvents = new AbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
             @Override
             public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();

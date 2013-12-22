@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
     private final IntegerBox portIntegerbox;
     private final TextBox hostnameTextbox;
-    private final AbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
+    private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
     private final CellTable<SwissTimingRaceRecordDTO> raceTable;
     private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
@@ -252,7 +252,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         trackedRacesPanel.add(trackedRacesListComposite);
         
-        filterablePanelEvents = new AbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
                 availableSwissTimingRaces, raceTable, raceList) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
