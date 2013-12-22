@@ -252,7 +252,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         addListenersForStoredDataAndStartController(typeControllers);
         // Read event data from configuration file
         synchronized (this) {
-            paramURL = checkForCachedPHPParams(paramURL);
             controlPointPositionPoller = scheduleClientParamsPHPPoller(paramURL, simulator, tracTracUpdateURI,
                     delayToLiveInMillis, tracTracUsername, tracTracPassword);
             notifyAll(); // the stop(boolean) method will try to cancel the controlPointPositionPoller; this may happen even before the above assignment took place; synchronize!
@@ -260,8 +259,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private URI checkForCachedStoredData(URI storedURI){
-        if (System.getProperty("cache.dir") != null) {
-            final String directory = System.getProperty("cache.dir");
+        if (System.getProperty("tractrac.mtb.cache.dir") != null) {
+            final String directory = System.getProperty("tractrac.mtb.cache.dir");
             if (new File(directory).exists()) {
                 final String[] pathFragments = storedURI.getPath().split("\\/");
                 final String mtbFileName = pathFragments[pathFragments.length-1];
@@ -296,6 +295,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
                 
                 try {
+                    // notice us using three slashes here - this is because of a bug in the TracAPI
                     return new URI("file:///" + directoryAndFileName);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
@@ -304,52 +304,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         
         return storedURI;
-    }
-
-    private URL checkForCachedPHPParams(URL paramsPHPURI){
-        if (System.getProperty("cache.dir") != null) {
-            final String directory = System.getProperty("cache.dir");
-            if (new File(directory).exists()) {
-                final String[] pathFragments = paramsPHPURI.getPath().split("\\/");
-                final String phpFileName = pathFragments[pathFragments.length-1];
-                final String directoryAndFileName = directory+"/"+phpFileName;
-                if (!new File(directoryAndFileName).exists()) {
-                    FileOutputStream phpOutStream = null;
-                    try {
-                        logger.info("Starting to download " + paramsPHPURI + " to cache dir " + directoryAndFileName);
-                        InputStream in = paramsPHPURI.openStream();
-                        phpOutStream = new FileOutputStream(new File(directoryAndFileName));
-                        byte data[] = new byte[1024];
-                        int count;
-                        while ((count = in.read(data, 0, 1024)) != -1)
-                        {
-                            phpOutStream.write(data, 0, count);
-                        }
-                        logger.info("Finished downloading params PHP file to cache!");
-                    } catch (Exception ex) {
-                        // never throw but display
-                        ex.printStackTrace();
-                    } finally {
-                        if (phpOutStream != null) {
-                            try {
-                                phpOutStream.close();
-                            } catch (IOException e) {
-                                // ignore
-                            }   
-                        }
-                    }
-                } else {
-                    logger.info("Found file " + directoryAndFileName + "! Reusing it for this race!");
-                }
-                
-                try {
-                    return new URL("file://" + directoryAndFileName);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return paramsPHPURI;
     }
 
     @Override
@@ -387,11 +341,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         
         // then schedule for periodic execution in background if the params url does not point to a file
         int initialDelayInMilliseconds = 1000*30; int delayInMilliseconds = 1000*15;
-        if (paramURL.toString().startsWith("file:")) {
-            initialDelayInMilliseconds = 1000*60*30;
-            delayInMilliseconds = 1000*60*5;
-        }
-            
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ initialDelayInMilliseconds, /* delay */ delayInMilliseconds, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
