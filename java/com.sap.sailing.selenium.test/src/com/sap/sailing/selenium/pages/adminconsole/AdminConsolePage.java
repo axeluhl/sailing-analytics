@@ -184,6 +184,7 @@ public class AdminConsolePage extends HostPage {
         }
         
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
+        // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         org.openqa.selenium.interactions.Actions actions = new Actions(this.driver);
         actions.moveToElement(tab, determineOffsetForClick(tab), 5);
         actions.click();

@@ -100,21 +100,36 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 new SeriesParameterValidator(stringMessages, existingSeries), callback);
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
+        
         nameEntryField = createTextBox(null);
+        nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
+        
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
+        isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
+        
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        startsWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
+        
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
+        firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
+        
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
+        useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
+        
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
-        discardThresholdBoxes.getWidget().setVisible(false);
+        Widget widget = discardThresholdBoxes.getWidget();
+        widget.ensureDebugId("DiscardThresholdBoxes");
+        widget.setVisible(false);
+        
         fleetListComposite = FleetListEditorComposite.createExpanded(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
+        fleetListComposite.ensureDebugId("FleetListEditorComposite");
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
             
             @Override

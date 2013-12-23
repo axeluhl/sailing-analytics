@@ -45,16 +45,19 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         this.existingEvents = existingEvents;
 
         nameEntryField = createTextBox(null);
+        nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
 
         boatClassEntryField = createTextBox(null);
+        boatClassEntryField.ensureDebugId("BoatClassTextBox");
         boatClassEntryField.setVisibleLength(20);
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
 
         scoringSchemeListBox = createListBox(false);
+        scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
             scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringMessages),
                     String.valueOf(scoringSchemeType.ordinal()));
@@ -64,10 +67,13 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends DataEntryDialog<R
         }
 
         sailingEventsListBox = createListBox(false);
-        courseAreaListBox = createListBox(false);
-        setupEventAndCourseAreaListBoxes(stringMessages);
+        sailingEventsListBox.ensureDebugId("EventListBox");
         
+        courseAreaListBox = createListBox(false);
+        courseAreaListBox.ensureDebugId("CourseAreaListBox");
         courseAreaListBox.setEnabled(false);
+
+        setupEventAndCourseAreaListBoxes(stringMessages);
     }
 
     @Override

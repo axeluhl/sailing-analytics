@@ -5,43 +5,27 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.pages.PageArea;
 
-public class FlexibleLeaderboardCreateDialog extends PageArea {
-    @FindBy(how = BySeleniumId.class, using = "OkButton")
-    private WebElement okButton;
-    @FindBy(how = BySeleniumId.class, using = "CancelButton")
-    private WebElement cancelButton;
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardNameField")
-    private WebElement nameField;
-    @FindBy(how = BySeleniumId.class, using = "StatusLabel")
-    private WebElement statusLabel;
+import com.sap.sailing.selenium.pages.common.DataEntryDialog;
+
+public class FlexibleLeaderboardCreateDialog extends DataEntryDialog {
+    @FindBy(how = BySeleniumId.class, using = "NameTextBox")
+    private WebElement nameTextBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "DisplayNameTextBox")
+    private WebElement displayNameTextBox;
 
     public FlexibleLeaderboardCreateDialog(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
     public void setName(String name) {
-        this.nameField.clear();
-        this.nameField.sendKeys(name);
+        this.nameTextBox.clear();
+        this.nameTextBox.sendKeys(name);
     }
     
-    public boolean isOkEnabled() {
-        return this.okButton.isEnabled();
-    }
-    
-    public String getErrorMessage() {
-        return this.statusLabel.getText();
-    }
-    
-    public void pressOk() {
-        this.okButton.click();
-        
-        // Wait, since we create the flexible leader board
-        waitForAjaxRequests();
-    }
-    
-    public void pressCancel() {
-        this.cancelButton.click();
+    public void setDisplayName(String name) {
+        this.displayNameTextBox.clear();
+        this.displayNameTextBox.sendKeys(name);
     }
 }

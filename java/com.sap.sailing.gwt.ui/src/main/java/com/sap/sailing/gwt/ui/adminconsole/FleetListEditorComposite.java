@@ -46,9 +46,16 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
             panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
             final TextBox nameBox = createNameBox();
+            nameBox.ensureDebugId("NameTextBox");
+            
             final IntegerBox orderNoBox = createOrderNoBox();
+            orderNoBox.ensureDebugId("OrderNoIntegerBox");
+            
             final ListBox colorListBox = createColorListBox(nameBox, orderNoBox);
+            colorListBox.ensureDebugId("ColorListBox");
+            
             final Button addButton = new Button(stringMessages.add());
+            addButton.ensureDebugId("AddButton");
             addButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

@@ -75,10 +75,14 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
         @Override
         public Widget initWidget() {
             HorizontalPanel panel = new HorizontalPanel();
+            panel.ensureDebugId("CollapsedListEditorWidget");
+            
             collapsedValuesBox = new TextBox();
+            collapsedValuesBox.ensureDebugId("CollapsedValuesTextBox");
             collapsedValuesBox.setReadOnly(true);
 
             collapsedEditButton = new Button(stringMessages.edit());
+            collapsedEditButton.ensureDebugId("CollapsedEditButton");
             collapsedEditButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -131,6 +135,7 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
                     DataEntryDialog.DialogCallback<List<ValueType>> callback) {
                 super(dialogTitle, "", stringMessages.save(), stringMessages.cancel(), null, callback);
                 expandedComposite = createExpandedUi(initialValues, ui);
+                expandedComposite.ensureDebugId("ExpandedListEditorComposite");
             }
 
             @Override
@@ -158,11 +163,16 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
 
         @Override
         public Widget initWidget() {
-            expandedValuesGrid = new Grid(0, 2);
-
             VerticalPanel panel = new VerticalPanel();
-            panel.add(createAddWidget());
+            
+            Widget addWidget = createAddWidget();
+            addWidget.ensureDebugId("AddWidget");
+            panel.add(addWidget);
+            
+            expandedValuesGrid = new Grid(0, 2);
+            expandedValuesGrid.ensureDebugId("ExpandedValuesGrid");
             panel.add(expandedValuesGrid);
+
             return panel;
         }
 
@@ -183,6 +193,7 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
             int rowIndex = expandedValuesGrid.insertRow(expandedValuesGrid.getRowCount());
 
             PushButton removeButton = new PushButton(new Image(removeImage));
+            removeButton.ensureDebugId("RemoveButton");
             removeButton.setTitle(stringMessages.remove());
             removeButton.addClickHandler(new ClickHandler() {
 
@@ -194,8 +205,11 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
                     context.onChange();
                 }
             });
-
-            expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(newValue));
+            
+            Widget widget = createValueWidget(newValue);
+            widget.ensureDebugId("ValueWidget");
+            
+            expandedValuesGrid.setWidget(rowIndex, 0, widget);
             expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
         }
 

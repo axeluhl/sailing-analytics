@@ -42,6 +42,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
+        this.textBox.ensureDebugId("FilterTextBox");
         this.all = all;
         add(label);
         add(getTextBox());

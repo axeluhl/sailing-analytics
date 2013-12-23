@@ -28,7 +28,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(12));
         
@@ -43,7 +43,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 1"); //$NON-NLS-1$
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(5));
@@ -58,7 +58,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 12"); //$NON-NLS-1$
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(1));
@@ -67,17 +67,15 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     /**
      * <p>Test with filter which does not match anything.</p>
      */
-    // TODO: This test fails at the moment, because of an incorrect result returned by the page object! If the table is
-    //       empty GWT uses a table body with one row as spacer, which is not filtered out correctly by the page object.
-//    @Test
-//    @SuppressWarnings("boxing")
-//    public void testNoneExisingFilter() {
-//        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-//        
-//        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
-//        tracTracEvents.listRaces(BMW_CUP_JSON_URL);
-//        tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
-//        
-//        assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
-//    }
+    @Test
+    @SuppressWarnings("boxing")
+    public void testNoneMatchingFilter() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        
+        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
+        
+        assertThat(tracTracEvents.getTrackableRaces().size(), is(0));
+    }
 }

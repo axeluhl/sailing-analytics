@@ -123,8 +123,14 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
         super(stringMessages.leaderboardGroup(), null, stringMessages.ok(), stringMessages.cancel(),
                 new LeaderboardGroupParameterValidator(stringMessages, existingLeaderboardGroups), callback);
         this.stringMessages = stringMessages;
+        
         displayLeaderboardsInReverseOrderCheckBox = createCheckbox(stringMessages.displayGroupsInReverseOrder());
+        // QUESTION [Riccardo]: Are this groups or leaderboards?
+        displayLeaderboardsInReverseOrderCheckBox.ensureDebugId("DisplayGroupsInReverseOrderCheckBox");
+        
         useOverallLeaderboardCheckBox = createCheckbox(stringMessages.useOverallLeaderboard());
+        useOverallLeaderboardCheckBox.ensureDebugId("UseOverallLeaderboardCheckBox");
+        
         Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.scoringSystem() + ":"));

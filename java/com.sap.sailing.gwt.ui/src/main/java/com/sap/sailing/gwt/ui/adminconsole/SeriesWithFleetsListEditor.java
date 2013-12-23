@@ -35,6 +35,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         @Override
         protected Widget createAddWidget() {
             Button addSeriesButton = new Button(stringMessages.addSeries());
+            addSeriesButton.ensureDebugId("AddSeriesButton");
             addSeriesButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -49,6 +50,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
                             addValue(newSeries);
                         }
                     });
+                    dialog.ensureDebugId("SeriesCreateDialog");
                     dialog.show();
                 }
             });

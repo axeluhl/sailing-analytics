@@ -50,9 +50,9 @@ public abstract class CellTable<T extends DataEntry> extends PageArea {
     
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
-    private static final String CELL_TABLE_CSS_CLASS = "GCKY0V4BDK"; //$NON-NLS-1$
+    private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
     
-    protected static final String SELECTED_ROW_CSS_CLASS = "GCKY0V4BNJ"; //$NON-NLS-1$
+    protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
     
     private static final String LOADING_ANIMATION_XPATH = ".//td/div/div/div/img";
     

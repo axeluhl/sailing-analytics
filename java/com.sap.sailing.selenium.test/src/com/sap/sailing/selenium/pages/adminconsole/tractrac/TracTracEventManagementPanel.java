@@ -1,19 +1,27 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-//import org.openqa.selenium.support.FindBy;
-//import org.openqa.selenium.support.How;
-
+import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
+
 import com.sap.sailing.selenium.pages.PageArea;
+
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListComposite.RegattaDescriptor;
+
+import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.CellTable;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
 
 /**
  * <p>The page object representing the TracTrac Events tab.</p>
@@ -22,24 +30,83 @@ import com.sap.sailing.selenium.pages.PageArea;
  *   D049941
  */
 public class TracTracEventManagementPanel extends PageArea {
-    @FindBy(how = BySeleniumId.class, using = "JSONURL")
-    private WebElement jsonURLField;
+    public static class TrackableRaceDescriptor {
+        public final String eventName;
+        public final String raceName;
+        public final String boatClass;
+        //public Object startTime;
+        //public Object raceStatus;
+        
+        public TrackableRaceDescriptor(String eventName, String raceName, String boatClass) {
+            this.eventName = eventName;
+            this.raceName = raceName;
+            this.boatClass = boatClass;
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.boatClass, this.eventName, this.raceName);
+        }
 
-    @FindBy(how = BySeleniumId.class, using = "LiveURI")
-    private WebElement liveURIField;
-
-    @FindBy(how = BySeleniumId.class, using = "StoredURI")
-    private WebElement storedURIField;
+        @Override
+        public boolean equals(Object object) {
+            if (this == object)
+                return true;
+            
+            if (object == null)
+                return false;
+            
+            if (getClass() != object.getClass())
+                return false;
+            
+            TrackableRaceDescriptor other = (TrackableRaceDescriptor) object;
+            
+            if(!Objects.equals(this.boatClass, other.boatClass))
+                return false;
+            
+            if(!Objects.equals(this.eventName, other.eventName))
+                return false;
+            
+            if(!Objects.equals(this.raceName, other.raceName))
+                return false;
+            
+            return true;
+        }
+    }
     
-    @FindBy(how = BySeleniumId.class, using = "ListRaces")
+    // TODO [D049941]: Prefix the Ids with the component (e.g. "Button")
+    @FindBy(how = BySeleniumId.class, using = "LiveURITextBox")
+    private WebElement liveURITextBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "StoredURITextBox")
+    private WebElement storedURITextBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "JsonURLTextBox")
+    private WebElement jsonURLTextBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "ListRacesButton")
     private WebElement listRacesButton;
     
-    @FindBy(how = BySeleniumId.class, using = "FilterRaces")
-    private WebElement filterTrackableRacesField;
+    @FindBy(how = BySeleniumId.class, using = "AvailableRegattasListBox")
+    private WebElement availableRegattasListBox;
     
-//    private WebElement trackWindCheckBox;
-//    private WebElement correctWindCheckbox;
-//    private WebElement simulateWithNowCheckbox;
+    @FindBy(how = BySeleniumId.class, using = "TrackWindCheckBox")
+    private WebElement trackWindCheckBox;
+
+    @FindBy(how = BySeleniumId.class, using = "CorrectWindCheckBox")
+    private WebElement correctWindCheckBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "SimulateWithStartTimeNowCheckBox")
+    private WebElement simulateWithStartTimeNowCheckBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "TrackableRacesFilterTextBox")
+    private WebElement trackableRacesFilterTextBox;
+    
+    @FindBy(how = BySeleniumId.class, using = "TrackableRacesCellTable")
+    private WebElement trackableRacesCellTable;
+    
+    @FindBy(how = BySeleniumId.class, using = "StartTracking")
+    private WebElement startTrackingButton;
     
     /**
      * <p></p>
@@ -53,6 +120,7 @@ public class TracTracEventManagementPanel extends PageArea {
         super(driver, element);
     }
     
+    
     /**
      * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
      *   {@link #getTrackableRaces()}.</p>
@@ -60,12 +128,28 @@ public class TracTracEventManagementPanel extends PageArea {
      * @param url
      *   The URL for which the races are to list.
      */
-    public void listRaces(String url) {
-        liveURIField.clear();
-        storedURIField.clear();
-        jsonURLField.clear();
-        jsonURLField.sendKeys(url);
-        listRacesButton.click();
+    public void listTrackableRaces(String url) {
+        listTrackableRaces("", "", url);  //$NON-NLS-1$//$NON-NLS-2$
+    }
+    
+    /**
+     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
+     *   {@link #getTrackableRaces()}.</p>
+     * 
+     * @param url
+     *   The URL for which the races are to list.
+     */
+    public void listTrackableRaces(String liveURI, String storedURI, String jsonURL) {
+        this.liveURITextBox.clear();
+        this.liveURITextBox.sendKeys(liveURI);
+        
+        this.storedURITextBox.clear();
+        this.storedURITextBox.sendKeys(storedURI);
+        
+        this.jsonURLTextBox.clear();
+        this.jsonURLTextBox.sendKeys(jsonURL);
+        
+        this.listRacesButton.click();
         
         waitForAjaxRequests();
     }
@@ -77,33 +161,48 @@ public class TracTracEventManagementPanel extends PageArea {
      * @return
      *   The list of all available trackable races.
      */
-    // QUESTION: Should we return something different instead of WebElements since it is not recommended to do so?
-    public List<WebElement> getTrackableRaces() {
-        WebElement availableRacesTabel = findElementBySeleniumId(this.context, "RacesTable"); //$NON-NLS-1$
-        List<WebElement> elements = availableRacesTabel.findElements(By.xpath("./tbody/tr")); //$NON-NLS-1$
-        Iterator<WebElement> iterator = elements.iterator();
+    public List<TrackableRaceDescriptor> getTrackableRaces() {
+        List<TrackableRaceDescriptor> descriptors = new LinkedList<>();
+        CellTable<DataEntry> table = getTrackableRacesTable();
         
-        while(iterator.hasNext()) {
-            WebElement element = iterator.next();
+        for(DataEntry entry : table.getEntries()) {
+            String event = entry.getColumnContent(0);
+            String race = entry.getColumnContent(1);
+            String boatClass = entry.getColumnContent(2);
             
-            if(!element.isDisplayed())
-                iterator.remove();
+            descriptors.add(new TrackableRaceDescriptor(event, race, boatClass));
         }
         
-        return elements;
+        return descriptors;
     }
     
-//    public List<String> getAvailableReggatasForTracking() {
-//        
-//    }
-//    
-//    public String getReggataForTracking() {
-//        
-//    }
-//    
-//    public void setReggataForTracking(String regatta) {
-//        
-//    }
+    public List<RegattaDescriptor> getAvailableReggatasForTracking() {
+        List<RegattaDescriptor> result = new ArrayList<>();
+        
+        Select select = new Select(this.availableRegattasListBox);
+        
+        for(WebElement option : select.getOptions()) {
+            RegattaDescriptor regatta = RegattaDescriptor.fromString(option.getAttribute("value"));
+            
+            result.add(regatta);
+        }
+        
+        return result;
+    }
+    
+    public RegattaDescriptor getReggataForTracking() {
+        Select select = new Select(this.availableRegattasListBox);
+        WebElement option = select.getFirstSelectedOption();
+        RegattaDescriptor regatta = RegattaDescriptor.fromString(option.getAttribute("value"));
+        
+        return regatta;
+    }
+    
+    public void setReggataForTracking(RegattaDescriptor regatta) {
+        Select select = new Select(this.availableRegattasListBox);
+        
+        select.selectByValue(regatta.toString());
+    }
     
     /**
      * <p>Sets the filter for the trackable races. After the filter is set you can obtain the new resulting list via
@@ -113,27 +212,49 @@ public class TracTracEventManagementPanel extends PageArea {
      *   The filter to apply to the trackable races.
      */
     public void setFilterForTrackableRaces(String filter) {
-        this.filterTrackableRacesField.clear();
-        this.filterTrackableRacesField.sendKeys(filter);
+        this.trackableRacesFilterTextBox.clear();
+        this.trackableRacesFilterTextBox.sendKeys(filter);
     }
     
-//    public void setTrackSettings(boolean trackWind, boolean correctWind, boolean simulateWithNow) {
-//        setSelection(this.trackWindCheckBox, trackWind);
-//        setSelection(this.correctWindCheckbox, correctWind);
-//        setSelection(this.simulateWithNowCheckbox, simulateWithNow);
-//    }
-//    
-//    public void startTrackingForRace() {
-//        
-//    }
-//    
-//    public void startTrackingForRaces() {
-//        
-//    }
-//    
-//    private void setSelection(WebElement checkbox, boolean selected) {
-//        WebElement input = checkbox.findElement(By.tagName("input"));
-//        if(input.isSelected() != selected)
-//            input.click();
-//    }
+    public void setTrackSettings(boolean trackWind, boolean correctWind, boolean simulateWithNow) {
+        setSelection(this.trackWindCheckBox, trackWind);
+        setSelection(this.correctWindCheckBox, correctWind);
+        setSelection(this.simulateWithStartTimeNowCheckBox, simulateWithNow);
+    }
+    
+    public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
+        CellTable<DataEntry> table = getTrackableRacesTable();
+        List<DataEntry> entries = table.getEntries();
+        Iterator<DataEntry> iterator = entries.iterator();
+        
+        while(iterator.hasNext()) {
+            DataEntry entry = iterator.next();
+            
+            String event = entry.getColumnContent(0);
+            String race = entry.getColumnContent(1);
+            String boatClass = entry.getColumnContent(2);
+            
+            TrackableRaceDescriptor descriptor = new TrackableRaceDescriptor(event, race, boatClass);
+            
+            if(!races.contains(descriptor))
+                iterator.remove();
+        }
+                
+        table.selectEntries(entries);
+        
+        this.startTrackingButton.click();
+        
+        waitForAjaxRequests();
+    }
+    
+    private CellTable<DataEntry> getTrackableRacesTable() {
+        return new GenericCellTable<>(this.driver, this.trackableRacesCellTable, DataEntry.class);
+    }
+    
+    private void setSelection(WebElement checkbox, boolean selected) {
+        WebElement input = checkbox.findElement(By.tagName("input"));
+        
+        if(input.isSelected() != selected)
+            input.click();
+    }
 }

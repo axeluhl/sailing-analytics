@@ -65,7 +65,9 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
         HorizontalPanel regattaManagementControlsPanel = new HorizontalPanel();
         regattaManagementControlsPanel.setSpacing(5);
+        
         Button addRegattaBtn = new Button(stringMessages.addRegatta());
+        addRegattaBtn.ensureDebugId("AddRegattaButton");
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -75,6 +77,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaManagementControlsPanel.add(addRegattaBtn);
         
         removeRegattaButton = new Button(stringMessages.remove());
+        removeRegattaButton.ensureDebugId("RemoveRegattaButton");
         removeRegattaButton.setEnabled(false);
         removeRegattaButton.addClickHandler(new ClickHandler() {
             @Override
@@ -100,10 +103,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaSelectionProvider.addRegattaSelectionChangeListener(this);
         
         regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
+        regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
@@ -152,6 +157,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 createNewRegatta(newRegatta);
             }
         });
+        dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
     

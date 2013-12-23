@@ -49,4 +49,10 @@ public class BySeleniumId extends By {
     public List<WebElement> findElements(SearchContext context) {
         return context.findElements(By.xpath(BY_SELENIUM_ID.format(new Object[] {this.id})));
     }
+    
+    @Override
+    public String toString() {
+      return "BySeleniumId: " + this.id;
+    }
+
 }
