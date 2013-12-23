@@ -15,6 +15,5 @@ public class PathFactory {
         }
         
         return null;
-        //throw new QueryException("Unknown path type");
     }
 }

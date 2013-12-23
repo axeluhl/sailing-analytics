@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.pages.gwt.query;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -35,19 +36,21 @@ public class AliasFactory {
             Class<?> returnType = method.getReturnType();
             //Type genericReturnType = method.getGenericReturnType();
             
-            if (MAPPED_PATH.equals(methodName) && parameterTypes.length == 0)
-                return this.hostExpression;
-
-            if (TO_STRING.equals(methodName) && parameterTypes.length == 0)
-                return this.hostExpression.toString();
-
-            if (HASH_CODE.equals(methodName) && parameterTypes.length == 0)
-                return Integer.valueOf(this.hostExpression.hashCode());
-            
-            PathMetadata<?> metadata = getOrCreatePathMetadata(method, args);
-            Path<?> path = PathFactory.createPath(returnType, metadata);
-            
-            AliasFactory.this.setCurrentExpression(path);
+            if(Modifier.isPublic(method.getModifiers())) {
+                if (MAPPED_PATH.equals(methodName) && parameterTypes.length == 0)
+                    return this.hostExpression;
+                
+                if (TO_STRING.equals(methodName) && parameterTypes.length == 0)
+                    return this.hostExpression.toString();
+                
+                if (HASH_CODE.equals(methodName) && parameterTypes.length == 0)
+                    return Integer.valueOf(this.hostExpression.hashCode());
+                
+                PathMetadata<?> metadata = getOrCreatePathMetadata(method, args);
+                Path<?> path = PathFactory.createPath(returnType, metadata);
+                
+                AliasFactory.this.setCurrentExpression(path);
+            }
             
             return null;
         }
@@ -59,8 +62,6 @@ public class AliasFactory {
     
     private final ThreadLocal<Expression<?>> current = new ThreadLocal<>();
     
-//    private final PathFactory pathFactory;
-        
     @SuppressWarnings("unchecked")
     public <A extends Expression<?>> A getCurrentExpression() {
         return (A) this.current.get();
@@ -89,31 +90,9 @@ public class AliasFactory {
         setCurrentExpression(null);
     }
     
-//    public <A> A createAlias(Class<A> clazz) {
-//        return null;
-//    }
-    
     public <A> A createAlias(Class<A> clazz) {
         return createProxy(clazz, new Class[0], new Object[0], null);
     }
-    
-//    @SuppressWarnings("unchecked")
-//    public <A> A createAliasForVariable(Class<A> clazz, String var) {
-//        try {
-//            Expression<?> path = this.pathCache.get(Pair.<Class<?>, String>of(clazz, var));
-//            ManagedObject proxy = this.proxyCache.get(Pair.<Class<?>, Expression<?>>of(clazz, path));
-//            
-//            return (A) proxy;
-//        } catch (ExecutionException exception) {
-//            throw new QueryException(exception);
-//        }        
-//    }
-//    
-//    @SuppressWarnings("unchecked")
-//    public <A> A createAliasForExpression(Class<A> clazz, Expression<?> path) {
-//        // TODO [D049941]: Use the proxy cache
-//        return createProxy(clazz, new Class[0], new Object[0], path);
-//    }
     
     protected void setCurrentExpression(Expression<?> expression) {
         this.current.set(expression);
