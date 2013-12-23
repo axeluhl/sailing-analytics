@@ -208,8 +208,9 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
-                if (uri.getScheme().equals("ws")) { // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
-                                                    // look for ws connectivity
+                if (uri.getScheme().equals("ws") && uri.getPort() != 443) {
+                    // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
+                    // look for ws connectivity
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
                     client.start();
                     client.connect(this, uri, request);
