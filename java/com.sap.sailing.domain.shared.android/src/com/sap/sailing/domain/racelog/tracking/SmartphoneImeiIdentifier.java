@@ -6,7 +6,9 @@ import java.util.Map;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 
 public class SmartphoneImeiIdentifier implements DeviceIdentifier {
-    public static final String TYPE = "smartphoneImei";
+	private static final long serialVersionUID = -1830014229310181702L;
+
+	public static final String TYPE = "smartphoneImei";
 
     private static final Map<String, SmartphoneImeiIdentifier> cache = new HashMap<String, SmartphoneImeiIdentifier>();
 

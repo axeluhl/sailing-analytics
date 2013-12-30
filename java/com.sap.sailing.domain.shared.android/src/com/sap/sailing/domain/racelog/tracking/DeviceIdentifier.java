@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 
 /**
@@ -8,7 +10,7 @@ import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
  * @author Fredrik Teschke
  *
  */
-public interface DeviceIdentifier extends IsManagedBySharedDomainFactory {
+public interface DeviceIdentifier extends IsManagedBySharedDomainFactory, Serializable {
     /**
      * The returned {@link String} is used to look up corresponding services for serialization
      * and persistence.
