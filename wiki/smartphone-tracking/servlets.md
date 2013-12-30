@@ -11,6 +11,7 @@ Servlet: `CreatePersistentCompetitorPostServlet`
 ```
 {"id": "",
  "name": "Competitor Fredrik",
+ "displayColor": "#00FE3C",
  "sailID": "1234",
  "team": {
    "name": "Team Fredrik",
