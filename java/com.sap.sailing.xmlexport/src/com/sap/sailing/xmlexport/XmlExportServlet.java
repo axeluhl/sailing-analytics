@@ -1,4 +1,4 @@
-package com.sap.sailing.xcelsiusadapter;
+package com.sap.sailing.xmlexport;
 
 import java.io.IOException;
 
