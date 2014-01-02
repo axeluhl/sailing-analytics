@@ -25,4 +25,12 @@
      <td>They don't seem to have any experience with Android apps. They mostly do iOS applications and also seem to be focused on games.</td>
      <td>SP: -1</td>
   </tr>
+  <tr>
+     <td>Creative Workline, http://www.creativeworkline.com/</td>
+     <td>Als schlanke Agentur bieten wir professionelle App Entwicklung und App Programmierung für mobile Apps sowie dazu passende Server-Schnittstellen und Websites. Sie benötigen eine native App für Android, iPhone, BlackBerry, Windows Phone, Android und Windows 8 Tablet oder Apple iPad, HTML5 Web-App oder Hybrid Apps? Dann sind Sie hier richtig!</td>
+     <td>Berlin</td>
+     <td>Aktivitätswächter, Gutschein des Tages, FDP App, Wunderlist</td>
+     <td>Seem to have some experience with mobile apps including Android Platform. References look quite good.</td>
+     <td>SP: +1</td>
+  </tr>
 </table>
