@@ -11,7 +11,6 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * Production Environment
-  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
   * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
