@@ -34,7 +34,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -55,7 +55,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
 
-    private final AbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
+    private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -85,7 +85,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         regattaTable = createRegattaTable();
         regattaTable.setVisible(false);
-        filterablePanelRegattas = new AbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
+        filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
                 regattaTable, regattaListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {

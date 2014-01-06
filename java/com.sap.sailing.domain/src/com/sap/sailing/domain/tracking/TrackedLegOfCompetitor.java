@@ -71,7 +71,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
-     * achieved and the speed value
+     * achieved and the speed value. In case you provide <code>timepoint</code> that is greater than the time point of the
+     * end of this leg the provided value will be ignored and replaced by the timepoint of the end of the leg.
      */
     Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
@@ -174,6 +175,11 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Computes the average cross track error for this leg. If you provide this method with a {@link TimePoint} greater
+     * than the time the mark passing of the leg end mark has occurred then the time point of the mark passing 
+     * of the leg end mark will be taken into account.
+     */
     Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     /**

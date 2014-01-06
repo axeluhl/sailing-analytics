@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
@@ -57,7 +57,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     private MultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
     private List<EventDTO> allEvents;
-    private AbstractFilterablePanel<EventDTO> filterTextbox;
+    private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
     private Button removeEventsButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -206,7 +206,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
                 venueNameColumn, publicationUrlColumn, isPublicColumn, courseAreasColumn));
-        filterTextbox = new AbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
+        filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
                 eventTable, eventProvider) {
 
             @Override
