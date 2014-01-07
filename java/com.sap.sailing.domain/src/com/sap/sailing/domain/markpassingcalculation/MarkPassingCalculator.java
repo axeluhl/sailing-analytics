@@ -44,7 +44,7 @@ public class MarkPassingCalculator {
 
     private MarkPassingUpdateListener listener;
     private final static Pair<Object, GPSFix> end = new Pair<Object, GPSFix>(null, null);
-    private boolean suspended;
+    private boolean suspended = false;
     private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
             .availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
@@ -53,7 +53,6 @@ public class MarkPassingCalculator {
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
         if (listen) {
-            suspended = true;
             listener = new MarkPassingUpdateListener(race, end);
         }
         finder = new CandidateFinder(race);
@@ -62,7 +61,6 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
         }
         if (listen) {
-            suspended = false;
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
         }
     }
@@ -88,7 +86,8 @@ public class MarkPassingCalculator {
                     if (fix == end) {
                         finished = true;
                         continue;
-                    } else if (!combinedFixes.containsKey(fix.getA())) {
+                    }
+                    if (!combinedFixes.containsKey(fix.getA())) {
                         combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
                     }
                     combinedFixes.get(fix.getA()).add(fix.getB());
@@ -107,15 +106,16 @@ public class MarkPassingCalculator {
             for (Object o : combinedFixes.keySet()) {
                 FutureTask<Boolean> task = new FutureTask<>(new GetAffectedFixes(o, combinedFixes.get(o)), true);
                 tasks.add(task);
-                executor.execute(task);
             }
             for (FutureTask<Boolean> task : tasks) {
+                task.run();
+              /*  executor.execute(task);
                 try {
                     task.get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
                             + " while waiting for the calculation of affected Fixes");
-                }
+                }*/
             }
             tasks.clear();
             for (Competitor c : finder.getAffectedCompetitors()) {
@@ -123,13 +123,15 @@ public class MarkPassingCalculator {
                 tasks.add(task);
             }
             for (FutureTask<Boolean> task : tasks) {
-                executor.execute(task);
+                task.run();
+               /* executor.execute(task);
                 try {
                     task.get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
                             + "while waiting for the calculation of MarkPassings");
                 }
+            */
             }
         }
     }

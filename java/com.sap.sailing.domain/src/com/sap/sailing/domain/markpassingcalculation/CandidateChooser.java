@@ -64,10 +64,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
         raceHasStartTime = race.getStartOfRace() == null ? false : true;
         start = new Candidate(0, race.getStartOfRace(), 1);
         end = new Candidate(
-                race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null,
-                1);
+                race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1);
         candidates = new LinkedHashMap<>();
-        ;
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new ArrayList<Candidate>());
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());

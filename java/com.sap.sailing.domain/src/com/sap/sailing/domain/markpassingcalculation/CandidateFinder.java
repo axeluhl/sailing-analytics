@@ -5,17 +5,19 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -32,7 +34,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private static final Logger logger = Logger.getLogger(CandidateFinder.class.getName());
 
     private LinkedHashMap<Competitor, List<GPSFix>> affectedFixes = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
+    private LinkedHashMap<Competitor, TreeMap<GPSFix, LinkedHashMap<Waypoint, Double>>> distances = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, List<GPSFix>>> candidates = new LinkedHashMap<>();
     private TrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
@@ -43,7 +45,13 @@ public class CandidateFinder implements AbstractCandidateFinder {
         this.race = race;
         for (Competitor c : race.getRace().getCompetitors()) {
             affectedFixes.put(c, new ArrayList<GPSFix>());
-            distances.put(c, new LinkedHashMap<GPSFix, LinkedHashMap<Waypoint, Double>>());
+            distances.put(c, new TreeMap<GPSFix, LinkedHashMap<Waypoint, Double>>(new Comparator<GPSFix>(){
+                @Override
+                public int compare(GPSFix arg0, GPSFix arg1) {
+                    return arg0.getTimePoint().compareTo(arg1.getTimePoint());
+                }
+                
+            }));
             candidates.put(c, new LinkedHashMap<Waypoint, List<GPSFix>>());
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
                 candidates.get(c).put(w, new ArrayList<GPSFix>());
@@ -55,7 +63,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     public Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c) {
         try {
             race.getTrack(c).lockForRead();
-            for (GPSFix fix : race.getTrack(c).getFixes()) {
+            for (GPSFix fix : race.getTrack(c).getRawFixes()) {
                 affectedFixes.get(c).add(fix);
             }
         } finally {
@@ -75,16 +83,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
         affectedFixes.get(c).addAll(fixes);
         calculateDistances(c);
-        ArrayList<GPSFix> fixesToBeReevaluated = new ArrayList<>();
         for (GPSFix fix : fixes) {
-            fixesToBeReevaluated.add(fix);
-            if (!(race.getTrack(c).getLastFixBefore(fix.getTimePoint()) == null)
-                    && !fixesToBeReevaluated.contains(race.getTrack(c).getLastFixBefore(fix.getTimePoint()))) {
-                fixesToBeReevaluated.add(race.getTrack(c).getLastFixBefore(fix.getTimePoint()));
+            if (!(distances.get(c).higherKey(fix) == null)
+                    && !affectedFixes.get(c).contains(distances.get(c).higherKey(fix))) {
+                affectedFixes.get(c).add(distances.get(c).higherKey(fix));
             }
-            if (!(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()) == null)
-                    && !fixesToBeReevaluated.contains(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()))) {
-                fixesToBeReevaluated.add(race.getTrack(c).getFirstFixAfter(fix.getTimePoint()));
+            if (!(distances.get(c).lowerKey(fix) == null)
+                    && !affectedFixes.get(c).contains(distances.get(c).lowerKey(fix))) {
+                affectedFixes.get(c).add(distances.get(c).lowerKey(fix));
             }
         }
     }
@@ -152,7 +158,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
         }
         affectedFixes.get(c).clear();
-        logger.fine(newCans.size() + "new Cans, old cans: "+ wrongCans.size());
+        logger.fine(newCans.size() + "new Candidates and "+wrongCans.size()+" removed Candidates for " + c);
         return new Pair<List<Candidate>, List<Candidate>>(newCans, wrongCans);
     }
 
@@ -223,8 +229,8 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
         GPSFix fixBefore = race.getTrack(c).getLastFixBefore(fix.getTimePoint());
         GPSFix fixAfter = race.getTrack(c).getFirstFixAfter(fix.getTimePoint());
-        if (distances.get(c).get(fix) != null && !(fixBefore == null)
-                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) && !(fixAfter == null)
+        if (!(fixBefore == null) && !(fixAfter == null)
+                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) 
                 && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
                 && getLikelyhood(c, w, fix) > penaltyForSkipping) {
             return true;
