@@ -13,6 +13,14 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.data.PolarFix;
 
+/**
+ * Public Facade interface allowing access to the polars of {@link TrackedRace}s and per {@link BoatClass}. Methods like
+ * {@link PolarDataService#getOptimalUpwindSpeedWithBearingFor(BoatClass, Speed)} allow the extraction of typical useful
+ * information obtainable from polar sheets.
+ * 
+ * @author Frederik Petersen (D054528)
+ * 
+ */
 public interface PolarDataService {
 
     /**
@@ -98,8 +106,20 @@ public interface PolarDataService {
 
     void newRaceFinishedTracking(TrackedRace trackedRace);
 
+    /**
+     * @param key
+     *            The {@link BoatClass} to obtain fixes for.
+     * @return All raw polar fixes for the {@link BoatClass}. The implementation is responsible for deciding wether a
+     *         cache is used or not.
+     */
     Set<PolarFix> getPolarFixesForBoatClass(BoatClass key);
 
+    /**
+     * 
+     * @param boatClass
+     *            The {@link BoatClass} to obtain the polar sheet for.
+     * @return The polar sheet for all existing races of the {@link BoatClass}.
+     */
     public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
 
 }

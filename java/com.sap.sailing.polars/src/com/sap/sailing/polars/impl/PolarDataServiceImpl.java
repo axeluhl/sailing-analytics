@@ -23,7 +23,16 @@ import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
 import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.generation.PolarSheetGenerator;
+import com.sap.sailing.util.SmartFutureCache;
 
+/**
+ * Uses two chained {@link SmartFutureCache}s. One to store {@link PolarFix}es extracted from {@link TrackedRace}s and
+ * the other one for storing one polar sheet per boat class. This allows quick access to desired measures like optimal
+ * beat angles.
+ * 
+ * @author Frederik Petersen (D054528)
+ * 
+ */
 public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarFixCache polarFixCache;

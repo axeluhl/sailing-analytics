@@ -8,6 +8,12 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.polars.PolarDataService;
 
+/**
+ * Extracts typical measures from polar sheets.
+ * 
+ * @author Frederik Petersen (D054528)
+ * 
+ */
 public class PolarSheetAnalyzer {
 
     private PolarDataService polarDataService;
