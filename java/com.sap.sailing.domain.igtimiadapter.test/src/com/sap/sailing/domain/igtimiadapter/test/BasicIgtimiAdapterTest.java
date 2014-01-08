@@ -58,7 +58,7 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         assertFalse(Util.isEmpty(daws));
         for (DataAccessWindow daw : daws) {
             assertEquals("DD-EE-AAGA", daw.getDeviceSerialNumber());
-            assertTrue(daw.getRecipient() instanceof Group);
+            assertTrue(daw.getId() == 17012 || daw.getRecipient() instanceof Group);
         }
     }
     
@@ -78,10 +78,10 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     
     @Test
     public void testGetSessions() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4571l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
+        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4846l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
         assertTrue(sessions.iterator().hasNext());
         final Session session = sessions.iterator().next();
-        assertEquals("Auto Session - 01:14:02 10 Nov", session.getName());
+        assertEquals("Humba", session.getName());
         User sessionOwher = connection.getUser(session.getOwnerId());
         assertEquals("Uhl", sessionOwher.getSurname());
     }
@@ -90,8 +90,8 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Map<Type, Double> typesAndCompression = new HashMap<>();
         typesAndCompression.put(Type.gps_latlong, 0.0);
-        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384420883000l),
-                new MillisecondsTimePoint(1384421639000l), Collections.singleton("GA-EN-AAEJ"), typesAndCompression);
+        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384068419000l),
+                new MillisecondsTimePoint(1384091860000l), Collections.singleton("DD-EE-AAGA"), typesAndCompression);
         assertTrue(data.iterator().hasNext());
     }
     

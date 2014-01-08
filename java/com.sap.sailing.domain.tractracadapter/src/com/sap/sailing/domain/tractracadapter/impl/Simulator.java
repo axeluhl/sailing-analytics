@@ -154,11 +154,25 @@ public class Simulator {
     }
 
     /**
-     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and {@link #delay(TimePoint)} is called.
-     * Otherwise, <code>time</code> is taken to be the original start time of the race which is then used to compute
-     * {@link #advanceInMillis} such that <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
+     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
+     * {@link #delay(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
+     * race which is then used to compute {@link #advanceInMillis} such that
+     * <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
      */
     public TimePoint advanceMarkPassingTimePoint(TimePoint time) {
+        return advanceTimePointAndUseAsStartTimeIfNeeded(time);
+    }
+
+    /**
+     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
+     * {@link #delay(TimePoint)} is called. Otherwise, the given start time <code>time</code> is used to compute
+     * {@link #advanceInMillis} such that <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
+     */
+    public TimePoint advanceStartTime(TimePoint raceStartTime) {
+        return advanceTimePointAndUseAsStartTimeIfNeeded(raceStartTime);
+    }
+
+    private TimePoint advanceTimePointAndUseAsStartTimeIfNeeded(TimePoint time){
         if (isAdvanceInMilliseSet()) {
             return advance(time);
         } else {

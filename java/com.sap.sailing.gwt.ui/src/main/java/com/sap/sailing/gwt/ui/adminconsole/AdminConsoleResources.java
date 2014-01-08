@@ -55,4 +55,7 @@ interface AdminConsoleResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/clock.png")
     ImageResource clock();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/xml.png")
+    ImageResource exportXMLIcon();
 }

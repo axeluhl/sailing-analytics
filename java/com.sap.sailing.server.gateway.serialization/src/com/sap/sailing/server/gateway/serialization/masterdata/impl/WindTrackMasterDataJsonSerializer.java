@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,8 +21,10 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
     public static final String FIELD_FIXES = "fixes";
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_RACE_ID = "raceId";
+    public static final String FIELD_ID_TYPE = "idType";
     public static final String FIELD_REGATTA_NAME = "regattaName";
     
+
     private final WindSource source;
     private final JsonSerializer<Wind> windSerializer;
     private final String regattaName;
@@ -48,7 +51,13 @@ public class WindTrackMasterDataJsonSerializer implements JsonSerializer<WindTra
             }
             windTrackJson.put(FIELD_RACE_NAME, raceName);
             if (raceId != null) {
-                windTrackJson.put(FIELD_RACE_ID, raceId.toString());
+                // Special treatment for UUIDs. They are represented as String because JSON doesn't have a way to
+                // otherwise. However, other, e.g., numeric, types used to encode a serializable ID must be preserved
+                // to JSON semantics. Also see the corresponding case distinction in the deserialized which first tries
+                // to parse a string as a UUID becore returning the ID as is.
+                windTrackJson.put(FIELD_ID_TYPE, raceId.getClass().getName());
+                Serializable raceIdAdapted = raceId instanceof UUID ? raceId.toString() : raceId;
+                windTrackJson.put(FIELD_RACE_ID, raceIdAdapted);
             }
             windTrackJson.put(FIELD_REGATTA_NAME, regattaName);
             JSONArray fixes = new JSONArray();
