@@ -308,6 +308,10 @@ public interface SailingService extends RemoteService {
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
     
+    List<String> getBoatClassNamesWithPolarSheetsAvailable();
+
+    PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName);
+
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
     EventDTO getEventByIdAsString(String eventIdAsString);

@@ -3138,6 +3138,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new PolarSheetGenerationResponseImpl(id, name, result);
     }
 
+    @Override
+    public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
+        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
+        List<String> names = new ArrayList<String>();
+        for (BoatClass boatClass : boatClasses) {
+            names.add(boatClass.getName());
+        }
+        return names;
+    }
+
+    @Override
+    public PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName) {
+        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
+        PolarSheetsData data = getService().getPolarDataService().getPolarSheetForBoatClass(boatClass);
+        String name = boatClassName + "_OVERALL";
+        String id = name;
+        return new PolarSheetGenerationResponseImpl(id, name, data);
+    }
+
     private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
         BoatClass boatClass = null;
         for (TrackedRace race : trackedRaces) {
@@ -3684,4 +3703,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+
 }

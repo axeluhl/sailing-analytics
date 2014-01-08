@@ -485,5 +485,10 @@ public interface SailingServiceAsync {
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+
+    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
+
+    void showCachedPolarSheetForBoatClass(String boatClassName,
+            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
 }
 

@@ -27,6 +27,9 @@ public class PolarSheetAnalyzer {
         Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
         int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());
         Number[] dataForProvidedWindSpeed = dataPerWindSpeed[windSpeedIndex];
+        if (dataForProvidedWindSpeed.length == 360) {
+            dataForProvidedWindSpeed = convertToOneSidedPolar(dataForProvidedWindSpeed);
+        }
         double optUpwindSpeed = 0;
         int optUpwindDeg = 0;
         for (int i = 0; i < 90; i++) {
@@ -38,6 +41,33 @@ public class PolarSheetAnalyzer {
             }
         }
         return new KnotSpeedWithBearingImpl(optUpwindSpeed, new DegreeBearingImpl(optUpwindDeg));
+    }
+
+    public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
+        PolarSheetsData data = polarDataService.getPolarSheetForBoatClass(boatClass);
+        Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
+        int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());
+        Number[] dataForProvidedWindSpeed = dataPerWindSpeed[windSpeedIndex];
+        double optDownwindSpeed = 0;
+        int optUpwindDeg = 0;
+        for (int i = 90; i < 180; i++) {
+            Number speed = dataForProvidedWindSpeed[i];
+            double speedUpwind = speed.doubleValue() * Math.sin(Math.toRadians(i - 90));
+            if (speedUpwind > optDownwindSpeed) {
+                optUpwindDeg = i;
+                optDownwindSpeed = speedUpwind;
+            }
+        }
+        return new KnotSpeedWithBearingImpl(optDownwindSpeed, new DegreeBearingImpl(optUpwindDeg));
+    }
+
+    private Number[] convertToOneSidedPolar(Number[] dataForProvidedWindSpeed) {
+        Number[] oneSided = new Number[180];
+        for (int i = 181; i < 360; i++) {
+            oneSided[360 - i] = (dataForProvidedWindSpeed[360 - i].doubleValue() + dataForProvidedWindSpeed[i]
+                    .doubleValue()) / 2;
+        }
+        return oneSided;
     }
 
 }

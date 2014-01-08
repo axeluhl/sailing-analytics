@@ -54,8 +54,7 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     @Override
     public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
-        // TODO Auto-generated method stub
-        return null;
+        return polarSheetAnalyzer.getOptimalDownwindSpeedWithBearingFor(boatClass, windSpeed);
     }
 
     @Override
