@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.dimensions;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.impl.AbstractDimension;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.domain.common.LegType;
 
 public final class TrackedLegOfCompetitorDimensionManager implements DimensionManager<TrackedLegOfCompetitorWithContext> {
@@ -13,7 +13,7 @@ public final class TrackedLegOfCompetitorDimensionManager implements DimensionMa
     /**
      * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
      */
-    public Dimension<TrackedLegOfCompetitorWithContext, ?> getDimensionFor(SharedDimension dimension) {
+    public Dimension<TrackedLegOfCompetitorWithContext, ?> getDimensionFor(DimensionIdentifier dimension) {
         switch (dimension) {
         case BoatClassName:
             return BoatClassNameDimension;

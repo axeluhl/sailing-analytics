@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public abstract class GroupBySelectionPanel extends FlowPanel {
@@ -29,11 +29,11 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
     private DeckPanel groupByOptionsPanel;
     private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
-    private List<ValueListBox<SharedDimension>> dimensionsToGroupByBoxes;
+    private List<ValueListBox<DimensionIdentifier>> dimensionsToGroupByBoxes;
 
     public GroupBySelectionPanel(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<SharedDimension>>();
+        dimensionsToGroupByBoxes = new ArrayList<ValueListBox<DimensionIdentifier>>();
 
         add(createGrouperTypeSelectionPanel());
 
@@ -44,7 +44,7 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
         dimensionsToGroupByPanel.setSpacing(5);
         groupByOptionsPanel.add(dimensionsToGroupByPanel);
         
-        ValueListBox<SharedDimension> dimensionToGroupByBox = createDimensionToGroupByBox();
+        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = createDimensionToGroupByBox();
         dimensionsToGroupByPanel.add(dimensionToGroupByBox);
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
 
@@ -77,7 +77,7 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
 
     private void applyDimensionsToGroupBy(QueryDefinition queryDefinition) {
         int index = 0;
-        for (SharedDimension dimension : queryDefinition.getDimensionsToGroupBy()) {
+        for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
             dimensionsToGroupByBoxes.get(index).setValue(dimension, true);
             index++;
         }
@@ -91,10 +91,10 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
         return getGrouperType() == GrouperType.Custom ? customGrouperScriptTextBox.getText() : "";
     }
 
-    public Collection<SharedDimension> getDimensionsToGroupBy() {
-        Collection<SharedDimension> dimensionsToGroupBy = new ArrayList<SharedDimension>();
+    public Collection<DimensionIdentifier> getDimensionsToGroupBy() {
+        Collection<DimensionIdentifier> dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
         if (getGrouperType() == GrouperType.Dimensions) {
-            for (ValueListBox<SharedDimension> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
+            for (ValueListBox<DimensionIdentifier> dimensionToGroupByBox : dimensionsToGroupByBoxes) {
                 if (dimensionToGroupByBox.getValue() != null) {
                     dimensionsToGroupBy.add(dimensionToGroupByBox.getValue());
                 }
@@ -147,11 +147,11 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
         return selectGroupByPanel;
     }
 
-    private ValueListBox<SharedDimension> createDimensionToGroupByBox() {
-        ValueListBox<SharedDimension> dimensionToGroupByBox = new ValueListBox<SharedDimension>(
-                new Renderer<SharedDimension>() {
+    private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
+        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new ValueListBox<DimensionIdentifier>(
+                new Renderer<DimensionIdentifier>() {
                     @Override
-                    public String render(SharedDimension gpsFixDimension) {
+                    public String render(DimensionIdentifier gpsFixDimension) {
                         if (gpsFixDimension == null) {
                             return "";
                         }
@@ -159,19 +159,19 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
                     }
 
                     @Override
-                    public void render(SharedDimension gpsFixDimension, Appendable appendable)
+                    public void render(DimensionIdentifier gpsFixDimension, Appendable appendable)
                             throws IOException {
                         appendable.append(render(gpsFixDimension));
 
                     }
                 });
-        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<SharedDimension>() {
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<DimensionIdentifier>() {
             private boolean firstChange = true;
 
             @Override
-            public void onValueChange(ValueChangeEvent<SharedDimension> event) {
+            public void onValueChange(ValueChangeEvent<DimensionIdentifier> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<SharedDimension> newBox = createDimensionToGroupByBox();
+                    ValueListBox<DimensionIdentifier> newBox = createDimensionToGroupByBox();
                     dimensionsToGroupByPanel.add(newBox);
                     dimensionsToGroupByBoxes.add(newBox);
                     firstChange = false;
@@ -182,7 +182,7 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
                 finishValueChangedHandling();
             }
         });
-        dimensionToGroupByBox.setAcceptableValues(Arrays.asList(SharedDimension.values()));
+        dimensionToGroupByBox.setAcceptableValues(Arrays.asList(DimensionIdentifier.values()));
         return dimensionToGroupByBox;
     }
     

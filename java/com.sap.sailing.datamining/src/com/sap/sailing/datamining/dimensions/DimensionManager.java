@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining.dimensions;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 
 public interface DimensionManager<DataType> {
 
-    public Dimension<DataType, ?> getDimensionFor(SharedDimension sharedDimension);
+    public Dimension<DataType, ?> getDimensionFor(DimensionIdentifier sharedDimension);
 
 }

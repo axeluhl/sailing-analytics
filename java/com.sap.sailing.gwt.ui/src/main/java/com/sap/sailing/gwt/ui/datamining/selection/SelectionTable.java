@@ -12,12 +12,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
 
 public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
     
-    private SharedDimension dimension;
+    private DimensionIdentifier dimension;
     private Collection<ContentType> allData;
 
     private AbstractFilterablePanel<ContentType> filterPanel;
@@ -25,7 +25,7 @@ public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
     private MultiSelectionModel<ContentType> selectionModel;
     private ListDataProvider<ContentType> dataProvider;
     
-    public SelectionTable(String title, SharedDimension dimension) {
+    public SelectionTable(String title, DimensionIdentifier dimension) {
         this.dimension = dimension;
         allData = new ArrayList<ContentType>();
         
@@ -65,7 +65,7 @@ public abstract class SelectionTable<ContentType, ValueType> extends FlowPanel {
         add(table);
     }
 
-    public SharedDimension getDimension() {
+    public DimensionIdentifier getDimension() {
         return dimension;
     }
     

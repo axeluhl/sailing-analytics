@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -79,13 +79,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             break;
         case Dimensions:
         default:
-            for (SharedDimension dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
+            for (DimensionIdentifier dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {
                 queryDTO.appendDimensionToGroupBy(dimension);
             }
             break;
         }
         
-        for (Entry<SharedDimension, Collection<?>> selectionEntry : selectionProvider.getSelection().entrySet()) {
+        for (Entry<DimensionIdentifier, Collection<?>> selectionEntry : selectionProvider.getSelection().entrySet()) {
             queryDTO.setSelectionFor(selectionEntry.getKey(), selectionEntry.getValue());
         }
         

@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
-import com.sap.sailing.datamining.shared.SharedDimension.OrdinalComparator;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.DimensionIdentifier.OrdinalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.components.SimpleValueListBox;
@@ -26,18 +26,18 @@ import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
 
 public class RestrictedGroupingProvider implements GroupingProvider {
     
-    private static final OrdinalComparator dimensionComparator = new SharedDimension.OrdinalComparator();
+    private static final OrdinalComparator dimensionComparator = new DimensionIdentifier.OrdinalComparator();
     
     private final StringMessages stringMessages;
     private final Set<GroupingChangedListener> listeners;
     
     private final HorizontalPanel mainPanel;
-    private final List<ValueListBox<SharedDimension>> dimensionToGroupByBoxes;
+    private final List<ValueListBox<DimensionIdentifier>> dimensionToGroupByBoxes;
 
     public RestrictedGroupingProvider(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         listeners = new HashSet<GroupingChangedListener>();
-        dimensionToGroupByBoxes = new ArrayList<ValueListBox<SharedDimension>>();
+        dimensionToGroupByBoxes = new ArrayList<ValueListBox<DimensionIdentifier>>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -45,16 +45,16 @@ public class RestrictedGroupingProvider implements GroupingProvider {
         mainPanel.add(createDimensionToGroupByBox());
     }
 
-    private ValueListBox<SharedDimension> createDimensionToGroupByBox() {
-        ValueListBox<SharedDimension> dimensionToGroupByBox = new SimpleValueListBox<SharedDimension>();
+    private ValueListBox<DimensionIdentifier> createDimensionToGroupByBox() {
+        ValueListBox<DimensionIdentifier> dimensionToGroupByBox = new SimpleValueListBox<DimensionIdentifier>();
         dimensionToGroupByBoxes.add(dimensionToGroupByBox);
-        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<SharedDimension>() {
+        dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<DimensionIdentifier>() {
             private boolean firstChange = true;
 
             @Override
-            public void onValueChange(ValueChangeEvent<SharedDimension> event) {
+            public void onValueChange(ValueChangeEvent<DimensionIdentifier> event) {
                 if (firstChange && event.getValue() != null) {
-                    ValueListBox<SharedDimension> newBox = createDimensionToGroupByBox();
+                    ValueListBox<DimensionIdentifier> newBox = createDimensionToGroupByBox();
                     mainPanel.add(newBox);
                     dimensionToGroupByBoxes.add(newBox);
                     firstChange = false;
@@ -71,8 +71,8 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     }
 
     private void updateAcceptableValues() {
-        for (ValueListBox<SharedDimension> dimensionToGroupByBox : dimensionToGroupByBoxes) {
-            List<SharedDimension> acceptableValues = new ArrayList<SharedDimension>(Arrays.asList(SharedDimension.values()));
+        for (ValueListBox<DimensionIdentifier> dimensionToGroupByBox : dimensionToGroupByBoxes) {
+            List<DimensionIdentifier> acceptableValues = new ArrayList<DimensionIdentifier>(Arrays.asList(DimensionIdentifier.values()));
             acceptableValues.removeAll(getDimensionsToGroupBy());
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
@@ -89,9 +89,9 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     }
 
     @Override
-    public Collection<SharedDimension> getDimensionsToGroupBy() {
-        Collection<SharedDimension> dimensionsToGroupBy = new ArrayList<SharedDimension>();
-        for (ValueListBox<SharedDimension> dimensionListBox : dimensionToGroupByBoxes) {
+    public Collection<DimensionIdentifier> getDimensionsToGroupBy() {
+        Collection<DimensionIdentifier> dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
+        for (ValueListBox<DimensionIdentifier> dimensionListBox : dimensionToGroupByBoxes) {
             if (dimensionListBox.getValue() != null) {
                 dimensionsToGroupBy.add(dimensionListBox.getValue());
             }
@@ -108,7 +108,7 @@ public class RestrictedGroupingProvider implements GroupingProvider {
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
         if (queryDefinition.getGrouperType() == GrouperType.Dimensions) {
             int index = 0;
-            for (SharedDimension dimension : queryDefinition.getDimensionsToGroupBy()) {
+            for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
                 dimensionToGroupByBoxes.get(index).setValue(dimension, true);
                 index++;
             }

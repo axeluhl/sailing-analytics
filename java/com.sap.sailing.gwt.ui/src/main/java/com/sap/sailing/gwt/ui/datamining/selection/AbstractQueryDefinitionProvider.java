@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -64,7 +64,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
             }
             break;
         case Dimensions:
-            for (SharedDimension dimension : queryDefinition.getDimensionsToGroupBy()) {
+            for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
                 if (dimension != null) {
                     break ValidateGrouper;
                 }

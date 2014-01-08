@@ -22,8 +22,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     private DataTypes dataType;
 
 //    private String customGrouperScriptText;
-    private List<SharedDimension> dimensionsToGroupBy;
-    private Map<SharedDimension, Iterable<?>> selectionMappedByDimension;
+    private List<DimensionIdentifier> dimensionsToGroupBy;
+    private Map<DimensionIdentifier, Iterable<?>> selectionMappedByDimension;
     
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -39,8 +39,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
         this.dataType = dataType;
 
 //        customGrouperScriptText = "";
-        dimensionsToGroupBy = new ArrayList<SharedDimension>();
-        selectionMappedByDimension = new HashMap<SharedDimension, Iterable<?>>();
+        dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
+        selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<?>>();
     }
     
     @Override
@@ -75,20 +75,20 @@ public class SimpleQueryDefinition implements QueryDefinition {
     }
 
     @Override
-    public List<SharedDimension> getDimensionsToGroupBy() {
+    public List<DimensionIdentifier> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 
     @Override
-    public Map<SharedDimension, Iterable<?>> getSelection() {
+    public Map<DimensionIdentifier, Iterable<?>> getSelection() {
         return selectionMappedByDimension;
     }
 
-    public void appendDimensionToGroupBy(SharedDimension dimension) {
+    public void appendDimensionToGroupBy(DimensionIdentifier dimension) {
         dimensionsToGroupBy.add(dimension);
     }
 
-    public void setSelectionFor(SharedDimension dimension, Collection<?> selection) {
+    public void setSelectionFor(DimensionIdentifier dimension, Collection<?> selection) {
         selectionMappedByDimension.put(dimension, selection);
     }
 

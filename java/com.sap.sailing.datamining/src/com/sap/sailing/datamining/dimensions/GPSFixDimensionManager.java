@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.dimensions;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.impl.AbstractDimension;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.domain.common.LegType;
 
 public final class GPSFixDimensionManager implements DimensionManager<GPSFixWithContext> {
@@ -14,7 +14,7 @@ public final class GPSFixDimensionManager implements DimensionManager<GPSFixWith
      * @return The dimension for the given dimension type. Throws an exception, if the used <code>ValueType</code> doesn't match the <code>ValueType</code> of the returning dimension.
      */
     @Override
-    public Dimension<GPSFixWithContext, ?> getDimensionFor(SharedDimension dimension) {
+    public Dimension<GPSFixWithContext, ?> getDimensionFor(DimensionIdentifier dimension) {
         switch (dimension) {
         case BoatClassName:
             return BoatClassNameDimension;

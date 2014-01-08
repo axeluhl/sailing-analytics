@@ -22,8 +22,8 @@ public interface QueryDefinition extends Serializable {
 
     public String getCustomGrouperScriptText();
 
-    public List<SharedDimension> getDimensionsToGroupBy();
+    public List<DimensionIdentifier> getDimensionsToGroupBy();
 
-    public Map<SharedDimension, Iterable<?>> getSelection();
+    public Map<DimensionIdentifier, Iterable<?>> getSelection();
 
 }

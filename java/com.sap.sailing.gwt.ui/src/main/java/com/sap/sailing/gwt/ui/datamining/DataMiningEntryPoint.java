@@ -18,7 +18,7 @@ import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
@@ -65,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
         
         SimpleQueryDefinition queryDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
-        queryDefinition.appendDimensionToGroupBy(SharedDimension.RegattaName);
+        queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
         queryRunner.run(queryDefinitionProvider.getQueryDefinition());
     }

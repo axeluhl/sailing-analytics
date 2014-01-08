@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -55,7 +55,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
 
     private RefreshingSelectionTablesSettings settings;
     private Timer timer;
-    private Map<SharedDimension, SelectionTable<?, ?>> tablesMappedByDimension;
+    private Map<DimensionIdentifier, SelectionTable<?, ?>> tablesMappedByDimension;
     private Set<SelectionChangedListener> listeners;
     
     public RefreshingSelectionTablesPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
@@ -66,7 +66,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         settings = new RefreshingSelectionTablesSettings();
         listeners = new HashSet<SelectionChangedListener>();
 
-        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?,?>>();
+        tablesMappedByDimension = new HashMap<DimensionIdentifier, SelectionTable<?,?>>();
         entryWidget = new SimplePanel();
         entryWidget.setWidget(createTables());
         
@@ -128,8 +128,8 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
 
     @Override
-    public Map<SharedDimension, Collection<?>> getSelection() {
-        Map<SharedDimension, Collection<?>> selection = new HashMap<SharedDimension, Collection<?>>();
+    public Map<DimensionIdentifier, Collection<?>> getSelection() {
+        Map<DimensionIdentifier, Collection<?>> selection = new HashMap<DimensionIdentifier, Collection<?>>();
         for (SelectionTable<?, ?> table : tablesMappedByDimension.values()) {
             Collection<?> specificSelection = table.getSelectionAsValues();
             if (!specificSelection.isEmpty()) {
@@ -141,7 +141,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
 
     @Override
     public void applySelection(QueryDefinition queryDefinition) {
-        for (Entry<SharedDimension, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
+        for (Entry<DimensionIdentifier, Iterable<?>> selectionEntry : queryDefinition.getSelection().entrySet()) {
             SelectionTable<?, ?> selectionTable = tablesMappedByDimension.get(selectionEntry.getKey());
             selectionTable.setSelection((Iterable<?>) selectionEntry.getValue());
         }
@@ -155,7 +155,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
     }
     
     @SuppressWarnings("unchecked") //You can't use instanceof for generic type parameters
-    private <ContentType> SelectionTable<ContentType, ?> getTable(SharedDimension dimension) {
+    private <ContentType> SelectionTable<ContentType, ?> getTable(DimensionIdentifier dimension) {
         try {
             return (SelectionTable<ContentType, ?>) tablesMappedByDimension.get(dimension);
         } catch (ClassCastException e) {
@@ -223,8 +223,8 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             @Override
             public void onSuccess(List<RegattaDTO> regattas) {
                 boolean tableContentChanged = false;
-                Map<SharedDimension, Collection<?>> content = extractContent(regattas);
-                for (Entry<SharedDimension, Collection<?>> contentEntry : content.entrySet()) {
+                Map<DimensionIdentifier, Collection<?>> content = extractContent(regattas);
+                for (Entry<DimensionIdentifier, Collection<?>> contentEntry : content.entrySet()) {
                     boolean currentTableContentChanged = getTable(contentEntry.getKey()).updateContent(contentEntry.getValue());
                     if (!tableContentChanged) {
                         tableContentChanged = currentTableContentChanged;
@@ -242,8 +242,8 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         });
     }
     
-    private Map<SharedDimension, Collection<?>> extractContent(Collection<RegattaDTO> regattas) {
-        Map<SharedDimension, Collection<?>> content = new HashMap<SharedDimension, Collection<?>>();
+    private Map<DimensionIdentifier, Collection<?>> extractContent(Collection<RegattaDTO> regattas) {
+        Map<DimensionIdentifier, Collection<?>> content = new HashMap<DimensionIdentifier, Collection<?>>();
         
         Set<RegattaDTO> regattasWithData = new HashSet<RegattaDTO>();
         Set<BoatClassDTO> boatClasses = new HashSet<BoatClassDTO>();
@@ -292,14 +292,14 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             }
         });
         
-        content.put(SharedDimension.RegattaName, sortedRegattas);
-        content.put(SharedDimension.BoatClassName, sortedBoatClasses);
-        content.put(SharedDimension.RaceName, sortedRaces);
-        content.put(SharedDimension.LegNumber, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        content.put(SharedDimension.LegType, Arrays.asList(LegType.values()));
-        content.put(SharedDimension.CompetitorName, competitors);
-        content.put(SharedDimension.SailID, competitors);
-        content.put(SharedDimension.Nationality, nationalities);
+        content.put(DimensionIdentifier.RegattaName, sortedRegattas);
+        content.put(DimensionIdentifier.BoatClassName, sortedBoatClasses);
+        content.put(DimensionIdentifier.RaceName, sortedRaces);
+        content.put(DimensionIdentifier.LegNumber, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        content.put(DimensionIdentifier.LegType, Arrays.asList(LegType.values()));
+        content.put(DimensionIdentifier.CompetitorName, competitors);
+        content.put(DimensionIdentifier.SailID, competitors);
+        content.put(DimensionIdentifier.Nationality, nationalities);
         
         return content;
     }
@@ -317,10 +317,10 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
 
     private Widget createTables() {
         HorizontalPanel tablesPanel = new HorizontalPanel();
-        tablesMappedByDimension = new HashMap<SharedDimension, SelectionTable<?, ?>>();
+        tablesMappedByDimension = new HashMap<DimensionIdentifier, SelectionTable<?, ?>>();
 
         SelectionTable<RegattaDTO, String> regattaNameTable = new SelectionTable<RegattaDTO, String>(stringMessages
-                .regatta(), SharedDimension.RegattaName) {
+                .regatta(), DimensionIdentifier.RegattaName) {
             @Override
             public String getValue(RegattaDTO regatta) {
                 return regatta.getName();
@@ -330,7 +330,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesMappedByDimension.put(regattaNameTable.getDimension(), regattaNameTable);
 
         SelectionTable<BoatClassDTO, String> boatClassTable = new SelectionTable<BoatClassDTO, String>(stringMessages
-                .boatClass(), SharedDimension.BoatClassName) {
+                .boatClass(), DimensionIdentifier.BoatClassName) {
             @Override
             public String getValue(BoatClassDTO boatClass) {
                 return boatClass.getName();
@@ -340,7 +340,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesMappedByDimension.put(boatClassTable.getDimension(), boatClassTable);
 
         SelectionTable<RaceDTO, String> raceNameTable = new SelectionTable<RaceDTO, String>(stringMessages.race(),
-                SharedDimension.RaceName) {
+                DimensionIdentifier.RaceName) {
             @Override
             public String getValue(RaceDTO race) {
                 return race.getName();
@@ -350,22 +350,22 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesMappedByDimension.put(raceNameTable.getDimension(), raceNameTable);
 
         SelectionTable<LegType, LegType> legTypeTable = new SimpleSelectionTable<LegType>(stringMessages.legType(),
-                SharedDimension.LegType);
+                DimensionIdentifier.LegType);
         tablesPanel.add(legTypeTable);
         tablesMappedByDimension.put(legTypeTable.getDimension(), legTypeTable);
 
         SelectionTable<Integer, Integer> legNumberTable = new SimpleSelectionTable<Integer>(stringMessages.legLabel(),
-                SharedDimension.LegNumber);
+                DimensionIdentifier.LegNumber);
         tablesPanel.add(legNumberTable);
         tablesMappedByDimension.put(legNumberTable.getDimension(), legNumberTable);
 
         SelectionTable<String, String> nationalityTable = new SimpleSelectionTable<String>(stringMessages
-                .nationality(), SharedDimension.Nationality);
+                .nationality(), DimensionIdentifier.Nationality);
         tablesPanel.add(nationalityTable);
         tablesMappedByDimension.put(nationalityTable.getDimension(), nationalityTable);
 
         SelectionTable<CompetitorDTO, String> competitorNameTable = new SelectionTable<CompetitorDTO, String>(stringMessages
-                .competitor(), SharedDimension.CompetitorName) {
+                .competitor(), DimensionIdentifier.CompetitorName) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getName();
@@ -375,7 +375,7 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         tablesMappedByDimension.put(competitorNameTable.getDimension(), competitorNameTable);
 
         SelectionTable<CompetitorDTO, String> competitorSailIDTable = new SelectionTable<CompetitorDTO, String>(stringMessages
-                .sailID(), SharedDimension.SailID) {
+                .sailID(), DimensionIdentifier.SailID) {
             @Override
             public String getValue(CompetitorDTO competitor) {
                 return competitor.getSailID();

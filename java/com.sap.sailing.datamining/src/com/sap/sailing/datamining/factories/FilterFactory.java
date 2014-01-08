@@ -19,7 +19,7 @@ import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 
 public final class FilterFactory {
 
@@ -29,7 +29,7 @@ public final class FilterFactory {
         return new PartitioningParallelFilter<DataType>(workerBuilder, executor);
     }
 
-    public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+    public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<DimensionIdentifier, Iterable<?>> selection) {
         ConcurrentFilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
         WorkerBuilder<FiltrationWorker<DataType>> builder = new FilterByCriteriaBuilder<DataType>(criteria); 
         return builder;
@@ -42,11 +42,11 @@ public final class FilterFactory {
         return new NonFilteringFilter<DataType>();
     }
 
-    private static <DataType> ConcurrentFilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<SharedDimension, Iterable<?>> selection) {
+    private static <DataType> ConcurrentFilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<DimensionIdentifier, Iterable<?>> selection) {
         DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         CompoundFilterCriteria<DataType> compoundCriteria = new AndCompoundFilterCriteria<DataType>();
 
-        for (Entry<SharedDimension, Iterable<?>> entry : selection.entrySet()) {
+        for (Entry<DimensionIdentifier, Iterable<?>> entry : selection.entrySet()) {
             Dimension<DataType, ?> dimension = dimensionManager.getDimensionFor(entry.getKey());
             if (dimension != null) {
                 ConcurrentFilterCriteria<DataType> criteria = createDimensionFilterCriteria(dimension, entry.getValue());

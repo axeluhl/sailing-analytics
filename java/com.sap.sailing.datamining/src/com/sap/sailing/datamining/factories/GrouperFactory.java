@@ -18,7 +18,7 @@ import com.sap.sailing.datamining.impl.PartitioningParallelGrouper;
 import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.SharedDimension;
+import com.sap.sailing.datamining.shared.DimensionIdentifier;
 
 public final class GrouperFactory {
     
@@ -56,10 +56,10 @@ public final class GrouperFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <DataType, ValueType> WorkerBuilder<GroupingWorker<DataType>> createMultiDimensionalGroupingWorkerBuilder(DataTypes dataType, List<SharedDimension> dimensionsToGroupBy) {
+    private static <DataType, ValueType> WorkerBuilder<GroupingWorker<DataType>> createMultiDimensionalGroupingWorkerBuilder(DataTypes dataType, List<DimensionIdentifier> dimensionsToGroupBy) {
         DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         Collection<Dimension<DataType, ValueType>> dimensions = new LinkedHashSet<Dimension<DataType, ValueType>>();
-        for (SharedDimension sharedDimension : dimensionsToGroupBy) {
+        for (DimensionIdentifier sharedDimension : dimensionsToGroupBy) {
             Dimension<DataType, ValueType> dimension = (Dimension<DataType, ValueType>) dimensionManager.getDimensionFor(sharedDimension);
             dimensions.add(dimension);
         }
