@@ -122,4 +122,11 @@ public interface PolarDataService {
      */
     public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
 
+    /**
+     * 
+     * @return The {@link BoatClass}es for which there are polar sheets available via
+     *         {@link PolarDataService#getPolarSheetForBoatClass(BoatClass)}
+     */
+    public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
+
 }

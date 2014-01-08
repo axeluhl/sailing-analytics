@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
+import com.sap.sailing.polars.caching.NoCacheEntryException;
 import com.sap.sailing.polars.caching.PolarFixCache;
 import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
 import com.sap.sailing.polars.caching.PolarSheetPerBoatClassCache;
@@ -84,9 +85,23 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
             Executor executor) throws InterruptedException, ExecutionException {
-        PolarFixAggregator aggregator = new PolarFixAggregator(trackedRaces, settings, executor);
-        aggregator.startPolarFixAggregation();
-        Set<PolarFix> fixes = aggregator.get();
+        Set<PolarFix> fixes;
+        // If settings are default, look into cache
+        if (settings.areDefault()) {
+            try {
+                fixes = polarFixCache.getFixesForTrackedRaces(trackedRaces);
+            } catch (NoCacheEntryException e) {
+                // If there is no cache entry for at least one of the races: Aggregate for non-cached races.
+                fixes = e.getCachedResultList();
+                PolarFixAggregator aggregator = new PolarFixAggregator(e.getNotCached(), settings, executor);
+                aggregator.startPolarFixAggregation();
+                fixes.addAll(aggregator.get());
+            }
+        } else {
+            PolarFixAggregator aggregator = new PolarFixAggregator(trackedRaces, settings, executor);
+            aggregator.startPolarFixAggregation();
+            fixes = aggregator.get();
+        }
         PolarSheetGenerator generator = new PolarSheetGenerator(fixes, settings);
         return generator.generate();
     }
@@ -111,6 +126,11 @@ public class PolarDataServiceImpl implements PolarDataService {
     @Override
     public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass) {
         return polarSheetPerBoatClassCache.get(boatClass, false);
+    }
+
+    @Override
+    public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
+        return polarSheetPerBoatClassCache.keySet();
     }
 
 }

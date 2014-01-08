@@ -32,7 +32,7 @@ public class PolarSheetGenerator {
     public PolarSheetGenerator(Set<PolarFix> fixes, PolarSheetGenerationSettings settings) {
         this.settings = settings;
         this.fixes = fixes;
-        stepping = settings.getWindStepping();;
+        stepping = settings.getWindStepping();
         polarData = initializePolarDataContainer();
     }
 
@@ -50,6 +50,9 @@ public class PolarSheetGenerator {
         Speed boatSpeed = polarFix.getBoatSpeed();
         Speed windSpeed = polarFix.getWindSpeed();
         int angle = (int) roundedAngle;
+        if (angle < 0) {
+            angle = (360 + angle);
+        }
         BoatAndWindSpeedWithOriginInfo speeds = new BoatAndWindSpeedWithOriginInfoImpl(boatSpeed, windSpeed,
                 polarFix.getGaugeIdString(), polarFix.getDayString());
         polarData.get(angle).add(speeds);

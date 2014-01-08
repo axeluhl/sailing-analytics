@@ -55,7 +55,9 @@ public class PolarFixCacheUpdater implements
             Map<RegattaAndRaceIdentifier, List<PolarFix>> oldCacheValue,
             Map<RegattaAndRaceIdentifier, List<PolarFix>> computedCacheUpdate, PolarFixCacheRaceInterval updateInterval) {
         Map<RegattaAndRaceIdentifier, List<PolarFix>> newCacheValue = new HashMap<RegattaAndRaceIdentifier, List<PolarFix>>();
-        newCacheValue.putAll(oldCacheValue);
+        if (oldCacheValue != null) {
+            newCacheValue.putAll(oldCacheValue);
+        }
         for (Entry<RegattaAndRaceIdentifier, List<PolarFix>> newEntry : computedCacheUpdate.entrySet()) {
             newCacheValue.put(newEntry.getKey(), newEntry.getValue());
         }

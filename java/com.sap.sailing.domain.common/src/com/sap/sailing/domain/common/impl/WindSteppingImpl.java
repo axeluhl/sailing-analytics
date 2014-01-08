@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.util.Arrays;
+
 import com.sap.sailing.domain.common.WindStepping;
 
 public class WindSteppingImpl implements WindStepping {
@@ -42,6 +44,28 @@ public class WindSteppingImpl implements WindStepping {
             result = levels[levelIndex];
         }
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(levels);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WindSteppingImpl other = (WindSteppingImpl) obj;
+        if (!Arrays.equals(levels, other.levels))
+            return false;
+        return true;
     }
 
 }

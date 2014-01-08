@@ -77,7 +77,9 @@ public class PolarFixAggregator implements Future<Set<PolarFix>> {
      *            wind's speed in knots
      */
     protected void addPolarFix(PolarFix polarFix) {
-        fixes.add(polarFix);
+        synchronized (fixes) {
+            fixes.add(polarFix);
+        }
     }
 
     private boolean allWorkersDone() {
