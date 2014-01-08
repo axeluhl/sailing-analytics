@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Xcelsiusadapter
-Bundle-SymbolicName: com.sap.sailing.xcelsiusadapter
+Bundle-Name: Leaderboard XML Export
+Bundle-SymbolicName: com.sap.sailing.xmlexport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -16,4 +16,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common
 Bundle-ClassPath: lib/jdom.jar,
  .
-Web-ContextPath: /xcelsius
+Web-ContextPath: /export
