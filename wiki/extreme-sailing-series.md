@@ -148,3 +148,5 @@ http://www.extremesailingseries.com/app/results/sap_results.php?event=istanbul
 Replacing istanbul with whatever the event name is for the results that you want to update. To update the overall series results just hit:
 
 http://www.extremesailingseries.com/app/results/sap_results.php?event=total
+
+http://www.extremesailingseries.com/app/results/csv_uploads/

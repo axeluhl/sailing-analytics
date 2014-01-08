@@ -31,7 +31,11 @@ Particularly when starting an EC2 instance, it is helpful to be able to do that 
 
 This will ask you for a comment about the release which goes into the release notes text file that accompanies the release. The build results are packed up into a .tar.gz file which is then uploaded to [releases.sapsailing.com](http://releases.sapsailing.com), using the name optionally provided using the -n parameter with the `release` action, or---as a default---the current timestamp for the release name.
 
-A release can be downloaded and installed to a server by changing to the server's directory, e.g., `~/servers/server` and there executing the `updateEC2Instance.sh` script. Afterwards, starting the instance works as after a local build.
+A release can be downloaded and installed to a server by changing to the server's directory, e.g., `~/servers/server` and there executing the `refreshInstance.sh` script with the parameter `install-release <release-name>`. Afterwards, starting the instance works as after a local build.
+
+## Working with Environments
+
+There exist a number of preconfigured environment configurations at [releases.sapsailing.com/environments](http://releases.sapsailing.com/environments). Such an environment can be automagically applied to your instance by changing to the servers directory and then executing the `refreshInstance.sh` script with the parameter `install-env <environment-name>`. This will update your env.sh. Make sure to afterwards restart your server.
 
 ## Starting, Administrating and Stopping a Java Instance
 

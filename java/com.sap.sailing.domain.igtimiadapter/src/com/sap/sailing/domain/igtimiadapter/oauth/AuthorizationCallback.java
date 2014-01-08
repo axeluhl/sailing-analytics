@@ -34,14 +34,14 @@ public class AuthorizationCallback {
     }
 
     @GET
-    @Produces("application/json;charset=UTF-8")
+    @Produces("text/plain;charset=UTF-8")
     @Path(AUTHORIZATIONCALLBACK)
     public Response obtainAccessToken(@QueryParam("code") String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
         Response result;
         if (code != null) {
             try {
                 connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
-                result = Response.ok().build();
+                result = Response.ok().entity("SAP Sailing Analytics authorized successfully to access user's tracks").build();
             } catch (Exception e) {
                 result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
                 logger.log(Level.SEVERE, "Error trying to obtain access token from authentication code " + code, e);

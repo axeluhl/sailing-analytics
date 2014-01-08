@@ -44,7 +44,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -64,7 +64,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private HorizontalPanel splitPanel;
     private CaptionPanel groupDetailsCaptionPanel;
 
-    private AbstractFilterablePanel<LeaderboardGroupDTO> groupsFilterablePanel;
+    private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> groupsFilterablePanel;
     private Button removeButton;
     private CellTable<LeaderboardGroupDTO> groupsTable;
     private MultiSelectionModel<LeaderboardGroupDTO> groupsSelectionModel;
@@ -84,7 +84,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private Button leaderboardUpButton;
     private Button leaderboardDownButton;
 
-    private AbstractFilterablePanel<StrippedLeaderboardDTO> leaderboardsFilterablePanel;
+    private LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> leaderboardsFilterablePanel;
     private CellTable<StrippedLeaderboardDTO> leaderboardsTable;
     private MultiSelectionModel<StrippedLeaderboardDTO> leaderboardsSelectionModel;
     private ListDataProvider<StrippedLeaderboardDTO> leaderboardsProvider;
@@ -171,7 +171,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
         leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
-        leaderboardsFilterablePanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
+        leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -392,7 +392,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
         groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
-        groupsFilterablePanel = new AbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
+        groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> string = new ArrayList<String>();

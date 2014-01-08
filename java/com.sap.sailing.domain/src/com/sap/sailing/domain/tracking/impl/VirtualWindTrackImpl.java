@@ -57,19 +57,20 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     public WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         WindWithConfidence<Pair<Position, TimePoint>> result = null;
         TimePoint adjustedAt;
-        TimePoint raceStartTimePoint = getTrackedRace().getStartOfRace();
+        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
-        if (raceStartTimePoint != null) {
+        if (startOfRace != null) {
+            TimePoint fourMinutesBeforeRaceStartTimePoint = startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS); // let wind tracks start four minutes before start
             if (timePointOfNewestEvent != null) {
-                if (at.compareTo(raceStartTimePoint) < 0) {
-                    adjustedAt = raceStartTimePoint;
+                if (at.compareTo(fourMinutesBeforeRaceStartTimePoint) < 0) {
+                    adjustedAt = fourMinutesBeforeRaceStartTimePoint;
                 } else if (at.compareTo(timePointOfNewestEvent) > 0) {
                     adjustedAt = timePointOfNewestEvent;
                 } else {
                     adjustedAt = at;
                 }
             } else {
-                adjustedAt = raceStartTimePoint;
+                adjustedAt = fourMinutesBeforeRaceStartTimePoint;
             }
         } else {
             if (timePointOfNewestEvent != null) {

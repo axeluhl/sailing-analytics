@@ -1,11 +1,10 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.Color;
 
 /**
  * Base interface for classes managing a set of {@link Competitor} objects.
@@ -27,8 +26,5 @@ public interface CompetitorFactory {
      */
     boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result);
 
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
-
-    DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, String displayColor, DynamicTeam team, DynamicBoat boat);
-
+    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat);
 }

@@ -88,6 +88,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 @Override
                 public void onSuccess(Pair<String, LeaderboardType> leaderboardNameAndType) {
                     if (leaderboardNameAndType != null && leaderboardName.equals(leaderboardNameAndType.getA())) {
+                        Window.setTitle(leaderboardName);
                         leaderboardType = leaderboardNameAndType.getB();
                         createUI(showRaceDetails, embedded, hideToolbar);
                     } else {

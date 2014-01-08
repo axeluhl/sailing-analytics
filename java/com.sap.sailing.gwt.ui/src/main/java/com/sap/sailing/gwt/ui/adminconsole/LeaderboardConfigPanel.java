@@ -64,7 +64,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
@@ -105,7 +105,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     private final CaptionPanel trackedRacesCaptionPanel;
     private final List<RegattaDTO> allRegattas;
 
-    private AbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
+    private LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
     final SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
@@ -197,7 +197,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        filterLeaderboardPanel = new AbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents, availableLeaderboardList, leaderboardTable, leaderboardList) {
+        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents, availableLeaderboardList, leaderboardTable, leaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -211,7 +211,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         leaderboardRemoveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm("Do you really want to remove the leaderboards?")) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards())) {
                     removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
                 }
             }
@@ -309,7 +309,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
                 if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm("Do you really want to remove the leaderboard: '" + leaderboardDTO.name + "' ?")) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboard(leaderboardDTO.name))) {
                         removeLeaderboard(leaderboardDTO);
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -318,7 +318,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(leaderboardDTO);
                     if (leaderboardDTO.type.isMetaLeaderboard()) {
-                        Window.alert("This is a meta leaderboard. It can't be changed here.");
+                        Window.alert(stringMessages.metaLeaderboardCannotBeChanged());
                     } else {
                         if (leaderboardDTO.type.isRegattaLeaderboard()) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
@@ -363,6 +363,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
+                    Window.open("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name, "", null);
                 }
             }
         });
@@ -736,7 +738,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     @Override
                     public void onSuccess(Boolean result) {
                         if (!result) {
-                            Window.alert("Failed to set new start time.");
+                            Window.alert(stringMessages.failedToSetNewStartTime());
                         }
                     }
                 });

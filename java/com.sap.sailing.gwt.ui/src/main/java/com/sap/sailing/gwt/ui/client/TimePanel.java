@@ -307,12 +307,22 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 timeSlider.setCurrentValue(new Double(time.getTime()), false);
             }
         }
-        dateLabel.setText(dateFormatter.format(time));
+        dateLabel.setText(getDateLabelText(time));
+        timeLabel.setText(getTimeLabelText(time));
+    }
+
+    protected String getTimeLabelText(Date time) {
+        final String timeLabelText;
         if (lastReceivedDataTimepoint == null) {
-            timeLabel.setText(timeFormatter.format(time));
+            timeLabelText = timeFormatter.format(time);
         } else {
-            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
+            timeLabelText = timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")";
         }
+        return timeLabelText;
+    }
+
+    protected String getDateLabelText(Date time) {
+        return dateFormatter.format(time);
     }
 
     protected Date getFromTime() {

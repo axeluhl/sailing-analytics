@@ -39,10 +39,12 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
@@ -63,8 +65,10 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -109,6 +113,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
+
+    public static final long TIME_BEFORE_START_TO_TRACK_WIND_MILLIS = 4 * 60 * 1000l; // let wind start four minutes before race
 
     private TrackedRaceStatus status;
 
@@ -767,6 +773,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
                 // competitor has finished race; use time point of crossing the finish line
                 end = markPassings.last().getTimePoint();
+            } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint() &&
+                    timePoint.after(markPassings.last().getTimePoint())) {
+                // if competitor has not finished the race (and the requested timepoint
+                // is after the last mark passing) then we can not tell anything about
+                // the distance traveled - this is in line with AbstractSimpleLeaderboardImpl#getTotalTimeSailedInMilliseconds
+                return null;
             }
             return getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
         }
@@ -1808,7 +1820,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
@@ -1863,7 +1875,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
@@ -2569,4 +2581,83 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getLineLengthAndAdvantage(at, getRace().getCourse().getLastWaypoint());
     }
 
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
+        SpeedWithConfidence<TimePoint> result = null;
+        if (getEndOfRace() != null) {
+            TimePoint fromTimePoint = getStartOfRace();
+            TimePoint toTimePoint = getEndOfRace();
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMillis);
+            WindTrack windTrack = getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMillis);
+            }
+            if (speedCounter > 0) {
+                Speed averageWindSpeed = new KnotSpeedImpl(sumWindSpeed / speedCounter);
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+                result = new SpeedWithConfidenceImpl<TimePoint>(averageWindSpeed, averageWindSpeedConfidence, toTimePoint);
+            }
+        } 
+        return result;
+    }
+
+    @Override
+    public Distance getCourseLength() {
+        List<Leg> legs = getRace().getCourse().getLegs();
+        Distance raceDistance = new NauticalMileDistance(0);
+        for (Leg leg : legs) {
+            Waypoint from = leg.getFrom();
+            Iterable<MarkPassing> markPassings = getMarkPassingsInOrder(from);
+            Iterator<MarkPassing> markPassingsIterator = markPassings.iterator();
+            if (!markPassingsIterator.hasNext()) {
+                return null;
+            }
+            MarkPassing firstPassing = markPassingsIterator.next();
+            TimePoint timePointOfFirstPassing = firstPassing.getTimePoint();
+            Waypoint to = leg.getTo();
+            Position fromPos = getApproximatePosition(from, timePointOfFirstPassing);
+            Position toPos = getApproximatePosition(to, timePointOfFirstPassing);
+            Distance legDistance = fromPos.getDistance(toPos);
+            raceDistance = raceDistance.add(legDistance);
+        }
+        return raceDistance;
+    }
+    
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+        Speed competitorSpeedWhenPassingStart = null;
+        lockForRead(competitorMarkPassings);
+        try {
+            if (!competitorMarkPassings.isEmpty()) {
+                TimePoint competitorStartTime = competitorMarkPassings.first().getTimePoint();
+                competitorSpeedWhenPassingStart = getTrack(competitor).getEstimatedSpeed(
+                        competitorStartTime);
+            }
+        } finally {
+            unlockAfterRead(competitorMarkPassings);
+        }
+        return competitorSpeedWhenPassingStart;
+    }
 }

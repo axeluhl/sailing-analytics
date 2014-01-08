@@ -28,7 +28,8 @@ public class FixFactory {
             String deviceSerialNumber = (String) e.getKey();
             JSONObject typesJson = (JSONObject) e.getValue();
             for (Entry<Object, Object> fixTypeAndFixesJson : typesJson.entrySet()) {
-                final String[] fixTypeAndOptionalColonSeparatedSensorsSubId = ((String) fixTypeAndFixesJson.getKey()).split(":");
+                final String fixTypeAndOptionalSensorId = (String) fixTypeAndFixesJson.getKey();
+                final String[] fixTypeAndOptionalColonSeparatedSensorsSubId = fixTypeAndOptionalSensorId.split(":");
                 int fixType = Integer.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[0]);
                 JSONObject fixesJson = (JSONObject) fixTypeAndFixesJson.getValue();
                 JSONArray timePointsMillis = (JSONArray) fixesJson.get("t");
@@ -50,6 +51,32 @@ public class FixFactory {
                     fixIndex++;
                 }
             }
+        }
+        return result;
+    }
+    
+    /**
+     * @param lastDataJson expected to use "c1", "c2", ... instead of "1" and "2" for the sensor parameters, and
+     * "timestamp" instead of "t" for the timestamp. The values are not provided as arrays but as single values.
+     */
+    public Iterable<Fix> createFixesFromLastDatum(JSONObject lastDataJson, Type type) {
+        List<Fix> result = new ArrayList<>();
+        JSONArray latestDataArray = (JSONArray) lastDataJson.get("latest_data");
+        for (Object d : latestDataArray) {
+            JSONObject latestDatum = (JSONObject) ((JSONObject) d).get("latest_datum");
+            String serialNumber = (String) latestDatum.get("serial_number");
+            // there is a field called "resource_id" but we're currently ignoring it because not all fixes have one and we currently
+            // don't have a use for it
+            Map<Integer, Object> valuesPerSubindex = new HashMap<>();
+            int i=1;
+            Object c_i;
+            while ((c_i=latestDatum.get("c"+i)) != null) {
+                valuesPerSubindex.put(i, c_i);
+                i++;
+            }
+            Sensor sensor = new SensorImpl(serialNumber, /* sensor ID */ 0); // Note: the sensor ID isn't obvious from neither the URL nor the response; using 0 as default
+            TimePoint timestamp = new MillisecondsTimePoint(((Number) latestDatum.get("timestamp")).longValue());
+            result.add(createFix(sensor, type, timestamp, valuesPerSubindex));
         }
         return result;
     }

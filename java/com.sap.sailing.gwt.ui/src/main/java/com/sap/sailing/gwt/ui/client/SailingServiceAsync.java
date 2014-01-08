@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -320,8 +319,6 @@ public interface SailingServiceAsync {
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
 
-    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
-
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
@@ -478,6 +475,15 @@ public interface SailingServiceAsync {
 
     void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> callback);
+
+    void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
     
+    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    
+    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 }
 

@@ -4,7 +4,7 @@ public interface LiveDataConnection {
     /**
      * Disconnects this connection. Afterwards, the connection will no longer feed live data to its listener(s).
      */
-    void disconnect() throws Exception;
+    void stop() throws Exception;
 
     /**
      * Waits for a successful connection for <code>timeoutInMillis</code> milliseconds. If the connection is successful

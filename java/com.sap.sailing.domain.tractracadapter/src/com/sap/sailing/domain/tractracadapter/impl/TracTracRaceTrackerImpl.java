@@ -214,11 +214,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             throw new RuntimeException("Connection failed. Could not connect to " + paramURL);
         }
         
-        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
-                + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
-        
         // check if there is a directory configured where stored data files can be cached
         storedURI = checkForCachedStoredData(storedURI);
+        
+        logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
+                + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
         
         // Initialize data controller using live and stored data sources
         controller = new DataController(liveURI, storedURI, this);
@@ -259,8 +259,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private URI checkForCachedStoredData(URI storedURI){
-        if (System.getProperty("cache.dir") != null) {
-            final String directory = System.getProperty("cache.dir");
+        if (System.getProperty("tractrac.mtb.cache.dir") != null) {
+            final String directory = System.getProperty("tractrac.mtb.cache.dir");
             if (new File(directory).exists()) {
                 final String[] pathFragments = storedURI.getPath().split("\\/");
                 final String mtbFileName = pathFragments[pathFragments.length-1];
@@ -295,6 +295,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
                 
                 try {
+                    // notice us using three slashes here - this is because of a bug in the TracAPI
                     return new URI("file:///" + directoryAndFileName);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
@@ -338,8 +339,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // now run the command once immediately and synchronously; see also bug 1345
         command.run();
         
-        // then schedule for periodic execution in background
-        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
+        // then schedule for periodic execution in background if the params url does not point to a file
+        int initialDelayInMilliseconds = 1000*30; int delayInMilliseconds = 1000*15;
+        ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(command, /* initialDelay */ initialDelayInMilliseconds, /* delay */ delayInMilliseconds, /* unit */ TimeUnit.MILLISECONDS);
         return task;
     }
 
@@ -519,6 +521,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         if (currentRace != null) {
             final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
             if (trackedRace != null) {
+                TimePoint raceStartTime = clientParams.getRace().getStartTime();
+                if (raceStartTime != null) {
+                    trackedRace.setStartTimeReceived(simulator == null ? raceStartTime : simulator.advanceStartTime(raceStartTime));
+                }
                 TimePoint startOfTracking = clientParams.getRace().getTrackingStartTime();
                 if (startOfTracking != null) {
                     trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
@@ -528,10 +534,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (endOfTracking != null) {
                     trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
                             .advance(endOfTracking));
-                }
-                TimePoint raceStartTime = clientParams.getRace().getStartTime();
-                if (raceStartTime != null) {
-                    trackedRace.setStartTimeReceived(raceStartTime);
                 }
             }
         }
@@ -585,7 +587,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     
     @Override
     public void stop() throws InterruptedException {
-        stop(/* stop receivers preemtively */ true);
+        stop(/* stop receivers preemtively */ false);
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
@@ -637,7 +639,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public void stopped() {
-        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces());
+        logger.info("stopped TracTrac tracking in tracker "+getID()+" for "+getRaces()+" while in status "+lastStatus);
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1.0);
         updateStatusOfTrackedRaces();
         // don't stop the tracker (see bug 1517) as it seems that the storedData... callbacks are unreliable, and

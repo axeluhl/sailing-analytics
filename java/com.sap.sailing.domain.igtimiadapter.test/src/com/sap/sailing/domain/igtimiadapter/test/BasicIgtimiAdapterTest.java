@@ -6,9 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -20,11 +22,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Group;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.Session;
@@ -33,14 +32,17 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Iterable<User> users = connection.getUsers();
-        assertEquals(1, Util.size(users));
-        assertEquals(connection.getAccount().getUser().getId(), users.iterator().next().getId());
+        assertEquals(2, Util.size(users));
+        Set<Long> userIds = new HashSet<>();
+        for (User user : users) {
+            userIds.add(user.getId());
+        }
+        assertTrue(userIds.contains(connection.getAccount().getUser().getId()));
     }
 
     @Test
@@ -56,7 +58,7 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         assertFalse(Util.isEmpty(daws));
         for (DataAccessWindow daw : daws) {
             assertEquals("DD-EE-AAGA", daw.getDeviceSerialNumber());
-            assertTrue(daw.getRecipient() instanceof Group);
+            assertTrue(daw.getId() == 17012 || daw.getRecipient() instanceof Group);
         }
     }
     
@@ -76,10 +78,10 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     
     @Test
     public void testGetSessions() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4571l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
+        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4846l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
         assertTrue(sessions.iterator().hasNext());
         final Session session = sessions.iterator().next();
-        assertEquals("Auto Session - 01:14:02 10 Nov", session.getName());
+        assertEquals("Humba", session.getName());
         User sessionOwher = connection.getUser(session.getOwnerId());
         assertEquals("Uhl", sessionOwher.getSurname());
     }
@@ -88,8 +90,8 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Map<Type, Double> typesAndCompression = new HashMap<>();
         typesAndCompression.put(Type.gps_latlong, 0.0);
-        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384420883000l),
-                new MillisecondsTimePoint(1384421639000l), Collections.singleton("GA-EN-AAEJ"), typesAndCompression);
+        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384068419000l),
+                new MillisecondsTimePoint(1384091860000l), Collections.singleton("DD-EE-AAGA"), typesAndCompression);
         assertTrue(data.iterator().hasNext());
     }
     
@@ -113,9 +115,6 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
         TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
         TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
-        IgtimiConnection connection = connectionFactory.connect(account);
         // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
         Set<String> deviceSerialNumbers = new HashSet<>();
@@ -130,6 +129,19 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
             assertTrue(fix.getTimePoint().compareTo(start) >= 0 && fix.getTimePoint().compareTo(end) <= 0);
         }
         assertTrue(foundWind);
+    }
+    
+    @Test
+    public void testReadLatestData() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        Iterable<Fix> fixes = connection.getLatestFixes(Arrays.asList(new String[] { "DD-EE-AAHG", "GA-EN-AAEA", "DD-EE-AAGA" }), Type.SOG );
+        assertEquals(2, Util.size(fixes));
+        Iterator<Fix> i = fixes.iterator();
+        Fix fix1 = i.next();
+        assertEquals("DD-EE-AAGA", fix1.getSensor().getDeviceSerialNumber());
+        assertEquals(Type.SOG, fix1.getType());
+        Fix fix2 = i.next();
+        assertEquals("DD-EE-AAHG", fix2.getSensor().getDeviceSerialNumber());
+        assertEquals(Type.SOG, fix2.getType());
     }
     
 }

@@ -359,6 +359,14 @@ public interface Leaderboard extends Named {
      * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
      */
     Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * @return <code>null</code> if no tracked race is available in this leaderboard, the competitor hasn't started
+     * a single race at <code>timePoint</code> or if the competitor has not finished one of the races. This method
+     * computes the average speed starting with the first mark passing until <code>timePoint</code> or if earlier then
+     * the timePoint of the last mark passing.
+     */
+    Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
     /**
      * @param legType the leg type for which to add up the times sailed

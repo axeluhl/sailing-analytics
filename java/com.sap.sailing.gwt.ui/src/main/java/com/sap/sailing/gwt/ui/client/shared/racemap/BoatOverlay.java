@@ -3,14 +3,18 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
@@ -38,22 +42,38 @@ public class BoatOverlay extends CanvasOverlayV3 {
     private int canvasWidth;
     private int canvasHeight;
 
-    private String color; 
+    private Color color; 
 
     private Map<Integer, Pair<Double, Size>> boatScaleAndSizePerZoomCache; 
 
     private final BoatClassVectorGraphics boatVectorGraphics;
-    
-    public BoatOverlay(MapWidget map, int zIndex, final CompetitorDTO competitorDTO, String color) {
-        super(map, zIndex);
+
+    /**
+     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
+     */
+    private LatLngBounds currentMapBounds;
+
+    public BoatOverlay(final RaceMap map, int zIndex, final CompetitorDTO competitorDTO, Color color) {
+        super(map.getMap(), zIndex);
         this.boatClass = competitorDTO.getBoatClass();
         this.color = color;
 
         boatScaleAndSizePerZoomCache = new HashMap<Integer, Pair<Double,Size>>();
-        
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
-    }
 
+        map.getMap().addBoundsChangeHandler(new BoundsChangeMapHandler() {
+            @Override
+            public void onEvent(BoundsChangeMapEvent event) {
+                if (!map.isAutoZoomInProgress() && !map.getMap().getBounds().equals(currentMapBounds)) {
+                    for (BoatOverlay boatOverlay : map.getBoatOverlays().values()) {
+                        boatOverlay.removeCanvasPositionTransition();
+                    }
+                }
+                currentMapBounds = map.getMap().getBounds();
+            }
+        });
+    }
+    
     @Override
     protected void draw() {
         if (mapProjection != null && boatFix != null) {
@@ -65,8 +85,13 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 boatScaleAndSize = getBoatScaleAndSize(boatClass);
                 boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
             }
+
             double boatSizeScaleFactor = boatScaleAndSize.getA();
-            double boatDrawingAngle = boatFix.speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
+            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
+            if (speedWithBearing == null) {
+                speedWithBearing = new SpeedWithBearingDTO(0, 0);
+            }
+            double boatDrawingAngle = speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
             if (boatDrawingAngle < 0) {
                 boatDrawingAngle += 360;
             }
@@ -76,7 +101,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             setCanvasSize(canvasWidth, canvasHeight);
 
             boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
-                    canvasWidth, canvasHeight, boatDrawingAngle, boatSizeScaleFactor, color);
+                    canvasWidth, canvasHeight, boatDrawingAngle, boatSizeScaleFactor, color.getAsHtml());
             
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
@@ -86,11 +111,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
     
-    public GPSFixDTO getBoatFix() {
-        return boatFix;
-    }
-
-    public void setBoatFix(GPSFixDTO boatFix) {
+    public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionTransition();
+        } else {
+            setCanvasPositionTransition(timeForPositionTransitionMillis);
+        }
         this.boatFix = boatFix;
     }
 

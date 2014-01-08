@@ -20,10 +20,13 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiverAdapter;
+import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
@@ -32,6 +35,8 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.Wind;
@@ -41,9 +46,14 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 /**
  * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
- * work, the time-wise adjacent {@link AWA}, {@link HDG}/{@link HDGM} and {@link GpsLatLong} fixes are used. If only
- * a magnetic heading ({@link HDGM}) is available, the {@link DeclinationService} is used to map that to a true heading.
- * The true wind direction is determined by adding the boat speed vector onto the apparent wind vector. 
+ * work, the time-wise adjacent {@link AWA}, {@link HDG}/{@link HDGM} and {@link GpsLatLong} fixes are used. If only a
+ * magnetic heading ({@link HDGM}) is available, the {@link DeclinationService} is used to map that to a true heading.
+ * The true wind direction is determined by adding the boat speed vector onto the apparent wind vector.
+ * <p>
+ * 
+ * Use the class by hooking it up to a {@link WebWocketConnectionManager} using
+ * {@link WebSocketConnectionManager#addListener(BulkFixReceiver)} and {@link #addListener(WindListener) add} a
+ * {@link WindListener} to this instance.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -59,7 +69,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     private final DynamicTrack<HDGM> hdgmTrack;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
-    private final ConcurrentHashMap<WindListener, WindListener> listeners;
+    private final ConcurrentHashMap<IgtimiWindListener, IgtimiWindListener> listeners;
     
     private class FixReceiver extends IgtimiFixReceiverAdapter {
         @Override
@@ -98,17 +108,17 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public IgtimiWindReceiver(String deviceSerialNumber) {
+    public IgtimiWindReceiver(Iterable<String> deviceSerialNumbers) {
         receiver = new FixReceiver();
         declinationService = DeclinationService.INSTANCE;
         listeners = new ConcurrentHashMap<>();
-        awaTrack = new DynamicTrackImpl<>("AWA Track for Igtimi wind track for device "+deviceSerialNumber);
-        awsTrack = new DynamicTrackImpl<>("AWS Track for Igtimi wind track for device "+deviceSerialNumber);
-        gpsTrack = new DynamicTrackImpl<>("GPS Track for Igtimi wind track for device "+deviceSerialNumber);
-        cogTrack = new DynamicTrackImpl<>("COG Track for Igtimi wind track for device "+deviceSerialNumber);
-        sogTrack = new DynamicTrackImpl<>("SOG Track for Igtimi wind track for device "+deviceSerialNumber);
-        hdgTrack = new DynamicTrackImpl<>("HDG Track for Igtimi wind track for device "+deviceSerialNumber);
-        hdgmTrack = new DynamicTrackImpl<>("HDGM Track for Igtimi wind track for device "+deviceSerialNumber);
+        awaTrack = new DynamicTrackImpl<>("AWA Track for Igtimi wind track for device "+deviceSerialNumbers);
+        awsTrack = new DynamicTrackImpl<>("AWS Track for Igtimi wind track for device "+deviceSerialNumbers);
+        gpsTrack = new DynamicTrackImpl<>("GPS Track for Igtimi wind track for device "+deviceSerialNumbers);
+        cogTrack = new DynamicTrackImpl<>("COG Track for Igtimi wind track for device "+deviceSerialNumbers);
+        sogTrack = new DynamicTrackImpl<>("SOG Track for Igtimi wind track for device "+deviceSerialNumbers);
+        hdgTrack = new DynamicTrackImpl<>("HDG Track for Igtimi wind track for device "+deviceSerialNumbers);
+        hdgmTrack = new DynamicTrackImpl<>("HDGM Track for Igtimi wind track for device "+deviceSerialNumbers);
     }
     
     /**
@@ -128,11 +138,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 }
             });
         }
+        logger.info("Received "+Util.size(awsFixes)+" wind fixes");
         for (AWS aws : awsFixes) {
             try {
                 final Wind wind = getWind(aws.getTimePoint());
                 if (wind != null) {
-                    notifyListeners(wind);
+                    notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
                 }
             } catch (ClassNotFoundException | IOException | ParseException e) {
                 logger.log(Level.INFO, "Exception while trying to construct Wind fix from Igtimi fix " + aws, e);
@@ -140,13 +151,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         }
     }
 
-    public void addListener(WindListener listener) {
+    public void addListener(IgtimiWindListener listener) {
         listeners.put(listener, listener);
     }
     
-    public void notifyListeners(Wind wind) {
-        for (WindListener listener : listeners.keySet()) {
-            listener.windDataReceived(wind);
+    public void notifyListeners(Wind wind, String deviceSerialNumber) {
+        for (IgtimiWindListener listener : listeners.keySet()) {
+            listener.windDataReceived(wind, deviceSerialNumber);
         }
     }
     
@@ -398,5 +409,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
 
     private DynamicTrack<HDGM> getHdgmTrack() {
         return hdgmTrack;
+    }
+
+    /**
+     * Tells the set of types that this wind receiver is interested in. Can be used to subscribe for fixes from
+     * resource data. See {@link IgtimiConnection#getResourceData(TimePoint, TimePoint, Iterable, Type...)}.
+     */
+    public Type[] getFixTypes() {
+        return new Type[] { Type.AWA, Type.AWS, Type.HDG, Type.HDGM, Type.gps_latlong, Type.COG, Type.SOG };
     }
 }

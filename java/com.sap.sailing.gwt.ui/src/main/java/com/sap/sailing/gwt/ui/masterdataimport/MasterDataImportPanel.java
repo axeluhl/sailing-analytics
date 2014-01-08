@@ -57,6 +57,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final EventRefresher eventRefresher;
     private final LeaderboardGroupRefresher leaderboardGroupRefresher;
     private CheckBox compressSwitch;
+    private TextBox filterBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, EventRefresher eventRefresher,
@@ -70,7 +71,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
-        hostBox.setText("http://live2.sapsailing.com/");
+        hostBox.setText("http://www.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
@@ -243,6 +244,9 @@ public class MasterDataImportPanel extends VerticalPanel {
                     leaderboardgroupListBox.addItem(lgName);
                 }
                 changeButtonStateAccordingToApplicationState();
+                if (!filterBox.getValue().isEmpty()) {
+                    filterLeaderboardGroupList();
+                }
             }
 
             @Override
@@ -294,7 +298,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.add(new Label(stringMessages.filterName() + ":"));
-        TextBox filterBox = new TextBox();
+        filterBox = new TextBox();
         setFilterHandler(filterBox);
         filterPanel.add(filterBox);
         contentPanel.add(filterPanel);
@@ -331,24 +335,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                clearListBox();
-                int visibleNameCount = 0;
-                List<String> filterTexts = Arrays.asList(filterBox.getText().split(" "));
-                for(String name : allLeaderboardGroupNames) {
-                    boolean containsAllFilterTexts = true;
-                    for (String filterText : filterTexts) {
-                        if (!name.toUpperCase().contains(filterText.toUpperCase())) {
-                            containsAllFilterTexts = false;
-                            break;
-                        }
-                    }
-                    if (containsAllFilterTexts) {
-                        leaderboardgroupListBox.addItem(name);
-                        visibleNameCount++;
-                    }
-                }
-                leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
-                changeButtonStateAccordingToApplicationState();
+                filterLeaderboardGroupList();
             }
         });
     }
@@ -358,6 +345,27 @@ public class MasterDataImportPanel extends VerticalPanel {
         for (int i = itemCount - 1; i >= 0; i--) {
             leaderboardgroupListBox.removeItem(i);
         }
+    }
+
+    private void filterLeaderboardGroupList() {
+        clearListBox();
+        int visibleNameCount = 0;
+        List<String> filterTexts = Arrays.asList(filterBox.getText().split(" "));
+        for (String name : allLeaderboardGroupNames) {
+            boolean containsAllFilterTexts = true;
+            for (String filterText : filterTexts) {
+                if (!name.toUpperCase().contains(filterText.toUpperCase())) {
+                    containsAllFilterTexts = false;
+                    break;
+                }
+            }
+            if (containsAllFilterTexts) {
+                leaderboardgroupListBox.addItem(name);
+                visibleNameCount++;
+            }
+        }
+        leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
+        changeButtonStateAccordingToApplicationState();
     }
 
 }

@@ -80,7 +80,7 @@ public class SignInTest {
     @Test
     public void testAddToken() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("de2d6531236200f7c9fb69a0463ffe8d6b13f62bd7aad8de98c22862e4928e8a");
         assertEquals("axel.uhl@gmx.de", account.getUser().getEmail());
         assertSame(account, connectionFactory.getExistingAccountByEmail("axel.uhl@gmx.de"));
     }
