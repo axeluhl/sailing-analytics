@@ -2475,15 +2475,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     Mark mark2 = markIter.next();
                     final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
                     final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
-                    Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
-                    Waypoint nextWaypoint = waypointsIter.next();
-                    Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
-                            .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
-                    Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2.getDifferenceTo(bearingFromStartToNextWaypoint);
-                    if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
-                        starboardMarkPosition = estimatedPositionMark1;
+                    if (approximatePositionOfStart != null && estimatedPositionMark1 != null || estimatedPositionMark2 != null) {
+                        Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
+                        Waypoint nextWaypoint = waypointsIter.next();
+                        Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
+                                .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
+                        Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2
+                                .getDifferenceTo(bearingFromStartToNextWaypoint);
+                        if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
+                            starboardMarkPosition = estimatedPositionMark1;
+                        } else {
+                            starboardMarkPosition = estimatedPositionMark2;
+                        }
                     } else {
-                        starboardMarkPosition = estimatedPositionMark2;
+                        // at least one of the line's two marks' positions couldn't be determined; can't say which
+                        // one is on starboard and therefore don't know anything
+                        starboardMarkPosition = null;
                     }
                 } else {
                     // only one waypoint in course; cannot determine bearing to next mark
