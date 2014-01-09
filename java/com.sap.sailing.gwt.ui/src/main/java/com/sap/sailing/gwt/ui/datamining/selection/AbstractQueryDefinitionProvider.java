@@ -58,11 +58,6 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         }
         
         ValidateGrouper: switch (grouper) {
-        case Custom:
-            if (queryDefinition.getCustomGrouperScriptText().isEmpty()) {
-                return stringMessages.noCustomGrouperScriptTextError();
-            }
-            break;
         case Dimensions:
             for (DimensionIdentifier dimension : queryDefinition.getDimensionsToGroupBy()) {
                 if (dimension != null) {

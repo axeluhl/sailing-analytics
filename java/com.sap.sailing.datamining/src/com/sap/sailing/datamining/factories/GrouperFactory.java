@@ -5,20 +5,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.BaseBindingProvider;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.ParallelGrouper;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.builders.DynamicGroupingWorkerBuilder;
 import com.sap.sailing.datamining.builders.MultiDimensionalGroupingWorkerBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
 import com.sap.sailing.datamining.impl.PartitioningParallelGrouper;
-import com.sap.sailing.datamining.impl.gpsfix.GPSFixBaseBindingProvider;
 import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 
 public final class GrouperFactory {
     
@@ -31,28 +28,11 @@ public final class GrouperFactory {
 
     private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createGroupingWorkerBuilder(QueryDefinition queryDefinition) {
         switch (queryDefinition.getGrouperType()) {
-        case Custom:
-            return createDynamicGroupingWorkerBuilder(queryDefinition.getCustomGrouperScriptText(), queryDefinition.getDataType());
         case Dimensions:
             return createMultiDimensionalGroupingWorkerBuilder(queryDefinition.getDataType(), queryDefinition.getDimensionsToGroupBy());
         }
         throw new IllegalArgumentException("Not yet implemented for the given grouper type: "
                 + queryDefinition.getGrouperType().toString());
-    }
-
-    private static <DataType> WorkerBuilder<GroupingWorker<DataType>> createDynamicGroupingWorkerBuilder(String grouperScriptText, DataTypes dataType) {
-        BaseBindingProvider<DataType> baseBindingProvider = createBaseBindingProvider(dataType);
-        return new DynamicGroupingWorkerBuilder<DataType>(grouperScriptText, baseBindingProvider);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <DataType> BaseBindingProvider<DataType> createBaseBindingProvider(DataTypes dataType) {
-        switch (dataType) {
-        case GPSFix:
-            return (BaseBindingProvider<DataType>) new GPSFixBaseBindingProvider();
-        }
-        throw new IllegalArgumentException("Not yet implemented for the given data type: "
-                + dataType.toString());
     }
 
     @SuppressWarnings("unchecked")

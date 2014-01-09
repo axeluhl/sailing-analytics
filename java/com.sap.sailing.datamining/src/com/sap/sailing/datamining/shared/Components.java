@@ -4,7 +4,7 @@ package com.sap.sailing.datamining.shared;
 public final class Components {
 
     public enum GrouperType {
-        Dimensions, Custom
+        Dimensions
     }
 
     public enum AggregatorType {

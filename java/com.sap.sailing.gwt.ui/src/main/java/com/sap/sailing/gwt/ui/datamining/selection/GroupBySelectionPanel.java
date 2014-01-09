@@ -9,16 +9,14 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.Renderer;
-import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public abstract class GroupBySelectionPanel extends FlowPanel {
@@ -26,8 +24,6 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
     private StringMessages stringMessages;
 
     private ValueListBox<GrouperType> grouperTypeListBox;
-    private DeckPanel groupByOptionsPanel;
-    private TextArea customGrouperScriptTextBox;
     private HorizontalPanel dimensionsToGroupByPanel;
     private List<ValueListBox<DimensionIdentifier>> dimensionsToGroupByBoxes;
 
@@ -37,36 +33,19 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
 
         add(createGrouperTypeSelectionPanel());
 
-        groupByOptionsPanel = new DeckPanel();
-        add(groupByOptionsPanel);
-
         dimensionsToGroupByPanel = new HorizontalPanel();
         dimensionsToGroupByPanel.setSpacing(5);
-        groupByOptionsPanel.add(dimensionsToGroupByPanel);
+        add(dimensionsToGroupByPanel);
         
         ValueListBox<DimensionIdentifier> dimensionToGroupByBox = createDimensionToGroupByBox();
         dimensionsToGroupByPanel.add(dimensionToGroupByBox);
         dimensionsToGroupByBoxes.add(dimensionToGroupByBox);
-
-        FlowPanel dynamicGroupByPanel = new FlowPanel();
-        groupByOptionsPanel.add(dynamicGroupByPanel);
-        dynamicGroupByPanel.add(new Label("public Object getValueToGroupByFrom(GPSFix data) {"));
-        customGrouperScriptTextBox = new TextArea();
-        customGrouperScriptTextBox.setCharacterWidth(100);
-        customGrouperScriptTextBox.setVisibleLines(1);
-        dynamicGroupByPanel.add(customGrouperScriptTextBox);
-        dynamicGroupByPanel.add(new Label("}"));
-
-        groupByOptionsPanel.showWidget(0);
     }
 
     public void apply(QueryDefinition queryDefinition) {
         grouperTypeListBox.setValue(queryDefinition.getGrouperType(), true);
         
         switch (queryDefinition.getGrouperType()) {
-        case Custom:
-            customGrouperScriptTextBox.setText(queryDefinition.getCustomGrouperScriptText());
-            break;
         case Dimensions:
             applyDimensionsToGroupBy(queryDefinition);
             break;
@@ -85,10 +64,6 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
 
     public GrouperType getGrouperType() {
         return grouperTypeListBox.getValue();
-    }
-
-    public String getCustomGrouperScriptText() {
-        return getGrouperType() == GrouperType.Custom ? customGrouperScriptTextBox.getText() : "";
     }
 
     public Collection<DimensionIdentifier> getDimensionsToGroupBy() {
@@ -123,23 +98,11 @@ public abstract class GroupBySelectionPanel extends FlowPanel {
             }
         });
         grouperTypeListBox.setValue(GrouperType.Dimensions, false);
-        //TODO Enable this, after custom groupers are safe
-//        grouperTypeListBox.setAcceptableValues(Arrays.asList(GrouperType.values()));
         selectGroupByPanel.add(grouperTypeListBox);
         
         grouperTypeListBox.addValueChangeHandler(new ValueChangeHandler<GrouperType>() {
             @Override
             public void onValueChange(ValueChangeEvent<GrouperType> event) {
-                if (event.getValue() != null) {
-                    switch (event.getValue()) {
-                    case Custom:
-                        groupByOptionsPanel.showWidget(1);
-                        break;
-                    case Dimensions:
-                        groupByOptionsPanel.showWidget(0);
-                        break;
-                    }
-                }
                 finishValueChangedHandling();
             }
         });

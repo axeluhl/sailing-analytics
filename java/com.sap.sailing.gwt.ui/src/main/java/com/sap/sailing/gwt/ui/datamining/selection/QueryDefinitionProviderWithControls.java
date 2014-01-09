@@ -74,9 +74,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                                                                    statisticProvider.getDataType());
         
         switch (queryDTO.getGrouperType()) {
-        case Custom:
-            queryDTO.setCustomGrouperScriptText(groupBySelectionPanel.getCustomGrouperScriptText());
-            break;
         case Dimensions:
         default:
             for (DimensionIdentifier dimension : groupBySelectionPanel.getDimensionsToGroupBy()) {

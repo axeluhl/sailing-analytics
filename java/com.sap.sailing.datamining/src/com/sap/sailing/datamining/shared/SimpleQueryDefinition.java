@@ -21,7 +21,6 @@ public class SimpleQueryDefinition implements QueryDefinition {
     private AggregatorType aggregatorType;
     private DataTypes dataType;
 
-//    private String customGrouperScriptText;
     private List<DimensionIdentifier> dimensionsToGroupBy;
     private Map<DimensionIdentifier, Iterable<?>> selectionMappedByDimension;
     
@@ -38,7 +37,6 @@ public class SimpleQueryDefinition implements QueryDefinition {
         this.aggregatorType = aggregatorType;
         this.dataType = dataType;
 
-//        customGrouperScriptText = "";
         dimensionsToGroupBy = new ArrayList<DimensionIdentifier>();
         selectionMappedByDimension = new HashMap<DimensionIdentifier, Iterable<?>>();
     }
@@ -69,12 +67,6 @@ public class SimpleQueryDefinition implements QueryDefinition {
     }
 
     @Override
-    public String getCustomGrouperScriptText() {
-//        return customGrouperScriptText;
-        return "";
-    }
-
-    @Override
     public List<DimensionIdentifier> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
@@ -90,10 +82,6 @@ public class SimpleQueryDefinition implements QueryDefinition {
 
     public void setSelectionFor(DimensionIdentifier dimension, Collection<?> selection) {
         selectionMappedByDimension.put(dimension, selection);
-    }
-
-    public void setCustomGrouperScriptText(String scriptText) {
-//        customGrouperScriptText = scriptText;
     }
 
 }
