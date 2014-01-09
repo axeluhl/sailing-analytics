@@ -65,11 +65,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Mark mark, Competitor competitor) {
-    	return new MarkPassingImpl(timePoint, waypoint, mark, competitor);
-    }
-
-    @Override
     public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }

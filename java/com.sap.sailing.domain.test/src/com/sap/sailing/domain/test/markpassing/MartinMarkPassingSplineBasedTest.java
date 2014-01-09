@@ -168,7 +168,7 @@ public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingT
 				// If the intersection is at 75% of the interpolated course, t_pass is at 75% between t_prev and t_fix.
 				// This cast truncates the milliseconds, which is acceptable at the moment.
 				TimePoint timePoint = time.minus((long) ((prevTime.asMillis() - time.asMillis()) * entry.getValue()));
-				possiblePassings.put(DomainFactory.INSTANCE.createMarkPassing(timePoint, wp, passedMark, competitor), new DegreePosition(entry.getKey().y(), entry.getKey().x()));
+				possiblePassings.put(DomainFactory.INSTANCE.createMarkPassing(timePoint, wp, competitor), new DegreePosition(entry.getKey().y(), entry.getKey().x()));
 			}
 		}
 		Entry<MarkPassing, Position> result = null;

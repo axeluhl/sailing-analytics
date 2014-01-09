@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.test.markpassing.MartinAbstractMarkPassingTest;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -154,11 +153,11 @@ public class MartinMarkPassingBearingBasedTest extends MartinAbstractMarkPassing
 				(passingInstruction.equals(PassingInstruction.Port) &&
 				passingBearingDelta > 0)) {
 			// markToBoatBearing is smaller than passing bearing -> passed on port
-			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
+			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, competitor);
 		} else if (	passingInstruction.equals(PassingInstruction.Starboard) &&
 					passingBearingDelta < 0) {
 			// markToBoatBearing is greater than passing bearing -> passed on stb
-			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, mark, competitor);
+			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, competitor);
 		}
 		return null;
 	}
@@ -238,12 +237,12 @@ public class MartinMarkPassingBearingBasedTest extends MartinAbstractMarkPassing
 				mark1PassingBearingDelta < 0 &&				
 				mark2PassingBearingDelta > 0) {
 			// gate passed if mark1 had to be passed on stb
-			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, closestMark, competitor);
+			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint,competitor);
 		} else if (	PassingInstructionOfMark1OfGate.equals(PassingInstruction.Port) &&
 				mark1PassingBearingDelta > 0 &&				
 				mark2PassingBearingDelta < 0) {
 			// gate passed if mark1 had to be passed on port
-			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, closestMark, competitor);
+			return DomainFactory.INSTANCE.createMarkPassing(fix.getTimePoint(), waypoint, competitor);
 		}
 		return null;
 	}

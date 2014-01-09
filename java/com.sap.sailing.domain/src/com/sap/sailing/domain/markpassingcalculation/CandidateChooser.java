@@ -41,6 +41,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
     static double strictness = 200;
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
+        
+        //Floro: ~11 14 17
+        
 
         @Override
         public double getReaching(Wind w) {
@@ -49,12 +52,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
         @Override
         public double getUpwind(Wind w) {
-            return 16;
+            return 11;
         }
 
         @Override
         public double getDownwind(Wind w) {
-            return 19;
+            return 17;
         }
 
     };

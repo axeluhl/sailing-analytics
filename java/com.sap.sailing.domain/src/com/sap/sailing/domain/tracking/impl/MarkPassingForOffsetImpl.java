@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -13,16 +12,14 @@ public class MarkPassingForOffsetImpl implements MarkPassingForOffsetWayPoint {
     private final TimePoint timePoint;
     private final Waypoint waypoint;
     private final Competitor competitor;
-    private final Mark mark;
     private final MarkPassing markpassingforOffset;
 
     
-    public MarkPassingForOffsetImpl(TimePoint timePoint, Waypoint waypoint, Mark mark, Competitor competitor, MarkPassing markPassingforOffset) {
+    public MarkPassingForOffsetImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor, MarkPassing markPassingforOffset) {
         super();
         this.timePoint = timePoint;
         this.waypoint = waypoint;
         this.competitor = competitor;
-        this.mark = mark;
         this.markpassingforOffset = markPassingforOffset;
     }
 
@@ -34,11 +31,6 @@ public class MarkPassingForOffsetImpl implements MarkPassingForOffsetWayPoint {
     @Override
     public Waypoint getWaypoint() {
         return waypoint;
-    }
-    
-    @Override
-    public Mark getMark() {
-                return mark;
     }
 
     @Override

@@ -11,18 +11,12 @@ public class MarkPassingImpl implements MarkPassing {
     private final TimePoint timePoint;
     private final Waypoint waypoint;
     private final Competitor competitor;
-    private final Mark mark;
     
     public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
-        this(timePoint, waypoint, null, competitor);
-    }
-    
-    public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Mark mark, Competitor competitor) {
     	super();
     	this.timePoint = timePoint;
         this.waypoint = waypoint;
         this.competitor = competitor;
-    	this.mark = mark;
     }
 
     @Override
@@ -34,12 +28,7 @@ public class MarkPassingImpl implements MarkPassing {
     public Waypoint getWaypoint() {
         return waypoint;
     }
-    
-    @Override
-    public Mark getMark() {
-		return mark;
-    }
-
+   
     @Override
     public Competitor getCompetitor() {
         return competitor;
