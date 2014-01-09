@@ -29,27 +29,27 @@ public abstract class AbstractRealRaceMarkPassingTest extends OnlineTracTracBase
 
     private boolean forceReload = true;
     
-    abstract void testRace(String raceID) throws IOException, InterruptedException, URISyntaxException;
+    abstract void testRace() throws IOException, InterruptedException, URISyntaxException;
 
     @Test
     public void testRace1() throws IOException, InterruptedException, URISyntaxException {
         setUp("bca3b490-2dce-0131-27f0-60a44ce903c3");
-        testRace("bca3b490-2dce-0131-27f0-60a44ce903c3");
+        testRace();
     }
     @Test
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
         setUp("52697ec0-2dd0-0131-2802-60a44ce903c3");
-        testRace("52697ec0-2dd0-0131-2802-60a44ce903c3");
+        testRace();
     }
     @Test
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
         setUp("528a0f30-2dd0-0131-2819-60a44ce903c3");
-        testRace("528a0f30-2dd0-0131-2819-60a44ce903c3");
+        testRace();
     }
     @Test
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         setUp("529a4150-2dd0-0131-2830-60a44ce903c3");
-        testRace("529a4150-2dd0-0131-2830-60a44ce903c3");
+        testRace();
     }
     
     protected void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {

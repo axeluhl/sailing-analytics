@@ -79,7 +79,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     @Override
     public void calculateFixesAffectedByNewCompetitorFixes(Competitor c, List<GPSFix> fixes) {
         if (!affectedFixes.containsKey(c)) {
-            affectedFixes.put(c, new ArrayList<GPSFix>());
+            affectedFixes.put(c, new ArrayList<GPSFix>()); //Does this ever happen?
         }
         affectedFixes.get(c).addAll(fixes);
         calculateDistances(c);
@@ -227,8 +227,8 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
-        GPSFix fixBefore = race.getTrack(c).getLastFixBefore(fix.getTimePoint());
-        GPSFix fixAfter = race.getTrack(c).getFirstFixAfter(fix.getTimePoint());
+        GPSFix fixBefore = distances.get(c).lowerKey(fix);
+        GPSFix fixAfter = distances.get(c).higherKey(fix);
         if (!(fixBefore == null) && !(fixAfter == null)
                 && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) 
                 && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
@@ -239,6 +239,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     private double getLikelyhood(Competitor c, Waypoint w, GPSFix fix) {
-        return 1 / (10 * Math.abs(distances.get(c).get(fix).get(w) / getLegLength(fix.getTimePoint(), w)) + 1);
+        return 1 / (100 * Math.abs(distances.get(c).get(fix).get(w) / getLegLength(fix.getTimePoint(), w)) + 1);
     }
 }

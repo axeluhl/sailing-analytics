@@ -39,21 +39,22 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private DynamicTrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
+    static double strictness = 200;
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
 
         @Override
         public double getReaching(Wind w) {
-            return 8;
+            return 14;
         }
 
         @Override
         public double getUpwind(Wind w) {
-            return 6;
+            return 16;
         }
 
         @Override
         public double getDownwind(Wind w) {
-            return 10;
+            return 19;
         }
 
     };
@@ -100,9 +101,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
                 if (raceHasStartTime) {
                     if (late == end) {
                         allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (early == start && early.getTimePoint().before(late.getTimePoint())) {
-                        allEdges.get(co).add(new Edge(early, late, 1)); // timeestimtion???
-                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint())
+                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint())
                             && estimatedTime(early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
                     }
@@ -213,34 +212,26 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     private double estimatedTime(Candidate c1, Candidate c2) {
 
-        double totalTime = 0;
-        int i;
+        double totalEstimatedTime = 0;
         Waypoint current;
         if (c1.getID() == 0) {
             current = race.getRace().getCourse().getFirstWaypoint();
-            i = 2;
         } else {
             current = c1.getWaypoint();
-            i = 1;
         }
-
         while (current != c2.getWaypoint()) {
-
             TrackedLeg leg = race.getTrackedLegStartingAt(current);
-
-            totalTime = totalTime
-                    + estimatedTimeOnLeg(
-                            leg,
-                            c1.getTimePoint().plus(
-                                    (2 * (i - 1) / (2 * (c2.getID() - c1.getID())) * c2.getTimePoint()
-                                            .minus(c1.getTimePoint().asMillis()).asMillis())));
-            i++;
+            totalEstimatedTime = totalEstimatedTime + estimatedTimeOnLeg(leg, c1.getTimePoint().plus(1/2 * c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis()));
             current = leg.getLeg().getTo();
         }
-        totalTime = totalTime * 3600000;
+        totalEstimatedTime = totalEstimatedTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
-        double timeDiff = Math.abs(totalTime - actualTime) / 1000;
-        return 1 - (Math.log10(timeDiff + 1) / 20);
+        double timeDiff = Math.abs(totalEstimatedTime - actualTime) / 1000;
+        double sigmaSquared = 0.2;
+        double factor = 1 / ( Math.sqrt(sigmaSquared * 2 * Math.PI));
+        double exponent = -(Math.pow(timeDiff/strictness, 2) / (2 * sigmaSquared));
+        return factor * Math.pow(Math.E, exponent);
+
     }
 
     private double estimatedTimeOnLeg(TrackedLeg leg, TimePoint t) {

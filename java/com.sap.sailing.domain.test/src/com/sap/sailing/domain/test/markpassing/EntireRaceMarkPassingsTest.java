@@ -35,7 +35,7 @@ public class EntireRaceMarkPassingsTest extends AbstractRealRaceMarkPassingTest 
     }
 
     @Override
-    void testRace(String raceID) throws IOException, InterruptedException, URISyntaxException {
+    void testRace() throws IOException, InterruptedException, URISyntaxException {
         
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
@@ -134,6 +134,6 @@ public class EntireRaceMarkPassingsTest extends AbstractRealRaceMarkPassingTest 
         System.out.println("Should not be null but are: " + wronglyNotComputed);
         System.out.println("accuracy: " + accuracy);
         System.out.println("Computation time: " + time + " ms");
-        assertTrue(accuracy > 0.9);
+        assertTrue(accuracy >= 0.9);
     }
 }
