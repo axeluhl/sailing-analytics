@@ -5,17 +5,6 @@ Bundle-SymbolicName: com.sap.sailing.polars.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.sap.sailing.domain.base,
- com.sap.sailing.domain.base.impl,
- com.sap.sailing.domain.common,
- com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.test.mock,
- com.sap.sailing.domain.tracking,
- com.sap.sailing.domain.tracking.impl,
- com.sap.sailing.polars.aggregation,
- com.sap.sailing.polars.analysis,
- com.sap.sailing.polars.data,
- com.sap.sailing.polars.data.impl,
- com.sap.sailing.polars.generation,
- com.sap.sailing.polars.impl,
+Fragment-Host: com.sap.sailing.polars
+Import-Package: com.sap.sailing.domain.test.mock,
  org.junit;version="4.8.2"
