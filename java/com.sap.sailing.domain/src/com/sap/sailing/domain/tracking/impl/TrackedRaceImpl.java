@@ -2475,7 +2475,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     Mark mark2 = markIter.next();
                     final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
                     final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
-                    if (approximatePositionOfStart != null && estimatedPositionMark1 != null || estimatedPositionMark2 != null) {
+                    if (approximatePositionOfStart != null && estimatedPositionMark1 != null && estimatedPositionMark2 != null) {
                         Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
                         Waypoint nextWaypoint = waypointsIter.next();
                         Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
