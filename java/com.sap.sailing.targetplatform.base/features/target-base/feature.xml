@@ -13,6 +13,13 @@
    </license>
 
    <plugin
+         id="javax.servlet"
+         download-size="0"
+         install-size="0"
+         version="2.5.0.v201103041518"
+         unpack="false"/>
+
+   <plugin
          id="slf4j.api"
          download-size="0"
          install-size="0"
@@ -48,6 +55,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.sun.mail.javax.mail"
+         download-size="0"
+         install-size="0"
+         version="1.4.5"
+         unpack="false"/>
+
+   <plugin
          id="org.hyperic.sigar"
          download-size="0"
          install-size="0"
@@ -66,27 +80,6 @@
          download-size="0"
          install-size="0"
          version="2.8.0.20130705130507"
-         unpack="false"/>
-
-   <plugin
-         id="com.sun.mail.javax.mail"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="javax.servlet"
-         download-size="0"
-         install-size="0"
-         version="2.5.0.v201103041518"
-         unpack="false"/>
-
-   <plugin
-         id="groovy-all"
-         download-size="0"
-         install-size="0"
-         version="2.1.6"
          unpack="false"/>
 
    <plugin
