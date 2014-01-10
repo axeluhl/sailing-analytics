@@ -32,4 +32,10 @@
          Their designer's web site: http://www.siemenvandijk.nl/</td>
      <td>Their greatest benefit is an in-depth knowledge of GWT, paired with what seem to be reasonable design skills.</td>
   </tr>
+  <tr>
+     <td>vmapit, http://www.vmapit.de</td>
+     <td>Mannheim</td>
+     <td>Telecom, SWR, Cornelsen Verlagsgruppe</td>
+     <td>These guys are coming from server side development and moved into mobile development 4 years ago. They have good understanding of both domains but probably don't have good designers in the team (have to check).</td>
+  </tr>
 </table>
