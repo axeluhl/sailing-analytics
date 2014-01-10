@@ -6,7 +6,8 @@ public enum PassingInstruction {
     Starboard,
     Gate,
     Line,
-    Offset;
+    Offset,
+    FixesBearing;
 
     public static PassingInstruction[] relevantValues(){
         PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length-1];

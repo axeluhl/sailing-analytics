@@ -61,15 +61,16 @@ public class CandidateFinder implements AbstractCandidateFinder {
 
     @Override
     public Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c) {
+        List<GPSFix> fixes = new ArrayList<GPSFix>();
         try {
             race.getTrack(c).lockForRead();
-            for (GPSFix fix : race.getTrack(c).getRawFixes()) {
-                affectedFixes.get(c).add(fix);
+            for (GPSFix fix : race.getTrack(c).getFixes()) {
+                fixes.add(fix);
             }
         } finally {
             race.getTrack(c).unlockAfterRead();
         }
-        calculateDistances(c);
+        calculateFixesAffectedByNewCompetitorFixes(c, fixes);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             candidates.get(c).get(w).clear();
         }
@@ -77,11 +78,10 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public void calculateFixesAffectedByNewCompetitorFixes(Competitor c, List<GPSFix> fixes) {
-        if (!affectedFixes.containsKey(c)) {
-            affectedFixes.put(c, new ArrayList<GPSFix>()); //Does this ever happen?
+    public void calculateFixesAffectedByNewCompetitorFixes(Competitor c, Iterable<GPSFix> fixes) {
+        for (GPSFix fix : fixes) {
+        affectedFixes.get(c).add(fix);
         }
-        affectedFixes.get(c).addAll(fixes);
         calculateDistances(c);
         for (GPSFix fix : fixes) {
             if (!(distances.get(c).higherKey(fix) == null)
@@ -112,9 +112,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
 
         for (Competitor c : distances.keySet()) {
-            if (!affectedFixes.containsKey(c)) {
-                affectedFixes.put(c, new ArrayList<GPSFix>());
-            }
             TimePoint t = start;
             while (race.getTrack(c).getFirstFixAfter(t) != null) {
                 GPSFix nextFix = race.getTrack(c).getFirstFixAfter(t);
@@ -130,12 +127,11 @@ public class CandidateFinder implements AbstractCandidateFinder {
 
     @Override
     public Iterable<Competitor> getAffectedCompetitors() {
-        return affectedFixes.keySet();
+         return affectedFixes.keySet();
     }
 
     @Override
     public Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c) {
-        // CreateCandidate method?
         if (logger.getLevel() == Level.FINEST) {
             logger.finest("Reevaluating " + affectedFixes.get(c).size() + " fixes for" + c);
         }
@@ -227,14 +223,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
-        GPSFix fixBefore = distances.get(c).lowerKey(fix);
-        GPSFix fixAfter = distances.get(c).higherKey(fix);
-        if (!(fixBefore == null) && !(fixAfter == null)
-                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w) 
-                && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
-                && getLikelyhood(c, w, fix) > penaltyForSkipping) {
-            return true;
-        }
+            GPSFix fixBefore = distances.get(c).lowerKey(fix);
+            GPSFix fixAfter = distances.get(c).higherKey(fix);
+            if (!(fixBefore == null) && !(fixAfter == null)
+                    && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w)
+                    && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
+                    && getLikelyhood(c, w, fix) > penaltyForSkipping) {
+                return true;
+            }
         return false;
     }
 

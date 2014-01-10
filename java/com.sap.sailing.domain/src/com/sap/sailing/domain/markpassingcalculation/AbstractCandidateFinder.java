@@ -29,7 +29,7 @@ public interface AbstractCandidateFinder {
      */
     Iterable<Competitor> getAffectedCompetitors();
 
-    void calculateFixesAffectedByNewCompetitorFixes(Competitor c, List<GPSFix> fixes);
+    void calculateFixesAffectedByNewCompetitorFixes(Competitor c, Iterable<GPSFix> fixes);
 
     void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 

@@ -43,21 +43,22 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
         
         //Floro: ~11 14 17
+        //OBMR 4.9 5.1 5.3
         
 
         @Override
         public double getReaching(Wind w) {
-            return 14;
+            return 5.1;
         }
 
         @Override
         public double getUpwind(Wind w) {
-            return 11;
+            return 4.9;
         }
 
         @Override
         public double getDownwind(Wind w) {
-            return 17;
+            return 5.3;
         }
 
     };
@@ -65,6 +66,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
         this.race = race;
+        //TODO race time comes at some point
         raceHasStartTime = race.getStartOfRace() == null ? false : true;
         start = new Candidate(0, race.getStartOfRace(), 1);
         end = new Candidate(
@@ -163,7 +165,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
         if (changed) {
             logger.info("New MarkPasses for"+ co);
             List<MarkPassing> markPassDeltas = new ArrayList<>();
-            //TODO This doesn't allow holes in the sequence!!
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
             }

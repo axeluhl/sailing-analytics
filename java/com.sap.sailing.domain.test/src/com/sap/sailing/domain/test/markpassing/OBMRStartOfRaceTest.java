@@ -52,7 +52,6 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
                 } else {
                     if(getTrackedRace().getMarkPassing(c, w) != null){
                         gotOther = true;
-                        break;
                     }
                 }
             }
@@ -60,6 +59,7 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
                 mistakes++;
             }
         } 
+        System.out.println(getTrackedRace().getStartOfRace());
         Assert.assertTrue(mistakes<1);
     }
 }

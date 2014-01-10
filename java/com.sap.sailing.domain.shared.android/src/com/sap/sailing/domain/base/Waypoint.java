@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.WithID;
@@ -22,4 +23,6 @@ public interface Waypoint extends Named, WithID, IsManagedBySharedDomainFactory 
      * @return
      */
     PassingInstruction getPassingInstructions();
+
+    Bearing getFixedBearing();
 }
