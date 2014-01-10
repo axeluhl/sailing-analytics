@@ -28,7 +28,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
-  * [[Create clickable UI prototypes with Azure|wiki/ui-clickable-prototypes]]
+  * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
