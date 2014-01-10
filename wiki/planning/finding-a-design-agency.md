@@ -25,4 +25,17 @@
      <td>Aktivitätswächter, Gutschein des Tages, FDP App, Wunderlist</td>
      <td>Seem to have some experience with mobile apps including Android Platform. References look quite good.</td>
   </tr>
+  <tr>
+     <td>Future Earth, http://www.future-earth.eu</td>
+     <td>Zeewolde, NL</td>
+     <td>Example apps: http://apps.microsoft.com/windows/nl-nl/app/kiekeboe-world/5acf1e9c-9041-4b43-89d2-902b06bdef06, http://www.future-earth.eu/framework/, http://www.qualitycounts.eu/about.html.<br>
+         Their designer's web site: http://www.siemenvandijk.nl/</td>
+     <td>Their greatest benefit is an in-depth knowledge of GWT, paired with what seem to be reasonable design skills.</td>
+  </tr>
+  <tr>
+     <td>vmapit, http://www.vmapit.de</td>
+     <td>Mannheim</td>
+     <td>Telecom, SWR, Cornelsen Verlagsgruppe</td>
+     <td>These guys are coming from server side development and moved into mobile development 4 years ago. They have good understanding of both domains but probably don't have good designers in the team (have to check).</td>
+  </tr>
 </table>
