@@ -28,8 +28,8 @@
   <tr>
      <td>Future Earth, http://www.future-earth.eu</td>
      <td>Zeewolde, NL</td>
-     <td>Example apps: http://apps.microsoft.com/windows/nl-nl/app/kiekeboe-world/5acf1e9c-9041-4b43-89d2-902b06bdef06, http://www.future-earth.eu/framework/, http://www.qualitycounts.eu/about.html.</td>
-     <td>Their designer's web site: http://www.siemenvandijk.nl/</td>
+     <td>Example apps: http://apps.microsoft.com/windows/nl-nl/app/kiekeboe-world/5acf1e9c-9041-4b43-89d2-902b06bdef06, http://www.future-earth.eu/framework/, http://www.qualitycounts.eu/about.html.<br>
+         Their designer's web site: http://www.siemenvandijk.nl/</td>
      <td>Their greatest benefit is an in-depth knowledge of GWT, paired with what seem to be reasonable design skills.</td>
   </tr>
 </table>
