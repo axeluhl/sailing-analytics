@@ -38,4 +38,39 @@
      <td>Telecom, SWR, Cornelsen Verlagsgruppe</td>
      <td>These guys are coming from server side development and moved into mobile development 4 years ago. They have good understanding of both domains but probably don't have good designers in the team (have to check).</td>
   </tr>
+  <tr>
+     <td>Kühlhaus, http://www.kuehlhaus.com/</td>
+     <td>Mannheim, Karlsruhe</td>
+     <td>BASF Agrar – PIA App, GLS Landingpage, Communication Platform Mobile Client (Telekom)</td>
+     <td>Design looks a bit aged but ok. They do not seem to have any experience with Android but mobile HTML looks ok.</td>
+  </tr>
+</table>
+
+Priority list
+
+<table>
+ <tr>
+  <td>Simon</td>
+  <td>Axel</td>
+  <td>Frank</td>
+  <td>Jens</td>
+ </tr>
+ <tr>
+  <td>Ubilabs</td>
+  <td>?</td>
+  <td>?</td>
+  <td>?</td>
+ </tr>
+ <tr>
+  <td>Creative Workline</td>
+  <td>?</td>
+  <td>?</td>
+  <td>?</td>
+ </tr>
+ <tr>
+  <td>Kuelhaus</td>
+  <td>?</td>
+  <td>?</td>
+  <td>?</td>
+ </tr>
 </table>
