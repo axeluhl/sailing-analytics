@@ -130,7 +130,7 @@ public class LeaderboardData extends ExportAction {
         }
         windElements.add(createNamedElementWithValue(prefix+"speed_in_knots", speedWithConfidence.getObject().getKnots()));
         windElements.add(createNamedElementWithValue(prefix+"speed_in_meters_per_second", speedWithConfidence.getObject().getMetersPerSecond()));
-        windElements.add(createNamedElementWithValue(prefix+"speed_in_beaufort", speedWithConfidence.getObject().getBeaufort()));
+        windElements.add(createNamedElementWithValue(prefix+"speed_in_beaufort", Math.rint(speedWithConfidence.getObject().getBeaufort())));
         windElements.add(createNamedElementWithValue(prefix+"confidence", speedWithConfidence.getConfidence()));
         
         double speedInKnots = speedWithConfidence.getObject().getKnots();
