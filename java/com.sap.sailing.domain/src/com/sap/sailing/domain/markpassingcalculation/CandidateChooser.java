@@ -34,7 +34,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, Boolean> correctStartTime;
+    private LinkedHashMap<Competitor, Boolean> correctStartTime = new LinkedHashMap<>();
     private TimePoint raceStartTime;
     private Candidate start;
     private Candidate end;
