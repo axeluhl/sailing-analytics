@@ -14,8 +14,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;

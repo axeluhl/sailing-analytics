@@ -30,21 +30,21 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 public class CandidateChooser implements AbstractCandidateChooser {
 
     private static final Logger logger = Logger.getLogger(CandidateChooser.class.getName());
-    
+
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
-    private boolean raceHasStartTime;
+    private LinkedHashMap<Competitor, Boolean> correctStartTime;
+    private TimePoint raceStartTime;
     private Candidate start;
     private Candidate end;
     private DynamicTrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
     static double strictness = 200;
     private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
-        
-        //Floro: ~11 14 17
-        //OBMR 4.9 5.1 5.3
-        
+
+        // Floro: ~11 14 17
+        // OBMR 4.9 5.1 5.3
 
         @Override
         public double getReaching(Wind w) {
@@ -66,11 +66,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
         this.race = race;
-        //TODO race time comes at some point
-        raceHasStartTime = race.getStartOfRace() == null ? false : true;
+        // TODO race time comes at some point
+        raceStartTime = race.getStartOfRace();
         start = new Candidate(0, race.getStartOfRace(), 1);
         end = new Candidate(
-                race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1);
+                race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null,
+                1);
         candidates = new LinkedHashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new ArrayList<Candidate>());
@@ -79,6 +80,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             candidates.get(c).add(start);
             candidates.get(c).add(end);
             allEdges.get(c).add(new Edge(start, end, 0));
+            correctStartTime.put(c, true);
         }
     }
 
@@ -89,7 +91,22 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
+        if (race.getStartOfRace() != raceStartTime) {
+            raceStartTime = race.getStartOfRace();
+            for (Competitor com : correctStartTime.keySet()) {
+                correctStartTime.put(com, false);
+            }
+        }
+        if (!correctStartTime.get(c)) {
+            candidateDeltas.getB().add(start);
+        }
+
         removeCandidates(candidateDeltas.getB(), c);
+        if (!correctStartTime.get(c)) {
+            start = new Candidate(0, raceStartTime, 1);
+            candidateDeltas.getA().add(start);
+            correctStartTime.put(c, true);
+        }
         addCandidates(candidateDeltas.getA(), c);
         findShortestPath(c);
     }
@@ -103,7 +120,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
                     early = oldCan;
                     late = newCan;
                 }
-                if (raceHasStartTime) {
+                if (raceStartTime != null) {
                     if (late == end) {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint())
@@ -127,7 +144,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     private void findShortestPath(Competitor co) {
         boolean changed = false;
-        
+
         ArrayList<Edge> all = new ArrayList<>();
         for (Edge e : allEdges.get(co)) {
             all.add(e);
@@ -163,7 +180,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             marker = candidateWithParent.get(marker);
         }
         if (changed) {
-            logger.info("New MarkPasses for"+ co);
+            logger.info("New MarkPasses for" + co);
             List<MarkPassing> markPassDeltas = new ArrayList<>();
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
@@ -172,6 +189,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
     }
 
+    @SuppressWarnings("unused")
     private void reEvaluateStartingEdges() {
         for (Competitor c : candidates.keySet()) {
             ArrayList<Edge> newEdges = new ArrayList<>();
@@ -225,15 +243,19 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
         while (current != c2.getWaypoint()) {
             TrackedLeg leg = race.getTrackedLegStartingAt(current);
-            totalEstimatedTime = totalEstimatedTime + estimatedTimeOnLeg(leg, c1.getTimePoint().plus(1/2 * c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis()));
+            totalEstimatedTime = totalEstimatedTime
+                    + estimatedTimeOnLeg(
+                            leg,
+                            c1.getTimePoint().plus(
+                                    1 / 2 * c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis()));
             current = leg.getLeg().getTo();
         }
         totalEstimatedTime = totalEstimatedTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
         double timeDiff = Math.abs(totalEstimatedTime - actualTime) / 1000;
         double sigmaSquared = 0.2;
-        double factor = 1 / ( Math.sqrt(sigmaSquared * 2 * Math.PI));
-        double exponent = -(Math.pow(timeDiff/strictness, 2) / (2 * sigmaSquared));
+        double factor = 1 / (Math.sqrt(sigmaSquared * 2 * Math.PI));
+        double exponent = -(Math.pow(timeDiff / strictness, 2) / (2 * sigmaSquared));
         return factor * Math.pow(Math.E, exponent);
 
     }
@@ -265,9 +287,10 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private void addCandidates(List<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
             candidates.get(co).add(c);
-            if (c.getID() == 1 && race.getStartOfRace() == null) {
-                reEvaluateStartingEdges();
-            }
+            /*
+             * if (c.getID() == 1 && race.getStartOfRace() == null) { reEvaluateStartingEdges(); }
+             */
+            // TODO Work without starting time
         }
         createNewEdges(co, newCandidates);
     }
