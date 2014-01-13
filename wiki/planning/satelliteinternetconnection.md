@@ -12,4 +12,6 @@ In order to have a internet connection in areas where the connection is flaky or
 - Airtime: $6 per MB (sent/received)
 - Hardware: $2950
 
-For 12 months with 1GB the costs would be: $75+($49*12)+(1000*$6)+$2950=$9613
+For 12 months with 200MB the costs would be: $75+($49*12)+(200*$6)+$2950=$4813
+
+Could save some money by renting the hardware unit. Prices yet to be determined.
