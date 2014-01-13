@@ -75,6 +75,20 @@ Telefon: 040 / 22 81 72 62 0
      <td>Jens: Alexander Poschmann made diploma thesis with GWT <br> Simon: Looking techie and inexperienced</td>
      <td>Alexander Poschmann a.poschmann@nodapo.de</td>
   </tr>
+  <tr>
+     <td>http://www.arcbees.com/</td>
+     <td>Montreal !!</td>
+     <td></td>
+     <td>Jens: Met at GWT.create. Have two members in GWT board.</td>
+     <td></td>
+  </tr>
+  <tr>
+     <td>http://www.oio.de/</td>
+     <td>Mannheim, Karlsruhe</td>
+     <td></td>
+     <td>Jens: Met at GWT.create.</td>
+     <td></td>
+  </tr>
 </table>
 
 Priority list
