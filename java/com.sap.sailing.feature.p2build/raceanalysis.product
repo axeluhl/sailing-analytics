@@ -51,7 +51,7 @@
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
-      <plugin id="com.sap.sailing.xcelsiusadapter" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
       <plugin id="org.apache.felix.shell" autoStart="true" startLevel="0" />
       <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="0" />
