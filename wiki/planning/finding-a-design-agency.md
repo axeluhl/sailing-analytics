@@ -44,6 +44,12 @@
      <td>BASF Agrar – PIA App, GLS Landingpage, Communication Platform Mobile Client (Telekom)</td>
      <td>Design looks a bit aged but ok. They do not seem to have any experience with Android but mobile HTML looks ok.</td>
   </tr>
+  <tr>
+     <td>Sysvision, http://www.sysvision.de/</td>
+     <td>Hamburg</td>
+     <td>iPad Anwendung für Lufthansa</td>
+     <td>Design skills look ok. iPad App for Lufthansa looks good that also holds for the dispatch management. Seems that they also have skills in Android development.</td>
+  </tr>
 </table>
 
 Priority list
@@ -68,7 +74,7 @@ Priority list
   <td>?</td>
  </tr>
  <tr>
-  <td>Kuelhaus</td>
+  <td>Sysvision</td>
   <td>?</td>
   <td>?</td>
   <td>?</td>
