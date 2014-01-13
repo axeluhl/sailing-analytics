@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.markpassingcalculation.MockedPolarSheetDeliverer;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -34,6 +35,9 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
 
     public  FlorianopolisMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
+        MockedPolarSheetDeliverer.reaching = 14;
+        MockedPolarSheetDeliverer.up = 11;
+        MockedPolarSheetDeliverer.down = 17;
     }
 
     private boolean forceReload = true;
@@ -140,22 +144,22 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
     
     }
 
-    @Ignore
+    @Test
     public void testRace1() throws IOException, InterruptedException, URISyntaxException {
         setUp("bca3b490-2dce-0131-27f0-60a44ce903c3");
         testRace();
     }
-    @Ignore
+    @Test
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
         setUp("52697ec0-2dd0-0131-2802-60a44ce903c3");
         testRace();
     }
-    @Ignore
+    @Test
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
         setUp("528a0f30-2dd0-0131-2819-60a44ce903c3");
         testRace();
     }
-    @Ignore
+    @Test
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         setUp("529a4150-2dd0-0131-2830-60a44ce903c3");
         testRace();

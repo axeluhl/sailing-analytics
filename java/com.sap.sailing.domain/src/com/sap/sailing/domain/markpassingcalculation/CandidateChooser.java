@@ -15,7 +15,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 /**
@@ -41,27 +40,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private DynamicTrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
     static double strictness = 200;
-    private PolarSheetDeliverer polar = new PolarSheetDeliverer() {
-
-        // Floro: ~11 14 17
-        // OBMR 4.9 5.1 5.3
-
-        @Override
-        public double getReaching(Wind w) {
-            return 5.1;
-        }
-
-        @Override
-        public double getUpwind(Wind w) {
-            return 4.9;
-        }
-
-        @Override
-        public double getDownwind(Wind w) {
-            return 5.3;
-        }
-
-    };
+    private MockedPolarSheetDeliverer polar = new MockedPolarSheetDeliverer(); 
+    
 
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
