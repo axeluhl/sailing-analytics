@@ -58,6 +58,23 @@
      <td>Design skills look ok. iPad App for Lufthansa looks good that also holds for the dispatch management. Seems that they also have skills in Android development. Jens: Good, effective colabortation for STG Training app. Assuming decent backend skills. Unwillling to use cross-platform technology, native-only.</td>
      <td>Daniel Wischer, daniel.wischer@sysvision.de</td>
   </tr>
+  <tr>
+     <td>http://www.nodapo.de/</td>
+     <td>Hamburg</td>
+     <td>
+ELBNAH IT-SYSTEME GmbH
+Ansprechpartner Herr Pascal Oblonczek
+E-Mail: pco@elbnah.com
+Telefon: 040 / 55 61 30 13
+<br><br>
+Drupaldise UG (haftungsbeschränkt)
+Ansprechpartner Herr Christian Steiger
+E-Mail: christian.steiger@drupaldise.com
+Telefon: 040 / 22 81 72 62 0
+</td>
+     <td>Jens: Alexander Poschmann made diploma thesis with GWT <br> Simon: Looking techie and inexperienced</td>
+     <td>Alexander Poschmann a.poschmann@nodapo.de</td>
+  </tr>
 </table>
 
 Priority list
