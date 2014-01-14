@@ -61,3 +61,5 @@ The links above lead to short write-ups of the respective business case behind t
 [[Microcopter Integration|wiki/planning/Microcopter]]
 
 [[Race Rendering Technology|wiki/planning/RaceRenderingTechnology]]
+
+[[Satellite Internet Connection|wiki/planning/SatelliteInternetConnection]]
