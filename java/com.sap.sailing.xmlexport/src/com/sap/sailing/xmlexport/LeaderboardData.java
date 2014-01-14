@@ -73,6 +73,7 @@ public class LeaderboardData extends ExportAction {
     private static final String VERY_LIGHT_WIND_DESCRIPTION = "Very Light";
     private static final String LIGHT_WIND_DESCRIPTION = "Light";
     private static final String MEDIUM_WIND_DESCRIPTION = "Medium";
+    private static final String MEDIUM_STRONG_WIND_DESCRIPTION = "Medium Strong";
     private static final String STRONG_WIND_DESCRIPTION = "Strong";
     private static final String VERY_STRONG_WIND_DESCRIPTION = "Very Strong";
     
@@ -142,12 +143,15 @@ public class LeaderboardData extends ExportAction {
         } else if (speedInKnots > 4 && speedInKnots <= 8) {
             windSpeedAsHumanReadableString = LIGHT_WIND_DESCRIPTION;
             windSpeedAsInterval = "4-8kn";
-        } else if (speedInKnots > 8 && speedInKnots <= 14) {
+        } else if (speedInKnots > 8 && speedInKnots <= 12) {
             windSpeedAsHumanReadableString = MEDIUM_WIND_DESCRIPTION;
-            windSpeedAsInterval = "8-14kn";
-        } else if (speedInKnots > 14 && speedInKnots <= 20) {
+            windSpeedAsInterval = "8-12kn";
+        } else if (speedInKnots > 12 && speedInKnots <= 16) {
+            windSpeedAsHumanReadableString = MEDIUM_STRONG_WIND_DESCRIPTION;
+            windSpeedAsInterval = "12-16kn";
+        } else if (speedInKnots > 16 && speedInKnots <= 20) {
             windSpeedAsHumanReadableString = STRONG_WIND_DESCRIPTION;
-            windSpeedAsInterval = "14-20kn";
+            windSpeedAsInterval = "16-20kn";
         } else if (speedInKnots > 20) {
             windSpeedAsHumanReadableString = VERY_STRONG_WIND_DESCRIPTION;
             windSpeedAsInterval = "20-"+speedInKnots+"kn";
