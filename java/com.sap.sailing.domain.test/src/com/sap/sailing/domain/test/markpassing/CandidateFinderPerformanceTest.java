@@ -47,7 +47,8 @@ public class CandidateFinderPerformanceTest extends AbstractMockedRaceMarkPassin
         f.calculateFixesAffectedByNewCompetitorFixes(bob, fixesAdded);
         f.getCandidateDeltas(bob);
         time = System.currentTimeMillis() - time;
-        Assert.assertTrue(time<10000);
+        System.out.println(time);
+        Assert.assertTrue(time<2000);
     }
 
     private GPSFixMoving rndFix() {

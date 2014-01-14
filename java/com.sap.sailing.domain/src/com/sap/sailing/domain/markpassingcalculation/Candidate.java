@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.TimePoint;
  * 
  */
 
-public class Candidate {
+public class Candidate  {
     private Waypoint w;
     private TimePoint p;
     private double distanceProbability;
@@ -48,5 +48,8 @@ public class Candidate {
 
     public Waypoint getWaypoint() {
         return w;
+    }
+    public String toString(){
+        return "Candidate for " + id + " with cost "+ distanceProbability + "and Timepoint " + p;
     }
 }

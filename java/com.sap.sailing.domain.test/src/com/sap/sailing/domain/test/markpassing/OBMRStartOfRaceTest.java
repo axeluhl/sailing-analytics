@@ -59,7 +59,6 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
                 mistakes++;
             }
         } 
-        System.out.println(getTrackedRace().getStartOfRace());
-        Assert.assertTrue(mistakes<1);
+        Assert.assertTrue(mistakes==0);
     }
 }
