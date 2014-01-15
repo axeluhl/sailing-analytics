@@ -14,7 +14,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain
-Import-Package: com.sap.sailing.domain.base,
- com.sap.sailing.domain.confidence,
- com.sap.sailing.domain.tracking,
+Import-Package: 
  com.sap.sailing.util
