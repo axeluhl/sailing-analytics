@@ -58,9 +58,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
             allEdges.put(c, new ArrayList<Edge>());
             addCandidates(Arrays.asList(start, end), c);
         }
-        MockedPolarSheetDeliverer.down = 5.3;
-        MockedPolarSheetDeliverer.reaching = 5.1;
-        MockedPolarSheetDeliverer.up = 4.9;
     }
 
     @Override
@@ -237,12 +234,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
         try {
             if (leg.getLegType(t) == LegType.DOWNWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles()
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2
                         / polar.getDownwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
             }
 
             if (leg.getLegType(t) == LegType.UPWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles()
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2)
                         / polar.getUpwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
             }
         } catch (NoWindException e) {

@@ -3,9 +3,9 @@ package com.sap.sailing.domain.markpassingcalculation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +44,7 @@ public class MarkPassingCalculator {
     private MarkPassingUpdateListener listener;
     private final static Pair<Object, GPSFix> end = new Pair<Object, GPSFix>(null, null);
     private boolean suspended = false;
-    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
+    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
             .availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
@@ -102,35 +102,23 @@ public class MarkPassingCalculator {
         
         private void computeMarkPasses(LinkedHashMap<Object, List<GPSFix>> combinedFixes) {
 
-            List<FutureTask<Boolean>> tasks = new ArrayList<>();
-             for (Object o : combinedFixes.keySet()) {
-                 new GetAffectedFixes(o, combinedFixes.get(o)).run();
-                 /* FutureTask<Boolean> task = new FutureTask<>(new GetAffectedFixes(o, combinedFixes.get(o)), true);
-                tasks.add(task);
-                executor.execute(task);
+            List<Callable<Object>> tasks = new ArrayList<>();
+            for (Object o : combinedFixes.keySet()) {
+                tasks.add(Executors.callable(new GetAffectedFixes(o, combinedFixes.get(o))));
             }
-            for (FutureTask<Boolean> task : tasks) {
-                try {
-                    task.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + " while waiting for the calculation of affected Fixes");
-                }*/
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             tasks.clear();
             for (Competitor c : finder.getAffectedCompetitors()) {
-                new ComputeMarkPassings(c).run();
-             /*   FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c), true);
-                tasks.add(task);
-                executor.execute(task);
+                tasks.add(Executors.callable(new ComputeMarkPassings(c)));
             }
-            for (FutureTask<Boolean> task : tasks) {
-                try {
-                    task.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + "while waiting for the calculation of MarkPassings");
-                }*/
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 

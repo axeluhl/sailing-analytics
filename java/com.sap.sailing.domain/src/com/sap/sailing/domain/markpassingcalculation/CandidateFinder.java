@@ -201,7 +201,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     }
                 }
                 if (p.equals(PassingInstruction.Gate)) {
-                    // Right now, both marks are observered, even though only one is actully rounded.
                     if (fix.getPosition().getDistance(positions.get(0)).getMeters() < fix.getPosition()
                             .getDistance(positions.get(1)).getMeters()) {
                         distance = fix.getPosition().getDistance(positions.get(0)).getMeters();
