@@ -20,6 +20,7 @@
     
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sailing.domain.SailingDomain" />
+  <inherits name="com.sap.sailing.datamining.DataMiningDomain" />
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.sap.sailing.gwt.ui.usermanagement.UserManagementPage'/>
