@@ -131,7 +131,7 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
-                                    <id>com.sap.sailing.xcelsiusadapter</id>
+                                    <id>com.sap.sailing.xmlexport</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
