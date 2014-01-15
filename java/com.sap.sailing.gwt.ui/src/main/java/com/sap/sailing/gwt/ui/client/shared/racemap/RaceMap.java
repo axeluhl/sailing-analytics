@@ -673,19 +673,21 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
+                    final long timeForPositionTransitionMillis = timer.getPlayState() == PlayStates.Playing ? // animate when playing
+                            1300*timer.getRefreshInterval()/1000 : -1;
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
                     if (tail == null) {
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                         tail.setMap(map);
                     } else {
-                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
+                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
+                                (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                         PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
                         tail.setOptions(newOptions);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date, 
-                            timer.getPlayState() == PlayStates.Playing ? // animate when playing
-                                1300*timer.getRefreshInterval()/1000 : -1);
+                            timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
