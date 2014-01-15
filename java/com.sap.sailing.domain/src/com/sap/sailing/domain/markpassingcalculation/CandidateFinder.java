@@ -103,7 +103,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 return o1.getTimePoint().compareTo(o2.getTimePoint());
             }
         });
-
+        for(GPSFix fix : gps){
+            fixes.add(fix);
+        }
         TimePoint start = fixes.first().getTimePoint();
         GPSFix nextMarkFixAfterLastGivenFix = race.getOrCreateTrack(mark).getFirstFixAfter(fixes.last().getTimePoint());
         TimePoint end = null;

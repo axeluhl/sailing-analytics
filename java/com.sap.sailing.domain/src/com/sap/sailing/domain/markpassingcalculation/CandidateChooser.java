@@ -58,6 +58,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
             allEdges.put(c, new ArrayList<Edge>());
             addCandidates(Arrays.asList(start, end), c);
         }
+        MockedPolarSheetDeliverer.down = 5.3;
+        MockedPolarSheetDeliverer.reaching = 5.1;
+        MockedPolarSheetDeliverer.up = 4.9;
     }
 
     @Override
@@ -203,7 +206,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     private double estimatedTime(Candidate c1, Candidate c2) {
-
+        //TODO takes the straight distance between legs, not the distance actually sailed
         double totalEstimatedTime = 0;
         Waypoint current;
         if (c1.getID() == 0) {

@@ -104,7 +104,8 @@ public class MarkPassingCalculator {
 
             List<FutureTask<Boolean>> tasks = new ArrayList<>();
              for (Object o : combinedFixes.keySet()) {
-                FutureTask<Boolean> task = new FutureTask<>(new GetAffectedFixes(o, combinedFixes.get(o)), true);
+                 new GetAffectedFixes(o, combinedFixes.get(o)).run();
+                 /* FutureTask<Boolean> task = new FutureTask<>(new GetAffectedFixes(o, combinedFixes.get(o)), true);
                 tasks.add(task);
                 executor.execute(task);
             }
@@ -114,11 +115,12 @@ public class MarkPassingCalculator {
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
                             + " while waiting for the calculation of affected Fixes");
-                }
+                }*/
             }
             tasks.clear();
             for (Competitor c : finder.getAffectedCompetitors()) {
-                FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c), true);
+                new ComputeMarkPassings(c).run();
+             /*   FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c), true);
                 tasks.add(task);
                 executor.execute(task);
             }
@@ -128,7 +130,7 @@ public class MarkPassingCalculator {
                 } catch (InterruptedException | ExecutionException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
                             + "while waiting for the calculation of MarkPassings");
-                }
+                }*/
             }
         }
 
@@ -142,7 +144,7 @@ public class MarkPassingCalculator {
         
             @Override
             public void run() {
-                chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
+                chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
             }
         }
 
