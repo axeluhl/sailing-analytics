@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * The standard implemantation of {@link AbstractCandidateFinder}. The fixes are evaluated for their distance to each
- * Waypoint. Every local minimum is a Candidate, and the probability depends on its ratio to the average lengths of the
+ * Waypoint. Every local minimum is a Candidate, and its probability depends on its ratio to the average lengths of the
  * {@link Leg}s before and after it.
  * 
  * @author Nicolas Klose
@@ -45,12 +45,12 @@ public class CandidateFinder implements AbstractCandidateFinder {
         this.race = race;
         for (Competitor c : race.getRace().getCompetitors()) {
             affectedFixes.put(c, new ArrayList<GPSFix>());
-            distances.put(c, new TreeMap<GPSFix, LinkedHashMap<Waypoint, Double>>(new Comparator<GPSFix>(){
+            distances.put(c, new TreeMap<GPSFix, LinkedHashMap<Waypoint, Double>>(new Comparator<GPSFix>() {
                 @Override
                 public int compare(GPSFix arg0, GPSFix arg1) {
                     return arg0.getTimePoint().compareTo(arg1.getTimePoint());
                 }
-                
+
             }));
             candidates.put(c, new LinkedHashMap<Waypoint, List<GPSFix>>());
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
@@ -80,7 +80,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     @Override
     public void calculateFixesAffectedByNewCompetitorFixes(Competitor c, Iterable<GPSFix> fixes) {
         for (GPSFix fix : fixes) {
-        affectedFixes.get(c).add(fix);
+            affectedFixes.get(c).add(fix);
         }
         calculateDistances(c);
         for (GPSFix fix : fixes) {
@@ -127,7 +127,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
 
     @Override
     public Iterable<Competitor> getAffectedCompetitors() {
-         return affectedFixes.keySet();
+        return affectedFixes.keySet();
     }
 
     @Override
@@ -144,17 +144,18 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     Candidate newCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
                             gps.getTimePoint(), getLikelyhood(c, w, gps), w);
                     newCans.add(newCandidate);
-                }
-                if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
-                    candidates.get(c).get(w).remove(gps);
-                    Candidate badCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                            gps.getTimePoint(), getLikelyhood(c, w, gps), w);
-                    wrongCans.add(badCandidate);
+                } else {
+                    if (!fixIsACandidate(gps, w, c) && candidates.get(c).get(w).contains(gps)) {
+                        candidates.get(c).get(w).remove(gps);
+                        Candidate badCandidate = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
+                                gps.getTimePoint(), getLikelyhood(c, w, gps), w);
+                        wrongCans.add(badCandidate);
+                    }
                 }
             }
         }
         affectedFixes.get(c).clear();
-        logger.fine(newCans.size() + "new Candidates and "+wrongCans.size()+" removed Candidates for " + c);
+        logger.fine(newCans.size() + " new Candidates and " + wrongCans.size() + " removed Candidates for " + c);
         return new Pair<List<Candidate>, List<Candidate>>(newCans, wrongCans);
     }
 
@@ -223,14 +224,17 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     private boolean fixIsACandidate(GPSFix fix, Waypoint w, Competitor c) {
-            GPSFix fixBefore = distances.get(c).lowerKey(fix);
-            GPSFix fixAfter = distances.get(c).higherKey(fix);
-            if (!(fixBefore == null) && !(fixAfter == null)
-                    && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixBefore).get(w)
-                    && distances.get(c).get(fix).get(w) <= distances.get(c).get(fixAfter).get(w)
-                    && getLikelyhood(c, w, fix) > penaltyForSkipping) {
+        GPSFix fixBefore = distances.get(c).lowerKey(fix);
+        GPSFix fixAfter = distances.get(c).higherKey(fix);
+        if (!(fixBefore == null) && !(fixAfter == null)){
+            double distanceBefore = distances.get(c).get(fixBefore).get(w);
+            double distance = distances.get(c).get(fix).get(w);
+            double distanceAfter = distances.get(c).get(fixAfter).get(w);
+            double cost = getLikelyhood(c, w, fix);
+            if (distance <= distanceBefore && distance <= distanceAfter && cost > penaltyForSkipping) {
                 return true;
             }
+        }
         return false;
     }
 
