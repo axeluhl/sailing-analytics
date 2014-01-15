@@ -14,6 +14,7 @@ public class RestApiApplication extends Application {
         classes.add(RegattasResource.class);
         classes.add(LeaderboardsResource.class);
         classes.add(MasterDataResource.class);
+        classes.add(PolarResource.class);
         // classes.add(WindResource.class);
         
         return classes;

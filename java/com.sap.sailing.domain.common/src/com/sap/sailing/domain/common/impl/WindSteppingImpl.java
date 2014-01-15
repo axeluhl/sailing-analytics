@@ -68,4 +68,42 @@ public class WindSteppingImpl implements WindStepping {
         return true;
     }
 
+    @Override
+    public int getLevelIndexFloorForValue(double speed) {
+        int result = -1;
+        for (int i = 0; i < levels.length - 1; i++) {
+            if (speed >= levels[i]) {
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public double getDistanceToLevelFloor(double speed) {
+        double result = 0;
+        int floor = getLevelIndexFloorForValue(speed);
+        if (floor == -1) {
+            result = 0;
+        } else {
+            result = speed - levels[floor];
+        }
+        return result;
+    }
+
+    @Override
+    public int getLevelIndexCeilingForValue(double speed) {
+        int floor = getLevelIndexFloorForValue(speed);
+        int result;
+        if (floor == -1) {
+            result = -1;
+        }
+        if (levels[floor] == speed) {
+            result = floor;
+        } else {
+            result = floor + 1;
+        }
+        return result;
+    }
+
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -16,8 +17,10 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.caching.NoCacheEntryException;
@@ -38,6 +41,8 @@ import com.sap.sailing.util.SmartFutureCache;
  */
 public class PolarDataServiceImpl implements PolarDataService {
 
+    private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getName());
+
     private final PolarFixCache polarFixCache;
     private final PolarSheetPerBoatClassCache polarSheetPerBoatClassCache;
 
@@ -48,21 +53,56 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     @Override
-    public SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind) {
+    public SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
+            throws NoPolarDataAvailableException {
         PolarSheetsData data = polarSheetPerBoatClassCache.get(boatClass, false);
-        int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());
         double angleToTheWind = bearingToTheWind.getDegrees();
         if (angleToTheWind < 0) {
             angleToTheWind = 360 + angleToTheWind;
         }
         int angleToTheWindFloor = (int) Math.floor(bearingToTheWind.getDegrees());
-        SpeedWithConfidence<Integer> speedFloor = getSpeedForConcreteValues(data, windSpeedIndex, angleToTheWindFloor);
         int angleToTheWindCeiling = (int) Math.ceil(bearingToTheWind.getDegrees());
+        int windSpeedIndexFloor = data.getStepping().getLevelIndexFloorForValue(windSpeed.getKnots());
+        boolean useFloor = true;
+        boolean useCeiling = true;
+        int windSpeedIndexCeiling;
+        if (windSpeedIndexFloor == -1) {
+            useFloor = false;
+            windSpeedIndexCeiling = 0;
+        } else if (windSpeedIndexFloor == data.getStepping().getRawStepping().length - 1) {
+            windSpeedIndexCeiling = -1;
+            useCeiling = false;
+        } else {
+            windSpeedIndexCeiling = data.getStepping().getLevelIndexCeilingForValue(windSpeed.getKnots());
+        }
+        SpeedWithConfidence<Integer> speed;
+        if (useFloor && useCeiling) {
+            double windSpeedIndexDistanceToFloor = data.getStepping().getDistanceToLevelFloor(windSpeed.getKnots());
+            SpeedWithConfidence<Integer> windSpeedFloor = getInterpolatedSpeedBetweenAngles(boatClass, data,
+                    windSpeedIndexFloor, angleToTheWind, angleToTheWindFloor, angleToTheWindCeiling);
+            SpeedWithConfidence<Integer> windSpeedCeiling = getInterpolatedSpeedBetweenAngles(boatClass, data,
+                    windSpeedIndexCeiling, angleToTheWind, angleToTheWindFloor, angleToTheWindCeiling);
+            speed = interpolateSpeed(windSpeedFloor, windSpeedCeiling, windSpeedIndexDistanceToFloor);
+        } else if (useFloor) {
+            speed = getInterpolatedSpeedBetweenAngles(boatClass, data, windSpeedIndexFloor, angleToTheWind,
+                    angleToTheWindFloor, angleToTheWindCeiling);
+        } else {
+            speed = getInterpolatedSpeedBetweenAngles(boatClass, data, windSpeedIndexCeiling, angleToTheWind,
+                    angleToTheWindFloor, angleToTheWindCeiling);
+        }
+
+        return speed;
+    }
+
+    private SpeedWithConfidence<Integer> getInterpolatedSpeedBetweenAngles(BoatClass boatClass, PolarSheetsData data,
+            int windSpeedIndex, double angleToTheWind, int angleToTheWindFloor, int angleToTheWindCeiling)
+            throws NoPolarDataAvailableException {
+        SpeedWithConfidence<Integer> speedFloor = getSpeedForConcreteValues(data, windSpeedIndex, angleToTheWindFloor,
+                boatClass);
         SpeedWithConfidence<Integer> speedCeiling = getSpeedForConcreteValues(data, windSpeedIndex,
-                angleToTheWindCeiling);
+                angleToTheWindCeiling, boatClass);
         SpeedWithConfidence<Integer> speed = interpolateSpeed(speedFloor, speedCeiling, angleToTheWind
                 - angleToTheWindFloor);
-
         return speed;
     }
 
@@ -88,14 +128,22 @@ public class PolarDataServiceImpl implements PolarDataService {
     }
 
     private SpeedWithConfidence<Integer> getSpeedForConcreteValues(PolarSheetsData data, int windSpeedIndex,
-            int angleToTheWind) {
+            int angleToTheWind, BoatClass boatClass) throws NoPolarDataAvailableException {
         Number rawSpeed = data.getAveragedPolarDataByWindSpeed()[windSpeedIndex][angleToTheWind];
         Speed speed = new KnotSpeedImpl(rawSpeed.doubleValue());
         PolarSheetsHistogramData histogramData = data.getHistogramDataMap().get(windSpeedIndex).get(angleToTheWind);
+        SpeedWithConfidenceImpl<Integer> speedWithConfidence;
+        if (histogramData != null) {
         double confidence = histogramData.getConfidenceMeasure();
         int numberOfUnderlyingFixes = histogramData.getDataCount();
-        SpeedWithConfidence<Integer> speedWithConfidence = new SpeedWithConfidenceImpl<Integer>(speed, confidence,
+            speedWithConfidence = new SpeedWithConfidenceImpl<Integer>(speed, confidence,
                 numberOfUnderlyingFixes);
+        } else {
+            NoPolarDataAvailableException e = new NoPolarDataAvailableException(boatClass, new KnotSpeedImpl(data
+                    .getStepping().getRawStepping()[windSpeedIndex]), new DegreeBearingImpl(angleToTheWind));
+            logger.warning(e.getLocalizedMessage());
+            throw e;
+        }
         return speedWithConfidence;
     }
 

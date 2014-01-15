@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.SpeedWithConfidenceWithIntegerRelationJsonSerializer;
 
@@ -28,11 +29,18 @@ public class PolarResource extends AbstractSailingServerResource {
             @QueryParam("windspeed") double windSpeed) {
         BoatClass boatClass = getService().getDomainObjectFactory().getBaseDomainFactory()
                 .getOrCreateBoatClass(boatClassName);
-        SpeedWithConfidence<Integer> speedWithConfidence = getService().getPolarDataService().getSpeed(boatClass,
-                new KnotSpeedImpl(windSpeed), new DegreeBearingImpl(angle));
-        SpeedWithConfidenceWithIntegerRelationJsonSerializer serializer = new SpeedWithConfidenceWithIntegerRelationJsonSerializer();
-        JSONObject jsonObj = serializer.serialize(speedWithConfidence);
-        ResponseBuilder responseBuilder = Response.ok(jsonObj.toJSONString(), MediaType.APPLICATION_JSON);
+        SpeedWithConfidence<Integer> speedWithConfidence;
+        ResponseBuilder responseBuilder;
+        try {
+            speedWithConfidence = getService().getPolarDataService().getSpeed(boatClass, new KnotSpeedImpl(windSpeed),
+                    new DegreeBearingImpl(angle));
+            SpeedWithConfidenceWithIntegerRelationJsonSerializer serializer = new SpeedWithConfidenceWithIntegerRelationJsonSerializer();
+            JSONObject jsonObj = serializer.serialize(speedWithConfidence);
+            responseBuilder = Response.ok(jsonObj.toJSONString(), MediaType.APPLICATION_JSON);
+        } catch (NoPolarDataAvailableException e) {
+            responseBuilder = Response.noContent();
+        }
+
         return responseBuilder.build();
     }
 

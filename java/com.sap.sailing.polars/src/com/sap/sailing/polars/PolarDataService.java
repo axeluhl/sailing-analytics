@@ -28,8 +28,10 @@ public interface PolarDataService {
      * @param bearingToTheWind
      *            Boat's direction relative to the wind. either in -180 -> +180 or 0 -> 359 degrees
      * @return The speed the boat is moving at for the specified wind and bearing according to the polar diagram.
+     * @throws NoPolarDataAvailableException
      */
-    SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind);
+    SpeedWithConfidence<Integer> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing bearingToTheWind)
+            throws NoPolarDataAvailableException;
 
     /**
      * Generates a polar sheet for geven races and settings using the provided executor for the worker threads. This
