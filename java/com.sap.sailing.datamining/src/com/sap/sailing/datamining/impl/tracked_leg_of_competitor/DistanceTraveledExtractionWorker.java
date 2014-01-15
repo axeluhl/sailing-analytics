@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
+package com.sap.sailing.datamining.impl.tracked_leg_of_competitor;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.impl.AbstractExtractionWorker;

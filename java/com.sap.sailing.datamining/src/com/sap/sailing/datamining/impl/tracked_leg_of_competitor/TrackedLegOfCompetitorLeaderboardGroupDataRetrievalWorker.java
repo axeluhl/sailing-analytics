@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.trackedLegOfCompetitor;
+package com.sap.sailing.datamining.impl.tracked_leg_of_competitor;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.gpsfix;
+package com.sap.sailing.datamining.impl.gps_fix;
 
 import com.sap.sailing.datamining.Clusters.WindStrength;
 import com.sap.sailing.datamining.data.GPSFixContext;

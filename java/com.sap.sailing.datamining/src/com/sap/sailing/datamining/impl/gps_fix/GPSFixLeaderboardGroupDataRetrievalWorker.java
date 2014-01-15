@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.gpsfix;
+package com.sap.sailing.datamining.impl.gps_fix;
 
 import java.util.ArrayList;
 import java.util.Collection;
