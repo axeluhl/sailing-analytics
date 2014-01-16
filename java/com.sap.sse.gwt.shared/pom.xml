@@ -4,10 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>root</artifactId>
-    <groupId>com.sap.sailing</groupId>
+    <groupId>com.sap.sse</groupId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>com.sap.sailing.gwt.ui</artifactId>
+  <artifactId>com.sap.sse.gwt</artifactId>
   <packaging>eclipse-plugin</packaging>
   <properties>
       <gwt.version>2.5.1</gwt.version>
@@ -39,18 +39,6 @@
     <dependency>
     	<groupId>com.sap.sailing</groupId>
     	<artifactId>com.sap.sailing.domain.common</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
-    </dependency>
-    <dependency>
-    	<groupId>com.sap.sse</groupId>
-    	<artifactId>com.sap.sse.gwt</artifactId>
-    	<version>1.0.0-SNAPSHOT</version>
-    	<classifier>sources</classifier>
-    </dependency>
-    <dependency>
-    	<groupId>com.sap.sailing</groupId>
-    	<artifactId>com.sap.sailing.datamining.shared</artifactId>
     	<version>1.0.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
     </dependency>
