@@ -18,6 +18,5 @@ Import-Package: javax.jms;version="1.1.0",
  org.json.simple.parser,
  org.osgi.framework,
  org.osgi.util.tracker
-Web-ContextPath: /gwt
 TrackLifecycle: true
 Export-Package: com.sap.sse.gwt.ui
