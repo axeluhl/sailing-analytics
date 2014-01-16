@@ -948,7 +948,7 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
     String statisticProvider();
-    String calculate();
-    String basedOn();
+    String toCalculateThe();
     String groupingProvider();
+    String use();
 }
