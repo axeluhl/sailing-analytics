@@ -1,6 +1,10 @@
 #!/bin/bash
 set -o functrace
 
+# This indicates the type of the project
+# and is used to correctly resolve bundle names
+PROJECT_TYPE="sailing"
+
 find_project_home () 
 {
     if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
@@ -65,7 +69,7 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
-p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 
 HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
@@ -398,11 +402,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
-	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
-	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
+	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
+	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
@@ -410,7 +414,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
@@ -456,7 +460,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
 
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APPVERSION=$RC_APP_VERSION"
         extra="$extra -Drc-app-api-version=$RC_APP_VERSION"
         
@@ -491,7 +495,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
 		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+	    for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
 		    mv -v $i.bak $i
 	    done
     fi
@@ -687,14 +691,14 @@ fi
 
 if [[ "$@" == "deploy-startpage" ]]; then
     TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
-    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.$PROJECT_TYPE.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed for startpage!"
     exit;;
     esac
 
-    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    cp $PROJECT_HOME/java/com.sap.$PROJECT_TYPE.www/index.html $TARGET_DIR_STARTPAGE
     echo "OK"
 fi
 
