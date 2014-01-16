@@ -26,16 +26,23 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class AbstractMockedRaceMarkPassingTest {
+public class AbstractMockedRaceMarkPassingTest extends AbstractRaceChangeListener {
     protected Competitor bob = new CompetitorImpl("Bob", "Bob", null, null, null);
     protected Competitor joe = new CompetitorImpl("Joe", "Joe", null, null, null);
     protected Competitor mike = new CompetitorImpl("Mike", "Mike", null, null, null);
@@ -74,6 +81,15 @@ public class AbstractMockedRaceMarkPassingTest {
         for (Waypoint w : trackedRace.getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
         }
+    }
+    protected GPSFixMoving rndFix() {
+        DegreePosition position = new DegreePosition(37.8878 + rnd.nextDouble() * 0.0019, -122.268 - rnd.nextDouble()
+                * 0.012);
+        TimePoint p = new MillisecondsTimePoint(
+                (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000))));
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
+
+        return new GPSFixMovingImpl(position, p, speed);
     }
 
 }

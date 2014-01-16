@@ -227,9 +227,9 @@ public class MartinMarkPassingBearingBasedTest extends MartinAbstractMarkPassing
 		PassingInstruction PassingInstructionOfMark1OfGate = getPassingInstructionForMark1OfGate(waypoint, fix.getTimePoint());
 		double mark1PassingBearingDelta = boatToMark1Bearing.getDifferenceTo(mark2ToMark1Bearing).getDegrees();
 		double mark2PassingBearingDelta = boatToMark2Bearing.getDifferenceTo(mark1ToMark2Bearing).getDegrees();
-		Mark closestMark = mark1;
+		//Mark closestMark = mark1;
 		if (mark2 != null && fix.getPosition().getDistance(mark1Pos).compareTo(fix.getPosition().getDistance(mark2Pos)) < 0) {
-			closestMark = mark2;
+			//closestMark = mark2;
 			
 		}
 		

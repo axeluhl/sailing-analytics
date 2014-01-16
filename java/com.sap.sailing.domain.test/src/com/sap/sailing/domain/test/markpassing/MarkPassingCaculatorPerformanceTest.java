@@ -2,23 +2,55 @@ package com.sap.sailing.domain.test.markpassing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.junit.Assert;
+import junit.framework.Assert;
+
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.markpassingcalculation.AbstractCandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
 
-public class CandidateChooserPerformanceTest extends AbstractMockedRaceMarkPassingTest {
+public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
-    public CandidateChooserPerformanceTest() {
+    public MarkPassingCaculatorPerformanceTest() {
         super();
     }
 
     @Test
-    public void test() {
+    public void testFinderPerformance() {
+        AbstractCandidateFinder f = new CandidateFinder(trackedRace);
+        List<GPSFix> fixesAdded = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            GPSFixMoving fix = rndFix();
+            trackedRace.recordFix(bob, fix);
+            fixesAdded.add(fix);
+        }
+        time = System.currentTimeMillis();
+        f.calculateFixesAffectedByNewCompetitorFixes(bob, fixesAdded);
+        f.getCandidateDeltas(bob);
+        time = System.currentTimeMillis() - time;
+        Assert.assertTrue(time<2000);
+    }
+
+    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+            Iterable<MarkPassing> markPassings) {
+        for (MarkPassing m : markPassings) {
+            System.out.println(m);
+        }
+    }
+    
+    @Test
+    public void testChooserPerformance() {
         testAddingCandidatesToChooser(200, 1);
     }
 
