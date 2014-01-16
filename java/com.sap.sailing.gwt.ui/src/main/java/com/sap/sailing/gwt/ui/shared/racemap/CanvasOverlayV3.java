@@ -259,14 +259,14 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
-    protected void setCanvasPositionTransition(long durationInMilliseconds) {
+    public void setCanvasPositionTransition(long durationInMilliseconds) {
         if (durationInMilliseconds != transitionTimeInMilliseconds) {
             setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
             transitionTimeInMilliseconds = durationInMilliseconds;
         }
     }
     
-    protected void removeCanvasPositionTransition() {
+    public void removeCanvasPositionTransition() {
         if (transitionTimeInMilliseconds != -1) {
             setProperty(canvas.getElement().getStyle(), "transition", "none");
             transitionTimeInMilliseconds = -1;

@@ -107,7 +107,17 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
         context.fill();
     }
 
-    public void setPosition(PositionDTO position) {
+    /**
+     * @param position the new psoition of the overlay
+     * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
+     */
+
+    public void setPosition(PositionDTO position, long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionTransition();
+        } else {
+            setCanvasPositionTransition(timeForPositionTransitionMillis);
+        }
         this.position = position;
     }
     

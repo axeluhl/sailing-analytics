@@ -1,11 +1,10 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
-import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -36,26 +35,10 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private final BoatClassImageData boatClassImageData;
 
-    /**
-     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
-     */
-    private LatLngBounds currentMapBounds;
-
-    public BoatOverlay(final RaceMap map, int zIndex, final CompetitorDTO competitorDTO) {
-        super(map.getMap(), zIndex);
+    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO) {
+        super(map, zIndex);
         this.boatClass = competitorDTO.getBoatClass();
         this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
-        map.getMap().addBoundsChangeHandler(new BoundsChangeMapHandler() {
-            @Override
-            public void onEvent(BoundsChangeMapEvent event) {
-                if (!map.isAutoZoomInProgress() && !map.getMap().getBounds().equals(currentMapBounds)) {
-                    for (BoatOverlay boatOverlay : map.getBoatOverlays().values()) {
-                        boatOverlay.removeCanvasPositionTransition();
-                    }
-                }
-                currentMapBounds = map.getMap().getBounds();
-            }
-        });
     }
   
     @Override
