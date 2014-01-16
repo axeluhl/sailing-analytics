@@ -1074,10 +1074,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<RaceLogEvent> result = new ArrayList<>();
         DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
         for (DBObject o : raceLog.find(query)) {
-            RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
-            if (raceLogEvent != null) {
-                targetRaceLog.load(raceLogEvent);
-                result.add(raceLogEvent);
+            try {
+                RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
+                if (raceLogEvent != null) {
+                    targetRaceLog.load(raceLogEvent);
+                    result.add(raceLogEvent);
+                }
+            } catch (IllegalStateException e) {
+                logger.log(Level.SEVERE, "Couldn't load race log event "+o+": "+e.getMessage(), e);
             }
         }
         return result;
