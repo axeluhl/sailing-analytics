@@ -133,7 +133,7 @@ public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingT
 			}
 			Vector2D mark1Pos = new Vector2D(markPositions.get(0));
 			Map<Vector2D, Double> intersections = null;
-			Mark passedMark = wp.getMarks().iterator().next();
+			//Mark passedMark = wp.getMarks().iterator().next();
 			if (isGate(wp)) {
 				if (wp.equals(raceCourse.getFirstWaypoint()) || wp.equals(raceCourse.getLastWaypoint())) {
 					// passing start or finish line
@@ -149,7 +149,7 @@ public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingT
 						intersections = interpolatedCourse.intersectWith(passingLine);
 						if (intersections.size() > 0) {
 							// already found a passing of a mark
-							passedMark = mark;
+							//passedMark = mark;
 							break;
 						}
 					}
@@ -168,7 +168,7 @@ public class MartinMarkPassingSplineBasedTest extends MartinAbstractMarkPassingT
 				// If the intersection is at 75% of the interpolated course, t_pass is at 75% between t_prev and t_fix.
 				// This cast truncates the milliseconds, which is acceptable at the moment.
 				TimePoint timePoint = time.minus((long) ((prevTime.asMillis() - time.asMillis()) * entry.getValue()));
-				possiblePassings.put(DomainFactory.INSTANCE.createMarkPassing(timePoint, wp, passedMark, competitor), new DegreePosition(entry.getKey().y(), entry.getKey().x()));
+				possiblePassings.put(DomainFactory.INSTANCE.createMarkPassing(timePoint, wp, competitor), new DegreePosition(entry.getKey().y(), entry.getKey().x()));
 			}
 		}
 		Entry<MarkPassing, Position> result = null;

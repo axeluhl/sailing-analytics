@@ -855,9 +855,9 @@ public interface StringMessages extends Messages {
     String showOverallLeaderboard();
     String exchangeHost();
     String explainExchangeHostName();
-    String line();
     String errorRunningDataMiningQuery();
     String offset();
+    String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);

@@ -3,9 +3,9 @@ package com.sap.sailing.domain.markpassingcalculation;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +41,10 @@ public class MarkPassingCalculator {
     private AbstractCandidateFinder finder;
     private AbstractCandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
-
     private MarkPassingUpdateListener listener;
     private final static Pair<Object, GPSFix> end = new Pair<Object, GPSFix>(null, null);
-    private boolean suspended;
-    private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
+    private boolean suspended = false;
+    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime()
             .availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
@@ -53,7 +52,6 @@ public class MarkPassingCalculator {
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
         if (listen) {
-            suspended = true;
             listener = new MarkPassingUpdateListener(race, end);
         }
         finder = new CandidateFinder(race);
@@ -62,10 +60,11 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
         }
         if (listen) {
-            suspended = false;
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
         }
     }
+    
+   
 
     private class Listen implements Runnable {
 
@@ -74,7 +73,6 @@ public class MarkPassingCalculator {
             logger.fine("MarkPassingCalculator is listening for new Fixes.");
             boolean finished = false;
             LinkedHashMap<Object, List<GPSFix>> combinedFixes = new LinkedHashMap<>();
-
             while (!finished) {
                 List<Pair<Object, GPSFix>> allNewFixes = new ArrayList<Pair<Object, GPSFix>>();
                 try {
@@ -88,7 +86,8 @@ public class MarkPassingCalculator {
                     if (fix == end) {
                         finished = true;
                         continue;
-                    } else if (!combinedFixes.containsKey(fix.getA())) {
+                    }
+                    if (!combinedFixes.containsKey(fix.getA())) {
                         combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
                     }
                     combinedFixes.get(fix.getA()).add(fix.getB());
@@ -100,69 +99,61 @@ public class MarkPassingCalculator {
                 }
             }
         }
-
+        
         private void computeMarkPasses(LinkedHashMap<Object, List<GPSFix>> combinedFixes) {
 
-            List<FutureTask<Boolean>> tasks = new ArrayList<>();
+            List<Callable<Object>> tasks = new ArrayList<>();
             for (Object o : combinedFixes.keySet()) {
-                FutureTask<Boolean> task = new FutureTask<>(new GetAffectedFixes(o, combinedFixes.get(o)), true);
-                tasks.add(task);
-                executor.execute(task);
+                tasks.add(Executors.callable(new GetAffectedFixes(o, combinedFixes.get(o))));
             }
-            for (FutureTask<Boolean> task : tasks) {
-                try {
-                    task.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + " while waiting for the calculation of affected Fixes");
-                }
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
             tasks.clear();
             for (Competitor c : finder.getAffectedCompetitors()) {
-                FutureTask<Boolean> task = new FutureTask<>(new ComputeMarkPassings(c), true);
-                tasks.add(task);
+                tasks.add(Executors.callable(new ComputeMarkPassings(c)));
             }
-            for (FutureTask<Boolean> task : tasks) {
-                executor.execute(task);
-                try {
-                    task.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + "while waiting for the calculation of MarkPassings");
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        private class ComputeMarkPassings implements Runnable {
+            Competitor c;
+        
+            public ComputeMarkPassings(Competitor c) {
+                this.c = c;
+            }
+        
+            @Override
+            public void run() {
+                chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
+            }
+        }
+
+
+        private class GetAffectedFixes implements Runnable {
+            Object o;
+            Iterable<GPSFix> fixes;
+        
+            public GetAffectedFixes(Object o, Iterable<GPSFix> fixes) {
+                this.o = o;
+                this.fixes = fixes;
+            }
+        
+            @Override
+            public void run() {
+                if (o instanceof Competitor) {
+                    finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o, fixes);
+                } else if (o instanceof Mark) {
+                    finder.calculateFixesAffectedByNewMarkFixes((Mark) o, fixes);
                 }
             }
-        }
-    }
-
-    private class GetAffectedFixes implements Runnable {
-        Object o;
-        List<GPSFix> fixes;
-
-        public GetAffectedFixes(Object o, List<GPSFix> fixes) {
-            this.o = o;
-            this.fixes = fixes;
-        }
-
-        @Override
-        public void run() {
-            if (o instanceof Competitor) {
-                finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o, fixes);
-            } else if (o instanceof Mark) {
-                finder.calculateFixesAffectedByNewMarkFixes((Mark) o, fixes);
-            }
-        }
-    }
-
-    private class ComputeMarkPassings implements Runnable {
-        Competitor c;
-
-        public ComputeMarkPassings(Competitor c) {
-            this.c = c;
-        }
-
-        @Override
-        public void run() {
-            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
         }
     }
 

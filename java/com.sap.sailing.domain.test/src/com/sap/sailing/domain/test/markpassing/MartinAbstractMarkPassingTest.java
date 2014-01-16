@@ -593,14 +593,14 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
 			MarkPassing passing = entry.getKey();
 			Position passPos = entry.getValue();
 			Position markPos = null; 
-			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getMark());
+			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getWaypoint().getMarks().iterator().next());
 			try {
 				markTrack.lockForRead();
 				markPos = markTrack.getLastFixAtOrBefore(passing.getTimePoint()).getPosition();
 			} finally {
 				markTrack.unlockAfterRead();
 			}
-			Bearing bearingDiff = markPos.getBearingGreatCircle(passPos).getDifferenceTo(getPassingBearing(passing.getWaypoint(), passing.getMark(), passing.getTimePoint()));
+			Bearing bearingDiff = markPos.getBearingGreatCircle(passPos).getDifferenceTo(getPassingBearing(passing.getWaypoint(), passing.getWaypoint().getMarks().iterator().next(), passing.getTimePoint()));
 			if (Math.abs(bearingDiff.getDegrees()) < 90) {
 				// passed on correct side of mark
 				possibleResults.put(entry.getKey(), entry.getValue());
@@ -619,7 +619,7 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
 			MarkPassing passing = entry.getKey();
 			Position passPos = entry.getValue();
 			Position markPos = null; 
-			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getMark());
+			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getWaypoint().getMarks().iterator().next());
 			try {
 				markTrack.lockForRead();
 				markPos = markTrack.getLastFixAtOrBefore(passing.getTimePoint()).getPosition();
