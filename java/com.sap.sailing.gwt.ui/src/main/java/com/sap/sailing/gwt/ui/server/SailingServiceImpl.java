@@ -51,6 +51,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.datamining.DataMiningFactory;
+import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -3446,6 +3451,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
 
+    
+    @Override
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
+        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
+        return query.run(getService());
+    }
+    
+    @Override
+    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
+        return null;
+    }
+    
     @Override
     public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
         List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();
