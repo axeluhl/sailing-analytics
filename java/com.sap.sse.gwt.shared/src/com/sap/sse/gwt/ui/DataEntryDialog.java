@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+package com.sap.sse.gwt.ui;
 
 import java.util.Date;
 
@@ -171,15 +171,15 @@ public abstract class DataEntryDialog<T> {
         TextBox textBox = new TextBox();
         textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(textBox);
         textBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), textBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), textBox);
         return textBox;
     }
     
@@ -208,15 +208,15 @@ public abstract class DataEntryDialog<T> {
         PasswordTextBox parrwordTextBox = new PasswordTextBox();
         parrwordTextBox.setVisibleLength(visibleLength);
         parrwordTextBox.setText(initialValue == null ? "" : initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(parrwordTextBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(parrwordTextBox);
         parrwordTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), parrwordTextBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), parrwordTextBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), parrwordTextBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), parrwordTextBox);
         return parrwordTextBox;
     }
     
@@ -229,14 +229,14 @@ public abstract class DataEntryDialog<T> {
     public TextArea createTextArea(String initialValue) {
         TextArea textArea = new TextArea();
         textArea.setText(initialValue == null ? "" : initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(textArea);
+        EntryPointUtils.addFocusUponKeyUpToggler(textArea);
         textArea.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent arg0) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textArea);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), textArea);
         return textArea;
     }
     
@@ -250,15 +250,15 @@ public abstract class DataEntryDialog<T> {
         LongBox longBox = new LongBox();
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(longBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(longBox);
         longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), longBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), longBox);
         return longBox;
     }
 
@@ -274,15 +274,15 @@ public abstract class DataEntryDialog<T> {
         DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(doubleBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(doubleBox);
         doubleBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), doubleBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), doubleBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), doubleBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), doubleBox);
         return doubleBox;
     }
 
@@ -299,15 +299,15 @@ public abstract class DataEntryDialog<T> {
         dateBox.getTextBox().setVisibleLength(visibleLength);
         dateBox.setFireNullValues(true);
         dateBox.setValue(initialDate);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(dateBox.getTextBox());
+        EntryPointUtils.addFocusUponKeyUpToggler(dateBox.getTextBox());
         dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), dateBox.getTextBox());
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        EntryPointUtils.linkEnterToButton(getOkButton(), dateBox.getTextBox());
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
         return dateBox;
     }
 
@@ -321,15 +321,15 @@ public abstract class DataEntryDialog<T> {
         IntegerBox intBox = new IntegerBox();
         intBox.setVisibleLength(visibleLength);
         intBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(intBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(intBox);
         intBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), intBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), intBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), intBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), intBox);
         return intBox;
     }
 
@@ -337,15 +337,15 @@ public abstract class DataEntryDialog<T> {
         LongBox longBox = new LongBox();
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(longBox);
+        EntryPointUtils.addFocusUponKeyUpToggler(longBox);
         longBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
+        EntryPointUtils.linkEnterToButton(getOkButton(), longBox);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), longBox);
         return longBox;
     }
 
@@ -377,8 +377,8 @@ public abstract class DataEntryDialog<T> {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        EntryPointUtils.linkEnterToButton(getOkButton(), result);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
@@ -391,8 +391,8 @@ public abstract class DataEntryDialog<T> {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        EntryPointUtils.linkEnterToButton(getOkButton(), result);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
@@ -416,8 +416,8 @@ public abstract class DataEntryDialog<T> {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        EntryPointUtils.linkEnterToButton(getOkButton(), result);
+        EntryPointUtils.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
 
