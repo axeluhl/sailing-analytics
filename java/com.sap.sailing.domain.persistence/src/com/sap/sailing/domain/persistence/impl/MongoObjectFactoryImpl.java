@@ -848,7 +848,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeWaypoint(Waypoint waypoint) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), getPassingInstructions(waypoint.getPassingInstructions()));
+        result.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), getPassingInstructions(waypoint.getPassingInstructions()));
         result.put(FieldNames.CONTROLPOINT.name(), storeControlPoint(waypoint.getControlPoint()));
         return result;
     }

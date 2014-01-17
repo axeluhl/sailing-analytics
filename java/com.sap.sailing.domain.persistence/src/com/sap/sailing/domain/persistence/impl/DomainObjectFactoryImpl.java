@@ -1265,6 +1265,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createRaceStatusEvent(createdAt, author, logicalTimePoint, id, competitors, passId, nextStatus);
     }
     
+    /**
+     * The old field name WAYPOINT_PASSINGSIDE has been replaced by WAYPOINT_PASSINGINSTRUCTIONS. If a race with the old
+     * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION
+     * 
+     */
     private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
         if (courseName == null) {
             courseName = "Course";
@@ -1275,7 +1280,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
             PassingInstruction passingInstructions = null;
-            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name());
+            if (waypointPassingInstruction == null) {
+                waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+                if(waypointPassingInstruction != null) {
+                    logger.info("Migrating PassingInstruction "+waypointPassingInstruction+" to field name WAYPOINT_PASSINGINSTRUCTIONS");
+                    dbObject.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), waypointPassingInstruction);
+                    dbObject.removeField(FieldNames.WAYPOINT_PASSINGSIDE.name());
+                }
+            }
+            
             if (waypointPassingInstruction != null) {
                 passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
