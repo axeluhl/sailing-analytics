@@ -2,7 +2,6 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,9 +16,6 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
-
-
-
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
