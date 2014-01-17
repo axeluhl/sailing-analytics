@@ -191,6 +191,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 for (Mark m : w.getMarks()) {
                     positions.add(race.getOrCreateTrack(m).getEstimatedPosition(fix.getTimePoint(), false));
                 }
+                //TODO Handle Offset correctly: MarkPassing for before with Markpassing for offset
                 if (p.equals(PassingInstruction.Port) || p.equals(PassingInstruction.Starboard)
                         || p.equals(PassingInstruction.Offset) || p.equals(PassingInstruction.None)) {
                     distance = fix.getPosition().getDistance(positions.get(0)).getMeters();

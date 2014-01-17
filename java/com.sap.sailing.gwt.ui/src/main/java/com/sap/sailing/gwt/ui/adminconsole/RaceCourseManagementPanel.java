@@ -221,17 +221,17 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         });
         TextColumn<ControlPointAndOldAndNewMark> nameColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
-            public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
-                return cpaoanb.getControlPoint().getName();
+            public String getValue(ControlPointAndOldAndNewMark cpaoanm) {
+                return cpaoanm.getControlPoint().getName();
             }
         };
         controlPointsTable.addColumn(nameColumn, stringMessages.controlPoint());
         TextColumn<ControlPointAndOldAndNewMark> passingInstructionsColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
-            public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
+            public String getValue(ControlPointAndOldAndNewMark cpaoanm) {
                 String result = "";
-                if(cpaoanb.getPassingInstructions() != null) {
-                    result = cpaoanb.getPassingInstructions().name();
+                if(cpaoanm.getPassingInstructions() != null) {
+                    result = cpaoanm.getPassingInstructions().name();
                 }
                 return result;
             }
@@ -239,16 +239,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         controlPointsTable.addColumn(passingInstructionsColumn, "Passing instructions");
         TextColumn<ControlPointAndOldAndNewMark> oldMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
-            public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
-                return "" + cpaoanb.getOldMark().getName();
+            public String getValue(ControlPointAndOldAndNewMark cpaoanm) {
+                return "" + cpaoanm.getOldMark().getName();
             }
         }; 
         controlPointsTable.addColumn(oldMarkColumn, stringMessages.mark());
         TextColumn<ControlPointAndOldAndNewMark> newMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>(){
 
             @Override
-            public String getValue(ControlPointAndOldAndNewMark cnaoanm) {
-                return "" + cnaoanm.getNewMark().getName();
+            public String getValue(ControlPointAndOldAndNewMark cpaoanm) {
+                return "" + cpaoanm.getNewMark().getName();
             }
             
         }; 
@@ -273,7 +273,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         grid.setWidget(1,  1, marksTable);
         
         courseActionsPanel = new HorizontalPanel();
-        courseActionsPanel.setSpacing(1 );
+        courseActionsPanel.setSpacing(10);
         insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
         insertWaypointBefore.addClickHandler(new ClickHandler() {
             @Override

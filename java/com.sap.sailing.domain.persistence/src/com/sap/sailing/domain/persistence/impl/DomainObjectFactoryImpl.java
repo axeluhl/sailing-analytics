@@ -1275,10 +1275,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
             PassingInstruction passingInstructions = null;
-            // TODO should this be renamed to WAYPOINT_PASSINGINSTRUCTIONS?
-            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGINSTRUCTION.name());
+            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
             if (waypointPassingInstruction != null) {
-                passingInstructions = PassingInstruction.valueOf(waypointPassingInstruction);
+                passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
             if (passingInstructions == null) {
@@ -1299,14 +1298,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
             } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
-                ControlPointWithTwoMarks gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                ControlPointWithTwoMarks gate = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = gate;
             }
         }
         return controlPoint;
     }
 
-    private ControlPointWithTwoMarks loadGate(DBObject dbObject) {
+    private ControlPointWithTwoMarks loadControlPointWithTwoMarks(DBObject dbObject) {
         Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
         String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
         Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));

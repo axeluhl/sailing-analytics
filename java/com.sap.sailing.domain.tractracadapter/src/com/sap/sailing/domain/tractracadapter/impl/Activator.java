@@ -13,7 +13,7 @@ public class Activator implements BundleActivator {
     
     private final TracTracAdapterFactory tracTracAdapterFactory;
     
-    private static boolean useTracTracMarkPassings = true;
+    private boolean useTracTracMarkPassings = true;
 
     public Activator() {
         // there is exactly one instance of the racingEventService in the whole server
@@ -31,11 +31,11 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
     }
     
-    public boolean isUseTracTracMarkPassings(){
+    public boolean isUseTracTracMarkPassings() {
         return useTracTracMarkPassings;
     }
     
-    public static Activator getInstance(){
+    public static Activator getInstance() {
         return new Activator();
     }
 }

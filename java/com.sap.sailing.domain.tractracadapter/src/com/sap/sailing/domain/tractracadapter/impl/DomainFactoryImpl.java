@@ -521,7 +521,7 @@ public class DomainFactoryImpl implements DomainFactory {
             } else {
                 logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
             }
-            if(!Activator.getInstance().isUseTracTracMarkPassings()){
+            if (!Activator.getInstance().isUseTracTracMarkPassings()) {
                 new MarkPassingCalculator(trackedRace, true);
             }
             return trackedRace;

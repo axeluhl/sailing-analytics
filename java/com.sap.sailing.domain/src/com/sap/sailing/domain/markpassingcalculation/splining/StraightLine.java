@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.markpassingcalculation.old;
+package com.sap.sailing.domain.markpassingcalculation.splining;
 
 /**
  * A straight line, represented by a location and a direction vector.

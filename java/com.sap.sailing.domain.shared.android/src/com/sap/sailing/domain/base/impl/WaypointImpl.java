@@ -16,11 +16,11 @@ public class WaypointImpl implements Waypoint {
     private final Bearing fixedBearing;
 
     public WaypointImpl(ControlPoint controlPoint) {
-        this(controlPoint, null);
+        this(controlPoint, /*ControlPoint*/null, /*Bearing*/null);
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions) {
-        this(controlPoint, passingInstructions, null);
+        this(controlPoint, passingInstructions, /*Bearing*/null);
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions, Bearing fixedBearing) {

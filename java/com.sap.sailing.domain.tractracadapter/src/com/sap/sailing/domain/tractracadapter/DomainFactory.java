@@ -209,6 +209,9 @@ public interface DomainFactory {
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
+    /**
+     * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
+     */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 

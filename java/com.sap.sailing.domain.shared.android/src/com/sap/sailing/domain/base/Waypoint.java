@@ -24,5 +24,9 @@ public interface Waypoint extends Named, WithID, IsManagedBySharedDomainFactory 
      */
     PassingInstruction getPassingInstructions();
 
+    /**
+     * A waypoint may be defined by using a single mark and a bearing from that mark, leading to a
+     * virtual line that the object needs to cross. For other waypoints, this methods returns <code>null</code>.
+     */
     Bearing getFixedBearing();
 }
