@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -37,9 +38,8 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
     @Before
     public void setUp() throws URISyntaxException, IOException, InterruptedException {
         super.setUp();
-        URL mtbUrl = getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.mtb");
-        URI storedUri = new URI(mtbUrl.toString());
-        super.setUp(getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.txt"),
+        URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath());
+        super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
@@ -101,7 +101,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:49:06")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:41")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:45")), JIBE_TOLERANCE);
 
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:45")), PENALTYCIRCLE_TOLERANCE);

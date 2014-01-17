@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -38,9 +39,8 @@ public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws URISyntaxException, IOException, InterruptedException {
         super.setUp();
-        URL mtbUrl = getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.mtb");
-        URI storedUri = new URI(mtbUrl.toString());
-        super.setUp(getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.txt"),
+        URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath());
+        super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
