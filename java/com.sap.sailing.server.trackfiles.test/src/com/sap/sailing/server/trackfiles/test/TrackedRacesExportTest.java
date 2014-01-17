@@ -36,7 +36,7 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 
     @Before
     public void setUp() throws URISyntaxException, IOException, InterruptedException {
-        URI storedUri = new URI("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb").getCanonicalPath());
+        URI storedUri = new URI("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPASSINGS });

@@ -71,7 +71,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
             URISyntaxException {
         final String raceName = "505 Race 2 from Kieler Woche 2011";
         logger.info("Loading race "+raceName);
-        URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath());
+        URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/"+paramsFile).getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS });

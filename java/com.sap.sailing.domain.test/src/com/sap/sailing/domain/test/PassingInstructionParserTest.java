@@ -31,7 +31,7 @@ public class PassingInstructionParserTest extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        URI storedUri = new URI("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.mtb").getCanonicalPath());
+        URI storedUri = new URI("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE });
