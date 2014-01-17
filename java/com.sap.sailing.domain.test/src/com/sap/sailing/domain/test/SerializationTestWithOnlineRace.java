@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
@@ -36,9 +38,11 @@ public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws URISyntaxException, IOException, InterruptedException {
         super.setUp();
-        super.setUp("event_20110609_KielerWoch",
-        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
-                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        URL mtbUrl = getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.mtb");
+        URI storedUri = new URI(mtbUrl.toString());
+        super.setUp(getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.txt"),
+                /* liveUri */ null, /* storedUri */ storedUri,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
                 new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(
