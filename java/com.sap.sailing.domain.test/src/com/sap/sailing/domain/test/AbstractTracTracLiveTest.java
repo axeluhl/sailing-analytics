@@ -87,6 +87,15 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
         // Initialize data controller using live and stored data sources
+        
+        if (storedUri.toString().startsWith("file:")) {
+            try {
+                storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "I/O for event "+event.getName()+", paramURL "+paramUrl);
