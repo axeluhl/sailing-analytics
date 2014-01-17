@@ -20,11 +20,11 @@ public class MarkImpl extends NamedImpl implements Mark {
     public MarkImpl(String name) {
         this(name, name);
     }
-    
+
     public MarkImpl(Serializable id, String name) {
-        this(id, name, MarkType.BUOY, /* color */ null, /* shape */ null, /* pattern */ null);
+        this(id, name, MarkType.BUOY, /* color */null, /* shape */null, /* pattern */null);
     }
-    
+
     public MarkImpl(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
         super(name);
         this.id = id;
@@ -71,8 +71,11 @@ public class MarkImpl extends NamedImpl implements Mark {
     public MarkType getType() {
         return type;
     }
-    
+
     public String toString() {
-        return getId() + " " + (getColor()==null?"":(getColor()+" ")) + super.toString();
+        return getId() + " " + (getColor() == null ? "" : (getColor() + " ")) + super.toString();
     }
+
+
+
 }

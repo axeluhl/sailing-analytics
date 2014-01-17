@@ -421,7 +421,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
-                                
             }
 
             @Override
