@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
@@ -38,9 +40,11 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        super.setUp("event_20110609_KielerWoch",
-        /* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
-                ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+        URL mtbUrl = getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.mtb");
+        URI storedUri = new URI(mtbUrl.toString());
+        super.setUp(getClass().getClassLoader().getResource("event_20110609_KielerWoch-505_Race_2.txt"),
+                /* liveUri */ null, /* storedUri */ storedUri,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         MillisecondsTimePoint timePointForFixes = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
         getTrackedRace().recordWind(
