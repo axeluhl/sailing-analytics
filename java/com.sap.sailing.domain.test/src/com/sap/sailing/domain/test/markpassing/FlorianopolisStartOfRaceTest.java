@@ -41,12 +41,12 @@ public class FlorianopolisStartOfRaceTest extends FlorianopolisMarkPassingTest {
             }
             finder.calculateFixesAffectedByNewCompetitorFixes(c, fixes);
             chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
-            System.out.println("\n"+c);
+         //   System.out.println("\n"+c);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst=false;
             boolean gotOther=false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-                System.out.println(getTrackedRace().getMarkPassing(c, w));
+              //  System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if(w==w1){
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else {

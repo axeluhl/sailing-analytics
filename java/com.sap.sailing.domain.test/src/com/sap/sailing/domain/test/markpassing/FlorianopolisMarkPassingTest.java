@@ -78,11 +78,11 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
         int incorrectPasses = 0;
 
         boolean printRight = false;
-        boolean printWrong = true;
+        boolean printWrong = false;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
-            System.out.println(c.getName() + "\n");
+          //  System.out.println(c.getName() + "\n");
             for (Waypoint w : waypoints) {
                 if (givenPasses.get(c).get(w) == null && !(computedPasses.get(c).get(w) == null)) {
                     wronglyComputed++;
@@ -131,15 +131,15 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
         int totalMarkPasses = numberOfCompetitors * waypoints.size();
         assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed
                 + wronglyComputed);
-        System.out.println("Total theoretical Passes: " + totalMarkPasses);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
+       /* System.out.println("Total theoretical Passes: " + totalMarkPasses);
         System.out.println("Correct comparison: " + correctPasses);
         System.out.println("Incorrect comparison: " + incorrectPasses);
         System.out.println("Correctly Null: " + correctlyNotComputed);
         System.out.println("Should be null but arent:" + wronglyComputed);
         System.out.println("Should not be null but are: " + wronglyNotComputed);
         System.out.println("accuracy: " + accuracy);
-        System.out.println("Computation time: " + time + " ms");
+        System.out.println("Computation time: " + time + " ms");*/
         assertTrue(accuracy >= 0.9);
     
     }

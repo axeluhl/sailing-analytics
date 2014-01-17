@@ -127,10 +127,13 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         logger.info("entering "+getClass().getName()+".tearDown()");
         Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
         // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
-        controller.stop(/* abortStored */ true);
-        logger.info("successfully stopped controller");
+        if (getController() != null)
+            controller.stop(/* abortStored */ true);
+    logger.info("successfully stopped controller");
         try {
-            ioThread.join(3000); // just wait a little bit, then give up
+            if (ioThread != null) {
+                ioThread.join(3000); // just wait a little bit, then give up
+            }
         } catch (InterruptedException ex) {
             Assert.fail(ex.getMessage());
         }
