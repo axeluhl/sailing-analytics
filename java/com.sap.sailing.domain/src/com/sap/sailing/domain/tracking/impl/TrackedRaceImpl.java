@@ -1666,7 +1666,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                         if (legType != LegType.REACHING) {
                             GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                            if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                            if (!track.hasDirectionChange(timePoint,
+                                    /* be even more conservative than maneuver detection to really try to get "straight line" behavior */
+                                    getManeuverDegreeAngleThreshold()/2.)) {
                                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
                                         .getEstimatedSpeed(timePoint, weigher);
                                 if (estimatedSpeedWithConfidence != null

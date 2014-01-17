@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +30,11 @@ public class PassingInstructionParserTest extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        
-        super.setUp("event_20131112_ESSFlorian",
-        /* raceId */"bca3b490-2dce-0131-27f0-60a44ce903c3", new ReceiverType[] { ReceiverType.RACECOURSE });
+        URL mtbUrl = getClass().getClassLoader().getResource("event_20131112_ESSFlorian-Race_1.mtb");
+        URI storedUri = new URI(mtbUrl.toString());
+        super.setUp(getClass().getClassLoader().getResource("event_20131112_ESSFlorian-Race_1.txt"),
+                /* liveUri */ null, /* storedUri */ storedUri,
+                new ReceiverType[] { ReceiverType.RACECOURSE });
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(10))), new WindSourceImpl(WindSourceType.WEB));

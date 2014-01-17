@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.zip.ZipOutputStream;
 
@@ -35,10 +37,12 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
 	@Before
 	public void setUp() throws URISyntaxException, IOException,
 			InterruptedException {
-		super.setUp("event_20120905_erEuropean",
-		/* raceId */"03fa908e-fc03-11e1-9150-10bf48d758ce", new ReceiverType[] {
-				ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
-				ReceiverType.RAWPOSITIONS, ReceiverType.MARKPASSINGS });
+	        URL mtbUrl = getClass().getClassLoader().getResource("event_20120905_erEuropean-Gold_fleet_-_race_1.mtb");
+	        URI storedUri = new URI(mtbUrl.toString());
+	        super.setUp(getClass().getClassLoader().getResource("event_20120905_erEuropean-Gold_fleet_-_race_1.txt"),
+	                /* liveUri */ null, /* storedUri */ storedUri,
+	                new ReceiverType[] { ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
+                    ReceiverType.RAWPOSITIONS, ReceiverType.MARKPASSINGS });
 	}
 
 	private byte[] getBytes(TrackFilesDataSource data, TrackFilesFormat format,

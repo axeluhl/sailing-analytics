@@ -1,0 +1,706 @@
+stored-uri:datafiles/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb
+StartReplay:1
+
+// Input from params_static:
+
+// Input from event_parameters:
+
+CompMarkerUUID:1
+CodanIsSponsor:0
+DefaultTailLength:60
+APzoomChangeTime:2500
+disableAutoProduce:0
+autoProduce:0
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:2
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+Marker1UUID:1
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:30
+Startlocation:10.853118896484375,45.8488908518382
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:60
+FramesPerSecond:8
+replayspeedup:5
+MatchRaceClock:0
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:1
+Minimapgeorect:10.771913,45.892151,10.883272,45.787647
+MinimapMarkerUUID:2
+Marker4UUID:2
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.05
+isMatchRace:0
+weatherEnabled:0
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:0
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:0
+DisableChangeRace:0
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Size:20
+ResultColumn2Type:ColorMarker
+ResultColumn3Name:sail
+ResultColumn3Size:60
+ResultColumn3Type:Ini
+ResultColumn4Name:name
+ResultColumn4Size:110
+ResultColumn4Type:Name
+ResultColumn5Name:after
+ResultColumn5Size:45
+ResultColumn5Type:BoatAfter
+ResultColumn6Name:kts
+ResultColumn6Size:40
+ResultColumn6Type:BoatSpeed
+DisableLeaderboard:0
+DisableAnalysis:0
+TableFontSize:11
+//live-uri:tcp://germanmaster.traclive.dk:4400
+//stored-uri:tcp://germanmaster.traclive.dk:4401
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:0
+SegmentFile:segments.php
+StartType:Mass
+ReCalcDirAndSpeed:0
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 20
+
+//-------- AUTO GENERATED PARAMETERS START ----------------
+
+EventID:fb6d6eaa-f766-11e1-9c1e-10bf48d758ce
+EventName:49er European Championship
+EventDB:event_20120905_erEuropean
+EventStartTime:2012-09-05 23:00:00
+EventEndTime:2012-09-16 23:00:00
+
+RaceID:03fa908e-fc03-11e1-9150-10bf48d758ce
+RaceName:Gold fleet - race 1
+RaceStartTime:2012-09-12 06:55:00
+RaceEndTime:
+RaceTrackingStartTime:2012-09-12 06:48:19
+RaceTrackingEndTime:2012-09-12 07:46:31
+RaceDefaultRouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+RaceHandicapSystem:NONE
+
+Image1UUID:bef35a04-fca0-11e1-9150-10bf48d758ce
+Image1Type:Logo
+Image1Description:f
+Image1Image:pictures/bef35a04-fca0-11e1-9150-10bf48d758ce/Sk_billede_2012-09-12_kl._08.10.37.png
+
+Class1UUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Class1Name:49er
+
+Team1UUID:0801fb82-f9dc-11e1-9150-10bf48d758ce
+Team1Name:Alfredo Gonzalez
+
+Team2UUID:07d44282-f9dc-11e1-9150-10bf48d758ce
+Team2Name:Allan Norregaard
+Team2Comp1UUID:80e04896-f9f6-11e1-9150-10bf48d758ce
+
+Team3UUID:08d8b4e2-f9dc-11e1-9150-10bf48d758ce
+Team3Name:Andrea Savio
+
+Team4UUID:096da908-f9dc-11e1-9150-10bf48d758ce
+Team4Name:Carl P Sylvan
+
+Team5UUID:07f2c4dc-f9dc-11e1-9150-10bf48d758ce
+Team5Name:Carlos Paz
+Team5Comp1UUID:81641aae-f9f6-11e1-9150-10bf48d758ce
+
+Team6UUID:07bd73ea-f9dc-11e1-9150-10bf48d758ce
+Team6Name:Caroline Heerema
+
+Team7UUID:09752dae-f9dc-11e1-9150-10bf48d758ce
+Team7Name:Charlie Ekberg Enlund
+Team7Comp1UUID:88e9eb14-f9f6-11e1-9150-10bf48d758ce
+
+Team8UUID:08d25de0-f9dc-11e1-9150-10bf48d758ce
+Team8Name:David Bondì
+
+Team9UUID:08749f3e-f9dc-11e1-9150-10bf48d758ce
+Team9Name:David Conlon
+
+Team10UUID:077c4ab4-f9dc-11e1-9150-10bf48d758ce
+Team10Name:David Gilmor
+
+Team11UUID:07a4298a-f9dc-11e1-9150-10bf48d758ce
+Team11Name:David Mori
+
+Team12UUID:08f4a94a-f9dc-11e1-9150-10bf48d758ce
+Team12Name:Diego Botin
+Team12Comp1UUID:8668614a-f9f6-11e1-9150-10bf48d758ce
+
+Team13UUID:09148472-f9dc-11e1-9150-10bf48d758ce
+Team13Name:Dubbini Leonardo
+Team13Comp1UUID:872f7b04-f9f6-11e1-9150-10bf48d758ce
+
+Team14UUID:0818eb44-f9dc-11e1-9150-10bf48d758ce
+Team14Name:Erik Lindahl
+
+Team15UUID:07eb29d4-f9dc-11e1-9150-10bf48d758ce
+Team15Name:Federico Alonso Telle
+Team15Comp1UUID:814244ce-f9f6-11e1-9150-10bf48d758ce
+
+Team16UUID:08e1a20a-f9dc-11e1-9150-10bf48d758ce
+Team16Name:Federico Gaspari
+
+Team17UUID:08ab1ee2-f9dc-11e1-9150-10bf48d758ce
+Team17Name:Finn Hinzpeter
+
+Team18UUID:097b9842-f9dc-11e1-9150-10bf48d758ce
+Team18Name:Fritiof Hedström
+
+Team19UUID:08512b76-f9dc-11e1-9150-10bf48d758ce
+Team19Name:Henry Iloyd William
+
+Team20UUID:09015816-f9dc-11e1-9150-10bf48d758ce
+Team20Name:Jacopo Plazzi
+Team20Comp1UUID:86b81f3c-f9f6-11e1-9150-10bf48d758ce
+
+Team21UUID:086e45f8-f9dc-11e1-9150-10bf48d758ce
+Team21Name:James McIntosh
+
+Team22UUID:0849a8ce-f9dc-11e1-9150-10bf48d758ce
+Team22Name:James Peters
+Team22Comp1UUID:82caf674-f9f6-11e1-9150-10bf48d758ce
+
+Team23UUID:079248aa-f9dc-11e1-9150-10bf48d758ce
+Team23Name:James Sly
+
+Team24UUID:088a06a8-f9dc-11e1-9150-10bf48d758ce
+Team24Name:Jan Hauke Erchson
+Team24Comp1UUID:842f686a-f9f6-11e1-9150-10bf48d758ce
+
+Team25UUID:07ad0f28-f9dc-11e1-9150-10bf48d758ce
+Team25Name:John Ferguson
+
+Team26UUID:07c50a60-f9dc-11e1-9150-10bf48d758ce
+Team26Name:Jonathan Bay
+
+Team27UUID:0810d594-f9dc-11e1-9150-10bf48d758ce
+Team27Name:Joonas Lindahl
+
+Team28UUID:08281380-f9dc-11e1-9150-10bf48d758ce
+Team28Name:Julien d'Ortoli
+Team28Comp1UUID:824ad1ba-f9f6-11e1-9150-10bf48d758ce
+
+Team29UUID:08907cea-f9dc-11e1-9150-10bf48d758ce
+Team29Name:Justus Schmidt
+Team29Comp1UUID:8454f184-f9f6-11e1-9150-10bf48d758ce
+
+Team30UUID:08bf5092-f9dc-11e1-9150-10bf48d758ce
+Team30Name:Kilian Holzapfel
+
+Team31UUID:091ac53a-f9dc-11e1-9150-10bf48d758ce
+Team31Name:Luca Dubbini
+
+Team32UUID:0948e500-f9dc-11e1-9150-10bf48d758ce
+Team32Name:Lukasz Przybytek
+Team32Comp1UUID:87fd4fb6-f9f6-11e1-9150-10bf48d758ce
+
+Team33UUID:07ccad1a-f9dc-11e1-9150-10bf48d758ce
+Team33Name:Mads Emil Stephensen
+Team33Comp1UUID:80c71844-f9f6-11e1-9150-10bf48d758ce
+
+Team34UUID:09414b2e-f9dc-11e1-9150-10bf48d758ce
+Team34Name:Marcin Czajkowski
+Team34Comp1UUID:87d70874-f9f6-11e1-9150-10bf48d758ce
+
+Team35UUID:07dbe118-f9dc-11e1-9150-10bf48d758ce
+Team35Name:Martin Due
+
+Team36UUID:08207a76-f9dc-11e1-9150-10bf48d758ce
+Team36Name:Mathieu Frei
+Team36Comp1UUID:8225ba6a-f9f6-11e1-9150-10bf48d758ce
+
+Team37UUID:086058bc-f9dc-11e1-9150-10bf48d758ce
+Team37Name:Max Richardson
+
+Team38UUID:0907b67a-f9dc-11e1-9150-10bf48d758ce
+Team38Name:Michele Saleri
+
+Team39UUID:09581250-f9dc-11e1-9150-10bf48d758ce
+Team39Name:Pavel Kalinchev
+Team39Comp1UUID:884bea36-f9f6-11e1-9150-10bf48d758ce
+
+Team40UUID:07b5dcde-f9dc-11e1-9150-10bf48d758ce
+Team40Name:Pavle Kostov
+Team40Comp1UUID:80879214-f9f6-11e1-9150-10bf48d758ce
+
+Team41UUID:08b91dd0-f9dc-11e1-9150-10bf48d758ce
+Team41Name:Philipp Kramer
+Team41Comp1UUID:852b8e88-f9f6-11e1-9150-10bf48d758ce
+
+Team42UUID:08b2b814-f9dc-11e1-9150-10bf48d758ce
+Team42Name:Philipp Müller
+
+Team43UUID:0939ad1a-f9dc-11e1-9150-10bf48d758ce
+Team43Name:Remco Hoeffnagel
+
+Team44UUID:092e50aa-f9dc-11e1-9150-10bf48d758ce
+Team44Name:Remy Oomens
+
+Team45UUID:0867d3a8-f9dc-11e1-9150-10bf48d758ce
+Team45Name:Richard Hall
+
+Team46UUID:087b1058-f9dc-11e1-9150-10bf48d758ce
+Team46Name:Robert Large
+
+Team47UUID:08cc01a2-f9dc-11e1-9150-10bf48d758ce
+Team47Name:Ross Vaughan
+
+Team48UUID:08ee365a-f9dc-11e1-9150-10bf48d758ce
+Team48Name:Ruggero Tita
+Team48Comp1UUID:86404980-f9f6-11e1-9150-10bf48d758ce
+
+Team49UUID:08420650-f9dc-11e1-9150-10bf48d758ce
+Team49Name:Rupert Tildesley
+
+Team50UUID:0989398e-f9dc-11e1-9150-10bf48d758ce
+Team50Name:Ryan Pesch
+
+Team51UUID:08c5a9ce-f9dc-11e1-9150-10bf48d758ce
+Team51Name:Ryan Seaton
+Team51Comp1UUID:857c62cc-f9f6-11e1-9150-10bf48d758ce
+
+Team52UUID:08fb0452-f9dc-11e1-9150-10bf48d758ce
+Team52Name:Stefano Cherin
+
+Team53UUID:082fd318-f9dc-11e1-9150-10bf48d758ce
+Team53Name:Thomas Ribeaud
+Team53Comp1UUID:8273e6c2-f9f6-11e1-9150-10bf48d758ce
+
+Team54UUID:0896cf00-f9dc-11e1-9150-10bf48d758ce
+Team54Name:Tim Elsner
+Team54Comp1UUID:847c0e22-f9f6-11e1-9150-10bf48d758ce
+
+Team55UUID:08a37aca-f9dc-11e1-9150-10bf48d758ce
+Team55Name:Tobias Schadewaldt
+Team55Comp1UUID:84a20d20-f9f6-11e1-9150-10bf48d758ce
+
+Team56UUID:0858bf44-f9dc-11e1-9150-10bf48d758ce
+Team56Name:Tom Bucktrout
+
+Team57UUID:0882a610-f9dc-11e1-9150-10bf48d758ce
+Team57Name:Tom Lange
+Team57Comp1UUID:8403be36-f9f6-11e1-9150-10bf48d758ce
+
+Team58UUID:09507fea-f9dc-11e1-9150-10bf48d758ce
+Team58Name:Tomasz Januszeweski
+Team58Comp1UUID:8824fea8-f9f6-11e1-9150-10bf48d758ce
+
+Team59UUID:090e1574-f9dc-11e1-9150-10bf48d758ce
+Team59Name:Uberto Crivelli Visconti
+
+Team60UUID:0981dc70-f9dc-11e1-9150-10bf48d758ce
+Team60Name:Victor Bergström
+
+Team61UUID:095fa2e0-f9dc-11e1-9150-10bf48d758ce
+Team61Name:Victor Casas
+
+Team62UUID:07fa6624-f9dc-11e1-9150-10bf48d758ce
+Team62Name:Vìctor Payá Canal
+
+Team63UUID:079b5e18-f9dc-11e1-9150-10bf48d758ce
+Team63Name:Yannick Lefebvre
+SELECT Competitors.UUID,FirstName,LastName,Initials,Color,Nationality,Description,Icon,Picture,ClassId,Handicap,HandicapDistance,StartTime FROM event_20120905_erEuropean.RaceObject INNER JOIN event_20120905_erEuropean.Competitors ON event_20120905_erEuropean.RaceObject.TrackedObjectId = event_20120905_erEuropean.Competitors.UUID WHERE RaceId='03fa908e-fc03-11e1-9150-10bf48d758ce' ORDER BY LID,StartTime,Competitors.UUID
+
+
+Comp1UUID:80879214-f9f6-11e1-9150-10bf48d758ce
+Comp1Name:Pavle Kostov
+Comp1NameShort:CRO 113
+Comp1Color:FFFFFF
+Comp1Nationality:CRO
+Comp1Description:
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1StartTime:2012-09-12 06:55:00
+Comp1ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp1RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp2UUID:80c71844-f9f6-11e1-9150-10bf48d758ce
+Comp2Name:Mads Emil Stephensen Lübeck
+Comp2NameShort:DEN 1113
+Comp2Color:FF0000
+Comp2Nationality:DEN
+Comp2Description:
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2StartTime:2012-09-12 06:55:00
+Comp2ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp2RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp3UUID:80e04896-f9f6-11e1-9150-10bf48d758ce
+Comp3Name:Allan Norregaard
+Comp3NameShort:DEN 3
+Comp3Color:00FFFF
+Comp3Nationality:DEN
+Comp3Description:
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3StartTime:2012-09-12 06:55:00
+Comp3ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp3RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp4UUID:814244ce-f9f6-11e1-9150-10bf48d758ce
+Comp4Name:Federico Alonso Tellechea
+Comp4NameShort:ESP 9
+Comp4Color:000000
+Comp4Nationality:ESP
+Comp4Description:
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4StartTime:2012-09-12 06:55:00
+Comp4ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp4RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp5UUID:81641aae-f9f6-11e1-9150-10bf48d758ce
+Comp5Name:Carlos Paz
+Comp5NameShort:ESP 1283
+Comp5Color:00FF00
+Comp5Nationality:ESP
+Comp5Description:
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5StartTime:2012-09-12 06:55:00
+Comp5ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp5RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp6UUID:8225ba6a-f9f6-11e1-9150-10bf48d758ce
+Comp6Name:Mathieu Frei
+Comp6NameShort:FRA 114
+Comp6Color:008000
+Comp6Nationality:FRA
+Comp6Description:
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6StartTime:2012-09-12 06:55:00
+Comp6ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp6RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp7UUID:824ad1ba-f9f6-11e1-9150-10bf48d758ce
+Comp7Name:Julien d'Ortoli
+Comp7NameShort:FRA 8
+Comp7Color:FFFFFF
+Comp7Nationality:FRA
+Comp7Description:
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7StartTime:2012-09-12 06:55:00
+Comp7ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp7RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp8UUID:8273e6c2-f9f6-11e1-9150-10bf48d758ce
+Comp8Name:Thomas Ribeaud
+Comp8NameShort:FRA 1309
+Comp8Color:FF00FF
+Comp8Nationality:FRA
+Comp8Description:
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8StartTime:2012-09-12 06:55:00
+Comp8ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp8RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp9UUID:82caf674-f9f6-11e1-9150-10bf48d758ce
+Comp9Name:James Peters
+Comp9NameShort:GBR 1295
+Comp9Color:FF0000
+Comp9Nationality:GBR
+Comp9Description:
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9StartTime:2012-09-12 06:55:00
+Comp9ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp9RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp10UUID:8403be36-f9f6-11e1-9150-10bf48d758ce
+Comp10Name:Tom Lange
+Comp10NameShort:GER 1260
+Comp10Color:800000
+Comp10Nationality:GER
+Comp10Description:
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10StartTime:2012-09-12 06:55:00
+Comp10ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp10RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp11UUID:842f686a-f9f6-11e1-9150-10bf48d758ce
+Comp11Name:Jan Hauke Erichsen
+Comp11NameShort:GER 216
+Comp11Color:008080
+Comp11Nationality:GER
+Comp11Description:
+Comp11Handicap:1.0000000000
+Comp11HandicapDistance:0.00000
+Comp11StartTime:2012-09-12 06:55:00
+Comp11ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp11RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp12UUID:8454f184-f9f6-11e1-9150-10bf48d758ce
+Comp12Name:Justus Schmidt
+Comp12NameShort:GER 1150
+Comp12Color:008000
+Comp12Nationality:GER
+Comp12Description:
+Comp12Handicap:1.0000000000
+Comp12HandicapDistance:0.00000
+Comp12StartTime:2012-09-12 06:55:00
+Comp12ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp12RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp13UUID:847c0e22-f9f6-11e1-9150-10bf48d758ce
+Comp13Name:Tim Elsner
+Comp13NameShort:GER 1211
+Comp13Color:FFFFFF
+Comp13Nationality:GER
+Comp13Description:
+Comp13Handicap:1.0000000000
+Comp13HandicapDistance:0.00000
+Comp13StartTime:2012-09-12 06:55:00
+Comp13ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp13RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp14UUID:84a20d20-f9f6-11e1-9150-10bf48d758ce
+Comp14Name:Tobias Schadewaldt
+Comp14NameShort:GER 1253
+Comp14Color:FF00FF
+Comp14Nationality:GER
+Comp14Description:
+Comp14Handicap:1.0000000000
+Comp14HandicapDistance:0.00000
+Comp14StartTime:2012-09-12 06:55:00
+Comp14ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp14RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp15UUID:852b8e88-f9f6-11e1-9150-10bf48d758ce
+Comp15Name:Philipp Kramer
+Comp15NameShort:GER 1155
+Comp15Color:00FFFF
+Comp15Nationality:GER
+Comp15Description:
+Comp15Handicap:1.0000000000
+Comp15HandicapDistance:0.00000
+Comp15StartTime:2012-09-12 06:55:00
+Comp15ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp15RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp16UUID:857c62cc-f9f6-11e1-9150-10bf48d758ce
+Comp16Name:Ryan Seaton
+Comp16NameShort:IRL 300
+Comp16Color:808000
+Comp16Nationality:IRL
+Comp16Description:
+Comp16Handicap:1.0000000000
+Comp16HandicapDistance:0.00000
+Comp16StartTime:2012-09-12 06:55:00
+Comp16ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp16RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp17UUID:86404980-f9f6-11e1-9150-10bf48d758ce
+Comp17Name:Ruggero Tita
+Comp17NameShort:ITA 111
+Comp17Color:800000
+Comp17Nationality:ITA
+Comp17Description:
+Comp17Handicap:1.0000000000
+Comp17HandicapDistance:0.00000
+Comp17StartTime:2012-09-12 06:55:00
+Comp17ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp17RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp18UUID:8668614a-f9f6-11e1-9150-10bf48d758ce
+Comp18Name:Diego Botin
+Comp18NameShort:ESP 986
+Comp18Color:008080
+Comp18Nationality:ESP
+Comp18Description:
+Comp18Handicap:1.0000000000
+Comp18HandicapDistance:0.00000
+Comp18StartTime:2012-09-12 06:55:00
+Comp18ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp18RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp19UUID:86b81f3c-f9f6-11e1-9150-10bf48d758ce
+Comp19Name:Jacopo Plazzi
+Comp19NameShort:ITA 023
+Comp19Color:FFFFFF
+Comp19Nationality:ITA
+Comp19Description:
+Comp19Handicap:1.0000000000
+Comp19HandicapDistance:0.00000
+Comp19StartTime:2012-09-12 06:55:00
+Comp19ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp19RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp20UUID:872f7b04-f9f6-11e1-9150-10bf48d758ce
+Comp20Name:Dubbini Leonardo
+Comp20NameShort:ITA 058
+Comp20Color:FF0000
+Comp20Nationality:ITA
+Comp20Description:
+Comp20Handicap:1.0000000000
+Comp20HandicapDistance:0.00000
+Comp20StartTime:2012-09-12 06:55:00
+Comp20ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp20RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp21UUID:87d70874-f9f6-11e1-9150-10bf48d758ce
+Comp21Name:Marcin Czajkowski
+Comp21NameShort:POL 117
+Comp21Color:000000
+Comp21Nationality:POL
+Comp21Description:
+Comp21Handicap:1.0000000000
+Comp21HandicapDistance:0.00000
+Comp21StartTime:2012-09-12 06:55:00
+Comp21ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp21RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp22UUID:87fd4fb6-f9f6-11e1-9150-10bf48d758ce
+Comp22Name:Lukasz Przybytek
+Comp22NameShort:POL 042
+Comp22Color:00FF00
+Comp22Nationality:POL
+Comp22Description:
+Comp22Handicap:1.0000000000
+Comp22HandicapDistance:0.00000
+Comp22StartTime:2012-09-12 06:55:00
+Comp22ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp22RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp23UUID:8824fea8-f9f6-11e1-9150-10bf48d758ce
+Comp23Name:Tomasz Januszewski
+Comp23NameShort:POL 052
+Comp23Color:800080
+Comp23Nationality:POL
+Comp23Description:
+Comp23Handicap:1.0000000000
+Comp23HandicapDistance:0.00000
+Comp23StartTime:2012-09-12 06:55:00
+Comp23ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp23RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp24UUID:884bea36-f9f6-11e1-9150-10bf48d758ce
+Comp24Name:Pavel Kalinchev
+Comp24NameShort:RUS 945
+Comp24Color:FFFF00
+Comp24Nationality:RUS
+Comp24Description:
+Comp24Handicap:1.0000000000
+Comp24HandicapDistance:0.00000
+Comp24StartTime:2012-09-12 06:55:00
+Comp24ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp24RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+Comp25UUID:88e9eb14-f9f6-11e1-9150-10bf48d758ce
+Comp25Name:Charlie Ekberg Enlund
+Comp25NameShort:SWE 1270
+Comp25Color:FFFFFF
+Comp25Nationality:SWE
+Comp25Description:
+Comp25Handicap:1.0000000000
+Comp25HandicapDistance:0.00000
+Comp25StartTime:2012-09-12 06:55:00
+Comp25ClassUUID:d4e534b0-f9d8-11e1-9150-10bf48d758ce
+Comp25RouteUUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+
+ControlPoint1UUID:5a0931e8-f9ff-11e1-9150-10bf48d758ce
+ControlPoint1Name:Start
+ControlPoint1HasTwoPoints:1
+ControlPoint1ShortName:St
+ControlPoint1Mark1Lon:10.832520
+ControlPoint1Mark1Lat:45.825928
+ControlPoint1Mark2Lon:10.802307
+ControlPoint1Mark2Lat:45.794340
+
+ControlPoint2UUID:7f145bac-fc93-11e1-9150-10bf48d758ce
+ControlPoint2Name:Start-Finish
+ControlPoint2HasTwoPoints:1
+ControlPoint2ShortName:SF
+ControlPoint2Mark1Lon:10.837612
+ControlPoint2Mark1Lat:45.845333
+ControlPoint2Mark2Lon:10.840403
+ControlPoint2Mark2Lat:45.845005
+
+ControlPoint3UUID:7f348486-f9ff-11e1-9150-10bf48d758ce
+ControlPoint3Name:Finish
+ControlPoint3HasTwoPoints:1
+ControlPoint3ShortName:Fi
+ControlPoint3Mark1Lon:10.681458
+ControlPoint3Mark1Lat:45.648608
+ControlPoint3Mark2Lon:10.678711
+ControlPoint3Mark2Lat:45.523668
+
+ControlPoint4UUID:a1bcd13e-fc93-11e1-9150-10bf48d758ce
+ControlPoint4Name:1
+ControlPoint4HasTwoPoints:0
+ControlPoint4ShortName:1
+ControlPoint4Mark1Lon:10.845675
+ControlPoint4Mark1Lat:45.859775
+
+ControlPoint5UUID:a81fe110-fc93-11e1-9150-10bf48d758ce
+ControlPoint5Name:2
+ControlPoint5HasTwoPoints:1
+ControlPoint5ShortName:2
+ControlPoint5Mark1Lon:10.839828
+ControlPoint5Mark1Lat:45.845573
+ControlPoint5Mark2Lon:10.840363
+ControlPoint5Mark2Lat:45.845452
+
+ControlPoint6UUID:b63b603a-fc93-11e1-9150-10bf48d758ce
+ControlPoint6Name:Replacement mark
+ControlPoint6HasTwoPoints:0
+ControlPoint6ShortName:R1
+ControlPoint6Mark1Lon:10.845018
+ControlPoint6Mark1Lat:45.858398
+
+
+SegmentFile:segments.php
+Route1UUID:82a946c0-fc97-11e1-9150-10bf48d758ce
+Route1Description:Race 1
+Route1Length:0
+Route1ControlPoint1UUID:7f145bac-fc93-11e1-9150-10bf48d758ce
+Route1ControlPoint2UUID:a1bcd13e-fc93-11e1-9150-10bf48d758ce
+Route1ControlPoint3UUID:a81fe110-fc93-11e1-9150-10bf48d758ce
+Route1ControlPoint4UUID:a1bcd13e-fc93-11e1-9150-10bf48d758ce
+Route1ControlPoint5UUID:7f145bac-fc93-11e1-9150-10bf48d758ce
+
+//-------- AUTO GENERATED PARAMETERS END ------------------
