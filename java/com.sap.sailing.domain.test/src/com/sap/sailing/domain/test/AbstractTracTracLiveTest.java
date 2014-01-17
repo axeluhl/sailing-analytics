@@ -90,7 +90,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         
         if (storedUri.toString().startsWith("file:")) {
             try {
-                storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));
+                storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:///$1"));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
