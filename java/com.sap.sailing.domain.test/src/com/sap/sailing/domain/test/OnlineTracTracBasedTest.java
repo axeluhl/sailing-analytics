@@ -20,6 +20,7 @@ import org.junit.Before;
 
 
 
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -85,10 +86,20 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
             IOException, InterruptedException, URISyntaxException {
         setUpWithoutLaunchingController(regattaName, raceId);
+        finishSetUp(receiverTypes);
+    }
+
+
+    private void finishSetUp(ReceiverType... receiverTypes) throws InterruptedException {
         assertEquals(getExpectedEventName(), getTracTracEvent().getName());
         completeSetupLaunchingControllerAndWaitForRaceDefinition(receiverTypes);
     }
 
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+        finishSetUp(receiverTypes);
+    }
 
     protected void completeSetupLaunchingControllerAndWaitForRaceDefinition(ReceiverType... receiverTypes)
             throws InterruptedException {
@@ -137,9 +148,16 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
-        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId),
-                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
-                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
+        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
+        final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
+        final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+    }
+
+
+    protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri)
+            throws FileNotFoundException, MalformedURLException {
+        super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
