@@ -97,7 +97,10 @@ public class MetadataParserImpl implements MetadataParser {
             for (TracTracControlPoint controlPoint : controlPoints) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (!controlPoint.getHasTwoPoints() && seqValue != null) {
-                    result.put(i, PassingInstruction.valueOfIgnoringCase(seqValue));
+                    final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
+                    if (passingInstructions != null) {
+                        result.put(i, passingInstructions);
+                    }
                 }
                 i++;
             }
