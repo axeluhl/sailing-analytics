@@ -1267,9 +1267,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     /**
      * The old field name WAYPOINT_PASSINGSIDE has been replaced by WAYPOINT_PASSINGINSTRUCTIONS. If a race with the old
-     * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION
+     * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION. If the first or last
+     * Waypoint has the PassingInstructions Gate, it is transfered to Line.
      * 
      */
+    @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
     private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
         if (courseName == null) {
             courseName = "Course";
@@ -1285,11 +1287,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
                 if(waypointPassingInstruction != null) {
                     logger.info("Migrating PassingInstruction "+waypointPassingInstruction+" to field name WAYPOINT_PASSINGINSTRUCTIONS");
+                    if((i==0||i==dbCourseList.size()-1)&&waypointPassingInstruction.toLowerCase().equals("gate")){
+                        logger.warning("Changing PassingInstructions of first or last Waypoint from Gate to Line.");
+                        waypointPassingInstruction = "Line";
+                    }
                     dbObject.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), waypointPassingInstruction);
                     dbObject.removeField(FieldNames.WAYPOINT_PASSINGSIDE.name());
                 }
             }
-            
             if (waypointPassingInstruction != null) {
                 passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
@@ -1311,21 +1316,56 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
+            } else if(controlPointClass.equals("Gate")) {
+                ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                dbObject.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
+                controlPoint = cpwtm;
             } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
-                ControlPointWithTwoMarks gate = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
-                controlPoint = gate;
+                ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                controlPoint = cpwtm;
             }
         }
         return controlPoint;
     }
 
+    /**
+     * Checks for the old GATE fields and migrates them to the new CONTROLPOINTWITHTWOMARKS fields.
+     */
+    @SuppressWarnings("deprecation") // Used for migrating old races
     private ControlPointWithTwoMarks loadControlPointWithTwoMarks(DBObject dbObject) {
-        Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
-        String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
-        Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
-        Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
-        
-        ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(gateId, leftMark, rightMark, gateName);
+        String controlPointName = (String) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name());
+        if (controlPointName == null) {
+            controlPointName = (String) dbObject.get(FieldNames.GATE_NAME.name());
+            logger.info("Migrating name of ControlPointWithTwoMarks " + controlPointName
+                    + " from GATE_NAME to new field CONTROLPOINTWITHTWOMARKS_NAME.");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), controlPointName);
+            dbObject.removeField(FieldNames.GATE_NAME.name());
+        }
+        Serializable controlPointId = (Serializable) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name());
+        if (controlPointId == null) {
+            controlPointId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
+            logger.info("Migrating id of ControlPointWithTwoMarks " + controlPointName
+                    + " from old field GATE_ID to CONTROLPOINTWITHTWOMARKS_ID.");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), controlPointId);
+            dbObject.removeField(FieldNames.GATE_ID.name());
+        }
+        DBObject dbLeft = (DBObject) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name());
+        if (dbLeft == null) {
+            dbLeft = (DBObject) dbObject.get(FieldNames.GATE_LEFT.name());
+            logger.info("Migrating left Mark of ControlPointWithTwoMarks " + controlPointName + " from old field GATE_LEFT to CONTROLPOINTWITHTWOMARKS_LEFT");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), dbLeft);
+            dbObject.removeField(FieldNames.GATE_LEFT.name());
+        }
+        Mark leftMark = loadMark(dbLeft);
+        DBObject dbRight = (DBObject) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name());
+        if (dbRight == null) {
+            dbRight = (DBObject) dbObject.get(FieldNames.GATE_RIGHT.name());
+            logger.info("Migrating right Mark of ControlPointWithTwoMarks " + controlPointName + " from old field GATE_RIGHT to CONTROLPOINTWITHTWOMARKS_RIGHT");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), dbRight);
+            dbObject.removeField(FieldNames.GATE_RIGHT.name());
+        }
+        Mark rightMark = loadMark(dbRight);
+        ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(controlPointId, leftMark, rightMark, controlPointName);
         return gate;
     }
 

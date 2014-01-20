@@ -860,17 +860,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeMark((Mark) controlPoint));
         } else if (controlPoint instanceof ControlPointWithTwoMarks) {
             result.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
-            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeGate((ControlPointWithTwoMarks) controlPoint));
+            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeControlPointWithTwoMarks((ControlPointWithTwoMarks) controlPoint));
         }
         return result;
     }
 
-    private DBObject storeGate(ControlPointWithTwoMarks gate) {
+    private DBObject storeControlPointWithTwoMarks(ControlPointWithTwoMarks cpwtm) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.GATE_ID.name(), gate.getId());
-        result.put(FieldNames.GATE_NAME.name(), gate.getName());
-        result.put(FieldNames.GATE_LEFT.name(), storeMark(gate.getLeft()));
-        result.put(FieldNames.GATE_RIGHT.name(), storeMark(gate.getRight()));
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), cpwtm.getId());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), cpwtm.getName());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), storeMark(cpwtm.getLeft()));
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), storeMark(cpwtm.getRight()));
         return result;
     }
 
