@@ -10,9 +10,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -38,7 +41,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections {
+public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, IsManagedBySharedDomainFactory {
     private static final long serialVersionUID = 8824782847677232275L;
     
     // deprecated structures that key corrections by name; to be removed once all databases have been migrated
@@ -57,8 +60,11 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     
     private final Leaderboard leaderboard;
     private transient Set<LeaderboardCorrectionsResolvedListener> listeners;
+
+    private CompetitorFactory competitorFactory;
     
-    public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard) {
+    public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard, CompetitorFactory competitorFactory) {
+        this.competitorFactory = competitorFactory;
         listeners = new HashSet<>();
         carriedPointsByCompetitorName = new HashMap<String, Double>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
@@ -105,8 +111,13 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void setCarriedPointsByID(Serializable competitorId, double carriedPoints) {
         assertNoTrackedRaceAssociatedYet();
-        synchronized (carriedPointsByCompetitorID) {
-            carriedPointsByCompetitorID.put(competitorId, carriedPoints);
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.setCarriedPoints(competitor, carriedPoints);
+        } else {
+            synchronized (carriedPointsByCompetitorID) {
+                carriedPointsByCompetitorID.put(competitorId, carriedPoints);
+            }
         }
     }
     
@@ -121,13 +132,18 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void setMaxPointsReasonByID(Serializable competitorId, RaceColumn raceColumn, MaxPointsReason maxPointsReason) {
         assertNoTrackedRaceAssociatedYet();
-        synchronized (maxPointsReasonsByCompetitorID) {
-            Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorID.get(competitorId);
-            if (map == null) {
-                map = new HashMap<RaceColumn, MaxPointsReason>();
-                maxPointsReasonsByCompetitorID.put(competitorId, map);
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
+        } else {
+            synchronized (maxPointsReasonsByCompetitorID) {
+                Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorID.get(competitorId);
+                if (map == null) {
+                    map = new HashMap<RaceColumn, MaxPointsReason>();
+                    maxPointsReasonsByCompetitorID.put(competitorId, map);
+                }
+                map.put(raceColumn, maxPointsReason);
             }
-            map.put(raceColumn, maxPointsReason);
         }
     }
 
@@ -147,13 +163,18 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void correctScoreByID(Serializable competitorId, RaceColumn raceColumn, double correctedScore) {
         assertNoTrackedRaceAssociatedYet();
-        synchronized (correctedScoresByCompetitorID) {
-            Map<RaceColumn, Double> map = correctedScoresByCompetitorID.get(competitorId);
-            if (map == null) {
-                map = new HashMap<RaceColumn, Double>();
-                correctedScoresByCompetitorID.put(competitorId, map);
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
+        } else {
+            synchronized (correctedScoresByCompetitorID) {
+                Map<RaceColumn, Double> map = correctedScoresByCompetitorID.get(competitorId);
+                if (map == null) {
+                    map = new HashMap<RaceColumn, Double>();
+                    correctedScoresByCompetitorID.put(competitorId, map);
+                }
+                map.put(raceColumn, correctedScore);
             }
-            map.put(raceColumn, correctedScore);
         }
     }
 
@@ -333,8 +354,13 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void setDisplayNameByID(Serializable competitorId, String displayName) {
         assertNoTrackedRaceAssociatedYet();
-        synchronized (displayNamesByCompetitorID) {
-            displayNamesByCompetitorID.put(competitorId, displayName);
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.setDisplayName(competitor, displayName);
+        } else {
+            synchronized (displayNamesByCompetitorID) {
+                displayNamesByCompetitorID.put(competitorId, displayName);
+            }
         }
     }
 
@@ -349,8 +375,13 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void suppressCompetitorById(Serializable competitorId) {
         assertNoTrackedRaceAssociatedYet();
-        synchronized (suppressedCompetitorIDs) {
-            suppressedCompetitorIDs.add(competitorId);
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.setSuppressed(competitor, true);
+        } else {
+            synchronized (suppressedCompetitorIDs) {
+                suppressedCompetitorIDs.add(competitorId);
+            }
         }
     }
 
@@ -419,6 +450,12 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory) {
+        this.competitorFactory = domainFactory;
+        return this;
     }
 
 }
