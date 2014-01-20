@@ -84,6 +84,11 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
+                                    <id>com.sap.sse.gwt</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
                                     <id>com.sap.sailing.gwt.ui</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
