@@ -120,7 +120,7 @@ public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
         ctx.beginPath();
         ctx.moveTo(1580,355);
         ctx.lineTo(778,-229);
-        ctx.bezierCurveTo(778,-229,1220,-175,1350,-47.599999999999994);
+        ctx.bezierCurveTo(778,-229,1220,-175,1350,-47.6);
         ctx.bezierCurveTo(1490,81.4,1580,355,1580,355);
         ctx.closePath();
         ctx.fill();
