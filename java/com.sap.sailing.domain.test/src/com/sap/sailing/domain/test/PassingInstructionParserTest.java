@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -30,9 +31,8 @@ public class PassingInstructionParserTest extends OnlineTracTracBasedTest {
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        URL mtbUrl = getClass().getClassLoader().getResource("event_20131112_ESSFlorian-Race_1.mtb");
-        URI storedUri = new URI(mtbUrl.toString());
-        super.setUp(getClass().getClassLoader().getResource("event_20131112_ESSFlorian-Race_1.txt"),
+        URI storedUri = new URI("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE });
         getTrackedRace().recordWind(

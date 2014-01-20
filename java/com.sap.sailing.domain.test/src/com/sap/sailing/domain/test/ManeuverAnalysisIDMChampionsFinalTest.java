@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -48,9 +49,8 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
     @Before
     public void setUp() throws URISyntaxException, IOException, InterruptedException {
         super.setUp();
-        URL mtbUrl = getClass().getClassLoader().getResource("event_20110929_Internatio-Champions_Cup_Final.mtb");
-        URI storedUri = new URI(mtbUrl.toString());
-        super.setUp(getClass().getClassLoader().getResource("event_20110929_Internatio-Champions_Cup_Final.txt"),
+        URI storedUri = new URI("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace());

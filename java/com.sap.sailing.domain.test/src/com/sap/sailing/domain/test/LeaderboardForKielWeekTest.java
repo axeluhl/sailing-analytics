@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -70,9 +71,8 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
             URISyntaxException {
         final String raceName = "505 Race 2 from Kieler Woche 2011";
         logger.info("Loading race "+raceName);
-        URL mtbUrl = getClass().getClassLoader().getResource(storedDataFile);
-        URI storedUri = new URI(mtbUrl.toString());
-        super.setUp(getClass().getClassLoader().getResource(paramsFile),
+        URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/"+paramsFile).getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS });
         logger.info("Recording wind for " + raceName);
