@@ -17,12 +17,12 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
 
 public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogComponent<RegattaRaceStatesSettings> {
 

@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Shared GWT Code
+Bundle-SymbolicName: com.sap.sse.gwt
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: com.sap.sailing.domain.common,
+ org.moxieapps.gwt.highcharts;bundle-version="1.5.0",
+ de.csenk.gwt.ws,
+ com.google.gwt.osgi;bundle-version="2.5.1"
+Bundle-ActivationPolicy: lazy
+Import-Package: javax.jms;version="1.1.0",
+ javax.servlet;version="2.6.0",
+ javax.servlet.http;version="2.6.0",
+ javax.servlet.descriptor;version="2.6.0",
+ org.json.simple,
+ org.json.simple.parser,
+ org.osgi.framework,
+ org.osgi.util.tracker
+TrackLifecycle: true
+Export-Package: com.sap.sse.gwt.ui

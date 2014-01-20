@@ -65,5 +65,4 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
         };
     }
-
 }

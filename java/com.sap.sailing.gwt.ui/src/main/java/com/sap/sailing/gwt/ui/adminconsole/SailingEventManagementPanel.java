@@ -32,7 +32,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -41,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
@@ -421,7 +421,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
-                                
             }
 
             @Override

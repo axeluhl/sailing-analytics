@@ -32,12 +32,12 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows an administrator to view and edit the set of competitors currently maintained by the server.

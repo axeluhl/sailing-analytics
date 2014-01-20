@@ -34,7 +34,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -58,7 +58,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -1274,16 +1274,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
-            NauticalSide passingSide = null;
-            String waypointPassingSide = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
-            if (waypointPassingSide != null) {
-                passingSide = NauticalSide.valueOf(waypointPassingSide);
+            PassingInstruction passingInstructions = null;
+            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+            if (waypointPassingInstruction != null) {
+                passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
-            if (passingSide == null) {
+            if (passingInstructions == null) {
                 waypoint = new WaypointImpl(controlPoint);
             } else {
-                waypoint = new WaypointImpl(controlPoint, passingSide);
+                waypoint = new WaypointImpl(controlPoint, passingInstructions);
             }
             courseData.addWaypoint(i++, waypoint);
         }
@@ -1297,21 +1297,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
-            } else if (controlPointClass.equals(Gate.class.getSimpleName())) {
-                Gate gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+            } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
+                ControlPointWithTwoMarks gate = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = gate;
             }
         }
         return controlPoint;
     }
 
-    private Gate loadGate(DBObject dbObject) {
+    private ControlPointWithTwoMarks loadControlPointWithTwoMarks(DBObject dbObject) {
         Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
         String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
         Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
         Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
         
-        Gate gate = baseDomainFactory.createGate(gateId, leftMark, rightMark, gateName);
+        ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(gateId, leftMark, rightMark, gateName);
         return gate;
     }
 
