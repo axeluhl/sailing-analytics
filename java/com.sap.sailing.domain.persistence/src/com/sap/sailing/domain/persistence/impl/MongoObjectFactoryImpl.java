@@ -302,9 +302,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
         TimePoint now = MillisecondsTimePoint.now();
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : scoreCorrection.getRaceColumnsThatHaveCorrections()) {
             BasicDBList dbCorrectionForRace = new BasicDBList();
-            for (Competitor competitor : leaderboard.getCompetitors()) {
+            for (Competitor competitor : scoreCorrection.getCompetitorsThatHaveCorrectionsIn(raceColumn)) {
                 // TODO bug 655: make score corrections time dependent
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn, now)) {
                     BasicDBObject dbCorrectionForCompetitor = new BasicDBObject();

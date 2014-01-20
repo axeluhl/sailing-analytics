@@ -473,4 +473,32 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         return leaderboard;
     }
 
+    @Override
+    public Iterable<RaceColumn> getRaceColumnsThatHaveCorrections() {
+        Set<RaceColumn> result = new HashSet<>();
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+            result.add(correctedScoresKey.getB());
+        }
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+            result.add(maxPointsReasonsKey.getB());
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Competitor> getCompetitorsThatHaveCorrectionsIn(RaceColumn raceColumn) {
+        Set<Competitor> result = new HashSet<>();
+        for (Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
+            if (raceColumn == correctedScoresKey.getB()) {
+                result.add(correctedScoresKey.getA());
+            }
+        }
+        for (Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
+            if (raceColumn == maxPointsReasonsKey.getB()) {
+                result.add(maxPointsReasonsKey.getA());
+            }
+        }
+        return result;
+    }
+
 }

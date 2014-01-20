@@ -290,6 +290,51 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2, MillisecondsTimePoint.now()));
     }
 
+    /**
+     * See bug 1707; the problem that this test case is trying to reproduce occurs when unlinking the last race from a leaderboard
+     * that was contributing one or more competitors that have a score correction. At commit 31074ccf2d3e2440d6a6f680504f150c264992ff
+     * the leaderboard is updated in the DB when a tracked race is removed (not explicitly unlinked). This is problematic for two reasons.
+     * First, the inverse operation (re-loading the race and automatically linking it again) does not lead to an update; second,
+     * the leaderboard loses all its score corrections in the DB because the score corrections, although still present in the
+     * ScoreCorrectionsImpl object, are not written to the DB because the leaderboard's competitor list is computed from its
+     * attached tracked races and therefore now is empty.
+     */
+    @Test
+    public void testRemovingAndReAddingLastRaceWithScoreCorrections() {
+        final String leaderboardName = "TestLeaderboard";
+        final String raceColumnName1 = "My First Race 1";
+        final String raceColumnName2 = "My First Race 2";
+        final double correctedPoints = 2.55;
+        final MaxPointsReason maxPointsReason = MaxPointsReason.DNF;
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
+                new LowPoint(), null);
+        Competitor competitor = createCompetitor();
+        TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
+        TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
+        RaceColumn r1 = leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false, 
+                leaderboard.getFleet(null));
+        RaceColumn r2 = leaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace */ true, 
+                leaderboard.getFleet(null));
+        leaderboard.getScoreCorrection().correctScore(competitor, leaderboard.getRaceColumnByName(raceColumnName1), correctedPoints);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitor, leaderboard.getRaceColumnByName(raceColumnName2), maxPointsReason);
+        // now release the tracked races; leaving no competitors in leaderboard.getCompetitors()
+        r1.releaseTrackedRace(leaderboard.getFleet(null));
+        r2.releaseTrackedRace(leaderboard.getFleet(null));
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        FlexibleLeaderboard loadedLeaderboard = (FlexibleLeaderboard) new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        // attach tracked race to leaderboard to ensure that competitor object is assigned properly
+        RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false, 
+                leaderboard.getFleet(null));
+        RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, 
+                leaderboard.getFleet(null));
+        assertEquals(leaderboardName, loadedLeaderboard.getName());
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1, MillisecondsTimePoint.now()));
+        assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.000000001);
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2, MillisecondsTimePoint.now()));
+        assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2, MillisecondsTimePoint.now()));
+    }
+
     private Competitor createCompetitor() {
         Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
