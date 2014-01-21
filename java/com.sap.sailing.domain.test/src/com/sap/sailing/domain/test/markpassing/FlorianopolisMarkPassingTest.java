@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.junit.*;
+import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
@@ -24,7 +24,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassingcalculation.MockedPolarSheetDeliverer;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -35,9 +34,6 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
 
     public  FlorianopolisMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
-        MockedPolarSheetDeliverer.reaching = 14;
-        MockedPolarSheetDeliverer.up = 11;
-        MockedPolarSheetDeliverer.down = 17;
     }
 
     private boolean forceReload = true;
@@ -132,14 +128,14 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
         assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed
                 + wronglyComputed);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
-       /* System.out.println("Total theoretical Passes: " + totalMarkPasses);
+        System.out.println("Total theoretical Passes: " + totalMarkPasses);
         System.out.println("Correct comparison: " + correctPasses);
         System.out.println("Incorrect comparison: " + incorrectPasses);
         System.out.println("Correctly Null: " + correctlyNotComputed);
         System.out.println("Should be null but arent:" + wronglyComputed);
         System.out.println("Should not be null but are: " + wronglyNotComputed);
         System.out.println("accuracy: " + accuracy);
-        System.out.println("Computation time: " + time + " ms");*/
+        System.out.println("Computation time: " + time + " ms");
         assertTrue(accuracy >= 0.9);
     
     }
