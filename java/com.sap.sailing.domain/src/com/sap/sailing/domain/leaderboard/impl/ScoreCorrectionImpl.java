@@ -339,7 +339,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
-            final RaceColumn raceColumn, final TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
+            final RaceColumn raceColumn, final TimePoint timePoint, final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             ScoringScheme scoringScheme) {
         Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
@@ -357,6 +357,19 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 result = correctedNonMaxedScore;
             }
         }
+        // also compute uncorrected score
+        Double resultUncorrected = 0.0;
+        try {
+            resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRankProvider.call(), new Callable<Integer>() {
+                                        @Override
+                                        public Integer call() {
+                                            return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
+                                        }
+                            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        final Double uncorrectedScore = resultUncorrected;
         final Double correctedScore = result;
         return new Result() {
             @Override
@@ -377,6 +390,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             @Override
             public TimePoint getTimePoint() {
                 return timePoint;
+            }
+
+            @Override
+            public Double getUncorrectedScore() {
+                return uncorrectedScore;
             }
         };
     }

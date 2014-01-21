@@ -33,6 +33,8 @@ public interface ScoreCorrection extends Serializable {
          *         the race at all.
          */
         Double getCorrectedScore();
+        
+        Double getUncorrectedScore();
 
         MaxPointsReason getMaxPointsReason();
 
