@@ -61,7 +61,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     private final Leaderboard leaderboard;
     private transient Set<LeaderboardCorrectionsResolvedListener> listeners;
 
-    private CompetitorFactory competitorFactory;
+    private transient CompetitorFactory competitorFactory;
     
     public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard, CompetitorFactory competitorFactory) {
         this.competitorFactory = competitorFactory;
