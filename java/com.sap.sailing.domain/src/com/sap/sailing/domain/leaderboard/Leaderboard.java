@@ -52,6 +52,7 @@ public interface Leaderboard extends Named {
     public interface Entry {
         int getTrackedRank();
         Double getNetPoints() throws NoWindException;
+        Double getNetPointsUncorrected() throws NoWindException;
         Double getTotalPoints() throws NoWindException;
         MaxPointsReason getMaxPointsReason();
         boolean isDiscarded() throws NoWindException;

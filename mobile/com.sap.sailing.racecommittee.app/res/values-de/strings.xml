@@ -80,6 +80,8 @@
         <item>Backbord</item>
         <item>Steuerbord</item>
         <item>Gate</item>
+        <item >Linie</item>
+        <item >Ablauf</item>
     </string-array>
     <string-array name="course_element_changers">
         <item>Nach oben</item>

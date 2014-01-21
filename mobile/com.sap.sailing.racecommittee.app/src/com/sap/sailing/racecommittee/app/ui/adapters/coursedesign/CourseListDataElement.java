@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
+import com.sap.sailing.domain.common.PassingInstruction;
 
 public class CourseListDataElement {
 	
 	private Mark leftMark;
 	private Mark rightMark;
-	private RoundingDirection roundingDirection;
+	private PassingInstruction passingInstructions;
 	
 	public Mark getLeftMark() {
 		return leftMark;
@@ -25,11 +25,11 @@ public class CourseListDataElement {
 		rightMark = mark;
 	}
 	
-	public RoundingDirection getRoundingDirection() {
-		return roundingDirection;
+	public PassingInstruction getPassingInstructions() {
+		return passingInstructions;
 	}
 	
-	public void setRoundingDirection(RoundingDirection direction) {
-		roundingDirection = direction;
+	public void setPassingInstructions(PassingInstruction instructions) {
+		passingInstructions = instructions;
 	}
 }

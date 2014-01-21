@@ -14,11 +14,15 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse.gwt</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.geocoding</module>
+		<module>com.sap.sailing.datamining</module>
+		<module>com.sap.sailing.datamining.shared</module>
+		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>

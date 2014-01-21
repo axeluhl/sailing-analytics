@@ -26,6 +26,8 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.controls.PanControlOptions;
 import com.google.gwt.maps.client.controls.ScaleControlOptions;
 import com.google.gwt.maps.client.controls.ZoomControlOptions;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dragend.DragEndMapEvent;
@@ -255,7 +257,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final CombinedWindPanel combinedWindPanel;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
-    
+
+    /**
+     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
+     */
+    private LatLngBounds currentMapBounds;
+
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
@@ -348,6 +355,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                   }
               });
+              map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                  @Override
+                  public void onEvent(BoundsChangeMapEvent event) {
+                      if (!isAutoZoomInProgress() && !map.getBounds().equals(currentMapBounds)) {
+                          // remove the canvas animations for boats 
+                          for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+                              boatOverlay.removeCanvasPositionTransition();
+                          }
+                          // remove the canvas animations for the info overlays of the selected boats 
+                          for(SmallTransparentInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
+                              infoOverlay.removeCanvasPositionTransition();
+                          }
+                      }
+                      currentMapBounds = map.getBounds();
+                  }
+              });
+              
               //If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization);
@@ -359,7 +383,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V2_APIKey); 
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
         
     public void redraw() {
@@ -631,6 +655,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (settings.isShowSelectedCompetitorsInfo()) {
                 Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(
                         competitorInfoOverlays.keySet());
+                final long timeForPositionTransitionMillis = timer.getPlayState() == PlayStates.Playing ? // animate when playing
+                        1300*timer.getRefreshInterval()/1000 : -1;
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
                     if (fixesAndTails.hasFixesFor(competitorDTO)) {
                         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
@@ -639,10 +665,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                                competitorInfoOverlay.setPosition(lastBoatFix.position);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
-                                competitorInfoOverlay.setPosition(lastBoatFix.position);
+                                competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.draw();
                             }
                             toRemoveCompetorInfoOverlays.remove(competitorDTO);
@@ -670,6 +696,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             Date tailsToTime = date;
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(fixesAndTails.getCompetitorsWithTails());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
+            final long timeForPositionTransitionMillis = timer.getPlayState() == PlayStates.Playing ? // animate when playing
+                    1300*timer.getRefreshInterval()/1000 : -1;
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
@@ -677,12 +705,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                         tail.setMap(map);
                     } else {
-                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
+                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
+                                (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date, 
-                            timer.getPlayState() == PlayStates.Playing ? // animate when playing
-                                1300*timer.getRefreshInterval()/1000 : -1);
+                            timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
@@ -1039,7 +1067,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             } else {
                 countDownOverlay.setInfoText(countDownText);
             }
-            countDownOverlay.setPosition(startMarkPositions.get(startMarkPositions.size() - 1));
+            countDownOverlay.setPosition(startMarkPositions.get(startMarkPositions.size() - 1), -1);
             countDownOverlay.draw();
         }
     }
@@ -1110,7 +1138,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatOverlay boatCanvas = new BoatOverlay(this, zIndex, competitorDTO);
+        final BoatOverlay boatCanvas = new BoatOverlay(map, zIndex, competitorDTO);
         boatCanvas.setSelected(highlighted);
         boatCanvas.addClickHandler(new ClickMapHandler() {
             @Override

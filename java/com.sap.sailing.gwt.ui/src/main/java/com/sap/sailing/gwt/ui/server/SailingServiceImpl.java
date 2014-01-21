@@ -51,6 +51,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.datamining.DataMiningFactory;
+import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -59,7 +64,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -92,9 +97,9 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -807,7 +812,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (MarkDTO markDTO : controlPointDTO.getMarks()) {
                     marks.add(markDTO);
                 }
-                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingSide());
+                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingInstructions());
                 waypointDTOs.add(waypointDTO);
             }
             result = new RaceCourseDTO(waypointDTOs);
@@ -1565,7 +1570,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         markDTOs.add(convertToMarkDTO(mark, positionAtDate));
                     }
                     ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint);
-                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, markDTOs, waypoint.getPassingSide());
+                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, markDTOs, waypoint.getPassingInstructions());
                     waypointDTOs.add(waypointDTO);
                 }
             }
@@ -1575,10 +1580,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
         ControlPointDTO result;
-        if (controlPoint instanceof Gate) {
-            final Mark left = ((Gate) controlPoint).getLeft();
+        if (controlPoint instanceof ControlPointWithTwoMarks) {
+            final Mark left = ((ControlPointWithTwoMarks) controlPoint).getLeft();
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            final Mark right = ((Gate) controlPoint).getRight();
+            final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
         } else {
@@ -1591,9 +1596,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint) {
         ControlPointDTO result;
-        if (controlPoint instanceof Gate) {
-            final Mark left = ((Gate) controlPoint).getLeft();
-            final Mark right = ((Gate) controlPoint).getRight();
+        if (controlPoint instanceof ControlPointWithTwoMarks) {
+            final Mark left = ((ControlPointWithTwoMarks) controlPoint).getLeft();
+            final Mark right = ((ControlPointWithTwoMarks) controlPoint).getRight();
             result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, null), convertToMarkDTO(right, null)); 
         } else {
             result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName());
@@ -1610,22 +1615,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * the course of the race identified by <code>raceIdentifier</code>.
      */
     @Override
-    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints) {
+    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
             Iterable<Waypoint> waypoints = course.getWaypoints();
-            List<Pair<ControlPoint, NauticalSide>> newControlPoints = new ArrayList<Pair<ControlPoint, NauticalSide>>();
+            List<Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
             int lastMatchPosition = -1;
-            for (Pair<ControlPointDTO, NauticalSide> controlPointAndPassingSide : controlPoints) {
-                ControlPointDTO controlPointDTO = controlPointAndPassingSide.getA();
+            for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
+                ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
                 ControlPoint matchFromOldCourse = null;
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
                     Waypoint waypointAtI = Util.get(waypoints, i);
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
                     if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
                         matchFromOldCourse = controlPointAtI;
-                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(matchFromOldCourse, null));
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(matchFromOldCourse, null));
                         lastMatchPosition = i;
                     }
                 }
@@ -1642,12 +1647,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
-                        newControlPoint = baseDomainFactory.createGate(id, left, right, gateDTO.getName());
-                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, null));
+                        newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
-                        NauticalSide nauticalSide = controlPointAndPassingSide.getB();
-                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, nauticalSide));
+                        PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
+                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
                     }
                 }
             }
@@ -3446,6 +3451,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
 
+    
+    @Override
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
+        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
+        return query.run(getService());
+    }
+    
+    @Override
+    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
+        return null;
+    }
+    
     @Override
     public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
         List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.overlays.Polyline;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -318,44 +319,62 @@ public class FixesAndTails {
      * <p>
      * 
      * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
+     * 
+     * @param delayForTailChangeInMillis
+     *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
+     *            the update immediately
      */
-    protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
-        int vertexCount = tail.getPath().getLength();
-        final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
-        while (indexOfFirstShownFix != -1 && vertexCount > 0
-                && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
-            tail.getPath().removeAt(0);
-            vertexCount--;
-            indexOfFirstShownFix++;
+    protected void updateTail(final Polyline tail, final  CompetitorDTO competitorDTO,
+            final Date from, final Date to, final int delayForTailChangeInMillis) {
+        Timer delayedOrImmediateExecutor = new Timer() {
+            @Override
+            public void run() {
+                int vertexCount = tail.getPath().getLength();
+                final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
+                int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix
+                        .get(competitorDTO);
+                while (indexOfFirstShownFix != -1 && vertexCount > 0
+                        && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
+                    tail.getPath().removeAt(0);
+                    vertexCount--;
+                    indexOfFirstShownFix++;
+                }
+                // now the polyline contains no more vertices representing fixes before "from";
+                // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
+                // and insert corresponding vertices into the polyline
+                while (indexOfFirstShownFix > 0
+                        && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
+                    indexOfFirstShownFix--;
+                    GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
+                    tail.getPath().insertAt(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+                    vertexCount++;
+                }
+                // now adjust the polylines tail: remove excess vertices that are after "to"
+                int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix
+                        .get(competitorDTO);
+                while (indexOfLastShownFix != -1 && vertexCount > 0
+                        && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+                    tail.getPath().removeAt(--vertexCount);
+                    indexOfLastShownFix--;
+                }
+                // now the polyline contains no more vertices representing fixes after "to";
+                // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
+                // and insert corresponding vertices into the polyline
+                while (indexOfLastShownFix < fixesForCompetitor.size() - 1
+                        && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
+                    indexOfLastShownFix++;
+                    GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
+                    tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+                }
+                firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+                lastShownFix.put(competitorDTO, indexOfLastShownFix);
+            }
+        };
+        if (delayForTailChangeInMillis == -1) {
+            delayedOrImmediateExecutor.run();
+        } else {
+            delayedOrImmediateExecutor.schedule(delayForTailChangeInMillis);
         }
-        // now the polyline contains no more vertices representing fixes before "from";
-        // go back in time starting at indexOfFirstShownFix while the fixes are still at or after "from"
-        // and insert corresponding vertices into the polyline
-        while (indexOfFirstShownFix > 0 && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
-            indexOfFirstShownFix--;
-            GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
-            tail.getPath().insertAt(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
-            vertexCount++;
-        }
-        // now adjust the polylines tail: remove excess vertices that are after "to"
-        int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        while (indexOfLastShownFix != -1 && vertexCount > 0
-                && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
-            tail.getPath().removeAt(--vertexCount);
-            indexOfLastShownFix--;
-        }
-        // now the polyline contains no more vertices representing fixes after "to";
-        // go forward in time starting at indexOfLastShownFix while the fixes are still at or before "to"
-        // and insert corresponding vertices into the polyline
-        while (indexOfLastShownFix < fixesForCompetitor.size() - 1
-                && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
-            indexOfLastShownFix++;
-            GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
-            tail.getPath().insertAt(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
-        }
-        firstShownFix.put(competitorDTO, indexOfFirstShownFix);
-        lastShownFix.put(competitorDTO, indexOfLastShownFix);
     }
 
     /**
