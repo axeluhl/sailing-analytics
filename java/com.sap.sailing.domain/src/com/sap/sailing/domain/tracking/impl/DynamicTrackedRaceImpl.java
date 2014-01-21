@@ -625,7 +625,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
-            // replicate all wind fixed that may have been loaded by the wind store
+            // replicate all wind fixes that may have been loaded by the wind store
             result.lockForRead();
             try {
                 for (Wind wind : result.getRawFixes()) {
