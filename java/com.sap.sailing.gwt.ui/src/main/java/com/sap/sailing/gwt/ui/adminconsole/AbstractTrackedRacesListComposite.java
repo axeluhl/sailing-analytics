@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
@@ -84,7 +84,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private final Button btnRefresh;
 
-    private final AbstractFilterablePanel<RaceDTO> filterablePanelRaces;
+    private final LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected final TrackedRacesSettings settings;
 
@@ -151,7 +151,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 }
             }
         });
-        filterablePanelRaces = new AbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
+        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
 
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {

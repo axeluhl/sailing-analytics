@@ -98,6 +98,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
+        logListener = new DynamicTrackedRaceLogListener(this);
+        courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
+        startTimeChangedListeners = new HashSet<StartTimeChangedListener>();
     }
 
     /**
@@ -614,15 +617,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to calling the super class implementation, notifies all race listeners registered with this tracked
-     * race using their {@link RaceChangeListener#windDataReceived(Wind, WindSource)} method. In particular this
-     * replicates all wind fixes that may have been loaded from the wind store for the new track.
+     * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
+     * call, all listeners are notified about these existing wind fixes using their
+     * {@link RaceChangeListener#windDataReceived(Wind, WindSource)} callback method. In particular this replicates all
+     * wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
-            // replicate all wind fixed that may have been loaded by the wind store
+            // replicate all wind fixes that may have been loaded by the wind store
             result.lockForRead();
             try {
                 for (Wind wind : result.getRawFixes()) {
@@ -637,24 +641,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public boolean recordWind(Wind wind, WindSource windSource) {
+        final boolean result;
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfRace = getStartOfRace();
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
-        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
-                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
+        if ((startOfTracking == null || !startOfTracking.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.minus(TrackedRaceImpl.TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(wind.getTimePoint())))
             &&
         (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
-            getOrCreateWindTrack(windSource).add(wind);
+            result = getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
-            return true;
         } else {
-            return false;
+            result = false;
         }
+        return result;
     }
 
     @Override

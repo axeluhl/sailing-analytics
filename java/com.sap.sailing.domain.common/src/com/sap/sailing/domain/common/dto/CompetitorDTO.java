@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Color;
+
 public interface CompetitorDTO extends Serializable {
     
     String getTwoLetterIsoCountryCode();
@@ -17,6 +19,8 @@ public interface CompetitorDTO extends Serializable {
     BoatClassDTO getBoatClass();
     
     String getName();
+    
+    Color getColor();
 
     /**
      * A regular instance will simply return this object. A compacted version may compute the result by looking it up

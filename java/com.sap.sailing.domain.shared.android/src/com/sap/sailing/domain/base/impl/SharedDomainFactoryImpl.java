@@ -17,8 +17,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -26,8 +26,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
@@ -168,20 +169,20 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Gate createGate(Mark left, Mark right, String name) {
-       return new GateImpl(left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(left, right, name);
     }
 
     @Override
-    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
-       return new GateImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(id, left, right, name);
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint, passingSide);
+            Waypoint result = new WaypointImpl(controlPoint, passingInstruction);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
@@ -281,14 +282,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, team, boat);
-    }
-
-    @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID competitorId, String name, DynamicTeam team,
-            DynamicBoat boat) {
-        return getCompetitorStore().getOrCreateDynamicCompetitor(competitorId, name, team, boat);
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
+        return getCompetitorStore().getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
     }
 
     @Override

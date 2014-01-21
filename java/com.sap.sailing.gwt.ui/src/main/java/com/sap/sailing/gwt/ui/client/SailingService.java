@@ -9,12 +9,15 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -285,7 +288,7 @@ public interface SailingService extends RemoteService {
 
     List<String> getUrlResultProviderNames();
     
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
 
@@ -333,8 +336,14 @@ public interface SailingService extends RemoteService {
     void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    
+    <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
 
     Iterable<CompetitorDTO> getCompetitors();
+
+    DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
+    
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
     CompetitorDTO updateCompetitor(CompetitorDTO competitor);
 
@@ -351,4 +360,14 @@ public interface SailingService extends RemoteService {
     boolean setStartTime(RaceLogSetStartTimeDTO dto);
     
     Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+
+    Iterable<String> getAllIgtimiAccountEmailAddresses();
+
+    String getIgtimiAuthorizationUrl();
+
+    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove);
+
+    Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
 }

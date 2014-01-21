@@ -8,9 +8,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.ColorMap;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.ColorMapImpl;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     private final Set<CompetitorDTO> allCompetitors;
@@ -36,7 +39,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         this.allCompetitors = new HashSet<CompetitorDTO>();
         this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
-        this.competitorsColorMap = new ColorMap<CompetitorDTO>();
+        this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
     }
     
     /**
@@ -48,12 +51,16 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     private void add(CompetitorDTO competitor, boolean notifyListeners) {
+        if (competitor.getColor() != null) {
+            Color color = competitor.getColor();
+            competitorsColorMap.addBlockedColor(color);
+        }
         boolean changed = allCompetitors.add(competitor);
         if (notifyListeners && changed) {
             fireListChanged(getAllCompetitors());
         }
     }
-    
+
     @Override
     public boolean hasMultiSelection() {
         return hasMultiSelection;
@@ -215,12 +222,17 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     @Override
-    public String getColor(CompetitorDTO competitor) {
+    public Color getColor(CompetitorDTO competitor) {
+        Color result = null;
         if (allCompetitors.contains(competitor)) {
-            return competitorsColorMap.getColorByID(competitor);
+            if (competitor.getColor() != null) {
+                result = competitor.getColor();
+            } else {
+                result = competitorsColorMap.getColorByID(competitor); 
+            }
         }
         
-        return null;
+        return result;
     }
 
     @Override

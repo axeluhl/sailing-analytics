@@ -12,6 +12,8 @@ import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
@@ -48,6 +50,13 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 competitorId = Helpers.tryUuidConversion(competitorId);
             }
             String name = (String) object.get(CompetitorJsonSerializer.FIELD_NAME);
+            String displayColorAsString = (String) object.get(CompetitorJsonSerializer.FIELD_DISPLAY_COLOR);
+            final Color displayColor;
+            if (displayColorAsString == null || displayColorAsString.isEmpty()) {
+                displayColor = null;
+            } else {
+                displayColor = new RGBColor(displayColorAsString);
+            }
             DynamicTeam team = null;
             DynamicBoat boat = null;
             if (teamJsonDeserializer != null) {
@@ -58,7 +67,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 boat = boatJsonDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                         CompetitorJsonSerializer.FIELD_BOAT));
             }
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, team, boat);
+            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, team, boat);
             return competitor;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

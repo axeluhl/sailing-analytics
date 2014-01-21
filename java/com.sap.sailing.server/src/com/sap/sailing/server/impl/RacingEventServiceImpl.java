@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -111,10 +114,9 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
-import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
@@ -161,8 +163,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
-
-    private final ExpeditionWindTrackerFactory expeditionWindTrackerFactory;
 
     /**
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be
@@ -227,6 +227,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final WindStore windStore;
 
     /**
+     * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
+     * object so that service lookups become possible.
+     */
+    private BundleContext bundleContext;
+
+    /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
      * competitor store} for competitor management. This base domain factory is then also used for the construction of
      * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
@@ -239,6 +245,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     public RacingEventServiceImpl(WindStore windStore) {
         this(true, windStore);
+    }
+    
+    void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
     
     /**
@@ -277,7 +287,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        expeditionWindTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
@@ -292,7 +301,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
-        
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -1248,34 +1256,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
-            boolean regattaChanged = false;
             for (Series series : regatta.getSeries()) {
                 for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
                     for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
                             raceColumn.releaseTrackedRace(fleet);
-                            regattaChanged = true;
                         }
                     }
                 }
             }
-            if (regattaChanged) {
-                updateStoredRegatta(regatta);
-            }
             for (Leaderboard leaderboard : getLeaderboards().values()) {
-                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by
-                                                                  // the code above
-                    boolean changed = false;
+                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by the code above
                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                         for (Fleet fleet : raceColumn.getFleets()) {
                             if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column
-                                changed = true; // untouched, e.g., for later re-load
+                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                             }
                         }
-                    }
-                    if (changed) {
-                        updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                     }
                 }
             }
@@ -1331,16 +1328,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination)
-            throws SocketException {
-        expeditionWindTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+        }
     }
 
     @Override
     public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
-        if (windTracker != null) {
-            windTracker.stop();
+        for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+            WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+            if (windTracker != null) {
+                windTracker.stop();
+            }
         }
     }
 
@@ -1349,9 +1349,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
-                WindTracker windTracker = expeditionWindTrackerFactory.getExistingWindTracker(race);
-                if (windTracker != null) {
-                    result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
+                    WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                    if (windTracker != null) {
+                        result.add(new Triple<Regatta, RaceDefinition, String>(regatta, race, windTracker.toString()));
+                    }
                 }
             }
         }
@@ -1569,24 +1571,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }
 
-    @Override
-    public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
-        UDPExpeditionReceiver receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-        receiver.addListener(listener, validMessagesOnly);
-    }
-
-    @Override
-    public void removeExpeditionListener(ExpeditionListener listener) {
-        UDPExpeditionReceiver receiver;
-        try {
-            receiver = expeditionWindTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-            receiver.removeListener(listener);
-        } catch (SocketException e) {
-            logger.info("Failed to remove expedition listener " + listener
-                    + "; exception while trying to retrieve wind receiver: " + e.getMessage());
-        }
-    }
-
     private ScheduledExecutorService getScheduler() {
         return scheduler;
     }
@@ -1781,9 +1765,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("Reading competitors...");
             for (Competitor competitor : ((CompetitorStore) ois.readObject()).getCompetitors()) {
                 DynamicCompetitor dynamicCompetitor = (DynamicCompetitor) competitor;
-                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
+                competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(), dynamicCompetitor.getColor(), dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat());
             }
-            logoutput.append("\nReceived " + competitorStore.size() + " NEW competitors\n");
+            logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
             logger.info("Reading device configurations...");
             configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
@@ -2078,6 +2062,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
         }
         return null;
+    }
+
+    private Iterable<WindTrackerFactory> getWindTrackerFactories() {
+        final Set<WindTrackerFactory> result;
+        if (bundleContext == null) {
+            result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
+        } else {
+            ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
+                    bundleContext, WindTrackerFactory.class.getName(), null);
+            tracker.open();
+            result = new HashSet<>();
+            for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
+                result.add(factory);
+            }
+        }
+        return result;
     }
 
 }

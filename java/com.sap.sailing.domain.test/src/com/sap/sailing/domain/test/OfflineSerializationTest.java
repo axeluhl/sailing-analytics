@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -126,7 +127,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
-        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingSide*/null);
+        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingInstruction*/null);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         assertSame(receiversWaypoint1, receiversSecondCopyOfWaypoint1);
@@ -157,7 +158,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),

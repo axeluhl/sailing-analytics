@@ -6,6 +6,9 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+
 public class Activator implements BundleActivator {
     private static Logger logger = Logger.getLogger(Activator.class.getName());
     
@@ -31,6 +34,9 @@ public class Activator implements BundleActivator {
             port = Integer.valueOf(context.getProperty(EXPEDITION_UDP_PORT_PROPERTY_NAME));
             logger.log(Level.INFO, "found "+EXPEDITION_UDP_PORT_PROPERTY_NAME+"="+port+" in OSGi context");
         }
+        // register the Expedition wind tracker factory as an OSGi service
+        context.registerService(ExpeditionWindTrackerFactory.class, ExpeditionWindTrackerFactory.getInstance(), /* properties */null);
+        context.registerService(WindTrackerFactory.class, ExpeditionWindTrackerFactory.getInstance(), /* properties */null);
     }
     
     public static Activator getInstance() {

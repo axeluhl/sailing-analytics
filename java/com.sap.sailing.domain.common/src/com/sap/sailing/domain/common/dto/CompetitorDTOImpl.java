@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Color;
+
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
  * {@link #getBoatClass() boat class} (whose equality and hash code, in turn, depends on its name) and the
@@ -13,18 +15,20 @@ import java.io.Serializable;
  */
 public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
     private static final long serialVersionUID = -4997852354821083154L;
+    private String countryName;
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
-    private String countryName;
+    private Color color;
     private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
     
     CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, Color color, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String idAsString, BoatClassDTO boatClass) {
         super(name);
+        this.color = color;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
@@ -40,6 +44,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
+        result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         return result;
     }
@@ -72,6 +77,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
             if (other.threeLetterIocCountryCode != null)
                 return false;
         } else if (!threeLetterIocCountryCode.equals(other.threeLetterIocCountryCode))
+            return false;
+        if (color == null) {
+            if (other.color != null)
+                return false;
+        } else if (!color.equals(other.color))
             return false;
         return true;
     }
@@ -111,4 +121,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
+    public Color getColor() {
+        return color;
+    }
 }

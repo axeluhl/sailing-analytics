@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
@@ -605,6 +606,12 @@ public interface TrackedRace extends Serializable {
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
     Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);
+    
+    /**
+     * The speed of the competitor when crossing the start line. It will return null if there are no recorded
+     * mark passings for this competitor (competitor did not yet or never pass the start line).
+     */
+    Speed getSpeedWhenCrossingStartLine(Competitor competitor);
 
     /**
      * Start time received by the tracking infrastructure. To determine real start time use {@link #getStartOfRace()}.
@@ -614,5 +621,16 @@ public interface TrackedRace extends Serializable {
     LineLengthAndAdvantage getStartLine(TimePoint at);
     
     LineLengthAndAdvantage getFinishLine(TimePoint at);
+    
+    /**
+     * Length of course if there are mark passings for competitors.
+     */
+    Distance getCourseLength();
+    
+    /**
+     * The average wind speed with confidence for this race. It uses the timepoint of the race end as
+     * a reference point.
+     */
+    SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
 
 }

@@ -3,11 +3,11 @@ package com.sap.sailing.server.gateway.serialization.coursedata.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class GateJsonSerializer extends BaseControlPointJsonSerializer implements JsonSerializer<ControlPoint> {
-    public static final String VALUE_CLASS = Gate.class.getSimpleName();
+    public static final String VALUE_CLASS = ControlPointWithTwoMarks.class.getSimpleName();
 
     public static final String FIELD_LEFT = "left";
     public static final String FIELD_RIGHT = "right";
@@ -25,7 +25,7 @@ public class GateJsonSerializer extends BaseControlPointJsonSerializer implement
 
     @Override
     public JSONObject serialize(ControlPoint object) {
-        Gate gate = (Gate) object;
+        ControlPointWithTwoMarks gate = (ControlPointWithTwoMarks) object;
         JSONObject result =  super.serialize(gate);
         
         result.put(FIELD_LEFT, markSerializer.serialize(gate.getLeft()));

@@ -17,7 +17,7 @@ import com.sap.sailing.util.BuildVersion;
 
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final String REPLICATION_SERVLET = "/replication/replication";
-    private final String hostname;
+    private final String masterServletHostname;
     private final String exchangeName;
     private final int servletPort;
     private final String messagingHostname;
@@ -29,8 +29,8 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     /**
      * @param messagingPort 0 means use default port
      */
-    public ReplicationMasterDescriptorImpl(String messagingHostname, String hostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
-        this.hostname = hostname;
+    public ReplicationMasterDescriptorImpl(String messagingHostname, String masterServletHostname, String exchangeName, int servletPort, int messagingPort, String queueName) {
+        this.masterServletHostname = masterServletHostname;
         this.messagingHostname = messagingHostname;
         this.servletPort = servletPort;
         this.messagingPort = messagingPort;
@@ -152,7 +152,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     @Override
     public String getHostname() {
-        return hostname;
+        return masterServletHostname;
     }
     
     @Override

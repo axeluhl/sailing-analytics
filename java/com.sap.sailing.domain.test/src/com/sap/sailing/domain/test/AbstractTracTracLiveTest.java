@@ -22,7 +22,7 @@ import org.junit.Rule;
 import org.junit.rules.Timeout;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -87,6 +87,15 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         event = KeyValue.setup(paramUrl);
         assertNotNull(event);
         // Initialize data controller using live and stored data sources
+        if (storedUri.toString().startsWith("file:")) {
+            try {
+                URI oldStoredUri = storedUri;
+                storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));
+                logger.info("Replaced storedUri "+oldStoredUri+" by "+storedUri);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
         controller = new DataController(liveUri, storedUri, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "I/O for event "+event.getName()+", paramURL "+paramUrl);
@@ -127,10 +136,13 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         logger.info("entering "+getClass().getName()+".tearDown()");
         Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
         // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
-        controller.stop(/* abortStored */ true);
-        logger.info("successfully stopped controller");
+        if (getController() != null) // the controller (and the ioThread see below) are null if the data is being read from a local file.
+            controller.stop(/* abortStored */ true);
+    logger.info("successfully stopped controller");
         try {
-            ioThread.join(3000); // just wait a little bit, then give up
+            if (ioThread != null) {
+                ioThread.join(3000); // just wait a little bit, then give up
+            }
         } catch (InterruptedException ex) {
             Assert.fail(ex.getMessage());
         }
@@ -192,10 +204,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         System.err.println("Error with live data "+arg0);
     }
 
-    public static Iterable<Pair<TracTracControlPoint, NauticalSide>> getTracTracControlPointsWithPassingSide(Iterable<ControlPoint> controlPoints) {
-        List<Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, NauticalSide>>();
+    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<ControlPoint> controlPoints) {
+        List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, PassingInstruction>>();
         for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
-            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), null));
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
         }
         return ttControlPoints;
     }

@@ -17,7 +17,7 @@
 
 - Using a release, set the following in the instance's user data:
 <pre>
-INSTALL_FROM_RELEASE=master-201311062138
+INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
 BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
@@ -52,6 +52,26 @@ USE_ENVIRONMENT=
 
 - To receive and forward wind, log into webserver as user trac and switch to $HOME/udpmirror. Start the mirror and forward it to the instance you want.
 
+#### Setting up Master and Replica
+
+- Fire up a master with the following configuration. There is a preconfigured master environment at http://releases.sapsailing.com/environments/live-master-server that you should use.
+
+<pre>
+INSTALL_FROM_RELEASE=(name-of-release)
+USE_ENVIRONMENT=live-master-server
+BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+</pre>
+
+- After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data!
+
+<pre>
+INSTALL_FROM_RELEASE=(name-of-release)
+USE_ENVIRONMENT=live-replica-server
+REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
+SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+BUILD_COMPLETE_NOTIFY=
+</pre>
 
 ## Costs per month
 
@@ -225,16 +245,11 @@ A closer look reveals that an ELB instance consists itself of many other invisib
 
 Here are the steps to create a load balanced setup:
 
-- Create a master instance holding all data
+- Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
 - Create `n` instances that are configured to connect to the master server
 - Create a load balancer that redirects everything from port 80 to let's say port 8888.
 - Associate all your instances
 - Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup.
-
-Two things are still needed before this setup can be executed:
-
-- Make it possible to configure instances that way that they automatically connect to a master upon start
-- Check what happens if the ELB acts as a transparent proxy not revealing the underlying instance name and address (should be)
 
 Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of it's internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 

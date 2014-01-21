@@ -8,11 +8,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -320,8 +323,6 @@ public interface SailingServiceAsync {
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
 
-    void getEventById(UUID id, AsyncCallback<EventDTO> callback);
-
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
@@ -383,7 +384,7 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 
@@ -456,7 +457,17 @@ public interface SailingServiceAsync {
     void importMasterData(String host, String[] names, boolean override, boolean compress,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
+    <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
+    
+    /**
+     * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />
+     * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
+     */
+    void pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<DataMiningSerializationDummy> asyncCallback);
+
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+
+    void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void updateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
@@ -482,6 +493,15 @@ public interface SailingServiceAsync {
      */
     void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> callback);
+
+    void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
     
+    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    
+    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+
+    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+
+    void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 }
 

@@ -80,6 +80,8 @@
         <item>Backbord</item>
         <item>Steuerbord</item>
         <item>Gate</item>
+        <item >Linie</item>
+        <item >Ablauf</item>
     </string-array>
 
     <string name="publish">Veröffentlichen</string>

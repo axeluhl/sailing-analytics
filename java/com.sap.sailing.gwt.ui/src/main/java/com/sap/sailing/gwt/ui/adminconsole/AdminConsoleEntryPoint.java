@@ -51,8 +51,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         TabLayoutPanel tabPanel = new ScrolledTabLayoutPanel(2.5, Unit.EM, resources.arrowLeft(), resources.arrowRight(), 200);
         tabPanel.ensureDebugId("AdministrationTabs");
-        tabPanel.setAnimationDuration(500);
-
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
         SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this,
@@ -91,7 +89,12 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 stringMessages);
         // createSwissTimingRacePanel.ensureDebugId("CreateSwissTimingRace");
         createSwissTimingRacePanel.setSize("90%", "90%");
-        addScrollableTab(tabPanel, createSwissTimingRacePanel, "Create SwissTiming race");
+        addScrollableTab(tabPanel, createSwissTimingRacePanel, stringMessages.createSwissTimingRace());
+
+        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
+        igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
+        igtimiAccountsPanel.setSize("90%", "90%");
+        addScrollableTab(tabPanel, igtimiAccountsPanel, stringMessages.igtimiAccounts());
 
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, stringMessages);

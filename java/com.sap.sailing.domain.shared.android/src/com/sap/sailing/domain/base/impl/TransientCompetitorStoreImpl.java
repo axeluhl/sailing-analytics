@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -50,8 +50,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
     }
     
-    private Competitor createCompetitor(Serializable id, String name, DynamicTeam team, DynamicBoat boat) {
-        Competitor result = new CompetitorImpl(id, name, team, boat);
+    private Competitor createCompetitor(Serializable id, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
+        Competitor result = new CompetitorImpl(id, name, displayColor, team, boat);
         addNewCompetitor(id, result);
         return result;
     }
@@ -72,30 +72,25 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
     
     @Override
-    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, DynamicTeam team, DynamicBoat boat) {
+    public Competitor getOrCreateCompetitor(Serializable competitorId, String name, Color displayColor, DynamicTeam team, DynamicBoat boat) {
         Competitor result = getExistingCompetitorById(competitorId); // avoid synchronization for successful read access
         if (result == null) {
             LockUtil.lockForWrite(lock);
             try {
                 result = getExistingCompetitorById(competitorId); // try again, now while holding the write lock
                 if (result == null) {
-                    result = createCompetitor(competitorId, name, team, boat);
+                    result = createCompetitor(competitorId, name, displayColor, team, boat);
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
         } else if (isCompetitorToUpdateDuringGetOrCreate(result)) {
-            updateCompetitor(result.getId().toString(), name, boat.getSailID(), team.getNationality());
+            updateCompetitor(result.getId().toString(), name, displayColor, boat.getSailID(), team.getNationality());
             competitorNoLongerToUpdateDuringGetOrCreate(result);
         }
         return result;
     }
     
-    @Override
-    public DynamicCompetitor getOrCreateDynamicCompetitor(UUID fromString, String name, DynamicTeam team, DynamicBoat boat) {
-        return (DynamicCompetitor) getOrCreateCompetitor(fromString, name, team, boat);
-    }
-
     private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {
         competitorsToUpdateDuringGetOrCreate.remove(result);
     }
@@ -168,12 +163,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public Competitor updateCompetitor(String idAsString, String newName, String newSailId, Nationality newNationality) {
+    public Competitor updateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality) {
         DynamicCompetitor competitor = (DynamicCompetitor) getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
             try {
                 competitor.setName(newName);
+                competitor.setColor(newDisplayColor);
                 competitor.getBoat().setSailId(newSailId);
                 competitor.getTeam().setNationality(newNationality);
                 weakCompetitorDTOCache.remove(competitor);
@@ -198,7 +194,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 if (competitorDTO == null) {
                     final Nationality nationality = c.getTeam().getNationality();
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
-                    competitorDTO = new CompetitorDTOImpl(c.getName(), countryCode == null ? ""
+                    competitorDTO = new CompetitorDTOImpl(c.getName(), c.getColor(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(), c
                             .getBoat().getSailID(), c.getId().toString(), new BoatClassDTO(c.getBoat().getBoatClass()

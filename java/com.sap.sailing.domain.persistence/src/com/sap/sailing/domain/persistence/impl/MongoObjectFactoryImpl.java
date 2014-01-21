@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -37,7 +37,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcher
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -302,9 +302,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
         TimePoint now = MillisecondsTimePoint.now();
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : scoreCorrection.getRaceColumnsThatHaveCorrections()) {
             BasicDBList dbCorrectionForRace = new BasicDBList();
-            for (Competitor competitor : leaderboard.getCompetitors()) {
+            for (Competitor competitor : scoreCorrection.getCompetitorsThatHaveCorrectionsIn(raceColumn)) {
                 // TODO bug 655: make score corrections time dependent
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn, now)) {
                     BasicDBObject dbCorrectionForCompetitor = new BasicDBObject();
@@ -848,7 +848,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeWaypoint(Waypoint waypoint) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), getPassingSide(waypoint.getPassingSide()));
+        result.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), getPassingInstructions(waypoint.getPassingInstructions()));
         result.put(FieldNames.CONTROLPOINT.name(), storeControlPoint(waypoint.getControlPoint()));
         return result;
     }
@@ -858,19 +858,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (controlPoint instanceof Mark) {
             result.put(FieldNames.CONTROLPOINT_CLASS.name(), Mark.class.getSimpleName());
             result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeMark((Mark) controlPoint));
-        } else if (controlPoint instanceof Gate) {
-            result.put(FieldNames.CONTROLPOINT_CLASS.name(), Gate.class.getSimpleName());
-            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeGate((Gate) controlPoint));
+        } else if (controlPoint instanceof ControlPointWithTwoMarks) {
+            result.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
+            result.put(FieldNames.CONTROLPOINT_VALUE.name(), storeControlPointWithTwoMarks((ControlPointWithTwoMarks) controlPoint));
         }
         return result;
     }
 
-    private DBObject storeGate(Gate gate) {
+    private DBObject storeControlPointWithTwoMarks(ControlPointWithTwoMarks cpwtm) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.GATE_ID.name(), gate.getId());
-        result.put(FieldNames.GATE_NAME.name(), gate.getName());
-        result.put(FieldNames.GATE_LEFT.name(), storeMark(gate.getLeft()));
-        result.put(FieldNames.GATE_RIGHT.name(), storeMark(gate.getRight()));
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), cpwtm.getId());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), cpwtm.getName());
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), storeMark(cpwtm.getLeft()));
+        result.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), storeMark(cpwtm.getRight()));
         return result;
     }
 
@@ -885,19 +885,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private String getPassingSide(NauticalSide passingSide) {
-        String passing = null;
-        if (passingSide != null) {
-            passing = passingSide.name();
+    private String getPassingInstructions(PassingInstruction passingInstructions) {
+        final String passing;
+        if (passingInstructions != null) {
+            passing = passingInstructions.name();
+        } else {
+            passing = null;
         }
         return passing;
     }
-
     @Override
     public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId());
+        DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false);
     }
@@ -913,9 +914,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeCompetitor(Competitor competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        BasicDBObject query = new BasicDBObject(CompetitorJsonSerializer.FIELD_ID, competitor.getId().toString());
+        DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
         collection.remove(query);
     }
+    
     @Override
     public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());

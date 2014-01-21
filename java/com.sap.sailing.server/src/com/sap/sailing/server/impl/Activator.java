@@ -19,7 +19,7 @@ public class Activator implements BundleActivator {
     
     private static ExtenderBundleTracker extenderBundleTracker;
 
-    private final RacingEventService racingEventService;
+    private final RacingEventServiceImpl racingEventService;
 
     public Activator() {
         boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
@@ -33,6 +33,7 @@ public class Activator implements BundleActivator {
         extenderBundleTracker.open();
 
         // register the racing service in the OSGi registry
+        racingEventService.setBundleContext(context);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
 
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+

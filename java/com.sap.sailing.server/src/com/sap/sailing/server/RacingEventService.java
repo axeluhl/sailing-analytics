@@ -58,7 +58,6 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.expeditionconnector.ExpeditionListener;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -140,7 +139,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws SocketException;
+    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception;
 
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
@@ -254,10 +253,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Updates the group data in the persistant store.
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
-
-    void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException;
-
-    void removeExpeditionListener(ExpeditionListener listener);
 
     DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);

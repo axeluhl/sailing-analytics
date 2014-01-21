@@ -1,9 +1,13 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 
 public class ResourceImpl implements Resource {
     private final long id;
@@ -47,8 +51,12 @@ public class ResourceImpl implements Resource {
     }
 
     @Override
-    public int[] getDataTypes() {
-        return dataTypes;
+    public Iterable<Type> getDataTypes() {
+        List<Type> result = new ArrayList<Type>();
+        for (int dataType : dataTypes) {
+            result.add(Type.valueOf(dataType));
+        }
+        return result;
     }
 
     @Override

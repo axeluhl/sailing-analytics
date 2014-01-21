@@ -1,6 +1,9 @@
 #!/bin/bash
 set -o functrace
 
+# This indicates the type of the project
+# and is used to correctly resolve bundle names
+PROJECT_TYPE="sailing"
 
 find_project_home () 
 {
@@ -53,7 +56,7 @@ fi
 cd $PROJECT_HOME
 active_branch=$(git symbolic-ref -q HEAD)
 if [[ $active_branch == "" ]]; then
-    active_branch="unknown"
+    active_branch="build"
 else
     active_branch=`basename $active_branch`
 fi
@@ -66,7 +69,7 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
-p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 
 HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
@@ -88,7 +91,7 @@ if [ $# -eq 0 ]; then
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
-    echo "-a Disable mobile projects (RaceCommittee App)"
+    echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -104,7 +107,8 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo ""
-    echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
+    echo "install: installs product files to $SERVERS_HOME/$active_branch. Does NOT overwrite any configuration in env.sh! If you want to"
+    echo "         overwrite the configuration then use the refreshInstance.sh script that comes with the instance. "
     echo ""
     echo "all: invokes build and then install"
     echo ""
@@ -213,8 +217,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
-    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
-    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
@@ -347,7 +350,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     echo -n "Connecting to OSGi server..."
     NC_CMD="nc -t 127.0.0.1 $OSGI_TELNET_PORT"
     echo "OK"
-    OLD_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    OLD_BUNDLE_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
@@ -362,11 +365,11 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # stop and uninstall
-    echo -n stop $BUNDLE_ID | $NC_CMD > /dev/null
-    echo -n uninstall $BUNDLE_ID | $NC_CMD > /dev/null
+    echo stop $BUNDLE_ID | $NC_CMD > /dev/null
+    echo uninstall $BUNDLE_ID | $NC_CMD > /dev/null
 
     # make sure bundle is removed
-    UNINSTALL_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    UNINSTALL_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     if [[ $UNINSTALL_INFORMATION == "" ]]; then
         echo "Uninstall procedure sucessful!"
     else
@@ -375,14 +378,14 @@ if [[ "$@" == "hot-deploy" ]]; then
     fi
 
     # now reinstall bundle
-    NEW_BUNDLE_ID=`echo -n install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
-    NEW_BUNDLE_INFORMATION=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
+    NEW_BUNDLE_ID=`echo install file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar | $NC_CMD`
+    NEW_BUNDLE_INFORMATION=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_`
     NEW_BUNDLE_ID=`echo $NEW_BUNDLE_INFORMATION | cut -d " " -f 1`
     echo "Installed new bundle file://$SERVERS_HOME/$active_branch/plugins/deploy/${NEW_BUNDLE_BASENAME}.jar with id $NEW_BUNDLE_ID"
 
     # and start
-    echo -n start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
-    NEW_BUNDLE_STATUS=`echo -n ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
+    echo start $NEW_BUNDLE_ID | $NC_CMD > /dev/null && sleep 1
+    NEW_BUNDLE_STATUS=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
     if [[ $NEW_BUNDLE_STATUS == "" ]]; then
         echo "ERROR: Something went wrong with start of bundle. Please check if everything went ok."
         exit
@@ -399,11 +402,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
-	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
-	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
+	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
+	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
@@ -411,7 +414,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+            for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
                 cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
@@ -457,7 +460,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
 
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APPVERSION=$RC_APP_VERSION"
         extra="$extra -Drc-app-api-version=$RC_APP_VERSION"
         
@@ -492,7 +495,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ]; then
 	    # Now move back the backup .gwt.xml files before they were (maybe) patched
 		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	    for i in com.sap.sailing.gwt.ui/src/main/resources/com/sap/sailing/gwt/ui/*.gwt.xml; do
+	    for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
 		    mv -v $i.bak $i
 	    done
     fi
@@ -550,14 +553,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
-    cp -v $PROJECT_HOME/java/target/updateEC2Instance.sh $ACDIR/
-    cp -v $PROJECT_HOME/java/target/shouldIBuildOrShouldIGo.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
-    fi
-
-    if [ ! -f $ACDIR/no-overwrite ]; then
         cp -v $p2PluginRepository/configuration/config.ini configuration/
 
         mkdir -p configuration/jetty/etc
@@ -566,11 +565,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
-        cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
 
-        cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
-
         cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
     fi
@@ -583,7 +579,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    # make sure to save the information from env.sh
+    # make sure to read the information from env.sh
     . $ACDIR/env.sh
 
     echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
@@ -614,9 +610,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
     echo ""
 
-    if [ -f $ACDIR/no-overwrite ]; then
-        echo "ATTENTION: I found the file $ACDIR/no-overwrite. This means that I did NOT use env.sh from this branch."
-    fi
+    echo "I did NOT overwrite env.sh if it already existed! Use the refreshInstance.sh script to update your configuration!"
     echo "Installation complete. You may now start the server using ./start"
 fi
 
@@ -697,14 +691,14 @@ fi
 
 if [[ "$@" == "deploy-startpage" ]]; then
     TARGET_DIR_STARTPAGE=$ACDIR/tmp/jetty-0.0.0.0-8889-bundlefile-_-any-/webapp/
-    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.sailing.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
+    read -s -n1 -p "Copying $PROJECT_HOME/java/com.sap.$PROJECT_TYPE.www/index.html to $TARGET_DIR_STARTPAGE - is this ok (y/n)?" answer
     case $answer in
     "Y" | "y") OK=1;;
     *) echo "Aborting... nothing has been changed for startpage!"
     exit;;
     esac
 
-    cp $PROJECT_HOME/java/com.sap.sailing.www/index.html $TARGET_DIR_STARTPAGE
+    cp $PROJECT_HOME/java/com.sap.$PROJECT_TYPE.www/index.html $TARGET_DIR_STARTPAGE
     echo "OK"
 fi
 

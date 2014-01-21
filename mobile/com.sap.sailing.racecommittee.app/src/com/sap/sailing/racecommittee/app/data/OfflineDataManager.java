@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -79,11 +80,11 @@ public class OfflineDataManager extends DataManager {
                 medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", null, null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
