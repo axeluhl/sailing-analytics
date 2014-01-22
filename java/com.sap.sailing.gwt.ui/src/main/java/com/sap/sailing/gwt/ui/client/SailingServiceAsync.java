@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -383,7 +383,7 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 

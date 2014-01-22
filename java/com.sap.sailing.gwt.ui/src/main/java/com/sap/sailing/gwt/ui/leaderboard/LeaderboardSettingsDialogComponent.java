@@ -22,13 +22,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.IntegerBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.ui.IntegerBox;
+import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;

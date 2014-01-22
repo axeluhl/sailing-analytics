@@ -1254,34 +1254,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
-            boolean regattaChanged = false;
             for (Series series : regatta.getSeries()) {
                 for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
                     for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
                             raceColumn.releaseTrackedRace(fleet);
-                            regattaChanged = true;
                         }
                     }
                 }
             }
-            if (regattaChanged) {
-                updateStoredRegatta(regatta);
-            }
             for (Leaderboard leaderboard : getLeaderboards().values()) {
-                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by
-                                                                  // the code above
-                    boolean changed = false;
+                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by the code above
                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                         for (Fleet fleet : raceColumn.getFleets()) {
                             if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column
-                                changed = true; // untouched, e.g., for later re-load
+                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                             }
                         }
-                    }
-                    if (changed) {
-                        updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                     }
                 }
             }

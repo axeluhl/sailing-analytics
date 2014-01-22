@@ -557,7 +557,7 @@ public interface StringMessages extends Messages {
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
     String tracTracUpdateUrl();
-    String passingSide();
+    String passingInstructions();
     String refreshNow();
     String stopUpdating();
     String startUpdating();
@@ -856,7 +856,8 @@ public interface StringMessages extends Messages {
     String exchangeHost();
     String explainExchangeHostName();
     String errorRunningDataMiningQuery();
-
+    String offset();
+    String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);

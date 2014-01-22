@@ -55,7 +55,6 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -66,6 +65,7 @@ import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -358,6 +358,31 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
             }
             return reasonForMaxPoints == null ? "" : reasonForMaxPoints.name();
+        }
+    }
+    
+    private class UncorrectedNetPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected UncorrectedNetPointsViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            return "("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
         }
     }
 
@@ -823,6 +848,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(maxPointsDropDownCellProvider);
         final NetPointsEditCellProvider netPointsEditCellProvider = new NetPointsEditCellProvider(race.getRaceColumnName());
         list.add(netPointsEditCellProvider);
+        final UncorrectedNetPointsViewProvider uncorrectedViewProvider = new UncorrectedNetPointsViewProvider(race.getRaceColumnName());
+        list.add(uncorrectedViewProvider);
         list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;

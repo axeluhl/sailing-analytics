@@ -18,8 +18,8 @@ import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 /**
  * The competitors produced by this dialog will have a <code>null</code>

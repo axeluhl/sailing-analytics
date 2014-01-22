@@ -19,8 +19,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.Filter;
 import com.sap.sailing.domain.common.filter.FilterSet;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public abstract class AbstractCompetitorsFilterSetDialog extends DataEntryDialog<FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>> {
     private final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> competitorsFilterSet;

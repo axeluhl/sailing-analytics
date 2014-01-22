@@ -164,17 +164,19 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     class EntryImpl implements Entry {
         private final Callable<Integer> trackedRankProvider;
         private final Double netPoints;
+        private final Double netPointsUncorrected;
         private final boolean isNetPointsCorrected;
         private final Double totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
         private final Fleet fleet;
 
-        private EntryImpl(Callable<Integer> trackedRankProvider, Double netPoints, boolean isNetPointsCorrected, Double totalPoints,
-                MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
+        private EntryImpl(Callable<Integer> trackedRankProvider, Double netPoints, Double netPointsUncorrected, boolean isNetPointsCorrected,
+                Double totalPoints, MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedRankProvider = trackedRankProvider;
             this.netPoints = netPoints;
+            this.netPointsUncorrected = netPointsUncorrected;
             this.isNetPointsCorrected = isNetPointsCorrected;
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
@@ -212,6 +214,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         @Override
         public Fleet getFleet() {
             return fleet;
+        }
+        @Override
+        public Double getNetPointsUncorrected() throws NoWindException {
+            return netPointsUncorrected;
         }
     }
     
@@ -651,10 +657,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint);
         final Double correctedScore = correctedResults.getCorrectedScore();
-        return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.isCorrected(),
-                discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()),
-                        correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
+        return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.getUncorrectedScore(),
+                correctedResults.isCorrected(),
+                        discarded ? DOUBLE_0
+                                : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()), correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
     @Override
@@ -690,10 +696,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 final Double correctedScore = correctedResults.getCorrectedScore();
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScore,
-                        correctedResults.isCorrected(), discarded ? DOUBLE_0 : (correctedScore==null?null:
-                                Double.valueOf((correctedScore * raceColumn.getFactor()))),
-                                correctedResults.getMaxPointsReason(), discarded,
-                                raceColumn.getFleetOfCompetitor(competitor));
+                        correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
+                                discarded ? DOUBLE_0 : (correctedScore==null?null:
+                                        Double.valueOf((correctedScore * raceColumn.getFactor()))), correctedResults.getMaxPointsReason(),
+                                discarded, raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
@@ -1237,6 +1243,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
+        entryDTO.netPointsUncorrected = entry.getNetPointsUncorrected();
         entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
