@@ -11,7 +11,7 @@ import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectDimensionFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectExternalLibraryFunctionFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectSideEffectFreeValueFilterCriteria;
-import com.sap.sailing.datamining.test.util.TestFunctionUtil;
+import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {
 
@@ -19,13 +19,13 @@ public class TestFunctionFilterCriterias {
     public void testMethodIsCorrectDimensionFilterCriteria() {
         ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectDimensionFilterCriteria();
         
-        Method dimension = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
+        Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         assertThat(filterCriteria.matches(dimension), is(true));
         
-        Method illegalDimension = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("illegalDimension");
+        Method illegalDimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("illegalDimension");
         assertThat(filterCriteria.matches(illegalDimension), is(false));
         
-        Method unmarkedMethod = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("unmarkedMethod");
+        Method unmarkedMethod = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("unmarkedMethod");
         assertThat(filterCriteria.matches(unmarkedMethod), is(false));
     }
 
@@ -33,10 +33,10 @@ public class TestFunctionFilterCriterias {
     public void testMethodIsCorrectSideEffectFreeValueFilterCriteria() {
         ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectSideEffectFreeValueFilterCriteria();
         
-        Method sideEffectFreeValue = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
+        Method sideEffectFreeValue = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         assertThat(filterCriteria.matches(sideEffectFreeValue), is(true));
         
-        Method unmarkedMethod = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("unmarkedMethod");
+        Method unmarkedMethod = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("unmarkedMethod");
         assertThat(filterCriteria.matches(unmarkedMethod), is(false));
     }
 
@@ -44,10 +44,10 @@ public class TestFunctionFilterCriterias {
     public void testMethodIsCorrectExternalLibraryFunctionFilterCriteria() {
         ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalLibraryFunctionFilterCriteria();
         
-        Method foo = TestFunctionUtil.getMethodFromExternalLibraryClass("foo");
+        Method foo = FunctionTestsUtil.getMethodFromExternalLibraryClass("foo");
         assertThat(filterCriteria.matches(foo), is(true));
         
-        Method fooVoid = TestFunctionUtil.getMethodFromExternalLibraryClass("fooVoid");
+        Method fooVoid = FunctionTestsUtil.getMethodFromExternalLibraryClass("fooVoid");
         assertThat(filterCriteria.matches(fooVoid), is(false));
     }
 

@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.function;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -13,17 +12,13 @@ import org.junit.Test;
 import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistry {
 
     @Test
     public void testSimpleRegistration() {
-        Method dimension = null;
-        try {
-            dimension = SimpleClassWithMarkedMethods.class.getMethod("dimension", (Class<?>[]) null);
-        } catch (NoSuchMethodException | SecurityException e) {
-            fail("Failed to reflect the method");
-        }
+        Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registry.register(dimension);
@@ -35,8 +30,9 @@ public class TestSimpleFunctionRegistry {
         assertThat(registry.getRegisteredFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
     
-    // TODO Test that inherited marked methods are also registered
-
-    // TODO Test the registration of libraries
+//    @Test
+//    public void testRegistrationByMethodRetrievers() {
+//        
+//    }
 
 }

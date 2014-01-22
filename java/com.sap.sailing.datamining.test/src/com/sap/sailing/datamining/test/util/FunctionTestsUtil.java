@@ -11,7 +11,7 @@ import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 
-public class TestFunctionUtil {
+public class FunctionTestsUtil {
 
     public static Collection<Function> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
         Set<Function> markedMethods = new HashSet<>();
