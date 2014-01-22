@@ -543,4 +543,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
