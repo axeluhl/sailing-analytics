@@ -433,6 +433,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
+        return Collections.unmodifiableMap(carriedPoints);
+    }
+
+    @Override
     public void unsetCarriedPoints(Competitor competitor) {
         Double oldCarriedPoints = carriedPoints.remove(competitor);
         getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, null);

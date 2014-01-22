@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -133,6 +134,13 @@ public interface Leaderboard extends Named {
      * <code>competitor</code>.
      */
     double getCarriedPoints(Competitor competitor);
+
+    /**
+     * 
+     * @return an unmodifiable map of competitors and their carried points. The key set can be a true super set of what
+     *         {@link #getAllCompetitors()} returns.
+     */
+    Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints();
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the

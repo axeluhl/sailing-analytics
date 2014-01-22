@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,11 +17,11 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -248,13 +249,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (leaderboard.hasCarriedPoints()) {
             BasicDBList dbCarriedPoints = new BasicDBList();
             dbLeaderboard.put(FieldNames.LEADERBOARD_CARRIED_POINTS_BY_ID.name(), dbCarriedPoints);
-            for (Competitor competitor : leaderboard.getCompetitors()) {
-                if (leaderboard.hasCarriedPoints(competitor)) {
-                    DBObject dbCarriedPointsForCompetitor = new BasicDBObject();
-                    dbCarriedPointsForCompetitor.put(FieldNames.COMPETITOR_ID.name(), competitor.getId());
-                    dbCarriedPointsForCompetitor.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), leaderboard.getCarriedPoints(competitor));
-                    dbCarriedPoints.add(dbCarriedPointsForCompetitor);
-                }
+            for (Entry<Competitor, Double> competitorWithCarriedPoints : leaderboard
+                    .getCompetitorsForWhichThereAreCarriedPoints().entrySet()) {
+                double carriedPoints = competitorWithCarriedPoints.getValue();
+                Competitor competitor = competitorWithCarriedPoints.getKey();
+                DBObject dbCarriedPointsForCompetitor = new BasicDBObject();
+                dbCarriedPointsForCompetitor.put(FieldNames.COMPETITOR_ID.name(), competitor.getId());
+                dbCarriedPointsForCompetitor.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), carriedPoints);
+                dbCarriedPoints.add(dbCarriedPointsForCompetitor);
             }
         }
         BasicDBObject dbScoreCorrections = new BasicDBObject();
