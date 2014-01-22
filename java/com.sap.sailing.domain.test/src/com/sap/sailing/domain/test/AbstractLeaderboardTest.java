@@ -3,6 +3,8 @@ package com.sap.sailing.domain.test;
 import java.io.Serializable;
 import java.util.Collections;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -14,6 +16,15 @@ import com.sap.sailing.domain.common.Color;
 public abstract class AbstractLeaderboardTest {
     public static CompetitorImpl createCompetitor(String competitorName) {
         return new CompetitorImpl(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
+                new PersonImpl(competitorName, new NationalityImpl("GER"),
+                /* dateOfBirth */ null, "This is famous "+competitorName)),
+                new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null));
+    }
+
+    public static Competitor createCompetitor(String competitorName, CompetitorFactory competitorFactory) {
+        return competitorFactory.getOrCreateCompetitor(123, competitorName, Color.RED, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),
                 new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
