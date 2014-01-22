@@ -16,9 +16,9 @@ public class GroupDividingParallelDataRetriever<DataType> extends AbstractParall
                                                           implements ParallelDataRetriever<DataType> {
 
     private RacingEventService racingService;
-    private WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder;
+    private WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> workerBuilder;
 
-    public GroupDividingParallelDataRetriever(RacingEventService racingService, WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public GroupDividingParallelDataRetriever(RacingEventService racingService, WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
         this.racingService = racingService;
         this.workerBuilder = workerBuilder;
@@ -27,9 +27,9 @@ public class GroupDividingParallelDataRetriever<DataType> extends AbstractParall
     @Override
     protected void setUpWorkersFor(Void v) {
         for (LeaderboardGroup group : racingService.getLeaderboardGroups().values()) {
-            DataRetrievalWorker<DataType> worker = workerBuilder.build();
+            DataRetrievalWorker<LeaderboardGroup, DataType> worker = workerBuilder.build();
             worker.setReceiver(this);
-            worker.setGroup(group);
+            worker.setSource(group);
             addWorker(worker);
         }
     }
