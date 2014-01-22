@@ -31,7 +31,7 @@ public class TestSimpleFunctionRegistry {
         Set<Function> expectedRegisteredFunctionsAsSet = new HashSet<>();
         expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction(dimension));
         Iterable<Function> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
-        assertThat(registry.getRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
         assertThat(registry.getRegisteredFunctionsOf(ClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
 
