@@ -603,6 +603,14 @@ public interface TrackedRace extends Serializable {
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
     
     /**
+     * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     * 
+     */
+    Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
     Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);

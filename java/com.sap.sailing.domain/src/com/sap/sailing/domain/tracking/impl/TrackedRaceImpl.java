@@ -2452,6 +2452,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        if (timePoint != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    timePoint, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     /**
      * The method has protected scope in order to allow for testing. Based on the bearing from the start waypoint to the
      * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
