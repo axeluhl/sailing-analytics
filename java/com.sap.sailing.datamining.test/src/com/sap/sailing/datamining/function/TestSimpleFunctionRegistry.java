@@ -28,9 +28,11 @@ public class TestSimpleFunctionRegistry {
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registry.register(dimension);
         
-        Set<Function> expectedRegisteredFunctions = new HashSet<>();
-        expectedRegisteredFunctions.add(new MethodWrappingFunction(dimension));
+        Set<Function> expectedRegisteredFunctionsAsSet = new HashSet<>();
+        expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction(dimension));
+        Iterable<Function> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
         assertThat(registry.getRegisteredFunctions(), is(expectedRegisteredFunctions));
+        assertThat(registry.getRegisteredFunctionsOf(ClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
 
     private Set<Function> getExpectedRegisteredMethodsToTestMarkedMethods() {
