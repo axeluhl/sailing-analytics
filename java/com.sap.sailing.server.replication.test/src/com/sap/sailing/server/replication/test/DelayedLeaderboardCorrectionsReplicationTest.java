@@ -129,15 +129,23 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hasso,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
+        logger.info("hasso object ID hash: "+System.identityHashCode(hasso));
         Leaderboard newMasterLeaderboard = master.getLeaderboardByName(masterLeaderboard.getName());
         SettableScoreCorrection newMasterScoreCorrections = newMasterLeaderboard.getScoreCorrection();
         RaceColumn newMasterQ2 = newMasterLeaderboard.getRaceColumnByName(Q2);
         newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2);
-        assertTrue(Util.isEmpty(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2))); // no score corrections applied yet
+        StringBuilder unexpectedCompetitors = new StringBuilder();
+        unexpectedCompetitors.append("Unexpected competitors having score corrections (expected no competitor to have a real score correction at this point: ");
+        for (Competitor unexpectedCompetitor : newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2)) {
+            unexpectedCompetitors.append(unexpectedCompetitor);
+            unexpectedCompetitors.append(" with object ID ");
+            unexpectedCompetitors.append(System.identityHashCode(unexpectedCompetitor));
+            unexpectedCompetitors.append(", ");
+        }
+        assertTrue(unexpectedCompetitors.toString(), Util.isEmpty(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2))); // no score corrections applied yet
         // now connect the tracked race again to the leaderboard column in the re-loaded environment
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
-        logger.info("hasso object ID hash: "+System.identityHashCode(hasso));
         logger.info("got score correction for competitor "+System.identityHashCode(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2).iterator().next()));
         assertTrue(Util.contains(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2), hasso)); // now score corrections must have been applied from Delayed... 
         // now the delayed corrections are expected to have been resolved:
