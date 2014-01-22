@@ -3,9 +3,11 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +23,11 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
@@ -42,6 +46,8 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
 public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServerReplicationTest {
+    private static final Logger logger = Logger.getLogger(DelayedLeaderboardCorrectionsReplicationTest.class.getName());
+    
     private static final String Q2 = "Q2";
     private ReplicationService replicaReplicator;
     private ReplicationMasterDescriptor masterDescriptor;
@@ -123,9 +129,17 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hasso,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
+        Leaderboard newMasterLeaderboard = master.getLeaderboardByName(masterLeaderboard.getName());
+        SettableScoreCorrection newMasterScoreCorrections = newMasterLeaderboard.getScoreCorrection();
+        RaceColumn newMasterQ2 = newMasterLeaderboard.getRaceColumnByName(Q2);
+        newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2);
+        assertTrue(Util.isEmpty(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2))); // no score corrections applied yet
         // now connect the tracked race again to the leaderboard column in the re-loaded environment
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
+        logger.info("hasso object ID hash: "+System.identityHashCode(hasso));
+        logger.info("got score correction for competitor "+System.identityHashCode(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2).iterator().next()));
+        assertTrue(Util.contains(newMasterScoreCorrections.getCompetitorsThatHaveCorrectionsIn(newMasterQ2), hasso)); // now score corrections must have been applied from Delayed... 
         // now the delayed corrections are expected to have been resolved:
         assertEquals(MaxPointsReason.DNF, master.getLeaderboardByName(leaderboardName).getMaxPointsReason(hasso,
                 master.getLeaderboardByName(leaderboardName).getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
