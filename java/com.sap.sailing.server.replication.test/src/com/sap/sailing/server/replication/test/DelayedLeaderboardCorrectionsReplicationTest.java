@@ -15,6 +15,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -66,8 +68,9 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // then start initial load, wait until finished; then link a tracked race to leaderboard's RaceColumn on master and
         // verify that on the replica it is associated to the RaceColumn as well, and the DelayedLeaderboardCorrections are
         // resolved properly on the replica.
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        final DomainFactory domainFactory = DomainFactory.INSTANCE;
+        BoatClass boatClass = domainFactory.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        DynamicCompetitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
@@ -75,7 +78,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 return new RegattaNameAndRaceName("Kieler Woche (5o5)", "Yellow Race 2");
             }
         };
-        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
+        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, domainFactory);
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 19, 44 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
@@ -92,11 +95,14 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // re-load new master from persistence
-        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
-        replica = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
+        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, domainFactory);
+        DomainFactoryImpl replicaDomainFactory = new DomainFactoryImpl();
+        replica = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace, replicaDomainFactory);
         final Leaderboard masterLeaderboardReloaded = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboardReloaded);
-        // expecting the correction to only be in the DelayedLeaderboardCorrection object but not the leaderboard itself
+        // expecting the correction to not be in the leaderboard because the competitor was not found in the
+        // domain factory's competitor store while loading and therefore the score correction could not immediately
+        // be applied to the leaderboard's real score correction
         assertEquals(MaxPointsReason.NONE, masterLeaderboardReloaded.getMaxPointsReason(hasso,
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
@@ -104,13 +110,16 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
+        // starting to replicate will clear the competitor store used by the replica in this test;
+        // the competitor will have to be looked up again after it was received by the replica.
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         Thread.sleep(1000);
 
         Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         assertNotNull(replicaLeaderboard);
         assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2));
-        // so far, the replica should also only have the delayed corrections:
+        // so far, the replica should also only have the delayed corrections since during deserializing them the
+        // replicatedHasso competitor was not yet known to the replica's competitor store:
         assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hasso,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
@@ -126,8 +135,9 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
     }
     
-    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
-        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
+    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace,
+            DomainFactory domainFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, domainFactory), PersistenceFactory.INSTANCE
                 .getMongoObjectFactory(MongoDBService.INSTANCE), MediaDBFactory.INSTANCE.getMediaDB(MongoDBService.INSTANCE), EmptyWindStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
