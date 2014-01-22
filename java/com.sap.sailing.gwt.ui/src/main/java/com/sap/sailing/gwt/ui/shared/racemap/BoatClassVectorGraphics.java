@@ -25,7 +25,7 @@ public abstract class BoatClassVectorGraphics {
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
 
-    protected final String SAIL_FILLCOLOR = "#FFFFFF";
+    protected final String SAIL_FILLCOLOR = "#555555";
     protected final String SAIL_STROKECOLOR = "#000000";
 
     BoatClassVectorGraphics(String mainBoatClassName, double boatLengthInMeters, double boatBeamInMeters, double boatCenterAlongLengthInMeters) {

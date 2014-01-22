@@ -65,7 +65,7 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
             ctx.setStrokeStyle(color);
         } else {
             ctx.setFillStyle("#FFFFFF");
-            ctx.setStrokeStyle("#FFFFFF");
+            ctx.setStrokeStyle("#000000");
         }
         
         ctx.setLineWidth(5.0);
