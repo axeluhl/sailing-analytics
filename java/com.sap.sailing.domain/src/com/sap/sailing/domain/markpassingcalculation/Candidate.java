@@ -20,6 +20,7 @@ public class Candidate  {
     private TimePoint p;
     private double distanceProbability;
     private int id;
+    // TODO Boolean for right side of waypoint and right rounding way for waypoint
 
     public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w) {
         this.w = w;

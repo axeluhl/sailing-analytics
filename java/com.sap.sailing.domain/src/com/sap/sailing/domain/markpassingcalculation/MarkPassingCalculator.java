@@ -104,7 +104,9 @@ public class MarkPassingCalculator {
 
             List<Callable<Object>> tasks = new ArrayList<>();
             for (Object o : combinedFixes.keySet()) {
-                tasks.add(Executors.callable(new GetAffectedFixes(o, combinedFixes.get(o))));
+                if (o instanceof Mark) {
+                    tasks.add(Executors.callable(new CheckForChangesThroughNewMarkFixes((Mark)o, combinedFixes.get(o))));
+                }
             }
             try {
                 executor.invokeAll(tasks);
@@ -112,8 +114,10 @@ public class MarkPassingCalculator {
                 e.printStackTrace();
             }
             tasks.clear();
-            for (Competitor c : finder.getAffectedCompetitors()) {
-                tasks.add(Executors.callable(new ComputeMarkPassings(c)));
+            for (Object o : combinedFixes.keySet()) {
+                if (o instanceof Competitor) {
+                    tasks.add(Executors.callable(new ComputeMarkPassings((Competitor) o, combinedFixes.get(o))));
+                }
             }
             try {
                 executor.invokeAll(tasks);
@@ -125,34 +129,32 @@ public class MarkPassingCalculator {
 
         private class ComputeMarkPassings implements Runnable {
             Competitor c;
+            List<GPSFix> fixes;
         
-            public ComputeMarkPassings(Competitor c) {
+            public ComputeMarkPassings(Competitor c, List<GPSFix> fixes) {
                 this.c = c;
-            }
-        
-            @Override
-            public void run() {
-                chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
-            }
-        }
-
-
-        private class GetAffectedFixes implements Runnable {
-            Object o;
-            Iterable<GPSFix> fixes;
-        
-            public GetAffectedFixes(Object o, Iterable<GPSFix> fixes) {
-                this.o = o;
                 this.fixes = fixes;
             }
         
             @Override
             public void run() {
-                if (o instanceof Competitor) {
-                    finder.calculateFixesAffectedByNewCompetitorFixes((Competitor) o, fixes);
-                } else if (o instanceof Mark) {
-                    finder.calculateFixesAffectedByNewMarkFixes((Mark) o, fixes);
-                }
+                chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c, fixes));
+            }
+        }
+
+
+        private class CheckForChangesThroughNewMarkFixes implements Runnable {
+            Mark m;
+            Iterable<GPSFix> fixes;
+        
+            public CheckForChangesThroughNewMarkFixes(Mark m, Iterable<GPSFix> fixes) {
+                this.m = m;
+                this.fixes = fixes;
+            }
+            @Override
+            public void run() {
+                    finder.calculateFixesAffectedByNewMarkFixes((Mark) m, fixes);
+                
             }
         }
     }

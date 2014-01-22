@@ -22,25 +22,17 @@ import com.sap.sailing.domain.tracking.GPSFix;
 
 public interface AbstractCandidateFinder {
 
-    void calculateFixesAffectedByNewCompetitorFixes(Competitor c, Iterable<GPSFix> fixes);
-
     void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 
     /**
      * Before calling this method, there have to be fixes that may have changed their status as a Candidate. This is
-     * done by the the methods {@link #calculateFixesAffectedByNewCompetitorFixes(Competitor, Iterable)} and
-     * {@link #calculateFixesAffectedByNewMarkFixes(Mark, Iterable)}
+     * done by the the method {@link #calculateFixesAffectedByNewMarkFixes(Mark, Iterable)}
      * 
      * @param c
      * @return
      */
-    Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c);
+    Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c, List<GPSFix> fixes);
 
-    /**
-     * @return the {@link Competitor}s that have affected Fixes, so the other Competitors can be ignored in the
-     *         following calculations.
-     */
-    Iterable<Competitor> getAffectedCompetitors();
 
     /**
      * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the Candidates
