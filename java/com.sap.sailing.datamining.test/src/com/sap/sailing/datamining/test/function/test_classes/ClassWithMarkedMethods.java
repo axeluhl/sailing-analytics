@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.test.function.test_classes;
 
-import com.sap.sailing.datamining.annotations.DefinesDataMiningFunctions;
 import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
 
@@ -9,7 +8,6 @@ import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
  * The tests will fail, because they are reflected via constant strings.
  */
 
-@DefinesDataMiningFunctions
 public class ClassWithMarkedMethods {
     
     @Dimension("dimension")
