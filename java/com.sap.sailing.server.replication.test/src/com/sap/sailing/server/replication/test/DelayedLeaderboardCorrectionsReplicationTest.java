@@ -74,7 +74,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         // then start initial load, wait until finished; then link a tracked race to leaderboard's RaceColumn on master and
         // verify that on the replica it is associated to the RaceColumn as well, and the DelayedLeaderboardCorrections are
         // resolved properly on the replica.
-        final DomainFactory domainFactory = DomainFactory.INSTANCE;
+        final DomainFactory domainFactory = new DomainFactoryImpl();
         BoatClass boatClass = domainFactory.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         DynamicCompetitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner"); // don't create competitor using CompetitorStore
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
