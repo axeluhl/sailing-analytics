@@ -169,6 +169,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         
+        addNamedElementWithValue(raceElement, "start_type", race.getTrackedLeg(race.getRace().getCourse().getFirstLeg()).getLegType(race.getStartOfRace()).name());
         addNamedElementWithValue(raceElement, "delay_to_live_in_millis", race.getDelayToLiveInMillis());
         
         addNamedElementWithValue(raceElement, "timepoint_of_last_event_as_millis", handleValue(race.getTimePointOfLastEvent()));
@@ -180,8 +181,10 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
+        LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+        addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
+
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
-        
         raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMillis*/ 5*60*1000)));
         
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
@@ -191,7 +194,6 @@ public class LeaderboardData extends ExportAction {
         for (Competitor competitor : allCompetitors) {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
-            LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", race.getSpeedWhenCrossingStartLine(competitor).getKnots());
