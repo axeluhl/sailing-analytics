@@ -2,8 +2,8 @@ package com.sap.sailing.datamining.factories;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.DataRetrievalWorker;
+import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.DataRetrieverWorkerBuilder;
 import com.sap.sailing.datamining.impl.GroupDividingParallelDataRetriever;

@@ -14,12 +14,12 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.impl.MultiDimensionalGroupingWorker;
 import com.sap.sailing.datamining.shared.CompoundGroupKey;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 
 public class TestDimensionGroupers {
 
@@ -28,7 +28,7 @@ public class TestDimensionGroupers {
         Dimension<Integer, String> crossSum = createCrossSumDimension();
         GroupingWorker<Integer> groupByDimension = new OpenGrouper<Integer>(Arrays.asList(crossSum));
         
-        DataReceiver receiver = new DataReceiver();
+        OpenDataReceiver<Map<GroupKey, Collection<Integer>>> receiver = new OpenDataReceiver<>();
         groupByDimension.setReceiver(receiver);
         
         Collection<Integer> data = Arrays.asList(11, 2, 13, 4, 22, 3, 21, 111);
@@ -51,7 +51,7 @@ public class TestDimensionGroupers {
         expectedGroups.put(new GenericGroupKey<String>("4"), group);
         
         groupByDimension.run();
-        assertEquals(expectedGroups, receiver.groupedData);
+        assertEquals(expectedGroups, receiver.result);
     }
     
     @Test
@@ -86,7 +86,7 @@ public class TestDimensionGroupers {
         Dimension<Integer, String> signum = createSignumDimension();
         GroupingWorker<Integer> groupByDimensions = new OpenGrouper<Integer>(Arrays.asList(crossSum, signum));
         
-        DataReceiver receiver = new DataReceiver();
+        OpenDataReceiver<Map<GroupKey, Collection<Integer>>> receiver = new OpenDataReceiver<>();
         groupByDimensions.setReceiver(receiver);
         
         Collection<Integer> data = Arrays.asList(13, -4, 22, -3, 21, -111);
@@ -109,7 +109,7 @@ public class TestDimensionGroupers {
         expectedGroups.put(new CompoundGroupKey(new GenericGroupKey<String>("4"), new GenericGroupKey<String>("-1")), expectedGroup);
         
         groupByDimensions.run();
-        Map<GroupKey, Collection<Integer>> groups = receiver.groupedData;
+        Map<GroupKey, Collection<Integer>> groups = receiver.result;
         for (Entry<GroupKey, Collection<Integer>> expectedGroupEntry : expectedGroups.entrySet()) {
             Collection<Integer> group = groups.get(expectedGroupEntry.getKey());
             assertNotNull("No group for key: " + expectedGroupEntry.getKey().asString(), group);
@@ -154,17 +154,6 @@ public class TestDimensionGroupers {
         
         public GroupKey getGroupKey(DataType dataEntry) {
             return getGroupKeyFor(dataEntry);
-        }
-        
-    }
-    
-    private static class DataReceiver implements WorkReceiver<Map<GroupKey, Collection<Integer>>> {
-        
-        public Map<GroupKey, Collection<Integer>> groupedData;
-
-        @Override
-        public void receiveWork(Map<GroupKey, Collection<Integer>> result) {
-            groupedData = result;
         }
         
     }

@@ -8,14 +8,13 @@ import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
  * The tests will fail, because they are reflected via constant strings.
  */
 
-public class ClassWithMarkedMethods {
+public class SimpleClassWithMarkedMethods {
     
     @Dimension("dimension")
     public String dimension() {
         return "Method marked as dimension";
     }
     
-    //TODO Test, that this method isn't added to the registry
     //     Methods without a return value can't be dimensions
     @Dimension("illegalDimension")
     public void illegalDimension() {

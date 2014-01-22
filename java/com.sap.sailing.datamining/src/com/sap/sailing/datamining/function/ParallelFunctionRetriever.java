@@ -4,6 +4,6 @@ import java.lang.reflect.Method;
 
 import com.sap.sailing.datamining.ParallelDataRetriever;
 
-public interface ParallelMethodRetriever extends ParallelDataRetriever<Method> {
+public interface ParallelFunctionRetriever extends ParallelDataRetriever<Method> {
 
 }

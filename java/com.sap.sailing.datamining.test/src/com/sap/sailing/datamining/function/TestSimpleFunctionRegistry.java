@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
-import com.sap.sailing.datamining.test.function.test_classes.ClassWithMarkedMethods;
+import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 
 public class TestSimpleFunctionRegistry {
 
@@ -20,7 +20,7 @@ public class TestSimpleFunctionRegistry {
     public void testSimpleRegistration() {
         Method dimension = null;
         try {
-            dimension = ClassWithMarkedMethods.class.getMethod("dimension", (Class<?>[]) null);
+            dimension = SimpleClassWithMarkedMethods.class.getMethod("dimension", (Class<?>[]) null);
         } catch (NoSuchMethodException | SecurityException e) {
             fail("Failed to reflect the method");
         }
@@ -32,20 +32,7 @@ public class TestSimpleFunctionRegistry {
         expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction(dimension));
         Iterable<Function> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
         assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
-        assertThat(registry.getRegisteredFunctionsOf(ClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
-    }
-
-    private Set<Function> getExpectedRegisteredMethodsToTestMarkedMethods() {
-        Set<Function> expectedRegisteredFunctions = new HashSet<>();
-        try {
-            Method dimension = ClassWithMarkedMethods.class.getMethod("dimension", (Class<?>[]) null);
-            Method sideEffectFreeValue = ClassWithMarkedMethods.class.getMethod("sideEffectFreeValue", (Class<?>[]) null);
-            expectedRegisteredFunctions.add(new MethodWrappingFunction(dimension));
-            expectedRegisteredFunctions.add(new MethodWrappingFunction(sideEffectFreeValue));
-        } catch (NoSuchMethodException | SecurityException e) {
-            fail("Failed to get the marked methods with reflection. Have the names been changed?");
-        }
-        return expectedRegisteredFunctions;
+        assertThat(registry.getRegisteredFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
     }
     
     // TODO Test that inherited marked methods are also registered

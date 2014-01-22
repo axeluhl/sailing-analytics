@@ -1,0 +1,30 @@
+package com.sap.sailing.datamining.function;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.junit.Test;
+
+import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
+import com.sap.sailing.datamining.test.util.TestFunctionUtil;
+
+public class TestMethodRetriever {
+
+    @Test
+    public void testMarkedMethodRetrievalWorker() {
+        Collection<Class<?>> classesToScan = new ArrayList<>();
+        classesToScan.add(SimpleClassWithMarkedMethods.class);
+        OpenDataReceiver<Collection<Function>> receiver = new OpenDataReceiver<>();
+        
+        FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createMarkedMethodRetrievalWorker(classesToScan, receiver);
+        
+        Collection<Function> expectedFunctions = TestFunctionUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        worker.run();
+        assertThat(receiver.result, is(expectedFunctions));
+    }
+
+}

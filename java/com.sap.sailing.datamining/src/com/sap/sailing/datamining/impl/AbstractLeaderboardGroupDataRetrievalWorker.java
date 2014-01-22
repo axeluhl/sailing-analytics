@@ -20,7 +20,9 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType> extends AbstractComponentWorker<Collection<DataType>> implements DataRetrievalWorker<LeaderboardGroup, DataType> {
+public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
+                      extends AbstractComponentWorker<Collection<DataType>> 
+                      implements DataRetrievalWorker<LeaderboardGroup, DataType> {
 
     private LeaderboardGroup group;
 
