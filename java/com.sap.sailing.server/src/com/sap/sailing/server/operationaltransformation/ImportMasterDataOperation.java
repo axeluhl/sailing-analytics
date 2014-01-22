@@ -131,23 +131,31 @@ public class ImportMasterDataOperation extends
                 Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(),
                         leaderboard, getRegattaIfPossible(leaderboard));
                 boolean addedScoreCorrections = false;
-                if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
-                    addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
-                    addedScoreCorrections = true;
-                }
-                addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
-                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
-                    @Override
-                    public Competitor getCompetitorById(String id) {
-                        return board.getCompetitorsById().get(id);
+                try {
+                    if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
+                        addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
+                        addedScoreCorrections = true;
                     }
-                });
-                addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
-                        board.getCompetitorsById());
-                addRaceLogEvents(leaderboard, board.getRaceLogEvents());
-                toState.updateStoredLeaderboard(leaderboard);
-                if (addedScoreCorrections) {
-                    unsetDummy(dummyColumnAndFleet, leaderboard);
+                    addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
+                    addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
+                        @Override
+                        public Competitor getCompetitorById(String id) {
+                            // If the tracked races were removed from the exporting server,
+                            // the competitors are not exported and thus not found right here.
+                            // Null is possible:
+                            Competitor competitor = board.getCompetitorsById().get(id);
+                            return competitor;
+                        }
+                    });
+                    addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
+                            board.getCompetitorsById());
+                    addRaceLogEvents(leaderboard, board.getRaceLogEvents());
+                    toState.updateStoredLeaderboard(leaderboard);
+
+                } finally {
+                    if (addedScoreCorrections) {
+                        unsetDummy(dummyColumnAndFleet, leaderboard);
+                    }
                 }
                 relinkTrackedRacesIfPossible(toState, newLeaderboard);
             }
@@ -239,7 +247,10 @@ public class ImportMasterDataOperation extends
     public static void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
             CompetitorByIdGetter competitorsById) {
         for (String id : suppressedCompetitors) {
-            leaderboard.setSuppressed(competitorsById.getCompetitorById(id), true);
+            Competitor competitorById = competitorsById.getCompetitorById(id);
+            if (competitorById != null) {
+                leaderboard.setSuppressed(competitorById, true);
+            }
         }
     }
 
@@ -414,6 +425,10 @@ public class ImportMasterDataOperation extends
                 RaceColumnInSeries raceColumn = raceColumnIter.next();
                 if (rcmd.getFactor() != null) {
                     raceColumn.setFactor(rcmd.getFactor());
+                }
+                Set<WindTrackMasterData> windTrackMasterData = rcmd.getWindTrackMasterData();
+                if (windTrackMasterData != null) {
+                    createWindTracks(windTrackMasterData, toState);
                 }
                 for (Map.Entry<String, RaceIdentifier> e : rcmd.getRaceIdentifiersByFleetName().entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());
