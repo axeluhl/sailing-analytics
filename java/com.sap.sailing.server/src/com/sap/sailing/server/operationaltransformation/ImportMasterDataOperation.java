@@ -24,11 +24,13 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -46,6 +48,9 @@ import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.RacingEventService;
@@ -82,10 +87,10 @@ public class ImportMasterDataOperation extends
 
     private void createLeaderboardGroupWithAllRelatedObjects(final LeaderboardGroupMasterData masterData,
             RacingEventService toState) {
+        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(masterData, toState);
         createRegattas(masterData, toState);
-        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (final LeaderboardMasterData board : masterData.getLeaderboards()) {
             leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
@@ -93,7 +98,17 @@ public class ImportMasterDataOperation extends
                     //Has already been added by this operation
                     continue;
                 } else if (override) {
-                    toState.removeLeaderboard(board.getName());
+                    for (RaceColumn raceColumn : existingLeaderboards.get(board.getName()).getRaceColumns()) {
+                        for (Fleet fleet : raceColumn.getFleets()) {
+                            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                raceColumn.releaseTrackedRace(fleet);
+                            }
+                        }
+                    }
+                    if (toState.getLeaderboardByName(board.getName()) != null) {
+                        toState.removeLeaderboard(board.getName());
+                    }
                     logger.info(String.format("Leaderboard with name %1$s already existed and has been overridden.",
                             board.getName()));
                 } else {
@@ -134,8 +149,9 @@ public class ImportMasterDataOperation extends
                 if (addedScoreCorrections) {
                     unsetDummy(dummyColumnAndFleet, leaderboard);
                 }
-
+                relinkTrackedRacesIfPossible(toState, newLeaderboard);
             }
+
         }
         int[] overallLeaderboardDiscardThresholds = masterData.getOverallLeaderboardDiscardingRule() != null ? masterData.getOverallLeaderboardDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces() : null;
         ScoringSchemeType overallLeaderboardScoringSchemeType = masterData.getOverallLeaderboardScoringScheme() != null ? masterData.getOverallLeaderboardScoringScheme().getType() : null;
@@ -178,6 +194,18 @@ public class ImportMasterDataOperation extends
                 }
             }
             toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
+        }
+    }
+
+    private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {
+        if (newLeaderboard instanceof FlexibleLeaderboard) {
+            for (RaceColumn raceColumn : newLeaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    DynamicTrackedRace trackedRace = toState.getTrackedRace((RegattaAndRaceIdentifier) raceColumn
+                            .getRaceIdentifier(fleet));
+                    raceColumn.setTrackedRace(fleet, trackedRace);
+                }
+            }
         }
     }
 
@@ -322,12 +350,20 @@ public class ImportMasterDataOperation extends
             Regatta existingRegatta = toState.getRegatta(new RegattaName(singleRegattaData.getRegattaName()));
             if (existingRegatta != null) {
                 if (creationCount.alreadyAddedRegattaWithId(existingRegatta.getId().toString())) {
-                    //Already added earlier in this import process
+                    // Already added earlier in this import process
                     continue;
                 } else if (override) {
-                    logger.info(String.format("Regatta with name %1$s already existed and has been overridden.",
-                            singleRegattaData.getRegattaName()));
+                    logger.info(String
+                            .format("Regatta with name %1$s already existed and has been overridden. All it's tracked races were stopped and removed.",
+                                    singleRegattaData.getRegattaName()));
                     try {
+                        TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
+                        if (trackedRegatta != null) {
+                            for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
+                                trackedRegatta.removeTrackedRace(race);
+                            }
+                        }
+                        toState.stopTrackingAndRemove(existingRegatta);
                         toState.removeRegatta(existingRegatta);
                     } catch (IOException | InterruptedException e) {
                         logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
