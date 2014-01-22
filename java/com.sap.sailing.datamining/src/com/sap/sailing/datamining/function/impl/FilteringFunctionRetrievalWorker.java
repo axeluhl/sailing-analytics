@@ -38,8 +38,8 @@ public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Co
         this.classesToScan = classesToScan;
     }
     
-    public void setFilter(ConcurrentFilterCriteria<Method> filter) {
-        this.filter = filter;
+    public void setFilter(ConcurrentFilterCriteria<Method> filterCriteria) {
+        this.filter = filterCriteria;
     }
 
 }

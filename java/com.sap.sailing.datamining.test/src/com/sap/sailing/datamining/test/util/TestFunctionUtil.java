@@ -14,18 +14,32 @@ import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMark
 public class TestFunctionUtil {
 
     public static Collection<Function> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
-        Set<Function> expectedRegisteredFunctions = new HashSet<>();
-        expectedRegisteredFunctions.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
-        expectedRegisteredFunctions.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
-        return expectedRegisteredFunctions;
+        Set<Function> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        markedMethods.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
+        return markedMethods;
     }
     
     public static Method getMethodFromSimpleClassWithMarkedMethod(String name) {
+        return getMethodFromClass(SimpleClassWithMarkedMethods.class, name);
+    }
+
+    public static Collection<Function> getMethodsOfExternalLibraryClass() {
+        Set<Function> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction(getMethodFromExternalLibraryClass("foo")));
+        return markedMethods;
+    }
+
+    public static Method getMethodFromExternalLibraryClass(String name) {
+        return getMethodFromClass(ExternalLibraryClass.class, name);
+    }
+    
+    private static Method getMethodFromClass(Class<?> fromClass, String methodName) {
         Method method = null;
         try {
-            method = SimpleClassWithMarkedMethods.class.getMethod(name, (Class<?>[]) null);
+            method = fromClass.getMethod(methodName, (Class<?>[]) null);
         } catch (NoSuchMethodException | SecurityException e) {
-            fail("Failed to get the method with name '" + name + "'. Have the names been changed?");
+            fail("Failed to get the method with name '" + methodName + "'. Have the names been changed?");
         }
         return method;
     }

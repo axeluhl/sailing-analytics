@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectDimensionFilterCriteria;
+import com.sap.sailing.datamining.function.impl.MethodIsCorrectExternalLibraryFunctionFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.test.util.TestFunctionUtil;
 
@@ -37,6 +38,17 @@ public class TestFunctionFilterCriterias {
         
         Method unmarkedMethod = TestFunctionUtil.getMethodFromSimpleClassWithMarkedMethod("unmarkedMethod");
         assertThat(filterCriteria.matches(unmarkedMethod), is(false));
+    }
+
+    @Test
+    public void testMethodIsCorrectExternalLibraryFunctionFilterCriteria() {
+        ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalLibraryFunctionFilterCriteria();
+        
+        Method foo = TestFunctionUtil.getMethodFromExternalLibraryClass("foo");
+        assertThat(filterCriteria.matches(foo), is(true));
+        
+        Method fooVoid = TestFunctionUtil.getMethodFromExternalLibraryClass("fooVoid");
+        assertThat(filterCriteria.matches(fooVoid), is(false));
     }
 
 }

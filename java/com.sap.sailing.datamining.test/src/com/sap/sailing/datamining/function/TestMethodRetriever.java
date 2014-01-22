@@ -9,6 +9,7 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sailing.datamining.test.util.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sailing.datamining.test.util.TestFunctionUtil;
 
@@ -23,6 +24,19 @@ public class TestMethodRetriever {
         FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createMarkedMethodRetrievalWorker(classesToScan, receiver);
         
         Collection<Function> expectedFunctions = TestFunctionUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        worker.run();
+        assertThat(receiver.result, is(expectedFunctions));
+    }
+    
+    @Test
+    public void testExternalMethodRetrievalWorker() {
+        Collection<Class<?>> classesToScan = new ArrayList<>();
+        classesToScan.add(ExternalLibraryClass.class);
+        OpenDataReceiver<Collection<Function>> receiver = new OpenDataReceiver<>();
+        
+        FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createExternalMethodRetrievalWorker(classesToScan, receiver);
+        
+        Collection<Function> expectedFunctions = TestFunctionUtil.getMethodsOfExternalLibraryClass();
         worker.run();
         assertThat(receiver.result, is(expectedFunctions));
     }

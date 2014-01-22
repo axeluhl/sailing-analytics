@@ -9,9 +9,8 @@ public class MethodIsCorrectDimensionFilterCriteria implements ConcurrentFilterC
 
     @Override
     public boolean matches(Method method) {
-        Class<?> returnType = method.getReturnType();
         return method.getAnnotation(Dimension.class) != null &&
-               !returnType.equals(Void.TYPE);
+               !method.getReturnType().equals(Void.TYPE);
     }
 
 }
