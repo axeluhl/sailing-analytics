@@ -2798,8 +2798,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    @Override
-    public EventDTO getEventById(UUID id) {
     private EventDTO getEventById(UUID id) {
         EventDTO result = null;
         Event event = getService().getEvent(id);
