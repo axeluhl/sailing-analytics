@@ -1044,6 +1044,10 @@ public class MasterDataImportTest {
         
         Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(regattaToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
+        TrackedRace trackedRace2 = new DummyTrackedRace(new HashSet<Competitor>(), regattaToOverride, null);
+        leaderboardToOverride.getRaceColumns().iterator().next().setTrackedRace(testFleet1ToOverride, trackedRace2);
+
+        raceColumn.setTrackedRace(testFleet1, trackedRace);
         List<String> leaderboardNamesToOverride = new ArrayList<String>();
         leaderboardNamesToOverride.add(leaderboardToOverride.getName());
         destService.addLeaderboardGroup(TEST_GROUP_NAME,
@@ -1091,6 +1095,10 @@ public class MasterDataImportTest {
         Assert.assertEquals(leaderboard.getDisplayName(), leaderboardOnTarget.getDisplayName());
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         
+        // Check if tracked race was reconnected to overriding leaderboard
+        Assert.assertNotNull(leaderboardOnTarget.getRaceColumns().iterator().next()
+                .getTrackedRace(leaderboardOnTarget.getFleet("testFleet1")));
+
     }
     
     @Test
