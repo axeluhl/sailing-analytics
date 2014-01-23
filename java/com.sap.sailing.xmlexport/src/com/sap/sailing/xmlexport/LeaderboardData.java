@@ -244,7 +244,6 @@ public class LeaderboardData extends ExportAction {
             TrackedLegOfCompetitor trackedLegOfCompetitor = race.getTrackedLeg(competitor, race.getRace().getCourse().getFirstLeg());
             addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
             
-            // error here - check with race 8 muscat
             MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
