@@ -86,7 +86,7 @@ public class ImportMasterDataOperation extends
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final LeaderboardGroupMasterData masterData,
-            RacingEventService toState) {
+            final RacingEventService toState) {
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(masterData, toState);
@@ -136,17 +136,8 @@ public class ImportMasterDataOperation extends
                         addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
                         addedScoreCorrections = true;
                     }
-                    addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
-                    addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
-                        @Override
-                        public Competitor getCompetitorById(String id) {
-                            // If the tracked races were removed from the exporting server,
-                            // the competitors are not exported and thus not found right here.
-                            // Null is possible:
-                            Competitor competitor = board.getCompetitorsById().get(id);
-                            return competitor;
-                        }
-                    });
+                    addCarriedPoints(leaderboard, board.getCarriedPoints(), baseDomainFactory);
+                    addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), baseDomainFactory);
                     addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
                             board.getCompetitorsById());
                     addRaceLogEvents(leaderboard, board.getRaceLogEvents());
@@ -188,12 +179,7 @@ public class ImportMasterDataOperation extends
             }
             Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
             addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
-                    new CompetitorByIdGetter() {
-                        @Override
-                        public Competitor getCompetitorById(String id) {
-                            return masterData.getCompetitorById(id);
-                        }
-                    });
+                    baseDomainFactory);
             Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
             if (factorsForMetaColumns != null) {
                 for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
@@ -233,31 +219,32 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addCompetitorDisplayNames(Leaderboard leaderboard, Map<String, String> displayNamesByCompetitorId,
-            Map<String, Competitor> competitorsById) {
-        for (Entry<String, String> entry : displayNamesByCompetitorId.entrySet()) {
-            leaderboard.setDisplayName(competitorsById.get(entry.getKey()), entry.getValue());
+    private void addCompetitorDisplayNames(Leaderboard leaderboard, Map<Serializable, String> map,
+            Map<Serializable, Competitor> map2) {
+        for (Entry<Serializable, String> entry : map.entrySet()) {
+            leaderboard.setDisplayName(baseDomainFactory.getExistingCompetitorById(entry.getKey()),
+                    entry.getValue());
         }
     }
     
     interface CompetitorByIdGetter {
-        Competitor getCompetitorById(String id);
+        Competitor getCompetitorById(Serializable id);
     }
 
-    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
-            CompetitorByIdGetter competitorsById) {
-        for (String id : suppressedCompetitors) {
-            Competitor competitorById = competitorsById.getCompetitorById(id);
+    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<Serializable> list,
+            DomainFactory domainFactory) {
+        for (Serializable id : list) {
+            Competitor competitorById = domainFactory.getExistingCompetitorById(id);
             if (competitorById != null) {
                 leaderboard.setSuppressed(competitorById, true);
             }
         }
     }
 
-    private void addCarriedPoints(Leaderboard leaderboard, Map<String, Double> carriedPoints,
-            Map<String, Competitor> competitorsById) {
-        for (Entry<String, Double> entry : carriedPoints.entrySet()) {
-            leaderboard.setCarriedPoints(competitorsById.get(entry.getKey()), entry.getValue());
+    private void addCarriedPoints(Leaderboard leaderboard, Map<Serializable, Double> carriedPoints,
+            DomainFactory domainFactory) {
+        for (Entry<Serializable, Double> entry : carriedPoints.entrySet()) {
+            leaderboard.setCarriedPoints(domainFactory.getExistingCompetitorById(entry.getKey()), entry.getValue());
         }
     }
 
@@ -314,7 +301,8 @@ public class ImportMasterDataOperation extends
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(columnName);
             if (raceColumn != null) {
                 for (SingleScoreCorrectionMasterData singleCorrection : scoreCorrectionEntry.getValue()) {
-                    Competitor competitor = leaderboard.getCompetitorByIdAsString(singleCorrection.getCompetitorId());
+                    Competitor competitor = leaderboard.getCompetitorByIdAsString(singleCorrection.getCompetitorId()
+                            .toString());
                     scoreCorrection.setMaxPointsReason(competitor, raceColumn,
                             MaxPointsReason.valueOf(singleCorrection.getMaxPointsReason()));
                     if (singleCorrection.getExplicitScoreCorrection() != null) {

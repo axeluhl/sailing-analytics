@@ -1,9 +1,13 @@
 package com.sap.sailing.server.gateway.serialization.masterdata.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -161,7 +165,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
             String displayName = leaderboard.getDisplayName(competitor);
             if (displayName != null) {
                 JSONObject displayNameJson = new JSONObject();
-                displayNameJson.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
+                addCompetitorId(competitor, displayNameJson);
                 displayNameJson.put(FIELD_DISPLAY_NAME, displayName);
                 array.add(displayNameJson);
             }
@@ -173,26 +177,41 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
         competitors.addAll(makeCollection(suppressedCompetitors));
         JSONArray array = new JSONArray();
         for (Competitor competitor : suppressedCompetitors) {
-            array.add(competitor.getId().toString());
+            JSONObject obj = new JSONObject();
+            addCompetitorId(competitor, obj);
+            array.add(obj);
         }
         return array;
     }
 
+    private void addCompetitorId(Competitor competitor, JSONObject obj) {
+        // Special treatment for UUIDs. They are represented as String because JSON doesn't have a way to represent
+        // them otherwise. However, other, e.g., numeric, types used to encode a serializable ID must be preserved
+        // according to JSON semantics. Also see the corresponding case distinction in the deserialized which first
+        // tries to parse a string as a UUID becore returning the ID as is.
+        obj.put(FIELD_TYPE, competitor.getId().getClass().getName());
+        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor
+                .getId();
+        obj.put(FIELD_COMPETITOR_ID, competitorId);
+    }
+
     private JSONArray createJsonArrayForCarriedPoints(Leaderboard leaderboard) {
         JSONArray jsonArray = new JSONArray();
-        for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            double carriedPoints = leaderboard.getCarriedPoints(competitor);
+        Map<Competitor, Double> competitorsWithCarriedPoints = leaderboard
+                .getCompetitorsForWhichThereAreCarriedPoints();
+        competitors.addAll(competitorsWithCarriedPoints.keySet());
+        for (Entry<Competitor, Double> entry : competitorsWithCarriedPoints.entrySet()) {
+            Double carriedPoints = entry.getValue();
             if (carriedPoints != 0) {
-                jsonArray.add(createJsonForCarriedPoints(competitor.getId().toString(), carriedPoints));
+                jsonArray.add(createJsonForCarriedPoints(entry.getKey(), carriedPoints));
             }
         }
-
         return jsonArray;
     }
 
-    private JSONObject createJsonForCarriedPoints(String id, double carriedPoints) {
+    private JSONObject createJsonForCarriedPoints(Competitor competitor, double carriedPoints) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(FIELD_COMPETITOR_ID, id);
+        addCompetitorId(competitor, jsonObject);
         jsonObject.put(FIELD_CARRIED, carriedPoints);
         return jsonObject;
     }
@@ -293,7 +312,7 @@ public class LeaderboardMasterDataJsonSerializer implements JsonSerializer<Leade
                         correction.getExplicitScoreCorrection(competitor, raceColumn));
                 scoreCorrectionForCompetitor.put(FIELD_MAX_POINTS_REASON,
                         correction.getMaxPointsReason(competitor, raceColumn, now).toString());
-                scoreCorrectionForCompetitor.put(FIELD_COMPETITOR_ID, competitor.getId().toString());
+                addCompetitorId(competitor, scoreCorrectionForCompetitor);
                 scoreCorrectionsForCompetitors.add(scoreCorrectionForCompetitor);
             }
         }
