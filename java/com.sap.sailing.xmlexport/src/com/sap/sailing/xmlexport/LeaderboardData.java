@@ -237,6 +237,11 @@ public class LeaderboardData extends ExportAction {
         
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
+            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
+            if (maxPointsReason.equals(MaxPointsReason.DNS)) {
+                // we do not want to include competitors that did not start the race
+                continue;
+            }
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
             int[] timePointsInSecondsBeforeStart = new int[]{5, 10, 20, 30};
@@ -264,7 +269,6 @@ public class LeaderboardData extends ExportAction {
             } else {
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", 0);
             }
-            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
             Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getEndOfRace(), /*waitForLatestAnalysis*/ false);
