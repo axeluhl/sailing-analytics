@@ -264,6 +264,8 @@ public interface SailingService extends RemoteService {
 
     EventDTO getEventByName(String eventName);
     
+    EventDTO getEventById(UUID id);
+
     Iterable<String> getScoreCorrectionProviderNames();
 
     ScoreCorrectionProviderDTO getScoreCorrectionsOfProvider(String providerName) throws Exception;
