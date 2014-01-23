@@ -243,8 +243,11 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "average_speed_over_ground_in_knots", averageSpeedOverGround == null ? 0.0 : averageSpeedOverGround.getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_rank", ++raceRank);
             TrackedLegOfCompetitor trackedLegOfCompetitor = race.getTrackedLeg(competitor, race.getRace().getCourse().getFirstLeg());
-            addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
-            
+            if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getFinishTime() != null) {
+                addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
+            } else {
+                addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", 0);
+            }
             MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
