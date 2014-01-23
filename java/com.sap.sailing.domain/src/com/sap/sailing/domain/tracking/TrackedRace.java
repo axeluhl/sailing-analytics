@@ -450,6 +450,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
@@ -556,12 +557,6 @@ public interface TrackedRace extends Serializable {
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
-
-    /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
 
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
