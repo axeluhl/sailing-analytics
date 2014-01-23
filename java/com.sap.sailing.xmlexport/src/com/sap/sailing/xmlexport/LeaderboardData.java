@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -208,7 +209,22 @@ public class LeaderboardData extends ExportAction {
         Collections.sort(allCompetitorsSortedByDistanceToStarboardSide, new Comparator<Competitor>() {
             @Override
             public int compare(Competitor o1, Competitor o2) {
-                return race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o1).compareTo(race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o2));
+                Distance o1Distance = race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o1);
+                Distance o2Distance = race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o2);
+                if (o1Distance != null && o2Distance != null) {
+                        return o1Distance.compareTo(o2Distance);
+                } else if (o1Distance == null && o2Distance == null) {
+                    return 0;
+                } else {
+                    // one of the distances is null - we can't really tell
+                    // which competitor is better in terms of sorting but we can try
+                    // by giving the competitor that has a null value a very big distance
+                    if (o1Distance == null) {
+                        return new MeterDistance(100000).compareTo(o2Distance);
+                    } else {
+                        return o1Distance.compareTo(new MeterDistance(100000));
+                    }
+                }
             }
         });
         
