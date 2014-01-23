@@ -161,8 +161,13 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
 
     protected Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId, RaceLogEvent suppressedEvent) {
-        // FIXME lock for read getInternalRawFixes?
-        LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
+        final LinkedHashSet<RaceLogEvent> stillToDeliverToClient;
+        lockForRead();
+        try {
+            stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
+        } finally {
+            unlockAfterRead();
+        }
         stillToDeliverToClient.remove(suppressedEvent);
         Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
         if (deliveredToClient != null) {
