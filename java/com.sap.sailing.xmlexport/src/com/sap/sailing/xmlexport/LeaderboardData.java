@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.Callable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +25,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -161,7 +165,7 @@ public class LeaderboardData extends ExportAction {
         return windElements;
     }
     
-    private Element createRaceXML(TrackedRace race, Fleet fleet, List<Element> legs, RaceColumn column, Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
@@ -169,6 +173,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         
+        addNamedElementWithValue(raceElement, "start_type", race.getTrackedLeg(race.getRace().getCourse().getFirstLeg()).getLegType(race.getStartOfRace()).name());
         addNamedElementWithValue(raceElement, "delay_to_live_in_millis", race.getDelayToLiveInMillis());
         
         addNamedElementWithValue(raceElement, "timepoint_of_last_event_as_millis", handleValue(race.getTimePointOfLastEvent()));
@@ -180,35 +185,62 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
+        LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+        addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
+
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
-        
         raceElement.addContent(createWindXML("wind_", race.getAverageWindSpeedWithConfidence(/*resolutionInMillis*/ 5*60*1000)));
         
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
         addNamedElementWithValue(raceElement, "race_participant_count", allCompetitors.size());
         
+        // sort competitors according to their distance to the starboard side of the start line
+        List<Competitor> allCompetitorsSortedByDistanceToStarboardSide = new ArrayList<Competitor>(allCompetitors.size());
+        allCompetitorsSortedByDistanceToStarboardSide.addAll(allCompetitors);
+        Collections.sort(allCompetitorsSortedByDistanceToStarboardSide, new Comparator<Competitor>() {
+            @Override
+            public int compare(Competitor o1, Competitor o2) {
+                return race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o1).compareTo(race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(o2));
+            }
+        });
+        
+        Map<Competitor, Integer> competitorToDistanceRank = new HashMap<Competitor, Integer>();
+        int raceRankSorted = 0;
+        for (Competitor competitorSorted : allCompetitorsSortedByDistanceToStarboardSide) {
+            raceRankSorted += 1;
+            competitorToDistanceRank.put(competitorSorted, raceRankSorted);
+        }
+        
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
-            LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+            int[] timePointsInSecondsBeforeStart = new int[]{5, 10, 20, 30};
+            for (int i : timePointsInSecondsBeforeStart) {
+                addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace().minus(i*1000)).getMeters());
+                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace().minus(i*1000)).getKnots());
+                addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceFromStarboardSideOfStartLine(competitor, race.getStartOfRace().minus(i*1000)).getMeters());
+            }
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
+            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
+            addNamedElementWithValue(competitorRaceDataElement, "rank_based_on_distance_from_starboard_side_of_start_line", competitorToDistanceRank.get(competitor));
             addNamedElementWithValue(competitorRaceDataElement, "speed_when_crossing_start_line_in_knots", race.getSpeedWhenCrossingStartLine(competitor).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "start_advantage_in_meters", start.getAdvantage().getMeters());
-            addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "advantageous_side_while_approaching_start_line", start.getAdvantageousSideWhileApproachingLine().name());
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_in_meters", race.getDistanceTraveled(competitor, race.getEndOfRace()).getMeters());
+            addNamedElementWithValue(competitorRaceDataElement, "average_speed_over_ground_in_knots", getAverageSpeedOverGround(race, competitor, race.getEndOfRace(), true).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_rank", ++raceRank);
-            addNamedElementWithValue(competitorRaceDataElement, "final_race_score", leaderboard.getScoringScheme().getScoreForRank(column, competitor, raceRank, new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    return allCompetitors.size();
-                }
-            }));
+            TrackedLegOfCompetitor trackedLegOfCompetitor = race.getTrackedLeg(competitor, race.getRace().getCourse().getFirstLeg());
+            addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
+            
+            // error here - check with race 8 muscat
+            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
+            Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
             Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getEndOfRace(), /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
-            addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace()).toString());
+            addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
             competitorElement.addContent(competitorRaceDataElement);
             raceElement.addContent(competitorElement);
         }
@@ -309,6 +341,7 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "windward_distance_to_overall_leader_that_has_finished_this_leg_in_meters", competitorLeg.getWindwardDistanceToOverallLeader(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "distance_traveled_in_meters", competitorLeg.getDistanceTraveled(legFinishTime).getMeters());
             addNamedElementWithValue(competitorLegDataElement, "average_speed_over_ground_in_knots", competitorLeg.getAverageSpeedOverGround(legFinishTime).getKnots());
+
             addNamedElementWithValue(competitorLegDataElement, "number_of_jibes", competitorLeg.getNumberOfJibes(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "number_of_tacks", competitorLeg.getNumberOfTacks(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "number_of_penalty_circles", competitorLeg.getNumberOfPenaltyCircles(legFinishTime));
@@ -320,9 +353,12 @@ public class LeaderboardData extends ExportAction {
             List<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
             addNamedElementWithValue(competitorLegDataElement, "maneuver_count", maneuvers.size());
             Element maneuversElement = new Element("maneuvers");
+            int maneuverCounter = 0;
             for (Maneuver man : maneuvers) {
+                maneuverCounter += 1;
                 Element maneuverInformation = new Element("maneuver");
                 addNamedElementWithValue(maneuverInformation, "type", man.getType().toString());
+                addNamedElementWithValue(maneuverInformation, "position", maneuverCounter);
                 addNamedElementWithValue(maneuverInformation, "direction_change_in_degrees", man.getDirectionChangeInDegrees());
                 Distance maneuverLoss = man.getManeuverLoss();
                 addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : 0.0);
@@ -371,6 +407,10 @@ public class LeaderboardData extends ExportAction {
             if (competitorLeg.getAverageCrossTrackError(now, /*waitForLatestAnalysis*/ false) == null) {
                 messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has no average cross track error for this leg!");
                 simpleConfidence -= 0.02;
+            }
+            if (competitorLeg.getStartTime().before(leg.getTrackedRace().getStartOfRace())) {
+                messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has a start time of " + competitorLeg.getStartTime() + " that is BEFORE start of race time!");
+                simpleConfidence -= 0.01;
             }
         }
         return new Pair<Double, Vector<String>>(simpleConfidence, messages);

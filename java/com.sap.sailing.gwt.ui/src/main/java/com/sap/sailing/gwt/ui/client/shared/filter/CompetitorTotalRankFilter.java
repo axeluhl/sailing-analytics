@@ -42,12 +42,12 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorDT
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        return stringMessages.totalRank();
+        return stringMessages.totalRegattaRank();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return stringMessages.totalRank();
+        return stringMessages.totalRegattaRank();
     }
 
     @Override

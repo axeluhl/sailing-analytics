@@ -14,6 +14,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -217,7 +218,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
-        leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
+        leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     private void storeColumnFactors(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
@@ -352,7 +353,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), oldName);
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
-        leaderboardCollection.update(query, renameUpdate);
+        leaderboardCollection.update(query, renameUpdate, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -394,7 +395,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbLeaderboardIds.add(dbLeaderboardId);
         }
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
-        leaderboardGroupCollection.update(query, dbLeaderboardGroup, true, false);
+        leaderboardGroupCollection.update(query, dbLeaderboardGroup, true, false, WriteConcern.SAFE);
     }
 
     @Override
@@ -409,7 +410,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
         BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
-        leaderboardGroupCollection.update(query, update);
+        leaderboardGroupCollection.update(query, update, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -425,7 +426,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
-        eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false);
+        eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -433,7 +434,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
         BasicDBObject query = new BasicDBObject(FieldNames.EVENT_ID.name(), id);
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.EVENT_NAME.name(), newName));
-        eventCollection.update(query, renameUpdate);
+        eventCollection.update(query, renameUpdate, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -486,7 +487,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
 
-        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
+        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -548,7 +549,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         DBObject entry = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
+        regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     @Override
@@ -902,7 +903,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         JSONObject json = competitorSerializer.serialize(competitor);
         DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
-        collection.update(query, entry, /* upsrt */true, /* multi */false);
+        collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     
     @Override
@@ -932,7 +933,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
         entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
         
-        configurationsCollections.update(query, entryObject, /* upsrt */ true, /* multi */ false);
+        configurationsCollections.update(query, entryObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }
 
     private DBObject createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {

@@ -22,7 +22,9 @@
 		<module>com.sap.sailing.geocoding</module>
 		<module>com.sap.sailing.datamining</module>
 		<module>com.sap.sailing.datamining.shared</module>
+<!-- The datamining.test fragment doesn't yet work properly with Hudson / OSGi; after fixing those, un-comment the following line again
 		<module>com.sap.sailing.datamining.test</module>
+-->
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
@@ -123,8 +125,7 @@
           -Dmongo.host=localhost
 		</parameters.mongodb>
         <parameters.debug>
-          -Xdebug
-          -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+          -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
         </parameters.debug>
         <!--
           "Forward declaration" for better readability. The actual value should be defined in the local settings.xml,
