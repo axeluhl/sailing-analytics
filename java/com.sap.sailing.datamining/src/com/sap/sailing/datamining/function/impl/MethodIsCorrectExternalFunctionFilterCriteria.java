@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 
-public class MethodIsCorrectExternalLibraryFunctionFilterCriteria implements ConcurrentFilterCriteria<Method> {
+public class MethodIsCorrectExternalFunctionFilterCriteria implements ConcurrentFilterCriteria<Method> {
 
     @Override
     public boolean matches(Method method) {

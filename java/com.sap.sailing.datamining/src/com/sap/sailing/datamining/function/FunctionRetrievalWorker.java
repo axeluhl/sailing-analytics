@@ -8,7 +8,7 @@ import com.sap.sailing.datamining.DataRetrievalWorker;
 import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.function.impl.FilteringFunctionRetrievalWorker;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sailing.datamining.function.impl.MethodIsCorrectExternalLibraryFunctionFilterCriteria;
+import com.sap.sailing.datamining.function.impl.MethodIsCorrectExternalFunctionFilterCriteria;
 import com.sap.sailing.datamining.function.impl.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
@@ -17,7 +17,7 @@ public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Cl
     
     public static final class Util {
         
-        public static FunctionRetrievalWorker createMarkedMethodRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
+        public static FunctionRetrievalWorker createMarkedFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
             FilteringFunctionRetrievalWorker worker = new FilteringFunctionRetrievalWorker();
             worker.setSource(classesToScan);
             worker.setReceiver(receiver);
@@ -30,12 +30,12 @@ public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Cl
             return worker;
         }
 
-        public static FunctionRetrievalWorker createExternalMethodRetrievalWorker(Collection<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
+        public static FunctionRetrievalWorker createExternalFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
             FilteringFunctionRetrievalWorker worker = new FilteringFunctionRetrievalWorker();
             worker.setSource(classesToScan);
             worker.setReceiver(receiver);
             
-            ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalLibraryFunctionFilterCriteria();
+            ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
             worker.setFilter(filterCriteria);
             
             return worker;
