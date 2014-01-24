@@ -539,6 +539,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
+        raceColumnTable.ensureDebugId("RaceColumnTable");
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
         raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
@@ -561,6 +562,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         vPanel.add(selectedLeaderboardRaceButtonPanel);
 
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
+        addRaceColumnsButton.ensureDebugId("AddRaceColumnsButton");
         selectedLeaderboardRaceButtonPanel.add(addRaceColumnsButton);
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -994,6 +996,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 updateRaceColumnsOfLeaderboard(leaderboardName, existingRaceColumns, result);
             }
         });
+        raceDialog.ensureDebugId("RaceColumnsInLeaderboardDialog");
         raceDialog.show();
     }
 

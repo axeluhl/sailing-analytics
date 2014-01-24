@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

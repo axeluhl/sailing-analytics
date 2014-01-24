@@ -22,6 +22,9 @@ public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "AvailableLeaderboardsTable")
     private WebElement availableLeaderboardsTable;
     
+    @FindBy(how = BySeleniumId.class, using = "AddRaceColumnsButton")
+    private WebElement addRaceColumnsButton;
+
     protected LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -35,11 +38,25 @@ public class LeaderboardConfigurationPanel extends PageArea {
         
         for(WebElement row : rows) {
             WebElement name = row.findElement(By.xpath(".//td/div/a"));
-            
             leaderboards.add(name.getText());
         }
         
         return leaderboards;
+    }
+    
+    public void selectLeaderboard(String leaderboardName) {
+        WebElement row = getLeaderboardRow(leaderboardName);
+        row.click();
+    }
+    
+    private WebElement getLeaderboardRow(String leaderboardName) {
+        for (WebElement row : getLeaderboardTable().getRows()) {
+            WebElement name = row.findElement(By.xpath(".//td/div/a"));
+            if (leaderboardName.equals(name.getText())) {
+                return row;
+            }
+        }
+        return null;
     }
     
     public void deleteLeaderboard(String leaderboard) {
@@ -76,5 +93,33 @@ public class LeaderboardConfigurationPanel extends PageArea {
         super.initElements();
         
         //this.availableLeaderboardsTable = new CellTable(this.driver, findElementBySeleniumId("AvailableLeaderboardsTable"));
+    }
+
+    /**
+     * Assuming that the leaderboard is already selected, clicks the "Add Races..." button 
+     * @param i
+     */
+    public void addRacesToFlexibleLeaderboard(int i) {
+        addRaceColumnsButton.click();
+        WebElement dialog = findElementBySeleniumId(this.driver, "RaceColumnsInLeaderboardDialog");
+        RaceColumnsInLeaderboardDialog raceColumnsInLeaderboardDialog = new RaceColumnsInLeaderboardDialog(this.driver, dialog);
+        raceColumnsInLeaderboardDialog.addRaces(2);
+        selectRaceColumn("R1", "Default");
+    }
+    
+    public void selectRaceColumn(String raceColumnName, String fleetName) {
+        CellTable table = getRaceColumnsTable();
+        for (WebElement row : table.getRows()) {
+            List<WebElement> fields = row.findElements(By.tagName("td"));
+            if (raceColumnName.equals(fields.get(0).getText()) && fleetName.equals(fields.get(1).getText())) {
+                row.click();
+                break;
+            }
+        }
+    }
+
+
+    private CellTable getRaceColumnsTable() {
+        return new CellTable(this.driver, findElementBySeleniumId(this.driver, "RaceColumnTable"));
     }
 }

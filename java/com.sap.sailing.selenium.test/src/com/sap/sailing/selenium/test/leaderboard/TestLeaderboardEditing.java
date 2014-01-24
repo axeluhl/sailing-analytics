@@ -39,6 +39,11 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
             assertFalse(dialog.isOkEnabled());
             String errorMessage = dialog.getErrorMessage();
             assertTrue(errorMessage.length() > 0);
+            dialog.pressCancel();
         }
+        // now create two race columns
+        leaderboardConfiguration.selectLeaderboard(leaderboardName);
+        leaderboardConfiguration.addRacesToFlexibleLeaderboard(2);
+        leaderboardConfiguration.selectRaceColumn("R1", "Default");
     }
 }

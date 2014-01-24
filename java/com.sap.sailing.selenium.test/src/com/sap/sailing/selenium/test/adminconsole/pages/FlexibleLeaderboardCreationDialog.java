@@ -5,19 +5,13 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.test.PageArea;
+import com.sap.sailing.selenium.test.gwt.widgets.AbstractDialog;
 
-public class FlexibleLeaderboardCreationDialog extends PageArea {
-    @FindBy(how = BySeleniumId.class, using = "OkButton")
-    private WebElement okButton;
-    @FindBy(how = BySeleniumId.class, using = "CancelButton")
-    private WebElement cancelButton;
+public class FlexibleLeaderboardCreationDialog extends AbstractDialog {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardNameField")
     private WebElement nameField;
     @FindBy(how = BySeleniumId.class, using = "LeaderboardDisplayNameField")
     private WebElement displayNameField;
-    @FindBy(how = BySeleniumId.class, using = "StatusLabel")
-    private WebElement statusLabel;
 
     public FlexibleLeaderboardCreationDialog(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -29,24 +23,5 @@ public class FlexibleLeaderboardCreationDialog extends PageArea {
         // now move the focus away from the nameField to ensure the onchange event is fired; see https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions
         this.displayNameField.sendKeys(" ");
         this.displayNameField.clear();
-    }
-    
-    public boolean isOkEnabled() {
-        return this.okButton.isEnabled();
-    }
-    
-    public String getErrorMessage() {
-        return this.statusLabel.getText();
-    }
-    
-    public void pressOk() {
-        this.okButton.click();
-        
-        // Wait, since we create the flexible leader board
-        waitForAjaxRequests();
-    }
-    
-    public void pressCancel() {
-        this.cancelButton.click();
     }
 }
