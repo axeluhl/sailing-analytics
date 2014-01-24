@@ -165,7 +165,7 @@ public class LeaderboardData extends ExportAction {
             windSpeedAsInterval = "16-20kn";
         } else if (speedInKnots > 20) {
             windSpeedAsHumanReadableString = VERY_STRONG_WIND_DESCRIPTION;
-            windSpeedAsInterval = "20-"+speedInKnots+"kn";
+            windSpeedAsInterval = "20-"+Math.rint(speedInKnots)+"kn";
         }
         windElements.add(createNamedElementWithValue(prefix+"human_readable", windSpeedAsHumanReadableString));
         windElements.add(createNamedElementWithValue(prefix+"knots_interval", windSpeedAsInterval));
@@ -237,13 +237,15 @@ public class LeaderboardData extends ExportAction {
         
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
-            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
-            if (maxPointsReason.equals(MaxPointsReason.DNS)) {
-                // we do not want to include competitors that did not start the race
-                continue;
-            }
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
+            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
+            if (maxPointsReason.equals(MaxPointsReason.DNS) || race.getMarkPassings(competitor).isEmpty()) {
+                // we do not want to include competitors that did not start the race
+                competitorElement.addContent(competitorRaceDataElement);
+                raceElement.addContent(competitorElement);
+                continue;
+            }
             int[] timePointsInSecondsBeforeStart = new int[]{5, 10, 20, 30};
             for (int i : timePointsInSecondsBeforeStart) {
                 addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace().minus(i*1000)).getMeters());
@@ -361,9 +363,9 @@ public class LeaderboardData extends ExportAction {
             TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
             
             /* if there is no start time then ignore all data of this leg */
-            if (competitorLeg.getStartTime() == null || competitorLeg.getFinishTime() == null) {
+            if (competitorLeg.getStartTime() == null || competitorLeg.getFinishTime() == null || competitorLeg.getTrackedLeg().getTrackedRace().getMarkPassings(competitor).isEmpty()) {
                 competitorElement.addContent(competitorLegDataElement);
-                log.info("Not exporting any XML data for " + trackedLeg.getTrackedRace().getRace().getName() + ":" + legCounter + " for competitor " + competitor.getName());
+                legElement.addContent(competitorElement);
                 continue;
             }
             
@@ -440,6 +442,10 @@ public class LeaderboardData extends ExportAction {
                 messages.add("Found a leg where the associated competitor is just null!");
                 simpleConfidence = 0.0;
                 continue;
+            }
+            if (competitorLeg.getTrackedLeg().getTrackedRace().getMarkPassings(competitorLeg.getCompetitor()).isEmpty()) {
+                messages.add("Competitor "+ competitorLeg.getCompetitor().getName() + " has no mark passings for the complete race!");
+                simpleConfidence -= 0.02;
             }
             if (!competitorLeg.hasFinishedLeg(now) || competitorLeg.getFinishTime() == null) {
                 messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has not finished this leg! Leg data won't be available!");
