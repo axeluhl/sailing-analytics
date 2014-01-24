@@ -12,22 +12,24 @@ import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 
-public class GroupDividingParallelDataRetriever<DataType> extends AbstractParallelComponent<RacingEventService, Collection<DataType>>
+public class GroupDividingParallelDataRetriever<DataType> extends AbstractParallelComponent<Void, Collection<DataType>>
                                                           implements ParallelDataRetriever<DataType> {
 
-    private WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder;
+    private RacingEventService racingService;
+    private WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> workerBuilder;
 
-    public GroupDividingParallelDataRetriever(WorkerBuilder<DataRetrievalWorker<DataType>> workerBuilder, ThreadPoolExecutor executor) {
+    public GroupDividingParallelDataRetriever(RacingEventService racingService, WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> workerBuilder, ThreadPoolExecutor executor) {
         super(executor);
+        this.racingService = racingService;
         this.workerBuilder = workerBuilder;
     }
     
     @Override
-    protected void setUpWorkersFor(RacingEventService racingService) {
+    protected void setUpWorkersFor(Void v) {
         for (LeaderboardGroup group : racingService.getLeaderboardGroups().values()) {
-            DataRetrievalWorker<DataType> worker = workerBuilder.build();
+            DataRetrievalWorker<LeaderboardGroup, DataType> worker = workerBuilder.build();
             worker.setReceiver(this);
-            worker.setGroup(group);
+            worker.setSource(group);
             addWorker(worker);
         }
     }

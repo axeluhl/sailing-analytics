@@ -319,10 +319,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     TrackedRaceImpl.this.notifyAll();
                 }
                 try {
+                    logger.info("Started loading wind tracks for " + getRace().getName());
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks);
+                    logger.info("Finished loading wind tracks for " + getRace().getName() + "! Found " + windTracks.size() + " wind tracks for this race!");
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -2364,12 +2366,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public RaceLog getRaceLog(Serializable identifier) {
         return attachedRaceLogs.get(identifier);
-    }
-    
-    @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
     }
     
     @Override

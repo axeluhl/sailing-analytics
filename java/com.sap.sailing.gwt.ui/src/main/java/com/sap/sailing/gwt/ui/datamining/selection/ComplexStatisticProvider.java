@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,65 +40,90 @@ public class ComplexStatisticProvider implements StatisticProvider {
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
         
-        mainPanel.add(new Label(this.stringMessages.calculate() + ":"));
-        statisticListBox = new SimpleValueListBox<StatisticType>();
-        Collection<StatisticType> registeredStatisticTypes = this.statisticsManager.getRegisteredStatisticTypes();
-        ComplexStatistic standardStatistic = this.statisticsManager.getStatistic(registeredStatisticTypes.iterator().next());
-        statisticListBox.setValue(standardStatistic.getStatisticType(), false);
-        statisticListBox.setAcceptableValues(registeredStatisticTypes);
-        statisticListBox.addValueChangeHandler(new ValueChangeHandler<StatisticType>() {
+        Label dataTypeLabel = new Label(this.stringMessages.use());
+        dataTypeLabel.addStyleName("dataTypeLabel");
+        mainPanel.add(dataTypeLabel);
+        dataTypeListBox = createDataTypeListBox();
+        mainPanel.add(dataTypeListBox);
+
+        mainPanel.add(new Label(this.stringMessages.toCalculateThe()));
+        statisticListBox = createStatisticToCalculateListBox();
+        mainPanel.add(statisticListBox);
+        
+        aggregatorListBox = createAggregatorListBox();
+        HorizontalPanel aggregatorPanel = surroundAggregatorListBoxWithBraces(aggregatorListBox);
+        mainPanel.add(aggregatorPanel);
+        
+        applyStatistic(getStandardStatistic());
+    }
+
+    private ValueListBox<DataTypes> createDataTypeListBox() {
+        ValueListBox<DataTypes> dataTypeListBox = new SimpleValueListBox<DataTypes>();
+        dataTypeListBox.setValue(getStandardStatistic().getBaseDataType(), false);
+        dataTypeListBox.setAcceptableValues(this.statisticsManager.getRegisteredBaseDataTypes());
+        dataTypeListBox.addValueChangeHandler(new ValueChangeHandler<DataTypes>() {
             @Override
-            public void onValueChange(ValueChangeEvent<StatisticType> event) {
+            public void onValueChange(ValueChangeEvent<DataTypes> event) {
                 applyStatistic(ComplexStatisticProvider.this.statisticsManager.getStatistic(event.getValue()));
                 notifyHandlers();
             }
         });
-        mainPanel.add(statisticListBox);
-        
+        return dataTypeListBox;
+    }
+
+    private HorizontalPanel surroundAggregatorListBoxWithBraces(ValueListBox<AggregatorType> aggregatorListBox) {
         HorizontalPanel aggregatorPanel = new HorizontalPanel();
         aggregatorPanel.setSpacing(1);
         aggregatorPanel.add(new Label("("));
-        aggregatorListBox = new SimpleValueListBox<AggregatorType>();
+        
+        aggregatorPanel.add(aggregatorListBox);
+        aggregatorPanel.add(new Label(")"));
+        return aggregatorPanel;
+    }
+    
+    private ValueListBox<AggregatorType> createAggregatorListBox() {
+        ValueListBox<AggregatorType> aggregatorListBox = new SimpleValueListBox<AggregatorType>();
         aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorType>() {
             @Override
             public void onValueChange(ValueChangeEvent<AggregatorType> event) {
                 notifyHandlers();
             }
         });
-        aggregatorPanel.add(aggregatorListBox);
-        aggregatorPanel.add(new Label(")"));
-        mainPanel.add(aggregatorPanel);
-        
-        mainPanel.add(new Label(this.stringMessages.basedOn()));
-        dataTypeListBox = new SimpleValueListBox<DataTypes>();
-        dataTypeListBox.addValueChangeHandler(new ValueChangeHandler<DataTypes>() {
+        return aggregatorListBox;
+    }
+
+    private ValueListBox<StatisticType> createStatisticToCalculateListBox() {
+        ValueListBox<StatisticType> statisticListBox = new SimpleValueListBox<StatisticType>();
+        statisticListBox.addValueChangeHandler(new ValueChangeHandler<StatisticType>() {
             @Override
-            public void onValueChange(ValueChangeEvent<DataTypes> event) {
+            public void onValueChange(ValueChangeEvent<StatisticType> event) {
                 notifyHandlers();
             }
         });
-        mainPanel.add(dataTypeListBox);
-        
-        applyStatistic(standardStatistic);
+        return statisticListBox;
+    }
+
+    private ComplexStatistic getStandardStatistic() {
+        return this.statisticsManager.getAllStatistics().iterator().next();
     }
 
     @Override
     public void applyQueryDefinition(QueryDefinition queryDefinition) {
-        applyStatistic(statisticsManager.getStatistic(queryDefinition.getStatisticType()));
+        applyStatistic(statisticsManager.getStatistic(queryDefinition.getDataType()));
         aggregatorListBox.setValue(queryDefinition.getAggregatorType(), false);
         dataTypeListBox.setValue(queryDefinition.getDataType(), false);
     }
 
     private void applyStatistic(ComplexStatistic statistic) {
-        statisticListBox.setValue(statistic.getStatisticType(), false);
+        dataTypeListBox.setValue(statistic.getBaseDataType(), false);
         
         aggregatorListBox.setAcceptableValues(Arrays.asList(AggregatorType.values()));
         aggregatorListBox.setValue(statistic.getPossibleAggregators().iterator().next(), false);
         aggregatorListBox.setAcceptableValues(statistic.getPossibleAggregators());
         
-        dataTypeListBox.setAcceptableValues(Arrays.asList(DataTypes.values()));
-        dataTypeListBox.setValue(statistic.getPossibleDataTypes().iterator().next(), false);
-        dataTypeListBox.setAcceptableValues(statistic.getPossibleDataTypes());
+        statisticListBox.setAcceptableValues(Arrays.asList(StatisticType.values()));
+        statisticListBox.setValue(statistic.getPossibleStatistics().iterator().next(), false);
+        statisticListBox.setAcceptableValues(statistic.getPossibleStatistics());
     }
 
     private void notifyHandlers() {

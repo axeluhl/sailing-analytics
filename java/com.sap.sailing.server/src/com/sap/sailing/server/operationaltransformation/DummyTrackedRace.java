@@ -462,12 +462,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Distance getDistanceToStartLine(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
