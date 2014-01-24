@@ -307,7 +307,6 @@ public class LeaderboardData extends ExportAction {
             return competitorElement;
         
         log.info("Creating XML for competitor " + competitor.getName());
-        createDataConfidenceXML(competitorConfidenceAndErrorMessages);
         
         if (competitor.getBoat() != null) {
             addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
@@ -335,9 +334,15 @@ public class LeaderboardData extends ExportAction {
             Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, timePointOfLatestModification);
             addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
             addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, timePointOfLatestModification).getMeters());
+            if (totalDistanceSailed == null) {
+                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
+            }
             addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, timePointOfLatestModification).getB().getKnots());
             Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, timePointOfLatestModification);
             addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
+            if (averageSpeed == null) {
+                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
+            }
             addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true).getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
@@ -346,16 +351,24 @@ public class LeaderboardData extends ExportAction {
             TimePoint now = MillisecondsTimePoint.now();
             addNamedElementWithValue(competitorElement, "total_time_sailed_in_milliseconds", leaderboard.getTotalTimeSailedInMilliseconds(competitor, now));
             addNamedElementWithValue(competitorElement, "total_time_sailed_including_non_finished_races_in_milliseconds", getTotalTimeSailedInMilliseconds(competitor, now, true));
-            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", leaderboard.getTotalDistanceTraveled(competitor, now).getMeters());
+            Distance totalDistanceSailed = leaderboard.getTotalDistanceTraveled(competitor, now);
+            addNamedElementWithValue(competitorElement, "total_distance_sailed_in_meters", totalDistanceSailed != null ? totalDistanceSailed.getMeters() : 0);
+            if (totalDistanceSailed == null) {
+                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His distance sailed is not comparable to others!");
+            }
             addNamedElementWithValue(competitorElement, "total_distance_sailed_including_non_finished_races_in_meters", getTotalDistanceTraveled(leaderboard, competitor, now).getMeters());
             addNamedElementWithValue(competitorElement, "maximum_speed_over_ground_in_knots", leaderboard.getMaximumSpeedOverGround(competitor, now).getB().getKnots());
             Speed averageSpeed = leaderboard.getAverageSpeedOverGround(competitor, now);
             addNamedElementWithValue(competitorElement, "average_speed_over_ground_from_start_mark_passing_in_knots", averageSpeed != null ? averageSpeed.getKnots() : 0);
+            if (averageSpeed == null) {
+                competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
+            }
             addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, now, true).getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
         }
+        createDataConfidenceXML(competitorConfidenceAndErrorMessages);
         log.info("Done with XML for competitor " + competitor.getName());
         return competitorElement;
     }
@@ -389,6 +402,9 @@ public class LeaderboardData extends ExportAction {
             competitorLegDataElement.addContent(createTimedXML("leg_started_time_", competitorLeg.getStartTime()));
             Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
+            if (maximumSpeed == null) {
+                raceConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +"has not finished this leg! His maximum speed for this leg is not comparable to others!");
+            }
             addNamedElementWithValue(competitorLegDataElement, "average_velocity_made_good_in_knots", competitorLeg.getAverageVelocityMadeGood(legFinishTime).getKnots());
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
             addNamedElementWithValue(competitorLegDataElement, "total_race_time_elapsed_as_millis", handleValue(legFinishTime)-handleValue(trackedLeg.getTrackedRace().getStartOfRace()));
