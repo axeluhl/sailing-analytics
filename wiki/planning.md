@@ -14,6 +14,8 @@ During our workshop of 2013-09-30, three major areas of development were identif
 
 * [[Race Committee App|wiki/planning/businesscases/RaceCommitteeApp]]
 
+* [[Audio Cast Solution / SAP Regatta Radio / sailing.fm|wiki/planning/businesscases/AudioCast]]
+
 The links above lead to short write-ups of the respective business case behind the topic, listing the pros and cons and discussing the risks.
 
 ## Project Candidates
