@@ -58,16 +58,9 @@
     pages mentioned above.
   -->
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
-     <!--
-     <capabilities>
-        <capability>
-          <name>version</name>
-          <value>14.0.0</value>
-        </capability>
-     </capabilities>
-     -->
   </driver-definition>
   <!--
-  <driver-definition class="org.openqa.selenium.chrome.ChromeDriver" />
+  <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
+  </driver-definition>
   -->
 </test-environment>

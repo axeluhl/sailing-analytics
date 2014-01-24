@@ -14,6 +14,8 @@ public class FlexibleLeaderboardCreationDialog extends PageArea {
     private WebElement cancelButton;
     @FindBy(how = BySeleniumId.class, using = "LeaderboardNameField")
     private WebElement nameField;
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardDisplayNameField")
+    private WebElement displayNameField;
     @FindBy(how = BySeleniumId.class, using = "StatusLabel")
     private WebElement statusLabel;
 
@@ -24,6 +26,9 @@ public class FlexibleLeaderboardCreationDialog extends PageArea {
     public void setName(String name) {
         this.nameField.clear();
         this.nameField.sendKeys(name);
+        // now move the focus away from the nameField to ensure the onchange event is fired; see https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions
+        this.displayNameField.sendKeys(" ");
+        this.displayNameField.clear();
     }
     
     public boolean isOkEnabled() {
