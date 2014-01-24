@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -51,7 +52,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 public int compare(GPSFix arg0, GPSFix arg1) {
                     return arg0.getTimePoint().compareTo(arg1.getTimePoint());
                 }
-
             }));
             candidates.put(c, new LinkedHashMap<Waypoint, List<Pair<GPSFix, GPSFix>>>());
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
@@ -99,6 +99,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         return getCandidateDeltas(c, fixes);
     }
     //TODO Live!!
+    //TODO Get local distance minima as backup...
     @Override
     public void calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps) {
         TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(new Comparator<GPSFix>() {
@@ -145,31 +146,10 @@ public class CandidateFinder implements AbstractCandidateFinder {
         LinkedHashMap<Waypoint, Set<Pair<GPSFix, GPSFix>>> pairs = calculateCTEAndCheckForChanges(c, fixes);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Pair<GPSFix, GPSFix> pair : pairs.get(w)) {
-                double cte1 = crossTrackErrors.get(c).get(pair.getA()).get(w).getA();
-                double cte2 = crossTrackErrors.get(c).get(pair.getB()).get(w).getA();
-                TimePoint start = pair.getA().getTimePoint();
-                long differenceInMillis = pair.getB().getTimePoint().asMillis() - pair.getA().getTimePoint().asMillis();
-                double ratio = (Math.abs(cte1) / (Math.abs(cte1) + Math.abs(cte2)));
-                TimePoint t = start.plus((long) (differenceInMillis*ratio));
-                Position p = race.getTrack(c).getEstimatedPosition(t, true);
-                double cost = getLikelyhood(w, p, t);
-                if (cost > penaltyForSkipping) {
-                    Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
+                Candidate ca = createCandidate(c, pair.getA(), pair.getB(), w);
+                if(ca.getProbability()>penaltyForSkipping){
                     candidates.get(c).get(w).add(pair);
-                    newCans.add(newCan);
-                }
-                if(passingInstructions.get(w)==PassingInstruction.Gate){
-                    double cte3 = crossTrackErrors.get(c).get(pair.getA()).get(w).getB();
-                    double cte4 = crossTrackErrors.get(c).get(pair.getB()).get(w).getB();
-                    double ratio2 = (Math.abs(cte3) / (Math.abs(cte3) + Math.abs(cte4)));
-                    TimePoint t2 = start.plus((long) (differenceInMillis*ratio2));
-                    Position p2 = race.getTrack(c).getEstimatedPosition(t2, true);
-                    double cost2 = getLikelyhood(w, p2, t2);
-                    if (cost2 > penaltyForSkipping) {
-                        Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t2, cost2, w);
-                        candidates.get(c).get(w).add(pair);
-                        newCans.add(newCan);
-                    }  
+                    newCans.add(ca);
                 }
             }
         }
@@ -245,6 +225,87 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
     }
 
+    private boolean crossTrackErrorSignChanges(GPSFix fix, GPSFix fix2, Waypoint w, Competitor c) {
+        if ((crossTrackErrors.get(c).get(fix).get(w).getA() < 0) != (crossTrackErrors.get(c).get(fix2).get(w).getA() <= 0)) {
+            return true;
+        } else if (passingInstructions.get(w) == PassingInstruction.Gate
+                && (crossTrackErrors.get(c).get(fix).get(w).getB() < 0) != (crossTrackErrors.get(c).get(fix2).get(w)
+                        .getB() <= 0)) {
+            return true;
+        }
+        return false;
+    }
+    
+    private Candidate createCandidate(Competitor c, GPSFix fix1, GPSFix fix2, Waypoint w){
+
+        double cte1 = crossTrackErrors.get(c).get(fix1).get(w).getA();
+        double cte2 = crossTrackErrors.get(c).get(fix2).get(w).getA();
+        if((cte1<0&&cte2<0)||(cte1>0&&cte2>0)){
+            cte1 = crossTrackErrors.get(c).get(fix1).get(w).getB();
+            cte2 = crossTrackErrors.get(c).get(fix2).get(w).getB();
+        }
+        TimePoint start = fix1.getTimePoint();
+        long differenceInMillis = fix2.getTimePoint().asMillis() - fix1.getTimePoint().asMillis();
+        double ratio = (Math.abs(cte1) / (Math.abs(cte1) + Math.abs(cte2)));
+        TimePoint t = start.plus((long) (differenceInMillis*ratio));
+        Position p = race.getTrack(c).getEstimatedPosition(t, true);
+        double cost = getDistanceLikelyhood(w, p, t)*isOnCorrectSideOfWaypoint(w, p, t)*passesInTheRightDirection(w, cte1, cte2);
+        
+          return  new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
+   }
+    
+    private double isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t){
+        if(w.getPassingInstructions()==PassingInstruction.Port||w.getPassingInstructions()==PassingInstruction.Starboard||w.getPassingInstructions()==PassingInstruction.FixedBearing){
+            return p.crossTrackError(
+                    race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, true),
+                    race.getCrossingBearing(w, t).add(new DegreeBearingImpl(90))).getMeters() < 0 ? 1 : 0.5;
+    
+        } else if (w.getPassingInstructions()==PassingInstruction.Gate) {
+            // TODO
+        } else if (w.getPassingInstructions()==PassingInstruction.Line) {
+            // TODO 
+        } else if (w.getPassingInstructions()==PassingInstruction.Offset) {
+            // TODO
+        }
+        return 1;
+    }
+
+    private double passesInTheRightDirection(Waypoint w, double cte1, double cte2){
+        if(w.getPassingInstructions()==PassingInstruction.Port) {
+            return cte1>cte2 ? 1 : 0.5;
+        }
+        if(w.getPassingInstructions()==PassingInstruction.Starboard) {
+            return cte1<cte2 ? 1 : 0.5;
+        }
+        else if (w.getPassingInstructions()==PassingInstruction.Gate) {
+            // TODO
+        } else if (w.getPassingInstructions()==PassingInstruction.Line) {
+            // TODO 
+        } else if (w.getPassingInstructions()==PassingInstruction.Offset) {
+            // TODO
+        } else if (w.getPassingInstructions()==PassingInstruction.FixedBearing) {
+            // TODO
+        }
+        
+        
+        return 1;
+    }
+
+    private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
+        return 1 / (100 * Math.abs(calculateDistance(p, w, t) / getLegLength(t, w)) + 1);
+    }
+
+    private double getLegLength(TimePoint t, Waypoint w) {
+        if (w == race.getRace().getCourse().getFirstWaypoint()) {
+            return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t).getMeters();
+        } else if (w == race.getRace().getCourse().getLastWaypoint()) {
+            return race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t).getMeters();
+        } else {
+            return (race.getTrackedLegStartingAt(w).getGreatCircleDistance(t).getMeters() + race
+                    .getTrackedLegFinishingAt(w).getGreatCircleDistance(t).getMeters()) / 2;
+        }
+    }
+
     private double calculateDistance(Position p, Waypoint w, TimePoint t) {
         double distance = 0;
         PassingInstruction instruction = passingInstructions.get(w);
@@ -269,31 +330,5 @@ public class CandidateFinder implements AbstractCandidateFinder {
             }
         }
         return distance;
-    }
-
-    private double getLegLength(TimePoint t, Waypoint w) {
-        if (w == race.getRace().getCourse().getFirstWaypoint()) {
-            return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t).getMeters();
-        } else if (w == race.getRace().getCourse().getLastWaypoint()) {
-            return race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t).getMeters();
-        } else {
-            return (race.getTrackedLegStartingAt(w).getGreatCircleDistance(t).getMeters() + race
-                    .getTrackedLegFinishingAt(w).getGreatCircleDistance(t).getMeters()) / 2;
-        }
-    }
-
-    private boolean crossTrackErrorSignChanges(GPSFix fix, GPSFix fix2, Waypoint w, Competitor c) {
-        if ((crossTrackErrors.get(c).get(fix).get(w).getA() < 0) != (crossTrackErrors.get(c).get(fix2).get(w).getA() <= 0)) {
-            return true;
-        } else if (passingInstructions.get(w) == PassingInstruction.Gate
-                && (crossTrackErrors.get(c).get(fix).get(w).getB() < 0) != (crossTrackErrors.get(c).get(fix2).get(w)
-                        .getB() <= 0)) {
-            return true;
-        }
-        return false;
-    }
-
-    private double getLikelyhood(Waypoint w, Position p, TimePoint t) {
-        return 1 / (100 * Math.abs(calculateDistance(p, w, t) / getLegLength(t, w)) + 1);
     }
 }

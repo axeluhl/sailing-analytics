@@ -18,21 +18,21 @@ import com.sap.sailing.domain.common.TimePoint;
 public class Candidate  {
     private Waypoint w;
     private TimePoint p;
-    private double distanceProbability;
+    private double probability;
     private int id;
     // TODO Boolean for right side of waypoint and right rounding way for waypoint
 
     public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w) {
         this.w = w;
         this.p = p;
-        this.distanceProbability = distanceProbability;
+        this.probability = distanceProbability;
         this.id = id;
     }
 
     public Candidate(int id, TimePoint p, double distanceProbability) {
         this.id = id;
         this.p = p;
-        this.distanceProbability = distanceProbability;
+        this.probability = distanceProbability;
     }
 
     public int getID() {
@@ -44,13 +44,13 @@ public class Candidate  {
     }
 
     public double getProbability() {
-        return distanceProbability;
+        return probability;
     }
 
     public Waypoint getWaypoint() {
         return w;
     }
     public String toString(){
-        return "Candidate for " + id + " with cost "+ distanceProbability + "and Timepoint " + p;
+        return "Candidate for " + id + " with cost "+ probability + "and Timepoint " + p;
     }
 }
