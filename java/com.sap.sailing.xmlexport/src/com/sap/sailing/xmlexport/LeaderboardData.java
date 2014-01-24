@@ -368,7 +368,7 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
         }
-        createDataConfidenceXML(competitorConfidenceAndErrorMessages);
+        competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         log.info("Done with XML for competitor " + competitor.getName());
         return competitorElement;
     }
@@ -403,7 +403,7 @@ public class LeaderboardData extends ExportAction {
             Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
             if (maximumSpeed == null) {
-                raceConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +"has not finished this leg! His maximum speed for this leg is not comparable to others!");
+                legConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +" has not finished this leg! His maximum speed for this leg is not comparable to others!");
             }
             addNamedElementWithValue(competitorLegDataElement, "average_velocity_made_good_in_knots", competitorLeg.getAverageVelocityMadeGood(legFinishTime).getKnots());
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
