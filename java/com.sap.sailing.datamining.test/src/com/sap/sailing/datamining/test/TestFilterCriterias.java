@@ -11,8 +11,8 @@ import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
-import com.sap.sailing.datamining.impl.criterias.RegexFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
+import com.sap.sailing.datamining.test.util.StringRegexFilterCriteria;
 
 public class TestFilterCriterias {
 
@@ -69,19 +69,6 @@ public class TestFilterCriterias {
         assertTrue(compoundCriteria.matches("BarF"));
         assertTrue(compoundCriteria.matches("BraFoo"));
         assertFalse(compoundCriteria.matches("Nothing"));
-    }
-
-    private class StringRegexFilterCriteria extends RegexFilterCriteria<String> {
-
-        public StringRegexFilterCriteria(String regex) {
-            super(regex);
-        }
-
-        @Override
-        protected String getValueToMatch(String data) {
-            return data;
-        }
-
     }
 
 }

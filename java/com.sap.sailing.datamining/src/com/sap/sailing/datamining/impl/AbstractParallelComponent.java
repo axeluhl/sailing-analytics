@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.sap.sailing.datamining.ComponentWorker;
+import com.sap.sailing.datamining.ParallelComponent;
 import com.sap.sailing.datamining.WorkReceiver;
 
 public abstract class AbstractParallelComponent<WorkingType, ResultType> implements ParallelComponent<WorkingType, ResultType>,

@@ -319,10 +319,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     TrackedRaceImpl.this.notifyAll();
                 }
                 try {
+                    logger.info("Started loading wind tracks for " + getRace().getName());
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks);
+                    logger.info("Finished loading wind tracks for " + getRace().getName() + "! Found " + windTracks.size() + " wind tracks for this race!");
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -1885,7 +1887,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.<p>
      * 
      * The time period assumed for a maneuver duration is taken from the
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
@@ -2367,18 +2369,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+    public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
         if (getStartOfRace() == null) {
             return null;
         }
 
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
         return getDistanceToStartLine(competitor, beforeStart);
     }
 
@@ -2423,12 +2419,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+    public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         if (getStartOfRace() == null) {
             return null;
         }
 
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
         return getTrack(competitor).getEstimatedSpeed(beforeStart);
     }
 
@@ -2441,6 +2437,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
                     competitorStartTime, /* extrapolate */false);
             final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(competitorStartTime);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        if (timePoint != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    timePoint, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
             if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
                 result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
             } else {

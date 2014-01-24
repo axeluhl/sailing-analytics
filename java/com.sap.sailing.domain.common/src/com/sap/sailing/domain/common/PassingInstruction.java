@@ -20,24 +20,24 @@ public enum PassingInstruction {
     Offset,
     FixedBearing;
 
-    public static PassingInstruction[] relevantValues(){
-        PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length-1];
+    public static PassingInstruction[] relevantValues() {
+        PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - 1];
 
         int i = 0;
-        for(PassingInstruction p : PassingInstruction.values()){
-            if(p != PassingInstruction.None)
+        for (PassingInstruction p : PassingInstruction.values()) {
+            if (p != PassingInstruction.None)
                 uiValues[i++] = p;
         }
         return uiValues;
-
     }
-    public static PassingInstruction valueOfIgnoringCase(String value){
-        for(PassingInstruction p : PassingInstruction.values()){
-            if(value.toLowerCase().equals(p.toString().toLowerCase())){
+
+    public static PassingInstruction valueOfIgnoringCase(String value) {
+        for (PassingInstruction p : PassingInstruction.values()) {
+            if (value.toLowerCase().equals(p.toString().toLowerCase())) {
                 return p;
             }
         }
-        throw new IllegalArgumentException("No enum constant of PassingInstructions matches " + value);
+        return null;
     }
     
 }

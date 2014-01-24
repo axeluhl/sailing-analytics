@@ -67,6 +67,13 @@ osgi> ss com.sap.sailing.monitoring
 osgi> start 71
 </pre>
 
+### Debug Tests Running During Full Build
+
+If you quickly want to run tests in an OSGi/Maven environment but debug locally, run a full build locally using `buildAndUpdateProduct.sh` with all other test bundles commented out in `java/pom.xml`. You may then go to the test bundle/fragment directory and use `mvn
+ -s ../../settings.xml -P debug.with-proxy install`. This will build the test bundle again and launch the tests, waiting for your debugger to connect. Connect your Eclipse debugger's remote debug launch to port 8000 on localhost.
+
+Don't forget to un-comment the test bundles in the `java/pom.xml` file when you're done.
+
 ### Display Line Endings for File
 
 Sometimes different line endings get mixed. To display all lin endings for each line of a given file use the following command:

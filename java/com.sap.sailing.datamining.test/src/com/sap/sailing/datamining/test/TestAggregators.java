@@ -10,12 +10,12 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.AggregationWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SumAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 
 public class TestAggregators {
 
@@ -24,7 +24,7 @@ public class TestAggregators {
         AggregationWorker<Integer, Integer> sumAggregator = new SumAggregationWorker<Integer, Integer>(new SimpleIntegerSumAggregator());
         Map<GroupKey, Collection<Integer>> data = asDataToAggregate(1, 7, 6, 3);
         sumAggregator.setDataToAggregate(data);
-        DataReceiver receiver = new DataReceiver();
+        OpenDataReceiver<Map<GroupKey, Integer>> receiver = new OpenDataReceiver<>();
         sumAggregator.setReceiver(receiver);
         
         sumAggregator.run();
@@ -43,7 +43,7 @@ public class TestAggregators {
         AggregationWorker<Integer, Integer> averageAggregator = new SimpleIntegerArithmeticAverageAggregationWorker();
         Map<GroupKey, Collection<Integer>> data = asDataToAggregate(1, 7, 6, 3);
         averageAggregator.setDataToAggregate(data);
-        DataReceiver receiver = new DataReceiver();
+        OpenDataReceiver<Map<GroupKey, Integer>> receiver = new OpenDataReceiver<>();
         averageAggregator.setReceiver(receiver);
 
         averageAggregator.run();
@@ -62,17 +62,6 @@ public class TestAggregators {
         Map<GroupKey,Integer> data = new HashMap<GroupKey, Integer>();
         data.put(new GenericGroupKey<Integer>(100), value);
         return data;
-    }
-    
-    private class DataReceiver implements WorkReceiver<Map<GroupKey, Integer>> {
-
-        public Map<GroupKey, Integer> result;
-
-        @Override
-        public void receiveWork(Map<GroupKey, Integer> result) {
-            this.result = result;
-        }
-        
     }
 
 }

@@ -62,7 +62,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
-    String totalRank();
+    String totalRegattaRank();
     String collapse();
     String expand();
     String leg();
@@ -950,7 +950,7 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
     String statisticProvider();
-    String calculate();
-    String basedOn();
+    String toCalculateThe();
     String groupingProvider();
+    String use();
 }

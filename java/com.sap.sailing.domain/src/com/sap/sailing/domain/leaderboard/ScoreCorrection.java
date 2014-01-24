@@ -33,6 +33,8 @@ public interface ScoreCorrection extends Serializable {
          *         the race at all.
          */
         Double getCorrectedScore();
+        
+        Double getUncorrectedScore();
 
         MaxPointsReason getMaxPointsReason();
 
@@ -96,6 +98,24 @@ public interface ScoreCorrection extends Serializable {
      * the race column specified by <code>raceInLeaderboard</code>.
      */
     boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
+    
+    /**
+     * @return all race columns for which this score corrections object has at least one correction; note that this
+     *         object may hold corrections also for competitors that are not currently returned by
+     *         {@link Leaderboard#getCompetitors()}, e.g., because one or more tracked races are not currently attached
+     *         to the leaderboard. It is still useful to retain these corrections as the race(s) may re-appear later on.
+     *         In particular, those corrections should be stored persistently.
+     */
+    Iterable<RaceColumn> getRaceColumnsThatHaveCorrections();
+
+    /**
+     * @return all competitors for which this score corrections object has at least one correction in column
+     *         <code>raceColumn</code>; note that this object may hold corrections also for competitors that are not
+     *         currently returned by {@link Leaderboard#getCompetitors()}, e.g., because one or more tracked races are
+     *         not currently attached to the leaderboard. It is still useful to retain these corrections as the race(s)
+     *         may re-appear later on. In particular, those corrections should be stored persistently.
+     */
+    Iterable<Competitor> getCompetitorsThatHaveCorrectionsIn(RaceColumn raceColumn);
 
     /**
      * Tells when the score correction was last updated. This should usually be the "validity time" and not the

@@ -39,8 +39,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private DynamicTrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
-    static double strictness = 200;
-    private MockedPolarSheetDeliverer polar = new MockedPolarSheetDeliverer(); 
+    static double strictness = 210;
     
 
     public CandidateChooser(DynamicTrackedRace race) {
@@ -235,12 +234,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
         try {
             if (leg.getLegType(t) == LegType.DOWNWIND) {
                 return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2
-                        / polar.getDownwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
+                        / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots();
             }
 
             if (leg.getLegType(t) == LegType.UPWIND) {
                 return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2)
-                        / polar.getUpwind(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
+                        / (race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots()*2/3);
             }
         } catch (NoWindException e) {
             Logger.getLogger(CandidateChooser.class.getName()).log(
@@ -250,7 +249,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
 
         return leg.getGreatCircleDistance(t).getNauticalMiles()
-                / polar.getReaching(race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t));
+                / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots()*0.8;
 
     }
 

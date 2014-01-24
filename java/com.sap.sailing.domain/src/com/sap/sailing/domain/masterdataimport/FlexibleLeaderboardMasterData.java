@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +23,11 @@ public class FlexibleLeaderboardMasterData extends LeaderboardMasterData {
     private List<RaceColumnMasterData> raceColumns;
 
     public FlexibleLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
+            Map<Serializable, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
             ScoringScheme scoringScheme, String courseAreaId, List<RaceColumnMasterData> raceColumns,
-            Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
+            Map<Serializable, Double> carriedPoints, List<Serializable> suppressedCompetitors,
+            Map<Serializable, String> displayNamesByCompetitorId,
+            Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints,
                 suppressedCompetitors, displayNamesByCompetitorId, raceLogEvents);
         this.scoringScheme = scoringScheme;

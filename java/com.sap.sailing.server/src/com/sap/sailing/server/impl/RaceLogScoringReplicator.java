@@ -144,12 +144,9 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 if (positionedCompetitor.getC().equals(MaxPointsReason.NONE)) {
                     try {
                         resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
-
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
-
-                        correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
+                        correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
                                 competitor, rankByRaceCommittee);
-
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
                     }
@@ -177,7 +174,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         return scoreHasBeenCorrected;
     }
 
-    private boolean correctScoreInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
+    private boolean correctScoreInLeaderboard(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
             final int numberOfCompetitorsInRace, 
             Competitor competitor, int rankByRaceCommittee) throws NoWindException {
         boolean scoreHasBeenCorrected = false;
@@ -188,12 +185,10 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                         return numberOfCompetitorsInRace;
                     }
                 });
-        Double trackedNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
         
-        if (trackedNetPoints == null || !trackedNetPoints.equals(scoreByRaceCommittee)) {
-            applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
-            scoreHasBeenCorrected = true;
-        }
+        // Do ALWAYS apply score corrections from race committee
+        applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
+        scoreHasBeenCorrected = true;
         return scoreHasBeenCorrected;
     }
 

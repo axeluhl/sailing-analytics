@@ -24,7 +24,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.markpassingcalculation.MockedPolarSheetDeliverer;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -35,9 +34,6 @@ public class OBMRMarkPassingTest extends OnlineTracTracBasedTest {
 
     public  OBMRMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
-        MockedPolarSheetDeliverer.reaching = 5.1;
-        MockedPolarSheetDeliverer.up = 4.9;
-        MockedPolarSheetDeliverer.down = 5.3;
     }
 
     private boolean forceReload = true;

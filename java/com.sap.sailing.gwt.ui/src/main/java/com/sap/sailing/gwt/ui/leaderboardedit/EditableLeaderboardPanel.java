@@ -360,6 +360,35 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             return reasonForMaxPoints == null ? "" : reasonForMaxPoints.name();
         }
     }
+    
+    private class UncorrectedNetPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected UncorrectedNetPointsViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            String result = "";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsUncorrected != null) {
+                result="("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
+            }
+            return result;
+        }
+    }
 
     private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell netPointsEditCell;
@@ -823,6 +852,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(maxPointsDropDownCellProvider);
         final NetPointsEditCellProvider netPointsEditCellProvider = new NetPointsEditCellProvider(race.getRaceColumnName());
         list.add(netPointsEditCellProvider);
+        final UncorrectedNetPointsViewProvider uncorrectedViewProvider = new UncorrectedNetPointsViewProvider(race.getRaceColumnName());
+        list.add(uncorrectedViewProvider);
         list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;

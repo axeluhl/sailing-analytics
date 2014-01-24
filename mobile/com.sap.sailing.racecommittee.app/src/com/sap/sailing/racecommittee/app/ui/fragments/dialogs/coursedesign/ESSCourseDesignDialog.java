@@ -204,16 +204,16 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 					CourseBase courseData = convertCourseElementsToACourseData();
 					sendCourseDataAndDismiss(courseData);
 				} catch (IllegalStateException ex) {
-					if (ex.getMessage().equals("Gate or Line has no right buoy")) {
+					if (ex.getMessage().equals("Missing second mark")) {
 						Toast.makeText(
 								getActivity(),
-								"A right buoy is missing for a gate or line. Please select the right buoy.",
+								"The selected passing instructions require two buoys. Please select the second buoy.",
 								Toast.LENGTH_LONG).show();
 					} else if (ex.getMessage().equals(
-							"Each waypoints needs passing Instructions")) {
+							"Each waypoints needs passing instructions")) {
 						Toast.makeText(
 								getActivity(),
-								"A waypoint has no passing Instructions. Please select the passing side by clicking long on the waypoint.",
+								"A waypoint has no passing instructions. Please select the passing instruction by clicking long on the waypoint.",
 								Toast.LENGTH_LONG).show();
 					}
 
@@ -358,25 +358,28 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         // TODO find a proper name for the highly flexible ESS courses to be shown on the regatta overview page
         CourseBase design = new CourseDataImpl("Course");
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
-
+        
         for (CourseListDataElement courseElement : courseElements) {
-            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)||courseElement.getPassingInstructions().equals(PassingInstruction.Line))
-                    && courseElement.getRightMark() != null) {
-                String gateName = "Gate " + courseElement.getLeftMark().getName() + " / "
-                        + courseElement.getRightMark().getName();
-               ControlPointWithTwoMarks gate = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement.getRightMark(), gateName);
-                Waypoint waypoint = new WaypointImpl(gate);
-
-                waypoints.add(waypoint);
-            } else if (courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
-                    && courseElement.getRightMark() == null) {
-                throw new IllegalStateException("Gate has no right buoy");
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line) || courseElement
+                    .getPassingInstructions().equals(PassingInstruction.Offset))) {
+                if (courseElement.getRightMark() != null) {
+                    String cpwtmName = "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / "
+                            + courseElement.getRightMark().getName();
+                    ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(),
+                            courseElement.getRightMark(), cpwtmName);
+                    Waypoint waypoint = new WaypointImpl(cpwtm);
+                    
+                    waypoints.add(waypoint);
+                } else {
+                    throw new IllegalStateException("Missing second mark");
+                }
             } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
-                throw new IllegalStateException("Each waypoints needs a passing side");
+                throw new IllegalStateException("Each waypoints needs passing instructions");
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(),
                         courseElement.getPassingInstructions());
-
+                
                 waypoints.add(waypoint);
             }
 
@@ -425,9 +428,9 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         if (courseElements.isEmpty()) {
             addNewCourseElementToList(mark);
         } else {
-            CourseListDataElement gateCourseElement = getFirstGateCourseElementWithoutRightMark();
-            if (gateCourseElement != null) {
-                gateCourseElement.setRightMark(mark);
+            CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
+            if (twoMarksCourseElement != null) {
+                twoMarksCourseElement.setRightMark(mark);
                 courseElementAdapter.notifyDataSetChanged();
             } else {
                 addNewCourseElementToList(mark);
@@ -435,9 +438,11 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         }
     }
 
-    private CourseListDataElement getFirstGateCourseElementWithoutRightMark() {
+    private CourseListDataElement getFirstTwoMarksCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : courseElements) {
-            if (courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line) || courseElement
+                    .getPassingInstructions().equals(PassingInstruction.Offset))
                     && courseElement.getRightMark() == null) {
                 return courseElement;
             }
@@ -452,9 +457,9 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
     }
 
     private void createPassingInstructionDialog(final CourseListDataElement courseElement) {
-        List<String> directions = new ArrayList<String>();
-        for (PassingInstruction direction : PassingInstruction.relevantValues()) {
-            directions.add(direction.name());
+        List<String> instructions = new ArrayList<String>();
+        for (PassingInstruction instruction : PassingInstruction.relevantValues()) {
+            instructions.add(instruction.name());
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
