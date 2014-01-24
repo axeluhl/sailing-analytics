@@ -13,6 +13,7 @@ import com.sap.sailing.datamining.factories.GrouperFactory;
 import com.sap.sailing.datamining.i18n.DataMiningResourceBundleManager;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.server.RacingEventService;
 
 public final class DataMiningFactory {
     
@@ -23,10 +24,10 @@ public final class DataMiningFactory {
     
     private DataMiningFactory() { }
 
-    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition) {
+    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
         Locale locale = stringMessages.getLocaleFrom(queryDefinition.getLocaleName());
         
-        ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), executor);
+        ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), racingService, executor);
         
         ParallelFilter<DataType> filter = createFilter(queryDefinition);
         

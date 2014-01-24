@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -1026,7 +1027,7 @@ public class MasterDataImportTest {
         eventToOverride.getVenue().addCourseArea(courseAreaToOverride);
         
         List<String> raceColumnNamesToOverride = new ArrayList<String>();
-        String raceColumnNameToOveride = "T1tooverride";
+        String raceColumnNameToOveride = raceColumnName;
         raceColumnNamesToOverride.add(raceColumnNameToOveride);
         emptyRaceColumnNamesList = Collections.emptyList();
         
@@ -1044,10 +1045,17 @@ public class MasterDataImportTest {
         
         Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(regattaToOverride.getRegattaIdentifier(),
                 "testDisplayNameNotToOverride", discardRule);
-        List<String> leaderboardNamesToOverride = new ArrayList<String>();
-        leaderboardNamesToOverride.add(leaderboardToOverride.getName());
-        destService.addLeaderboardGroup(TEST_GROUP_NAME,
-                "testGroupDescNotToOverride", false, leaderboardNamesToOverride, null, null);
+        TrackedRace trackedRace2 = new DummyTrackedRace(new HashSet<Competitor>(), regattaToOverride, null);
+        RaceColumn columnToOverride = leaderboardToOverride.getRaceColumns().iterator().next();
+        columnToOverride.setTrackedRace(testFleet1ToOverride, trackedRace2);
+        RegattaAndRaceIdentifier identifierOfRegattaTrackedRace = regattaToOverride.getRaceIdentifier(columnToOverride
+                .getRaceDefinition(testFleet1ToOverride));
+
+        destService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDescToOverride", false, new ArrayList<String>(),
+                null, null);
+        destService.getLeaderboardGroupByName(TEST_GROUP_NAME).addLeaderboard(leaderboardToOverride);
+        destService.addLeaderboard(leaderboardToOverride);
+
 
         // Deserialization copied from SailingServiceImpl
         
@@ -1080,7 +1088,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(group.getDescription(), leaderboardGroupOnTarget.getDescription());
         Leaderboard leaderboardOnTarget = destService.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         Assert.assertNotNull(leaderboardOnTarget);
-        Regatta regattaOnTarget = destService.getRegattaByName(TEST_LEADERBOARD_NAME);
+        Regatta regattaOnTarget = destService.getRegattaByName(TEST_REGATTA_NAME + " (" + TEST_BOAT_CLASS_NAME + ")");
         Assert.assertNotNull(regattaOnTarget);
 
         Assert.assertEquals(courseAreaUUID, eventOnTarget.getVenue().getCourseAreas().iterator().next().getId());
@@ -1091,6 +1099,9 @@ public class MasterDataImportTest {
         Assert.assertEquals(leaderboard.getDisplayName(), leaderboardOnTarget.getDisplayName());
         Assert.assertTrue(leaderboardOnTarget.getScoreCorrection().hasCorrectionFor(raceColumnOnTarget));
         
+        // Check that tracked race of regatta leaderboard has been removed
+        Assert.assertNull(destService.getTrackedRace(identifierOfRegattaTrackedRace));
+
     }
     
     @Test

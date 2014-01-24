@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
@@ -11,20 +12,20 @@ import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
 
 public class SimpleStatisticsManager implements StatisticsManager {
     
-    private HashMap<StatisticType, ComplexStatistic> statisticsMap;
+    private HashMap<DataTypes, ComplexStatistic> statisticsMap;
 
     public SimpleStatisticsManager() {
-        statisticsMap = new HashMap<StatisticType, ComplexStatistic>();
+        statisticsMap = new HashMap<DataTypes, ComplexStatistic>();
     }
 
     @Override
     public void addStatistic(ComplexStatistic statistic) {
-        statisticsMap.put(statistic.getStatisticType(), statistic);
+        statisticsMap.put(statistic.getBaseDataType(), statistic);
     }
 
     @Override
-    public ComplexStatistic getStatistic(StatisticType statisticType) {
-        return statisticsMap.get(statisticType);
+    public ComplexStatistic getStatistic(DataTypes dataType) {
+        return statisticsMap.get(dataType);
     }
 
     @Override
@@ -33,19 +34,19 @@ public class SimpleStatisticsManager implements StatisticsManager {
     }
     
     @Override
-    public Collection<StatisticType> getRegisteredStatisticTypes() {
+    public Set<DataTypes> getRegisteredBaseDataTypes() {
         return statisticsMap.keySet();
     }
     
     public static StatisticsManager createManagerWithStandardStatistics() {
         StatisticsManager manager = new SimpleStatisticsManager();
         
-        manager.addStatistic(new ComplexStatistic(StatisticType.Speed,
-                                                  Arrays.asList(AggregatorType.Average),
-                                                  Arrays.asList(DataTypes.GPSFix)));
-        manager.addStatistic(new ComplexStatistic(StatisticType.Distance,
-                                                  Arrays.asList(AggregatorType.Average, AggregatorType.Sum),
-                                                  Arrays.asList(DataTypes.TrackedLegOfCompetitor)));
+        manager.addStatistic(new ComplexStatistic(DataTypes.GPSFix,
+                                                  Arrays.asList(StatisticType.Speed),
+                                                  Arrays.asList(AggregatorType.Average)));
+        manager.addStatistic(new ComplexStatistic(DataTypes.TrackedLegOfCompetitor,
+                                                  Arrays.asList(StatisticType.Distance),
+                                                  Arrays.asList(AggregatorType.Average, AggregatorType.Sum)));
         
         return manager;
     }
