@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -357,13 +358,27 @@ public class ImportMasterDataOperation extends
                                     singleRegattaData.getRegattaName()));
                     try {
                         TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
+                        List<TrackedRace> toRemove = new ArrayList<TrackedRace>();
                         if (trackedRegatta != null) {
                             for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
-                                trackedRegatta.removeTrackedRace(race);
+                                toRemove.add(race);
+                            }
+                            for (TrackedRace raceToRemove : toRemove) {
+                                trackedRegatta.removeTrackedRace(raceToRemove);
+                                RaceDefinition race = existingRegatta.getRaceByName(raceToRemove.getRaceIdentifier()
+                                        .getRaceName());
+                                if (race != null) {
+                                    try {
+                                        toState.removeRace(existingRegatta, race);
+                                    } catch (IOException | InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
                             }
                         }
                         toState.stopTrackingAndRemove(existingRegatta);
                         toState.removeRegatta(existingRegatta);
+
                     } catch (IOException | InterruptedException e) {
                         logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
                                 singleRegattaData.getRegattaName()));
