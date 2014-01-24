@@ -633,8 +633,8 @@ public class LeaderboardData extends ExportAction {
             }
         }
         
-        sendDocument(createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages), leaderboard.getName() + ".xml");
         log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
+        sendDocument(createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages), leaderboard.getName() + ".xml");
     }
     
 
