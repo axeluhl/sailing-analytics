@@ -36,8 +36,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
             fixesAdded.add(fix);
         }
         time = System.currentTimeMillis();
-        f.calculateFixesAffectedByNewCompetitorFixes(bob, fixesAdded);
-        f.getCandidateDeltas(bob);
+        f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
         Assert.assertTrue(time<2000);
     }

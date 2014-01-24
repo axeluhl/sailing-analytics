@@ -811,7 +811,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 || instruction == PassingInstruction.Port
                 || instruction == PassingInstruction.Starboard) {
             Bearing before = getTrackedLegFinishingAt(w).getLegBearing(t);
-            Bearing after = getTrackedLegStartingAt(w).getLegBearing(t);
+            Bearing after = getTrackedLegStartingAt(w).getLegBearing(t).reverse();
             result = before.middle(after);
         } else if (instruction == PassingInstruction.Line) {
             Iterator<Mark> it = w.getMarks().iterator();

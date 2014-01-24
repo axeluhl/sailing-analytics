@@ -78,6 +78,12 @@ public class AbstractMockedRaceMarkPassingTest extends AbstractRaceChangeListene
                 System.currentTimeMillis())));
         trackedRace.recordFix(m3, new GPSFixImpl(new DegreePosition(37.887936, -122.268841), new MillisecondsTimePoint(
                 System.currentTimeMillis())));
+        trackedRace.recordFix(m, new GPSFixImpl(new DegreePosition(37.888796, -122.279602), new MillisecondsTimePoint(
+                System.currentTimeMillis())));
+        trackedRace.recordFix(m2, new GPSFixImpl(new DegreePosition(37.889653, -122.268991), new MillisecondsTimePoint(
+                System.currentTimeMillis())));
+        trackedRace.recordFix(m3, new GPSFixImpl(new DegreePosition(37.887936, -122.268841), new MillisecondsTimePoint(
+                System.currentTimeMillis())));
         for (Waypoint w : trackedRace.getRace().getCourse().getWaypoints()) {
             waypoints.add(w);
         }

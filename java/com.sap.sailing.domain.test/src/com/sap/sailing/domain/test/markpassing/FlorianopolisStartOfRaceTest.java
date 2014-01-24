@@ -22,6 +22,7 @@ public class FlorianopolisStartOfRaceTest extends FlorianopolisMarkPassingTest {
 
     @Override
     protected void testRace() {
+        CandidateChooser.strictness = 210;
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
 
@@ -39,14 +40,13 @@ public class FlorianopolisStartOfRaceTest extends FlorianopolisMarkPassingTest {
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            finder.calculateFixesAffectedByNewCompetitorFixes(c, fixes);
-            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
-         //   System.out.println("\n"+c);
+            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c, fixes));
+         System.out.println("\n"+c);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst=false;
             boolean gotOther=false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-              //  System.out.println(getTrackedRace().getMarkPassing(c, w));
+             System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if(w==w1){
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else {
@@ -61,5 +61,6 @@ public class FlorianopolisStartOfRaceTest extends FlorianopolisMarkPassingTest {
             }
         } 
         Assert.assertTrue(mistakes<1);
+        CandidateChooser.strictness = 290;
     }
 }

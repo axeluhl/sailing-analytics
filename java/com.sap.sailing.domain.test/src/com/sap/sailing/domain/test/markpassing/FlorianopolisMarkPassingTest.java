@@ -65,7 +65,7 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 20000;
+        final int tolerance = 10000;
         int numberOfCompetitors = 0;
         int wronglyComputed = 0;
         int wronglyNotComputed = 0;
@@ -74,7 +74,7 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
         int incorrectPasses = 0;
 
         boolean printRight = false;
-        boolean printWrong = false;
+        boolean printWrong = true;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;

@@ -39,13 +39,13 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private DynamicTrackedRace race;
     private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
-    static double strictness = 210;
+    public static double strictness = 300;
     
-
+    
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
         this.race = race;
-        raceStartTime = race.getStartOfRace();
+        raceStartTime = race.getStartOfRace().minus(2000);
         start = new Candidate(0, raceStartTime, 1);
         end = new Candidate(
                 race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null,
@@ -66,8 +66,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace() != raceStartTime) {
-            raceStartTime = race.getStartOfRace();
+        if (race.getStartOfRace().minus(2000) != raceStartTime) {
+            raceStartTime = race.getStartOfRace().minus(2000);
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);
             }

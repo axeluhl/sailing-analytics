@@ -22,6 +22,7 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
 
     @Override
     protected void testRace() {
+        CandidateChooser.strictness = 210;
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
 
@@ -39,8 +40,7 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            finder.calculateFixesAffectedByNewCompetitorFixes(c, fixes);
-            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c));
+            chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c, fixes));
         //    System.out.println("\n"+c);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst=false;
@@ -60,5 +60,6 @@ public class OBMRStartOfRaceTest extends OBMRMarkPassingTest {
             }
         } 
         Assert.assertTrue(mistakes==0);
+        CandidateChooser.strictness = 290;
     }
 }
