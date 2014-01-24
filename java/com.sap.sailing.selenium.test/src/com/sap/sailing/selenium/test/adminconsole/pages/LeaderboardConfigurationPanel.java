@@ -118,7 +118,10 @@ public class LeaderboardConfigurationPanel extends PageArea {
         }
     }
 
-
+    public TrackedRacesPanel getTrackedRacesPanel() {
+        return new TrackedRacesPanel(driver, findElementBySeleniumId(context, "TrackedRaces"));
+    }
+    
     private CellTable getRaceColumnsTable() {
         return new CellTable(this.driver, findElementBySeleniumId(this.driver, "RaceColumnTable"));
     }

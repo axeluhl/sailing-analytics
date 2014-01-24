@@ -1,18 +1,18 @@
 package com.sap.sailing.selenium.test.adminconsole.pages;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+
+
+
 //import org.openqa.selenium.support.FindBy;
 //import org.openqa.selenium.support.How;
-
-import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
-
+import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.test.PageArea;
 
 /**
@@ -34,9 +34,13 @@ public class TracTracEventManagementPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "ListRaces")
     private WebElement listRacesButton;
     
-    @FindBy(how = BySeleniumId.class, using = "FilterRaces")
-    private WebElement filterTrackableRacesField;
-    
+    @FindBy(how = BySeleniumId.class, using = "TrackableRacesSection")
+    private WebElement startTrackingPanel;
+
+    @FindBy(how = BySeleniumId.class, using = "TrackedRaces")
+    private WebElement trackedRacesPanel;
+
+
 //    private WebElement trackWindCheckBox;
 //    private WebElement correctWindCheckbox;
 //    private WebElement simulateWithNowCheckbox;
@@ -66,10 +70,13 @@ public class TracTracEventManagementPanel extends PageArea {
         jsonURLField.clear();
         jsonURLField.sendKeys(url);
         listRacesButton.click();
-        
         waitForAjaxRequests();
     }
     
+    public TracTracStartTrackingPanel getStartTrackingPanel() {
+        return new TracTracStartTrackingPanel(driver, startTrackingPanel);
+    }
+
     /**
      * <p>Returns the list of all available trackable races. This list will be empty if no race is available or if no
      *   race was specified before.</p>
@@ -77,33 +84,9 @@ public class TracTracEventManagementPanel extends PageArea {
      * @return
      *   The list of all available trackable races.
      */
-    // QUESTION: Should we return something different instead of WebElements since it is not recommended to do so?
     public List<WebElement> getTrackableRaces() {
-        WebElement availableRacesTabel = findElementBySeleniumId(this.context, "RacesTable"); //$NON-NLS-1$
-        List<WebElement> elements = availableRacesTabel.findElements(By.xpath("./tbody/tr")); //$NON-NLS-1$
-        Iterator<WebElement> iterator = elements.iterator();
-        
-        while(iterator.hasNext()) {
-            WebElement element = iterator.next();
-            
-            if(!element.isDisplayed())
-                iterator.remove();
-        }
-        
-        return elements;
+        return getStartTrackingPanel().getTrackableRaces();
     }
-    
-//    public List<String> getAvailableReggatasForTracking() {
-//        
-//    }
-//    
-//    public String getReggataForTracking() {
-//        
-//    }
-//    
-//    public void setReggataForTracking(String regatta) {
-//        
-//    }
     
     /**
      * <p>Sets the filter for the trackable races. After the filter is set you can obtain the new resulting list via
@@ -113,27 +96,33 @@ public class TracTracEventManagementPanel extends PageArea {
      *   The filter to apply to the trackable races.
      */
     public void setFilterForTrackableRaces(String filter) {
-        this.filterTrackableRacesField.clear();
-        this.filterTrackableRacesField.sendKeys(filter);
+        getStartTrackingPanel().setFilterForTrackableRaces(filter);
     }
     
-//    public void setTrackSettings(boolean trackWind, boolean correctWind, boolean simulateWithNow) {
-//        setSelection(this.trackWindCheckBox, trackWind);
-//        setSelection(this.correctWindCheckbox, correctWind);
-//        setSelection(this.simulateWithNowCheckbox, simulateWithNow);
-//    }
-//    
-//    public void startTrackingForRace() {
-//        
-//    }
-//    
-//    public void startTrackingForRaces() {
-//        
-//    }
-//    
-//    private void setSelection(WebElement checkbox, boolean selected) {
-//        WebElement input = checkbox.findElement(By.tagName("input"));
-//        if(input.isSelected() != selected)
-//            input.click();
-//    }
+    public void startTracking(String regattaName, String raceName) {
+        getStartTrackingPanel().startTracking(regattaName, raceName);
+    }
+    
+    public void waitForTrackedRaceLoadingFinished(String regattaName, String raceName, long timeoutInMillis) throws InterruptedException {
+        waitForAjaxRequests(); // wait for the Start Tracking request to succeed; then check Tracked races table and keep refreshing until we time out
+        TrackedRacesPanel trp = getTrackedRacesPanel();
+        long started = System.currentTimeMillis();
+        WebElement raceRow = trp.getTrackedRace(regattaName, raceName);
+        while ((raceRow == null || "TRACKING".equals(raceRow.findElements(By.tagName("td")).get(6).getText()))
+                && System.currentTimeMillis()-started < timeoutInMillis) {
+            Thread.sleep(2000); // wait 2s for the race to appear
+            trp.refresh();
+            raceRow = trp.getTrackedRace(regattaName, raceName);
+        }
+    }
+
+    private TrackedRacesPanel getTrackedRacesPanel() {
+        return new TrackedRacesPanel(driver, trackedRacesPanel);
+    }
+
+    public void stopTracking(String regattaName, String raceName) {
+        final TrackedRacesPanel trp = getTrackedRacesPanel();
+        trp.getTrackedRace(regattaName, raceName).click();
+        trp.stopTracking();
+    }
 }
