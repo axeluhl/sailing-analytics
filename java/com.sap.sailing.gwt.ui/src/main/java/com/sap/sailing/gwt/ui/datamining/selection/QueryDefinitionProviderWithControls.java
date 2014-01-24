@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.SimpleQueryDefinition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticsManager;
 
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
 
@@ -35,7 +34,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private SelectionProvider<?> selectionProvider;
     
-    private StatisticsManager statisticsManager;
     private StatisticProvider statisticProvider;
 
     private GroupingProvider groupBySelectionPanel;
@@ -52,7 +50,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
                 }
             }
         };
-        statisticsManager = SimpleStatisticsManager.createManagerWithStandardStatistics();
 
         mainPanel.add(createFunctionsPanel());
 
@@ -104,14 +101,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         HorizontalPanel functionsPanel = new HorizontalPanel();
         functionsPanel.setSpacing(5);
 
-        Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
-        clearSelectionButton.addClickHandler(new ClickHandler() {
+        statisticProvider = new ComplexStatisticProvider(getStringMessages(), SimpleStatisticsManager.createManagerWithStandardStatistics());
+        statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
-            public void onClick(ClickEvent event) {
-                selectionProvider.clearSelection();
+            public void statisticChanged() {
+                notifyQueryDefinitionChanged();
             }
         });
-        functionsPanel.add(clearSelectionButton);
+        functionsPanel.add(statisticProvider.getEntryWidget());
 
         groupBySelectionPanel = new RestrictedGroupingProvider(getStringMessages());
         groupBySelectionPanel.addGroupingChangedListener(new GroupingChangedListener() {
@@ -122,14 +119,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         });
         functionsPanel.add(groupBySelectionPanel.getEntryWidget());
 
-        statisticProvider = new ComplexStatisticProvider(getStringMessages(), statisticsManager);
-        statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
+        Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
+        clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
-            public void statisticChanged() {
-                notifyQueryDefinitionChanged();
+            public void onClick(ClickEvent event) {
+                selectionProvider.clearSelection();
             }
         });
-        functionsPanel.add(statisticProvider.getEntryWidget());
+        functionsPanel.add(clearSelectionButton);
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);

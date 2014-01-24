@@ -148,12 +148,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
         // TODO Auto-generated method stub
         return null;

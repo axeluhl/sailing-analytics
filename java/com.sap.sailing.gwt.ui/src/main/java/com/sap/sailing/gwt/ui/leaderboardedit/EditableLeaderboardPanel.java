@@ -382,7 +382,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         @Override
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
-            return "("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
+            String result = "";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsUncorrected != null) {
+                result="("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
+            }
+            return result;
         }
     }
 

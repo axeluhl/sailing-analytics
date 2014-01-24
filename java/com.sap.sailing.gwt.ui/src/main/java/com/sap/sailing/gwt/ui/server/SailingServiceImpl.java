@@ -3454,8 +3454,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition); 
-        return query.run(getService());
+        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition, getService()); 
+        return query.run();
     }
     
     @Override

@@ -10,17 +10,17 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.WorkReceiver;
-import com.sap.sailing.datamining.impl.AbstractExtractionWorker;
 import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
+import com.sap.sailing.datamining.test.util.StringLengthExtractor;
 
 public class TestExtractors {
 
     @Test
     public void testAbstractExtractor() {
-        ExtractionWorker<String, Integer> lengthExtractor = new LengthExtractor();
-        DataReceiver receiver = new DataReceiver();
+        ExtractionWorker<String, Integer> lengthExtractor = new StringLengthExtractor();
+        OpenDataReceiver<Map<GroupKey, Collection<Integer>>> receiver = new OpenDataReceiver<Map<GroupKey, Collection<Integer>>>();
         lengthExtractor.setReceiver(receiver);
         
         Collection<String> dataEntries = Arrays.asList("Fu", "Bar", "Blub");
@@ -34,26 +34,6 @@ public class TestExtractors {
         expectedExtractedData.put(new GenericGroupKey<Integer>(100), expectedExtractedDataEntries);
         lengthExtractor.run();
         assertEquals(expectedExtractedData, receiver.result);
-    }
-    
-    private class LengthExtractor extends AbstractExtractionWorker<String, Integer> {
-
-        @Override
-        public Integer extract(String dataEntry) {
-            return dataEntry.length();
-        }
-
-    }
-    
-    private class DataReceiver implements WorkReceiver<Map<GroupKey, Collection<Integer>>> {
-
-        public Map<GroupKey, Collection<Integer>> result;
-
-        @Override
-        public void receiveWork(Map<GroupKey, Collection<Integer>> result) {
-            this.result = result;
-        }
-        
     }
 
 }
