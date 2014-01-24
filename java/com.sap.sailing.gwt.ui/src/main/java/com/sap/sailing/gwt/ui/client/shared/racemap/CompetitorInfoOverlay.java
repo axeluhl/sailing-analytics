@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
@@ -28,6 +29,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     private int canvasWidth;
     private int canvasHeight;
+    private int infoBoxHeight = 20;
 
     private Color competitorColor; 
 
@@ -48,10 +50,12 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             Context2d ctx = getCanvas().getContext2d();
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
-            // Don't delete: this is a method to find out the length of a text in pixel 
-            // ctx.setFont("12px bold Verdana sans-serif");
-            // TextMetrics measureText = ctx.measureText(infoText);
-            // double textWidth = measureText.getWidth();
+            ctx.setFont("12px bold Verdana sans-serif");
+            TextMetrics measureText = ctx.measureText(infoText);
+            double textWidth = measureText.getWidth();
+
+            canvasWidth = (int) textWidth + 10 + infoBoxHeight;
+            setCanvasSize(canvasWidth, canvasHeight);
 
             ctx.save();
             ctx.clearRect(0,  0,  canvasWidth, canvasHeight);
@@ -74,20 +78,20 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.moveTo(1.33,0.787);
-            ctx.lineTo(90.6,0.787);
-            ctx.lineTo(72.9,18.5);
-            ctx.lineTo(1.33,18.5);
+            ctx.moveTo(1.0,1.0);
+            ctx.lineTo(canvasWidth,1.0);
+            ctx.lineTo(canvasWidth-infoBoxHeight,infoBoxHeight);
+            ctx.lineTo(1.0,infoBoxHeight);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
             
             // show a second measure
 //            ctx.beginPath();
-//            ctx.moveTo(1.33,26.4);
+//            ctx.moveTo(1.0,26.4);
 //            ctx.lineTo(66.2,26.4);
 //            ctx.lineTo(53.1,39.3);
-//            ctx.lineTo(1.33,39.3);
+//            ctx.lineTo(1.0,39.3);
 //            ctx.closePath();
 //            ctx.fill();
 //            ctx.stroke();
