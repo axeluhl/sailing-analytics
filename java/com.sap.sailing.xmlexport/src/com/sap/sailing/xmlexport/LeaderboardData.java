@@ -447,7 +447,6 @@ public class LeaderboardData extends ExportAction {
         }
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(legElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
-        log.info("Exported leg " + trackedLeg.getTrackedRace().getRace().getName() + ":" + legCounter + " in " + elapsedTime.asMillis() + " milliseconds");
         return legElement;
     }
     
