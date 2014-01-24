@@ -180,6 +180,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
         addNamedElementWithValue(raceElement, "fleet_name", fleet.getName());
         addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
+        addNamedElementWithValue(raceElement, "is_live", race.isLive(MillisecondsTimePoint.now()) ? "true" : "false");
         
         addNamedElementWithValue(raceElement, "start_type", race.getTrackedLeg(race.getRace().getCourse().getFirstLeg()).getLegType(race.getStartOfRace()).name());
         addNamedElementWithValue(raceElement, "delay_to_live_in_millis", race.getDelayToLiveInMillis());
@@ -187,6 +188,13 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "timepoint_of_last_event_as_millis", handleValue(race.getTimePointOfLastEvent()));
         addNamedElementWithValue(raceElement, "timepoint_of_newest_event_as_millis", handleValue(race.getTimePointOfNewestEvent()));
         addNamedElementWithValue(raceElement, "timepoint_of_oldest_event_as_millis", handleValue(race.getTimePointOfOldestEvent()));
+        
+        if (race.isLive(MillisecondsTimePoint.now())) {
+            // we can't tell meaningful values about live races
+            raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
+            raceElement.addContent(legs);
+            return raceElement;
+        }
         
         raceElement.addContent(createTimedXML("start_time_", race.getStartOfRace()));
         raceElement.addContent(createTimedXML("end_time_", race.getEndOfRace()));
@@ -357,6 +365,9 @@ public class LeaderboardData extends ExportAction {
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
         legElement.addContent(createDataConfidenceXML(legConfidenceAndErrorMessages));
+        if (trackedLeg.getTrackedRace().isLive(MillisecondsTimePoint.now())) {
+            return legElement;
+        }
         addNamedElementWithValue(legElement, "position", legCounter);
         addNamedElementWithValue(legElement, "mark_from", leg.getFrom().getName());
         addNamedElementWithValue(legElement, "mark_to", leg.getTo().getName());
@@ -495,6 +506,9 @@ public class LeaderboardData extends ExportAction {
             messages.add("End tracking time of race " + race.getRaceIdentifier().getRaceName() + " is either null or not valid!");
             simpleConfidence -= 0.2;
         }
+        if (race.isLive(MillisecondsTimePoint.now())) {
+            messages.add("This race is live - data for this race will not be available until the race has been finished!");
+        }
         return new Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
@@ -582,14 +596,12 @@ public class LeaderboardData extends ExportAction {
             competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
         
-        TrackedRace raceBefore = null; int sameDayGroupIndex = 0;
+        TrackedRace raceBefore = null; int sameDayGroupIndex = 0; int raceCounter = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
-                int raceCounter = 0;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
-                    raceCounter++;
                     Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
@@ -597,7 +609,7 @@ public class LeaderboardData extends ExportAction {
                         Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
                         legs.add(createLegXML(leg, leaderboard, ++legCounter, raceConfidenceAndErrorMessages, legConfidenceAndErrorMessages));
                     }
-                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, raceCounter, raceConfidenceAndErrorMessages));
+                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages));
                     raceBefore = trackedRace;
                 }
             }
