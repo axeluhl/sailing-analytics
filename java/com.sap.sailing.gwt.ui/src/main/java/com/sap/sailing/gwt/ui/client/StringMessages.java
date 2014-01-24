@@ -941,7 +941,8 @@ public interface StringMessages extends Messages {
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);
     String resultFromIgtimiWindImport(String string);
-    String countDownInMillis(String timeToStartInFractionalSeconds);
+    String timeToStart(String timeToStart);
+    String timeSinceStart(String timeSince);
     String distanceToLine();
     String beatAngleTooltip();
     String beatAngle();

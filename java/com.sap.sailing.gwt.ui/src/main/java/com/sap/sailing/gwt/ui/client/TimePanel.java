@@ -47,6 +47,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Label timeDelayLabel;
     private final Label timeLabel;
     private final Label dateLabel;
+    private final Label timeToStartLabel;
+    private final FlowPanel timeToStartControlPanel;
     private final Label playModeLabel;
     protected final TimeSlider timeSlider;
     private final Button backToLivePlayButton;
@@ -186,10 +188,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timeControlPanel.add(dateLabel);
         timeControlPanel.add(timeLabel);
         
-        dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         dateLabel.getElement().setClassName("dateLabel");
-        timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeLabel.getElement().setClassName("timeLabel");
+
+        // time to start control
+        timeToStartControlPanel = new FlowPanel();
+        timeToStartControlPanel.setStyleName("timePanel-controls-timeToStart");
+        timeToStartLabel = new Label();
+        timeToStartControlPanel.add(timeToStartLabel);
+        timeToStartLabel.getElement().setClassName("timeToStartLabel");
         
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
@@ -276,11 +283,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         setWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
-        
         controlsPanel.add(playSpeedControlPanel);
         controlsPanel.add(playModeControlPanel );
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
+        controlsPanel.add(timeToStartControlPanel);
     }
 
     @Override
@@ -309,6 +316,18 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         }
         dateLabel.setText(getDateLabelText(time));
         timeLabel.setText(getTimeLabelText(time));
+        String timeToStartLabelText = getTimeToStartLabelText(time);
+        if(timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
+            timeToStartControlPanel.setVisible(true);
+            timeToStartLabel.setText(getTimeToStartLabelText(time));
+        } else {
+            timeToStartControlPanel.setVisible(false);
+            timeToStartLabel.setText("");
+        }
+    }
+
+    protected String getTimeToStartLabelText(Date time) {
+        return null;
     }
 
     protected String getTimeLabelText(Date time) {

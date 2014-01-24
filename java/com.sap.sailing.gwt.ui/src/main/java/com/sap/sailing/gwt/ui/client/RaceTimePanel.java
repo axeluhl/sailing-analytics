@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
@@ -29,17 +30,20 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     /**
-     * If the race's start time is already known and the <code>time</code> is before the start, append a count-down to the label
+     * If the race's start time is already known and the <code>time</code> is before the start we can set the count-down label
      */
     @Override
-    protected String getTimeLabelText(Date time) {
-        final String result;
+    protected String getTimeToStartLabelText(Date time) {
+        String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
-        if (selectedRaceTimes.startOfRace != null && time.before(selectedRaceTimes.startOfRace)) {
-            result = super.getTimeLabelText(time) + ", " + stringMessages.countDownInMillis(
-                    NumberFormat.getFormat("0.00").format(((double) selectedRaceTimes.startOfRace.getTime()-time.getTime()) / 1000.));
-        } else {
-            result = super.getTimeLabelText(time);
+        if (selectedRaceTimes.startOfRace != null) {
+            if(time.before(selectedRaceTimes.startOfRace)) {
+                String timeToStartInSeconds = NumberFormat.getFormat("0.0").format(((double) selectedRaceTimes.startOfRace.getTime()-time.getTime()) / 1000.) + "s";
+                result = stringMessages.timeToStart(timeToStartInSeconds);
+            } else if(time.after(selectedRaceTimes.startOfRace)) {
+                long timeSinceStartInMs = time.getTime() - selectedRaceTimes.startOfRace.getTime();
+                result = stringMessages.timeSinceStart(DateAndTimeFormatterUtil.formatElapsedTime(timeSinceStartInMs));
+            }
         }
         return result;
     }
