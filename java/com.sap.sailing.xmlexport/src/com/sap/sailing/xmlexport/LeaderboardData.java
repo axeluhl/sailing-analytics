@@ -170,7 +170,6 @@ public class LeaderboardData extends ExportAction {
     }
     
     private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
-        TimePoint timeSpent = MillisecondsTimePoint.now();
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
@@ -290,9 +289,6 @@ public class LeaderboardData extends ExportAction {
         
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         raceElement.addContent(legs);
-        TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
-        addNamedElementWithValue(raceElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
-        log.info("Exported race " + race.getRace().getName() + " in " + elapsedTime.asMillis() + " milliseconds");
         return raceElement;
     }
     
@@ -370,7 +366,6 @@ public class LeaderboardData extends ExportAction {
         competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
-        log.info("Exported competitor " + competitor.getName() + " in " + elapsedTime.asMillis() + " milliseconds");
         return competitorElement;
     }
     
@@ -622,6 +617,7 @@ public class LeaderboardData extends ExportAction {
                 sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
+                    TimePoint timeSpentForRace = MillisecondsTimePoint.now();
                     Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
@@ -629,7 +625,11 @@ public class LeaderboardData extends ExportAction {
                         Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
                         legs.add(createLegXML(leg, leaderboard, ++legCounter, raceConfidenceAndErrorMessages, legConfidenceAndErrorMessages));
                     }
-                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages));
+                    Element raceElement = createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages);
+                    TimePoint elapsedTimeForRace = MillisecondsTimePoint.now().minus(timeSpentForRace.asMillis());
+                    addNamedElementWithValue(raceElement, "generation_time_in_milliseconds", elapsedTimeForRace.asMillis());
+                    racesElements.add(raceElement);
+                    log.info("Exported complete race " + trackedRace.getRace().getName() + " in " + timeSpentForRace.asMillis() + " milliseconds!");
                     raceBefore = trackedRace;
                 }
             }
