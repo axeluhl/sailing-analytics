@@ -34,7 +34,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     private int infoBoxWidth;
     private double cornerRadius;
 
-    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText, RaceMapImageManager raceMapImageManager) {
+    public SmallTransparentInfoOverlay(MapWidget map, int zIndex, String infoText) {
         super(map, zIndex);
         this.infoText = infoText;
         canvasWidth = 20;
@@ -49,6 +49,8 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
+
+//        setCanvasSize(canvasWidth, canvasHeight);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
     }
 
     /**
-     * @param position the new psoition of the overlay
+     * @param position the new position of the overlay
      * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
      */
 
@@ -126,6 +128,5 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
      */
     public void setInfoText(String infoText) {
         this.infoText = infoText;
-        draw();
     }
 }
