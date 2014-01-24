@@ -180,7 +180,6 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
         addNamedElementWithValue(raceElement, "fleet_name", fleet.getName());
         addNamedElementWithValue(raceElement, "same_day_index", sameDayGroupIndex);
-        raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         
         addNamedElementWithValue(raceElement, "start_type", race.getTrackedLeg(race.getRace().getCourse().getFirstLeg()).getLegType(race.getStartOfRace()).name());
         addNamedElementWithValue(raceElement, "delay_to_live_in_millis", race.getDelayToLiveInMillis());
@@ -244,6 +243,7 @@ public class LeaderboardData extends ExportAction {
                 // we do not want to include competitors that did not start the race
                 competitorElement.addContent(competitorRaceDataElement);
                 raceElement.addContent(competitorElement);
+                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid data for this race!");
                 continue;
             }
             int[] timePointsInSecondsBeforeStart = new int[]{5, 10, 20, 30};
@@ -260,6 +260,9 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "start_advantage_in_meters", start.getAdvantage().getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "advantageous_side_while_approaching_start_line", start.getAdvantageousSideWhileApproachingLine().name());
             Distance distanceTraveledInThisRace = race.getDistanceTraveled(competitor, race.getEndOfRace());
+            if (distanceTraveledInThisRace == null) {
+                raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid distance traveled for this race!");
+            }
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_in_meters", distanceTraveledInThisRace == null ? 0.0 : distanceTraveledInThisRace.getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_including_non_finished_legs_in_meters", getDistanceTraveled(race, competitor, race.getEndOfRace(), /*alsoReturnDistanceIfCompetitorHasNotFinishedRace*/ true).getMeters());
             Speed averageSpeedOverGround = getAverageSpeedOverGround(race, competitor, race.getEndOfRace(), true);
@@ -269,6 +272,7 @@ public class LeaderboardData extends ExportAction {
             if (trackedLegOfCompetitor != null && trackedLegOfCompetitor.getFinishTime() != null) {
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", trackedLegOfCompetitor.getRank(trackedLegOfCompetitor.getFinishTime()));
             } else {
+                raceConfidenceAndErrorMessages.getB().add("It seems that competitor " + competitor.getName() + " has not finished first leg!");
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", 0);
             }
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
@@ -280,6 +284,7 @@ public class LeaderboardData extends ExportAction {
             raceElement.addContent(competitorElement);
         }
         
+        raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         raceElement.addContent(legs);
         log.info("Done with XML for race " + race.getRace().getName());
         return raceElement;
@@ -537,7 +542,7 @@ public class LeaderboardData extends ExportAction {
             simpleConfidence -= 1.0;
         }
         TimePoint dateAtYear2000 = new MillisecondsTimePoint(946681200000l);
-        if (leaderboard.getTimePointOfLatestModification().before(dateAtYear2000)) {
+        if (leaderboard.getTimePointOfLatestModification() != null && leaderboard.getTimePointOfLatestModification().before(dateAtYear2000)) {
             messages.add("The time point of the last modification for this leaderboard is very old.");
             simpleConfidence -= 0.4;
         }
