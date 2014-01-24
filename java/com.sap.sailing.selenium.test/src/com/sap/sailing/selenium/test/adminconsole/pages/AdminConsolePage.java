@@ -146,6 +146,11 @@ public class AdminConsolePage extends HostPage {
             driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         }
         logger.log(Level.INFO, String.format("Scrolled %d times left", 20 - maxScrollActions));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // wait until tab is really available for clicking
         tab.click();
         // Wait for the tab to become visible due to the used animations.
         wait.withTimeout(30, TimeUnit.SECONDS);

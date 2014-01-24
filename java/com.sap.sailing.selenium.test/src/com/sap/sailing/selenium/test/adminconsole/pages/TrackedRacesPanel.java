@@ -24,7 +24,7 @@ public class TrackedRacesPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "UntrackRace")
     private WebElement stopTrackingButton;
     
-    @FindBy(how = BySeleniumId.class, using = "TrackedRaces")
+    @FindBy(how = BySeleniumId.class, using = "TrackedRacesTable")
     private WebElement trackedRacesTable;
     
     public TrackedRacesPanel(WebDriver driver, WebElement element) {

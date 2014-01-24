@@ -126,7 +126,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
