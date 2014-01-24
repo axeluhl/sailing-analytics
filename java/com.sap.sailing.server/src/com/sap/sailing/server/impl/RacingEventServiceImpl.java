@@ -866,21 +866,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     }
                     trackers.add(tracker);
                 }
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it
-                // in EventImpl constructor
+                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
                 String regattaName = tracker.getRegatta().getName();
                 Regatta regattaWithName = regattasByName.get(regattaName);
-                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it
-                // in
-                // EventImpl constructor
+                // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
                 if (regattaWithName != null) {
                     if (regattaWithName != tracker.getRegatta()) {
                         if (Util.isEmpty(regattaWithName.getAllRaces())) {
                             // probably, tracker removed the last races from the old regatta and created a new one
+                            regattasByName.remove(regattaName);
                             cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                         } else {
-                            throw new RuntimeException("Internal error. Two Event objects with equal name "
-                                    + regattaName);
+                            throw new RuntimeException("Internal error. Two Event objects with equal name " + regattaName);
                         }
                     }
                 } else {
