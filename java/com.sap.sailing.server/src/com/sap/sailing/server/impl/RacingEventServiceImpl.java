@@ -876,8 +876,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             // probably, tracker removed the last races from the old regatta and created a new one
                             cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                         } else {
-                            throw new RuntimeException("Internal error. Two Event objects with equal name "
-                                    + regattaName);
+                            throw new RuntimeException("Internal error. Two Event objects with equal name " + regattaName);
                         }
                     }
                 } else {
