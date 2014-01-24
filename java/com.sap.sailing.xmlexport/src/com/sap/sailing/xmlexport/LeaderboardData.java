@@ -340,7 +340,8 @@ public class LeaderboardData extends ExportAction {
             if (averageSpeed == null) {
                 competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
             }
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true).getKnots());
+            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
+            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
@@ -360,7 +361,8 @@ public class LeaderboardData extends ExportAction {
             if (averageSpeed == null) {
                 competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
             }
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, now, true).getKnots());
+            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, now, true);
+            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
