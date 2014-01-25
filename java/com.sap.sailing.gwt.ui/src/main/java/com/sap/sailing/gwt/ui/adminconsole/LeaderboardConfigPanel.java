@@ -435,6 +435,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
+        trackedRacesListComposite.ensureDebugId("TrackedRaces");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
