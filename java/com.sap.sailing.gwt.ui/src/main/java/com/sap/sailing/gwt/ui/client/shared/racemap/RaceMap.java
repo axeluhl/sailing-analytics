@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
@@ -1525,7 +1526,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 timeChanged(timer.getTime());
             }
         }
-        //Trigger auto-zoom if needed
+        // Now update tails for all competitors because selection change may also affect all unselected competitors
+        for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
+            Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            if (tail != null) {
+                PolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                tail.setOptions(newOptions);
+            }
+        }
+        // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
@@ -1797,7 +1806,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
-        options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
+        boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
+        if (isHighlighted || noCompetitorSelected) {
+            options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
+        } else {
+            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
+        }
         if (isHighlighted) {
             options.setStrokeWeight(2);
         } else {
