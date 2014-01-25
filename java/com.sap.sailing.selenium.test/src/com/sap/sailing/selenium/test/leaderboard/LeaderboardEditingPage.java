@@ -28,9 +28,6 @@ public class LeaderboardEditingPage extends HostPage {
     @FindBy(how = BySeleniumId.class, using = "EditableLeaderboardPanel")
     private WebElement editableLeaderboardPanel;
     
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardTable")
-    private WebElement leaderboardTable;
-    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -50,7 +47,7 @@ public class LeaderboardEditingPage extends HostPage {
                 alert.accept();
             }
         } catch (NoAlertPresentException e) {
-            logger.log(Level.SEVERE, "Exception during switchTo", e);
+            logger.log(Level.INFO, "No alert message found; probably already logged in: "+e.getMessage());
         }
         return new LeaderboardEditingPage(driver);
     }
@@ -60,7 +57,7 @@ public class LeaderboardEditingPage extends HostPage {
     }
     
     public LeaderboardTable getLeaderboardTable() {
-        return new LeaderboardTable(this.driver, this.leaderboardTable);
+        return new LeaderboardTable(this.driver, findElementBySeleniumId(context, "LeaderboardTable"));
     }
     
     /**
@@ -68,7 +65,7 @@ public class LeaderboardEditingPage extends HostPage {
      */
     @Override
     protected void verify() {
-        if(!PAGE_TITLE.equals(this.driver.getTitle())) {
+        if (!PAGE_TITLE.equals(this.driver.getTitle())) {
             throw new IllegalStateException("This is not the administration console: " + this.driver.getTitle()); //$NON-NLS-1$
         }
     }
