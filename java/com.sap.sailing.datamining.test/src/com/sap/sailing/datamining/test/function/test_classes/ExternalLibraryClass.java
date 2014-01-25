@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.test.util;
+package com.sap.sailing.datamining.test.function.test_classes;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!

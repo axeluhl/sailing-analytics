@@ -7,9 +7,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -17,14 +14,13 @@ import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
+import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sailing.datamining.test.util.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
-public class TestSimpleFunctionRegistry {
+public class TestSimpleFunctionRegistryRegistrations {
     
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    //TODO Test that if SubTypeWithMarkedMethods is registered, that also the methods of SuperTypeWithMarkedMethods are registered
 
     @Test
     public void testSimpleRegistration() {
@@ -41,7 +37,7 @@ public class TestSimpleFunctionRegistry {
     }
     
     @Test
-    public void testRegistrationByMethodRetrievers() {
+    public void testRegistrationByFunctionRetrievers() {
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registerMethodsOfTestClassesViaFunctionRetrieversTo(registry);
 
@@ -55,12 +51,12 @@ public class TestSimpleFunctionRegistry {
     private void registerMethodsOfTestClassesViaFunctionRetrieversTo(FunctionRegistry registry) {
         Collection<Class<?>> classesToScan = new HashSet<>();
         classesToScan.add(SimpleClassWithMarkedMethods.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, executor);
+        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         registry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
         Collection<Class<?>> externalClasses = new HashSet<>();
         externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, executor);
+        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
         registry.registerFunctionsRetrievedBy(externalFunctionRetriever);
     }
     

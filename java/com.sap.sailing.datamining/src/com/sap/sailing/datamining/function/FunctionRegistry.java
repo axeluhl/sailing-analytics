@@ -12,7 +12,8 @@ public interface FunctionRegistry {
     public void registerAll(Iterable<Function> functions);
 
     public Iterable<Function> getAllRegisteredFunctions();
-    public Map<Class<?>, Collection<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass();
+    public Map<Class<?>, Iterable<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass();
     public Iterable<Function> getRegisteredFunctionsOf(Class<?> declaringClass);
+    public Collection<Function> getAllDimensions();
 
 }

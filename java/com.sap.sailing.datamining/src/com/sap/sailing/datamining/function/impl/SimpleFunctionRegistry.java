@@ -2,10 +2,10 @@ package com.sap.sailing.datamining.function.impl;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -19,10 +19,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     
     private static final Logger LOGGER = Logger.getLogger(SimpleFunctionRegistry.class.getName());
     
-    private final Map<Class<?>, Collection<Function>> registeredMethodsMappedByDeclaringClass;
+    private final Map<Class<?>, Collection<Function>> registeredFunctionsMappedByDeclaringClass;
+    private final Collection<Function> dimensions;
 
     public SimpleFunctionRegistry() {
-        registeredMethodsMappedByDeclaringClass = new HashMap<>();
+        registeredFunctionsMappedByDeclaringClass = new HashMap<>();
+        dimensions = new HashSet<>();
     }
     
     @Override
@@ -49,29 +51,50 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     
     @Override
     public void register(Function function) {
-        if (!registeredMethodsMappedByDeclaringClass.containsKey(function.getDeclaringClass())) {
-            registeredMethodsMappedByDeclaringClass.put(function.getDeclaringClass(), new HashSet<Function>());
+        putFunctionIntoMap(function);
+        addToDimensionsIfFunctionIsADimension(function);
+    }
+
+    private void addToDimensionsIfFunctionIsADimension(Function function) {
+        if (function.isDimension()) {
+            dimensions.add(function);
         }
-        registeredMethodsMappedByDeclaringClass.get(function.getDeclaringClass()).add(function);
+    }
+
+    private void putFunctionIntoMap(Function function) {
+        if (!registeredFunctionsMappedByDeclaringClass.containsKey(function.getDeclaringClass())) {
+            registeredFunctionsMappedByDeclaringClass.put(function.getDeclaringClass(), new HashSet<Function>());
+        }
+        registeredFunctionsMappedByDeclaringClass.get(function.getDeclaringClass()).add(function);
     }
     
     @Override
     public Iterable<Function> getAllRegisteredFunctions() {
         Set<Function> registeredMethods = new HashSet<>();
-        for (Collection<Function> registeredMethodsOfClass : registeredMethodsMappedByDeclaringClass.values()) {
+        for (Collection<Function> registeredMethodsOfClass : registeredFunctionsMappedByDeclaringClass.values()) {
             registeredMethods.addAll(registeredMethodsOfClass);
         }
         return registeredMethods;
     }
     
     @Override
-    public Map<Class<?>, Collection<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass() {
-        return Collections.unmodifiableMap(registeredMethodsMappedByDeclaringClass);
+    public Map<Class<?>, Iterable<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass() {
+        Map<Class<?>, Iterable<Function>> registeredFunctions = new HashMap<>();
+        for (Entry<Class<?>, Collection<Function>> registeredFunctionsEntry : registeredFunctionsMappedByDeclaringClass.entrySet()) {
+            Iterable<Function> functionsAsIterable = registeredFunctionsEntry.getValue();
+            registeredFunctions.put(registeredFunctionsEntry.getKey(), functionsAsIterable);
+        }
+        return registeredFunctions;
     }
     
     @Override
     public Iterable<Function> getRegisteredFunctionsOf(Class<?> declaringClass) {
-        return registeredMethodsMappedByDeclaringClass.get(declaringClass);
+        return registeredFunctionsMappedByDeclaringClass.get(declaringClass);
+    }
+    
+    @Override
+    public Collection<Function> getAllDimensions() {
+        return dimensions;
     }
 
 }

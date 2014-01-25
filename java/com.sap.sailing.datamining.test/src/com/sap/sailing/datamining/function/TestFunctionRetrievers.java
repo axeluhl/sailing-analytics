@@ -9,22 +9,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
 import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
+import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sailing.datamining.test.util.ExternalLibraryClass;
-import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 
 public class TestFunctionRetrievers {
-    
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     @Test
     public void testMarkedFunctionRetrievalWorker() {
@@ -58,7 +52,7 @@ public class TestFunctionRetrievers {
         classesToScan.add(SimpleClassWithMarkedMethods.class);
         assertThat("Not enough classes to scan for this test.", classesToScan.size(), greaterThanOrEqualTo(getMaximumWorkerAmount()));
         
-        ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , executor);
+        ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , FunctionTestsUtil.getExecutor());
 
         Collection<Function> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
         try {
@@ -70,7 +64,7 @@ public class TestFunctionRetrievers {
     }
 
     private int getMaximumWorkerAmount() {
-        return (int) (executor.getCorePoolSize() * 0.5);
+        return (int) (FunctionTestsUtil.getExecutor().getCorePoolSize() * 0.5);
     }
 
     private Collection<Class<?>> getManyClassesToScan() {

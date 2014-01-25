@@ -1,20 +1,39 @@
 package com.sap.sailing.datamining.function.impl;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
+import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.function.Function;
 
 public class MethodWrappingFunction implements Function {
 
     private Method method;
+    
+    private boolean isDimension;
 
     public MethodWrappingFunction(Method method) {
         this.method = method;
+        initializeIsDimension();
+    }
+
+    private void initializeIsDimension() {
+        isDimension = method.getAnnotation(Dimension.class) != null;
     }
 
     @Override
     public Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
+    }
+    
+    @Override
+    public Iterable<Class<?>> getParameters() {
+        return Arrays.asList(method.getParameterTypes());
+    }
+    
+    @Override
+    public boolean isDimension() {
+        return isDimension;
     }
 
     @Override
