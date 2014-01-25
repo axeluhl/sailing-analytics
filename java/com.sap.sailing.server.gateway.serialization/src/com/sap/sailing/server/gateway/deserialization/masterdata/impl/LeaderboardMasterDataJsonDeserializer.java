@@ -1,11 +1,14 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,6 +26,7 @@ import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.masterdata.impl.LeaderboardMasterDataJsonSerializer;
 
 public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<LeaderboardMasterData> {
@@ -46,13 +50,13 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         }
         String name = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_NAME);
         String displayName = (String) object.get(LeaderboardMasterDataJsonSerializer.FIELD_DISPLAY_NAME);
-        Map<String, String> displayNamesByCompetitorId = deserializeCompetitorDisplayNames((JSONArray) object
+        Map<Serializable, String> displayNamesByCompetitorId = deserializeCompetitorDisplayNames((JSONArray) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_DISPLAY_NAMES));
         ScoreCorrectionMasterData scoreCorrection = deserializeScoreCorrection((JSONObject) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_SCORE_CORRECTION));
-        Map<String, Double> carriedPoints = deserializeCarriedPoints((JSONArray) object
+        Map<Serializable, Double> carriedPoints = deserializeCarriedPoints((JSONArray) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_CARRIED_POINTS));
-        List<String> suppressedCompetitors = deserializeSuppressedCompetitors((JSONArray) object
+        List<Serializable> suppressedCompetitors = deserializeSuppressedCompetitors((JSONArray) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_SUPPRESSED_COMPETITORS));
         Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents = deserializeRaceLogEvents((JSONArray) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_RACE_LOG_EVENTS));
@@ -61,13 +65,13 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         boolean isRegattaLeaderBoard = (Boolean) object
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_REGATTA_LEADERBOARD);
 
-        Map<String, Competitor> competitorsById = new HashMap<String, Competitor>();
+        Map<Serializable, Competitor> competitorsById = new HashMap<Serializable, Competitor>();
         JSONArray competitorsJsonArray = (JSONArray) object.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITORS);
 
         for (Object obj : competitorsJsonArray) {
             JSONObject competitorJson = (JSONObject) obj;
             Competitor deserializedCompetitor = competitorDeserializer.deserialize(competitorJson);
-            competitorsById.put(deserializedCompetitor.getId().toString(), deserializedCompetitor);
+            competitorsById.put(deserializedCompetitor, deserializedCompetitor);
         }
         final LeaderboardMasterData result;
         if (isRegattaLeaderBoard) {
@@ -128,35 +132,82 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
         return logEvents;
     }
 
-    private Map<String, String> deserializeCompetitorDisplayNames(JSONArray jsonArray) {
-        Map<String, String> result = new HashMap<String, String>();
+    private Map<Serializable, String> deserializeCompetitorDisplayNames(JSONArray jsonArray) {
+        Map<Serializable, String> result = new HashMap<Serializable, String>();
         for (Object obj : jsonArray) {
             JSONObject json = (JSONObject) obj;
-            String id = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);
+            Serializable id;
+            try {
+                JSONObject object = (JSONObject) obj;
+                id = extractId(object);
+            } catch (Exception e) {
+                // Backward compability
+                id = (String) obj;
+            }
             String displayName = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_DISPLAY_NAME);
             result.put(id, displayName);
         }
         return result;
     }
 
-    public static List<String> deserializeSuppressedCompetitors(JSONArray jsonArray) {
-        List<String> ids = new ArrayList<String>();
+    public static List<Serializable> deserializeSuppressedCompetitors(JSONArray jsonArray) {
+        List<Serializable> ids = new ArrayList<Serializable>();
         if (jsonArray != null) {
             for (Object obj : jsonArray) {
-                ids.add((String) obj);
+                Serializable id;
+                try {
+                    JSONObject object = (JSONObject) obj;
+                    id = extractId(object);
+                } catch (Exception e) {
+                    // Backward compability
+                    id = (String) obj;
+                }
+                ids.add(id);
             }
         }
         return ids;
     }
 
-    private Map<String, Double> deserializeCarriedPoints(JSONArray jsonArray) {
-        Map<String, Double> carriedPoints = new HashMap<String, Double>();
+    private static Serializable extractId(JSONObject object) {
+        Serializable id;
+        Object idClassName = object.get(LeaderboardMasterDataJsonSerializer.FIELD_TYPE);
+        id = (Serializable) object.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);
+        if (idClassName != null) {
+            try {
+                Class<?> idClass = Class.forName((String) idClassName);
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    id = (Serializable) constructorFromString.newInstance(id.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    id = Helpers.tryUuidConversion(id);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            // To ensure some kind of a backward compability.
+            try {
+                id = UUID.fromString(id.toString());
+            } catch (IllegalArgumentException e) {
+                id = id.toString();
+            }
+        }
+        return id;
+    }
+
+    private Map<Serializable, Double> deserializeCarriedPoints(JSONArray jsonArray) {
+        Map<Serializable, Double> carriedPoints = new HashMap<Serializable, Double>();
         for (Object obj : jsonArray) {
             JSONObject jsonCarriedPoints = (JSONObject) obj;
-            String competitorId = (String) jsonCarriedPoints
-                    .get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);
+            Serializable id;
+            try {
+                id = extractId(jsonCarriedPoints);
+            } catch (Exception e) {
+                // Backward compability
+                id = (String) obj;
+            }
             Double carried = (Double) jsonCarriedPoints.get(LeaderboardMasterDataJsonSerializer.FIELD_CARRIED);
-            carriedPoints.put(competitorId, carried);
+            carriedPoints.put(id, carried);
         }
         return carriedPoints;
     }
@@ -192,7 +243,7 @@ public class LeaderboardMasterDataJsonDeserializer implements JsonDeserializer<L
     }
 
     private SingleScoreCorrectionMasterData deserializeScoreCorrectionForCompetitor(JSONObject json) {
-        String competitorId = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_COMPETITOR_ID);
+        Serializable competitorId = extractId(json);
         Double explicitScoreCorrection = ((Double) json
                 .get(LeaderboardMasterDataJsonSerializer.FIELD_EXPLICIT_SCORE_CORRECTION));
         String maxPointsReason = (String) json.get(LeaderboardMasterDataJsonSerializer.FIELD_MAX_POINTS_REASON);
