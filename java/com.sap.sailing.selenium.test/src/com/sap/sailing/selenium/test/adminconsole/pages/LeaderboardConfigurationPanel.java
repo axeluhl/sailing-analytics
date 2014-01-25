@@ -62,21 +62,16 @@ public class LeaderboardConfigurationPanel extends PageArea {
     public void deleteLeaderboard(String leaderboard) {
         CellTable table = getLeaderboardTable();
         List<WebElement> rows = table.getRows();
-        
-        for(WebElement row : rows) {
+        for (WebElement row : rows) {
             WebElement name = row.findElement(By.xpath(".//td/div/a"));
-            
-            if(!leaderboard.equals(name.getText()))
-                continue;
-            
-            WebElement removeAction = row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
-            
-            removeAction.click();
-            
-            this.driver.switchTo().alert().accept();
+            if (leaderboard.equals(name.getText())) {
+                WebElement removeAction = row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
+                removeAction.click();
+                this.driver.switchTo().alert().accept();
+            }
         }
     }
-    
+
     public FlexibleLeaderboardCreationDialog startCreatingFlexibleLeaderboard() {
         this.createFlexibleLeaderboardButton.click();
         // Wait, since we trigger an AJAX-request to get the available events

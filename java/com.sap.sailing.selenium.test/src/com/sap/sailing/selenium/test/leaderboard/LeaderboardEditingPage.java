@@ -25,6 +25,12 @@ public class LeaderboardEditingPage extends HostPage {
     
     private static final Logger logger = Logger.getLogger(LeaderboardEditingPage.class.getName());
 
+    @FindBy(how = BySeleniumId.class, using = "EditableLeaderboardPanel")
+    private WebElement editableLeaderboardPanel;
+    
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardTable")
+    private WebElement leaderboardTable;
+    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -46,29 +52,8 @@ public class LeaderboardEditingPage extends HostPage {
         } catch (NoAlertPresentException e) {
             logger.log(Level.SEVERE, "Exception during switchTo", e);
         }
-        // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
-//        FluentWait<WebDriver> wait = new FluentWait<>(driver);
-//        wait.withTimeout(5, TimeUnit.SECONDS);
-//        wait.pollingEvery(100, TimeUnit.MILLISECONDS);
-//        
-//        Alert alert = wait.until(new Function<WebDriver, Alert>() {
-//            @Override
-//            public Alert apply(WebDriver context) {
-//                TargetLocator locator = context.switchTo();
-//                
-//                return locator.alert();
-//            }
-//        });
-//        alert.authenticateUsing(new UserAndPassword("user", "password"));
-        
         return new LeaderboardEditingPage(driver);
     }
-    
-    @FindBy(how = BySeleniumId.class, using = "EditableLeaderboardPanel")
-    private WebElement editableLeaderboardPanel;
-    
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardTable")
-    private WebElement leaderboardTable;
     
     private LeaderboardEditingPage(WebDriver driver) {
         super(driver);

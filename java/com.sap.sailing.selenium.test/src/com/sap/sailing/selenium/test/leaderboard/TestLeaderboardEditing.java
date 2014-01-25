@@ -1,12 +1,15 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sailing.selenium.test.adminconsole.pages.AdminConsolePage;
 import com.sap.sailing.selenium.test.adminconsole.pages.FlexibleLeaderboardCreationDialog;
@@ -27,6 +30,8 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         LeaderboardEditingPage page = LeaderboardEditingPage.goToPage(leaderboardName, getWebDriver(), getContextRoot());
         LeaderboardTable table = page.getLeaderboardTable();
         assertNotNull(table);
+        Iterable<WebElement> rows = table.getRows();
+        assertEquals("Expected 6 rows for the six competitors but found only "+Util.size(rows), 6, Util.size(rows));
     }
 
     private void createNewLeaderboardLoadRaceAndLink(String leaderboardName) throws InterruptedException {
