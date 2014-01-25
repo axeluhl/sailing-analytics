@@ -28,10 +28,10 @@ public abstract class AbstractPartitioningParallelFunctionRetriever
     @Override
     protected void setUpWorkersFor(Void data) {
         final int workerAmount = calculateMaximumAmountOfWorkers();
-        final int partitionSize = calculatePartitionSize(workerAmount);
         if (workerAmount >= classesToScan.size()) {
             simpleWorkerSetUp();
         } else {
+            final int partitionSize = calculatePartitionSize(workerAmount);
             partitioningWorkerSetUp(partitionSize);
         }
     }

@@ -64,6 +64,19 @@ public class TestSimpleFunctionRegistry {
         registry.registerFunctionsRetrievedBy(externalFunctionRetriever);
     }
     
-    //TODO Test the multiple registration of the same functions. It should be there only once 
+    @Test
+    public void testTheMultipleRegistrationOfTheSameFunction() {
+        Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
+        
+        FunctionRegistry registry = new SimpleFunctionRegistry();
+        registry.register(dimension);
+        registry.register(dimension);
+        registry.register(dimension);
+        
+        Set<Function> expectedRegisteredFunctionsAsSet = new HashSet<>();
+        expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction(dimension));
+        Iterable<Function> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
+        assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
+    }
 
 }
