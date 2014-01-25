@@ -38,7 +38,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         leaderboardConfiguration.selectLeaderboard(leaderboardName);
         leaderboardConfiguration.addRacesToFlexibleLeaderboard(2);
         leaderboardConfiguration.selectRaceColumn("R1", "Default");
-        leaderboardConfiguration.getTrackedRacesPanel().getTrackedRace(BMW_CUP_REGATTA, BMW_CUP_RACE_8).click(); // associates the race with the column
+        leaderboardConfiguration.getTrackedRacesPanel().getTrackedRace(BMW_CUP_REGATTA+" ("+BMW_CUP_BOAT_CLASS+")", BMW_CUP_RACE_8).click(); // associates the race with the column
     }
 
     private void startTrackingRaceAndWait(AdminConsolePage adminConsole, String bmwCupJsonUrl, String bmwCupRegatta, String bmwCupRace8, long l) throws InterruptedException {
