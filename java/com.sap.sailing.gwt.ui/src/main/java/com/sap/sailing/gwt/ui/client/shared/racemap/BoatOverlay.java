@@ -60,13 +60,11 @@ public class BoatOverlay extends CanvasOverlayV3 {
         if (mapProjection != null && boatFix != null) {
             // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
             int zoom = map.getZoom();
-
             Pair<Double, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.get(zoom);
-            if(boatScaleAndSize == null) {
+            if (boatScaleAndSize == null) {
                 boatScaleAndSize = getBoatScaleAndSize(boatClass);
                 boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
             }
-
             double boatSizeScaleFactor = boatScaleAndSize.getA();
             SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
             if (speedWithBearing == null) {
@@ -76,17 +74,13 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (boatDrawingAngle < 0) {
                 boatDrawingAngle += 360;
             }
-
             canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
             canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
             setCanvasSize(canvasWidth, canvasHeight);
-
             boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
                     canvasWidth, canvasHeight, boatDrawingAngle, boatSizeScaleFactor, color.getAsHtml());
-            
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
-            
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
         }
@@ -102,7 +96,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     public Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
-        double minBoatLength = 35;
+        double minBoatLength = 25;
 
         Size boatSizeInPixel = calculateBoundingBox(mapProjection,
                 LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg),
