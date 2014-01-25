@@ -629,7 +629,7 @@ public class LeaderboardData extends ExportAction {
                     TimePoint elapsedTimeForRace = MillisecondsTimePoint.now().minus(timeSpentForRace.asMillis());
                     addNamedElementWithValue(raceElement, "generation_time_in_milliseconds", elapsedTimeForRace.asMillis());
                     racesElements.add(raceElement);
-                    log.info("Exported complete race " + trackedRace.getRace().getName() + " in " + timeSpentForRace.asMillis() + " milliseconds!");
+                    log.info("Exported complete race " + trackedRace.getRace().getName() + " in " + elapsedTimeForRace.asMillis() + " milliseconds!");
                     raceBefore = trackedRace;
                 }
             }
