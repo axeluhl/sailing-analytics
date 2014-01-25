@@ -77,9 +77,9 @@ public class CellTable extends PageObject {
     protected void verify() {
         // TODO: Verify that the context represents a GWT CellTable
         String tagName = ((WebElement) this.context).getTagName();
-
-        if (!tagName.equalsIgnoreCase("table"))
+        if (!tagName.equalsIgnoreCase("table")) {
             throw new IllegalArgumentException("WebElement does not represent a table");
+        }
     }
 
     private List<WebElement> findHeaders() {

@@ -68,6 +68,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
                 WebElement removeAction = row.findElement(By.xpath(".//td/div/div[@title='Remove']/img"));
                 removeAction.click();
                 this.driver.switchTo().alert().accept();
+                break;
             }
         }
     }
