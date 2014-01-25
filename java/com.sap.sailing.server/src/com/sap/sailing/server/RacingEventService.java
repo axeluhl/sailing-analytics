@@ -469,7 +469,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
 
     /**
-     * Gets the start time and pass identifier for the queried race.
+     * Gets the start time and pass identifier for the queried race. Returns <code>null</code> if there
+     * is no attached race log.
      */
     Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
 
