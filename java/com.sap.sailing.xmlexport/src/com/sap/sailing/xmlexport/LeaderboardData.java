@@ -90,7 +90,6 @@ public class LeaderboardData extends ExportAction {
     }
 
     private Element createLeaderboardXML(Leaderboard leaderboard, List<Element> competitors, List<Element> races, Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages) {
-        log.info("Creating XML for leaderboard " + leaderboard.getName());
         Element leaderboardElement = new Element("leaderboard");
         addNamedElementWithValue(leaderboardElement, "name", leaderboard.getName());
         addNamedElementWithValue(leaderboardElement, "display_name", leaderboard.getDisplayName());
@@ -101,7 +100,6 @@ public class LeaderboardData extends ExportAction {
         leaderboardElement.addContent(createDataConfidenceXML(leaderboardConfidenceAndErrorMessages));
         leaderboardElement.addContent(competitors);
         leaderboardElement.addContent(races);
-        log.info("Done with XML for leaderboard " + leaderboard.getName());
         return leaderboardElement;
     }
     
@@ -135,7 +133,6 @@ public class LeaderboardData extends ExportAction {
     }
     
     public List<Element> createWindXML(String prefix, SpeedWithConfidence<TimePoint> speedWithConfidence) {
-        log.info("Creating XML for wind " + prefix);
         List<Element> windElements = new ArrayList<Element>();
         if (speedWithConfidence == null) {
             speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(0.0), 0, MillisecondsTimePoint.now());
@@ -169,12 +166,10 @@ public class LeaderboardData extends ExportAction {
         }
         windElements.add(createNamedElementWithValue(prefix+"human_readable", windSpeedAsHumanReadableString));
         windElements.add(createNamedElementWithValue(prefix+"knots_interval", windSpeedAsInterval));
-        log.info("Done with XML for wind " + prefix);
         return windElements;
     }
     
     private Element createRaceXML(final TrackedRace race, final Fleet fleet, final List<Element> legs, final RaceColumn column, final Leaderboard leaderboard, int sameDayGroupIndex, int raceCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
-        log.info("Creating XML for race " + race.getRace().getName());
         Element raceElement = new Element("race");
         addNamedElementWithValue(raceElement, "name", cleanRaceName(race.getRace().getName()));
         addNamedElementWithValue(raceElement, "race_index_in_leaderboard", raceCounter);
@@ -294,19 +289,17 @@ public class LeaderboardData extends ExportAction {
         
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         raceElement.addContent(legs);
-        log.info("Done with XML for race " + race.getRace().getName());
         return raceElement;
     }
     
     private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+        TimePoint timeSpent = MillisecondsTimePoint.now();
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
         addNamedElementWithValue(competitorElement, "name", competitor.getName());
         
         if (shortVersion)
             return competitorElement;
-        
-        log.info("Creating XML for competitor " + competitor.getName());
         
         if (competitor.getBoat() != null) {
             addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
@@ -343,7 +336,8 @@ public class LeaderboardData extends ExportAction {
             if (averageSpeed == null) {
                 competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
             }
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true).getKnots());
+            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
+            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
@@ -363,18 +357,20 @@ public class LeaderboardData extends ExportAction {
             if (averageSpeed == null) {
                 competitorConfidenceAndErrorMessages.getB().add("Competitor has not finished all races in this leaderboard! His average speed over ground is not comparable to others!");
             }
-            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", getAverageSpeedOverGround(leaderboard, competitor, now, true).getKnots());
+            Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, now, true);
+            addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
             
             addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, now));
             addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, now));
         }
-        createDataConfidenceXML(competitorConfidenceAndErrorMessages);
-        log.info("Done with XML for competitor " + competitor.getName());
+        competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
+        TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
+        addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
         return competitorElement;
     }
     
     private Element createLegXML(TrackedLeg trackedLeg, Leaderboard leaderboard, int legCounter, Pair<Double, Vector<String>> raceConfidenceAndErrorMessages, Pair<Double, Vector<String>> legConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
-        log.info("Creating XML for leg " + trackedLeg.getTrackedRace().getRace().getName() + ":" + legCounter);
+        TimePoint timeSpent = MillisecondsTimePoint.now();
         Leg leg = trackedLeg.getLeg();
         Element legElement = new Element("leg");
         legElement.addContent(createDataConfidenceXML(legConfidenceAndErrorMessages));
@@ -403,7 +399,7 @@ public class LeaderboardData extends ExportAction {
             Pair<GPSFixMoving, Speed> maximumSpeed = competitorLeg.getMaximumSpeedOverGround(legFinishTime);
             addNamedElementWithValue(competitorLegDataElement, "maximum_speed_over_ground_in_knots", maximumSpeed != null ? maximumSpeed.getB().getKnots() : -1);
             if (maximumSpeed == null) {
-                raceConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +"has not finished this leg! His maximum speed for this leg is not comparable to others!");
+                legConfidenceAndErrorMessages.getB().add("Competitor "+ competitor.getName() +" has not finished this leg! His maximum speed for this leg is not comparable to others!");
             }
             addNamedElementWithValue(competitorLegDataElement, "average_velocity_made_good_in_knots", competitorLeg.getAverageVelocityMadeGood(legFinishTime).getKnots());
             addNamedElementWithValue(competitorLegDataElement, "leg_finished_time_as_millis", handleValue(legFinishTime));
@@ -446,7 +442,8 @@ public class LeaderboardData extends ExportAction {
             competitorElement.addContent(competitorLegDataElement);
             legElement.addContent(competitorElement);
         }
-        log.info("Done with XML for leg " + trackedLeg.getTrackedRace().getRace().getName() + ":" + legCounter);
+        TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
+        addNamedElementWithValue(legElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
         return legElement;
     }
     
@@ -602,6 +599,8 @@ public class LeaderboardData extends ExportAction {
     
     public void perform() throws Exception {
         final Leaderboard leaderboard = getLeaderboard();
+        TimePoint timeSpent = MillisecondsTimePoint.now();
+        log.info("Starting XML export of " + leaderboard.getName());
         Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
         
         final List<Element> racesElements = new ArrayList<Element>();
@@ -618,6 +617,7 @@ public class LeaderboardData extends ExportAction {
                 sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
+                    TimePoint timeSpentForRace = MillisecondsTimePoint.now();
                     Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();
                     int legCounter = 0;
@@ -625,12 +625,17 @@ public class LeaderboardData extends ExportAction {
                         Pair<Double, Vector<String>> legConfidenceAndErrorMessages = checkData(leg);
                         legs.add(createLegXML(leg, leaderboard, ++legCounter, raceConfidenceAndErrorMessages, legConfidenceAndErrorMessages));
                     }
-                    racesElements.add(createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages));
+                    Element raceElement = createRaceXML(trackedRace, fleet, legs, raceColumn, leaderboard, sameDayGroupIndex, ++raceCounter, raceConfidenceAndErrorMessages);
+                    TimePoint elapsedTimeForRace = MillisecondsTimePoint.now().minus(timeSpentForRace.asMillis());
+                    addNamedElementWithValue(raceElement, "generation_time_in_milliseconds", elapsedTimeForRace.asMillis());
+                    racesElements.add(raceElement);
+                    log.info("Exported complete race " + trackedRace.getRace().getName() + " in " + elapsedTimeForRace.asMillis() + " milliseconds!");
                     raceBefore = trackedRace;
                 }
             }
         }
         
+        log.info("Finished XML export of leaderboard " + leaderboard.getName() + " in " + MillisecondsTimePoint.now().minus(timeSpent.asMillis()).asMillis() + " milliseconds");
         sendDocument(createLeaderboardXML(leaderboard, competitorElements, racesElements, leaderboardConfidenceAndErrorMessages), leaderboard.getName() + ".xml");
     }
     
