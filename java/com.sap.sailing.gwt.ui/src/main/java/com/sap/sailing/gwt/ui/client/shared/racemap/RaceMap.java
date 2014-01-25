@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
@@ -1798,12 +1797,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
-        if(isHighlighted) {
-            options.setStrokeWeight(3);
-            options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
+        options.setStrokeColor(competitorSelection.getColor(competitor).getAsHtml());
+        if (isHighlighted) {
+            options.setStrokeWeight(2);
         } else {
             options.setStrokeWeight(1);
-            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
         }
         options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         return options;
