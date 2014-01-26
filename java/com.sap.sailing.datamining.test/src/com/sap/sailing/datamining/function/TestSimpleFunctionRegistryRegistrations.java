@@ -19,8 +19,6 @@ import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMark
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistryRegistrations {
-    
-    //TODO Test that if SubTypeWithMarkedMethods is registered, that also the methods of SuperTypeWithMarkedMethods are registered
 
     @Test
     public void testSimpleRegistration() {

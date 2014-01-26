@@ -12,9 +12,11 @@ import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
+import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
+import com.sap.sailing.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 
@@ -46,6 +48,16 @@ public class FunctionTestsUtil {
 
     public static Method getMethodFromExternalLibraryClass(String name) {
         return getMethodFromClass(ExternalLibraryClass.class, name);
+    }
+
+    public static Collection<Function> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
+        Set<Function> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
+        return markedMethods;
     }
     
     public static Method getMethodFromClass(Class<?> fromClass, String methodName) {
