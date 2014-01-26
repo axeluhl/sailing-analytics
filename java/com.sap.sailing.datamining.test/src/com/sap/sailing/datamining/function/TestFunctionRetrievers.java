@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.function;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -50,7 +49,7 @@ public class TestFunctionRetrievers {
     public void testFunctionRetrievalWithManyClassesToScan() {
         Collection<Class<?>> classesToScan = getManyClassesToScan();
         classesToScan.add(SimpleClassWithMarkedMethods.class);
-        assertThat("Not enough classes to scan for this test.", classesToScan.size(), greaterThanOrEqualTo(getMaximumWorkerAmount()));
+        assertThat("Not enough classes to scan for this test.", classesToScan.size() >= getMaximumWorkerAmount(), is(true));
         
         ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , FunctionTestsUtil.getExecutor());
 
