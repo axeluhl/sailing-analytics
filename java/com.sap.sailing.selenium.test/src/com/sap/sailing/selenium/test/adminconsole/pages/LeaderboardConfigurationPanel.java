@@ -108,7 +108,7 @@ public class LeaderboardConfigurationPanel extends PageArea {
         for (WebElement row : table.getRows()) {
             List<WebElement> fields = row.findElements(By.tagName("td"));
             if (raceColumnName.equals(fields.get(0).getText()) && fleetName.equals(fields.get(1).getText())) {
-                row.click();
+                fields.get(1).click();
                 break;
             }
         }

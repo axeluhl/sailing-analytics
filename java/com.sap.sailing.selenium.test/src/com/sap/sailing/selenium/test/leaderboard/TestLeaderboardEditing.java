@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.domain.common.impl.Util;
@@ -43,12 +44,14 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         leaderboardConfiguration.selectLeaderboard(leaderboardName);
         leaderboardConfiguration.addRacesToFlexibleLeaderboard(2);
         leaderboardConfiguration.selectRaceColumn("R1", "Default");
-        leaderboardConfiguration.getTrackedRacesPanel().getTrackedRace(BMW_CUP_REGATTA+" ("+BMW_CUP_BOAT_CLASS+")", BMW_CUP_RACE_8).click(); // associates the race with the column
+        WebElement trackedRace = leaderboardConfiguration.getTrackedRacesPanel().getTrackedRace(BMW_CUP_REGATTA+" ("+BMW_CUP_BOAT_CLASS+")", BMW_CUP_RACE_8);
+        trackedRace.findElements(By.tagName("td")).get(1).click(); // associates the race with the column
     }
 
     private void startTrackingRaceAndWait(AdminConsolePage adminConsole, String bmwCupJsonUrl, String bmwCupRegatta, String bmwCupRace8, long l) throws InterruptedException {
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        Thread.sleep(500); // wait for list to appear; it seems that the waitForAjaxCalls isn't really reliable...
         TracTracStartTrackingPanel startTrackingPanel = tracTracEvents.getStartTrackingPanel();
         startTrackingPanel.setTrackWind(false);
         tracTracEvents.startTracking(BMW_CUP_REGATTA, BMW_CUP_RACE_8);
