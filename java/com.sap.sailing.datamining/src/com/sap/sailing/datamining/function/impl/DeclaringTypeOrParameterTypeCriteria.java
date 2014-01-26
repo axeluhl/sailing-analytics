@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.function.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -8,26 +9,36 @@ import com.sap.sailing.datamining.function.Function;
 
 public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCriteria<Function> {
 
-    private Collection<Class<?>> expectingTypes;
+    private final Collection<Class<?>> expectingTypes;
 
     public DeclaringTypeOrParameterTypeCriteria(Class<?> expectingType) {
-        this.expectingTypes = getSuperClassesAndInterfacesOf(expectingType);
+        this.expectingTypes = new HashSet<>();
+        addAllSupertypesOf(expectingType);
         this.expectingTypes.add(expectingType);
     }
 
-    private Collection<Class<?>> getSuperClassesAndInterfacesOf(Class<?> expectingType) {
-        Collection<Class<?>> superClassesAndInterfaces = new HashSet<>();
+    private void addAllSupertypesOf(Class<?> type) {
+        boolean wasSuperclassAdded = false;
+        boolean wereInterfacesAdded = false;
         
-        for (Class<?> interfaceOfExpectingType : expectingType.getInterfaces()) {
-            superClassesAndInterfaces.add(interfaceOfExpectingType);
+        if (isSuperTypeValid(type)) {
+            wasSuperclassAdded = expectingTypes.add(type.getSuperclass());
         }
+        wereInterfacesAdded = expectingTypes.addAll(getInterfacesOf(type));
         
-        Class<?> currentType = expectingType;
-        while (currentType.getSuperclass() != null && !currentType.getSuperclass().equals(Object.class)) {
-            currentType = currentType.getSuperclass();
-            superClassesAndInterfaces.add(currentType);
+        if (wasSuperclassAdded || wereInterfacesAdded) {
+            for (Class<?> expectingType : expectingTypes) {
+                addAllSupertypesOf(expectingType);
+            }
         }
-        return superClassesAndInterfaces;
+    }
+
+    public boolean isSuperTypeValid(Class<?> type) {
+        return type.getSuperclass() != null && !type.getSuperclass().equals(Object.class);
+    }
+
+    private Collection<Class<?>> getInterfacesOf(Class<?> type) {
+        return Arrays.asList(type.getInterfaces());
     }
 
     @Override

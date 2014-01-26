@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.test.function.test_classes;
 
-public class DataTypeWithContextImpl implements DataTypeWithContext {
+public class DataTypeWithContextImpl implements DataTypeWithContext, ExtendingInterface {
 
     private String regattaName;
     private String raceName;
@@ -16,6 +16,11 @@ public class DataTypeWithContextImpl implements DataTypeWithContext {
     public String getRegattaName() {
         return regattaName;
     }
+    
+    @Override
+    public int getRaceNameLength() {
+        return getRaceName().length();
+    }
 
     @Override
     public String getRaceName() {
@@ -25,6 +30,11 @@ public class DataTypeWithContextImpl implements DataTypeWithContext {
     @Override
     public int getLegNumber() {
         return legNumber;
+    }
+
+    @Override
+    public int getSpeedInKnots() {
+        return 0;
     }
 
 }

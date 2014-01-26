@@ -7,7 +7,7 @@ import com.sap.sailing.datamining.annotations.Dimension;
  * The tests will fail, because they are reflected via constant strings.
  */
 
-public interface DataTypeWithContext {
+public interface DataTypeWithContext extends DataTypeInterface {
     
     @Dimension("regattaName")
     public String getRegattaName();

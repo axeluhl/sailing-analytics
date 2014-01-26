@@ -48,7 +48,7 @@ public class FunctionTestsUtil {
         return getMethodFromClass(ExternalLibraryClass.class, name);
     }
     
-    private static Method getMethodFromClass(Class<?> fromClass, String methodName) {
+    public static Method getMethodFromClass(Class<?> fromClass, String methodName) {
         return getMethodFromClass(fromClass, methodName, (Class<?>[]) null);
     }
 
