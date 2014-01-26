@@ -114,25 +114,47 @@ public class AdminConsolePage extends HostPage {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
         int maxScrollActions = 20;
+        FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
+        wait.withTimeout(10, TimeUnit.SECONDS);
+        wait.pollingEvery(2, TimeUnit.SECONDS);
+        WebElement scroller;
         while (!tab.isDisplayed() && maxScrollActions-- > 0) {
-            FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
-            wait.withTimeout(10, TimeUnit.SECONDS);
-            wait.pollingEvery(2, TimeUnit.SECONDS);
-            WebElement scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
-                    By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
+            try {
+                scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
+                        By.className("gwt-ScrolledTabLayoutPanel-scrollRight")));
+            } catch (org.openqa.selenium.TimeoutException e) {
+                break; // scroller probably not present; try the other direction
+            }
+            if (!scroller.isDisplayed()) {
+                break; // reached last tab; still not visible; try the other direction
+            }
             scroller = scroller.findElement(By.tagName("img"));
-
             scroller.click();
             driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         }
-        logger.log(Level.INFO, String.format("Scrolled %d times.", 20 - maxScrollActions));
-        
+        logger.log(Level.INFO, String.format("Scrolled %d times right", 20 - maxScrollActions));
+        maxScrollActions = 20;
+        while (!tab.isDisplayed() && maxScrollActions-- > 0) {
+            try {
+                scroller = wait.until(ElementSearchConditions.visibilityOfElementLocated(
+                        By.className("gwt-ScrolledTabLayoutPanel-scrollLeft")));
+            } catch (org.openqa.selenium.TimeoutException e) {
+                break; // scroller probably not present; try the other direction
+            }
+            scroller = scroller.findElement(By.tagName("img"));
+            scroller.click();
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        }
+        logger.log(Level.INFO, String.format("Scrolled %d times left", 20 - maxScrollActions));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // wait until tab is really available for clicking
         tab.click();
         // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = new FluentWait<>(this.tabPanel);
         wait.withTimeout(30, TimeUnit.SECONDS);
         wait.pollingEvery(5, TimeUnit.SECONDS);
-        
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
         return content;
     }

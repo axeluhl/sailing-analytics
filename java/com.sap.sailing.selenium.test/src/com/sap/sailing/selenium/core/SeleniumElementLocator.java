@@ -46,11 +46,11 @@ public class SeleniumElementLocator implements ElementLocator {
      *   The context for search of the element or the list of elements.
      * @param field
      *   The field for which an element or an element list should be lazily locate.
-     * @param timeOut
-     *   The maximum amount of time to wait for the element or the list of elements.
+     * @param timeOutSeconds
+     *   The maximum amount of time to wait for the element or the list of elements in seconds
      */
-    public SeleniumElementLocator(SearchContext context, Field field, int timeOut) {
-        this(context, field, timeOut, 250);
+    public SeleniumElementLocator(SearchContext context, Field field, int timeOutSeconds) {
+        this(context, field, timeOutSeconds, 250);
     }
 
     /**
@@ -61,17 +61,17 @@ public class SeleniumElementLocator implements ElementLocator {
      *   The context for search of the element or the list of elements.
      * @param field
      *   The field for which an element or an element list should be lazily locate.
-     * @param timeOut
-     *   The maximum amount of time to wait for the element or the list of elements.
-     * @param interval
-     *   The frequency with which to check the search context.
+     * @param timeOutSeconds
+     *   The maximum amount of time to wait for the element or the list of elements in seconds
+     * @param intervalMillis
+     *   The frequency with which to check the search context in milliseconds
      */
-    public SeleniumElementLocator(SearchContext context, Field field, int timeOut, int interval) {
+    public SeleniumElementLocator(SearchContext context, Field field, int timeOutSeconds, int intervalMillis) {
         this.context = context;
 
         this.wait = new FluentWait<>(this.context);
-        this.wait.withTimeout(timeOut, TimeUnit.SECONDS);
-        this.wait.pollingEvery(interval, TimeUnit.MILLISECONDS);
+        this.wait.withTimeout(timeOutSeconds, TimeUnit.SECONDS);
+        this.wait.pollingEvery(intervalMillis, TimeUnit.MILLISECONDS);
         this.wait.ignoring(NoSuchElementException.class);
 
         Annotations annotations = new Annotations(field);

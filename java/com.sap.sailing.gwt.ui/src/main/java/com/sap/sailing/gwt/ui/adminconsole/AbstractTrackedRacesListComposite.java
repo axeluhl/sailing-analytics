@@ -126,7 +126,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -152,7 +152,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -163,6 +162,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilter");
         filterPanel.add(filterablePanelRaces);
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);

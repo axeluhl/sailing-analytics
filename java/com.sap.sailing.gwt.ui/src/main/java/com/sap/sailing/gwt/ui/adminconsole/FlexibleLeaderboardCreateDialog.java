@@ -16,6 +16,7 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
         nameTextBox = createTextBox(null);
         nameTextBox.ensureDebugId("LeaderboardNameField");
         displayNameTextBox = createTextBox(null);
+        displayNameTextBox.ensureDebugId("LeaderboardDisplayNameField");
         nameTextBox.setVisibleLength(50);
         displayNameTextBox.setVisibleLength(50);
 
