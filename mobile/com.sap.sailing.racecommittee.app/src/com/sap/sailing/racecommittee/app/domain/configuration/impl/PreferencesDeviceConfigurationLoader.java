@@ -73,7 +73,7 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
     }
     
     private static void logApply(String configurationName, Object value) {
-        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value.toString()));
+        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value==null?"null":value.toString()));
     }
 
 }

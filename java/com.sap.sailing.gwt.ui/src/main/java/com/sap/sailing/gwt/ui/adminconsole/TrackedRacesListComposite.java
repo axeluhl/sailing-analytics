@@ -102,7 +102,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
         btnRemoveRace = new Button(stringMessages.remove());
-        btnRemoveRace.ensureDebugId("RemoveRave");
+        btnRemoveRace.ensureDebugId("RemoveRace");
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

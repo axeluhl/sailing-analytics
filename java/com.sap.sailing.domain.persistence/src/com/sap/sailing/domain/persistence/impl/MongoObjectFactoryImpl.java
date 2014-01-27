@@ -901,7 +901,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         JSONObject json = competitorSerializer.serialize(competitor);
-        DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
+        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
@@ -917,7 +917,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeCompetitor(Competitor competitor) {
         logger.info("Removing persistent competitor info for competitor "+competitor.getName()+" with ID "+competitor.getId());
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        DBObject query = (DBObject) JSON.parse(competitorSerializer.getCompetitorIdQuery(competitor).toString());
+        DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         collection.remove(query);
     }
     
