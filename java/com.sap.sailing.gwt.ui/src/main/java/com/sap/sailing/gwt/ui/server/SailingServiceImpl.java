@@ -3600,7 +3600,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
         Pair<TimePoint, Integer> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
-        if (result == null) {
+        if (result == null || result.getA() == null) {
             return null;
         }
         return new Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());

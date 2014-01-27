@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -17,22 +18,23 @@ public abstract class LeaderboardMasterData {
 
     private int[] resultDiscardingRule;
 
-    private Map<String, Competitor> competitorsById;
+    private Map<Serializable, Competitor> competitorsById;
 
     private ScoreCorrectionMasterData scoreCorrection;
 
-    private Map<String, Double> carriedPoints;
+    private Map<Serializable, Double> carriedPoints;
 
-    private List<String> suppressedCompetitors;
+    private List<Serializable> suppressedCompetitors;
 
-    private Map<String, String> displayNamesByCompetitorId;
+    private Map<Serializable, String> displayNamesByCompetitorId;
 
     private Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents;
 
     public LeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
-            Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
+            Map<Serializable, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
+            Map<Serializable, Double> carriedPoints, List<Serializable> suppressedCompetitors,
+            Map<Serializable, String> displayNamesByCompetitorId,
+            Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         this.name = name;
         this.displayName = displayName;
         this.resultDiscardingRule = resultDiscardingRule;
@@ -60,7 +62,7 @@ public abstract class LeaderboardMasterData {
         return rule;
     }
 
-    public Map<String, Competitor> getCompetitorsById() {
+    public Map<Serializable, Competitor> getCompetitorsById() {
         return competitorsById;
     }
 
@@ -68,15 +70,15 @@ public abstract class LeaderboardMasterData {
         return scoreCorrection;
     }
 
-    public Map<String, Double> getCarriedPoints() {
+    public Map<Serializable, Double> getCarriedPoints() {
         return carriedPoints;
     }
 
-    public List<String> getSuppressedCompetitors() {
+    public List<Serializable> getSuppressedCompetitors() {
         return suppressedCompetitors;
     }
 
-    public Map<String, String> getDisplayNamesByCompetitorId() {
+    public Map<Serializable, String> getDisplayNamesByCompetitorId() {
         return displayNamesByCompetitorId;
     }
 
