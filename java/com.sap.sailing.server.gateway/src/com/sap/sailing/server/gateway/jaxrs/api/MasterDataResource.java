@@ -1,7 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.json.simple.JSONObject;
 
@@ -32,8 +35,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("leaderboardgroups")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
-            @QueryParam("compress") Boolean compress)
-            throws IOException {
+            @QueryParam("compress") Boolean compress) throws UnsupportedEncodingException {
         long startTime = System.currentTimeMillis();
         if (compress == null) {
             compress = false;
@@ -57,14 +59,22 @@ public class MasterDataResource extends AbstractSailingServerResource {
         JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
         ResponseBuilder resp;
         if (compress) {
-            byte[] uncompressedResult = masterData.toJSONString().getBytes("UTF-8");
-            byte[] result;
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzip = new GZIPOutputStream(out);
-            gzip.write(uncompressedResult);
-            gzip.close();
-            result = out.toByteArray();
-            resp = Response.ok(result, MediaType.APPLICATION_JSON).header("Content-Encoding", "gzip");
+            final byte[] uncompressedResult = masterData.toJSONString().getBytes("UTF-8");
+
+            StreamingOutput streamingOutput = new StreamingOutput() {
+
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    GZIPOutputStream gzip = null;
+                    try {
+                        gzip = new GZIPOutputStream(output);
+                        gzip.write(uncompressedResult);
+                    } finally {
+                        gzip.close();
+                    }
+                }
+            };
+            resp = Response.ok(streamingOutput, MediaType.APPLICATION_JSON).header("Content-Encoding", "gzip");
         } else {
             String result = masterData.toJSONString();
             resp = Response.ok(result, MediaType.APPLICATION_JSON);

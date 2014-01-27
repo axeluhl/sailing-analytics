@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.BufferedReader;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -3333,7 +3335,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         HttpURLConnection connection = null;
 
         URL serverAddress = null;
-        GZIPInputStream gzip = null;
+        InputStream inputStream = null;
+        BufferedReader rd = null;
         try {
             serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
@@ -3342,17 +3345,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection = (HttpURLConnection)serverAddress.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
-            connection.setReadTimeout(600000);
+            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+            connection.setReadTimeout(60000);
             connection.connect();
 
-            //read the result from the server
-            BufferedReader rd;
+            
             if (compress) {
-                gzip = new GZIPInputStream(connection.getInputStream());
-                rd = new BufferedReader(new InputStreamReader(gzip, Charset.forName("UTF-8")));
+                InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(connection.getInputStream(),
+                        connection);
+                inputStream = new GZIPInputStream(timeoutExtendingInputStream);
             } else {
-                rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+                inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
+
+            rd = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = rd.readLine()) != null) {
@@ -3368,8 +3374,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             long timeToImport = System.currentTimeMillis() - startTime;
             logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
             try {
-                if (gzip != null) {
-                    gzip.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (rd != null) {
+                    rd.close();
                 }
             } catch (IOException e) {
             }
@@ -3679,5 +3688,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    private class TimeoutExtendingInputStream extends FilterInputStream {
+
+        private final HttpURLConnection connection;
+
+        protected TimeoutExtendingInputStream(InputStream in, HttpURLConnection connection) {
+            super(in);
+            this.connection = connection;
+        }
+
+        @Override
+        public int read() throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read(b, off, len);
+        }
+
     }
 }
