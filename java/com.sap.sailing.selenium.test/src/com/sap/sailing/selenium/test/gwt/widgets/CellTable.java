@@ -69,7 +69,6 @@ public class CellTable extends PageObject {
 
             return rows;
         }
-
         return Collections.emptyList();
     }
 

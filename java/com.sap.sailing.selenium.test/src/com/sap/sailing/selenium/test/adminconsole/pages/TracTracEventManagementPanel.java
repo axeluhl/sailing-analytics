@@ -108,7 +108,7 @@ public class TracTracEventManagementPanel extends PageArea {
         TrackedRacesPanel trp = getTrackedRacesPanel();
         long started = System.currentTimeMillis();
         WebElement raceRow = trp.getTrackedRace(regattaName, raceName);
-        while ((raceRow == null || "TRACKING".equals(raceRow.findElements(By.tagName("td")).get(6).getText()))
+        while ((raceRow == null || !"TRACKING".equals(raceRow.findElements(By.tagName("td")).get(6).getText()))
                 && System.currentTimeMillis()-started < timeoutInMillis) {
             Thread.sleep(2000); // wait 2s for the race to appear
             trp.refresh();
