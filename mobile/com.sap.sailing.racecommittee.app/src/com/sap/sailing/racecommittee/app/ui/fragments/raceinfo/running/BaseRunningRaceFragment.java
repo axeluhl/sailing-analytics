@@ -81,6 +81,8 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             @Override
             public void onClick(View v) {
                 getRaceState().setGeneralRecall(MillisecondsTimePoint.now());
+                // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
+                getRaceState().setAdvancePass(MillisecondsTimePoint.now());
             }
         });
         
