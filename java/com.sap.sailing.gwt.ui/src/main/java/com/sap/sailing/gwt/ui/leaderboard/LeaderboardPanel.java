@@ -1403,6 +1403,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
+        leaderboardTable.ensureDebugId("LeaderboardTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {

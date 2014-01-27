@@ -288,6 +288,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
+        racesTable.ensureDebugId("RacesTable");
         this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {

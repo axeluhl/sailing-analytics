@@ -16,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.base.Size;
 import com.google.gwt.maps.client.events.click.ClickEventFormatter;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
@@ -318,6 +319,21 @@ public abstract class CanvasOverlayV3 {
         double diffY = Math.abs(pointY.getY() - pointCenter.getY());
         
         return Math.min(diffX, diffY);  
+    }
+
+    protected Size calculateBoundingBox(MapCanvasProjection projection, LatLng position, double distanceXInMeter, double distanceYInMeter) {
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
+
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+        LatLng posWithDistanceY = LatLng.newInstance(translateRhumbY.getLatDeg(), translateRhumbY.getLngDeg());
+
+        Point pointCenter = projection.fromLatLngToDivPixel(position);
+        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
+
+        return Size.newInstance(Math.abs(pointX.getX() - pointCenter.getX()), Math.abs(pointY.getY() - pointCenter.getY()));
     }
     
     protected void setCanvasSize(int newWidthInPx, int newHeightInPx) {
