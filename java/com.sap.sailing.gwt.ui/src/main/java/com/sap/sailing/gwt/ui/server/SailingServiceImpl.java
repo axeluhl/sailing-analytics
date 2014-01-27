@@ -3368,6 +3368,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection = (HttpURLConnection)serverAddress.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
+            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
             connection.setReadTimeout(60000);
             connection.connect();
 
