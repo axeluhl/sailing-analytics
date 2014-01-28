@@ -3,6 +3,8 @@ package com.sap.sailing.datamining.function.impl;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
 
 public class DataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
@@ -15,7 +17,8 @@ public class DataMiningClassesWithFunctionsService implements ClassesWithFunctio
     @Override
     public Collection<Class<?>> getInternalClassesWithMarkedMethods() {
         Collection<Class<?>> internalClasses = new HashSet<>();
-        
+        internalClasses.add(GPSFixWithContext.class);
+        internalClasses.add(TrackedLegOfCompetitorWithContext.class);
         return internalClasses;
     }
     
