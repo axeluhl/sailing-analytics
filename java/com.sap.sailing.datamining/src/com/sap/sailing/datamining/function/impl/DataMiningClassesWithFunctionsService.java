@@ -3,9 +3,9 @@ package com.sap.sailing.datamining.function.impl;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sailing.datamining.function.ClassesWithMarkedMethodsService;
+import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
 
-public class DataMiningClassesWithMarkedMethodsService implements ClassesWithMarkedMethodsService {
+public class DataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
     
     @Override
     public boolean hasInternalClassesWithMarkedMethods() {

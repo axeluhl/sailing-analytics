@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.function;
 
 import java.util.Collection;
 
-public interface ClassesWithMarkedMethodsService {
+public interface ClassesWithFunctionsService {
 
     public boolean hasInternalClassesWithMarkedMethods();
     public Collection<Class<?>> getInternalClassesWithMarkedMethods();

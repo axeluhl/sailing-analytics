@@ -12,11 +12,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.datamining.function.ClassesWithMarkedMethodsService;
+import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.DataMiningClassesWithMarkedMethodsService;
+import com.sap.sailing.datamining.function.impl.DataMiningClassesWithFunctionsService;
 import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.RegistryFunctionsProvider;
@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
     }
 
     private void registerDataMiningClassesWithMarkedMethodsService() {
-        context.registerService(ClassesWithMarkedMethodsService.class, new DataMiningClassesWithMarkedMethodsService(), null);
+        context.registerService(ClassesWithFunctionsService.class, new DataMiningClassesWithFunctionsService(), null);
     }
 
     private FunctionRegistry createAndBuildFunctionRegistry() {
@@ -58,7 +58,7 @@ public class Activator implements BundleActivator {
 
     private ServiceReference<?>[] getAllClassesWithMarkedMethodsServices() {
         try {
-            return context.getServiceReferences(ClassesWithMarkedMethodsService.class.getName(), null);
+            return context.getServiceReferences(ClassesWithFunctionsService.class.getName(), null);
         } catch (InvalidSyntaxException e) {
             LOGGER.log(Level.SEVERE, "Error getting the service references. Data mining won't work.", e);
         }
@@ -68,7 +68,7 @@ public class Activator implements BundleActivator {
     @SuppressWarnings("unchecked")
     private void registerServiceTo(ServiceReference<?> serviceReference, FunctionRegistry functionRegistry) {
         try {
-            ServiceReference<ClassesWithMarkedMethodsService> specificServiceReference = (ServiceReference<ClassesWithMarkedMethodsService>) serviceReference;
+            ServiceReference<ClassesWithFunctionsService> specificServiceReference = (ServiceReference<ClassesWithFunctionsService>) serviceReference;
             registerSpecificServiceTo(context.getService(specificServiceReference), functionRegistry);
         } catch (ClassCastException exception) {
             String serviceName = context.getService(serviceReference).getClass().getName();
@@ -78,7 +78,7 @@ public class Activator implements BundleActivator {
         }
     }
     
-    private void registerSpecificServiceTo(ClassesWithMarkedMethodsService service, FunctionRegistry functionRegistry) {
+    private void registerSpecificServiceTo(ClassesWithFunctionsService service, FunctionRegistry functionRegistry) {
         if (service.hasInternalClassesWithMarkedMethods()) {
             registerInternalMarkedFunctionsTo(service, functionRegistry);
         }
@@ -87,7 +87,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void registerInternalMarkedFunctionsTo(ClassesWithMarkedMethodsService service,
+    public void registerInternalMarkedFunctionsTo(ClassesWithFunctionsService service,
             FunctionRegistry functionRegistry) {
         Collection<Class<?>> internalClasses = service.getInternalClassesWithMarkedMethods();
         ParallelFunctionRetriever internalMarkedFunctionsRetriever = new PartitioningParallelMarkedFunctionRetriever(
@@ -95,7 +95,7 @@ public class Activator implements BundleActivator {
         functionRegistry.registerFunctionsRetrievedBy(internalMarkedFunctionsRetriever);
     }
 
-    public void registerExternalLibraryFunctionsTo(ClassesWithMarkedMethodsService service,
+    public void registerExternalLibraryFunctionsTo(ClassesWithFunctionsService service,
             FunctionRegistry functionRegistry) {
         Collection<Class<?>> externalClasses = service.getExternalLibraryClasses();
         ParallelFunctionRetriever externalLibraryFunctionsRetriever = new PartitionParallelExternalFunctionRetriever(
