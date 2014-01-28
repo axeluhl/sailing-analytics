@@ -9,6 +9,7 @@ import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
+import com.sap.sailing.domain.devices.NoCorrespondingDeviceMapperRegisteredException;
 
 public class OsgiDeviceTypeServiceFinder implements DeviceTypeServiceFinder {
     private static final Logger logger = Logger.getLogger(OsgiDeviceTypeServiceFinder.class.getName());
@@ -43,6 +44,9 @@ public class OsgiDeviceTypeServiceFinder implements DeviceTypeServiceFinder {
             e.printStackTrace();
         }
 
+        if (service == null) throw new NoCorrespondingDeviceMapperRegisteredException(
+                "Could not find handler for device identifier", deviceType);
+        
         return service;
     }
 }

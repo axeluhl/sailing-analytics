@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.devices;
 
-public class NoCorrespondingDeviceMapperRegisteredException extends Exception {
+public class NoCorrespondingDeviceMapperRegisteredException extends RuntimeException {
     private final String deviceType;
     private static final long serialVersionUID = -358955216089477585L;
 

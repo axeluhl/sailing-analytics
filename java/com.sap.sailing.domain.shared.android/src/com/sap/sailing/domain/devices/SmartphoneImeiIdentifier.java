@@ -41,5 +41,12 @@ public class SmartphoneImeiIdentifier implements DeviceIdentifier {
     public String toString() {
         return "IMEI " + imei;
     }
-
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SmartphoneImeiIdentifier) {
+            return ((SmartphoneImeiIdentifier) obj).imei.equals(imei);
+        }
+        return false;
+    }
 }
