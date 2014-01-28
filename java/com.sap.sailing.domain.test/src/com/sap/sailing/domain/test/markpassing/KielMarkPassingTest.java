@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.GregorianCalendar;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -26,19 +26,19 @@ public class KielMarkPassingTest extends AbstractMarkPassingTest {
     }
    
 
-    @Test
+    @Ignore
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
         setUp(2);
         testRace();
         testStartOfRace();
     }
-    @Test
+    @Ignore
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
         setUp(3);
         testRace();
         testStartOfRace();
     }
-    @Test
+    @Ignore
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         setUp(4);
         testRace();

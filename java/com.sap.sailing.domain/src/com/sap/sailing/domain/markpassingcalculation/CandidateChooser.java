@@ -154,7 +154,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
             }
-            race.updateMarkPassings(co, markPassDeltas);
+                race.updateMarkPassings(co, markPassDeltas);
         }
     }
 
@@ -233,12 +233,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
         try {
             if (leg.getLegType(t) == LegType.DOWNWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2 //seems to be less exact... / Math.sin(0.5*race.getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind())
                         / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots();
             }
 
             if (leg.getLegType(t) == LegType.UPWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2)
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2) // / Math.sin(0.5*race.getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind())
                         / (race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots()*2/3);
             }
         } catch (NoWindException e) {

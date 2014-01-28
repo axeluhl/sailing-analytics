@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
+import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -18,31 +18,36 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 public class CandidateFinderTest extends AbstractMockedRaceMarkPassingTest {
 
-    @Ignore
-    // TODO And Test is wrong with new linear interpolation
+    @Test
     public void test() {
-       
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(37.88917, -122.279581),
-                new MillisecondsTimePoint(System.currentTimeMillis() - 2000), new KnotSpeedWithBearingImpl(1,
-                        new DegreeBearingImpl(90)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(37.888848, -122.279769),
-                new MillisecondsTimePoint(System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2,
-                        new DegreeBearingImpl(90)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(37.888496,-122.279618),
-                new MillisecondsTimePoint(System.currentTimeMillis() + 2000), new KnotSpeedWithBearingImpl(3,
-                        new DegreeBearingImpl(90)));
-        
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003,0.000049),
+                new MillisecondsTimePoint(System.currentTimeMillis() - 2000), new KnotSpeedWithBearingImpl(5,
+                        new DegreeBearingImpl(330)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062,0.000029),
+                new MillisecondsTimePoint(System.currentTimeMillis()), new KnotSpeedWithBearingImpl(5,
+                        new DegreeBearingImpl(270)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026,-0.000024),
+                new MillisecondsTimePoint(System.currentTimeMillis() + 2000), new KnotSpeedWithBearingImpl(5,
+                        new DegreeBearingImpl(225)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056,-0.000049),
+                new MillisecondsTimePoint(System.currentTimeMillis() + 4000), new KnotSpeedWithBearingImpl(5,
+                        new DegreeBearingImpl(190)));
         trackedRace.recordFix(bob, fix1);
         trackedRace.recordFix(bob, fix2);
         CandidateFinder finder = new CandidateFinder(trackedRace);
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         fixes.add(fix1);
         fixes.add(fix2);
-        
         assertEquals(0, finder.getCandidateDeltas(bob, fixes).getA().size());
+        
         trackedRace.recordFix(bob, fix3);
         fixes.clear();
         fixes.add(fix3);
-        assertEquals(2, finder.getCandidateDeltas(bob, fixes).getA().size());
+        assertEquals(1, finder.getCandidateDeltas(bob, fixes).getA().size()); // CTE candidate
+        
+        trackedRace.recordFix(bob, fix4);
+        fixes.clear();
+        fixes.add(fix4);
+        assertEquals(1, finder.getCandidateDeltas(bob, fixes).getA().size()); // Distance Candidate
     }
 }
