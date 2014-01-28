@@ -30,6 +30,18 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         windHasBeenInitialized= false;
     }
 
+    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
+        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
+    }
+
+    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
+        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
+    }
+
+    private static Position copyPosition(GPSFixMoving gpsFix) {
+        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
+    }
+
     @Override
     public String getRegattaName() {
         return context.getTrackedRace().getTrackedRegatta().getRegatta().getName();
@@ -101,18 +113,6 @@ public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWit
         }
         
         return wind;
-    }
-
-    private static SpeedWithBearing copySpeed(GPSFixMoving gpsFix) {
-        return new KnotSpeedWithBearingImpl(gpsFix.getSpeed().getKnots(), gpsFix.getSpeed().getBearing());
-    }
-
-    private static TimePoint copyTimePoint(GPSFixMoving gpsFix) {
-        return new MillisecondsTimePoint(gpsFix.getTimePoint().asMillis());
-    }
-
-    private static Position copyPosition(GPSFixMoving gpsFix) {
-        return new DegreePosition(gpsFix.getPosition().getLatDeg(), gpsFix.getPosition().getLngDeg());
     }
 
 }
