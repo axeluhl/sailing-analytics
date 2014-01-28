@@ -86,7 +86,7 @@ public class TracTracStartTrackingPanel extends PageArea {
     }
 
     public void startTracking(String regattaName, String raceName) {
-        getTrackableRace(regattaName, raceName).click();
+        getTrackableRace(regattaName, raceName).findElements(By.tagName("td")).get(0).click();
         startTrackingButton.click();
         try {
             // there may be an alert that there already is some default regatta; ignore it

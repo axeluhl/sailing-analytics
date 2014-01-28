@@ -62,7 +62,7 @@ public abstract class HttpRequest {
      * Returns a copied {@link InputStream} of the server's response.
      * You must close this stream when done.
      */
-    public InputStream execute() throws Exception {
+    public InputStream execute() throws IOException {
         ExLog.i(TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -94,6 +94,9 @@ public abstract class HttpRequest {
             
             connection.disconnect();
             return copiedResponseInputStream;
+        } catch (IOException e) {
+            ExLog.i(TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
+            throw e;
         } finally {
             if (responseInputStream != null) {
                 responseInputStream.close();

@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.BufferedReader;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -59,12 +61,12 @@ import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -668,7 +670,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
         }
         if (regatta.getDefaultCourseArea() != null) {
-            regattaDTO.defaultCourseAreaUuidAsString = regatta.getDefaultCourseArea().getId().toString();
+            regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
@@ -1822,20 +1824,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
-            String courseAreaId) {
-        UUID courseAreaUuid = convertIdentifierStringToUuid(courseAreaId);
+            UUID courseAreaId) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, leaderboardDisplayName, discardThresholds,
-                baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid)), false);
-    }
-
-    private UUID convertIdentifierStringToUuid(String identifierToConvert) {
-        UUID convertedUuid = null;
-        if (identifierToConvert != null) {
-            try {
-                convertedUuid = UUID.fromString(identifierToConvert);
-            } catch (IllegalArgumentException iae) {}
-        }
-        return convertedUuid;
+                baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaId)), false);
     }
 
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
@@ -1928,7 +1919,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
         }
         if (leaderboard.getDefaultCourseArea() != null) {
-            leaderboardDTO.defaultCourseAreaIdAsString = leaderboard.getDefaultCourseArea().getId().toString();
+            leaderboardDTO.defaultCourseAreaId = leaderboard.getDefaultCourseArea().getId();
             leaderboardDTO.defaultCourseAreaName = leaderboard.getDefaultCourseArea().getName();
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
@@ -1959,9 +1950,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, String newCourseAreaIdAsString) {
-        UUID newCourseAreaUuid = convertIdentifierStringToUuid(newCourseAreaIdAsString);
-        Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaUuid));
+    public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, UUID newCourseAreaId) {
+        Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaId));
         return createStrippedLeaderboardDTO(updatedLeaderboard, false);
     }
     
@@ -2761,9 +2751,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        getService().apply(new UpdateEvent(eventUuid, eventName, venue.getName(), publicationUrl, isPublic, regattaNames));
+    public void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(eventId, eventName, venue.getName(), publicationUrl, isPublic, regattaNames));
     }
 
     @Override
@@ -2771,35 +2760,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID eventUuid = UUID.randomUUID();
         getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
-            createCourseArea(eventUuid.toString(), courseAreaName);
+            createCourseArea(eventUuid, courseAreaName);
         }
         return getEventById(eventUuid);
     }
 
     @Override
-    public CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName) {
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        CourseArea courseArea = getService().apply(new AddCourseArea(eventUuid, courseAreaName, UUID.randomUUID()));
+    public CourseAreaDTO createCourseArea(UUID eventId, String courseAreaName) {
+        CourseArea courseArea = getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
         return convertToCourseAreaDTO(courseArea);
     }
 
     @Override
-    public void removeEvents(Collection<String> eventIdsAsStrings) {
-        for (String eventId : eventIdsAsStrings) {
+    public void removeEvents(Collection<UUID> eventIds) {
+        for (UUID eventId : eventIds) {
             removeEvent(eventId);
         }
     }
 
     @Override
-    public void removeEvent(String eventIdAsString) {
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        getService().apply(new RemoveEvent(eventUuid));
+    public void removeEvent(UUID eventId) {
+        getService().apply(new RemoveEvent(eventId));
     }
 
     @Override
-    public void renameEvent(String eventIdAsString, String newName) {
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        getService().apply(new RenameEvent(eventUuid, newName));
+    public void renameEvent(UUID eventId, String newName) {
+        getService().apply(new RenameEvent(eventId, newName));
     }
 
     @Override
@@ -2813,14 +2799,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
-    
-    @Override
-    public EventDTO getEventByIdAsString(String eventIdAsString) {
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        return getEventById(eventUuid);
-    }
 
-    private EventDTO getEventById(UUID id) {
+    @Override
+    public EventDTO getEventById(UUID id) {
         EventDTO result = null;
         Event event = getService().getEvent(id);
         if (event != null) {
@@ -2835,7 +2816,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.publicationUrl = event.getPublicationUrl();
         eventDTO.isPublic = event.isPublic();
-        eventDTO.id = event.getId().toString();
+        eventDTO.id = event.getId();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -2852,14 +2833,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
-        courseAreaDTO.uuidAsString = courseArea.getId().toString();
+        courseAreaDTO.id = courseArea.getId();
         return courseAreaDTO;
     }
     
     @Override
-    public List<RaceGroupDTO> getRegattaStructureForEvent(String eventIdAsString) {
+    public List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) {
         List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
-        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        Event event = getService().getEvent(eventId);
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
@@ -2938,10 +2919,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateRegatta(RegattaIdentifier regattaName, String defaultCourseAreaUuidAsString, 
+    public void updateRegatta(RegattaIdentifier regattaName, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO configurationDTO) {
-        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaUuidAsString);
-        getService().apply(new UpdateSpecificRegatta(regattaName, courseAreaUuid, convertToRegattaConfiguration(configurationDTO)));
+        getService().apply(new UpdateSpecificRegatta(regattaName, defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO)));
     }
 
     @Override
@@ -2997,13 +2977,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId) {
-        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
+            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId) {
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
                         regattaName, boatClassName, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid));
+                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId));
         return convertToRegattaDTO(regatta);
     }
 
@@ -3164,17 +3143,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreaIdsAsString, 
+    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreaIds, 
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay) {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         
         Calendar dayToCheck = Calendar.getInstance();
         dayToCheck.setTime(new Date());
         
-        Event event = getService().getEvent(convertIdentifierStringToUuid(eventIdAsString));
+        Event event = getService().getEvent(eventId);
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (!visibleCourseAreaIdsAsString.contains(courseArea.getId().toString())) {
+                if (!visibleCourseAreaIds.contains(courseArea.getId())) {
                     continue;
                 }
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
@@ -3356,7 +3335,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         HttpURLConnection connection = null;
 
         URL serverAddress = null;
-        GZIPInputStream gzip = null;
+        InputStream inputStream = null;
+        BufferedReader rd = null;
         try {
             serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
@@ -3365,17 +3345,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             connection = (HttpURLConnection)serverAddress.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
-            connection.setReadTimeout(10000);
+            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+            connection.setReadTimeout(60000);
             connection.connect();
 
-            //read the result from the server
-            BufferedReader rd;
+            
             if (compress) {
-                gzip = new GZIPInputStream(connection.getInputStream());
-                rd = new BufferedReader(new InputStreamReader(gzip, Charset.forName("UTF-8")));
+                InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(connection.getInputStream(),
+                        connection);
+                inputStream = new GZIPInputStream(timeoutExtendingInputStream);
             } else {
-                rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+                inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
+
+            rd = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = rd.readLine()) != null) {
@@ -3391,8 +3374,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             long timeToImport = System.currentTimeMillis() - startTime;
             logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
             try {
-                if (gzip != null) {
-                    gzip.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (rd != null) {
+                    rd.close();
                 }
             } catch (IOException e) {
             }
@@ -3626,7 +3612,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (result == null || result.getA() == null) {
             return null;
         }
-        return new Pair<Date, Integer>(result.getA().asDate(), result.getB());
+        return new Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
     }
 
     @Override
@@ -3702,5 +3688,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    private class TimeoutExtendingInputStream extends FilterInputStream {
+
+        private final HttpURLConnection connection;
+
+        protected TimeoutExtendingInputStream(InputStream in, HttpURLConnection connection) {
+            super(in);
+            this.connection = connection;
+        }
+
+        @Override
+        public int read() throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read(b);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            connection.setReadTimeout(10000);
+            return super.read(b, off, len);
+        }
+
     }
 }

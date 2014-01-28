@@ -29,8 +29,17 @@ public class TimeUtils {
         return DateFormat.format(format, timePoint.asDate()).toString();
     }
 
-    public static String formatDuration(long milliseconds) {
+    public static String formatDurationSince(long milliseconds) {
+        int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
+        return formatDuration(secondsTillStart);
+    }
+    
+    public static String formatDurationUntil(long milliseconds) {
         int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
+        return formatDuration(secondsTillStart);
+    }
+    
+    private static String formatDuration(int secondsTillStart) {
         int hours = secondsTillStart / 3600;
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);

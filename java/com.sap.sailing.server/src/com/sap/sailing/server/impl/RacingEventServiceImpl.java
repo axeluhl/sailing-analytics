@@ -235,6 +235,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final MediaLibrary mediaLibrary;
     
+    /**
+     * Currently valid pairs of {@link DeviceConfigurationMatcher}s and {@link DeviceConfiguration}s. 
+     * The contents of this map is persisted and replicated. See {@link DeviceConfigurationMapImpl}.
+     */
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
@@ -1275,14 +1279,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
            RegattaConfiguration newRegattaConfiguration) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
-        synchronized (regatta) {
-            CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
-            if (newCourseArea != regatta.getDefaultCourseArea()) {
-                regatta.setDefaultCourseArea(newCourseArea);
-            }
-            regatta.setRegattaConfiguration(newRegattaConfiguration);
-            mongoObjectFactory.storeRegatta(regatta);
+        CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
+        if (newCourseArea != regatta.getDefaultCourseArea()) {
+            regatta.setDefaultCourseArea(newCourseArea);
         }
+        regatta.setRegattaConfiguration(newRegattaConfiguration);
+        mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }
 
