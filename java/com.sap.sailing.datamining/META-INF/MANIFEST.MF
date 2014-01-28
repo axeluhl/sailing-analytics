@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.sap.sailing.datamining
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ActivationPolicy: lazy
 Import-Package: com.google.gwt.i18n.client,
  com.sap.sailing.server,
  org.osgi.framework;version="1.7.0"
