@@ -1,7 +1,13 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.net.URLEncoder;
+
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
+/**
+ * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
+ * {@link URLEncoder} to help us with the encoding.
+ */
 public class QRCodeUtils {
 
     private static final String fragmentKey = "identifier";

@@ -55,7 +55,7 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
         
         if (regattaConfigurationLoader != null) {
             regattaConfigurationLoader.store();
-            logApply("regatta configuration", configuration.getRegattaConfiguration());
+            logApply("regatta configuration", "[object]");
         }
         
         if (configuration.getAllowedCourseAreaNames() != null) {

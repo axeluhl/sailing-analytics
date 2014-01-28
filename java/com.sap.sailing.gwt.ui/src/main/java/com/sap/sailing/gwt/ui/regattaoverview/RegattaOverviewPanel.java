@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.regattaoverview;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,7 +42,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     protected final StringMessages stringMessages;
     protected final ErrorReporter errorReporter;
     
-    private final String eventIdAsString;
+    private final UUID eventId;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
     private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
@@ -71,11 +72,11 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, 
-            String eventIdAsString, RegattaRaceStatesSettings settings) {
+            UUID eventId, RegattaRaceStatesSettings settings) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.eventIdAsString = eventIdAsString;
+        this.eventId = eventId;
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
@@ -89,7 +90,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(STYLE_CONTENT_WRAPPER);
         
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventIdAsString, settings, uiUpdateTimer);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventId, settings, uiUpdateTimer);
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         regattaRaceStatesComponent.setWidth("100%");
         
@@ -191,12 +192,12 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveEvent() {
-        sailingService.getEventByIdAsString(eventIdAsString, new MarkedAsyncCallback<EventDTO>() {
+        sailingService.getEventById(eventId, new MarkedAsyncCallback<EventDTO>() {
 
             @Override
             protected void handleFailure(Throwable cause) {
                 settingsButton.setEnabled(false);
-                errorReporter.reportError("Error trying to load event with id " + eventIdAsString + " : "
+                errorReporter.reportError("Error trying to load event with id " + eventId + " : "
                         + cause.getMessage());
             }
 
@@ -228,11 +229,11 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveRegattaStructure() {
-        sailingService.getRegattaStructureForEvent(eventIdAsString, new MarkedAsyncCallback<List<RaceGroupDTO>>() {
+        sailingService.getRegattaStructureForEvent(eventId, new MarkedAsyncCallback<List<RaceGroupDTO>>() {
 
             @Override
             protected void handleFailure(Throwable cause) {
-                errorReporter.reportError("Error trying to load regattas for event with id " + eventIdAsString + " : "
+                errorReporter.reportError("Error trying to load regattas for event with id " + eventId + " : "
                         + cause.getMessage());
             }
 

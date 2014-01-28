@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +19,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
  */
 public interface ServerReplyCallback {
     /**
-     * The inputStream does not need to be closed by the implementing class.
+     * The inputStream MUST be closed by the implementing class.
      */
-    void onReply(Intent originalIntent, Context context, InputStream inputStream);
+    void processResponse(Context context, InputStream inputStream, Serializable raceId);
 }

@@ -454,7 +454,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
 
     /**
-     * Sets a new start time on the RaceLog identified by the passed parameters.
+     * Forces a new start time on the RaceLog identified by the passed parameters.
      * @param leaderboardName name of the RaceLog's leaderboard.
      * @param raceColumnName name of the RaceLog's column
      * @param fleetName name of the RaceLog's fleet
@@ -469,8 +469,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime);
 
     /**
-     * Gets the start time and pass identifier for the queried race. Returns <code>null</code> if there
-     * is no attached race log.
+     * Gets the start time and pass identifier for the queried race. Start time might be <code>null</code>.
      */
     Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
 

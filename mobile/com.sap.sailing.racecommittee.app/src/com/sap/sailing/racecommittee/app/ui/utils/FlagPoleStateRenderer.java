@@ -68,7 +68,7 @@ public class FlagPoleStateRenderer {
                 Toast.makeText(v.getContext(), upperFlag.toString() + "|" + lowerFlag.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        if (upperFlag == Flags.CLASS) {
+        if (upperFlag == Flags.CLASS && race.getFleet().getColor() != null) {
             flagView.setPadding(6, 6, 6, 6);
             flagView.setBackgroundColor(getFleetColorId());
         }
