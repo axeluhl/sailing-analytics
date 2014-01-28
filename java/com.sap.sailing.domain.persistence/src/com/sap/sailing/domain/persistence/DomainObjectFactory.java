@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
@@ -102,4 +103,6 @@ public interface DomainObjectFactory {
     DomainFactory getBaseDomainFactory();
 
     Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
+    
+    void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder);
 }

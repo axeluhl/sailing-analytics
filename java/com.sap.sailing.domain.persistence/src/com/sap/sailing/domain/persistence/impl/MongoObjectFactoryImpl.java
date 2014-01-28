@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -86,6 +87,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    
+    //use as follows:
+//    DeviceIdentifierPersistenceHandler handler = 
+//            deviceTypeServiceFinder.findService(
+//            DeviceIdentifierPersistenceHandler.class, identifierType);
+    private static DeviceTypeServiceFinder deviceTypeServiceFinder;
 
     public MongoObjectFactoryImpl(DB database) {
         super();
@@ -966,4 +973,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         configurationsCollections.remove(query);
     }
 
+    @Override
+    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
+            deviceTypeServiceFinder = finder;
+    }
 }

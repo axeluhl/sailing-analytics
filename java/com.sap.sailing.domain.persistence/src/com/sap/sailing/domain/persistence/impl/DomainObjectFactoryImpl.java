@@ -29,12 +29,12 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -81,6 +81,7 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -141,6 +142,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
+
+    //use as follows:
+//    DeviceIdentifierPersistenceHandler handler = deviceTypeServiceFinder.findService(
+//            DeviceIdentifierPersistenceHandler.class, identifierType);
+    private static DeviceTypeServiceFinder deviceTypeServiceFinder;
     
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory) {
         super();
@@ -1448,5 +1454,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         }
         return configuration;
+    }
+
+    @Override
+    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
+        deviceTypeServiceFinder = finder;
     }
 }

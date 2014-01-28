@@ -71,6 +71,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -242,6 +243,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
+
+    private DeviceTypeServiceFinder deviceTypeServiceFinder;
 
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
@@ -2128,4 +2131,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return result;
     }
 
+    @Override
+    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
+        this.deviceTypeServiceFinder = finder;
+        mongoObjectFactory.setDeviceTypeServiceFinder(finder);
+        domainObjectFactory.setDeviceTypeServiceFinder(finder);
+    }
 }

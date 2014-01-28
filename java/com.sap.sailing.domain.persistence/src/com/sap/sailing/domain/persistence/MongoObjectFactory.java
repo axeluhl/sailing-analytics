@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -108,4 +109,5 @@ public interface MongoObjectFactory {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
 
+    void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder);
 }

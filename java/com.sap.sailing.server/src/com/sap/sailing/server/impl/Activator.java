@@ -35,6 +35,12 @@ public class Activator implements BundleActivator {
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
+        
+        // At this point the OSGi resolver is used as device type service finder.
+        // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
+        // this code block is not run, and the test case can inject some other type of finder
+        // instead.
+        racingEventService.setDeviceTypeServiceFinder(new OsgiDeviceTypeServiceFinder(context));
 
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
