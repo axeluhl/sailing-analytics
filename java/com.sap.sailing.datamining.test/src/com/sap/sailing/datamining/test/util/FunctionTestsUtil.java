@@ -51,12 +51,17 @@ public class FunctionTestsUtil {
     }
 
     public static Collection<Function> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
-        Set<Function> markedMethods = new HashSet<>();
+        Collection<Function> markedMethods = getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
+        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
+        return markedMethods;
+    }
+
+    public static Collection<Function> getMarkedMethodsOfDataTypeWithContextAndItsSupertypes() {
+        Collection<Function> markedMethods = new HashSet<>();
         markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
         markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
         markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
         markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
         return markedMethods;
     }
     
@@ -64,7 +69,7 @@ public class FunctionTestsUtil {
         return getMethodFromClass(fromClass, methodName, (Class<?>[]) null);
     }
 
-    private static Method getMethodFromClass(Class<?> fromClass, String methodName, Class<?>... parameterTypes) {
+    public static Method getMethodFromClass(Class<?> fromClass, String methodName, Class<?>... parameterTypes) {
         Method method = null;
         try {
             method = fromClass.getMethod(methodName, parameterTypes);

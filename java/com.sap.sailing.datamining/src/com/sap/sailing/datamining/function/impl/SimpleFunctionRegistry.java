@@ -69,7 +69,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     }
     
     @Override
-    public Iterable<Function> getAllRegisteredFunctions() {
+    public Collection<Function> getAllRegisteredFunctions() {
         Set<Function> registeredMethods = new HashSet<>();
         for (Collection<Function> registeredMethodsOfClass : registeredFunctionsMappedByDeclaringClass.values()) {
             registeredMethods.addAll(registeredMethodsOfClass);

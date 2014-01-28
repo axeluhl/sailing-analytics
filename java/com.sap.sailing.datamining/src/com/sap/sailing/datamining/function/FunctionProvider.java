@@ -6,4 +6,6 @@ public interface FunctionProvider {
 
     public Collection<Function> getDimenionsFor(Class<?> dataType);
 
+    public Collection<Function> getFunctionsFor(Class<?> sourceType);
+
 }

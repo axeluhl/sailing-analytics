@@ -11,7 +11,7 @@ public interface FunctionRegistry {
     public void registerFunctionsRetrievedBy(ParallelFunctionRetriever functionRetriever);
     public void registerAll(Iterable<Function> functions);
 
-    public Iterable<Function> getAllRegisteredFunctions();
+    public Collection<Function> getAllRegisteredFunctions();
     public Map<Class<?>, Iterable<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass();
     public Iterable<Function> getRegisteredFunctionsOf(Class<?> declaringClass);
     public Collection<Function> getAllDimensions();

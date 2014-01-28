@@ -3,12 +3,14 @@ package com.sap.sailing.datamining.function;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.function.impl.RegistryFunctionsProvider;
@@ -16,6 +18,7 @@ import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
+import com.sap.sailing.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.function.test_classes.SubTypeWithMarkedMethods;
@@ -27,7 +30,7 @@ public class TestFunctionProvider {
     private FunctionRegistry functionRegistry;
     
     @Before
-    public void initializeTheFunctionRegistry() {
+    public void initializeFunctionRegistry() {
         functionRegistry = new SimpleFunctionRegistry();
         
         Collection<Class<?>> classesToScan = new HashSet<>();
@@ -36,6 +39,7 @@ public class TestFunctionProvider {
         classesToScan.add(DataTypeWithContextProcessor.class);
         classesToScan.add(SuperTypeWithMarkedMethods.class);
         classesToScan.add(SubTypeWithMarkedMethods.class);
+        classesToScan.add(ExtendingInterface.class);
         ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
@@ -56,6 +60,24 @@ public class TestFunctionProvider {
         
         providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContextImpl.class));
         assertThat(providedDimensions, is(expectedDimensions));
+    }
+    
+    @Test
+    public void testGetFunctionsForType() {
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        Method getRegattaAndRaceName = FunctionTestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
+        
+        Collection<Function> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
+        expectedFunctions.add(new MethodWrappingFunction(getRegattaAndRaceName));
+        
+        Collection<Function> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
+        assertThat(providedFunctions, is(expectedFunctions));
+        
+        expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
+        expectedFunctions.add(new MethodWrappingFunction(getRegattaAndRaceName));
+        
+        providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
+        assertThat(providedFunctions, is(expectedFunctions));
     }
 
 }
