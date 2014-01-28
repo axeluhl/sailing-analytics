@@ -12,28 +12,31 @@ public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCri
     private final Collection<Class<?>> expectingTypes;
 
     public DeclaringTypeOrParameterTypeCriteria(Class<?> expectingType) {
-        this.expectingTypes = new HashSet<>();
-        addAllSupertypesOf(expectingType);
+        this.expectingTypes = getSupertypesOf(expectingType);
         this.expectingTypes.add(expectingType);
     }
 
-    private void addAllSupertypesOf(Class<?> type) {
-        boolean wasSuperclassAdded = false;
-        boolean wereInterfacesAdded = false;
+    private Collection<Class<?>> getSupertypesOf(Class<?> type) {
+        Collection<Class<?>> supertypes = new HashSet<>();
         
-        if (isSuperTypeValid(type)) {
-            wasSuperclassAdded = expectingTypes.add(type.getSuperclass());
+        boolean supertypeAdded = supertypes.addAll(getInterfacesOf(type));
+        if (isSuperclassValid(type)) {
+            boolean superclassAdded = supertypes.add(type.getSuperclass());
+            supertypeAdded = supertypeAdded ? true : superclassAdded;
         }
-        wereInterfacesAdded = expectingTypes.addAll(getInterfacesOf(type));
         
-        if (wasSuperclassAdded || wereInterfacesAdded) {
-            for (Class<?> expectingType : expectingTypes) {
-                addAllSupertypesOf(expectingType);
+        do {
+            Collection<Class<?>> supertypesToAdd = new HashSet<>();
+            for (Class<?> supertype : supertypes) {
+                supertypesToAdd.addAll(getSupertypesOf(supertype));
             }
-        }
+            supertypeAdded = supertypes.addAll(supertypesToAdd);
+        } while (supertypeAdded);
+        
+        return supertypes;
     }
 
-    public boolean isSuperTypeValid(Class<?> type) {
+    private boolean isSuperclassValid(Class<?> type) {
         return type.getSuperclass() != null && !type.getSuperclass().equals(Object.class);
     }
 
