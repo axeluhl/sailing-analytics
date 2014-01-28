@@ -244,8 +244,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final WindStore windStore;
 
-    private DeviceTypeServiceFinder deviceTypeServiceFinder;
-
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
      * object so that service lookups become possible.
@@ -253,18 +251,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private BundleContext bundleContext;
 
     /**
-     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore
-     * competitor store} for competitor management. This base domain factory is then also used for the construction of
-     * the {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection, hence
-     * removes all previously persistent competitors. This is the default for testing and for backward compatibility with
-     * prior releases that did not support a persistent competitor collection.
+     * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
+     * store} for competitor management. This base domain factory is then also used for the construction of the
+     * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection,
+     * hence removes all previously persistent competitors. It uses an {@link EmptyWindStore}. This is the default for
+     * testing and for backward compatibility with prior releases that did not support a persistent competitor
+     * collection. It does not set a {@link DeviceTypeServiceFinder}, so no specific device type-dependent look-ups can
+     * be performed.
      */
     public RacingEventServiceImpl() {
         this(true, null);
     }
     
-    public RacingEventServiceImpl(WindStore windStore) {
-        this(true, windStore);
+    public RacingEventServiceImpl(WindStore windStore, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+        this(true, windStore, deviceTypeServiceFinder);
     }
     
     void setBundleContext(BundleContext bundleContext) {
@@ -273,23 +273,51 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     /**
      * Like {@link #RacingEventServiceImpl()}, but allows callers to specify that the persistent competitor collection
-     * be cleared before the service starts.
+     * be cleared before the service starts. The {@link #loadInitiallyFromDatabase()} method is called.
+     * Callers are expected to {@link #setDeviceTypeServiceFinder(DeviceTypeServiceFinder) set a device type service finder}
+     * first which is then used during loading the leaderboards to resolve device specifications found in race logs; afterwards
+     * the client must call the {@link #loadInitiallyFromDatabase()} method.
      * 
      * @param clearPersistentCompetitorStore
-     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the correcponding
+     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the corresponding
      *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors
      *            created and stored during previous service executions will initially be loaded.
      */
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore) {
-        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), null);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(deviceTypeServiceFinder), clearPersistentCompetitorStore, deviceTypeServiceFinder), null, deviceTypeServiceFinder);
     }
     
-    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore) {
-        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), clearPersistentCompetitorStore), windStore);
+    /**
+     * Initializes the service, sets a default device type service finder and calls {@link #loadInitiallyFromDatabase()}
+     * to load the service state from the persistent store. Note that no
+     * {@link #setDeviceTypeServiceFinder(DeviceTypeServiceFinder) device type service finder} is set, so loading
+     * existing race logs may have trouble resolving device identifiers.
+     * 
+     * @param windStore
+     *            if <code>null</code>, a default {@link MongoWindStore} will be used, based on the persistence set-up
+     *            of this service
+     * @param deviceTypeServiceFinder
+     *            used to find the services handling specific types of tracking devices, such as the persistent storage
+     *            of {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor
+     *            associations per race tracked.
+     */
+    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(deviceTypeServiceFinder),
+                clearPersistentCompetitorStore, deviceTypeServiceFinder), windStore, deviceTypeServiceFinder);
     }
     
-    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore) {
-        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore);
+    /**
+     * @param windStore
+     *            if <code>null</code>, a default {@link MongoWindStore} will be used, based on the persistence set-up
+     *            of this service
+     * @param deviceTypeServiceFinder
+     *            used to find the services handling specific types of tracking devices, such as the persistent storage of
+     *            {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor associations
+     *            per race tracked.
+     */
+    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), 
+                persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore);
     }
 
     /**
@@ -301,6 +329,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore);
     }
 
+    /**
+     * @param windStore
+     *            if <code>null</code>, a default {@link MongoWindStore} will be used, based on the persistence set-up
+     *            of this service
+     * @param deviceTypeServiceFinder
+     *            used to find the services handling specific types of tracking devices, such as the persistent storage of
+     *            {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor associations
+     *            per race tracked.
+     */
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
         logger.info("Created " + this);
@@ -2129,12 +2166,5 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
         return result;
-    }
-
-    @Override
-    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
-        this.deviceTypeServiceFinder = finder;
-        mongoObjectFactory.setDeviceTypeServiceFinder(finder);
-        domainObjectFactory.setDeviceTypeServiceFinder(finder);
     }
 }

@@ -479,6 +479,4 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DomainObjectFactory getDomainObjectFactory();
     
     WindStore getWindStore();
-    
-    void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder);
 }

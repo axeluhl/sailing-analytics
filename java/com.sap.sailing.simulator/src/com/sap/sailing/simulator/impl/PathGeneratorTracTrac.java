@@ -53,7 +53,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     public PathGeneratorTracTrac(SimulationParameters parameters) {
 
         this.parameters = parameters;
-        this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE);
+        this.service = new RacingEventServiceImpl(EmptyWindStore.INSTANCE, null);
         this.tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
 
         this.legIndex = 0;

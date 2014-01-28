@@ -142,14 +142,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
+    private final DeviceTypeServiceFinder deviceTypeServiceFinder;
 
-    //use as follows:
-//    DeviceIdentifierPersistenceHandler handler = deviceTypeServiceFinder.findService(
-//            DeviceIdentifierPersistenceHandler.class, identifierType);
-    private static DeviceTypeServiceFinder deviceTypeServiceFinder;
-    
+    /**
+     * Uses <code>null</code> as the {@link DeviceTypeServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
+     * using this instance of a {@link DomainObjectFactory}.
+     */
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory) {
+        this(db, baseDomainFactory, /* deviceTypeServiceFinder */ null);
+    }
+    
+    public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, DeviceTypeServiceFinder deviceTypeServiceFinder) {
         super();
+        this.deviceTypeServiceFinder = deviceTypeServiceFinder;
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.database = db;
@@ -1454,10 +1459,5 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
         }
         return configuration;
-    }
-
-    @Override
-    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
-        deviceTypeServiceFinder = finder;
     }
 }

@@ -19,28 +19,30 @@ public class Activator implements BundleActivator {
     
     private static ExtenderBundleTracker extenderBundleTracker;
 
-    private final RacingEventServiceImpl racingEventService;
+    private RacingEventServiceImpl racingEventService;
+    
+    private final boolean clearPersistentCompetitors;
 
     public Activator() {
-        boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
+        clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
         logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
-        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors);
+        
     }
     
     public void start(BundleContext context) throws Exception {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
-
-        // register the racing service in the OSGi registry
-        racingEventService.setBundleContext(context);
-        context.registerService(RacingEventService.class.getName(), racingEventService, null);
         
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
-        racingEventService.setDeviceTypeServiceFinder(new OsgiDeviceTypeServiceFinder(context));
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, new OsgiDeviceTypeServiceFinder(context));
+
+        // register the racing service in the OSGi registry
+        racingEventService.setBundleContext(context);
+        context.registerService(RacingEventService.class.getName(), racingEventService, null);
 
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());

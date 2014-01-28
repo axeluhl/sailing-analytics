@@ -87,16 +87,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final DeviceTypeServiceFinder deviceTypeServiceFinder;
     
-    //use as follows:
-//    DeviceIdentifierPersistenceHandler handler = 
-//            deviceTypeServiceFinder.findService(
-//            DeviceIdentifierPersistenceHandler.class, identifierType);
-    private static DeviceTypeServiceFinder deviceTypeServiceFinder;
-
+    /**
+     * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
+     * Use this constructor only for testing purposes or in cases where there will happen absolutely no access to
+     * {@link DeviceIdentifier} objects.
+     */
     public MongoObjectFactoryImpl(DB database) {
-        super();
+        this(database, /* deviceTypeServiceFinder */ null);
+    }
+    
+    public MongoObjectFactoryImpl(DB database, DeviceTypeServiceFinder deviceTypeServiceFinder) {
         this.database = database;
+        this.deviceTypeServiceFinder = deviceTypeServiceFinder;
     }
     
     @Override
@@ -971,10 +975,5 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject();
         query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
         configurationsCollections.remove(query);
-    }
-
-    @Override
-    public void setDeviceTypeServiceFinder(DeviceTypeServiceFinder finder) {
-            deviceTypeServiceFinder = finder;
     }
 }
