@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -140,8 +141,9 @@ public class MasterDataImportPanel extends VerticalPanel {
                             if (leaderboardGroupsCreated > 0) {
                                 leaderboardGroupRefresher.fillLeaderboardGroups();
                             }
+                            Set<String> overwrittenRegattas = result.getOverwrittenRegattaNames();
                             showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated,
-                                    regattasCreated);
+                                    regattasCreated, overwrittenRegattas);
                             changeButtonStateAccordingToApplicationState();
                         }
 
@@ -186,9 +188,17 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void showSuccessAlert(int leaderboardsCreated, int leaderboardGroupsCreated, int eventsCreated,
-            int regattasCreated) {
-        Window.alert(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
+            int regattasCreated, Set<String> overwrittenRegattas) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(stringMessages.importSuccess(leaderboardGroupsCreated, leaderboardsCreated, eventsCreated,
                 regattasCreated));
+        if (overwrittenRegattas.size() > 0) {
+            buffer.append("\n\n" + stringMessages.importSuccessOverwriteInfo() + "\n");
+            for (String regattaName : overwrittenRegattas) {
+                buffer.append(regattaName + "\n");
+            }
+        }
+        Window.alert(buffer.toString());
 
     }
 
