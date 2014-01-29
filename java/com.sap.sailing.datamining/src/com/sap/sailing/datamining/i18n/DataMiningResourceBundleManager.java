@@ -25,8 +25,14 @@ public class DataMiningResourceBundleManager implements DataMiningStringMessages
         initializeSupportedLocales(defaultLocale);
     }
     
-    protected String get(Locale locale, String message, String... parameters) {
-        String result = getResourceBundle(locale).getString(message);
+    @Override
+    public String get(Locale locale, String messageKey) {
+        return get(locale, messageKey, new String[0]);
+    }
+    
+    @Override
+    public String get(Locale locale, String messageKey, String... parameters) {
+        String result = getResourceBundle(locale).getString(messageKey);
         
         for (int i = 0; i < parameters.length; i++) {
             String replacementRegex = MESSAGE_PARAMETER_START + i + MESSAGE_PARAMETER_END;
@@ -52,21 +58,6 @@ public class DataMiningResourceBundleManager implements DataMiningStringMessages
     @Override
     public String get(Locale locale, Message message) {
         return get(locale, message, new String[0]);
-    }
-    
-    @Override
-    public String get(String localeName, Message message, String... parameters) {
-        return get(getLocaleFrom(localeName), message, parameters);
-    }
-    
-    @Override
-    public String get(String localeName, Message message, Message... parameters) {
-        return get(getLocaleFrom(localeName), message, parameters);
-    }
-    
-    @Override
-    public String get(String localeName, Message message) {
-        return get(getLocaleFrom(localeName), message);
     }
 
     @Override

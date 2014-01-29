@@ -2,23 +2,40 @@ package com.sap.sailing.datamining.function.impl;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Locale;
 
+import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
+import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
 import com.sap.sailing.datamining.function.Function;
 
-public class MethodWrappingFunction implements Function {
+public class MethodWrappingFunction extends AbstractFunction implements Function {
 
     private Method method;
     
-    private boolean isDimension;
-
+    private String messageKey;
+    
     public MethodWrappingFunction(Method method) {
+        super(isMethodADimension(method));
         this.method = method;
-        initializeIsDimension();
+        initializeMessageKey();
     }
 
-    private void initializeIsDimension() {
-        isDimension = method.getAnnotation(Dimension.class) != null;
+    private static boolean isMethodADimension(Method method) {
+        return method.getAnnotation(Dimension.class) != null;
+    }
+
+    private void initializeMessageKey() {
+        if (method.getAnnotation(Dimension.class) != null) {
+            setMessageKey(method.getAnnotation(Dimension.class).value());
+        }
+        if (method.getAnnotation(SideEffectFreeValue.class) != null) {
+            setMessageKey(method.getAnnotation(SideEffectFreeValue.class).value());
+        }
+    }
+
+    private void setMessageKey(String messageKey) {
+        this.messageKey = messageKey;
     }
 
     @Override
@@ -32,8 +49,19 @@ public class MethodWrappingFunction implements Function {
     }
     
     @Override
-    public boolean isDimension() {
-        return isDimension;
+    public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
+        if (getMessageKey() == null || getMessageKey().isEmpty()) {
+            return getShortMethodName();
+        }
+        return stringMessages.get(locale, getMessageKey());
+    }
+    
+    private String getShortMethodName() {
+        return method.getName();
+    }
+
+    private String getMessageKey() {
+        return messageKey;
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.function;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Map;
 
 public interface FunctionRegistry {
 
@@ -12,7 +11,6 @@ public interface FunctionRegistry {
     public void registerAll(Iterable<Function> functions);
 
     public Collection<Function> getAllRegisteredFunctions();
-    public Map<Class<?>, Iterable<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass();
     public Iterable<Function> getRegisteredFunctionsOf(Class<?> declaringClass);
     public Collection<Function> getAllDimensions();
 

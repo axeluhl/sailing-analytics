@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -75,16 +74,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             registeredMethods.addAll(registeredMethodsOfClass);
         }
         return registeredMethods;
-    }
-    
-    @Override
-    public Map<Class<?>, Iterable<Function>> getRegisteredFunctionsMappedByTheirDeclaringClass() {
-        Map<Class<?>, Iterable<Function>> registeredFunctions = new HashMap<>();
-        for (Entry<Class<?>, Collection<Function>> registeredFunctionsEntry : registeredFunctionsMappedByDeclaringClass.entrySet()) {
-            Iterable<Function> functionsAsIterable = registeredFunctionsEntry.getValue();
-            registeredFunctions.put(registeredFunctionsEntry.getKey(), functionsAsIterable);
-        }
-        return registeredFunctions;
     }
     
     @Override

@@ -23,11 +23,12 @@ import com.sap.sailing.datamining.function.impl.RegistryFunctionsProvider;
 import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
 
 public class Activator implements BundleActivator {
-    
+
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getName());
-    
+
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60,
+            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     private static BundleContext context;
 
@@ -37,9 +38,9 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
-        
+
         registerDataMiningClassesWithMarkedMethodsService();
-        
+
         functionRegistry = createAndBuildFunctionRegistry();
         functionProvider = new RegistryFunctionsProvider(functionRegistry);
     }
@@ -50,9 +51,9 @@ public class Activator implements BundleActivator {
 
     private FunctionRegistry createAndBuildFunctionRegistry() {
         FunctionRegistry functionRegistry = new SimpleFunctionRegistry();
-            for (ServiceReference<?> serviceReference : getAllClassesWithMarkedMethodsServices()) {
-                registerServiceTo(serviceReference, functionRegistry);
-            }
+        for (ServiceReference<?> serviceReference : getAllClassesWithMarkedMethodsServices()) {
+            registerServiceTo(serviceReference, functionRegistry);
+        }
         return functionRegistry;
     }
 
@@ -64,7 +65,7 @@ public class Activator implements BundleActivator {
         }
         return new ServiceReference<?>[0];
     }
-    
+
     @SuppressWarnings("unchecked")
     private void registerServiceTo(ServiceReference<?> serviceReference, FunctionRegistry functionRegistry) {
         try {
@@ -77,7 +78,7 @@ public class Activator implements BundleActivator {
             return;
         }
     }
-    
+
     private void registerSpecificServiceTo(ClassesWithFunctionsService service, FunctionRegistry functionRegistry) {
         if (service.hasInternalClassesWithMarkedMethods()) {
             registerInternalMarkedFunctionsTo(service, functionRegistry);
@@ -87,8 +88,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void registerInternalMarkedFunctionsTo(ClassesWithFunctionsService service,
-            FunctionRegistry functionRegistry) {
+    public void registerInternalMarkedFunctionsTo(ClassesWithFunctionsService service, FunctionRegistry functionRegistry) {
         Collection<Class<?>> internalClasses = service.getInternalClassesWithMarkedMethods();
         ParallelFunctionRetriever internalMarkedFunctionsRetriever = new PartitioningParallelMarkedFunctionRetriever(
                 internalClasses, getExecutor());
@@ -113,7 +113,7 @@ public class Activator implements BundleActivator {
     public static ThreadPoolExecutor getExecutor() {
         return executor;
     }
-    
+
     public static FunctionProvider getFunctionProvider() {
         return functionProvider;
     }

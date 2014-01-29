@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.function;
+package com.sap.sailing.datamining.function.impl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.impl.DeclaringTypeOrParameterTypeCriteria;
 import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
