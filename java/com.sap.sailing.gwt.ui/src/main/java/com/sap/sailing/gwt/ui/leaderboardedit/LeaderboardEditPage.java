@@ -23,6 +23,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages, userAgent);
+                    leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {

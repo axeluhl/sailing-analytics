@@ -2,35 +2,27 @@ package com.sap.sailing.selenium.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-
 import java.net.URL;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.runner.Description;
-
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.ParentRunner;
-
-import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.FrameworkField;
 import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
-
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
-
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.sap.sailing.selenium.core.Selenium.SeleniumJUnit4ClassRunner;
 import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefinition;
-
 import com.sap.sailing.selenium.core.impl.TestEnvironmentImpl;
 
 /**
@@ -142,17 +134,17 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
         }
 
         private String createDriverDescription() {
-            return descripeDriver() + descripeCapabilities();
+            return describeDriver() + describeCapabilities();
         }
 
-        private String descripeDriver() {
+        private String describeDriver() {
             String driver = this.definition.getDriver();
             int index = driver.lastIndexOf('.');
 
             return (index != -1 ? driver.substring(index + 1) : driver);
         }
 
-        private String descripeCapabilities() {
+        private String describeCapabilities() {
             Map<String, String> capabilities = this.definition.getCapabilities();
 
             if (capabilities.isEmpty())
@@ -177,12 +169,11 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
         private TestEnvironmentImpl createTestEnvironment() throws Exception {
             try {
                 String driverClassname = this.definition.getDriver();
-                Map<String, String> capabilityDefenitions = this.definition.getCapabilities();
+                Map<String, String> capabilityDefinitions = this.definition.getCapabilities();
 
                 @SuppressWarnings("unchecked")
                 Class<WebDriver> clazz = (Class<WebDriver>) Class.forName(driverClassname);
-                Capabilities capabilities = new DesiredCapabilities(capabilityDefenitions);
-
+                DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
                 WebDriver driver = constructor.newInstance(capabilities);
                 

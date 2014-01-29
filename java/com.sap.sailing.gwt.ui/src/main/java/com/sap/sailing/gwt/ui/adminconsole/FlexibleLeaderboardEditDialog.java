@@ -38,7 +38,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
         sailingEventsListBox = createSailingEventListBox();
         for (EventDTO event : existingEvents) {
             for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                if (courseArea.uuidAsString.equals(leaderboard.getCourseAreaIdAsString())) {
+                if (courseArea.id.equals(leaderboard.getCourseAreaId())) {
                     int index = existingEvents.indexOf(event) + 1; // + 1 because of the "Please select... item"
                     sailingEventsListBox.setSelectedIndex(index);
                     onEventSelectionChanged();

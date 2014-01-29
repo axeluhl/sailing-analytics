@@ -17,7 +17,8 @@ import com.sap.sailing.domain.tracking.Wind;
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {}
+    public void statusChanged(TrackedRaceStatus newStatus) {
+    }
 
     @Override
     public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {

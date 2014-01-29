@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -33,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 
 public class RegattaDetailsComposite extends Composite {
@@ -318,7 +318,7 @@ public class RegattaDetailsComposite extends Composite {
         if (regatta != null) {
             regattaName.setText(regatta.getName());
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.getName() : "");
-            defaultCourseArea.setText(regatta.defaultCourseAreaUuidAsString == null ? "" : regatta.defaultCourseAreaName);
+            defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {

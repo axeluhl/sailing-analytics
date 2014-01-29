@@ -27,7 +27,6 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -37,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class RegattaListComposite extends Composite implements RegattaDisplayer {
 
@@ -221,7 +221,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
         
-        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuidAsString,
+        sailingService.updateRegatta(regattaName, editedRegatta.defaultCourseAreaUuid,
                 editedRegatta.configuration,
                 new AsyncCallback<Void>() {
             @Override

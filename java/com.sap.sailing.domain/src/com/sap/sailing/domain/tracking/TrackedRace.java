@@ -450,6 +450,7 @@ public interface TrackedRace extends Serializable {
 
     /**
      * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     * or if the competitor has not finished one of the legs in the race.
      */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
@@ -558,12 +559,6 @@ public interface TrackedRace extends Serializable {
     void addStartTimeChangedListener(StartTimeChangedListener listener);
 
     /**
-     * For a competitor, computes the distance (TODO not yet clear whether over ground or projected onto wind direction)
-     * into the race <code>secondsIntoTheRace</code> after the race {@link TrackedRace#getStart() started}.
-     */
-    Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace);
-
-    /**
      * Tells how far the given <code>competitor</code> was from the start line at the time point of the given seconds before the start.
      * <p>
      * 
@@ -576,7 +571,7 @@ public interface TrackedRace extends Serializable {
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
      * returned. If the competitor's position cannot be determined, <code>null</code> is returned.
      */
-    Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart);
+    Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart);
 
     /**
      * Tells how far the given <code>competitor</code> was from the start line at the given <code>timePoint</code>.
@@ -603,9 +598,17 @@ public interface TrackedRace extends Serializable {
     Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor);
     
     /**
+     * At the given timepoint and for the competitor, this method returns the distance to the starboard end of the start line
+     * or---if the start waypoint was a single mark---the distance to the single start mark at the timepoint.
+     * If the competitor hasn't started yet, <code>null</code> is returned.
+     * 
+     */
+    Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint);
+    
+    /**
      * The estimated speed of the competitor at the time point of the given seconds before the start of race. 
      */
-    Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart);
+    Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart);
     
     /**
      * The speed of the competitor when crossing the start line. It will return null if there are no recorded

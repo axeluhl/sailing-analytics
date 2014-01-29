@@ -52,7 +52,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -72,6 +71,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
     TrackedRaceChangedListener {
@@ -299,7 +299,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         TextColumn<StrippedLeaderboardDTO> courseAreaColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                return leaderboard.defaultCourseAreaIdAsString == null ? "" : leaderboard.defaultCourseAreaName;
+                return leaderboard.defaultCourseAreaId == null ? "" : leaderboard.defaultCourseAreaName;
             }
         };
 
@@ -324,7 +324,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
                                     leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
                                     leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
-                                    leaderboardDTO.defaultCourseAreaIdAsString);
+                                    leaderboardDTO.defaultCourseAreaId);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,
@@ -340,7 +340,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             });
                             dialog.show();
                         } else {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaIdAsString);
+                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaId);
                             openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
                         }
                     }
@@ -435,6 +435,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
+        trackedRacesListComposite.ensureDebugId("TrackedRaces");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -539,6 +540,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
+        raceColumnTable.ensureDebugId("RaceColumnTable");
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
         raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
@@ -561,6 +563,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         vPanel.add(selectedLeaderboardRaceButtonPanel);
 
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
+        addRaceColumnsButton.ensureDebugId("AddRaceColumnsButton");
         selectedLeaderboardRaceButtonPanel.add(addRaceColumnsButton);
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -994,6 +997,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 updateRaceColumnsOfLeaderboard(leaderboardName, existingRaceColumns, result);
             }
         });
+        raceDialog.ensureDebugId("RaceColumnsInLeaderboardDialog");
         raceDialog.show();
     }
 
@@ -1107,7 +1111,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
-                        newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIdAsString(),
+                        newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
                         new MarkedAsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void handleFailure(Throwable t) {
@@ -1163,7 +1167,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(), leaderboardToUpdate.getDisplayName(),
-                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIdAsString(), new AsyncCallback<StrippedLeaderboardDTO>() {
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaId(), new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "

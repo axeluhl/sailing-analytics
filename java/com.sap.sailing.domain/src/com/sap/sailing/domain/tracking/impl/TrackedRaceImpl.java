@@ -319,10 +319,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     TrackedRaceImpl.this.notifyAll();
                 }
                 try {
+                    logger.info("Started loading wind tracks for " + getRace().getName());
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks);
+                    logger.info("Finished loading wind tracks for " + getRace().getName() + "! Found " + windTracks.size() + " wind tracks for this race!");
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -1666,7 +1668,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                         if (legType != LegType.REACHING) {
                             GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                            if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                            if (!track.hasDirectionChange(timePoint,
+                                    /* be even more conservative than maneuver detection to really try to get "straight line" behavior */
+                                    getManeuverDegreeAngleThreshold()/2.)) {
                                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
                                         .getEstimatedSpeed(timePoint, weigher);
                                 if (estimatedSpeedWithConfidence != null
@@ -1883,7 +1887,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.<p>
      * 
      * The time period assumed for a maneuver duration is taken from the
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
@@ -2365,18 +2369,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+    public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
         if (getStartOfRace() == null) {
             return null;
         }
 
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
         return getDistanceToStartLine(competitor, beforeStart);
     }
 
@@ -2421,12 +2419,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+    public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         if (getStartOfRace() == null) {
             return null;
         }
 
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
         return getTrack(competitor).getEstimatedSpeed(beforeStart);
     }
 
@@ -2439,6 +2437,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
                     competitorStartTime, /* extrapolate */false);
             final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(competitorStartTime);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        if (timePoint != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    timePoint, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
             if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
                 result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
             } else {
@@ -2475,15 +2491,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     Mark mark2 = markIter.next();
                     final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
                     final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
-                    Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
-                    Waypoint nextWaypoint = waypointsIter.next();
-                    Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
-                            .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
-                    Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2.getDifferenceTo(bearingFromStartToNextWaypoint);
-                    if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
-                        starboardMarkPosition = estimatedPositionMark1;
+                    if (approximatePositionOfStart != null && estimatedPositionMark1 != null && estimatedPositionMark2 != null) {
+                        Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
+                        Waypoint nextWaypoint = waypointsIter.next();
+                        Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
+                                .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
+                        Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2
+                                .getDifferenceTo(bearingFromStartToNextWaypoint);
+                        if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
+                            starboardMarkPosition = estimatedPositionMark1;
+                        } else {
+                            starboardMarkPosition = estimatedPositionMark2;
+                        }
                     } else {
-                        starboardMarkPosition = estimatedPositionMark2;
+                        // at least one of the line's two marks' positions couldn't be determined; can't say which
+                        // one is on starboard and therefore don't know anything
+                        starboardMarkPosition = null;
                     }
                 } else {
                     // only one waypoint in course; cannot determine bearing to next mark

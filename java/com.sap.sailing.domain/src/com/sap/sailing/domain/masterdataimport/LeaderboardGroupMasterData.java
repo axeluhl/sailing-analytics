@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +13,9 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 
 /**
  * Holds leaderboard group object AND its leaderboards, etc
- * @author d054528
- *
+ * 
+ * @author d054528 Frederik Petersen
+ * 
  */
 public class LeaderboardGroupMasterData {
 
@@ -27,11 +29,11 @@ public class LeaderboardGroupMasterData {
     private final Set<EventMasterData> events;
     private final Set<RegattaMasterData> regattas;
     private final Map<String, Double> metaColumnsWithFactors;
-    private final List<String> overallLeaderboardSuppressedCompetitorIds;
+    private final List<Serializable> overallLeaderboardSuppressedCompetitorIds;
 
     public LeaderboardGroupMasterData(String name, String description, boolean displayGroupsRevese,
             boolean hasOverallLeaderboard, ScoringScheme overallLeaderboardScoringScheme,
-            int[] overallLeaderboardDiscardingRule, List<String> overallLeaderboardAuppressedCompetitorIds,
+            int[] overallLeaderboardDiscardingRule, List<Serializable> overallLeaderboardAuppressedCompetitorIds,
             Map<String, Double> metaColumnsWithFactors, Iterable<LeaderboardMasterData> leaderboards, Set<EventMasterData> events, Set<RegattaMasterData> regattas) {
         super();
         this.name = name;
@@ -47,9 +49,9 @@ public class LeaderboardGroupMasterData {
         this.regattas = regattas;
     }
     
-    public Competitor getCompetitorById(String competitorId) {
+    public Competitor getCompetitorById(Serializable id) {
         for (LeaderboardMasterData leaderboard : leaderboards) {
-            Competitor c = leaderboard.getCompetitorsById().get(competitorId);
+            Competitor c = leaderboard.getCompetitorsById().get(id);
             if (c != null) {
                 return c;
             }
@@ -73,7 +75,7 @@ public class LeaderboardGroupMasterData {
         return overallLeaderboardScoringScheme;
     }
 
-    public List<String> getOverallLeaderboardSuppressedCompetitorIds() {
+    public List<Serializable> getOverallLeaderboardSuppressedCompetitorIds() {
         return overallLeaderboardSuppressedCompetitorIds;
     }
 

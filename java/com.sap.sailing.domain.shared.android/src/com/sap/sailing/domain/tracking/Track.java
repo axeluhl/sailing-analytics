@@ -53,6 +53,14 @@ public interface Track<FixType extends Timed> extends Serializable {
     /**
      * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
      * will be thrown in case the caller has failed to do so.
+     * 
+     * @return The smoothened fixes between from and to.
+     */
+    Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive);
+
+    /**
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
      */
     Iterable<FixType> getRawFixes();
 

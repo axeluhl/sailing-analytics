@@ -132,7 +132,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
                 if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
                         && startDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
-                    btSetDate.setText("Today");
+                    btSetDate.setText(R.string.today);
                 } else {
                     String dateString = DateFormat.getDateFormat(getActivity()).format(startDate.getTime());
                     btSetDate.setText(dateString);

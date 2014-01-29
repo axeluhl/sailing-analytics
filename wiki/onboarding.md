@@ -53,6 +53,7 @@ This document describes the onboarding process for a new team member (developer)
   - Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   - Check that JDK 1.6 has been matched to JavaSE-1.6 and that JDK 1.7 has been matched to JavaSE-1.7 (...>Installed JREs>Execution Environments)
   - It is also possible to match the SAPJVM 6 or 7 to the JavaSE-1.6 (for profiling purposes)
+  - Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
   - Import all Race Analysis projects from the `java/` subdirectory of the git main folder
   - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   - Set the Eclipse target platform to race-analysis-p2-ide-local.target (located in com.sap.sailing.targetplatform/definitions)

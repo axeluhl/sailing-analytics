@@ -42,7 +42,7 @@ public class AutoUpdaterChecker {
         this.state = new AutoUpdaterStateImpl(forceUpdate);
 
         this.dialog = new ProgressDialog(context);
-        dialog.setTitle("Auto-Update");
+        dialog.setTitle(context.getString(R.string.auto_update));
         dialog.setCancelable(true);
         dialog.setButton(context.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
@@ -70,12 +70,12 @@ public class AutoUpdaterChecker {
 
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             dialog.setIndeterminate(true);
-            dialog.setMessage("Checking for version information on server...");
+            dialog.setMessage(context.getString(R.string.auto_update_checking_version));
             dialog.show();
             
             try {
                 URL versionUrl = composeVersionUrl();
-                ExLog.i(TAG, String.format("Trying to download auto-update info from %s", versionUrl.toString()));
+                ExLog.i(TAG, context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
 
                 final AutoUpdaterVersionDownloader downloader = new AutoUpdaterVersionDownloader(this);
                 downloader.execute(versionUrl);
@@ -87,7 +87,7 @@ public class AutoUpdaterChecker {
                 });
             } catch (MalformedURLException e) {
                 onError();
-                Toast.makeText(context, "The version file link was not valid.", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.auto_update_version_file_url_invalid, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -118,11 +118,11 @@ public class AutoUpdaterChecker {
                 }
             };
 
-            String messageFormat = needsUpdate ? "Click 'Install' to perform the update to version %d." : "You already have installed the version offered by the server (version %d).";
+            String messageFormat = needsUpdate ? context.getString(R.string.auto_update_click_install) : context.getString(R.string.auto_update_force_install);
             
             AlertDialog.Builder updateDialog = new AlertDialog.Builder(context);
             updateDialog
-                .setTitle("Auto-Update")
+                .setTitle(R.string.auto_update)
                 .setMessage(String.format(messageFormat, serverVersion))
                 .setPositiveButton(context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok), needsUpdate ? updateListener : dismissListener)
                 .setNegativeButton(context.getString(needsUpdate ?  android.R.string.cancel : R.string.auto_update_install_anyway), needsUpdate ? dismissListener : updateListener)
@@ -131,12 +131,12 @@ public class AutoUpdaterChecker {
                 updateDialog.show();
             } else {
                 dialog.dismiss();
-                Toast.makeText(context, "You are already up to date!", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.auto_update_already_up_to_date, Toast.LENGTH_LONG).show();
             }
         }
 
         private void downloadUpdate(String apkFileName) {
-            dialog.setMessage("Downloading APK from server...");
+            dialog.setMessage(context.getString(R.string.auto_update_downloading_apk));
             
             try {
                 File target = updater.createApkTargetFile();
@@ -154,10 +154,10 @@ public class AutoUpdaterChecker {
                 });
             } catch (MalformedURLException e) {
                 onError();
-                Toast.makeText(context, "The download link was not valid.", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.auto_update_apk_link_invalid, Toast.LENGTH_LONG).show();
             } catch (IOException e) {
                 onError();
-                Toast.makeText(context, "The download file couldn't be created.", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.auto_update_apk_file_error, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -180,8 +180,8 @@ public class AutoUpdaterChecker {
             dialog.dismiss();
             AlertDialog.Builder errorDialog = new AlertDialog.Builder(context);
             errorDialog
-                .setTitle("Auto-Update")
-                .setMessage("Error while trying to auto-update.")
+                .setTitle(R.string.auto_update)
+                .setMessage(R.string.auto_update_error)
                 .setIcon(context.getResources().getDrawable(android.R.drawable.ic_dialog_alert))
                 .setPositiveButton(context.getString(android.R.string.ok), new OnClickListener() {
                         @Override

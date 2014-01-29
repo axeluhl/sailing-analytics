@@ -127,7 +127,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
         Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
-        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingSide*/null);
+        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingInstruction*/null);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         assertSame(receiversWaypoint1, receiversSecondCopyOfWaypoint1);
