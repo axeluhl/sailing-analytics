@@ -29,5 +29,9 @@ public class SimpleClassWithMarkedMethods {
     public void unmarkedMethod() {
         
     }
+    
+    public int increment(int i) {
+        return i + 1;
+    }
 
 }

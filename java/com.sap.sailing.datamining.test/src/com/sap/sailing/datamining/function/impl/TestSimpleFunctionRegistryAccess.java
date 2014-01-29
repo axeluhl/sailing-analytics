@@ -16,8 +16,6 @@ import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sailing.datamining.test.function.test_classes.SubTypeWithMarkedMethods;
-import com.sap.sailing.datamining.test.function.test_classes.SuperTypeWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistryAccess {
@@ -32,8 +30,6 @@ public class TestSimpleFunctionRegistryAccess {
         classesToScan.add(SimpleClassWithMarkedMethods.class);
         classesToScan.add(DataTypeWithContext.class);
         classesToScan.add(DataTypeWithContextProcessor.class);
-        classesToScan.add(SuperTypeWithMarkedMethods.class);
-        classesToScan.add(SubTypeWithMarkedMethods.class);
         ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
