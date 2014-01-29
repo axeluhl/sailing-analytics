@@ -48,9 +48,9 @@ public class TestSimpleFunctionRegistryAccess {
 
     @Test
     public void testGetAllDimensions() {
-        Collection<Function> modifiableExpectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
+        Collection<Function<?>> modifiableExpectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
         modifiableExpectedDimensions.addAll(FunctionTestsUtil.getDimensionsFor(SimpleClassWithMarkedMethods.class));
-        Iterable<Function> expectedDimensions = modifiableExpectedDimensions;
+        Iterable<Function<?>> expectedDimensions = modifiableExpectedDimensions;
         assertThat(functionRegistry.getAllDimensions(), is(expectedDimensions));
     }
 

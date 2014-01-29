@@ -57,9 +57,9 @@ public class TestFunctionProvider {
     public void testGetDimensionsForType() {
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         
-        Collection<Function> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
+        Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
         
-        Collection<Function> providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContext.class));
+        Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContext.class));
         assertThat(providedDimensions, is(expectedDimensions));
         
         providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContextImpl.class));
@@ -71,14 +71,14 @@ public class TestFunctionProvider {
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
         Method getRegattaAndRaceName = FunctionTestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
         
-        Collection<Function> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        expectedFunctions.add(new MethodWrappingFunction(getRegattaAndRaceName));
+        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
+        expectedFunctions.add(new MethodWrappingFunction<>(getRegattaAndRaceName));
         
-        Collection<Function> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
+        Collection<Function<?>> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
         assertThat(providedFunctions, is(expectedFunctions));
         
         expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
-        expectedFunctions.add(new MethodWrappingFunction(getRegattaAndRaceName));
+        expectedFunctions.add(new MethodWrappingFunction<>(getRegattaAndRaceName));
         
         providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
         assertThat(providedFunctions, is(expectedFunctions));

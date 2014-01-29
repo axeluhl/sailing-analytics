@@ -29,10 +29,10 @@ public class FunctionTestsUtil {
         return executor;
     }
     
-    public static Collection<Function> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
-        Set<Function> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
-        markedMethods.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
+    public static Collection<Function<?>> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
+        Set<Function<?>> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
         return markedMethods;
     }
     
@@ -40,9 +40,9 @@ public class FunctionTestsUtil {
         return getMethodFromClass(SimpleClassWithMarkedMethods.class, name);
     }
 
-    public static Collection<Function> getMethodsOfExternalLibraryClass() {
-        Set<Function> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction(getMethodFromExternalLibraryClass("foo")));
+    public static Collection<Function<?>> getMethodsOfExternalLibraryClass() {
+        Set<Function<?>> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromExternalLibraryClass("foo")));
         return markedMethods;
     }
 
@@ -50,18 +50,18 @@ public class FunctionTestsUtil {
         return getMethodFromClass(ExternalLibraryClass.class, name);
     }
 
-    public static Collection<Function> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
-        Collection<Function> markedMethods = getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
+    public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
+        Collection<Function<?>> markedMethods = getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
         return markedMethods;
     }
 
-    public static Collection<Function> getMarkedMethodsOfDataTypeWithContextAndItsSupertypes() {
-        Collection<Function> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        markedMethods.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+    public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextAndItsSupertypes() {
+        Collection<Function<?>> markedMethods = new HashSet<>();
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
         return markedMethods;
     }
     
@@ -79,7 +79,7 @@ public class FunctionTestsUtil {
         return method;
     }
 
-    public static Collection<Function> getDimensionsFor(Class<?> dataType) {
+    public static Collection<Function<?>> getDimensionsFor(Class<?> dataType) {
         if (dataType.equals(DataTypeWithContext.class) || dataType.equals(DataTypeWithContextImpl.class)) {
             return getDimensionsForDataTypeWithContext();
         }
@@ -89,18 +89,18 @@ public class FunctionTestsUtil {
         throw new IllegalArgumentException("There are no dimensions for " + dataType.getSimpleName());
     }
 
-    private static Collection<Function> getDimensionsForSimpleClassWithMarkedMethods() {
-        Collection<Function> dimensions = new HashSet<>();
-        dimensions.add(new MethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+    private static Collection<Function<?>> getDimensionsForSimpleClassWithMarkedMethods() {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        dimensions.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("dimension")));
         return dimensions;
     }
 
-    private static Collection<Function> getDimensionsForDataTypeWithContext() {
-        Collection<Function> dimensions = new HashSet<>();
-        dimensions.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        dimensions.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        dimensions.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
-        dimensions.add(new MethodWrappingFunction(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
+    private static Collection<Function<?>> getDimensionsForDataTypeWithContext() {
+        Collection<Function<?>> dimensions = new HashSet<>();
+        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
         return dimensions;
     }
 

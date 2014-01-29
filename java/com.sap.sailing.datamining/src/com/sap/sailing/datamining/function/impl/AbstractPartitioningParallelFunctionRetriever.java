@@ -15,7 +15,7 @@ import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
 import com.sap.sailing.datamining.impl.AbstractParallelComponent;
 
 public abstract class AbstractPartitioningParallelFunctionRetriever
-                      extends AbstractParallelComponent<Void, Collection<Function>>
+                      extends AbstractParallelComponent<Void, Collection<Function<?>>>
                       implements ParallelFunctionRetriever {
 
     private List<Class<?>> classesToScan;
@@ -50,7 +50,7 @@ public abstract class AbstractPartitioningParallelFunctionRetriever
         }
     }
 
-    private ComponentWorker<Collection<Function>> createWorker(Class<?> classToScan) {
+    private ComponentWorker<Collection<Function<?>>> createWorker(Class<?> classToScan) {
         Collection<Class<?>> classToScanAsCollection = new HashSet<>();
         classToScanAsCollection.add(classToScan);
         return createWorker(classToScanAsCollection);
@@ -66,12 +66,12 @@ public abstract class AbstractPartitioningParallelFunctionRetriever
     protected abstract FunctionRetrievalWorker createWorker(Iterable<Class<?>> classesToScan);
 
     @Override
-    protected Collection<Function> finalizeData() {
-        Collection<Function> data = new HashSet<>();
-        for (Collection<Function> results : getResults()) {
+    protected Collection<Function<?>> finalizeData() {
+        Collection<Function<?>> data = new HashSet<>();
+        for (Collection<Function<?>> results : getResults()) {
             data.addAll(results);
         }
-        return Collections.unmodifiableCollection(new CopyOnWriteArrayList<Function>(data));
+        return Collections.unmodifiableCollection(new CopyOnWriteArrayList<Function<?>>(data));
     }
 
 }

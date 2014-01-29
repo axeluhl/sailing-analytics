@@ -13,11 +13,11 @@ import com.sap.sailing.datamining.function.impl.MethodIsCorrectSideEffectFreeVal
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
 
-public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Class<?>>, Function> {
+public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Class<?>>, Function<?>> {
     
     public static final class Util {
         
-        public static FunctionRetrievalWorker createMarkedFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
+        public static FunctionRetrievalWorker createMarkedFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function<?>>> receiver) {
             FilteringFunctionRetrievalWorker worker = new FilteringFunctionRetrievalWorker();
             worker.setSource(classesToScan);
             worker.setReceiver(receiver);
@@ -30,7 +30,7 @@ public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Cl
             return worker;
         }
 
-        public static FunctionRetrievalWorker createExternalFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function>> receiver) {
+        public static FunctionRetrievalWorker createExternalFunctionRetrievalWorker(Iterable<Class<?>> classesToScan, WorkReceiver<Collection<Function<?>>> receiver) {
             FilteringFunctionRetrievalWorker worker = new FilteringFunctionRetrievalWorker();
             worker.setSource(classesToScan);
             worker.setReceiver(receiver);

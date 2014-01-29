@@ -9,25 +9,25 @@ import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.AbstractComponentWorker;
 
-public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function>> implements FunctionRetrievalWorker {
+public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function<?>>> implements FunctionRetrievalWorker {
 
     private Iterable<Class<?>> classesToScan;
     private ConcurrentFilterCriteria<Method> filter;
 
     @Override
-    protected Collection<Function> doWork() {
-        Collection<Function> functions = new HashSet<>();
+    protected Collection<Function<?>> doWork() {
+        Collection<Function<?>> functions = new HashSet<>();
         for (Class<?> classToScan : classesToScan) {
             functions.addAll(getFilteredMethodsFrom(classToScan));
         }
         return functions;
     }
 
-    private Collection<Function> getFilteredMethodsFrom(Class<?> classToScan) {
-        Collection<Function> functions = new HashSet<>();
+    private Collection<Function<?>> getFilteredMethodsFrom(Class<?> classToScan) {
+        Collection<Function<?>> functions = new HashSet<>();
         for (Method method : classToScan.getMethods()) {
             if (filter != null && filter.matches(method)) {
-                functions.add(new MethodWrappingFunction(method));
+                functions.add(new MethodWrappingFunction<>(method));
             }
         }
         return functions;

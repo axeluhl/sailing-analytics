@@ -28,18 +28,18 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     }
 
     @Override
-    public Collection<Function> getDimenionsFor(Class<?> dataType) {
+    public Collection<Function<?>> getDimenionsFor(Class<?> dataType) {
         return filterForSourceType(functionRegistry.getAllDimensions(), dataType);
     }
     
     @Override
-    public Collection<Function> getFunctionsFor(Class<?> sourceType) {
+    public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
         return filterForSourceType(functionRegistry.getAllRegisteredFunctions(), sourceType);
     }
     
-    private Collection<Function> filterForSourceType(Collection<Function> functions, Class<?> sourceType) {
-        Collection<Function> dimensionsForType = new HashSet<>();
-        ParallelFilter<Function> dimensionForTypeFilter = createFilterForSourceTypeFilter(sourceType);
+    private Collection<Function<?>> filterForSourceType(Collection<Function<?>> functions, Class<?> sourceType) {
+        Collection<Function<?>> dimensionsForType = new HashSet<>();
+        ParallelFilter<Function<?>> dimensionForTypeFilter = createFilterForSourceTypeFilter(sourceType);
         
         try {
             dimensionsForType = dimensionForTypeFilter.start(functions).get();
@@ -50,10 +50,10 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         return dimensionsForType;
     }
 
-    private ParallelFilter<Function> createFilterForSourceTypeFilter(Class<?> sourceType) {
-        ConcurrentFilterCriteria<Function> declaringTypeOrParameterTypeCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
-        WorkerBuilder<FiltrationWorker<Function>> workerBuilder = new FilterByCriteriaBuilder<Function>(declaringTypeOrParameterTypeCriteria);
-        ParallelFilter<Function> dimensionForTypeFilter = new PartitioningParallelFilter<>(workerBuilder, DataMiningFactory.getExecutor());
+    private ParallelFilter<Function<?>> createFilterForSourceTypeFilter(Class<?> sourceType) {
+        ConcurrentFilterCriteria<Function<?>> declaringTypeOrParameterTypeCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
+        WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(declaringTypeOrParameterTypeCriteria);
+        ParallelFilter<Function<?>> dimensionForTypeFilter = new PartitioningParallelFilter<>(workerBuilder, DataMiningFactory.getExecutor());
         return dimensionForTypeFilter;
     }
 

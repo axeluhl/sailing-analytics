@@ -9,8 +9,8 @@ public class FunctionFactory {
     
     private FunctionFactory() { }
 
-    public static Function createMethodWrappingFunction(Method method) {
-        return new MethodWrappingFunction(method);
+    public static <ReturnType> Function<ReturnType> createMethodWrappingFunction(Method method) {
+        return new MethodWrappingFunction<ReturnType>(method);
     }
 
 }

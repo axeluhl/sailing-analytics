@@ -7,9 +7,8 @@ import java.util.Locale;
 import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
-import com.sap.sailing.datamining.function.Function;
 
-public class MethodWrappingFunction extends AbstractFunction implements Function {
+public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
     private Method method;
     
@@ -49,6 +48,11 @@ public class MethodWrappingFunction extends AbstractFunction implements Function
     }
     
     @Override
+    public ReturnType invoke(Object instance) {
+        return null;
+    }
+    
+    @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
         if (getMessageKey() == null || getMessageKey().isEmpty()) {
             return getShortMethodName();
@@ -62,6 +66,11 @@ public class MethodWrappingFunction extends AbstractFunction implements Function
 
     private String getMessageKey() {
         return messageKey;
+    }
+
+    @Override
+    public String toString() {
+        return getDeclaringClass().getSimpleName() + "." + method.getName();
     }
 
     @Override
@@ -80,18 +89,13 @@ public class MethodWrappingFunction extends AbstractFunction implements Function
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MethodWrappingFunction other = (MethodWrappingFunction) obj;
+        MethodWrappingFunction<?> other = (MethodWrappingFunction<?>) obj;
         if (method == null) {
             if (other.method != null)
                 return false;
         } else if (!method.equals(other.method))
             return false;
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + method.getName();
     }
 
 }

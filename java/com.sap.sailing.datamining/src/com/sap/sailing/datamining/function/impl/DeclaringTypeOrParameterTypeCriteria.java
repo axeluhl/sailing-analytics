@@ -7,7 +7,7 @@ import java.util.HashSet;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.Function;
 
-public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCriteria<Function> {
+public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCriteria<Function<?>> {
 
     private final Collection<Class<?>> expectingTypes;
 
@@ -45,7 +45,7 @@ public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCri
     }
 
     @Override
-    public boolean matches(Function function) {
+    public boolean matches(Function<?> function) {
         for (Class<?> expectingType : expectingTypes) {
             if (isDeclaringTypeMatching(function, expectingType) ||
                 isAParameterTypeMatching(function, expectingType)) {
@@ -55,7 +55,7 @@ public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCri
         return false;
     }
 
-    private boolean isAParameterTypeMatching(Function function, Class<?> expectingType) {
+    private boolean isAParameterTypeMatching(Function<?> function, Class<?> expectingType) {
         for (Class<?> parameterType : function.getParameters()) {
             if (parameterType.equals(expectingType)) {
                 return true;
@@ -64,7 +64,7 @@ public class DeclaringTypeOrParameterTypeCriteria implements ConcurrentFilterCri
         return false;
     }
 
-    public boolean isDeclaringTypeMatching(Function function, Class<?> expectingType) {
+    public boolean isDeclaringTypeMatching(Function<?> function, Class<?> expectingType) {
         return function.getDeclaringClass().equals(expectingType);
     }
 

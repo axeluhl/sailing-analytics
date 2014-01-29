@@ -19,24 +19,24 @@ import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestDeclaringTypeOrParameterTypeCriteria {
 
-    private Function getSpeedInKnotsValue;
-    private Function getRaceNameLengthValue;
-    private Function getRegattaNameDimension;
+    private Function<?> getSpeedInKnotsValue;
+    private Function<?> getRaceNameLengthValue;
+    private Function<?> getRegattaNameDimension;
     
-    private Function libraryFunction;
+    private Function<?> libraryFunction;
     
     @Before
     public void setUpFunctions() {
-        getSpeedInKnotsValue = new MethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
-        getRaceNameLengthValue = new MethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
-        getRegattaNameDimension = new MethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        getSpeedInKnotsValue = new MethodWrappingFunction<>(FunctionTestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
+        getRaceNameLengthValue = new MethodWrappingFunction<>(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
+        getRegattaNameDimension = new MethodWrappingFunction<>(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         
-        libraryFunction = new MethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo"));
+        libraryFunction = new MethodWrappingFunction<>(FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo"));
     }
 
     @Test
     public void testMatchingTypeWithBigHierarchy() {
-        ConcurrentFilterCriteria<Function> criteria = new DeclaringTypeOrParameterTypeCriteria(DataTypeWithContextImpl.class);
+        ConcurrentFilterCriteria<Function<?>> criteria = new DeclaringTypeOrParameterTypeCriteria(DataTypeWithContextImpl.class);
 
         assertThat(criteria.matches(getSpeedInKnotsValue), is(true));
         assertThat(criteria.matches(getRaceNameLengthValue), is(true));

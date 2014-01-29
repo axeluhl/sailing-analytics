@@ -26,11 +26,11 @@ public class TestFunctionRetrievers {
     public void testMarkedFunctionRetrievalWorker() {
         Collection<Class<?>> classesToScan = new ArrayList<>();
         classesToScan.add(SimpleClassWithMarkedMethods.class);
-        OpenDataReceiver<Collection<Function>> receiver = new OpenDataReceiver<>();
+        OpenDataReceiver<Collection<Function<?>>> receiver = new OpenDataReceiver<>();
         
         FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createMarkedFunctionRetrievalWorker(classesToScan, receiver);
         
-        Collection<Function> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
         worker.run();
         assertThat(receiver.result, is(expectedFunctions));
     }
@@ -39,11 +39,11 @@ public class TestFunctionRetrievers {
     public void testExternalFunctionRetrievalWorker() {
         Collection<Class<?>> classesToScan = new ArrayList<>();
         classesToScan.add(ExternalLibraryClass.class);
-        OpenDataReceiver<Collection<Function>> receiver = new OpenDataReceiver<>();
+        OpenDataReceiver<Collection<Function<?>>> receiver = new OpenDataReceiver<>();
         
         FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createExternalFunctionRetrievalWorker(classesToScan, receiver);
         
-        Collection<Function> expectedFunctions = FunctionTestsUtil.getMethodsOfExternalLibraryClass();
+        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMethodsOfExternalLibraryClass();
         worker.run();
         assertThat(receiver.result, is(expectedFunctions));
     }
@@ -56,9 +56,9 @@ public class TestFunctionRetrievers {
         
         ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , FunctionTestsUtil.getExecutor());
 
-        Collection<Function> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
         try {
-            Collection<Function> retrievedFunctions = new HashSet<>(functionRetriever.start(null).get());
+            Collection<Function<?>> retrievedFunctions = new HashSet<>(functionRetriever.start(null).get());
             assertThat(retrievedFunctions, is(expectedFunctions));
         } catch (InterruptedException | ExecutionException e) {
             fail("Error during the function retrieving");
