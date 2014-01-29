@@ -27,4 +27,10 @@ public class TestMethodWrappingFunctionInvocation {
         assertThat(getRegattaName.invoke(dataEntry), is(dataEntry.getRegattaName()));
     }
 
+    @Test
+    public void testInvocationWithParameters() {
+        DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
+        assertThat(getRegattaName.invoke(dataEntry), is(dataEntry.getRegattaName()));
+    }
+
 }

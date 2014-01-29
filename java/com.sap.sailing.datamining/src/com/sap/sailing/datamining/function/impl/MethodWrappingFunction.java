@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.function.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Locale;
@@ -14,14 +15,27 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     
     private String messageKey;
     
-    public MethodWrappingFunction(Method method) {
+    /**
+     * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
+     * aren't equal.
+     */
+    public MethodWrappingFunction(Method method, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isMethodADimension(method));
+        checkThatReturnTypesMatch(method, returnType);
+        
         this.method = method;
         initializeMessageKey();
     }
 
     private static boolean isMethodADimension(Method method) {
         return method.getAnnotation(Dimension.class) != null;
+    }
+
+    private void checkThatReturnTypesMatch(Method method, Class<ReturnType> returnType) {
+        if (!method.getReturnType().equals(returnType)) {
+            throw new IllegalArgumentException("The method return type " + method.getReturnType().getName()
+                                             + " and expected return type " + returnType.getName() + " don't match");
+        }
     }
 
     private void initializeMessageKey() {
@@ -49,9 +63,20 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     
     @Override
     public ReturnType invoke(Object instance) {
-        return null;
+        return invoke(instance, new Object[0]);
     }
     
+    @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
+    @Override
+    public ReturnType invoke(Object instance, Object... parameters) {
+        try {
+            return (ReturnType) method.invoke(instance, parameters);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
         if (getMessageKey() == null || getMessageKey().isEmpty()) {
