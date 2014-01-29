@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.function.impl;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,9 +12,6 @@ import org.junit.Test;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;

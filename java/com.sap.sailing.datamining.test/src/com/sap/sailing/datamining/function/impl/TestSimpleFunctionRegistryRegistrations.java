@@ -10,13 +10,10 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
-import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
@@ -31,7 +28,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         registry.register(dimension);
         
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
-        expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction<>(dimension));
+        expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
         assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
         assertThat(registry.getRegisteredFunctionsOf(SimpleClassWithMarkedMethods.class), is(expectedRegisteredFunctions));
@@ -71,7 +68,7 @@ public class TestSimpleFunctionRegistryRegistrations {
         registry.register(dimension);
         
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
-        expectedRegisteredFunctionsAsSet.add(new MethodWrappingFunction<>(dimension));
+        expectedRegisteredFunctionsAsSet.add(FunctionFactory.createMethodWrappingFunction(dimension));
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
         assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
     }

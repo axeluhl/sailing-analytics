@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.AbstractComponentWorker;
@@ -27,7 +28,7 @@ public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Co
         Collection<Function<?>> functions = new HashSet<>();
         for (Method method : classToScan.getMethods()) {
             if (filter != null && filter.matches(method)) {
-                functions.add(new MethodWrappingFunction<>(method));
+                functions.add(FunctionFactory.createMethodWrappingFunction(method));
             }
         }
         return functions;

@@ -32,6 +32,12 @@ public class TestMethodWrappingFunction {
         externalLibraryMethod = FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo");
     }
     
+//    @Test(expected=IllegalArgumentException.class)
+//    public void testMethodReturnTypeAndGivenReturnTypeDoesntMatch() {
+//        @SuppressWarnings("unused")
+//        Function<String> function = new MethodWrappingFunction<>(externalLibraryMethod, String.class);
+//    }
+    
     @Test
     public void testIsDimension() {
         Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);

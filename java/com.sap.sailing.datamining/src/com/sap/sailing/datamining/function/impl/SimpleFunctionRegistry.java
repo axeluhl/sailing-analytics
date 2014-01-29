@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
@@ -45,7 +46,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     
     @Override
     public void register(Method method) {
-        register(new MethodWrappingFunction<>(method));
+        register(FunctionFactory.createMethodWrappingFunction(method));
     }
     
     @Override

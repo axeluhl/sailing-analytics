@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.function.impl;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
@@ -8,9 +8,6 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.function.impl.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sailing.datamining.function.impl.MethodIsCorrectExternalFunctionFilterCriteria;
-import com.sap.sailing.datamining.function.impl.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {

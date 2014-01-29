@@ -14,7 +14,6 @@ import org.junit.Test;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;

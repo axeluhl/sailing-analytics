@@ -10,8 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.function.impl.MethodWrappingFunction;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
@@ -31,8 +31,8 @@ public class FunctionTestsUtil {
     
     public static Collection<Function<?>> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
         Set<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("dimension")));
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue")));
         return markedMethods;
     }
     
@@ -42,7 +42,7 @@ public class FunctionTestsUtil {
 
     public static Collection<Function<?>> getMethodsOfExternalLibraryClass() {
         Set<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromExternalLibraryClass("foo")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromExternalLibraryClass("foo")));
         return markedMethods;
     }
 
@@ -52,16 +52,16 @@ public class FunctionTestsUtil {
 
     public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes() {
         Collection<Function<?>> markedMethods = getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(ExtendingInterface.class, "getRaceNameLength")));
         return markedMethods;
     }
 
     public static Collection<Function<?>> getMarkedMethodsOfDataTypeWithContextAndItsSupertypes() {
         Collection<Function<?>> markedMethods = new HashSet<>();
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        markedMethods.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        markedMethods.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
         return markedMethods;
     }
     
@@ -91,16 +91,16 @@ public class FunctionTestsUtil {
 
     private static Collection<Function<?>> getDimensionsForSimpleClassWithMarkedMethods() {
         Collection<Function<?>> dimensions = new HashSet<>();
-        dimensions.add(new MethodWrappingFunction<>(getMethodFromSimpleClassWithMarkedMethod("dimension")));
+        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromSimpleClassWithMarkedMethod("dimension")));
         return dimensions;
     }
 
     private static Collection<Function<?>> getDimensionsForDataTypeWithContext() {
         Collection<Function<?>> dimensions = new HashSet<>();
-        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
-        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
-        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
-        dimensions.add(new MethodWrappingFunction<>(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
+        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRegattaName")));
+        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getRaceName")));
+        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
+        dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
         return dimensions;
     }
 
