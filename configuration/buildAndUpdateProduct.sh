@@ -37,7 +37,7 @@ fi
 # if project_home is still empty we could not determine any suitable directory
 if [[ $PROJECT_HOME == "" ]]; then
     echo "Could neither determine nor get PROJECT_HOME. Please provide it by setting an environment variable with this name."
-    exit
+    exit 1
 fi
 
 if [ "$SERVERS_HOME" = "" ]; then
@@ -173,7 +173,7 @@ fi
 if [[ "$@" == "release" ]]; then
     if [ ! -d $p2PluginRepository/plugins ]; then
         echo "Could not find source directory $p2PluginRepository!"
-        exit
+        exit 1
     fi
 
     RELEASE_NOTES=""
@@ -189,7 +189,7 @@ if [[ "$@" == "release" ]]; then
 
         if [[ $RELEASE_NOTES == "" ]]; then
             echo -e "\nCome on - I can not release without at least some notes about this release!"
-            exit
+            exit 1
         fi
         echo -e "\nThank you! One last thing..."
 
@@ -272,7 +272,7 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     if [ ! -d $p2PluginRepository/plugins ]; then
         echo "Could not find source directory $p2PluginRepository!"
-        exit
+        exit 1
     fi
 
     if [[ $HAS_OVERWRITTEN_TARGET -eq 1 ]]; then
@@ -281,7 +281,7 @@ if [[ "$@" == "hot-deploy" ]]; then
 
     if [ ! -d $SERVERS_HOME/$active_branch/plugins ]; then
         echo "Could not find target directory $SERVERS_HOME/$active_branch/plugins!"
-        exit
+        exit 1
     fi
 
     # locate old bundle
@@ -289,7 +289,7 @@ if [[ "$@" == "hot-deploy" ]]; then
     OLD_BUNDLE=`find $SERVERS_HOME/$active_branch/plugins -maxdepth 1 -name "${OSGI_BUNDLE_NAME}_*.jar"`
     if [[ $OLD_BUNDLE == "" ]] || [[ $BUNDLE_COUNT -ne 1 ]]; then
         echo "ERROR: Could not find any bundle named $OSGI_BUNDLE_NAME ($BUNDLE_COUNT). Perhaps your name is misspelled or you have no build?"
-        exit
+        exit 1
     fi
 
     OLD_BUNDLE_BASENAME=`basename $OLD_BUNDLE .jar`
@@ -313,7 +313,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         case $answer in
         "Y" | "y") echo "Continuing";;
         *) echo "Aborting..."
-           exit;;
+           exit 1;;
         esac
     fi
 
@@ -343,7 +343,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "osgi> ss $OSGI_BUNDLE_NAME"
         echo "71   INSTALLED   $NEW_BUNDLE_BASENAME"
         echo "osgi> start 71"
-        exit
+        exit 1
     fi
 
     # first get bundle ID
@@ -360,7 +360,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         case $answer in
         "Y" | "y") echo "Continuing";;
         *) echo "Aborting..."
-           exit;;
+           exit 1;;
         esac
     fi
 
@@ -374,7 +374,7 @@ if [[ "$@" == "hot-deploy" ]]; then
         echo "Uninstall procedure sucessful!"
     else
         echo "Something went wrong during uninstall. Please check error logs."
-        exit
+        exit 1
     fi
 
     # now reinstall bundle
@@ -388,11 +388,11 @@ if [[ "$@" == "hot-deploy" ]]; then
     NEW_BUNDLE_STATUS=`echo ss | $NC_CMD | grep ${OSGI_BUNDLE_NAME}_ | grep ACTIVE`
     if [[ $NEW_BUNDLE_STATUS == "" ]]; then
         echo "ERROR: Something went wrong with start of bundle. Please check if everything went ok."
-        exit
+        exit 1
     fi
 
     echo "Everything seems to be ok. Bundle hot-deployed to server with new id $NEW_BUNDLE_ID"
-    exit
+    exit 0
 fi
 
 echo "Starting $@ of server..."
@@ -454,7 +454,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         if [[ $ANDROID_HOME == "" ]]; then
             echo "Environment variable ANDROID_HOME not found. Aborting."
             echo "Deactivate mobile build with parameter -a."
-            exit
+            exit 1
         fi
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
@@ -478,9 +478,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
-	echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-	echo "Maven version used: `mvn --version`"
-	mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+    echo "Maven version used: `mvn --version`"
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+    MVN_EXIT_CODE=$?
 
     if [ $reporting -eq 1 ]; then
         echo "INFO: Generating reports"
@@ -492,15 +493,20 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     fi
 
     cd $PROJECT_HOME/java
-	if [ $gwtcompile -eq 1 ]; then
-	    # Now move back the backup .gwt.xml files before they were (maybe) patched
-		echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	    for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
-		    mv -v $i.bak $i
-	    done
+    if [ $gwtcompile -eq 1 ]; then
+	# Now move back the backup .gwt.xml files before they were (maybe) patched
+	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
+	for i in com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources/com/sap/$PROJECT_TYPE/gwt/ui/*.gwt.xml; do
+	    mv -v $i.bak $i
+	done
     fi
 
+    if [ $MVN_EXIT_CODE -eq 0 ]; then
 	echo "Build complete. Do not forget to install product..."
+    else
+        echo "Build had errors. Maven exit status was $MVN_EXIT_CODE"
+    fi
+    exit $MVN_EXIT_CODE
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
@@ -510,13 +516,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         case $answer in
         "Y" | "y") echo "Continuing";;
         *) echo "Aborting..."
-           exit;;
+           exit 1;;
         esac
     fi
 
     if [ ! -d $ACDIR ]; then
         echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
-        exit
+        exit 1
     fi
 
     # secure current state so that it can be reused if something goes wrong

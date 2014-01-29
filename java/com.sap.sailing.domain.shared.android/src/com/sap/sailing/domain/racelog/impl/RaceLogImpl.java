@@ -104,13 +104,13 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             unlockAfterWrite();
         }
         if (isAdded) {
-            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            logger.finer(String.format("%s (%s) was added to log %s.", event, event.getClass().getName(), getId()));
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }
