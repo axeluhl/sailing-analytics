@@ -239,7 +239,7 @@ if [[ "$@" == "release" ]]; then
     echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
 
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
-        SIMPLE_VERSION_INFO=$OSGI_BUNDLE_NAME
+        SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
      
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
@@ -482,6 +482,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     echo "Maven version used: `mvn --version`"
     mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
     MVN_EXIT_CODE=$?
+    echo "Maven exit code is $MVN_EXIT_CODE"
 
     if [ $reporting -eq 1 ]; then
         echo "INFO: Generating reports"
