@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.logging.Level;
 
 import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
@@ -72,7 +73,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         try {
             return (ReturnType) method.invoke(instance, parameters);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            e.printStackTrace();
+            getLogger().log(Level.FINER, "Error invoking the Function " + getShortMethodName(), e);
         }
         return null;
     }
@@ -95,7 +96,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + method.getName();
+        return getDeclaringClass().getSimpleName() + "." + getShortMethodName();
     }
 
     @Override
