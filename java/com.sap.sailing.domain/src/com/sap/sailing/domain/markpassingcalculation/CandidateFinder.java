@@ -255,11 +255,11 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     changed = true;
                 } else {
                     if (fixAfter != null && crossTrackErrorSignChanges(fix, fixAfter, w, c)) {
-                        result.get(w).getA().add(new Pair<GPSFix, GPSFix>(fixAfter, fix));
+                        result.get(w).getA().add(new Pair<GPSFix, GPSFix>(fix, fixAfter));
                         changed = true;
                     }
                     if (fixBefore != null && crossTrackErrorSignChanges(fix, fixBefore, w, c)) {
-                        result.get(w).getA().add(new Pair<GPSFix, GPSFix>(fixAfter, fix));
+                        result.get(w).getA().add(new Pair<GPSFix, GPSFix>(fixBefore, fix));
                         changed = true;
                     }
                 }
