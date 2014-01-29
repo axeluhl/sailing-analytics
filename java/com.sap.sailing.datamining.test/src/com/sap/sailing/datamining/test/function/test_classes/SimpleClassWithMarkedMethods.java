@@ -15,7 +15,7 @@ public class SimpleClassWithMarkedMethods {
         return "Method marked as dimension";
     }
     
-    //     Methods without a return value can't be dimensions
+    //Methods without a return value can't be dimensions
     @Dimension("illegalDimension")
     public void illegalDimension() {
         
