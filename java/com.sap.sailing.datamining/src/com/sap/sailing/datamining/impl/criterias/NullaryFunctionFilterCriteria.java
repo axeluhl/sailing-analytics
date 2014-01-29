@@ -7,12 +7,12 @@ import java.util.Objects;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.Function;
 
-public class NullaryFilterCriteria<DataType, ValueType> implements ConcurrentFilterCriteria<DataType> {
+public class NullaryFunctionFilterCriteria<DataType, ValueType> implements ConcurrentFilterCriteria<DataType> {
 
     private Function<ValueType> function;
     private Collection<ValueType> valuesToMatch;
 
-    public NullaryFilterCriteria(Function<ValueType> function, Collection<ValueType> valuesToMatch) {
+    public NullaryFunctionFilterCriteria(Function<ValueType> function, Collection<ValueType> valuesToMatch) {
         this.function = function;
         this.valuesToMatch = new HashSet<>(valuesToMatch);
     }

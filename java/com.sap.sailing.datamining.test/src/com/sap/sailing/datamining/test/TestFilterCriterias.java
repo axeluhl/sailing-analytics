@@ -17,7 +17,7 @@ import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
-import com.sap.sailing.datamining.impl.criterias.NullaryFilterCriteria;
+import com.sap.sailing.datamining.impl.criterias.NullaryFunctionFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
@@ -86,16 +86,16 @@ public class TestFilterCriterias {
     public void testNullaryFunctionValuesFilterCriteria() {
         Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        ConcurrentFilterCriteria<DataTypeWithContext> nullaryFilterCriteria = new NullaryFilterCriteria<>(getRegattaName, valuesToMatch);
+        ConcurrentFilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionFilterCriteria<>(getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
-        assertThat(nullaryFilterCriteria.matches(regatta), is(true));
+        assertThat(nullaryFunctionFilterCriteria.matches(regatta), is(true));
         
         DataTypeWithContext otherRegatta = new DataTypeWithContextImpl("Other Regatta", "Race Name", 7);
-        assertThat(nullaryFilterCriteria.matches(otherRegatta), is(true));
+        assertThat(nullaryFunctionFilterCriteria.matches(otherRegatta), is(true));
         
         DataTypeWithContext unmatchingRegatta = new DataTypeWithContextImpl("Unmatching Regatta", "Race Name", 7);
-        assertThat(nullaryFilterCriteria.matches(unmatchingRegatta), is(false));
+        assertThat(nullaryFunctionFilterCriteria.matches(unmatchingRegatta), is(false));
     }
 
 }
