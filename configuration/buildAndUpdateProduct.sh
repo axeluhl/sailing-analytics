@@ -239,7 +239,7 @@ if [[ "$@" == "release" ]]; then
     echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
 
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
-        SIMPLE_VERSION_INFO=$OSGI_BUNDLE_NAME
+        SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
      
     mkdir $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
