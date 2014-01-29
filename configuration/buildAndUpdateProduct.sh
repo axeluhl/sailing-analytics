@@ -482,6 +482,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     echo "Maven version used: `mvn --version`"
     mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
     MVN_EXIT_CODE=$?
+    echo "Maven exit code is $MVN_EXIT_CODE"
 
     if [ $reporting -eq 1 ]; then
         echo "INFO: Generating reports"
