@@ -377,8 +377,8 @@ public class ImportMasterDataOperation extends
                             }
                         }
                         toState.stopTrackingAndRemove(existingRegatta);
+                        creationCount.addOverwrittenRegattaName(existingRegatta.getName());
                         toState.removeRegatta(existingRegatta);
-
                     } catch (IOException | InterruptedException e) {
                         logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
                                 singleRegattaData.getRegattaName()));
