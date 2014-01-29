@@ -37,8 +37,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private TimePoint raceStartTime;
     private Candidate start;
     private Candidate end;
-    private DynamicTrackedRace race;
-    private double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
+    private final DynamicTrackedRace race;
+    private final double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
     public static double strictness = 300;
     
     
