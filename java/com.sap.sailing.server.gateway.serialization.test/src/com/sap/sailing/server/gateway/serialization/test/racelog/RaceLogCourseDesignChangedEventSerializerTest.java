@@ -94,8 +94,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     }
 
     protected void compareCourseData(CourseBase serializedCourse, CourseBase deserializedCourse) {
-        assertEquals(serializedCourse.getFirstWaypoint().getPassingInstructions(), null);
-        assertEquals(deserializedCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(serializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(deserializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
         Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
 
