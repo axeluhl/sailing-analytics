@@ -135,7 +135,7 @@
                     <configuration>
                       <excludeJarResources>
                         <!-- Prevents *-sources.jar to be distributed with the APK -->
-                        <excludeJarResource>com.sap.sailing.*\.jar$</excludeJarResource>
+                        <excludeJarResource>com.sap.sailing.*-sources\.jar$</excludeJarResource>
                       </excludeJarResources>
                     </configuration>
                   </execution>
