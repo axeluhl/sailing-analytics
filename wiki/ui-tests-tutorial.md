@@ -173,10 +173,10 @@ Now that you have access to the web elements, you can add your service methods t
 The page object for the event management panel is written in a similar fashion (Listing 7). The method `startCreatingEvent` performs a click on the button, looks up the `WebElement` for the dialog programmatically and returns the page object for the dialog. Since service methods should be coarse granular usually, you should also add the method `createEvent` which just takes the data for the new event and hides the interaction with the dialog completely. The last two methods return page objects which represent a GWT CellTable and its entries that already exist in our framework.
 
     public class SailingEventManagementPanelPO extends PageArea {
-        @FindBy(how = BySeleniumId.class, using = "CreateLeaderboardGroupButton")
+        @FindBy(how = BySeleniumId.class, using = "AddEventButton")
         private WebElement createEventButton;
         
-        @FindBy(how = BySeleniumId.class, using = "LeaderboardGroupsCellTable")
+        @FindBy(how = BySeleniumId.class, using = "EventsCellTable")
         private WebElement eventsTable;
         
         public SailingEventManagementPanelPO(WebDriver driver, WebElement element) {
