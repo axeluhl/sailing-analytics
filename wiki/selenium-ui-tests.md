@@ -107,4 +107,4 @@ For a more practical example of how to write page objects and test you should ta
 
 ## Updating Selenium
 
-While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps.
+While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps to be able to run the tests local.
