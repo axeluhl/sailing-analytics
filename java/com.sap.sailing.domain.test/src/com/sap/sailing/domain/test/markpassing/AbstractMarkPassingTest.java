@@ -64,7 +64,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 10000;
+        final int tolerance = 20000;
         int numberOfCompetitors = 0;
         int wronglyComputed = 0;
         int wronglyNotComputed = 0;
@@ -73,8 +73,8 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         int incorrectPasses = 0;
 
         boolean printRight = false;
-        boolean printWrong = false;
-        boolean printResult = false;
+        boolean printWrong = true;
+        boolean printResult = true;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
@@ -142,7 +142,6 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     protected void testStartOfRace() {
-        CandidateChooser.strictness=150;
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
 
@@ -180,7 +179,6 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             }
         }
         Assert.assertTrue(mistakes == 0);
-        CandidateChooser.strictness=300;
     }
 
     /**
