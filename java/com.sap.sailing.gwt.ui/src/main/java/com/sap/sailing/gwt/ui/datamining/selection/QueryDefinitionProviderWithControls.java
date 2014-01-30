@@ -104,7 +104,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         statisticProvider = new ComplexStatisticProvider(getStringMessages(), SimpleStatisticsManager.createManagerWithStandardStatistics());
         statisticProvider.addStatisticChangedListener(new StatisticChangedListener() {
             @Override
-            public void statisticChanged() {
+            public void statisticChanged(SimpleStatistic newStatistic) {
                 notifyQueryDefinitionChanged();
             }
         });

@@ -29,7 +29,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     }
 
     @Override
-    public Collection<Function<?>> getDimenionsFor(Class<?> dataType) {
+    public Collection<Function<?>> getDimensionsFor(Class<?> dataType) {
         return filterForDeclaringType(functionRegistry.getAllDimensions(), dataType);
     }
     

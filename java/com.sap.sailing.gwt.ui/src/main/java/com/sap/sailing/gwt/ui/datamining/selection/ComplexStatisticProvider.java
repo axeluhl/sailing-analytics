@@ -127,9 +127,15 @@ public class ComplexStatisticProvider implements StatisticProvider {
     }
 
     private void notifyHandlers() {
+        SimpleStatistic newStatistic = getStatistic();
         for (StatisticChangedListener listener : listeners) {
-            listener.statisticChanged();
+            listener.statisticChanged(newStatistic);
         }
+    }
+
+    @Override
+    public SimpleStatistic getStatistic() {
+        return new SimpleStatistic(getDataType(), getStatisticType(), getAggregatorType());
     }
 
     @Override

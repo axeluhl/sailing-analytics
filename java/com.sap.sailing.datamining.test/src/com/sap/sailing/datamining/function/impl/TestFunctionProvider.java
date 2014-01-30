@@ -58,10 +58,10 @@ public class TestFunctionProvider {
         
         Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
         
-        Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContext.class));
+        Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContext.class));
         assertThat(providedDimensions, is(expectedDimensions));
         
-        providedDimensions = new HashSet<>(functionProvider.getDimenionsFor(DataTypeWithContextImpl.class));
+        providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContextImpl.class));
         assertThat(providedDimensions, is(expectedDimensions));
     }
     

@@ -54,10 +54,16 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.DataMiningFactory;
+import com.sap.sailing.datamining.DataMiningService;
 import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.data.GPSFixWithContext;
+import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -332,6 +338,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
+    private final ServiceTracker<DataMiningService, DataMiningService> dataMiningServiceTracker;
+
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
@@ -381,6 +389,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        dataMiningServiceTracker = createAndOpenDataMiningServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
         igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
@@ -465,6 +474,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
+    }
+
+    protected ServiceTracker<DataMiningService, DataMiningService> createAndOpenDataMiningServiceTracker(
+            BundleContext context) {
+        ServiceTracker<DataMiningService, DataMiningService> result = new ServiceTracker<DataMiningService, DataMiningService>(
+                context, DataMiningService.class.getName(), null);
+        result.open();
+        return result;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -1795,6 +1812,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
+    }
+    
+    private DataMiningService getDataMiningService() {
+        return dataMiningServiceTracker.getService();
     }
     
     @Override
@@ -3437,7 +3458,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
 
+    @Override
+    public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType) {
+        Class<?> dataTypeBaseClass = getBaseClassFor(dataType);
+        Collection<Function<?>> dimensions = getDataMiningService().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
+        return functionsAsFunctionDTOs(dimensions);
+    }
     
+    private Class<?> getBaseClassFor(DataTypes dataType) {
+        switch (dataType) {
+        case GPSFix:
+            return GPSFixWithContext.class;
+        case TrackedLegOfCompetitor:
+            return TrackedLegOfCompetitorWithContext.class;
+        }
+        throw new IllegalArgumentException("No base class for data type " + dataType);
+    }
+
+    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions) {
+        Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
+        for (Function<?> function : functions) {
+            functionDTOs.add(function.asDTO());
+        }
+        return functionDTOs;
+    }
+
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
         Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition, getService()); 

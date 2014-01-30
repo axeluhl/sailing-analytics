@@ -5,12 +5,14 @@ import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
+import com.sap.sailing.gwt.ui.datamining.selection.SimpleStatistic;
 
 public interface StatisticProvider extends Component<Object> {
     
     public StatisticType getStatisticType();
     public AggregatorType getAggregatorType();
     public DataTypes getDataType();
+    public SimpleStatistic getStatistic();
 
     public void addStatisticChangedListener(StatisticChangedListener listener);
     

@@ -1,9 +1,7 @@
 package com.sap.sailing.datamining.impl;
 
 import java.util.Collection;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +10,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import com.sap.sailing.datamining.DataMiningService;
 import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
@@ -26,14 +25,9 @@ public class Activator implements BundleActivator {
 
     private static final Logger LOGGER = Logger.getLogger(Activator.class.getName());
 
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60,
-            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-
     private static BundleContext context;
-
-    private static FunctionRegistry functionRegistry;
-    private static FunctionProvider functionProvider;
+    
+    private static DataMiningService dataMiningService;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -41,8 +35,15 @@ public class Activator implements BundleActivator {
 
         registerDataMiningClassesWithMarkedMethodsService();
 
-        functionRegistry = createAndBuildFunctionRegistry();
-        functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionRegistry functionRegistry = createAndBuildFunctionRegistry();
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        
+        dataMiningService = new DataMiningServiceImpl(functionRegistry, functionProvider);
+        registerDataMiningService();
+    }
+
+    private void registerDataMiningService() {
+        context.registerService(DataMiningService.class, dataMiningService, null);
     }
 
     private void registerDataMiningClassesWithMarkedMethodsService() {
@@ -111,11 +112,11 @@ public class Activator implements BundleActivator {
     }
 
     public static ThreadPoolExecutor getExecutor() {
-        return executor;
+        return DataMiningServiceImpl.getExecutor();
     }
 
     public static FunctionProvider getFunctionProvider() {
-        return functionProvider;
+        return dataMiningService.getFunctionProvider();
     }
 
 }
