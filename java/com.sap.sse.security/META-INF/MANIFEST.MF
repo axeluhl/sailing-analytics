@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Security
 Bundle-SymbolicName: com.sap.sse.security
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.sap.sailing.security.Activator
+Bundle-Activator: com.sap.sse.security.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.3.0"
@@ -11,4 +11,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/scribe-1.3.5.jar,
  lib/shiro-core-1.2.2.jar,
  lib/shiro-web-1.2.2.jar,
- .
+ .,
+ lib/slf4j-api-1.7.5.jar,
+ lib/slf4j-simple-1.7.5.jar
