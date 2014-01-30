@@ -1,4 +1,3 @@
-***
 # UI-Tests Tutorial
 
 In this tutorial, we want to give a practical introduction in how to write UI-Tests with our framework and Selenium. You will learn to prepare your UI for testing as well as to write page objects and tests. For this reason, we write a small test which interacts with the administration console and the goal of the test is to verify the correct creation of a new event.
