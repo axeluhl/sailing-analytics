@@ -22,6 +22,8 @@ If we look at the "Events"  tab of the administration console, we can see that w
         }
     }
 
+
+
     public class EventCreateDialog extends EventDialog<EventDTO> {
         public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
                 DialogCallback<EventDTO> callback) {
@@ -42,29 +44,6 @@ If we look at the "Events"  tab of the administration console, we can see that w
             isPublicCheckBox = createCheckbox("");
             isPublicCheckBox.ensureDebugId("IsPublicCheckbox");
             isPublicCheckBox.setValue(false);
-        }
-    }
-
-    public class EventCreateDialog extends DataEntryDialog<EventDTO> {
-        @Override
-        protected Widget getAdditionalWidget() {
-            ...
-            
-            Button addCourseAreaButton = new Button(stringConstants.addCourseArea());
-            addCourseAreaButton.ensureDebugId("AddCourseAreaButton");
-            ...
-        }
-        
-        private Widget createCourseAreaNameWidget(String defaultName, boolean isEnabled) {
-            TextBox textBox = createTextBox(defaultName);
-            textBox.enusreDebugId("CourseArea" + courseAreaNameEntryFields.size() + "TextField");
-            textBox.setVisibleLength(40);
-            textBox.setEnabled(isEnabled);
-            textBox.setWidth("175px");
-            
-            courseAreaNameEntryFields.add(textBox);
-            
-            return textBox;
         }
     }
     
