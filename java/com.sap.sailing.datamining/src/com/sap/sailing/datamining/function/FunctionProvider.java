@@ -10,6 +10,9 @@ public interface FunctionProvider {
 
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
 
+    /**
+     * @return The first function, that matches the given DTO or <code>null</code>
+     */
     public Function<?> getFunctionFor(FunctionDTO functionDTO);
 
 }

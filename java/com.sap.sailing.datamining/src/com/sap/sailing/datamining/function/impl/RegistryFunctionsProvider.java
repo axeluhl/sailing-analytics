@@ -30,41 +30,68 @@ public class RegistryFunctionsProvider implements FunctionProvider {
 
     @Override
     public Collection<Function<?>> getDimenionsFor(Class<?> dataType) {
-        return filterForSourceType(functionRegistry.getAllDimensions(), dataType);
+        return filterForDeclaringType(functionRegistry.getAllDimensions(), dataType);
     }
     
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return filterForSourceType(functionRegistry.getAllRegisteredFunctions(), sourceType);
+        return filterForDeclaringType(functionRegistry.getAllRegisteredFunctions(), sourceType);
     }
     
-    private Collection<Function<?>> filterForSourceType(Collection<Function<?>> functions, Class<?> sourceType) {
-        Collection<Function<?>> dimensionsForType = new HashSet<>();
-        ConcurrentFilterCriteria<Function<?>> sourceTypeFilterCriteria = createSourceTypeFilterCriteria(sourceType);
-        ParallelFilter<Function<?>> dimensionForTypeFilter = createFilterForSourceTypeFilter(sourceTypeFilterCriteria);
+    private Collection<Function<?>> filterForDeclaringType(Collection<Function<?>> functions, Class<?> sourceType) {
+        ConcurrentFilterCriteria<Function<?>> declaringTypeFilterCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
+        ParallelFilter<Function<?>> functionsForDeclaringTypeFilter = createFilterForCriteria(declaringTypeFilterCriteria);
+        
+        return executeFilter(functionsForDeclaringTypeFilter, functions);
+    }
+
+    private Collection<Function<?>> executeFilter(ParallelFilter<Function<?>> functionFilter, Collection<Function<?>> functionsToFilter) {
+        Collection<Function<?>> filteredFunctions = new HashSet<>();
         
         try {
-            dimensionsForType = dimensionForTypeFilter.start(functions).get();
+            filteredFunctions = functionFilter.start(functionsToFilter).get();
         } catch (InterruptedException | ExecutionException exception) {
-            LOGGER.log(Level.SEVERE, "Error getting the dimensions for " + sourceType.getName(), exception);
+            LOGGER.log(Level.SEVERE, "Error filtering the functions", exception);
         }
         
-        return dimensionsForType;
+        return filteredFunctions;
     }
 
-    private ConcurrentFilterCriteria<Function<?>> createSourceTypeFilterCriteria(Class<?> sourceType) {
-        return new DeclaringTypeOrParameterTypeCriteria(sourceType);
-    }
-
-    private ParallelFilter<Function<?>> createFilterForSourceTypeFilter(ConcurrentFilterCriteria<Function<?>> filterCriteria) {
+    private ParallelFilter<Function<?>> createFilterForCriteria(ConcurrentFilterCriteria<Function<?>> filterCriteria) {
         WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(filterCriteria);
         return new PartitioningParallelFilter<>(workerBuilder, Activator.getExecutor());
     }
     
     @Override
     public Function<?> getFunctionFor(FunctionDTO functionDTO) {
-        // TODO Auto-generated method stub
-        return null;
+        if (functionDTO == null) {
+            return null;
+        }
+        
+        ConcurrentFilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionDTOFilterCriteria(functionDTO);
+        ParallelFilter<Function<?>> functionMatchesDTOFilter = createFilterForCriteria(functionDTOFilterCriteria);
+        
+        Collection<Function<?>> functionsMatchingDTO = executeFilter(functionMatchesDTOFilter, functionRegistry.getAllRegisteredFunctions());
+        if (moreThanOneFunctionMatchedDTO(functionsMatchingDTO)) {
+            logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
+        }
+        
+        return getFunctionToReturn(functionsMatchingDTO);
+    }
+
+    private boolean moreThanOneFunctionMatchedDTO(Collection<Function<?>> functionsMatchingDTO) {
+        return functionsMatchingDTO.size() > 1;
+    }
+
+    private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {
+        LOGGER.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
+        for (Function<?> function : functionsMatchingDTO) {
+            LOGGER.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
+        }
+    }
+
+    private Function<?> getFunctionToReturn(Collection<Function<?>> functionsMatchingDTO) {
+        return functionsMatchingDTO.isEmpty() ? null : functionsMatchingDTO.iterator().next();
     }
 
 }

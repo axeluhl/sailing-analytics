@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.function.impl;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
@@ -89,10 +90,25 @@ public class TestFunctionProvider {
         FunctionDTO getRegattaNameDTO = getRegattaName.asDTO(Locale.ENGLISH, stringMessages);
         
         FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
-        
-        @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected, so the Functions have to be specific (without <?>)
+        @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
         Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionFor(getRegattaNameDTO);
         assertThat(providedFunction, is(getRegattaName));
+    }
+    
+    @Test
+    public void testGetFunctionForUnregisteredDTO() {
+        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
+        Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
+        FunctionDTO incrementDTO = increment.asDTO(Locale.ENGLISH, stringMessages);
+        
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        assertThat(functionProvider.getFunctionFor(incrementDTO), is(nullValue()));
+    }
+    
+    @Test
+    public void testGetFunctionForNullDTO() {
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        assertThat(functionProvider.getFunctionFor(null), is(nullValue()));
     }
 
 }
