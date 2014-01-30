@@ -43,8 +43,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     }
     
     protected void compareCourseData(CourseBase storedCourse, CourseBase loadedCourse) {
-        assertEquals(storedCourse.getFirstWaypoint().getPassingInstructions(), null);
-        assertEquals(loadedCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(storedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(loadedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
         Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         

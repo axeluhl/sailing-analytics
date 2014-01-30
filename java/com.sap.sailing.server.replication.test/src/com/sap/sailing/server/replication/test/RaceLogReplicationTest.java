@@ -347,8 +347,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     }
     
     protected void compareCourseBase(CourseBase masterCourse, CourseBase replicatedCourse) {
-        assertEquals(masterCourse.getFirstWaypoint().getPassingInstructions(), null);
-        assertEquals(replicatedCourse.getFirstWaypoint().getPassingInstructions(), null);
+        assertEquals(masterCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(replicatedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
         Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         Assert.assertTrue(replicatedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         
