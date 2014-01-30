@@ -287,4 +287,43 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         }
         return false;
     }
+
+    @Override
+    public Iterable<String> getWindDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        // find all the devices from which we may read
+        Iterable<DataAccessWindow> dataAccessWindows = getDataAccessWindows(
+                Permission.read, /* start time */ null, /* end time */ null,
+                /* get data for all available deviceSerialNumbers */null);
+        Set<String> deviceSerialNumbersWeCanRead = new HashSet<>();
+        for (DataAccessWindow daw : dataAccessWindows) {
+            deviceSerialNumbersWeCanRead.add(daw.getDeviceSerialNumber());
+        }
+        // find all that haven't even sent GPS; those may never have sent ever, so we need to listen to them for new stuff; they could be wind sensors
+        Iterable<Fix> gpsFixes = getLatestFixes(deviceSerialNumbersWeCanRead, Type.gps_latlong);
+        Set<String> devicesWithGps = getDeviceSerialNumbers(gpsFixes);
+        Iterable<Fix> awsFixes = getLatestFixes(deviceSerialNumbersWeCanRead, Type.AWS); // look for latest fixes with apparent wind speed in the fix
+        Set<String> devicesWithWind = getDeviceSerialNumbers(awsFixes);
+        Set<String> devicesThatHaveNeverSentGpsNorWind = new HashSet<>(deviceSerialNumbersWeCanRead);
+        devicesThatHaveNeverSentGpsNorWind.removeAll(devicesWithGps);
+        devicesThatHaveNeverSentGpsNorWind.removeAll(devicesWithWind);
+        Set<String> devicesWeShouldListenTo = new HashSet<>();
+        devicesWeShouldListenTo.addAll(devicesWithWind);
+        devicesWeShouldListenTo.addAll(devicesThatHaveNeverSentGpsNorWind);
+        logger.info("Wind devices identified: "
+                + devicesWeShouldListenTo
+                + " because from all devices "+deviceSerialNumbersWeCanRead+" for "
+                + devicesThatHaveNeverSentGpsNorWind
+                + " we don't know what they are as they never sent anything we can access, and for "
+                + devicesWithWind + " we know they sent wind");
+        return devicesWeShouldListenTo;
+    }
+    
+    private Set<String> getDeviceSerialNumbers(Iterable<Fix> fixes) {
+        Set<String> deviceSerialNumbers = new HashSet<>();
+        for (Fix fix : fixes) {
+            deviceSerialNumbers.add(fix.getSensor().getDeviceSerialNumber());
+        }
+        return deviceSerialNumbers;
+    }
+
 }

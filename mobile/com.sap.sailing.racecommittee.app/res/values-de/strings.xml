@@ -144,7 +144,7 @@
     <string name="settings_category_polling">Polling Einstellungen</string>
     <string name="settings_polling_active_header">Aktiviere Polling</string>
     <string name="settings_polling_active_description">Wenn aktiv wird im festgelegten Intervall Änderungen an den Rennen beim Server abgefragt.</string>
-    <string name="settings_polling_interval_header">Polling Intervall (Minuten)</string>
+    <string name="settings_polling_interval_header">Polling Intervall (Sekunden)</string>
     <!-- SETTINGS -->
     
     <string name="compass_view_compass">Kompass</string>
