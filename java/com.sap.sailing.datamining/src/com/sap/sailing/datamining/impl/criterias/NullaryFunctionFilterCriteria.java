@@ -19,7 +19,7 @@ public class NullaryFunctionFilterCriteria<DataType, ValueType> implements Concu
 
     @Override
     public boolean matches(DataType dataEntry) {
-        ValueType value = function.invoke(dataEntry);
+        ValueType value = function.tryToInvoke(dataEntry);
         
         for (ValueType valueToMatch : valuesToMatch) {
             if (Objects.equals(value, valueToMatch)) {

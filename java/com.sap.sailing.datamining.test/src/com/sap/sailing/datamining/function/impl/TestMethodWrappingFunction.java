@@ -4,20 +4,17 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.shared.Message;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
+import com.sap.sailing.datamining.test.util.StringMessagesForTests;
 
 public class TestMethodWrappingFunction {
     
@@ -52,7 +49,7 @@ public class TestMethodWrappingFunction {
     
     @Test
     public void testGetLocalizedName() {
-        StringMessages stringMessages = new StringMessages();
+        StringMessagesForTests stringMessages = new StringMessagesForTests();
 
         Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);
         String expectedEnglishName = "dimension-english";
@@ -70,64 +67,6 @@ public class TestMethodWrappingFunction {
         String expectedName = "foo";
         assertThat(externalLibraryFunction.getLocalizedName(Locale.ENGLISH, stringMessages), is(expectedName));
         assertThat(externalLibraryFunction.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedName));
-    }
-    
-    private class StringMessages implements DataMiningStringMessages {
-        
-        private final Map<Locale, Map<String, String>> messages;
-        
-        public StringMessages() {
-            messages = new HashMap<>();
-            initializeEnglishMessages();
-            initializeGermanMessages();
-        }
-
-        private void initializeEnglishMessages() {
-            Map<String, String> englishMessages = new HashMap<>();
-            messages.put(Locale.ENGLISH, englishMessages);
-
-            englishMessages.put("dimension", "dimension-english");
-            englishMessages.put("value", "sideEffectFreeValue-english");
-        }
-
-        private void initializeGermanMessages() {
-            Map<String, String> germanMessages = new HashMap<>();
-            messages.put(Locale.GERMAN, germanMessages);
-
-            germanMessages.put("dimension", "dimension-deutsch");
-            germanMessages.put("value", "sideEffectFreeValue-deutsch");
-        }
-
-        @Override
-        public Locale getLocaleFrom(String localeName) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        @Override
-        public String get(Locale locale, Message message) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        @Override
-        public String get(Locale locale, Message message, String... parameters) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        @Override
-        public String get(Locale locale, Message message, Message... parameters) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        @Override
-        public String get(Locale locale, String messageKey) {
-            return messages.get(locale).get(messageKey);
-        }
-
-        @Override
-        public String get(Locale locale, String messageKey, String... parameters) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-        
     }
 
 }

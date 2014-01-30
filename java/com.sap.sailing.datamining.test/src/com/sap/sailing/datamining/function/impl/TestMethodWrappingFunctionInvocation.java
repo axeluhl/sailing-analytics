@@ -28,23 +28,23 @@ public class TestMethodWrappingFunctionInvocation {
     @Test
     public void testInvocationWithNoParameters() {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
-        assertThat(getRegattaName.invoke(dataEntry), is(dataEntry.getRegattaName()));
+        assertThat(getRegattaName.tryToInvoke(dataEntry), is(dataEntry.getRegattaName()));
     }
 
     @Test
     public void testInvocationWithParameters() {
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         int valueToIncrement = 10;
-        assertThat(increment.invoke(instance, valueToIncrement), is(instance.increment(valueToIncrement)));
+        assertThat(increment.tryToInvoke(instance, valueToIncrement), is(instance.increment(valueToIncrement)));
     }
     
     @Test
     public void testInvocationWithWrongParameters() {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
-        assertThat(getRegattaName.invoke(dataEntry, "Wrong Parameter"), is(nullValue()));
+        assertThat(getRegattaName.tryToInvoke(dataEntry, "Wrong Parameter"), is(nullValue()));
 
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
-        assertThat(increment.invoke(instance), is(nullValue()));
+        assertThat(increment.tryToInvoke(instance), is(nullValue()));
     }
 
 }

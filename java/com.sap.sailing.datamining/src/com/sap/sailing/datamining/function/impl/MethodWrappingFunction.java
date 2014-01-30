@@ -2,13 +2,17 @@ package com.sap.sailing.datamining.function.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
 import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
+import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sailing.datamining.shared.impl.dto.FunctionDTOImpl;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
@@ -63,17 +67,17 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
     
     @Override
-    public ReturnType invoke(Object instance) {
-        return invoke(instance, new Object[0]);
+    public ReturnType tryToInvoke(Object instance) {
+        return tryToInvoke(instance, new Object[0]);
     }
     
     @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
     @Override
-    public ReturnType invoke(Object instance, Object... parameters) {
+    public ReturnType tryToInvoke(Object instance, Object... parameters) {
         try {
             return (ReturnType) method.invoke(instance, parameters);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            getLogger().log(Level.FINER, "Error invoking the Function " + getShortMethodName(), e);
+            getLogger().log(Level.FINER, "Error invoking the Function " + getMethodName(), e);
         }
         return null;
     }
@@ -81,22 +85,42 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
         if (getMessageKey() == null || getMessageKey().isEmpty()) {
-            return getShortMethodName();
+            return getMethodName();
         }
         return stringMessages.get(locale, getMessageKey());
     }
     
-    private String getShortMethodName() {
+    private String getMethodName() {
         return method.getName();
     }
 
     private String getMessageKey() {
         return messageKey;
     }
+    
+    @Override
+    public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages) {
+        String functionName = getMethodName();
+        String sourceTypeName = getDeclaringClass().getSimpleName();
+        String returnTypeName = method.getReturnType().getSimpleName();
+        List<String> parameterTypeNames = getParameterTypeNames();
+
+        String displayName = getLocalizedName(locale, stringMessages);
+        
+        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension());
+    }
+
+    private List<String> getParameterTypeNames() {
+        List<String> parameterTypeNames = new ArrayList<>();
+        for (Class<?> parameterType : method.getParameterTypes()) {
+            parameterTypeNames.add(parameterType.getSimpleName());
+        }
+        return parameterTypeNames;
+    }
 
     @Override
     public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + getShortMethodName();
+        return getDeclaringClass().getSimpleName() + "." + getMethodName();
     }
 
     @Override
