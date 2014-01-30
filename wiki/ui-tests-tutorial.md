@@ -139,10 +139,9 @@ For the dialog you should define the variables for the 3 different text fields a
         @FindBy(how = BySeleniumId.class, using = "IsPublicCheckBox")
         private WebElement isPublicCheckBox;
         
-        public EventCreateDialog(WebDriver driver, WebElement element) {
+        public EventCreateDialogPO(WebDriver driver, WebElement element) {
             super(driver, element);
         }
-    }
     }
 
 Now that you have access to the web elements, you can add your service methods to the page object. Usually the service methods are coarse granular, like `login(String user, String password)`, but since the dialog has an error state for the case of invalid input, which you may test later, you should add methods to interact with the single widgets (Listing 6). The methods for clicking the “Ok” or the “Cancel” button are already implemented in the base class `DataEntryDialog`. After finishing the dialog with “Ok”, our base class also waits for all pending asynchrony requests and returns immediately if there is none.
@@ -166,7 +165,7 @@ Now that you have access to the web elements, you can add your service methods t
         }
         
         public void setPubic(boolean isPublic) {
-            CheckBox checkbox = new CheckBox(this.driver, this.isPublicCheckBox);
+            CheckBoxPO checkbox = new CheckBoxPO(this.driver, this.isPublicCheckBox);
             checkbox.setSelected(isPublic);
         }
     }
@@ -180,20 +179,20 @@ The page object for the event management panel is written in a similar fashion (
         @FindBy(how = BySeleniumId.class, using = "LeaderboardGroupsCellTable")
         private WebElement eventsTable;
         
-        public SailingEventManagementPanel(WebDriver driver, WebElement element) {
+        public SailingEventManagementPanelPO(WebDriver driver, WebElement element) {
             super(driver, element);
         }
         
-        public EventCreateDialog startCreatingEvent() {
+        public EventCreateDialogPO startCreatingEvent() {
             this.createEventButton.click();
             
             WebElement dialog = findElementBySeleniumId(this.driver, "EventCreateDialog");
             
-            return new EventCreateDialog(this.driver, dialog);
+            return new EventCreateDialogPO(this.driver, dialog);
         }
         
         public void createEvent(String name, String venue, String url, boolean isPublic) {
-            EventCreateDialog dialog = startCreatingEvent();
+            EventCreateDialogPO dialog = startCreatingEvent();
             dialog.setName(name);
             dialog.setVenue(venue);
             dialog.setPublicationUrl(url);
@@ -201,12 +200,12 @@ The page object for the event management panel is written in a similar fashion (
             dialog.pressOk();
         }
         
-        public CellTable<DataEntry> getEventsTable() {
-            return new GenericCellTable<DataEntry>(this.driver, this.eventsTable, DataEntry.class);
+        public CellTablePO<DataEntryPO> getEventsTable() {
+            return new GenericCellTablePO<DataEntryPO>(this.driver, this.eventsTable, DataEntryPO.class);
         }
         
-        public List<DataEntry> getEvents() {
-            CellTable<DataEntry> table = getEventsTable();
+        public List<DataEntryPO> getEvents() {
+            CellTablePO<DataEntryPO> table = getEventsTable();
             
             return table.getEntries();
         }
@@ -228,4 +227,28 @@ In the last step, you have to plug your new page object for the event management
         }
         
         ...
+    }
+
+## Writing the Test
+
+Now that you have all necessary page objects, you can start to write the test. Our framework uses a specialized JUnit-Runner for the execution of a test with selenium and injects a `TestEnvironment` into a field of the test class that is annotated with `Managed`. The injected `TestEnvironment` gives you access to the `WebDriver` and the base URL to the application under test. However, you can simply extend the base class `AbstractSeleniumTest` which has all required annotations applied already.
+
+Writing the test is straight forward and there are no big differences to other test cases. You use the page objects to simulate the user interactions and to retrieve the data for your assertions (Listing 9). Since our application persists most of the object, you should clear the state of the `RacingEventService` before each test. For the test itself you use the factory method in the page object for the administration console to navigate to it. There you have to switch to the tab for the event management, where you can create your test event and retrieve the existing events. Since you cleared the state of the application before the test, there should only be one which makes the assertion of the test.
+
+    public class TestEventCreation extends AbstractSeleniumTest {
+        @Before
+        public void clearDatabase() {
+            clearState(getContextRoot());
+        }
+        
+        @Test
+        public void testCreateEvent() {
+            AdminConsolePagePO adminConsole = AdminConsolePagePO.goToPage(getWebDriver(), getContextRoot());
+            SailingEventManagementPanelPO eventManagement = adminConsole.goToEventManagement();
+            
+            eventManagement.createEvent("Test Event", "Test Venue", "", false);
+        
+            List<DataEntry> events = eventManagement.getEvents();
+            assertTrue(events.size() == 1);
+        }
     }
