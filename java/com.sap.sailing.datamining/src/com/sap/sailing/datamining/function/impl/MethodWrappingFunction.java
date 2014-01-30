@@ -99,14 +99,20 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
     
     @Override
+    public FunctionDTO asDTO() {
+        return createDTO(getMethodName());
+    }
+
+    @Override
     public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages) {
+        return createDTO(getLocalizedName(locale, stringMessages));
+    }
+    
+    private FunctionDTO createDTO(String displayName) {
         String functionName = getMethodName();
         String sourceTypeName = getDeclaringClass().getSimpleName();
         String returnTypeName = method.getReturnType().getSimpleName();
         List<String> parameterTypeNames = getParameterTypeNames();
-
-        String displayName = getLocalizedName(locale, stringMessages);
-        
         return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension());
     }
 

@@ -41,20 +41,19 @@ public class TestFunctionDTOConstruction {
     public void testDimensionDTOConstruction() {
         Function<?> dimension = FunctionFactory.createMethodWrappingFunction(dimensionMethod);
         
-        FunctionDTO expectedDimensionDTO = createExpectedDimensionDTO(Locale.ENGLISH, "dimension");
+        FunctionDTO expectedDimensionDTO = createExpectedDimensionDTO();
+        assertThat(dimension.asDTO(), is(expectedDimensionDTO));
         assertThat(dimension.asDTO(Locale.ENGLISH, stringMessages), is(expectedDimensionDTO));
-        
-        expectedDimensionDTO = createExpectedDimensionDTO(Locale.GERMAN, "dimension");
         assertThat(dimension.asDTO(Locale.GERMAN, stringMessages), is(expectedDimensionDTO));
     }
 
-    public FunctionDTOImpl createExpectedDimensionDTO(Locale locale, String messageKey) {
+    public FunctionDTOImpl createExpectedDimensionDTO() {
         String functionName = dimensionMethod.getName();
         String sourceTypeName = dimensionMethod.getDeclaringClass().getSimpleName();
         String returnTypeName = dimensionMethod.getReturnType().getSimpleName();
         List<String> parameterTypeNames = new ArrayList<>();
 
-        String displayName = stringMessages.get(locale, messageKey);
+        String displayName = functionName;
         boolean isDimension = true;
         
         return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);
@@ -64,20 +63,18 @@ public class TestFunctionDTOConstruction {
     public void testNullarySideEffectFreeValueDTOConstruction() {
         Function<?> sideEffectFreeValue = FunctionFactory.createMethodWrappingFunction(sideEffectFreeValueMethod);
         
-        FunctionDTO expectedDTO = createExpectedNullarySideEffectFreeValueDTO(Locale.ENGLISH, "value");
+        FunctionDTO expectedDTO = createExpectedNullarySideEffectFreeValueDTO();
         assertThat(sideEffectFreeValue.asDTO(Locale.ENGLISH, stringMessages), is(expectedDTO));
-        
-        expectedDTO = createExpectedNullarySideEffectFreeValueDTO(Locale.GERMAN, "value");
         assertThat(sideEffectFreeValue.asDTO(Locale.GERMAN, stringMessages), is(expectedDTO));
     }
 
-    private FunctionDTO createExpectedNullarySideEffectFreeValueDTO(Locale locale, String messageKey) {
+    private FunctionDTO createExpectedNullarySideEffectFreeValueDTO() {
         String functionName = sideEffectFreeValueMethod.getName();
         String sourceTypeName = sideEffectFreeValueMethod.getDeclaringClass().getSimpleName();
         String returnTypeName = sideEffectFreeValueMethod.getReturnType().getSimpleName();
         List<String> parameterTypeNames = new ArrayList<>();
 
-        String displayName = stringMessages.get(locale, messageKey);
+        String displayName = functionName;
         boolean isDimension = false;
         
         return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);

@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
 import com.sap.sailing.datamining.DataMiningStringMessages;
+import com.sap.sailing.datamining.annotations.Dimension;
+import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
 import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 
 public interface Function<ReturnType> {
@@ -26,7 +28,17 @@ public interface Function<ReturnType> {
      * @return The result of the function or <code>null</code>, if an {@link InvocationTargetException}, {@link IllegalAccessException} or {@link IllegalArgumentException} was thrown.
      */
     public ReturnType tryToInvoke(Object instance, Object... parameters);
+
+    /**
+     * Creates the corresponding DTO for this function, with the function name as display name.
+     */
+    public FunctionDTO asDTO();
     
+    /**
+     * Creates the corresponding DTO for this function, with the retrieved string message for the given locale and the contained message key.
+     * The message key is provided with the {@link Dimension} or {@link SideEffectFreeValue} annotation.<br>
+     * If the function has no message key, the function name is used as display name.
+     */
     public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages);
 
 }

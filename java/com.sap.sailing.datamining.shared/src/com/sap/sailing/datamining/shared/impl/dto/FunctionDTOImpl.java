@@ -67,7 +67,6 @@ public class FunctionDTOImpl implements FunctionDTO {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((functionName == null) ? 0 : functionName.hashCode());
         result = prime * result + (isDimension ? 1231 : 1237);
         result = prime * result + ((parameterTypeNames == null) ? 0 : parameterTypeNames.hashCode());
@@ -85,11 +84,6 @@ public class FunctionDTOImpl implements FunctionDTO {
         if (getClass() != obj.getClass())
             return false;
         FunctionDTOImpl other = (FunctionDTOImpl) obj;
-        if (displayName == null) {
-            if (other.displayName != null)
-                return false;
-        } else if (!displayName.equals(other.displayName))
-            return false;
         if (functionName == null) {
             if (other.functionName != null)
                 return false;
