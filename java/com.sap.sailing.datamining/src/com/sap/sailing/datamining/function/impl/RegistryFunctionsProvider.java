@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.WorkerBuilder;
@@ -15,7 +14,9 @@ import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
+import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
+import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 
 public class RegistryFunctionsProvider implements FunctionProvider {
     
@@ -39,7 +40,8 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     
     private Collection<Function<?>> filterForSourceType(Collection<Function<?>> functions, Class<?> sourceType) {
         Collection<Function<?>> dimensionsForType = new HashSet<>();
-        ParallelFilter<Function<?>> dimensionForTypeFilter = createFilterForSourceTypeFilter(sourceType);
+        ConcurrentFilterCriteria<Function<?>> sourceTypeFilterCriteria = createSourceTypeFilterCriteria(sourceType);
+        ParallelFilter<Function<?>> dimensionForTypeFilter = createFilterForSourceTypeFilter(sourceTypeFilterCriteria);
         
         try {
             dimensionsForType = dimensionForTypeFilter.start(functions).get();
@@ -50,11 +52,19 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         return dimensionsForType;
     }
 
-    private ParallelFilter<Function<?>> createFilterForSourceTypeFilter(Class<?> sourceType) {
-        ConcurrentFilterCriteria<Function<?>> declaringTypeOrParameterTypeCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
-        WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(declaringTypeOrParameterTypeCriteria);
-        ParallelFilter<Function<?>> dimensionForTypeFilter = new PartitioningParallelFilter<>(workerBuilder, DataMiningFactory.getExecutor());
-        return dimensionForTypeFilter;
+    private ConcurrentFilterCriteria<Function<?>> createSourceTypeFilterCriteria(Class<?> sourceType) {
+        return new DeclaringTypeOrParameterTypeCriteria(sourceType);
+    }
+
+    private ParallelFilter<Function<?>> createFilterForSourceTypeFilter(ConcurrentFilterCriteria<Function<?>> filterCriteria) {
+        WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(filterCriteria);
+        return new PartitioningParallelFilter<>(workerBuilder, Activator.getExecutor());
+    }
+    
+    @Override
+    public Function<?> getFunctionFor(FunctionDTO functionDTO) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

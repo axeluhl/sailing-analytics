@@ -6,15 +6,18 @@ import static org.junit.Assert.assertThat;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
+import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
@@ -22,8 +25,11 @@ import com.sap.sailing.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
+import com.sap.sailing.datamining.test.util.StringMessagesForTests;
 
 public class TestFunctionProvider {
+    
+    private static final DataMiningStringMessages stringMessages = new StringMessagesForTests();
     
     private FunctionRegistry functionRegistry;
     
@@ -74,6 +80,19 @@ public class TestFunctionProvider {
         
         providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
         assertThat(providedFunctions, is(expectedFunctions));
+    }
+    
+    @Test
+    public void testGetFunctionForDTO() {
+        Method getRegattaNameMethod = FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName");
+        Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
+        FunctionDTO getRegattaNameDTO = getRegattaName.asDTO(Locale.ENGLISH, stringMessages);
+        
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        
+        @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected, so the Functions have to be specific (without <?>)
+        Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionFor(getRegattaNameDTO);
+        assertThat(providedFunction, is(getRegattaName));
     }
 
 }

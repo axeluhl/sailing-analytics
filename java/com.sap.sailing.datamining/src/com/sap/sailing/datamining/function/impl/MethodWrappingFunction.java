@@ -120,7 +120,20 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public String toString() {
-        return getDeclaringClass().getSimpleName() + "." + getMethodName();
+        return getDeclaringClass().getSimpleName() + "." + getMethodName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+    }
+
+    private String parametersAsString() {
+        StringBuilder parameterBuilder = new StringBuilder();
+        boolean first = true;
+        for (Class<?> parameterType : getParameters()) {
+            if (!first) {
+                parameterBuilder.append(", ");
+            }
+            parameterBuilder.append(parameterType.getSimpleName());
+            first = false;
+        }
+        return parameterBuilder.toString();
     }
 
     @Override
