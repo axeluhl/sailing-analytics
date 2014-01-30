@@ -6,9 +6,6 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.WithID;
 
-
-This is absolutely broken!!!
-
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
  * example, Kiel Week 2011 is an event, and the International German Championship 2011 held, e.g., in Travem�nde, is an event,
