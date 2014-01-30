@@ -252,3 +252,8 @@ Writing the test is straight forward and there are no big differences to other t
             assertTrue(events.size() == 1);
         }
     }
+
+## Executing the Test
+
+
+## Advanced Topics
