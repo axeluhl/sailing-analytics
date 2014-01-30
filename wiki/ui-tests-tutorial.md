@@ -5,7 +5,7 @@ In this tutorial, we want to give a practical introduction in how to write UI-Te
 
 When you start to write UI tests, the first thing you have to do is, to ensure that the UI is testable. This means, that you have to be able to easily find all widgets in the final HTML-Document the user interacts with. The simplest approach here is to use debug identifiers which are provided by GWT and to assign an identifier to all important widgets, like buttons and text fields. Our framework contains a corresponding mechanism to lookup elements by the debug identifier, but more on this later.
 
-If we look at the "Events"  tab of the administration console, we can see that we need the button for adding a new event as well as the table for the validation of the creation (Listing 1). In addition we need all the text fields and the checkbox of the dialog for creating a new event, which are instantiated by the class ´EventCreateDialog`, as well as for the dialog itself (Listing 2).
+If we look at the "Events"  tab of the administration console, we can see that we need the button for adding a new event as well as the table for the validation of the creation (Listing 1).
 
     public class SailingEventManagementPanel extends SimplePanel implements EventRefresher {
         public SailingEventManagementPanel(final SailingServiceAsync sailingService,
@@ -22,7 +22,7 @@ If we look at the "Events"  tab of the administration console, we can see that w
         }
     }
 
-t
+In addition we need all the text fields and the checkbox of the dialog for creating a new event, which are instantiated by the class ´EventCreateDialog`, as well as for the dialog itself (Listing 2).
 
     public class EventCreateDialog extends EventDialog<EventDTO> {
         public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
