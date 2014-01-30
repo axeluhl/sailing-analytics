@@ -86,7 +86,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         int id = rnd.nextInt(3);
         return new Candidate(id + 1, new MillisecondsTimePoint(
                 (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
-                waypoints.get(id));
+                waypoints.get(id), true, "Test");
     }
 
 }
