@@ -59,5 +59,71 @@ public class TestFunctionDTOConstruction {
         
         return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);
     }
+    
+    @Test
+    public void testNullarySideEffectFreeValueDTOConstruction() {
+        Function<?> sideEffectFreeValue = FunctionFactory.createMethodWrappingFunction(sideEffectFreeValueMethod);
+        
+        FunctionDTO expectedDTO = createExpectedNullarySideEffectFreeValueDTO(Locale.ENGLISH, "value");
+        assertThat(sideEffectFreeValue.asDTO(Locale.ENGLISH, stringMessages), is(expectedDTO));
+        
+        expectedDTO = createExpectedNullarySideEffectFreeValueDTO(Locale.GERMAN, "value");
+        assertThat(sideEffectFreeValue.asDTO(Locale.GERMAN, stringMessages), is(expectedDTO));
+    }
+
+    private FunctionDTO createExpectedNullarySideEffectFreeValueDTO(Locale locale, String messageKey) {
+        String functionName = sideEffectFreeValueMethod.getName();
+        String sourceTypeName = sideEffectFreeValueMethod.getDeclaringClass().getSimpleName();
+        String returnTypeName = sideEffectFreeValueMethod.getReturnType().getSimpleName();
+        List<String> parameterTypeNames = new ArrayList<>();
+
+        String displayName = stringMessages.get(locale, messageKey);
+        boolean isDimension = false;
+        
+        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);
+    }
+    
+    @Test
+    public void testExternalLibraryFunctionDTOConstruction() {
+        Function<?> externalLibraryFunction = FunctionFactory.createMethodWrappingFunction(externalLibraryMethod);
+        
+        FunctionDTO expectedDTO = createExpectedExternalLibraryFunctionDTO();
+        assertThat(externalLibraryFunction.asDTO(Locale.ENGLISH, stringMessages), is(expectedDTO));
+        assertThat(externalLibraryFunction.asDTO(Locale.GERMAN, stringMessages), is(expectedDTO));
+    }
+
+    private FunctionDTO createExpectedExternalLibraryFunctionDTO() {
+        String functionName = externalLibraryMethod.getName();
+        String sourceTypeName = externalLibraryMethod.getDeclaringClass().getSimpleName();
+        String returnTypeName = externalLibraryMethod.getReturnType().getSimpleName();
+        List<String> parameterTypeNames = new ArrayList<>();
+
+        String displayName = functionName;
+        boolean isDimension = false;
+        
+        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);
+    }
+    
+    @Test
+    public void testFunctionDTOConstructionForMethodWithParameters() {
+        Function<?> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
+        
+        FunctionDTO expectedDTO = createFunctionDTOWithParameters();
+        assertThat(increment.asDTO(Locale.ENGLISH, stringMessages), is(expectedDTO));
+        assertThat(increment.asDTO(Locale.GERMAN, stringMessages), is(expectedDTO));
+    }
+
+    private FunctionDTO createFunctionDTOWithParameters() {
+        String functionName = incrementMethod.getName();
+        String sourceTypeName = incrementMethod.getDeclaringClass().getSimpleName();
+        String returnTypeName = incrementMethod.getReturnType().getSimpleName();
+        List<String> parameterTypeNames = new ArrayList<>();
+        parameterTypeNames.add(int.class.getSimpleName());
+
+        String displayName = functionName;
+        boolean isDimension = false;
+        
+        return new FunctionDTOImpl(functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, isDimension);
+    }
 
 }
