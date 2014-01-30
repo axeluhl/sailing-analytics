@@ -785,7 +785,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
         Bearing result = null;
         PassingInstruction instruction = w.getPassingInstructions();
-        if (instruction == null) {
+        if (instruction == PassingInstruction.None) {
             if (w.equals(getRace().getCourse().getFirstWaypoint())
                     || w.equals(getRace().getCourse().getLastWaypoint())) {
                 instruction = PassingInstruction.Line;
@@ -800,9 +800,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     instruction = PassingInstruction.Gate;
                 } else if (numberofMarks == 1) {
                     instruction = PassingInstruction.Port;
-                } else {
-                    instruction = PassingInstruction.None;
-                }
+                } 
             }
         }
         if (instruction == PassingInstruction.FixedBearing) {
