@@ -21,9 +21,7 @@ If we look at the "Events"  tab of the administration console, we can see that w
             ...
         }
     }
-
-
-
+ 
     public class EventCreateDialog extends EventDialog<EventDTO> {
         public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
                 DialogCallback<EventDTO> callback) {
