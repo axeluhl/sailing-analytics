@@ -31,7 +31,7 @@ public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory 
     public synchronized LiveDataConnection getOrCreateLiveDataConnection(Iterable<String> deviceSerialNumbers) throws Exception {
         Set<String> deviceSerialNumbersAsSet = new HashSet<>();
         Util.addAll(deviceSerialNumbers, deviceSerialNumbersAsSet);
-        LiveDataConnection result = dataConnectionsForDeviceSerialNumbers.get(dataConnectionsForDeviceSerialNumbers);
+        LiveDataConnection result = dataConnectionsForDeviceSerialNumbers.get(deviceSerialNumbersAsSet);
         if (result == null) {
             result = new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, account);
             dataConnectionsForDeviceSerialNumbers.put(deviceSerialNumbersAsSet, result);
@@ -43,7 +43,7 @@ public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory 
         }
         usageCount++;
         usageCounts.put(result, usageCount);
-        return result;
+        return new LiveDataConnectionWrapper(this, result);
     }
 
     public synchronized void stop(LiveDataConnection actualConnection) throws Exception {
