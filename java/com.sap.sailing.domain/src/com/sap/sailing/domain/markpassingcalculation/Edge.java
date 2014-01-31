@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.Waypoint;
 public class Edge {
     private Candidate start;
     private Candidate end;
-    static double penaltyForSkipped = 0.9;
+    static double penaltyForSkipped = 0.8;
     private double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
@@ -31,7 +31,7 @@ public class Edge {
     
     public double getProbability() {
             return 1 - (start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability)
-                    + 2*penaltyForSkipped * (end.getID() - start.getID()) - 1;
+                    + 2*penaltyForSkipped * (end.getID() - start.getID()- 1) ;
     }
 
     public Candidate getStart() {
@@ -42,7 +42,6 @@ public class Edge {
         return end;
     }
     public String toString(){
-        return "From ID " + start.getID()+ " to "+end.getID()+": "+ (1 - (start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability)
-                    + 2*penaltyForSkipped * (end.getID() - start.getID()) - 1);
+        return "From ID " + start.getID()+ " to "+end.getID()+": "+ getProbability();
     }
 }

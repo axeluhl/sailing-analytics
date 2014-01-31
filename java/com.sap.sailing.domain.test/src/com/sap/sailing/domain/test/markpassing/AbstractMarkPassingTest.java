@@ -138,13 +138,11 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             System.out.println("Computation time: " + time + " ms");
         }
         assertTrue(accuracy >= 0.9);
-
     }
 
     protected void testStartOfRace() {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
-
         int mistakes = 0;
         for (Competitor c : getRace().getCompetitors()) {
             List<GPSFix> fixes = new ArrayList<GPSFix>();
@@ -165,7 +163,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             boolean gotFirst = false;
             boolean gotOther = false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-               // System.out.println(getTrackedRace().getMarkPassing(c, w));
+               System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if (w == w1) {
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else {

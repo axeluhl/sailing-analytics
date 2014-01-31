@@ -40,12 +40,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
-    private static double strictness = 200;
+    private static double strictness = 250;
 
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
         this.race = race;
-        raceStartTime = race.getStartOfRace().minus(2000);
+        raceStartTime = race.getStartOfRace();
         start = new Candidate(0, raceStartTime, 1, null, true, "Proxy");
         end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1, null, true, "Proxy");
         candidates = new LinkedHashMap<>();
@@ -64,8 +64,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace().minus(2000) != raceStartTime) {
-            raceStartTime = race.getStartOfRace().minus(2000);
+        if (race.getStartOfRace() != raceStartTime) {
+            raceStartTime = race.getStartOfRace();
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);
             }
@@ -91,8 +91,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
                 if (raceStartTime != null) {
                     if (late == end) {
                         allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedTime(early, late) > penaltyForSkipping) {
-                        allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
+                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedTime(early, late) >penaltyForSkipping) {
+                        Edge e = new Edge(early, late, estimatedTime(early, late));
+                        allEdges.get(co).add(e);
                     }
                 } else {
                     if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) > penaltyForSkipping) {
@@ -132,7 +133,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
             }
             all.remove(newMostLikelyEdge);
         }
-
         Candidate marker = candidateWithParent.get(end);
         while (!(marker == start)) {
             if (currentMarkPasses.get(co).get(marker.getWaypoint()) == null || currentMarkPasses.get(co).get(marker.getWaypoint()).getTimePoint() != marker.getTimePoint()) {
@@ -175,7 +175,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
         double numberOfCompetitors = 0;
         double totalTimeDifference = 0;
         for (Competitor c : candidates.keySet()) {
-
             double closestCandidate = -1;
             for (Candidate ca : candidates.get(c)) {
                 if (ca.getID() == 1) {
@@ -195,7 +194,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     private double estimatedTime(Candidate c1, Candidate c2) {
-        // TODO takes the straight distance between legs, not the distance actually sailed
         double totalEstimatedTime = 0;
         Waypoint current;
         if (c1.getID() == 0) {
@@ -210,35 +208,28 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
         totalEstimatedTime = totalEstimatedTime * 3600000;
         double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
-        double timeDiff = Math.abs(totalEstimatedTime - actualTime) / 1000;
-        double sigmaSquared = 0.2;
+        double timeDiffInSeconds = Math.abs(totalEstimatedTime - actualTime) / 1000;
+        double sigmaSquared = 1/(2*Math.PI);
         double factor = 1 / (Math.sqrt(sigmaSquared * 2 * Math.PI));
-        double exponent = -(Math.pow(timeDiff / strictness, 2) / (2 * sigmaSquared));
-        return factor * Math.pow(Math.E, exponent);
-
+        double exponent = -(Math.pow(timeDiffInSeconds / strictness, 2) / (2 * sigmaSquared));
+        double result = factor * Math.pow(Math.E, exponent);
+        return result;
     }
 
     private double estimatedTimeOnLeg(TrackedLeg leg, TimePoint t) {
-
         try {
             if (leg.getLegType(t) == LegType.DOWNWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2 // seems to be less exact... /
-                                                                              // Math.sin(0.5*race.getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksDownwind())
-                        / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots();
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2 / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots();
             }
-
             if (leg.getLegType(t) == LegType.UPWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2) // /
-                                                                                       // Math.sin(0.5*race.getRace().getBoatClass().getMinimumAngleBetweenDifferentTacksUpwind())
+                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2)
                         / (race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots() * 2 / 3);
             }
         } catch (NoWindException e) {
             Logger.getLogger(CandidateChooser.class.getName()).log(Level.SEVERE,
                     "CandidateChooser threw exception " + e.getMessage() + " while estimating the Time between two Candidates.");
         }
-
         return leg.getGreatCircleDistance(t).getNauticalMiles() / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots() * 0.8;
-
     }
 
     private void addCandidates(List<Candidate> newCandidates, Competitor co) {
