@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.impl;
+package com.sap.sailing.domain.igtimiadapter.shared;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -358,8 +358,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             trueHeading = hdg;
         } else {
             Bearing hdgm = getHDGM(timePoint, hdgmPair);
-            Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
-            trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+            if (hdgm != null) {
+                Declination declination = declinationService.getDeclination(timePoint, position, /* timeoutForOnlineFetchInMilliseconds 5s */ 5000);
+                trueHeading = hdgm.add(declination.getBearingCorrectedTo(timePoint));
+            } else {
+                trueHeading = null;
+            }
         }
         return trueHeading;
     }

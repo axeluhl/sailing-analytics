@@ -34,6 +34,7 @@ import com.sap.sailing.domain.igtimiadapter.Session;
 import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;

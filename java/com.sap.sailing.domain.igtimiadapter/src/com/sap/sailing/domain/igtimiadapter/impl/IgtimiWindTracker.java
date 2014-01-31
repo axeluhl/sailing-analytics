@@ -16,6 +16,7 @@ import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
+import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.tracking.AbstractWindTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
