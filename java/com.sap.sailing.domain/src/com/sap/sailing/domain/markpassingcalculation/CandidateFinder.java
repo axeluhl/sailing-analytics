@@ -56,7 +56,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
 
     public CandidateFinder(DynamicTrackedRace race) {
         this.race = race;
-
         for (Competitor c : race.getRace().getCompetitors()) {
             crossTrackErrors.put(c, new TreeMap<GPSFix, LinkedHashMap<Waypoint, Pair<Double, Double>>>(comp));
             distances.put(c, new TreeMap<GPSFix, LinkedHashMap<Waypoint, Double>>(comp));
@@ -383,7 +382,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (50 * Math.abs( distance/legLength ) + 1);
+        double result = 1 / (20 * Math.abs( distance/legLength ) + 1);
         // Auch NormalVerteilung??!
         return result;
     }

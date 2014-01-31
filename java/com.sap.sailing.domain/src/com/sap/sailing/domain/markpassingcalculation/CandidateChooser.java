@@ -9,9 +9,11 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -40,9 +42,10 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
-    private static double strictness = 250;
+    private static double strictness = 1000;
 
     public CandidateChooser(DynamicTrackedRace race) {
+        // Duplicate Edges?
         logger.setLevel(Level.INFO);
         this.race = race;
         raceStartTime = race.getStartOfRace();
@@ -91,8 +94,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
                 if (raceStartTime != null) {
                     if (late == end) {
                         allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedTime(early, late) >penaltyForSkipping) {
-                        Edge e = new Edge(early, late, estimatedTime(early, late));
+                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
+                        Edge e = new Edge(early, late, estimatedDistance(co, early, late));
                         allEdges.get(co).add(e);
                     }
                 } else {
@@ -100,8 +103,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
                     } else if (late == end || early == start) {
                         allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedTime(early, late) > penaltyForSkipping) {
-                        allEdges.get(co).add(new Edge(early, late, estimatedTime(early, late)));
+                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
+                        allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late)));
                     }
                 }
             }
@@ -193,8 +196,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
         return 1 / (0.00001 * (totalTimeDifference / numberOfCompetitors) + 1);
     }
 
-    private double estimatedTime(Candidate c1, Candidate c2) {
-        double totalEstimatedTime = 0;
+    private double estimatedDistance(Competitor c, Candidate c1, Candidate c2) {
+        Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint current;
         if (c1.getID() == 0) {
             current = race.getRace().getCourse().getFirstWaypoint();
@@ -203,33 +206,32 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
         while (current != c2.getWaypoint()) {
             TrackedLeg leg = race.getTrackedLegStartingAt(current);
-            totalEstimatedTime = totalEstimatedTime + estimatedTimeOnLeg(leg, c1.getTimePoint().plus(1 / 2 * c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis()));
+            totalEstimatedDistance = totalEstimatedDistance.add(estimatedDistanceOnLeg(leg,
+                    c1.getTimePoint().plus(1 / 2 * c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis())));
             current = leg.getLeg().getTo();
         }
-        totalEstimatedTime = totalEstimatedTime * 3600000;
-        double actualTime = c2.getTimePoint().asMillis() - c1.getTimePoint().asMillis();
-        double timeDiffInSeconds = Math.abs(totalEstimatedTime - actualTime) / 1000;
-        double sigmaSquared = 1/(2*Math.PI);
+        Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
+        double differenceInMeters = totalEstimatedDistance.getMeters() - actualDistance.getMeters();
+        double sigmaSquared = 1 / (2 * Math.PI);
         double factor = 1 / (Math.sqrt(sigmaSquared * 2 * Math.PI));
-        double exponent = -(Math.pow(timeDiffInSeconds / strictness, 2) / (2 * sigmaSquared));
+        double exponent = -(Math.pow(differenceInMeters / strictness, 2) / (2 * sigmaSquared));
         double result = factor * Math.pow(Math.E, exponent);
         return result;
     }
 
-    private double estimatedTimeOnLeg(TrackedLeg leg, TimePoint t) {
+    private Distance estimatedDistanceOnLeg(TrackedLeg leg, TimePoint t) {
         try {
             if (leg.getLegType(t) == LegType.DOWNWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * 1.2 / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots();
+                return leg.getGreatCircleDistance(t).scale(1.2);
             }
             if (leg.getLegType(t) == LegType.UPWIND) {
-                return leg.getGreatCircleDistance(t).getNauticalMiles() * Math.sqrt(2)
-                        / (race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots() * 2 / 3);
+                return leg.getGreatCircleDistance(t).scale(Math.sqrt(2));
             }
         } catch (NoWindException e) {
             Logger.getLogger(CandidateChooser.class.getName()).log(Level.SEVERE,
                     "CandidateChooser threw exception " + e.getMessage() + " while estimating the Time between two Candidates.");
         }
-        return leg.getGreatCircleDistance(t).getNauticalMiles() / race.getWind(race.getApproximatePosition(leg.getLeg().getFrom(), t), t).getKnots() * 0.8;
+        return leg.getGreatCircleDistance(t).scale(1.3);
     }
 
     private void addCandidates(List<Candidate> newCandidates, Competitor co) {
