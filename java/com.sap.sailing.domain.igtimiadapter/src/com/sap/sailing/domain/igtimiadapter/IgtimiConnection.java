@@ -96,7 +96,7 @@ public interface IgtimiConnection {
      * 
      * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()}.
      */
-    LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
+    LiveDataConnection getOrCreateLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
     /**
      * @param sessionIds

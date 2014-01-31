@@ -138,12 +138,18 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 }
             });
         }
-        logger.info("Received "+Util.size(awsFixes)+" wind fixes");
+        logger.fine("Received "+Util.size(awsFixes)+" wind fixes");
+        boolean loggedWindFixGenerationProblem = false;
         for (AWS aws : awsFixes) {
             try {
                 final Wind wind = getWind(aws.getTimePoint());
                 if (wind != null) {
                     notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
+                } else {
+                    if (!loggedWindFixGenerationProblem) {
+                        logger.info("Not enough information to build a Wind fix out of data provided. AWS received but most probably HDG or HDGM not received (yet) - check your compass.");
+                        loggedWindFixGenerationProblem = true;
+                    }
                 }
             } catch (ClassNotFoundException | IOException | ParseException e) {
                 logger.log(Level.INFO, "Exception while trying to construct Wind fix from Igtimi fix " + aws, e);
