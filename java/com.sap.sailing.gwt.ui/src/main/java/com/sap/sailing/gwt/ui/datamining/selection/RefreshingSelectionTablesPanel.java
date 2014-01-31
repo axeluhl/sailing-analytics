@@ -77,6 +77,8 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
                 }
                 @Override
                 public void onSuccess(Collection<FunctionDTO> result) {
+                    @SuppressWarnings("unused")
+                    Collection<FunctionDTO> dimensions = result;
                     // TODO Auto-generated method stub
                     
                 }

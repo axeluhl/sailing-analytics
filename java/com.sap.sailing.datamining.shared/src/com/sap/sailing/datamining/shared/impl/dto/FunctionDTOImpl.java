@@ -6,7 +6,8 @@ import java.util.List;
 import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 
 public class FunctionDTOImpl implements FunctionDTO {
-
+    private static final long serialVersionUID = 4587389541910498505L;
+    
     private String functionName;
     private String sourceTypeName;
     private String returnTypeName;
@@ -14,6 +15,13 @@ public class FunctionDTOImpl implements FunctionDTO {
 
     private String displayName;
     private boolean isDimension;
+
+    /**
+     * Constructor for the GWT-Serialization. Don't use this!
+     */
+    @Deprecated
+    FunctionDTOImpl() {
+    }
     
     public FunctionDTOImpl(String functionName, String sourceTypeName, String returnTypeName, List<String> parameterTypeNames, String displayName, boolean isDimension) {
         this.functionName = functionName;
@@ -25,22 +33,27 @@ public class FunctionDTOImpl implements FunctionDTO {
         this.isDimension = isDimension;
     }
 
+    @Override
     public String getSourceTypeName() {
         return sourceTypeName;
     }
 
+    @Override
     public String getReturnTypeName() {
         return returnTypeName;
     }
 
+    @Override
     public List<String> getParameters() {
         return parameterTypeNames;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
     
+    @Override
     public boolean isDimension() {
         return isDimension;
     }
