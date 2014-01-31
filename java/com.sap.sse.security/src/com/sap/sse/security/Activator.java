@@ -1,9 +1,7 @@
 package com.sap.sse.security;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.config.IniSecurityManagerFactory;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.util.Factory;
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -24,11 +22,10 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        Factory<org.apache.shiro.mgt.SecurityManager> factory = new IniSecurityManagerFactory();
-        org.apache.shiro.mgt.SecurityManager securityManager = factory.getInstance();
-        SecurityUtils.setSecurityManager(securityManager);
+        
         registration = context.registerService(SecurityService.class.getName(),
-                new SecurityServiceImpl(securityManager), null);
+                new SecurityServiceImpl(), null);
+        Logger.getLogger(Activator.class.getName()).info("Security Service registered.");;
     }
 
     /*
