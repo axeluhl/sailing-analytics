@@ -5,11 +5,8 @@ import java.io.PrintWriter;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,17 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
@@ -40,24 +35,21 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
  * @author Simon Marcel Pamies
  *
  */
-public class WindStatusServlet extends SailingServerHttpServlet {
+public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
+    
+    private static int igtimiRawMessageCount;
     private static List<IgtimiMessageInfo> lastIgtimiMessages;
-
-    final private Map<Integer, ExpeditionMessageInfo> lastMessageInfosPerBoat;
+    private static IgtimiWindReceiver igtimiWindReceiver;
+    private static LiveDataConnection liveDataConnection;
 
     private static boolean isExpeditionListenerRegistered;
     private static boolean isIgtimiListenerRegistered;
     
-    private static long MIN_TIME_SINCE_LAST_MESSAGE = 5 * 1000; // 5s; 
-    private static long MAX_TIME_SINCE_LAST_MESSAGE = 2 * 60 * 60 * 1000; // 2 hour
-    private static long MAX_TIME_TO_KEEP_OLD_MESSAGES = 5 * 60 * 1000; // 5 minutes worth of data
-
     public WindStatusServlet() {
         super();
-        lastMessageInfosPerBoat = new HashMap<Integer, ExpeditionMessageInfo>();
         isExpeditionListenerRegistered = false;
         isIgtimiListenerRegistered = false;
     }
@@ -71,6 +63,7 @@ public class WindStatusServlet extends SailingServerHttpServlet {
         if (!isIgtimiListenerRegistered) {
             isIgtimiListenerRegistered = registerIgtimiListener();
             lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
+            igtimiRawMessageCount = 0;
         }
     }
 
@@ -84,9 +77,28 @@ public class WindStatusServlet extends SailingServerHttpServlet {
         out.println("<html>");
         out.println("<head>");
         out.println("<title>Wind Status</title>");
+        out.println("<meta http-equiv=refresh content=10>");
         out.println("</head>");
         out.println("<body>");
-        out.println("<input type='button' value='Refresh' onClick='window.location.reload()'><br/>");
+        out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3><br/>");
+        if (lastIgtimiMessages != null) {
+            int counter = 0;
+            for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
+                counter++;
+                IgtimiMessageInfo message = iterator.previous();
+                out.println(message);
+                out.println("<br/>");
+                if (counter >= 10) {
+                    break;
+                }
+            }
+        } else {
+            if (igtimiRawMessageCount == 0) {
+                out.println("<i>No Igtimi messages received so far!</i>");
+            } else {
+                out.println("<i>"+igtimiRawMessageCount+" Igtimi message bunch has been received but not enough messages to generate wind information.</i>");
+            }
+        }
         out.println("<h3>Expedition Wind Status</h3>");
         if (lastExpeditionMessages.size()>0) {
             for (ExpeditionMessageInfo message : lastExpeditionMessages) {
@@ -95,76 +107,9 @@ public class WindStatusServlet extends SailingServerHttpServlet {
         } else {
             out.println("<div>No Expedition messages received so far!</div>");
         }
-        out.println("<h3>Igtimi Wind Status</h3><br/>");
-        if (lastIgtimiMessages.size()>0) {
-            out.println("<table><tr><td><b>Last General</b></td><td><b>Last Wind</b></td></tr><tr><td valign=top>");
-            for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
-                IgtimiMessageInfo message = iterator.previous();
-                if (message.receivedFix.getType() != Type.AWA && message.receivedFix.getType() != Type.AWS) {
-                    out.println(message);
-                    out.println("<br/>");
-                }
-            }
-            out.println("</td><td valign=top>");
-            for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
-                IgtimiMessageInfo message = iterator.previous();
-                if (message.receivedFix.getType() == Type.AWA || message.receivedFix.getType() == Type.AWS) {
-                    out.println(message);
-                    out.println("<br/>");
-                }
-            }
-            out.println("</td><tr></table>");
-        } else {
-            out.println("<div>No Igtimi messages received so far!</div>");
-        }
         out.println("</body>");
         out.println("</html>");
         out.close();
-    }
-
-    private PrintWriter dummy(HttpServletResponse resp) throws IOException {
-        PrintWriter out = resp.getWriter();
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Expedition Wind Status</title>");
-        out.println("</head>");
-        out.println("<body>");
-        out.println("<h3>Expedition Wind Status</h3>");
-       
-        if(lastMessageInfosPerBoat.size() > 0) {
-            Date now = new Date(); 
-            List<Integer> messagesToDrop = new ArrayList<Integer>();
-            for(ExpeditionMessageInfo info: lastMessageInfosPerBoat.values()) {
-                out.println("Boat-No:" + "&nbsp;" + info.boatID);
-                out.println("<br/>");
-                long timeSinceLastMessageInMs = now.getTime() - info.messageReceivedAt.getTime();
-                if(timeSinceLastMessageInMs > MAX_TIME_SINCE_LAST_MESSAGE) {
-                    messagesToDrop.add(info.boatID);
-                } else if(timeSinceLastMessageInMs > MIN_TIME_SINCE_LAST_MESSAGE) {
-                    long hours = TimeUnit.MILLISECONDS.toHours(timeSinceLastMessageInMs);
-                    long minutes = TimeUnit.MILLISECONDS.toMinutes(timeSinceLastMessageInMs) - TimeUnit.HOURS.toMinutes(hours);
-                    long seconds = TimeUnit.MILLISECONDS.toSeconds(timeSinceLastMessageInMs) - (TimeUnit.MINUTES.toSeconds(minutes) + TimeUnit.HOURS.toSeconds(hours));
-                    out.println("Time since last message:" + "&nbsp;" + String.format("%02d:%02d:%02d", hours, minutes, seconds));
-                    out.println("<br/>");
-                }
-                out.println("Last message received:" + "&nbsp;" + info.messageReceivedAt.toString());
-                out.println("<br/>");
-                out.println("Last message:" + "&nbsp;" + info.message.getOriginalMessage());
-                out.println("<br/>");
-                GPSFix gpsFix = info.message.getGPSFix();
-                out.println("Has GPS-Fix:" + "&nbsp;" + (gpsFix != null ? gpsFix.toString() : "no"));
-                out.println("<br/>");
-                SpeedWithBearing trueWind = info.message.getTrueWind();
-                out.println("Has TrueWind:" + "&nbsp;" + (trueWind != null ? trueWind.toString() : "no"));
-                out.println("<br/><br/>");
-            }
-            for(Integer boatID: messagesToDrop) {
-                lastMessageInfosPerBoat.remove(boatID);
-            }
-        } else {
-            out.println("No expedition wind sources available.");
-        }
-        return out;
     }
 
     private boolean registerIgtimiListener() {
@@ -176,28 +121,12 @@ public class WindStatusServlet extends SailingServerHttpServlet {
             if (account.getUser() != null) {
                 IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
-                    LiveDataConnection liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
+                    liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
+                    igtimiWindReceiver = new IgtimiWindReceiver(igtimiConnection.getWindDevices());
+                    igtimiWindReceiver.addListener(this);
+                    liveDataConnection.addListener(igtimiWindReceiver);
+                    liveDataConnection.addListener(this);
                     result = true;
-                    liveDataConnection.addListener(new BulkFixReceiver() {
-                        @Override
-                        public void received(Iterable<Fix> fixes) {
-                            for (Fix fix : fixes) {
-                                TimePoint messagesReceivedAt = MillisecondsTimePoint.now();
-                                if (fix != null) {
-                                    IgtimiMessageInfo message = new IgtimiMessageInfo();
-                                    message.receivedFix = fix;
-                                    message.messageReceivedAt = messagesReceivedAt;
-                                    // remove last message if it is old enough
-                                    if (WindStatusServlet.lastIgtimiMessages != null) {
-                                        if (WindStatusServlet.lastIgtimiMessages.size() > 100) {
-                                            WindStatusServlet.lastIgtimiMessages.remove(0);
-                                        }
-                                        lastIgtimiMessages.add(message);
-                                    }
-                                }
-                            }
-                        }
-                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -221,7 +150,7 @@ public class WindStatusServlet extends SailingServerHttpServlet {
                         info.boatID = message.getBoatID();
                         info.message = message;
                         info.messageReceivedAt = new Date();
-                        lastMessageInfosPerBoat.put(info.boatID, info);
+                        lastExpeditionMessages.add(info);
                     }
                 }
             } 
@@ -239,16 +168,48 @@ public class WindStatusServlet extends SailingServerHttpServlet {
         Date messageReceivedAt;
         
         public String toString() {
-            return "";
+            if (message.getTrueWind() != null) {
+                return messageReceivedAt.toString() + ": [" + boatID + "] Knots: " + message.getTrueWind().getKnots() + " Bearing: " + message.getTrueWindBearing().getDegrees();
+            }
+            return messageReceivedAt.toString() + ": [" + boatID + "] " + message.getOriginalMessage();
         }
     }
     
     private class IgtimiMessageInfo {
-        Fix receivedFix;
-        TimePoint messageReceivedAt;
+        Wind wind;
+        private String deviceSerialInfo;
+        
+        public IgtimiMessageInfo(Wind wind, String deviceSerialInfo) {
+            this.wind = wind;
+            this.deviceSerialInfo = deviceSerialInfo;
+        }
         
         public String toString() {
-            return receivedFix.toString();
+            return deviceSerialInfo + ":" + wind.toString();
         }
+    }
+
+    @Override
+    public void windDataReceived(Wind wind, String deviceSerialNumber) {
+        lastIgtimiMessages.add(new IgtimiMessageInfo(wind, deviceSerialNumber));
+    }
+    
+    @Override
+    public void destroy() {
+        if (liveDataConnection != null) {
+            try {
+                liveDataConnection.stop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                liveDataConnection = null;
+                isIgtimiListenerRegistered = false;
+            }
+        }
+    }
+
+    @Override
+    public void received(Iterable<Fix> fixes) {
+        igtimiRawMessageCount += 1;
     }
 }
