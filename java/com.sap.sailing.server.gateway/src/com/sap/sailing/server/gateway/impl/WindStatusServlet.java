@@ -176,7 +176,7 @@ public class WindStatusServlet extends SailingServerHttpServlet {
             if (account.getUser() != null) {
                 IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
                 try {
-                    LiveDataConnection liveDataConnection = igtimiConnection.createLiveConnection(igtimiConnection.getWindDevices());
+                    LiveDataConnection liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     result = true;
                     liveDataConnection.addListener(new BulkFixReceiver() {
                         @Override

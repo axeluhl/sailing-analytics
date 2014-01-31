@@ -35,7 +35,8 @@ import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
-import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
+import com.sap.sailing.domain.igtimiadapter.websocket.LiveDataConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.websocket.LiveDataConnectionFactoryImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -45,10 +46,12 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionImpl.class.getName());
     private final Account account;
     private final IgtimiConnectionFactoryImpl connectionFactory;
+    private final LiveDataConnectionFactory liveDataConnectionFactory;
     
     public IgtimiConnectionImpl(IgtimiConnectionFactoryImpl connectionFactory, Account account) {
         this.connectionFactory = connectionFactory;
         this.account = account;
+        liveDataConnectionFactory = new LiveDataConnectionFactoryImpl(connectionFactory, account);
     }
     
     @Override
@@ -184,8 +187,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
     
 
     @Override
-    public LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception {
-        return new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, getAccount());
+    public LiveDataConnection getOrCreateLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception {
+        return liveDataConnectionFactory.getOrCreateLiveDataConnection(deviceSerialNumbers);
     }
 
     private DynamicTrack<Fix> getOrCreateTrack(Map<String, Map<Type, DynamicTrack<Fix>>> result,

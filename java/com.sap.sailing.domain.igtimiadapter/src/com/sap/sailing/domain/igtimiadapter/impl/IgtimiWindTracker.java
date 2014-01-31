@@ -46,7 +46,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 IgtimiConnection connection = connectionFactory.connect(account);
                                 Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                 if (!stopping) {
-                                    LiveDataConnection liveConnection = connection.createLiveConnection(devicesWeShouldListenTo);
+                                    LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
                                     IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(devicesWeShouldListenTo);
                                     liveConnection.addListener(windReceiver);
                                     windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));

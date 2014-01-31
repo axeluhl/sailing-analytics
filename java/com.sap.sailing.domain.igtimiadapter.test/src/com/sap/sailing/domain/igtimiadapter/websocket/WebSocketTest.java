@@ -158,7 +158,7 @@ public class WebSocketTest {
         // the data from baur@stg-academy.org, particularly containing the Berlin test data
         Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
         IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-        LiveDataConnection liveDataConnection = conn.createLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        LiveDataConnection liveDataConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
         liveDataConnection.addListener(new BulkFixReceiver() {
             @Override
             public void received(Iterable<Fix> fixes) {
