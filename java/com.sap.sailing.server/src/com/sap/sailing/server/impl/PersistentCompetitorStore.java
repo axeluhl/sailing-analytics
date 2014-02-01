@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -38,9 +38,9 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
      *            if <code>true</code>, the persistent competitor store is initially cleared, with all persistent
      *            competitor data removed; use with caution!
      */
-    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clear, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+    public PersistentCompetitorStore(MongoObjectFactory storeTo, boolean clear, TypeBasedServiceFinderFactory serviceFinderFactory) {
         DomainFactoryImpl baseDomainFactory = new DomainFactoryImpl(this);
-        this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, deviceTypeServiceFinder);
+        this.loadFrom = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, baseDomainFactory, serviceFinderFactory);
         this.storeTo = storeTo;
         if (clear) {
             storeTo.removeAllCompetitors();

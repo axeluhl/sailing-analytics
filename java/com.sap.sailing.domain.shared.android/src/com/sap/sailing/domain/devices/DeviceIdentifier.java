@@ -3,8 +3,6 @@ package com.sap.sailing.domain.devices;
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 
 public interface DeviceIdentifier extends IsManagedBySharedDomainFactory {
-    public static final String TYPE = "type";
-
     /**
      * This type identifier is used to determine what adapter shall be used to resolve this device identifier. For
      * example, the smartphone adapter is used to resolve smartphone identifiers, while in future an Igtimi adapter

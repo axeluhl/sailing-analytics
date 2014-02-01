@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -33,8 +33,8 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
 
     @Override
     public DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService, DomainFactory baseDomainFactory,
-            DeviceTypeServiceFinder deviceTypeServiceFinder) {
-        return new DomainObjectFactoryImpl(mongoDBService.getDB(), baseDomainFactory, deviceTypeServiceFinder);
+            TypeBasedServiceFinderFactory serviceFinderFactory) {
+        return new DomainObjectFactoryImpl(mongoDBService.getDB(), baseDomainFactory, serviceFinderFactory);
     }
 
     @Override
@@ -43,8 +43,8 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     }
     
     @Override
-    public MongoObjectFactory getDefaultMongoObjectFactory(DeviceTypeServiceFinder deviceTypeServiceFinder) {
-        return new MongoObjectFactoryImpl(this.defaultMongoObjectFactory.getDatabase(), deviceTypeServiceFinder);
+    public MongoObjectFactory getDefaultMongoObjectFactory(TypeBasedServiceFinderFactory serviceFinderFactory) {
+        return new MongoObjectFactoryImpl(this.defaultMongoObjectFactory.getDatabase(), serviceFinderFactory);
     }
 
     @Override

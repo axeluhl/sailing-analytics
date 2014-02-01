@@ -18,6 +18,8 @@ public class Activator implements BundleActivator {
     private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
     
     private static ExtenderBundleTracker extenderBundleTracker;
+    
+    private CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory;
 
     private RacingEventServiceImpl racingEventService;
     
@@ -38,7 +40,8 @@ public class Activator implements BundleActivator {
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
-        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, new OsgiDeviceTypeServiceFinder(context));
+        serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory);
 
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
@@ -51,6 +54,9 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         if (extenderBundleTracker != null) {
             extenderBundleTracker.close();
+        }
+        if (serviceFinderFactory != null) {
+            serviceFinderFactory.close();
         }
         // stop the tracking of the wind and all races
         for (Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {

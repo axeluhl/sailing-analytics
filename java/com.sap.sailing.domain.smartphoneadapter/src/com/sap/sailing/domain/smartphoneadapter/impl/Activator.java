@@ -6,8 +6,8 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.devices.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
 
 /**
@@ -22,7 +22,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         SmartphoneImeiHandlerImpl handler = new SmartphoneImeiHandlerImpl();
         Dictionary<String, String> properties = new Hashtable<String, String>();
-        properties.put(DeviceIdentifier.TYPE, SmartphoneImeiIdentifier.TYPE);
+        properties.put(TypeBasedServiceFinder.TYPE, SmartphoneImeiIdentifier.TYPE);
         context.registerService(DeviceIdentifierPersistenceHandler.class, handler, properties);
     }
 

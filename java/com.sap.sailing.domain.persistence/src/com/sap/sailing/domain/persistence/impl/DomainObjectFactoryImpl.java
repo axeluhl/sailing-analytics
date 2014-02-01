@@ -81,7 +81,9 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.devices.DeviceTypeServiceFinder;
+import com.sap.sailing.domain.devices.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -142,19 +144,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
-    private final DeviceTypeServiceFinder deviceTypeServiceFinder;
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
-     * Uses <code>null</code> as the {@link DeviceTypeServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
+     * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
      * using this instance of a {@link DomainObjectFactory}.
      */
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory) {
         this(db, baseDomainFactory, /* deviceTypeServiceFinder */ null);
     }
     
-    public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, DeviceTypeServiceFinder deviceTypeServiceFinder) {
+    public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
-        this.deviceTypeServiceFinder = deviceTypeServiceFinder;
+        this.serviceFinderFactory = serviceFinderFactory;
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.database = db;
