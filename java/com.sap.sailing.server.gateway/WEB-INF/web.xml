@@ -196,6 +196,14 @@
 	</servlet-mapping>
 			
 	<servlet>
+		<servlet-name>WindStatusServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindStatusServlet</servlet-name>
+		<url-pattern>/windStatus</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.TrackFilesExportPostServlet</servlet-class>
 	</servlet>

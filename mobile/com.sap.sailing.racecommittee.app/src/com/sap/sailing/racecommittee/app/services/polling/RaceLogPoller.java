@@ -87,7 +87,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
     }
 
     protected long getPollingIntervalInMs() {
-        return appPreferences.getPollingInterval() * 60 * 1000;
+        return appPreferences.getPollingInterval() * 1000;
     }
 
     @Override
