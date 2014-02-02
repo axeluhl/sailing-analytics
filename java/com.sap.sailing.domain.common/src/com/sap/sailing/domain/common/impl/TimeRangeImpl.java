@@ -57,4 +57,11 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
     public boolean endsAfter(TimeRange other) {
         return to().after(other.to());
     }
+
+    @Override
+    public long timeDifference(TimePoint timePoint) {
+        if (includes(timePoint)) return 0;
+        if (timePoint.before(from())) return from().asMillis() - timePoint.asMillis();
+        return to().asMillis() - timePoint.asMillis();
+    }
 }
