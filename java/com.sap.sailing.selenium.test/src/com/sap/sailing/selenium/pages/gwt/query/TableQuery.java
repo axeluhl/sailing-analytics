@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 
 import com.sap.sailing.selenium.pages.gwt.query.operation.bool.And;
 
-public class TableQuery<S extends DataEntry> {
-    private CellTable<? extends S> table;
+public class TableQuery<S extends DataEntryPO> {
+    private CellTablePO<? extends S> table;
     
     private Predicate where;
     
     public TableQuery() {
     }
     
-    public <Q extends CellTable<? extends S>> TableQuery<S> from(Q table) {
+    public <Q extends CellTablePO<? extends S>> TableQuery<S> from(Q table) {
         this.table = table;
         
         return this;

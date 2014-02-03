@@ -7,15 +7,15 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
-public class TrackedRacesManagementPanel extends PageArea {
+public class TrackedRacesManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListCoposite;
     
-    public TrackedRacesManagementPanel(WebDriver driver, WebElement element) {
+    public TrackedRacesManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
-    public TrackedRacesList getTrackedRacesList() {
-        return new TrackedRacesList(this.driver, this.trackedRacesListCoposite);
+    public TrackedRacesListPO getTrackedRacesList() {
+        return new TrackedRacesListPO(this.driver, this.trackedRacesListCoposite);
     }
 }

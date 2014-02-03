@@ -28,7 +28,7 @@ import org.openqa.selenium.WebDriver;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.sap.sailing.selenium.core.Selenium.SeleniumJUnit4ClassRunner;
+import com.sap.sailing.selenium.core.SeleniumRunner.SeleniumJUnit4ClassRunner;
 import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefinition;
 
 import com.sap.sailing.selenium.core.impl.TestEnvironmentImpl;
@@ -40,7 +40,7 @@ import com.sap.sailing.selenium.core.impl.TestEnvironmentImpl;
  * @author
  *   D049941
  */
-public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
+public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
     /**
      * <p>A test runner that will run the tests for a specific browser instance using a Selenium web driver. The web
      *   driver is provided to the tests by injecting it to annotated fields.</p>
@@ -216,7 +216,7 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
      * @throws InitializationError
      *   If there was an error during the initialization of the test runner.
      */
-    public Selenium(Class<?> klass) throws InitializationError {
+    public SeleniumRunner(Class<?> klass) throws InitializationError {
         super(klass);
 
         this.children = new LinkedList<>();

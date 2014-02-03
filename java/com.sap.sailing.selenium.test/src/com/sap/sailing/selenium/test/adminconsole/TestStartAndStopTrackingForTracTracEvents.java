@@ -3,7 +3,7 @@ package com.sap.sailing.selenium.test.adminconsole;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -28,7 +28,7 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
     public void testStartAndStopTrackingWithCorrectRegatta() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         
         // TODO: Complete the test case!

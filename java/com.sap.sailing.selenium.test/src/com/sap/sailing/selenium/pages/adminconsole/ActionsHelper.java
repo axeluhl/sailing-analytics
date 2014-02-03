@@ -12,7 +12,7 @@ import org.openqa.selenium.support.ui.FluentWait;
 import com.google.common.base.Function;
 import com.sap.sailing.selenium.pages.PageObject;
 
-public class Actions {
+public class ActionsHelper {
     private static final String ACTION_XPATH = ".//descendant::div[@name='%s']/img";
     
     public static final String EDIT_ACTION = "ACTION_EDIT";

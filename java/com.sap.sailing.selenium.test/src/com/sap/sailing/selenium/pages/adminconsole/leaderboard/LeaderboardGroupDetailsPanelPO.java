@@ -10,14 +10,14 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 import com.sap.sailing.selenium.pages.gwt.query.Alias;
 import com.sap.sailing.selenium.pages.gwt.query.TableQuery;
 
-public class LeaderboardGroupDetailsPanel extends PageArea {
+public class LeaderboardGroupDetailsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardsFilterTextBox")
     private WebElement leaderboardsFilterTextBox;
     
@@ -27,7 +27,7 @@ public class LeaderboardGroupDetailsPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "RefreshLeaderboardsButton")
     private WebElement refreshLeaderboardsButton;
     
-    public LeaderboardGroupDetailsPanel(WebDriver driver, WebElement element) {
+    public LeaderboardGroupDetailsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -35,15 +35,15 @@ public class LeaderboardGroupDetailsPanel extends PageArea {
         this.refreshLeaderboardsButton.click();
     }
     
-    public CellTable<DataEntry> getLeaderboardsTable() {
-        return new GenericCellTable<DataEntry>(this.driver, this.leaderboardsCellTable, DataEntry.class);
+    public CellTablePO<DataEntryPO> getLeaderboardsTable() {
+        return new GenericCellTablePO<DataEntryPO>(this.driver, this.leaderboardsCellTable, DataEntryPO.class);
     }
     
-    public DataEntry findLeaderboardEntry(String name) {
-        CellTable<DataEntry> table = getLeaderboardsTable();
-        DataEntry alias = Alias.alias(DataEntry.class);
+    public DataEntryPO findLeaderboardEntry(String name) {
+        CellTablePO<DataEntryPO> table = getLeaderboardsTable();
+        DataEntryPO alias = Alias.alias(DataEntryPO.class);
         
-        TableQuery<DataEntry> query = new TableQuery<>();
+        TableQuery<DataEntryPO> query = new TableQuery<>();
         query.from(table).
             where($(alias.getColumnContent("Leaderboard Name")).eq(name));
         

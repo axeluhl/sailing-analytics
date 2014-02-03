@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement;
  * @param <T>
  *   The type of the data entries the table contains.
  */
-public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
+public class GenericCellTablePO<T extends DataEntryPO> extends CellTablePO<T> {
     /**
      * <p></p>
      * 
@@ -22,7 +22,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
      * @param <T>
      *   The type of the data entries the factory creates.
      */
-    public static interface DataEntryFactory<T extends DataEntry> {
+    public static interface DataEntryFactory<T extends DataEntryPO> {
         /**
          * <p>Creates and returns a new entry which represents the specified element (a row) of the given table.</p>
          * 
@@ -33,7 +33,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
          * @return
          *   The data entry representing the element.
          */
-        public <S extends CellTable<T>> T createEntry(S table, WebElement element);
+        public <S extends CellTablePO<T>> T createEntry(S table, WebElement element);
     }
     
     /**
@@ -44,7 +44,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
      * @param <T>
      *   The type of the data entries the factory creates.
      */
-    public static class DefaultDataEntryFactory<T extends DataEntry> implements DataEntryFactory<T> {
+    public static class DefaultDataEntryFactory<T extends DataEntryPO> implements DataEntryFactory<T> {
         private Class<T> type;
         
         /**
@@ -64,7 +64,7 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
          * with the formal parameter types CellTable and WebElement.</p>
          */
         @Override
-        public <S extends CellTable<T>> T createEntry(S table, WebElement element) {
+        public <S extends CellTablePO<T>> T createEntry(S table, WebElement element) {
         	Class<?> clazz = table.getClass();
         	
         	while(clazz != null) {
@@ -83,11 +83,11 @@ public class GenericCellTable<T extends DataEntry> extends CellTable<T> {
     
     private DataEntryFactory<T> factory;
     
-    public GenericCellTable(WebDriver driver, WebElement element, Class<T> entryType) {
+    public GenericCellTablePO(WebDriver driver, WebElement element, Class<T> entryType) {
         this(driver, element, new DefaultDataEntryFactory<>(entryType));
     }
     
-    public GenericCellTable(WebDriver driver, WebElement element, DataEntryFactory<T> factory) {
+    public GenericCellTablePO(WebDriver driver, WebElement element, DataEntryFactory<T> factory) {
         super(driver, element);
         
         this.factory = factory;

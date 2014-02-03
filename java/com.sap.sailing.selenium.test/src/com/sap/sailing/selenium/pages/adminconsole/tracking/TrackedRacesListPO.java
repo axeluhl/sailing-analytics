@@ -14,11 +14,11 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
-public class TrackedRacesList extends PageArea {
+public class TrackedRacesListPO extends PageArea {
     public enum Status {
         LOADING,
         TRACKING,
@@ -105,7 +105,7 @@ public class TrackedRacesList extends PageArea {
     
     //@FindBy(how = BySeleniumId.class, using = "ExportPopup")
     
-    protected TrackedRacesList(WebDriver driver, WebElement element) {
+    protected TrackedRacesListPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -116,9 +116,9 @@ public class TrackedRacesList extends PageArea {
     
     public List<TrackedRaceDescriptor> getTrackedRaces() {
         List<TrackedRaceDescriptor> descriptors = new LinkedList<>();
-        CellTable<DataEntry> table = getTrackedRacesTable();
+        CellTablePO<DataEntryPO> table = getTrackedRacesTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String regatta = entry.getColumnContent(0);
             String boatClass = entry.getColumnContent(1);
             String race = entry.getColumnContent(2);
@@ -138,9 +138,9 @@ public class TrackedRacesList extends PageArea {
     public List<Status> getStatus(List<TrackedRaceDescriptor> races) {
         List<Status> result = new ArrayList<>(Collections.<Status>nCopies(races.size(), null));
         
-        CellTable<DataEntry> table = getTrackedRacesTable();
+        CellTablePO<DataEntryPO> table = getTrackedRacesTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String regatta = entry.getColumnContent(0);
             String boatClass = entry.getColumnContent(1);
             String race = entry.getColumnContent(2);
@@ -170,8 +170,8 @@ public class TrackedRacesList extends PageArea {
         waitForAjaxRequests();
     }
     
-    private CellTable<DataEntry> getTrackedRacesTable() {
-        return new GenericCellTable<>(this.driver, this.trackedRacesTable, DataEntry.class);
+    private CellTablePO<DataEntryPO> getTrackedRacesTable() {
+        return new GenericCellTablePO<>(this.driver, this.trackedRacesTable, DataEntryPO.class);
     }
     
 //    private List<WebElement> getTrackedRaces(List<TrackedRaceDescriptor> races) {

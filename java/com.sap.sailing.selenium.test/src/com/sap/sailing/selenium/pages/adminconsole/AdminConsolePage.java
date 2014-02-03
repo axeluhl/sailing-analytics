@@ -20,13 +20,13 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.HostPage;
 
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanel;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
 
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanel;
-import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -115,8 +115,8 @@ public class AdminConsolePage extends HostPage {
         super(driver);
     }
     
-    public RegattaStructureManagementPanel goToRegattaStructure() {
-        return new RegattaStructureManagementPanel(this.driver, goToTab(REGATTA_STRUCTURE_TAB_LABEL,
+    public RegattaStructureManagementPanelPO goToRegattaStructure() {
+        return new RegattaStructureManagementPanelPO(this.driver, goToTab(REGATTA_STRUCTURE_TAB_LABEL,
                 REGATTA_STRUCTURE_TAB_IDENTIFIER));
     }
     
@@ -127,23 +127,23 @@ public class AdminConsolePage extends HostPage {
      * @return
      *   The page object for the TracTracEvents tab.
      */
-    public TracTracEventManagementPanel goToTracTracEvents() {
-        return new TracTracEventManagementPanel(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
+    public TracTracEventManagementPanelPO goToTracTracEvents() {
+        return new TracTracEventManagementPanelPO(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
                 TRACTRAC_EVENTS_TAB_IDENTIFIER));
     }
     
-    public TrackedRacesManagementPanel goToTrackedRaces() {
-        return new TrackedRacesManagementPanel(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
+    public TrackedRacesManagementPanelPO goToTrackedRaces() {
+        return new TrackedRacesManagementPanelPO(this.driver, goToTab(TRACKED_RACES_TAB_LABEL,
                 TRACKED_RACES_TAB_IDENTIFIER));
     }
     
-    public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {
-        return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
+    public LeaderboardConfigurationPanelPO goToLeaderboardConfiguration() {
+        return new LeaderboardConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
     }
     
-    public LeaderboardGroupConfigurationPanel goToLeaderboardGroupConfiguration() {
-        return new LeaderboardGroupConfigurationPanel(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
+    public LeaderboardGroupConfigurationPanelPO goToLeaderboardGroupConfiguration() {
+        return new LeaderboardGroupConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER));
     }
     

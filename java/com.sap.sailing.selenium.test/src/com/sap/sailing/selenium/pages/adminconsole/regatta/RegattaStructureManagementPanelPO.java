@@ -9,9 +9,9 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListComposite.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
-public class RegattaStructureManagementPanel extends PageArea {
+public class RegattaStructureManagementPanelPO extends PageArea {
     public static final String DEFAULT_SERIES_NAME = "Default"; //$NON-NLS-1$
     
     @FindBy(how = BySeleniumId.class, using = "AddRegattaButton")
@@ -26,16 +26,16 @@ public class RegattaStructureManagementPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "RegattaDetailsComposite")
     WebElement regattaDetails;
     
-    public RegattaStructureManagementPanel(WebDriver driver, WebElement element) {
+    public RegattaStructureManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
-    public RegattaCreateDialog startRegattaCreation() {
+    public RegattaCreateDialogPO startRegattaCreation() {
         this.addRegattaButton.click();
         
         WebElement dialog = findElementBySeleniumId(this.driver, "RegattaCreateDialog"); //$NON-NLS-1$
         
-        return new RegattaCreateDialog(this.driver, dialog);
+        return new RegattaCreateDialogPO(this.driver, dialog);
     }
     
     /**
@@ -44,11 +44,11 @@ public class RegattaStructureManagementPanel extends PageArea {
      * @param regatta
      */
     public void createRegatta(RegattaDescriptor regatta) {
-        RegattaCreateDialog createRegattaDialog = startRegattaCreation();
+        RegattaCreateDialogPO createRegattaDialog = startRegattaCreation();
         createRegattaDialog.setRegattaName(regatta.getName());
         createRegattaDialog.setBoatClass(regatta.getBoatClass());
         
-        SeriesCreateDialog addSeriesDialog = createRegattaDialog.addSeries();
+        SeriesCreateDialogPO addSeriesDialog = createRegattaDialog.addSeries();
         addSeriesDialog.setSeriesName(DEFAULT_SERIES_NAME);
         
         addSeriesDialog.pressOk();
@@ -65,24 +65,24 @@ public class RegattaStructureManagementPanel extends PageArea {
         // Select all regattas and click the remove button
     }
     
-    public RegattaListComposite getRegattaList() {
-        return new RegattaListComposite(this.driver, this.regattaList);
+    public RegattaListCompositePO getRegattaList() {
+        return new RegattaListCompositePO(this.driver, this.regattaList);
     }
     
     public void selectRegatta(RegattaDescriptor regatta) {
         
     }
     
-    public RegattaDetailsComposite getRegattaDetails(RegattaDescriptor regatta) {
-        RegattaListComposite regattaList = getRegattaList();
+    public RegattaDetailsCompositePO getRegattaDetails(RegattaDescriptor regatta) {
+        RegattaListCompositePO regattaList = getRegattaList();
         regattaList.selectRegatta(regatta);
         
         return getRegattaDetails();
     }
     
-    public RegattaDetailsComposite getRegattaDetails() {
+    public RegattaDetailsCompositePO getRegattaDetails() {
         if(this.regattaDetails.isDisplayed())
-            return new RegattaDetailsComposite(this.driver, this.regattaDetails);
+            return new RegattaDetailsCompositePO(this.driver, this.regattaDetails);
         
         return null;
     }

@@ -6,9 +6,9 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 
-import com.sap.sailing.selenium.pages.common.DataEntryDialog;
+import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
-public class SeriesCreateDialog extends DataEntryDialog {
+public class SeriesCreateDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "NameTextField")
     private WebElement seriesNameTextField;
     
@@ -27,7 +27,7 @@ public class SeriesCreateDialog extends DataEntryDialog {
 //    @FindBy(how = BySeleniumId.class, using = "FleetListEditorComposite")
 //    private WebElement fleetsPanel;
     
-    public SeriesCreateDialog(WebDriver driver, WebElement element) {
+    public SeriesCreateDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

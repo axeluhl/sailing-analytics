@@ -17,11 +17,11 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListComposite.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 /**
  * <p>The page object representing the TracTrac Events tab.</p>
@@ -29,7 +29,7 @@ import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
  * @author
  *   D049941
  */
-public class TracTracEventManagementPanel extends PageArea {
+public class TracTracEventManagementPanelPO extends PageArea {
     public static class TrackableRaceDescriptor {
         public final String eventName;
         public final String raceName;
@@ -116,7 +116,7 @@ public class TracTracEventManagementPanel extends PageArea {
      * @param element
      *   
      */
-    public TracTracEventManagementPanel(WebDriver driver, WebElement element) {
+    public TracTracEventManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -163,9 +163,9 @@ public class TracTracEventManagementPanel extends PageArea {
      */
     public List<TrackableRaceDescriptor> getTrackableRaces() {
         List<TrackableRaceDescriptor> descriptors = new LinkedList<>();
-        CellTable<DataEntry> table = getTrackableRacesTable();
+        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String event = entry.getColumnContent(0);
             String race = entry.getColumnContent(1);
             String boatClass = entry.getColumnContent(2);
@@ -223,12 +223,12 @@ public class TracTracEventManagementPanel extends PageArea {
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
-        CellTable<DataEntry> table = getTrackableRacesTable();
-        List<DataEntry> entries = table.getEntries();
-        Iterator<DataEntry> iterator = entries.iterator();
+        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
+        List<DataEntryPO> entries = table.getEntries();
+        Iterator<DataEntryPO> iterator = entries.iterator();
         
         while(iterator.hasNext()) {
-            DataEntry entry = iterator.next();
+            DataEntryPO entry = iterator.next();
             
             String event = entry.getColumnContent(0);
             String race = entry.getColumnContent(1);
@@ -247,8 +247,8 @@ public class TracTracEventManagementPanel extends PageArea {
         waitForAjaxRequests();
     }
     
-    private CellTable<DataEntry> getTrackableRacesTable() {
-        return new GenericCellTable<>(this.driver, this.trackableRacesCellTable, DataEntry.class);
+    private CellTablePO<DataEntryPO> getTrackableRacesTable() {
+        return new GenericCellTablePO<>(this.driver, this.trackableRacesCellTable, DataEntryPO.class);
     }
     
     private void setSelection(WebElement checkbox, boolean selected) {

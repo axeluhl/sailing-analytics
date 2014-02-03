@@ -8,14 +8,14 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.adminconsole.Actions;
+import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 // TODO: Implement if needed
-public class RegattaDetailsComposite extends PageArea {
+public class RegattaDetailsCompositePO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "NameLabel")
     private WebElement regattaNameLabel;
     
@@ -31,7 +31,7 @@ public class RegattaDetailsComposite extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "SeriesCellTable")
     private WebElement seriesTable;
     
-    public RegattaDetailsComposite(WebDriver driver, WebElement element) {
+    public RegattaDetailsCompositePO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -55,38 +55,38 @@ public class RegattaDetailsComposite extends PageArea {
 //        
 //    }
     
-    public SeriesEditDialog editSeries(String series) {
-        DataEntry entry = findSeries(series);
+    public SeriesEditDialogPO editSeries(String series) {
+        DataEntryPO entry = findSeries(series);
         
         if(entry != null) {
-            WebElement action = Actions.findEditAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
             action.click();
             
             WebElement dialog = findElementBySeleniumId(this.driver, "SeriesEditDialog");
             
-            return new SeriesEditDialog(this.driver, dialog);
+            return new SeriesEditDialogPO(this.driver, dialog);
         }
         
         return null;
     }
     
     public void deleteSeries(String series) {
-        DataEntry entry = findSeries(series);
+        DataEntryPO entry = findSeries(series);
         
         if(entry != null) {
-            WebElement removeAction = Actions.findRemoveAction(entry.getWebElement());
+            WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
             removeAction.click();
             
-            Actions.acceptAlert(this.driver);
+            ActionsHelper.acceptAlert(this.driver);
             
             //waitForAjaxRequests();
         }
     }
     
-    private DataEntry findSeries(String series) {
-        CellTable<DataEntry> table = getSeriesTable();
+    private DataEntryPO findSeries(String series) {
+        CellTablePO<DataEntryPO> table = getSeriesTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
             
             if(series.equals(name))
@@ -96,7 +96,7 @@ public class RegattaDetailsComposite extends PageArea {
         return null;
     }
     
-    private CellTable<DataEntry> getSeriesTable() {
-        return new GenericCellTable<>(this.driver, this.seriesTable, DataEntry.class);
+    private CellTablePO<DataEntryPO> getSeriesTable() {
+        return new GenericCellTablePO<>(this.driver, this.seriesTable, DataEntryPO.class);
     }
 }

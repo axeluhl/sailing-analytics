@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * <p>Used to mark a field in test cases that should be injected with the {@link TestEnvironment} by the
- *   {@link Selenium} runner. The environment provides the web driver to use for the tests as well as other information
+ *   {@link SeleniumRunner} runner. The environment provides the web driver to use for the tests as well as other information
  *   as configured.</p>
  * 
  * @author

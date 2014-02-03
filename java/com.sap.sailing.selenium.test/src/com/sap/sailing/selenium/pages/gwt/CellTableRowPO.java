@@ -4,12 +4,12 @@ import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-public abstract class CellTableRow extends PageArea {
+public abstract class CellTableRowPO extends PageArea {
     protected static final String ROW_TAG_NAME = "tr"; //$NON-NLS-1$
     
-    protected final CellTable<?> table;
+    protected final CellTablePO<?> table;
     
-    public CellTableRow(CellTable<?> table, WebElement element) {
+    public CellTableRowPO(CellTablePO<?> table, WebElement element) {
         super(table.getWebDriver(), element);
         
         this.table = table;
@@ -18,7 +18,7 @@ public abstract class CellTableRow extends PageArea {
     /**
      * <p>NOTE: This constructor is only used for creating an alias!</p>
      */
-    protected CellTableRow() {
+    protected CellTableRowPO() {
         super(null, null);
         
         this.table = null;

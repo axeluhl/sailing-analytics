@@ -12,14 +12,14 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.adminconsole.Actions;
+import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.CellTable.SortingOrder;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO.SortingOrder;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
-public class RegattaListComposite extends PageArea {
+public class RegattaListCompositePO extends PageArea {
     public static class RegattaDescriptor {
         private final String name;
         private final String boatClass;
@@ -90,7 +90,7 @@ public class RegattaListComposite extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "RegattasCellTable")
     private WebElement regattasTable;
     
-    public RegattaListComposite(WebDriver driver, WebElement element) {
+    public RegattaListCompositePO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -104,9 +104,9 @@ public class RegattaListComposite extends PageArea {
     
     public List<RegattaDescriptor> getRegattas() {
         List<RegattaDescriptor> descriptors = new LinkedList<>();
-        CellTable<DataEntry> table = getRegattasTable();
+        CellTablePO<DataEntryPO> table = getRegattasTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
             String boatClass = entry.getColumnContent(1);
             
@@ -117,7 +117,7 @@ public class RegattaListComposite extends PageArea {
     }
     
     public void selectRegatta(RegattaDescriptor regatta) {
-        DataEntry entry = findRegatta(regatta);
+        DataEntryPO entry = findRegatta(regatta);
         
         if(entry != null) {
             entry.select();
@@ -129,22 +129,22 @@ public class RegattaListComposite extends PageArea {
 //    }
     
     public void removeRegatta(RegattaDescriptor regatta) {
-        DataEntry entry = findRegatta(regatta);
+        DataEntryPO entry = findRegatta(regatta);
         
         if(entry != null) {
-            WebElement action = Actions.findRemoveAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findRemoveAction(entry.getWebElement());
             action.click();
             
             waitForAjaxRequests();
             
-            Actions.acceptAlert(this.driver);
+            ActionsHelper.acceptAlert(this.driver);
         }
     }
     
-    private DataEntry findRegatta(RegattaDescriptor regatta) {
-        CellTable<DataEntry> table = getRegattasTable();
+    private DataEntryPO findRegatta(RegattaDescriptor regatta) {
+        CellTablePO<DataEntryPO> table = getRegattasTable();
         
-        for(DataEntry entry : table.getEntries()) {
+        for(DataEntryPO entry : table.getEntries()) {
             String name = entry.getColumnContent(0);
 //            String boatClass = columns.getColumnContent(1);
 //            
@@ -158,11 +158,11 @@ public class RegattaListComposite extends PageArea {
     }
     
     private void sortRegattaList(int column, SortingOrder order) {
-        CellTable<DataEntry> table = getRegattasTable();
+        CellTablePO<DataEntryPO> table = getRegattasTable();
         table.sortByColumn(column, order);
     }
     
-    private CellTable<DataEntry> getRegattasTable() {
-        return new GenericCellTable<>(this.driver, this.regattasTable, DataEntry.class);
+    private CellTablePO<DataEntryPO> getRegattasTable() {
+        return new GenericCellTablePO<>(this.driver, this.regattasTable, DataEntryPO.class);
     }
 }

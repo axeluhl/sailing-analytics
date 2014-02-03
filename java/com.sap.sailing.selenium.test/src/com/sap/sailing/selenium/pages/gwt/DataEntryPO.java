@@ -21,17 +21,17 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.common.CSSHelper;
 
-public class DataEntry extends CellTableRow {
+public class DataEntryPO extends CellTableRowPO {
     protected static final String CELL_TAG_NAME = "td"; //$NON-NLS-1$
     
     @FindBy(how = ByTagName.class, using = CELL_TAG_NAME)
     private List<WebElement> columns;
     
-    public DataEntry(CellTable<?> table, WebElement element) {
+    public DataEntryPO(CellTablePO<?> table, WebElement element) {
         super(table, element);
     }
     
-    public DataEntry() {
+    public DataEntryPO() {
         super();
     }
     
@@ -44,7 +44,7 @@ public class DataEntry extends CellTableRow {
     }
     
     public boolean isSelected() {
-        return CSSHelper.hasCSSClass((WebElement) this.context, CellTable.SELECTED_ROW_CSS_CLASS);
+        return CSSHelper.hasCSSClass((WebElement) this.context, CellTablePO.SELECTED_ROW_CSS_CLASS);
     }
     
     public void select() {

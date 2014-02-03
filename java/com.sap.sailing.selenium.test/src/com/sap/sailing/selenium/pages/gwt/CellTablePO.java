@@ -28,7 +28,7 @@ import com.sap.sailing.selenium.pages.common.CSSHelper;
  * @param <T>
  *   The type of the data entries the table contains.
  */
-public abstract class CellTable<T extends DataEntry> extends PageArea {
+public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     /**
      * <p></p>
      */
@@ -92,7 +92,7 @@ public abstract class CellTable<T extends DataEntry> extends PageArea {
      * @param element
      *   
      */
-    public CellTable(WebDriver driver, WebElement element) {
+    public CellTablePO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

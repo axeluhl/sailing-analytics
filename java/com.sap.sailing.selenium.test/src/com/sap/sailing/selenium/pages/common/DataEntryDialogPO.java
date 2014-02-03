@@ -7,7 +7,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
-public abstract class DataEntryDialog extends PageArea {
+public abstract class DataEntryDialogPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "StatusLabel")
     private WebElement statusLabel;
 
@@ -18,7 +18,7 @@ public abstract class DataEntryDialog extends PageArea {
     private WebElement cancelButton;
     
 
-    public DataEntryDialog(WebDriver driver, WebElement element) {
+    public DataEntryDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

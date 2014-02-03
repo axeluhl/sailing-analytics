@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialog;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanel;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -25,10 +25,10 @@ public class TestLeaderboardCreation extends AbstractSeleniumTest {
     
     @Test
     public void testCreateFlexibleLeaderboardWithDuplicateName() {
-        FlexibleLeaderboardCreateDialog dialog;
+        FlexibleLeaderboardCreateDialogPO dialog;
         
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
 
         dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
         dialog.setName("Humba Humba");

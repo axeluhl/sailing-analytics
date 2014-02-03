@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.common.CSSHelper;
 
-public class CheckBox extends PageArea {
+public class CheckBoxPO extends PageArea {
     protected static final String CHECKBOX_TAG_NAME = "span"; //$NON-NLS-1$
     
     private static final String CHECKBOX_CSS_CLASS = "gwt-CheckBox";
@@ -20,7 +20,7 @@ public class CheckBox extends PageArea {
     @FindBy(how = ByTagName.class, using = "label")
     private WebElement label;
     
-    public CheckBox(WebDriver driver, WebElement element) {
+    public CheckBoxPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
 

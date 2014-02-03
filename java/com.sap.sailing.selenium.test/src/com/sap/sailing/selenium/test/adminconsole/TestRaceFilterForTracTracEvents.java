@@ -6,7 +6,7 @@ import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanel;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
@@ -27,7 +27,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testNoFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(12));
@@ -42,7 +42,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 1"); //$NON-NLS-1$
         
@@ -57,7 +57,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testExactFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 12"); //$NON-NLS-1$
         
@@ -72,7 +72,7 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
     public void testNoneMatchingFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
-        TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setFilterForTrackableRaces("BMW Cup Race 18"); //$NON-NLS-1$
         

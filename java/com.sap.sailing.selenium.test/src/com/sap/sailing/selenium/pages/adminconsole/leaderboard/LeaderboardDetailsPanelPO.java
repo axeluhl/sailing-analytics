@@ -12,15 +12,15 @@ import com.sap.sailing.selenium.core.FindBy;
 
 import com.sap.sailing.selenium.pages.PageArea;
 
-import com.sap.sailing.selenium.pages.adminconsole.Actions;
+import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesList.TrackedRaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
-import com.sap.sailing.selenium.pages.gwt.GenericCellTable;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
+import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
-public class LeaderboardDetailsPanel extends PageArea {
+public class LeaderboardDetailsPanelPO extends PageArea {
     public static class RaceDescriptor {
         private final String name;
         private final String fleet;
@@ -90,16 +90,16 @@ public class LeaderboardDetailsPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
     
-    public LeaderboardDetailsPanel(WebDriver driver, WebElement element) {
+    public LeaderboardDetailsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
         
-        CellTable<DataEntry> racesTable = getRacesTable();
+        CellTablePO<DataEntryPO> racesTable = getRacesTable();
         
-        for(DataEntry entry : racesTable.getEntries()) {
+        for(DataEntryPO entry : racesTable.getEntries()) {
             String name = entry.getColumnContent(0);
             String fleet = entry.getColumnContent(1);
             //String medalRace = entry.getColumnContent(2);
@@ -122,31 +122,31 @@ public class LeaderboardDetailsPanel extends PageArea {
 //    }
     
     public void unlinkRace(RaceDescriptor race) {
-        DataEntry entry = findRace(race);
+        DataEntryPO entry = findRace(race);
         
         if(entry != null) {
-            WebElement action = Actions.findUnlinkRaceAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findUnlinkRaceAction(entry.getWebElement());
             
             action.click();
         }
     }
     
     public void refreshRaceLog(RaceDescriptor race) {
-        DataEntry entry = findRace(race);
+        DataEntryPO entry = findRace(race);
         
         if(entry != null) {
-            WebElement action = Actions.findRefreshAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findRefreshAction(entry.getWebElement());
             
             action.click();
             
             // QUESTION [D049941]: What else can happen?
-            Actions.acceptAlert(this.driver);
+            ActionsHelper.acceptAlert(this.driver);
         }
     }
     
     public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
-        DataEntry raceRow = findRace(race);
-        DataEntry trackingRow = findTracking(tracking);
+        DataEntryPO raceRow = findRace(race);
+        DataEntryPO trackingRow = findTracking(tracking);
         
         if(raceRow == null || trackingRow == null) {
         }
@@ -155,10 +155,10 @@ public class LeaderboardDetailsPanel extends PageArea {
         trackingRow.select();
     }
     
-    private DataEntry findRace(RaceDescriptor race) {
-        CellTable<DataEntry> racesTable = getRacesTable();
+    private DataEntryPO findRace(RaceDescriptor race) {
+        CellTablePO<DataEntryPO> racesTable = getRacesTable();
         
-        for(DataEntry entry : racesTable.getEntries()) {
+        for(DataEntryPO entry : racesTable.getEntries()) {
             String name = entry.getColumnContent(0);
             String fleet = entry.getColumnContent(1);
             //String medalRace = entry.getColumnContent(2);
@@ -174,10 +174,10 @@ public class LeaderboardDetailsPanel extends PageArea {
         return null;
     }
     
-    private DataEntry findTracking(TrackedRaceDescriptor tracking) {
-        CellTable<DataEntry> trackingTable = getTrackedRacesTable();
+    private DataEntryPO findTracking(TrackedRaceDescriptor tracking) {
+        CellTablePO<DataEntryPO> trackingTable = getTrackedRacesTable();
         
-        for(DataEntry entry : trackingTable.getEntries()) {
+        for(DataEntryPO entry : trackingTable.getEntries()) {
             String regatta = entry.getColumnContent(0);
             String boatClass = entry.getColumnContent(1);
             String raceName = entry.getColumnContent(2);
@@ -191,13 +191,13 @@ public class LeaderboardDetailsPanel extends PageArea {
         return null;
     }
     
-    private CellTable<DataEntry> getRacesTable() {
-        return new GenericCellTable<>(this.driver, this.racesCellTable, DataEntry.class);
+    private CellTablePO<DataEntryPO> getRacesTable() {
+        return new GenericCellTablePO<>(this.driver, this.racesCellTable, DataEntryPO.class);
     }
     
-    private CellTable<DataEntry> getTrackedRacesTable() {
+    private CellTablePO<DataEntryPO> getTrackedRacesTable() {
         WebElement table = findElementBySeleniumId(this.trackedRacesListComposite, "TrackedRacesCellTable");
         
-        return new GenericCellTable<>(this.driver, table, DataEntry.class);
+        return new GenericCellTablePO<>(this.driver, table, DataEntryPO.class);
     }
 }

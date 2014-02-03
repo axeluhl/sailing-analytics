@@ -7,9 +7,9 @@ import org.openqa.selenium.support.ui.Select;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 
-import com.sap.sailing.selenium.pages.common.DataEntryDialog;
+import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
-public class SeriesEditDialog extends DataEntryDialog {
+public class SeriesEditDialogPO extends DataEntryDialogPO {
     
     @FindBy(how = BySeleniumId.class, using = "MedalSeriesCheckbox")
     private WebElement medalSeriesCheckbox;
@@ -32,7 +32,7 @@ public class SeriesEditDialog extends DataEntryDialog {
     @FindBy(how = BySeleniumId.class, using = "AddRacesButton")
     private WebElement addRacesButton;
     
-    public SeriesEditDialog(WebDriver driver, WebElement element) {
+    public SeriesEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

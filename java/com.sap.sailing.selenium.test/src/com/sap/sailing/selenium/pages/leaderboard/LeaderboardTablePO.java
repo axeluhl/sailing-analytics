@@ -3,19 +3,19 @@ package com.sap.sailing.selenium.pages.leaderboard;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.sap.sailing.selenium.pages.gwt.CellTable;
-import com.sap.sailing.selenium.pages.gwt.DataEntry;
+import com.sap.sailing.selenium.pages.gwt.CellTablePO;
+import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTable.LeaderboardEntry;
+import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO.LeaderboardEntry;
 
-public class LeaderboardTable extends CellTable<LeaderboardEntry> {
-    public class LeaderboardEntry extends DataEntry {
+public class LeaderboardTablePO extends CellTablePO<LeaderboardEntry> {
+    public class LeaderboardEntry extends DataEntryPO {
         private static final String TOTAL_RANK = "Total rank";
         private static final String COMPETITOR = "Competitor";
         private static final String NAME = "Name";
         
         protected LeaderboardEntry(WebElement element) {
-            super(LeaderboardTable.this, element);
+            super(LeaderboardTablePO.this, element);
         }
         
         
@@ -53,7 +53,7 @@ public class LeaderboardTable extends CellTable<LeaderboardEntry> {
 //        }
     }
     
-    public LeaderboardTable(WebDriver driver, WebElement element) {
+    public LeaderboardTablePO(WebDriver driver, WebElement element) {
         super(driver, element);
         
     }

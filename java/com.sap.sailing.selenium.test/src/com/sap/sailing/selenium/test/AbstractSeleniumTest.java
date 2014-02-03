@@ -27,7 +27,7 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.core.Managed;
-import com.sap.sailing.selenium.core.Selenium;
+import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
 
@@ -39,7 +39,7 @@ import com.sap.sailing.selenium.core.WindowManager;
  * @author
  *   D049941
  */
-@RunWith(Selenium.class)
+@RunWith(SeleniumRunner.class)
 public abstract class AbstractSeleniumTest {
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
