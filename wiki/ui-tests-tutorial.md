@@ -242,7 +242,7 @@ Writing the test is straight forward and there are no big differences to other t
         
         @Test
         public void testCreateEvent() {
-            AdminConsolePagePO adminConsole = AdminConsolePagePO.goToPage(getWebDriver(), getContextRoot());
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             SailingEventManagementPanelPO eventManagement = adminConsole.goToEventManagement();
             
             eventManagement.createEvent("Test Event", "Test Venue", "", false);
