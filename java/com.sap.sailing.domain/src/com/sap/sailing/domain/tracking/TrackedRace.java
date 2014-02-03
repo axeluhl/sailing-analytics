@@ -564,8 +564,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -581,8 +580,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
