@@ -80,8 +80,8 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("<meta http-equiv=refresh content=10>");
         out.println("</head>");
         out.println("<body>");
-        out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3><br/>");
-        if (lastIgtimiMessages != null) {
+        out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
+        if (lastIgtimiMessages != null && lastIgtimiMessages.size() > 0) {
             int counter = 0;
             for (ListIterator<IgtimiMessageInfo> iterator = WindStatusServlet.lastIgtimiMessages.listIterator(WindStatusServlet.lastIgtimiMessages.size()); iterator.hasPrevious();) {
                 counter++;
@@ -105,7 +105,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                 out.println(message);
             }
         } else {
-            out.println("<div>No Expedition messages received so far!</div>");
+            out.println("<i>No Expedition messages received so far!</i>");
         }
         out.println("</body>");
         out.println("</html>");
