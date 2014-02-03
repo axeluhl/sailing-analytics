@@ -41,7 +41,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate start;
     private Candidate end;
     private final DynamicTrackedRace race;
-    private final double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
+    private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
     private static double strictness = 1000;
 
     public CandidateChooser(DynamicTrackedRace race) {
@@ -99,9 +99,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         allEdges.get(co).add(e);
                     }
                 } else {
-                    if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) > penaltyForSkipping) {
+                   /*if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
-                    } else if (late == end || early == start) {
+                    } else*/ if (late == end || early == start) {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late)));

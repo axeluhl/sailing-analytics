@@ -42,7 +42,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, LinkedHashMap<List<GPSFix>, Candidate>>> cteCandidates = new LinkedHashMap<>();
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, LinkedHashMap<GPSFix, Candidate>>> distanceCandidates = new LinkedHashMap<>();
     private final DynamicTrackedRace race;
-    private final double penaltyForSkipping = 1 - Edge.penaltyForSkipped;
+    private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
     private final LinkedHashMap<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
     private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
         @Override
@@ -86,6 +86,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 }
                 passingInstructions.put(w, instruction);
             }
+            Edge.setNumberOfWayoints(passingInstructions.keySet().size());
         }
     }
 
@@ -199,7 +200,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 if (dis1 != null && dis3 != null && dis2 < dis1 && dis2 < dis3) {
                     t = fix.getTimePoint();
                     p = fix.getPosition();
-                    cost = getDistanceLikelyhood(w, p, t) * 0.85;
+                    cost = getDistanceLikelyhood(w, p, t) * 0.95;
                     if (cost > penaltyForSkipping) {
                         isCan = true;
                     }
@@ -382,7 +383,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (20 * Math.abs( distance/legLength ) + 1);
+        double result = 1 / (15 * Math.abs( distance/legLength ) + 1);
         // Auch NormalVerteilung??!
         return result;
     }
