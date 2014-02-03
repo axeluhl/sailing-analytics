@@ -12,7 +12,7 @@ You have to ensure that your Firefox browser has a profile called "Selenium" and
 
 ### Running the tests with GWT hosted mode
 
-Launch the server by choosing the "Sailing Server (Proxy)" or "Sailing Server (No Proxy)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
+Launch the server by choosing the "Sailing Server (Proxy, winddbTest)" or "Sailing Server (No Proxy, winddbTest)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
 
 When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy, GWT Codesvr)" or "com.sap.sailing.senelium.test (No Proxy, GWT Codesvr)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
 
@@ -101,7 +101,7 @@ The easiest way to execute the tests is to perform a full Maven build. Here you 
 
 After the build, Tycho will start a server instance and runs all tests against the deployed application.
 
-Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, Jetty on 8889)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expects the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
+Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, winddbTest)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expects the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
 
 For a more practical example of how to write page objects and test you should take a look at the [[tutorial|wiki/ui-tests-tutorial]].
 
