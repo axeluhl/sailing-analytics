@@ -28,6 +28,14 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 
 public abstract class AbstractRaceChart extends SimplePanel implements RaceSelectionChangeListener,
     TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
+    /**
+     * Used as the turboThreshold for the Highcharts series; this is
+     * basically the maximum number of points in a series to be displayed.
+     * Setting it to 0 means there will be no limit. Default is 1000.
+     * See also bug 1742.
+     */
+    protected static final int MAX_SERIES_POINTS = 0;
+
     protected Chart chart;
     protected PlotLine timePlotLine;
 
