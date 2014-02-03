@@ -256,3 +256,9 @@ Writing the test is straight forward and there are no big differences to other t
 
 
 ## Advanced Topics
+
+TODO by Riccardo
+
+* Extend DataEntryPO
+* Query Framework
+* WindowManager
