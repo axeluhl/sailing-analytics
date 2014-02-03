@@ -634,4 +634,20 @@ public interface TrackedRace extends Serializable {
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
 
+    /**
+     * Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard and returns its position. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    Position getStarboardMarkOfStartlinePosition(TimePoint at);
+    
+    /**
+     * Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    Mark getStarboardMarkOfStartline(TimePoint at);
+
 }
