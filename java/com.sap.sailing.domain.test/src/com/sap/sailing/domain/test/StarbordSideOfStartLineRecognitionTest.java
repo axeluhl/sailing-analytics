@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -83,6 +84,16 @@ public class StarbordSideOfStartLineRecognitionTest {
             super(null, null, Collections.<Sideline> emptyList(), null, 0, 0, 0, 0);
         }
         
+        @Override
+        public Position getStarboardMarkOfStartlinePosition(TimePoint at) {
+            return super.getStarboardMarkOfStartlinePosition(at);
+        }
+        
+        @Override
+        public Mark getStarboardMarkOfStartline(TimePoint at) {
+            return super.getStarboardMarkOfStartline(at);
+        }
+        
     }
 
     @Test
@@ -108,6 +119,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getOrCreateTrack(startPort)).thenReturn(startPortTrack);
         when(trackedRace.getOrCreateTrack(windward)).thenReturn(windwardTrack);
         when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
+        when(trackedRace.getStarboardMarkOfStartline(now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(windwardWaypoint, now)).thenCallRealMethod();
         
@@ -163,6 +175,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getOrCreateTrack(startStarboard)).thenReturn(startStarboardTrack);
         when(trackedRace.getOrCreateTrack(windward)).thenReturn(windwardTrack);
         when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
+        when(trackedRace.getStarboardMarkOfStartline(now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(windwardWaypoint, now)).thenCallRealMethod();
         return trackedRace;
