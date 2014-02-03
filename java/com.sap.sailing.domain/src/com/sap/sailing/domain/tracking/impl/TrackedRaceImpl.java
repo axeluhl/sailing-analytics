@@ -2401,7 +2401,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         Mark second = marksIterator.next();
                         Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
                                 false);
-                        result = competitorPosition.getDistanceToLine(firstPosition, secondPosition);
+                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
+                        if (bearingGreatCircle == null) {
+                            result = null;
+                        } else {
+                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                    firstPosition, bearingGreatCircle);
+                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                        }
                     } else {
                         result = competitorPosition.getDistance(firstPosition);
                     }
