@@ -109,8 +109,9 @@ For a more practical example of how to write page objects and test you should ta
 
 While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps to be able to run the tests local.
 
-* Download the latest _Client & WebDriver Bindings_ for Java from the official Selenium website
+* Download the latest _Client & WebDriver Bindings_ for Java from the official [Selenium](http://docs.seleniumhq.org/download/) website
 * Delete the _selenium-java-<version>.jar_ in the root directory of the project _org.openqa.selenium.osgi_ as well as all libraries in the _lib_ directory and copy the new versions from the downloaded file in  the appropriate folders
 * Open the _MANIFEST.MF_ with the Plug-in Manifest Editor and switch to the _Runtime_ tab
-    * test
+    * Remove all the old libraries from the _Classpath_ section and add all new versions
+    * Add all new packages that start with _org.openqa.selenium_ to the _Exported Packages_ section in the case there were packages added
 * Updated the version number in the _MANIFEST.MF_ and in the _pom.xml_
