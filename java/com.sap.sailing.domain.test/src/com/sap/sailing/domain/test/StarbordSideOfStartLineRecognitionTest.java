@@ -18,7 +18,6 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -84,10 +83,6 @@ public class StarbordSideOfStartLineRecognitionTest {
             super(null, null, Collections.<Sideline> emptyList(), null, 0, 0, 0, 0);
         }
         
-        @Override
-        protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-            return super.getStarboardMarkOfStartlinePosition(at);
-        }
     }
 
     @Test

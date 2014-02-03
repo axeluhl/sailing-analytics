@@ -2467,22 +2467,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
-
-    /**
-     * The method has protected scope in order to allow for testing. Based on the bearing from the start waypoint to the
-     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
-     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
-     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
-     */
-    protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-        final Position starboardMarkPosition;
+    
+    @Override
+    public Mark getStarboardMarkOfStartline(TimePoint at) {
         final Course course = getRace().getCourse();
         Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
         if (waypointsIter.hasNext()) {
             Waypoint startWaypoint = waypointsIter.next();
             if (Util.size(startWaypoint.getMarks()) == 1) {
-                starboardMarkPosition = getOrCreateTrack(startWaypoint.getMarks().iterator().next())
-                        .getEstimatedPosition(at, /* extrapolate */false);
+                return startWaypoint.getMarks().iterator().next();
             } else {
                 if (waypointsIter.hasNext()) {
                     final Position approximatePositionOfStart = getApproximatePosition(startWaypoint, at);
@@ -2501,25 +2494,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2
                                 .getDifferenceTo(bearingFromStartToNextWaypoint);
                         if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
-                            starboardMarkPosition = estimatedPositionMark1;
+                            return mark1;
                         } else {
-                            starboardMarkPosition = estimatedPositionMark2;
+                            return mark2;
                         }
                     } else {
                         // at least one of the line's two marks' positions couldn't be determined; can't say which
                         // one is on starboard and therefore don't know anything
-                        starboardMarkPosition = null;
+                        return null;
                     }
                 } else {
                     // only one waypoint in course; cannot determine bearing to next mark
-                    starboardMarkPosition = null;
+                    return null;
                 }
             }
         } else {
             // only one waypoint in course; can't determine bearing to next waypoint
-            starboardMarkPosition = null;
+            return null;
         }
-        return starboardMarkPosition;
+    }
+
+    @Override
+    public Position getStarboardMarkOfStartlinePosition(TimePoint at) {
+        Mark starboardMark = getStarboardMarkOfStartline(at);
+        if (starboardMark != null) {
+            return getOrCreateTrack(starboardMark).getEstimatedPosition(at, /*extrapolate*/ false);
+        }
+        return null;
     }
 
     protected NamedReentrantReadWriteLock getWindLoadingLock() {
