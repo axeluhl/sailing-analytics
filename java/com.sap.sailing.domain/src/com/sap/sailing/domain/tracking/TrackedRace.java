@@ -564,8 +564,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -581,8 +580,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -635,5 +633,21 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
+
+    /**
+     * Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard and returns its position. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    Position getStarboardMarkOfStartlinePosition(TimePoint at);
+    
+    /**
+     * Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
+     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
+     */
+    Mark getStarboardMarkOfStartline(TimePoint at);
 
 }
