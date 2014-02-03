@@ -2370,12 +2370,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
+        final Distance result;
         if (getStartOfRace() == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+            result = getDistanceToStartLine(competitor, beforeStart);
         }
-
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
-        return getDistanceToStartLine(competitor, beforeStart);
+        return result;
     }
 
     @Override

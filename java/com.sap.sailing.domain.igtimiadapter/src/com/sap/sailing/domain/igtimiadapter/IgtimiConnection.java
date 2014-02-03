@@ -96,7 +96,7 @@ public interface IgtimiConnection {
      * 
      * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()}.
      */
-    LiveDataConnection createLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
+    LiveDataConnection getOrCreateLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
     /**
      * @param sessionIds
@@ -154,6 +154,12 @@ public interface IgtimiConnection {
      */
     Map<TrackedRace, Integer> importWindIntoRace(Iterable<DynamicTrackedRace> trackedRaces) throws IllegalStateException,
             ClientProtocolException, IOException, ParseException;
+    
+    /**
+     * Find all the devices from which we may read and which have logged GPS positions and apparent wind speed (AWS) or that
+     * have never logged GPS nor wind (probably new sensors)
+     */
+    Iterable<String> getWindDevices() throws IllegalStateException, IOException, ParseException;
 
     /**
      * Returns the latest datum for the specified devices that contains a fix of the <code>type</code> requested. The
