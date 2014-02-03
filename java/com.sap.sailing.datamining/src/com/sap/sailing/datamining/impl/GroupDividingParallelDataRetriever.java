@@ -12,6 +12,13 @@ import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 
+/**
+ * Retrieves elements of type <code>DataType</code> from all {@link LeaderboardGroup}s known to the
+ * {@link RacingEventSErvice} passed to this object's constructor. See also
+ * {@link RacingEventService#getLeaderboardGroups()}.
+ * 
+ * @param <DataType>
+ */
 public class GroupDividingParallelDataRetriever<DataType> extends AbstractParallelComponent<Void, Collection<DataType>>
                                                           implements ParallelDataRetriever<DataType> {
 
