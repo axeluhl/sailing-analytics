@@ -31,4 +31,8 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
         return windFix;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "windFix=" + windFix;
+    }
 }

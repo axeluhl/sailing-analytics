@@ -63,7 +63,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util;
@@ -2012,12 +2011,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
-        Leaderboard leaderboard = getLeaderboardByName(selectedLeaderboardName);
+    public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnDTO.getName());
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleet.getName());
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
                 RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.setOrReloadRaceLogInformation(raceColumn.getRaceLogInformation(), fleetImpl);
@@ -2090,7 +2089,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return null;
     }
     
-    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+    public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);

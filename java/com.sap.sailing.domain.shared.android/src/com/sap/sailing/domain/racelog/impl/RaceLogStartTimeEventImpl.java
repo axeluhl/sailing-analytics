@@ -31,4 +31,9 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
         visitor.visit(this);
     }
 
+    @Override
+    public String getShortInfo() {
+        return "startTime=" + startTime;
+    }
+
 }

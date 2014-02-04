@@ -44,4 +44,9 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
         visitor.visit(this);
     }
 
-}
+    @Override
+    public String getShortInfo() {
+        return "upperFlag=" + upperFlag + ", lowerFlag=" + lowerFlag + ", isDisplayed=" + isDisplayed;
+    }
+
+ }

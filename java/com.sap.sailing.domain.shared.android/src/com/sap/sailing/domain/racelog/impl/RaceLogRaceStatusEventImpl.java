@@ -30,4 +30,9 @@ public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements Race
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String getShortInfo() {
+        return "nextStatus=" + nextStatus;
+    }
 }
