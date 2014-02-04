@@ -25,7 +25,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -75,7 +75,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getOrCreateTrack(startStarboard)).thenReturn(startStarboardTrack);
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getStartLine(now)).thenCallRealMethod();
-        LineLengthAndAdvantage startLine = trackedRace.getStartLine(now);
+        LineDetails startLine = trackedRace.getStartLine(now);
         assertNull(startLine);
     }
     

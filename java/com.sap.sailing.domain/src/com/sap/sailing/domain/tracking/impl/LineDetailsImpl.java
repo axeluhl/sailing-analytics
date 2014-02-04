@@ -6,9 +6,9 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 
-public class LineLengthAndAdvantageImpl implements LineLengthAndAdvantage {
+public class LineDetailsImpl implements LineDetails {
     private final TimePoint timePoint;
     private final Waypoint waypoint;
     private final Distance length;
@@ -18,7 +18,7 @@ public class LineLengthAndAdvantageImpl implements LineLengthAndAdvantage {
     private final Mark portMarkWhileApproachingLine;
     private final Mark starboardMarkWhileApproachingLine;
     
-    public LineLengthAndAdvantageImpl(TimePoint timePoint, Waypoint waypoint, Distance length,
+    public LineDetailsImpl(TimePoint timePoint, Waypoint waypoint, Distance length,
             Bearing absoluteAngleDifferenceToTrueWind, NauticalSide advantageousSideWhileApproachingLine,
             Distance advantage, Mark portMarkWhileApproachingLine, Mark starboardMarkWhileApproachingLine) {
         super();

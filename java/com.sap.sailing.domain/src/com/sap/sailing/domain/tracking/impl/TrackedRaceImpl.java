@@ -85,7 +85,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -2477,7 +2477,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The method has protected visibility largely for testing purposes.
      */
     protected Mark getStarboardMarkOfStartlineOrSingleStartMark(TimePoint at) {
-        LineLengthAndAdvantage startLine = getStartLine(at);
+        LineDetails startLine = getStartLine(at);
         final Mark result;
         if (startLine != null) {
             result = startLine.getStarboardMarkWhileApproachingLine();
@@ -2517,11 +2517,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * or is the only waypoint, <code>null</code> is returned because no reasonable statement can be
      * made about the direction from which the line is to be passed.
      */
-    private LineLengthAndAdvantage getLineLengthAndAdvantage(TimePoint timePoint, Waypoint waypoint) {
+    private LineDetails getLineLengthAndAdvantage(TimePoint timePoint, Waypoint waypoint) {
         List<Position> markPositions = new ArrayList<Position>();
         int numberOfMarks = 0;
         boolean allMarksHavePositions = true;
-        LineLengthAndAdvantage result = null;
+        LineDetails result = null;
         if (waypoint != null) {
             for (Mark lineMark : waypoint.getMarks()) {
                 numberOfMarks++;
@@ -2598,7 +2598,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             advantageousSideWhileApproachingLine = null;
                             distanceAdvantage = null;
                         }
-                        result = new LineLengthAndAdvantageImpl(timePoint, waypoint,
+                        result = new LineDetailsImpl(timePoint, waypoint,
                                 portMarkPositionWhileApproachingLine
                                         .getDistance(starboardMarkPositionWhileApproachingLine),
                                 differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
@@ -2614,12 +2614,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
 
     @Override
-    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+    public LineDetails getStartLine(TimePoint at) {
         return getLineLengthAndAdvantage(at, getRace().getCourse().getFirstWaypoint());
     }
 
     @Override
-    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+    public LineDetails getFinishLine(TimePoint at) {
         return getLineLengthAndAdvantage(at, getRace().getCourse().getLastWaypoint());
     }
 

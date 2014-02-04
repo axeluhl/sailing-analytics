@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.TimePoint;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface LineLengthAndAdvantage {
+public interface LineDetails {
     TimePoint getTimePoint();
 
     Waypoint getWaypoint();

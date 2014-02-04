@@ -623,13 +623,13 @@ public interface TrackedRace extends Serializable {
      * @return <code>null</code> if the start waypoint does not have two marks or the course
      * is empty or the start waypoint is the only waypoint
      */
-    LineLengthAndAdvantage getStartLine(TimePoint at);
+    LineDetails getStartLine(TimePoint at);
     
     /**
      * @return <code>null</code> if the finish waypoint does not have two marks or the course
      * is empty or the finish waypoint is the only waypoint
      */
-    LineLengthAndAdvantage getFinishLine(TimePoint at);
+    LineDetails getFinishLine(TimePoint at);
     
     /**
      * Length of course if there are mark passings for competitors.

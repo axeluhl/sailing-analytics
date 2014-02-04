@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -201,7 +201,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
-        LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+        LineDetails start = race.getStartLine(race.getStartOfTracking());
         addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
 
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
