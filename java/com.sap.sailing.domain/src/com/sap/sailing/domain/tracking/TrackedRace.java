@@ -619,9 +619,17 @@ public interface TrackedRace extends Serializable {
      */
     TimePoint getStartTimeReceived();
     
-    LineLengthAndAdvantage getStartLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the start waypoint does not have two marks or the course
+     * is empty or the start waypoint is the only waypoint
+     */
+    LineDetails getStartLine(TimePoint at);
     
-    LineLengthAndAdvantage getFinishLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course
+     * is empty or the finish waypoint is the only waypoint
+     */
+    LineDetails getFinishLine(TimePoint at);
     
     /**
      * Length of course if there are mark passings for competitors.
@@ -633,21 +641,4 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
-
-    /**
-     * Based on the bearing from the start waypoint to the
-     * next mark, identifies which of the two marks of the start line is on starboard and returns its position. If the start waypoint has only
-     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
-     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
-     */
-    Position getStarboardMarkOfStartlinePosition(TimePoint at);
-    
-    /**
-     * Based on the bearing from the start waypoint to the
-     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
-     * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
-     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
-     */
-    Mark getStarboardMarkOfStartline(TimePoint at);
-
 }

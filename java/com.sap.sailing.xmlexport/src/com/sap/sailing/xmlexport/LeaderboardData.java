@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -201,7 +201,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
-        LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+        LineDetails start = race.getStartLine(race.getStartOfTracking());
         addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
 
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
@@ -276,7 +276,7 @@ public class LeaderboardData extends ExportAction {
                             secondMarkPosition
                             );
                         // now compute the distance from starboard mark
-                        Mark starboardMark = race.getStarboardMarkOfStartline(beforeRaceStartTime);
+                        Mark starboardMark = race.getStartLine(beforeRaceStartTime).getStarboardMarkWhileApproachingLine();
                         Mark portMark = null;
                         if (starboardMark.equals(first)) {
                             portMark = second;
@@ -303,7 +303,7 @@ public class LeaderboardData extends ExportAction {
                     }
                 }
             }
-            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStarboardMarkOfStartline(race.getStartOfRace()).getName());
+            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());

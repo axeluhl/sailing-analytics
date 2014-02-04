@@ -191,7 +191,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
@@ -1528,7 +1528,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
                 if (firstWaypoint != null && Util.size(firstWaypoint.getMarks())==2) {
-                    final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
+                    final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
                     if (markPositionDTOsAndLineAdvantage != null) {
                         final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
                         result.startMarkPositions = startMarkPositionDTOs;
@@ -1540,7 +1540,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
                 if (lastWaypoint != null && Util.size(lastWaypoint.getMarks())==2) {
-                    final LineLengthAndAdvantage markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
+                    final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
                     if (markPositionDTOsAndLineAdvantage != null) {
                         final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
                         result.finishMarkPositions = finishMarkPositionDTOs;

@@ -30,7 +30,7 @@ import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -560,13 +560,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+    public LineDetails getStartLine(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+    public LineDetails getFinishLine(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -591,18 +591,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Mark getStarboardMarkOfStartline(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
