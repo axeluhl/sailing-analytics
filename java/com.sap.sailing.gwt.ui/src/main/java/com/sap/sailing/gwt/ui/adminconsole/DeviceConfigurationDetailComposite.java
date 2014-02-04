@@ -26,11 +26,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
-import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class DeviceConfigurationDetailComposite extends Composite {

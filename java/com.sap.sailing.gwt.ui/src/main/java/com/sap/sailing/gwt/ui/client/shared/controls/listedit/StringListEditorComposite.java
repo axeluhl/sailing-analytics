@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.gwt.ui.client.shared.controls.listedit;
 
 import java.util.List;
 

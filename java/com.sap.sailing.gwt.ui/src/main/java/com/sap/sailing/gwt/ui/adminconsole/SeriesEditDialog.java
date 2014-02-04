@@ -23,9 +23,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
-import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
 import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {

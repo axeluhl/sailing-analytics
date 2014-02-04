@@ -19,7 +19,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorUiStrategy;
 
 public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
 

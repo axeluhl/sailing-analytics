@@ -12,22 +12,18 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
     
-    public static ListEditorComposite<SeriesDTO> createExpanded(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
-        return new SeriesWithFleetsListEditor(initialValues, new ExpandedUi(stringMessages, removeImage));
-    }
-
-    protected SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, ListEditorUiStrategy<SeriesDTO> activeUi) {
-        super(initialValues, activeUi);
+    public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage));
     }
     
     private static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
-
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage) {
             super(stringMessages, removeImage);
         }
