@@ -276,7 +276,7 @@ public class LeaderboardData extends ExportAction {
                             secondMarkPosition
                             );
                         // now compute the distance from starboard mark
-                        Mark starboardMark = race.getStarboardMarkOfStartline(beforeRaceStartTime);
+                        Mark starboardMark = race.getStartLine(beforeRaceStartTime).getStarboardMarkWhileApproachingLine();
                         Mark portMark = null;
                         if (starboardMark.equals(first)) {
                             portMark = second;
@@ -303,7 +303,7 @@ public class LeaderboardData extends ExportAction {
                     }
                 }
             }
-            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStarboardMarkOfStartline(race.getStartOfRace()).getName());
+            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());

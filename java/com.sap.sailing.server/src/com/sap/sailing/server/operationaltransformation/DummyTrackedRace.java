@@ -544,15 +544,4 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
-    @Override
-    public Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Mark getStarboardMarkOfStartline(TimePoint at) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
