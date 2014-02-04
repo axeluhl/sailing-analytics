@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,8 +37,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private static final Logger logger = Logger.getLogger(CandidateChooser.class.getName());
 
     private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, List<Edge>> allEdges = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, List<Candidate>> candidates = new LinkedHashMap<>();
+    private LinkedHashMap<Competitor, Set<Edge>> allEdges = new LinkedHashMap<>();
+    private LinkedHashMap<Competitor, Set<Candidate>> candidates = new LinkedHashMap<>();
     private TimePoint raceStartTime;
     private Candidate start;
     private Candidate end;
@@ -53,9 +55,9 @@ public class CandidateChooser implements AbstractCandidateChooser {
         end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1, null, true, "Proxy");
         candidates = new LinkedHashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
-            candidates.put(c, new ArrayList<Candidate>());
+            candidates.put(c, new TreeSet<Candidate>());
             currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
-            allEdges.put(c, new ArrayList<Edge>());
+            allEdges.put(c, new TreeSet<Edge>());
             addCandidates(Arrays.asList(start, end), c);
         }
     }
@@ -67,6 +69,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
+
         if (race.getStartOfRace() != raceStartTime) {
             raceStartTime = race.getStartOfRace();
             for (Competitor com : allEdges.keySet()) {
@@ -77,6 +80,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
                 addCandidates(Arrays.asList(start), com);
             }
         }
+
         removeCandidates(candidateDeltas.getB(), c);
         addCandidates(candidateDeltas.getA(), c);
         findShortestPath(c);
@@ -92,16 +96,19 @@ public class CandidateChooser implements AbstractCandidateChooser {
                     late = newCan;
                 }
                 if (raceStartTime != null) {
-                    if (late == end) {
+                    if (late == end && early != end) {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
                         Edge e = new Edge(early, late, estimatedDistance(co, early, late));
                         allEdges.get(co).add(e);
                     }
                 } else {
-                   /*if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) > penaltyForSkipping) {
-                        allEdges.get(co).add(new Edge(early, late, numberOfCloseStarts(late.getTimePoint())));
-                    } else*/ if (late == end || early == start) {
+
+                    /*
+                     * if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) >
+                     * penaltyForSkipping) { allEdges.get(co).add(new Edge(early, late,
+                     * numberOfCloseStarts(late.getTimePoint()))); } else
+                     */if ((late == end || early == start) && early != late) {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late)));
@@ -117,32 +124,34 @@ public class CandidateChooser implements AbstractCandidateChooser {
         for (Edge e : allEdges.get(co)) {
             all.add(e);
         }
-        LinkedHashMap<Candidate, Candidate> candidateWithParent = new LinkedHashMap<>();
-        candidateWithParent.put(start, null);
-        Edge newMostLikelyEdge = null;
+        LinkedHashMap<Candidate, Pair<Candidate, Double>> candidateWithParent = new LinkedHashMap<>();
+        candidateWithParent.put(start, new Pair<Candidate, Double>(null, 0.0));
+        Pair<Edge, Double> currentMostLikelyEdge = null;
         while (!candidateWithParent.containsKey(end)) {
-            newMostLikelyEdge = null;
+            currentMostLikelyEdge = null;
             for (Edge e : all) {
                 if (candidateWithParent.containsKey(e.getStart())) {
-                    if (newMostLikelyEdge == null) {
-                        newMostLikelyEdge = e;
-                    } else if (e.getProbability() < newMostLikelyEdge.getProbability()) {
-                        newMostLikelyEdge = e;
+                    Double cost = candidateWithParent.get(e.getStart()).getB() + e.getProbability();
+                    if (currentMostLikelyEdge == null) {
+                        currentMostLikelyEdge = new Pair<Edge, Double>(e, cost);
+                    } else if (cost < currentMostLikelyEdge.getB()) {
+                        currentMostLikelyEdge = new Pair<Edge, Double>(e, cost);
                     }
                 }
             }
-            if (!candidateWithParent.containsKey(newMostLikelyEdge.getEnd())) {
-                candidateWithParent.put(newMostLikelyEdge.getEnd(), newMostLikelyEdge.getStart());
+            if (!candidateWithParent.containsKey(currentMostLikelyEdge.getA().getEnd())
+                    || candidateWithParent.get(currentMostLikelyEdge.getA().getEnd()).getB() > currentMostLikelyEdge.getB()) {
+                candidateWithParent.put(currentMostLikelyEdge.getA().getEnd(), new Pair<Candidate, Double>(currentMostLikelyEdge.getA().getStart(), currentMostLikelyEdge.getB()));
             }
-            all.remove(newMostLikelyEdge);
+            all.remove(currentMostLikelyEdge.getA());
         }
-        Candidate marker = candidateWithParent.get(end);
+        Candidate marker = candidateWithParent.get(end).getA();
         while (!(marker == start)) {
             if (currentMarkPasses.get(co).get(marker.getWaypoint()) == null || currentMarkPasses.get(co).get(marker.getWaypoint()).getTimePoint() != marker.getTimePoint()) {
                 currentMarkPasses.get(co).put(marker.getWaypoint(), new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
                 changed = true;
             }
-            marker = candidateWithParent.get(marker);
+            marker = candidateWithParent.get(marker).getA();
         }
         if (changed) {
             logger.info("New MarkPasses for " + co);
@@ -242,7 +251,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
             /*
              * if (c.getID() == 1 && race.getStartOfRace() == null) { reEvaluateStartingEdges(); }
              */
-            // TODO Work without starting time
         }
         createNewEdges(co, newCandidates);
     }

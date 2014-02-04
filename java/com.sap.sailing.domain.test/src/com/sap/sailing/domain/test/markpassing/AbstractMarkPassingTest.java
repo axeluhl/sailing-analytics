@@ -19,6 +19,7 @@ import junit.framework.Assert;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
@@ -73,8 +74,8 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         int incorrectPasses = 0;
 
         boolean printRight = false;
-        boolean printWrong = true;
-        boolean printResult = true;
+        boolean printWrong = false;
+        boolean printResult = false;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
@@ -100,8 +101,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         System.out.println("Both null" + "\n");
                     }
                 } else {
-                    long timedelta = givenPasses.get(c).get(w).getTimePoint().asMillis()
-                            - computedPasses.get(c).get(w).getTimePoint().asMillis();
+                    long timedelta = givenPasses.get(c).get(w).getTimePoint().asMillis() - computedPasses.get(c).get(w).getTimePoint().asMillis();
                     if ((Math.abs(timedelta) < tolerance)) {
                         correctPasses++;
                         if (printRight) {
@@ -124,8 +124,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
 
         int totalMarkPasses = numberOfCompetitors * waypoints.size();
-        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed
-                + wronglyComputed);
+        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed + wronglyComputed);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
         if (printResult) {
             System.out.println("Total theoretical Passes: " + totalMarkPasses);
@@ -144,13 +143,13 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
         int mistakes = 0;
+        TimePoint t = getTrackedRace().getStartOfRace();
         for (Competitor c : getRace().getCompetitors()) {
             List<GPSFix> fixes = new ArrayList<GPSFix>();
             try {
                 getTrackedRace().getTrack(c).lockForRead();
-
                 for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                    if (fix.getTimePoint().minus(120000).before(getTrackedRace().getStartOfRace())) {
+                    if (fix.getTimePoint().minus(120000).before(t)) {
                         fixes.add(fix);
                     }
                 }
@@ -163,7 +162,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             boolean gotFirst = false;
             boolean gotOther = false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-               System.out.println(getTrackedRace().getMarkPassing(c, w));
+              //  System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if (w == w1) {
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else {
@@ -173,6 +172,48 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 }
             }
             if (!gotFirst || gotOther) {
+                mistakes++;
+            }
+        }
+        Assert.assertTrue(mistakes == 0);
+    }
+
+    protected void testFirstTwoWaypoints() {
+        CandidateFinder finder = new CandidateFinder(getTrackedRace());
+        CandidateChooser chooser = new CandidateChooser(getTrackedRace());
+        int mistakes = 0;
+        TimePoint t = getTrackedRace().getStartOfRace();
+        for (Competitor c : getRace().getCompetitors()) {
+            List<GPSFix> fixes = new ArrayList<GPSFix>();
+            try {
+                getTrackedRace().getTrack(c).lockForRead();
+                for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
+                    if (fix.getTimePoint().minus(360000).before(t)) {
+                        fixes.add(fix);
+                    }
+                }
+            } finally {
+                getTrackedRace().getTrack(c).unlockAfterRead();
+            }
+            Pair<List<Candidate>, List<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+            chooser.calculateMarkPassDeltas(c, f);
+            Waypoint w1 = getRace().getCourse().getFirstWaypoint();
+            Waypoint w2 = getRace().getCourse().getFirstLeg().getTo();
+            boolean gotFirst = false;
+            boolean gotSecond = false;
+            boolean gotOther = false;
+            for (Waypoint w : getRace().getCourse().getWaypoints()) {
+    //            System.out.println(getTrackedRace().getMarkPassing(c, w));
+                if (w == w1) {
+                    gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
+                } else if (w == w2) {
+                    gotSecond = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
+                } else if (getTrackedRace().getMarkPassing(c, w) != null) {
+                    gotOther = true;
+
+                }
+            }
+            if (!gotFirst|| !gotSecond || gotOther) {
                 mistakes++;
             }
         }

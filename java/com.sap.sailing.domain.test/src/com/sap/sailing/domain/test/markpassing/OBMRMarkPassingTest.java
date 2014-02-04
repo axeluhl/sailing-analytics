@@ -25,6 +25,7 @@ public class OBMRMarkPassingTest extends AbstractMarkPassingTest {
         setUp("65099a64-245d-11e2-9635-10bf48d758ce");
         testRace();
         testStartOfRace();
+        testFirstTwoWaypoints();
     }
     
     protected void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {

@@ -43,6 +43,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
         setUp("529a4150-2dd0-0131-2830-60a44ce903c3");
         testRace();
         testStartOfRace();
+        testFirstTwoWaypoints();
     }
     
     protected void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {

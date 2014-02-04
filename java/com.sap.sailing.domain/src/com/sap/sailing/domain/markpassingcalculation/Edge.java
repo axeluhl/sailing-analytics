@@ -13,11 +13,12 @@ import com.sap.sailing.domain.base.Waypoint;
  * 
  */
 
-public class Edge {
+public class Edge implements Comparable<Edge> {
     private Candidate start;
     private Candidate end;
     private static int numberOfWaypoints;
-    private static double penaltyForSkipped = 0.6;
+    private static double penaltyForSkipped = 0.8;
+    private static double penaltyForSkippedToEnd = 0.7;
     private double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
@@ -34,9 +35,9 @@ public class Edge {
         numberOfWaypoints = number;
     }
 
-    public double getProbability() {
-        double penalty = end.getID() == numberOfWaypoints + 1 ? penaltyForSkipped : 0.9;
-        return 1 - (start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability) + 2 * penalty * (end.getID() - start.getID() - 1);
+    public Double getProbability() {
+        double penalty = end.getID() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
+        return 1-(start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability) + 2 * penalty * (end.getID() - start.getID() - 1);
     }
 
     public Candidate getStart() {
@@ -49,5 +50,10 @@ public class Edge {
 
     public String toString() {
         return "From ID " + start.getID() + " to " + end.getID() + ": " + getProbability();
+    }
+
+    @Override
+    public int compareTo(Edge o) {
+        return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getProbability().compareTo(o.getProbability());
     }
 }

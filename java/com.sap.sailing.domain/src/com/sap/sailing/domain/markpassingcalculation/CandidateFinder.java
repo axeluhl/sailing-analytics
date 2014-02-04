@@ -383,7 +383,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (15 * Math.abs( distance/legLength ) + 1);
+        double result = 1 / (10 * Math.abs( distance/legLength ) + 1);
         // Auch NormalVerteilung??!
         return result;
     }
