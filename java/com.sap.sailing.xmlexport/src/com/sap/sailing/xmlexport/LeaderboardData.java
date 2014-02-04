@@ -22,12 +22,15 @@ import org.jdom.Element;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -36,7 +39,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -76,6 +79,8 @@ import com.sap.sailing.server.RacingEventService;
  */
 public class LeaderboardData extends ExportAction {
     
+    private static final int MAX_EARLY_START_DIFFERENCE = 10*1000; // 10 seconds
+
     private final Logger log = Logger.getLogger(LeaderboardData.class.getName());
     
     private static final String VERY_LIGHT_WIND_DESCRIPTION = "Very Light";
@@ -196,7 +201,7 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(raceElement, "start_of_tracking_time_as_millis", handleValue(race.getStartOfTracking()));
         addNamedElementWithValue(raceElement, "end_of_tracking_time_as_millis", handleValue(race.getEndOfTracking()));
         
-        LineLengthAndAdvantage start = race.getStartLine(race.getStartOfTracking());
+        LineDetails start = race.getStartLine(race.getStartOfTracking());
         addNamedElementWithValue(raceElement, "start_line_length_in_meters", start.getLength().getMeters());
 
         addNamedElementWithValue(raceElement, "course_length_in_meters", race.getCourseLength().getMeters());
@@ -249,12 +254,56 @@ public class LeaderboardData extends ExportAction {
                 raceConfidenceAndErrorMessages.getB().add("Competitor " + competitor.getName() + " has no valid data for this race!");
                 continue;
             }
-            int[] timePointsInSecondsBeforeStart = new int[]{5, 10, 20, 30};
+            int[] timePointsInSecondsBeforeStart = new int[]{0, 5, 10, 20, 30};
             for (int i : timePointsInSecondsBeforeStart) {
-                addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace().minus(i*1000)).getMeters());
-                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace().minus(i*1000)).getKnots());
-                addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceFromStarboardSideOfStartLine(competitor, race.getStartOfRace().minus(i*1000)).getMeters());
+                TimePoint beforeRaceStartTime = race.getStartOfRace().minus(i*1000);
+                addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceToStartLine(competitor, beforeRaceStartTime).getMeters());
+                addNamedElementWithValue(competitorRaceDataElement, "speed_"+i+"seconds_before_start_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(beforeRaceStartTime).getKnots());
+                addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_"+i+"seconds_before_start_in_meters", race.getDistanceFromStarboardSideOfStartLine(competitor, beforeRaceStartTime).getMeters());
+                
+                Iterator<Mark> marksForStartLine = race.getStartLine(beforeRaceStartTime).getWaypoint().getControlPoint().getMarks().iterator();
+                Mark first = marksForStartLine.next();
+                Mark second = null;
+                if (marksForStartLine.hasNext()) {
+                    second = marksForStartLine.next();
+                    Position firstMarkPosition = race.getOrCreateTrack(first).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                    Position secondMarkPosition = race.getOrCreateTrack(second).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                    Position competitorPosition = race.getTrack(competitor).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                    if (firstMarkPosition != null && secondMarkPosition != null) {
+                        Position projectedCompetitorPositionOntoStartLine = getOrthogonalProjectionOntoLine(
+                            competitorPosition,
+                            firstMarkPosition,
+                            secondMarkPosition
+                            );
+                        // now compute the distance from starboard mark
+                        Mark starboardMark = race.getStartLine(beforeRaceStartTime).getStarboardMarkWhileApproachingLine();
+                        Mark portMark = null;
+                        if (starboardMark.equals(first)) {
+                            portMark = second;
+                        } else {
+                            portMark = first;
+                        }
+                        Position portMarkPosition = race.getOrCreateTrack(portMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                        Position starboardMarkPosition = race.getOrCreateTrack(starboardMark).getEstimatedPosition(beforeRaceStartTime, /*extrapolate*/ false);
+                        Distance projectedDistance = projectedCompetitorPositionOntoStartLine.getDistance(starboardMarkPosition);
+                        Bearing bearingToStarboardMarkFromCompetitorPosition = competitorPosition.getBearingGreatCircle(starboardMarkPosition);
+                        Bearing bearingFromPortToStarboardMark = portMarkPosition.getBearingGreatCircle(starboardMarkPosition);
+                        Bearing bearingFromProjectedCompetitorPositionToStarboardMark = projectedCompetitorPositionOntoStartLine.getBearingGreatCircle(starboardMarkPosition);
+                        addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_port_mark_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromPortToStarboardMark.getDegrees());
+                        addNamedElementWithValue(competitorRaceDataElement, "bearing_fom_projected_position_to_starboard_mark"+i+"seconds_before_start_in_degrees", bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees());
+                        addNamedElementWithValue(competitorRaceDataElement, "bearing_to_starboard_mark_"+i+"seconds_before_start_in_degrees", bearingToStarboardMarkFromCompetitorPosition.getDegrees());
+                        if (Math.rint(bearingFromPortToStarboardMark.getDegrees()) == Math.rint(bearingFromProjectedCompetitorPositionToStarboardMark.getDegrees())) {
+                            addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "true");
+                            addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", projectedDistance.getMeters());
+                        } else {
+                            addNamedElementWithValue(competitorRaceDataElement, "competitor_in_startline_box_"+i+"seconds_before_start", "false");
+                            addNamedElementWithValue(competitorRaceDataElement, "projected_starboard_mark_distance_"+i+"seconds_before_start_in_meters", 0-projectedDistance.getMeters());
+                        }
+                        addNamedElementWithValue(competitorRaceDataElement, "projected_position_onto_startline_"+i+"seconds_before_start", projectedCompetitorPositionOntoStartLine.toString());
+                    }
+                }
             }
+            addNamedElementWithValue(competitorRaceDataElement, "starboard_mark_name", race.getStartLine(race.getStartOfRace()).getStarboardMarkWhileApproachingLine().getName());
             addNamedElementWithValue(competitorRaceDataElement, "distance_to_start_line_on_race_start_in_meters", race.getDistanceToStartLine(competitor, race.getStartOfRace()).getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "speed_on_start_signal_of_race_in_knots", race.getTrack(competitor).getEstimatedSpeed(race.getStartOfRace()).getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "distance_from_starboard_side_of_start_line_when_passing_start_in_meters", race.getDistanceFromStarboardSideOfStartLineWhenPassingStart(competitor).getMeters());
@@ -493,8 +542,10 @@ public class LeaderboardData extends ExportAction {
                 simpleConfidence -= 0.02;
             }
             if (competitorLeg.getStartTime() != null && competitorLeg.getStartTime().before(leg.getTrackedRace().getStartOfRace())) {
-                messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has a start time of " + competitorLeg.getStartTime() + " that is BEFORE start of race time!");
-                simpleConfidence -= 0.01;
+                if ((leg.getTrackedRace().getStartOfRace().asMillis()-competitorLeg.getStartTime().asMillis())>=MAX_EARLY_START_DIFFERENCE) {
+                    messages.add("Competitor " + competitorLeg.getCompetitor().getName() + " has a start time of " + competitorLeg.getStartTime() + " that is 10 seconds or more before start of race time (" + leg.getTrackedRace().getStartOfRace() + ").");
+                    simpleConfidence -= 0.01;
+                }
             }
         }
         return new Pair<Double, Vector<String>>(simpleConfidence, messages);

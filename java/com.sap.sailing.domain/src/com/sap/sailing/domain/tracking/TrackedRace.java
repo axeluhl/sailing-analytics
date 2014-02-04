@@ -564,8 +564,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -581,8 +580,7 @@ public interface TrackedRace extends Serializable {
      * 
      * The distance to the line is calculated by projecting the competitor's position onto the line orthogonally and
      * computing the distance of the projected position and the competitor's position.
-     * <p
-     * .
+     * <p>
      * 
      * Should the course be empty, <code>null</code> is returned. If the course's first waypoint is not a line or gate,
      * the geometric distance between the first waypoint and the competitor's position at <code>timePoint</code> is
@@ -621,9 +619,17 @@ public interface TrackedRace extends Serializable {
      */
     TimePoint getStartTimeReceived();
     
-    LineLengthAndAdvantage getStartLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the start waypoint does not have two marks or the course
+     * is empty or the start waypoint is the only waypoint
+     */
+    LineDetails getStartLine(TimePoint at);
     
-    LineLengthAndAdvantage getFinishLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course
+     * is empty or the finish waypoint is the only waypoint
+     */
+    LineDetails getFinishLine(TimePoint at);
     
     /**
      * Length of course if there are mark passings for competitors.
@@ -635,5 +641,4 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
-
 }
