@@ -955,4 +955,5 @@ public interface StringMessages extends Messages {
     String toCalculateThe();
     String groupingProvider();
     String use();
+    String releaseNotes();
 }
