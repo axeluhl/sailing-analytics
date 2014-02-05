@@ -116,7 +116,7 @@ public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawDownwindPortTackSails(Context2d ctx) {
+    protected void drawDownwindStarboardTackSails(Context2d ctx) {
         ctx.beginPath();
         ctx.moveTo(1580,355);
         ctx.lineTo(778,-229);
@@ -155,7 +155,7 @@ public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawDownwindStarboardTackSails(Context2d ctx) {
+    protected void drawDownwindPortTackSails(Context2d ctx) {
         ctx.beginPath();
         ctx.moveTo(744,357);
         ctx.lineTo(200,465);
@@ -194,7 +194,7 @@ public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawUpwindPortTackSails(Context2d ctx) {
+    protected void drawUpwindStarboardTackSails(Context2d ctx) {
         ctx.beginPath();
         ctx.moveTo(1050,355);
         ctx.lineTo(751,307);
@@ -215,7 +215,7 @@ public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawUpwindStarboardTackSails(Context2d ctx) {
+    protected void drawUpwindPortTackSails(Context2d ctx) {
         ctx.beginPath();
         ctx.moveTo(1050,360);
         ctx.lineTo(751,408);
