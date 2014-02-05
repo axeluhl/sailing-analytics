@@ -68,6 +68,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -299,7 +300,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         TextColumn<StrippedLeaderboardDTO> courseAreaColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                return leaderboard.defaultCourseAreaIdAsString == null ? "" : leaderboard.defaultCourseAreaName;
+                return leaderboard.defaultCourseAreaId == null ? "" : leaderboard.defaultCourseAreaName;
             }
         };
 
@@ -324,7 +325,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name,
                                     leaderboardDTO.displayName, /* scoring scheme provided by regatta */ null,
                                     leaderboardDTO.discardThresholds, leaderboardDTO.regattaName,
-                                    leaderboardDTO.defaultCourseAreaIdAsString);
+                                    leaderboardDTO.defaultCourseAreaId);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,
@@ -340,7 +341,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             });
                             dialog.show();
                         } else {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaIdAsString);
+                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaId);
                             openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
                         }
                     }
@@ -435,6 +436,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
+        trackedRacesListComposite.ensureDebugId("TrackedRaces");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -533,12 +535,15 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     refreshRaceLog(object.getA(), object.getB(), true);
                 } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(object.getA(), object.getB());
+                } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
+                    showRaceLog(object.getA(), object.getB());
                 }
             }
         });
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
+        raceColumnTable.ensureDebugId("RaceColumnTable");
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
         raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
@@ -561,6 +566,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         vPanel.add(selectedLeaderboardRaceButtonPanel);
 
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
+        addRaceColumnsButton.ensureDebugId("AddRaceColumnsButton");
         selectedLeaderboardRaceButtonPanel.add(addRaceColumnsButton);
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -747,6 +753,33 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void cancel() { }
         }).show();
+    }
+
+    private void showRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO, new AsyncCallback<RaceLogDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage(), true);
+            }
+            @Override
+            public void onSuccess(RaceLogDTO result) {
+                openRaceLogDialog(result);
+            }
+        });
+    }
+    
+    private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
+        RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(RaceLogDTO result) {
+            }
+        });
+        dialog.show();
     }
 
     private void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet, final boolean showAlerts) {
@@ -994,6 +1027,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 updateRaceColumnsOfLeaderboard(leaderboardName, existingRaceColumns, result);
             }
         });
+        raceDialog.ensureDebugId("RaceColumnsInLeaderboardDialog");
         raceDialog.show();
     }
 
@@ -1107,7 +1141,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
-                        newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIdAsString(),
+                        newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
                         new MarkedAsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void handleFailure(Throwable t) {
@@ -1163,7 +1197,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(), leaderboardToUpdate.getDisplayName(),
-                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIdAsString(), new AsyncCallback<StrippedLeaderboardDTO>() {
+                leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaId(), new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "

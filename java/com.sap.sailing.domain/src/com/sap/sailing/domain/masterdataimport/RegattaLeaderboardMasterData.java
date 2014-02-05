@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -18,9 +19,10 @@ public class RegattaLeaderboardMasterData extends LeaderboardMasterData {
     private Regatta regatta;
 
     public RegattaLeaderboardMasterData(String name, String displayName, int[] resultDiscardingRule,
-            Map<String, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection, String regattaName,
-            Map<String, Double> carriedPoints, List<String> suppressedCompetitors,
-            Map<String, String> displayNamesByCompetitorId, Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
+            Map<Serializable, Competitor> competitorsById, ScoreCorrectionMasterData scoreCorrection,
+            String regattaName, Map<Serializable, Double> carriedPoints, List<Serializable> suppressedCompetitors,
+            Map<Serializable, String> displayNamesByCompetitorId,
+            Map<String, Map<String, List<RaceLogEvent>>> raceLogEvents) {
         super(name, displayName, resultDiscardingRule, competitorsById, scoreCorrection, carriedPoints,
                 suppressedCompetitors, displayNamesByCompetitorId, raceLogEvents);
         this.regattaName = regattaName;

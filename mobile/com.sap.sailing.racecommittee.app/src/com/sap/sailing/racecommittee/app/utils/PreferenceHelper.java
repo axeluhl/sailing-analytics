@@ -22,7 +22,7 @@ public class PreferenceHelper {
      * Whenever you change a preference's type (e.g. from Integer to String) you need to bump this version code to the
      * appropriate app version (see AndroidManifest.xml).
      */
-    private final static int LAST_COMPATIBLE_VERSION = 3;
+    private final static int LAST_COMPATIBLE_VERSION = 4;
 
     /**
      * Application stores preference version code in this preference file (and key).

@@ -11,10 +11,10 @@ import org.junit.Test;
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FiltrationWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
+import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 
 public class TestFilters {
 
@@ -27,23 +27,12 @@ public class TestFilters {
         FiltrationWorker<Integer> filter = new CriteriaFiltrationWorker<Integer>(criteria);
         filter.setDataToFilter(data);
 
-        Receiver receiver = new Receiver();
+        OpenDataReceiver<Collection<Integer>> receiver = new OpenDataReceiver<>();
         filter.setReceiver(receiver);
         
         filter.run();
         Collection<Integer> expectedFilteredData = Arrays.asList(1, 2, 3, 4, 5);
-        assertEquals(expectedFilteredData, receiver.data);
-    }
-    
-    private class Receiver implements WorkReceiver<Collection<Integer>> {
-        
-        public Collection<Integer> data;
-
-        @Override
-        public void receiveWork(Collection<Integer> data) {
-            this.data = data;
-        }
-        
+        assertEquals(expectedFilteredData, receiver.result);
     }
 
 }

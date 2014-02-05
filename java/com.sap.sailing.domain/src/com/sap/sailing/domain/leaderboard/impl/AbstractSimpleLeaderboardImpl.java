@@ -433,6 +433,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
+        return Collections.unmodifiableMap(carriedPoints);
+    }
+
+    @Override
     public void unsetCarriedPoints(Competitor competitor) {
         Double oldCarriedPoints = carriedPoints.remove(competitor);
         getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, null);
@@ -1274,10 +1279,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         if (!competitorMarkPassings.isEmpty()) {
                             final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
                             if (firstMarkPassing.getWaypoint() == startWaypoint) {
-                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, 5);
+                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, /*milliseconds before start*/ 5000);
                                 entryDTO.distanceToStartLineFiveSecondsBeforeStartInMeters = distanceToStartLineFiveSecondsBeforeStartOfRace == null ? null
                                         : distanceToStartLineFiveSecondsBeforeStartOfRace.getMeters();
-                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, 5);
+                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, /*milliseconds before start*/ 5000);
                                 entryDTO.speedOverGroundFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
                                         : speedFiveSecondsBeforeStartOfRace.getKnots();
                                 Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(

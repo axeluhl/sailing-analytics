@@ -9,12 +9,9 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -69,11 +66,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private final VerticalPanel panel;
 
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-
     private final Label noTrackedRacesLabel;
 
     protected final SailingServiceAsync sailingService;
@@ -126,7 +118,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -152,7 +144,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -163,6 +154,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilter");
         filterPanel.add(filterablePanelRaces);
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
@@ -233,7 +225,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.startOfRace != null) {
-                    return dateFormatter.render(raceDTO.startOfRace) + " " + timeFormatter.render(raceDTO.startOfRace);
+                    return DateAndTimeFormatterUtil.defaultDateFormatter.render(raceDTO.startOfRace) + " " + 
+                            DateAndTimeFormatterUtil.defaultTimeFormatter.render(raceDTO.startOfRace);
                 }
 
                 return "";

@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.deserialization.masterdata.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +109,10 @@ public class LeaderboardGroupMasterDataJsonDeserializer implements JsonDeseriali
         ScoringScheme overallLeaderboardScoringScheme = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeScoringScheme((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SCORING_SCHEME), domainFactory);
         int[] overallLeaderboardResultDiscardingThresholds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeResultDesicardingRule((JSONObject) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_DISCARDING_THRESHOLDS));
         Map<String, Double> metaColumnsWithFactors = !hasOverallLeaderboard ? null : deserializeMetaColumnsWithFactor((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_META_COLUMNS));
-        List<String> overallLeaderboardSuppressedCompetitorsIds = !hasOverallLeaderboard ? null : LeaderboardMasterDataJsonDeserializer.deserializeSuppressedCompetitors((JSONArray) object.get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS));
+        List<Serializable> overallLeaderboardSuppressedCompetitorsIds = !hasOverallLeaderboard ? null
+                : LeaderboardMasterDataJsonDeserializer
+                        .deserializeSuppressedCompetitors((JSONArray) object
+                                .get(LeaderboardGroupMasterDataJsonSerializer.FIELD_OVERALL_LEADERBOARD_SUPPRESSED_COMPETITORS));
         return new LeaderboardGroupMasterData(name, description, displayGroupsReverse, hasOverallLeaderboard, overallLeaderboardScoringScheme, overallLeaderboardResultDiscardingThresholds, overallLeaderboardSuppressedCompetitorsIds, metaColumnsWithFactors, leaderboards, events, regattas);
     }
 

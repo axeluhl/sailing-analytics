@@ -17,7 +17,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -77,7 +79,12 @@ public abstract class ExportAction {
         }
         return newRaceName;
     }
-
+    
+    public Position getOrthogonalProjectionOntoLine(Position positionToProject, Position lineMarkPosition1, Position lineMarkPosition2) {
+        Bearing bearing = lineMarkPosition1.getBearingGreatCircle(lineMarkPosition2);
+        return positionToProject.projectToLineThrough(lineMarkPosition2, bearing);
+    }
+    
     public Long getTotalTimeSailedInMilliseconds(final Competitor competitor, final TimePoint timePoint, boolean alsoReturnTimeIfCompetitorHasNotFinishedRace) throws IOException, ServletException {
         Long result = null;
         for (TrackedRace trackedRace : getLeaderboard().getTrackedRaces()) {
@@ -187,6 +194,34 @@ public abstract class ExportAction {
                     if (distanceTraveled != null) {
                         result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
                     }
+                }
+            }
+        }
+        return result;
+    }
+    
+    public Speed getAverageSpeedOverGround(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {
+        Speed result = null;
+        if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            if (!markPassings.isEmpty()) {
+                TimePoint from = markPassings.first().getTimePoint();
+                TimePoint to;
+                if (timePoint.after(markPassings.last().getTimePoint()) &&
+                        markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                    // stop counting when competitor finished the race
+                    to = markPassings.last().getTimePoint();
+                } else {
+                    if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
+                            timePoint.after(markPassings.last().getTimePoint()) &&
+                            !alsoIncludeNonFinishedRaces) {
+                        return null;
+                    }
+                    to = timePoint;
+                }
+                Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
+                if (distanceTraveled != null) {
+                    result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
                 }
             }
         }

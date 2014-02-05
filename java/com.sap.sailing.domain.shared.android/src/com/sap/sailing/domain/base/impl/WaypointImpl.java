@@ -16,7 +16,7 @@ public class WaypointImpl implements Waypoint {
     private final Bearing fixedBearing;
 
     public WaypointImpl(ControlPoint controlPoint) {
-        this(controlPoint, /*ControlPoint*/null, /*Bearing*/null);
+        this(controlPoint, PassingInstruction.None, /*Bearing*/null);
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions) {
@@ -24,6 +24,9 @@ public class WaypointImpl implements Waypoint {
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions, Bearing fixedBearing) {
+        if (passingInstructions == null){
+            throw new IllegalArgumentException("PassingInstructions cannot be null");
+        }
         this.controlPoint = controlPoint;
         this.passingInstructions = passingInstructions;
         this.fixedBearing=fixedBearing;

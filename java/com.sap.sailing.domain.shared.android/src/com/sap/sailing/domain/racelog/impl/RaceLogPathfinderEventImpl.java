@@ -30,4 +30,9 @@ public class RaceLogPathfinderEventImpl extends RaceLogEventImpl implements Race
         return this.pathfinderId;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "pathfinderId=" + pathfinderId;
+    }
+
 }

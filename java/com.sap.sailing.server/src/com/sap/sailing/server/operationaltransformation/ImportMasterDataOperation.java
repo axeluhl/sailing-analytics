@@ -19,16 +19,19 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -46,6 +49,9 @@ import com.sap.sailing.domain.masterdataimport.SingleScoreCorrectionMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.RacingEventService;
@@ -81,11 +87,11 @@ public class ImportMasterDataOperation extends
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final LeaderboardGroupMasterData masterData,
-            RacingEventService toState) {
+            final RacingEventService toState) {
+        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(masterData, toState);
         createRegattas(masterData, toState);
-        Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         for (final LeaderboardMasterData board : masterData.getLeaderboards()) {
             leaderboardNames.add(board.getName());
             if (existingLeaderboards.containsKey(board.getName())) {
@@ -93,7 +99,17 @@ public class ImportMasterDataOperation extends
                     //Has already been added by this operation
                     continue;
                 } else if (override) {
-                    toState.removeLeaderboard(board.getName());
+                    for (RaceColumn raceColumn : existingLeaderboards.get(board.getName()).getRaceColumns()) {
+                        for (Fleet fleet : raceColumn.getFleets()) {
+                            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                            if (trackedRace != null) {
+                                raceColumn.releaseTrackedRace(fleet);
+                            }
+                        }
+                    }
+                    if (toState.getLeaderboardByName(board.getName()) != null) {
+                        toState.removeLeaderboard(board.getName());
+                    }
                     logger.info(String.format("Leaderboard with name %1$s already existed and has been overridden.",
                             board.getName()));
                 } else {
@@ -116,26 +132,26 @@ public class ImportMasterDataOperation extends
                 Pair<RaceColumn, Fleet> dummyColumnAndFleet = addDummyTrackedRace(board.getCompetitorsById().values(),
                         leaderboard, getRegattaIfPossible(leaderboard));
                 boolean addedScoreCorrections = false;
-                if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
-                    addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
-                    addedScoreCorrections = true;
-                }
-                addCarriedPoints(leaderboard, board.getCarriedPoints(), board.getCompetitorsById());
-                addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), new CompetitorByIdGetter() {
-                    @Override
-                    public Competitor getCompetitorById(String id) {
-                        return board.getCompetitorsById().get(id);
+                try {
+                    if (dummyColumnAndFleet.getA() != null && dummyColumnAndFleet.getB() != null) {
+                        addScoreCorrectionsIfPossible(board.getScoreCorrection(), newLeaderboard);
+                        addedScoreCorrections = true;
                     }
-                });
-                addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
-                        board.getCompetitorsById());
-                addRaceLogEvents(leaderboard, board.getRaceLogEvents());
-                toState.updateStoredLeaderboard(leaderboard);
-                if (addedScoreCorrections) {
-                    unsetDummy(dummyColumnAndFleet, leaderboard);
-                }
+                    addCarriedPoints(leaderboard, board.getCarriedPoints(), baseDomainFactory);
+                    addSuppressedCompetitors(leaderboard, board.getSuppressedCompetitors(), baseDomainFactory);
+                    addCompetitorDisplayNames(leaderboard, board.getDisplayNamesByCompetitorId(),
+                            board.getCompetitorsById());
+                    addRaceLogEvents(leaderboard, board.getRaceLogEvents());
+                    toState.updateStoredLeaderboard(leaderboard);
 
+                } finally {
+                    if (addedScoreCorrections) {
+                        unsetDummy(dummyColumnAndFleet, leaderboard);
+                    }
+                }
+                relinkTrackedRacesIfPossible(toState, newLeaderboard);
             }
+
         }
         int[] overallLeaderboardDiscardThresholds = masterData.getOverallLeaderboardDiscardingRule() != null ? masterData.getOverallLeaderboardDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces() : null;
         ScoringSchemeType overallLeaderboardScoringSchemeType = masterData.getOverallLeaderboardScoringScheme() != null ? masterData.getOverallLeaderboardScoringScheme().getType() : null;
@@ -164,12 +180,7 @@ public class ImportMasterDataOperation extends
             }
             Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
             addSuppressedCompetitors(overallLeaderboard, masterData.getOverallLeaderboardSuppressedCompetitorIds(),
-                    new CompetitorByIdGetter() {
-                        @Override
-                        public Competitor getCompetitorById(String id) {
-                            return masterData.getCompetitorById(id);
-                        }
-                    });
+                    baseDomainFactory);
             Map<String, Double> factorsForMetaColumns = masterData.getMetaColumnsWithFactors();
             if (factorsForMetaColumns != null) {
                 for (RaceColumn column : overallLeaderboard.getRaceColumns()) {
@@ -178,6 +189,18 @@ public class ImportMasterDataOperation extends
                 }
             }
             toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
+        }
+    }
+
+    private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {
+        if (newLeaderboard instanceof FlexibleLeaderboard) {
+            for (RaceColumn raceColumn : newLeaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    DynamicTrackedRace trackedRace = toState.getTrackedRace((RegattaAndRaceIdentifier) raceColumn
+                            .getRaceIdentifier(fleet));
+                    raceColumn.setTrackedRace(fleet, trackedRace);
+                }
+            }
         }
     }
 
@@ -197,28 +220,32 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addCompetitorDisplayNames(Leaderboard leaderboard, Map<String, String> displayNamesByCompetitorId,
-            Map<String, Competitor> competitorsById) {
-        for (Entry<String, String> entry : displayNamesByCompetitorId.entrySet()) {
-            leaderboard.setDisplayName(competitorsById.get(entry.getKey()), entry.getValue());
+    private void addCompetitorDisplayNames(Leaderboard leaderboard, Map<Serializable, String> map,
+            Map<Serializable, Competitor> map2) {
+        for (Entry<Serializable, String> entry : map.entrySet()) {
+            leaderboard.setDisplayName(baseDomainFactory.getExistingCompetitorById(entry.getKey()),
+                    entry.getValue());
         }
     }
     
     interface CompetitorByIdGetter {
-        Competitor getCompetitorById(String id);
+        Competitor getCompetitorById(Serializable id);
     }
 
-    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<String> suppressedCompetitors,
-            CompetitorByIdGetter competitorsById) {
-        for (String id : suppressedCompetitors) {
-            leaderboard.setSuppressed(competitorsById.getCompetitorById(id), true);
+    public static void addSuppressedCompetitors(Leaderboard leaderboard, List<Serializable> list,
+            DomainFactory domainFactory) {
+        for (Serializable id : list) {
+            Competitor competitorById = domainFactory.getExistingCompetitorById(id);
+            if (competitorById != null) {
+                leaderboard.setSuppressed(competitorById, true);
+            }
         }
     }
 
-    private void addCarriedPoints(Leaderboard leaderboard, Map<String, Double> carriedPoints,
-            Map<String, Competitor> competitorsById) {
-        for (Entry<String, Double> entry : carriedPoints.entrySet()) {
-            leaderboard.setCarriedPoints(competitorsById.get(entry.getKey()), entry.getValue());
+    private void addCarriedPoints(Leaderboard leaderboard, Map<Serializable, Double> carriedPoints,
+            DomainFactory domainFactory) {
+        for (Entry<Serializable, Double> entry : carriedPoints.entrySet()) {
+            leaderboard.setCarriedPoints(domainFactory.getExistingCompetitorById(entry.getKey()), entry.getValue());
         }
     }
 
@@ -275,7 +302,8 @@ public class ImportMasterDataOperation extends
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(columnName);
             if (raceColumn != null) {
                 for (SingleScoreCorrectionMasterData singleCorrection : scoreCorrectionEntry.getValue()) {
-                    Competitor competitor = leaderboard.getCompetitorByIdAsString(singleCorrection.getCompetitorId());
+                    Competitor competitor = leaderboard.getCompetitorByIdAsString(singleCorrection.getCompetitorId()
+                            .toString());
                     scoreCorrection.setMaxPointsReason(competitor, raceColumn,
                             MaxPointsReason.valueOf(singleCorrection.getMaxPointsReason()));
                     if (singleCorrection.getExplicitScoreCorrection() != null) {
@@ -322,12 +350,34 @@ public class ImportMasterDataOperation extends
             Regatta existingRegatta = toState.getRegatta(new RegattaName(singleRegattaData.getRegattaName()));
             if (existingRegatta != null) {
                 if (creationCount.alreadyAddedRegattaWithId(existingRegatta.getId().toString())) {
-                    //Already added earlier in this import process
+                    // Already added earlier in this import process
                     continue;
                 } else if (override) {
-                    logger.info(String.format("Regatta with name %1$s already existed and has been overridden.",
-                            singleRegattaData.getRegattaName()));
+                    logger.info(String
+                            .format("Regatta with name %1$s already existed and has been overridden. All it's tracked races were stopped and removed.",
+                                    singleRegattaData.getRegattaName()));
                     try {
+                        TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
+                        List<TrackedRace> toRemove = new ArrayList<TrackedRace>();
+                        if (trackedRegatta != null) {
+                            for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
+                                toRemove.add(race);
+                            }
+                            for (TrackedRace raceToRemove : toRemove) {
+                                trackedRegatta.removeTrackedRace(raceToRemove);
+                                RaceDefinition race = existingRegatta.getRaceByName(raceToRemove.getRaceIdentifier()
+                                        .getRaceName());
+                                if (race != null) {
+                                    try {
+                                        toState.removeRace(existingRegatta, race);
+                                    } catch (IOException | InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            }
+                        }
+                        toState.stopTrackingAndRemove(existingRegatta);
+                        creationCount.addOverwrittenRegattaName(existingRegatta.getName());
                         toState.removeRegatta(existingRegatta);
                     } catch (IOException | InterruptedException e) {
                         logger.warning(String.format("Regatta with name %1$s could not be deleted due to an error.",
@@ -378,6 +428,10 @@ public class ImportMasterDataOperation extends
                 RaceColumnInSeries raceColumn = raceColumnIter.next();
                 if (rcmd.getFactor() != null) {
                     raceColumn.setFactor(rcmd.getFactor());
+                }
+                Set<WindTrackMasterData> windTrackMasterData = rcmd.getWindTrackMasterData();
+                if (windTrackMasterData != null) {
+                    createWindTracks(windTrackMasterData, toState);
                 }
                 for (Map.Entry<String, RaceIdentifier> e : rcmd.getRaceIdentifiersByFleetName().entrySet()) {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(e.getKey()), e.getValue());

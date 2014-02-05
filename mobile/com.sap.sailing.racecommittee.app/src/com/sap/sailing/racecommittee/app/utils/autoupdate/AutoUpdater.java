@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,9 +11,9 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
@@ -83,10 +82,10 @@ public class AutoUpdater {
             }
         };
 
-        builder.setTitle("Auto-Update completed")
+        builder.setTitle(R.string.auto_update_completed)
                 .setMessage(
-                        "The automatic update has been completed. You should now re-synchronize your connection settings with the server.")
-                .setPositiveButton("Take me there", okListener)
+                        R.string.auto_update_completed_text)
+                .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
                 .setNegativeButton(android.R.string.cancel, cancelListener).create().show();
     }
 

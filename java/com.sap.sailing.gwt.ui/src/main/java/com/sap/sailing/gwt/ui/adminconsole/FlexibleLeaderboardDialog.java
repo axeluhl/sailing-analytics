@@ -78,9 +78,9 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     private void setCourseAreaInDescriptor(LeaderboardDescriptor leaderboard) {
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {
-            leaderboard.setCourseAreaIdAsString(null);
+            leaderboard.setCourseAreaId(null);
         } else {
-            leaderboard.setCourseAreaIdAsString(getSelectedCourseArea().uuidAsString);
+            leaderboard.setCourseAreaId(getSelectedCourseArea().id);
         }
     }
 

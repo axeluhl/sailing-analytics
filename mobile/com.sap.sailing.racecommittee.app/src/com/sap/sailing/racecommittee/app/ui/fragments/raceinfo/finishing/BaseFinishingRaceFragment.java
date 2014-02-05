@@ -71,7 +71,7 @@ public abstract class BaseFinishingRaceFragment<ProcedureType extends RacingProc
             
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
-                    getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
+                    getRace().getName(), TimeUtils.formatDurationSince(millisecondsSinceStart)));
         }
         
         String info = updateAdditionalInfoText();

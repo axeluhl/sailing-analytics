@@ -62,7 +62,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
-    String totalRank();
+    String totalRegattaRank();
     String collapse();
     String expand();
     String leg();
@@ -686,6 +686,7 @@ public interface StringMessages extends Messages {
     String startsWithZeroScore();
     String masterDataImportPanel();
     String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
     String addReplicationMaster();
@@ -726,6 +727,7 @@ public interface StringMessages extends Messages {
     String finishAt();
     String protestEndsAt();
     String unknown();
+    String raceLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
@@ -941,7 +943,8 @@ public interface StringMessages extends Messages {
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);
     String resultFromIgtimiWindImport(String string);
-    String countDownInMillis(String timeToStartInFractionalSeconds);
+    String timeToStart(String timeToStart);
+    String timeSinceStart(String timeSince);
     String distanceToLine();
     String beatAngleTooltip();
     String beatAngle();
@@ -949,7 +952,7 @@ public interface StringMessages extends Messages {
     String rerunQueryAfterRefreshTooltip();
     String queryDefinitionProvider();
     String statisticProvider();
-    String calculate();
-    String basedOn();
+    String toCalculateThe();
     String groupingProvider();
+    String use();
 }

@@ -5,8 +5,9 @@ import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.gps_fix.GPSFixLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.shared.DataTypes;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
-public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<DataRetrievalWorker<DataType>> {
+public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> {
 
     private final DataTypes dataType;
 
@@ -16,12 +17,12 @@ public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<DataR
 
     @Override
     @SuppressWarnings("unchecked")
-    public DataRetrievalWorker<DataType> build() {
+    public DataRetrievalWorker<LeaderboardGroup, DataType> build() {
         switch (dataType) {
         case GPSFix:
-            return (DataRetrievalWorker<DataType>) new GPSFixLeaderboardGroupDataRetrievalWorker();
+            return (DataRetrievalWorker<LeaderboardGroup, DataType>) new GPSFixLeaderboardGroupDataRetrievalWorker();
         case TrackedLegOfCompetitor:
-            return (DataRetrievalWorker<DataType>) new TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker();
+            return (DataRetrievalWorker<LeaderboardGroup, DataType>) new TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker();
         }
         throw new IllegalArgumentException("Not yet implemented for the given data type: " + dataType.toString());
     }
