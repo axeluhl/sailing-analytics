@@ -13,10 +13,10 @@ import com.sap.sailing.datamining.ParallelExtractor;
 import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ParallelGrouper;
 import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.Message;
-import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.impl.QueryResultImpl;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
 public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
 

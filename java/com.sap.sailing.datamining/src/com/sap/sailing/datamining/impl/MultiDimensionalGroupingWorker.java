@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class MultiDimensionalGroupingWorker<DataType, ValueType> extends AbstractGroupingWorker<DataType> {
     

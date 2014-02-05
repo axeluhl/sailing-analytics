@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResult;
 
 public interface ResultsPresenter<ResultType> {
 

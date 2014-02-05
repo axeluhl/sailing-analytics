@@ -24,12 +24,12 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.UnitFormatter;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryResult;
 
 public class ResultsChart implements ResultsPresenter<Number> {
 

@@ -9,11 +9,8 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -69,6 +66,9 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to

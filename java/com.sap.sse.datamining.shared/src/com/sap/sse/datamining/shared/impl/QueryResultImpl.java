@@ -1,11 +1,11 @@
-package com.sap.sailing.datamining.shared.impl;
+package com.sap.sse.datamining.shared.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.Unit;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = -8347731622150585715L;
@@ -69,10 +69,10 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     	return unit;
     }
 
-	@Override
-	public int getValueDecimals() {
-		return valueDecimals;
-	}
+    @Override
+    public int getValueDecimals() {
+        return valueDecimals;
+    }
 
     @Override
     public Map<GroupKey, AggregatedType> getResults() {

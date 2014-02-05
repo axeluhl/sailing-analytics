@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.google.gwt.core.shared.GWT;
-import com.sap.sailing.datamining.shared.Unit;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.datamining.shared.Unit;
 
 public final class UnitFormatter {
 

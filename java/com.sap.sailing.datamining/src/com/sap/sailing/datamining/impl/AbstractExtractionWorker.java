@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.GroupKey;
 
 public abstract class AbstractExtractionWorker<DataType, ExtractedType> extends AbstractComponentWorker<Map<GroupKey, Collection<ExtractedType>>>
                                                                         implements ExtractionWorker<DataType, ExtractedType> {

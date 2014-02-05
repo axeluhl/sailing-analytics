@@ -15,11 +15,11 @@ import org.junit.Test;
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sailing.datamining.impl.AbstractDimension;
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.impl.CompoundGroupKey;
-import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sailing.datamining.test.util.OpenGrouper;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 public class TestDimensionGroupers {
 

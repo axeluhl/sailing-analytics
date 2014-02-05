@@ -2,7 +2,7 @@ package com.sap.sailing.datamining;
 
 import java.util.concurrent.ExecutionException;
 
-import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResult;
 
 public interface Query<DataType, AggregatedType> {
     

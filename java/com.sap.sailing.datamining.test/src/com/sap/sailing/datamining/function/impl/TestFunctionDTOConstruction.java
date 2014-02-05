@@ -13,12 +13,12 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
-import com.sap.sailing.datamining.shared.impl.dto.FunctionDTOImpl;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.StringMessagesForTests;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 
 public class TestFunctionDTOConstruction {
     

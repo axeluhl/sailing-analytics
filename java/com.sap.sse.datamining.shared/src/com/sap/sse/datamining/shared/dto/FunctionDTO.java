@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.shared.dto;
+package com.sap.sse.datamining.shared.dto;
 
 import java.io.Serializable;
 import java.util.List;

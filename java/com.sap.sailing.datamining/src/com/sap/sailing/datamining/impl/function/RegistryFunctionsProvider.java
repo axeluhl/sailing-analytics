@@ -16,7 +16,7 @@ import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class RegistryFunctionsProvider implements FunctionProvider {
     

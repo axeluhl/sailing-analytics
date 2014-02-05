@@ -1,6 +1,6 @@
-package com.sap.sailing.datamining.shared.impl;
+package com.sap.sse.datamining.shared.impl;
 
-import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.GroupKey;
 
 
 public class CompoundGroupKey extends AbstractGroupKey {

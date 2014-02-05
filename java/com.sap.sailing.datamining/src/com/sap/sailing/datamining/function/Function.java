@@ -6,7 +6,7 @@ import java.util.Locale;
 import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface Function<ReturnType> {
 

@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.function;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class FunctionDTOFilterCriteria implements ConcurrentFilterCriteria<Function<?>> {
 

@@ -3,8 +3,8 @@ package com.sap.sailing.datamining;
 import java.util.Collection;
 import java.util.Map;
 
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.Unit;
 
 public interface ParallelExtractor<DataType, ExtractedType> extends ParallelComponent<Map<GroupKey, Collection<DataType>>,
                                                                                       Map<GroupKey, Collection<ExtractedType>>> {

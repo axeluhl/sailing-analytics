@@ -59,11 +59,8 @@ import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
 import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
-import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -328,6 +325,9 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
+import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 /**
  * The server side implementation of the RPC service.

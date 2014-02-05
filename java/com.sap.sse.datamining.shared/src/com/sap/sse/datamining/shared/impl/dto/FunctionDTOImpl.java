@@ -1,9 +1,9 @@
-package com.sap.sailing.datamining.shared.impl.dto;
+package com.sap.sse.datamining.shared.impl.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class FunctionDTOImpl implements FunctionDTO {
     private static final long serialVersionUID = 4587389541910498505L;

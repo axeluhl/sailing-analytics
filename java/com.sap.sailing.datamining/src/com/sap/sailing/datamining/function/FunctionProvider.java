@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.function;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public interface FunctionProvider {
 

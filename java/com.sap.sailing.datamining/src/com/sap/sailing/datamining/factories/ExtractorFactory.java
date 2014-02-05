@@ -10,8 +10,8 @@ import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.ExtractionWorkerBuilder;
 import com.sap.sailing.datamining.impl.GroupDividingParallelExtractor;
 import com.sap.sailing.datamining.shared.Message;
-import com.sap.sailing.datamining.shared.Unit;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sse.datamining.shared.Unit;
 
 public final class ExtractorFactory {
     

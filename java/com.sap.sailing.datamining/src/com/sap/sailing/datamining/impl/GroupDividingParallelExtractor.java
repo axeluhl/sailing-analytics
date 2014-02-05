@@ -11,8 +11,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.sap.sailing.datamining.ExtractionWorker;
 import com.sap.sailing.datamining.ParallelExtractor;
 import com.sap.sailing.datamining.WorkerBuilder;
-import com.sap.sailing.datamining.shared.GroupKey;
-import com.sap.sailing.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.Unit;
 
 public class GroupDividingParallelExtractor<DataType, ExtractedType> extends AbstractParallelComponent<Map<GroupKey, Collection<DataType>>,
                                                                                                        Map<GroupKey, Collection<ExtractedType>>>

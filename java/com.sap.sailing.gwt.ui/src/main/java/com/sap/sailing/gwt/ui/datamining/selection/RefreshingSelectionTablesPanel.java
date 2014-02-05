@@ -25,7 +25,6 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -42,6 +41,7 @@ import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSetti
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings>, StatisticChangedListener {
     

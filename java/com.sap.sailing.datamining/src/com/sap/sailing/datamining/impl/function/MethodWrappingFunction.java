@@ -11,8 +11,8 @@ import java.util.logging.Level;
 import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.annotations.Dimension;
 import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
-import com.sap.sailing.datamining.shared.dto.FunctionDTO;
-import com.sap.sailing.datamining.shared.impl.dto.FunctionDTOImpl;
+import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
 

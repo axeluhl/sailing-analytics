@@ -1,8 +1,8 @@
-package com.sap.sailing.datamining.shared;
+package com.sap.sse.datamining.shared;
 
 import java.io.Serializable;
 
-import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
 @SuppressWarnings("unused")
 public final class DataMiningSerializationDummy implements Serializable {
