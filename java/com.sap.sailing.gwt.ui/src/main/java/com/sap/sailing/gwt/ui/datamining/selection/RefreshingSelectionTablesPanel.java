@@ -22,9 +22,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -36,14 +35,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.SelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.SelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
-public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings>, StatisticChangedListener {
+public class RefreshingSelectionTablesPanel implements SelectionProvider<RefreshingSelectionTablesSettings> {
     
     private static final int resizeDelay = 100;
     private static final double relativeWidthInPercent = 1;
@@ -67,23 +64,6 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
         this.errorReporter = errorReporter;
         settings = new RefreshingSelectionTablesSettings();
         listeners = new HashSet<SelectionChangedListener>();
-        
-        for (DataTypes dataType : DataTypes.values()) {
-            this.sailingService.getDimensionsFor(dataType, new AsyncCallback<Collection<FunctionDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO Auto-generated method stub
-                    
-                }
-                @Override
-                public void onSuccess(Collection<FunctionDTO> result) {
-                    @SuppressWarnings("unused")
-                    Collection<FunctionDTO> dimensions = result;
-                    // TODO Auto-generated method stub
-                    
-                }
-            });
-        }
 
         tablesMappedByDimension = new HashMap<DimensionIdentifier, SelectionTable<?,?>>();
         entryWidget = new SimplePanel();
@@ -125,12 +105,6 @@ public class RefreshingSelectionTablesPanel implements SelectionProvider<Refresh
             table.setWidth((absoluteWidth / tables.size()) + "px");
             table.setHeight(absoluteHeight + "px");
         }
-    }
-    
-    @Override
-    public void statisticChanged(SimpleStatistic newStatistic) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override

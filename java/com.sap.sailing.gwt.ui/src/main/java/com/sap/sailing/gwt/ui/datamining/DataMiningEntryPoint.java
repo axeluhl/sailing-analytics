@@ -21,6 +21,8 @@ import com.sap.sailing.datamining.shared.impl.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.DataMiningService;
+import com.sap.sailing.gwt.ui.client.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.shared.components.Component;
@@ -34,15 +36,12 @@ import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSetti
 public class DataMiningEntryPoint extends AbstractEntryPoint {
 
     private static DataMiningResources resources = GWT.create(DataMiningResources.class);
-
-//    private static final String PARAM_BENCHMARK = "benchmark";
+    
+    private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-
-//        String benchmarkParameter = Window.Location.getParameter(PARAM_BENCHMARK);
-//        boolean showBenchmark = benchmarkParameter != null && benchmarkParameter.equals("true");
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         SplitLayoutPanel splitPanel = new SplitLayoutPanel();
@@ -60,7 +59,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         
         splitPanel.add(dockPanel);
         
-        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, sailingService, this, queryDefinitionProvider, resultsPresenter);
+        QueryRunner queryRunner = new SimpleQueryRunner(stringMessages, dataMiningService, this, queryDefinitionProvider, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
         

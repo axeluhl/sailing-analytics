@@ -6,8 +6,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.gwt.ui.client.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
@@ -20,7 +20,7 @@ import com.sap.sse.datamining.shared.QueryResult;
 public class SimpleQueryRunner implements QueryRunner {
 
     private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
+    private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
 
     private QueryRunnerSettings settings;
@@ -29,11 +29,11 @@ public class SimpleQueryRunner implements QueryRunner {
     
     private final Button runButton;
 
-    public SimpleQueryRunner(StringMessages stringMessages, SailingServiceAsync sailingService,
+    public SimpleQueryRunner(StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
             ResultsPresenter<Number> resultsPresenter) {
         this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
+        this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         
         this.settings = new QueryRunnerSettings();
@@ -58,7 +58,7 @@ public class SimpleQueryRunner implements QueryRunner {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
 //            queryStatusLabel.setText(" | " + stringMessages.running());
-            sailingService.runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
+            dataMiningService.runQuery(queryDefinition, new AsyncCallback<QueryResult<Number>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());

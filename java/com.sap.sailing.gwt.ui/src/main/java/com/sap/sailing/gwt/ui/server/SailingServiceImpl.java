@@ -53,14 +53,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.datamining.DataMiningService;
-import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.data.GPSFixWithContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.factories.DataMiningFactory;
-import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.shared.DataTypes;
-import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -243,6 +235,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -250,7 +243,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -325,9 +317,6 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.impl.ReplicaDescriptor;
 import com.sap.sailing.util.BuildVersion;
-import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 /**
  * The server side implementation of the RPC service.
@@ -340,8 +329,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
-
-    private final ServiceTracker<DataMiningService, DataMiningService> dataMiningServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
@@ -392,7 +379,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        dataMiningServiceTracker = createAndOpenDataMiningServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
         igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
@@ -477,14 +463,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();
-    }
-
-    protected ServiceTracker<DataMiningService, DataMiningService> createAndOpenDataMiningServiceTracker(
-            BundleContext context) {
-        ServiceTracker<DataMiningService, DataMiningService> result = new ServiceTracker<DataMiningService, DataMiningService>(
-                context, DataMiningService.class.getName(), null);
-        result.open();
-        return result;
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -1815,10 +1793,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private ReplicationService getReplicationService() {
         return replicationServiceTracker.getService();
-    }
-    
-    private DataMiningService getDataMiningService() {
-        return dataMiningServiceTracker.getService();
     }
     
     @Override
@@ -3483,42 +3457,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             competitorIdsAsStrings.add(competitor.getIdAsString());
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
-    }
-
-    @Override
-    public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType) {
-        Class<?> dataTypeBaseClass = getBaseClassFor(dataType);
-        Collection<Function<?>> dimensions = getDataMiningService().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
-        return functionsAsFunctionDTOs(dimensions);
-    }
-    
-    private Class<?> getBaseClassFor(DataTypes dataType) {
-        switch (dataType) {
-        case GPSFix:
-            return GPSFixWithContext.class;
-        case TrackedLegOfCompetitor:
-            return TrackedLegOfCompetitorWithContext.class;
-        }
-        throw new IllegalArgumentException("No base class for data type " + dataType);
-    }
-
-    private Collection<FunctionDTO> functionsAsFunctionDTOs(Collection<Function<?>> functions) {
-        Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
-        for (Function<?> function : functions) {
-            functionDTOs.add(function.asDTO());
-        }
-        return functionDTOs;
-    }
-
-    @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition, getService()); 
-        return query.run();
-    }
-    
-    @Override
-    public DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
-        return null;
     }
     
     @Override
