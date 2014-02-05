@@ -48,7 +48,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (!boatClassNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterABoatClass();
             } else if (!unique) {
                 errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }

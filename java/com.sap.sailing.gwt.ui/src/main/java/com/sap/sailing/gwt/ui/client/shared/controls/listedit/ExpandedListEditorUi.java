@@ -59,7 +59,7 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
             }
         });
 
-        expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(newValue));
+        expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(rowIndex+1, newValue));
         expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
     }
 
@@ -71,5 +71,5 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
 
     protected abstract Widget createAddWidget();
 
-    protected abstract Widget createValueWidget(ValueType newValue);
+    protected abstract Widget createValueWidget(int row, ValueType newValue);
 }

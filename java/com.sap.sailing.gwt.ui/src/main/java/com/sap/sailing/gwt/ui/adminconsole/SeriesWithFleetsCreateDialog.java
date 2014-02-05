@@ -114,7 +114,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         discardThresholdBoxes.getWidget().setVisible(false);
-        fleetListComposite = FleetListEditorComposite.createExpanded(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
+        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
             
             @Override

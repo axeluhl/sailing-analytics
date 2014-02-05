@@ -8,7 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,24 +52,30 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         }
 
         @Override
-        protected Widget createValueWidget(SeriesDTO seriesDTO) {
-            Grid seriesGrid = new Grid(2, 3);
-            seriesGrid.setCellSpacing(3);
-            Label seriesLabel = new Label(stringMessages.series() + ":");
+        protected Widget createValueWidget(int row, SeriesDTO seriesDTO) {
+            HorizontalPanel hPanel = new HorizontalPanel();
+            hPanel.setSpacing(5);
+            Label seriesLabel = new Label(stringMessages.series() + " " + row + ": ");
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            seriesGrid.setWidget(0, 0, seriesLabel);
-            seriesGrid.setHTML(0, 1, seriesDTO.getName());
+            hPanel.add(seriesLabel);
+            hPanel.add(new Label(seriesDTO.getName() + ", "));
+            
+            String fleetText = seriesDTO.getFleets().size() + " ";
+            
             if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                seriesGrid.setHTML(1, 1, seriesDTO.getFleets().size() + " fleets: "
-                        + seriesDTO.getFleets().toString());
+                if(seriesDTO.getFleets().size() == 1) {
+                    fleetText = "1 " + stringMessages.fleet();
+                } else {
+                    fleetText = seriesDTO.getFleets().size() + " " + stringMessages.fleets();
+                }
+                fleetText += ": " + seriesDTO.getFleets().toString();
             } else {
-                seriesGrid.setHTML(1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
+                fleetText = "No fleets defined.";
             }
-            return seriesGrid;
-
+            hPanel.add(new Label(fleetText));
+            
+            return hPanel;
         }
-        
     }
-    
 }

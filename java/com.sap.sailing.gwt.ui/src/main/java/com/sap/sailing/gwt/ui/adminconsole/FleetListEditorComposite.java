@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,17 +23,10 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
-import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorUiStrategy;
 
 public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
-
-    public static ListEditorComposite<FleetDTO> createExpanded(List<FleetDTO> initialValues,
-            StringMessages stringMessages, ImageResource removeImage) {
-        return new FleetListEditorComposite(initialValues, new ExpandedUi(stringMessages, removeImage));
-    }
-
-    public FleetListEditorComposite(List<FleetDTO> initialValues, ListEditorUiStrategy<FleetDTO> activeUi) {
-        super(initialValues, activeUi);
+    public FleetListEditorComposite(List<FleetDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage));
     }
 
     private static class ExpandedUi extends ExpandedListEditorUi<FleetDTO> {
@@ -74,38 +69,24 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
         }
 
         @Override
-        protected Widget createValueWidget(FleetDTO value) {
-            HorizontalPanel panel = new HorizontalPanel();
-
-            final TextBox nameBox = createNameBox();
-            nameBox.setValue(value.getName());
-            nameBox.setEnabled(false);
-            nameBox.setReadOnly(true);
-
-            final IntegerBox orderNoBox = createOrderNoBox();
-            orderNoBox.setValue(value.getOrderNo());
-            orderNoBox.setEnabled(false);
-            orderNoBox.setReadOnly(true);
-
-            final ListBox colorListBox = createColorListBox(nameBox, orderNoBox);
-            colorListBox.setEnabled(false);
-            if (value.getColor() == null) {
-                colorListBox.setSelectedIndex(0);
+        protected Widget createValueWidget(int row, FleetDTO fleet) {
+            HorizontalPanel hPanel = new HorizontalPanel();
+            hPanel.setSpacing(4);
+            Label fleetLabel = new Label(row + ". " + stringMessages.fleet() + ":");
+            fleetLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+            hPanel.add(fleetLabel);
+            
+            String valueText = fleet.getName();
+            if(fleet.getColor() != null) {
+                valueText += ", " + stringMessages.color() + " '" + fleet.getColor().toString() + "'";
             } else {
-                for (int i = 1; i < colorListBox.getItemCount(); i++) {
-                    String fleetsColorValue = colorListBox.getValue(i);
-                    FleetColors fleetsColor = FleetColors.valueOf(fleetsColorValue);
-                    if (fleetsColor.getColor().equals(value.getColor())) {
-                        colorListBox.setSelectedIndex(i);
-                        break;
-                    }
-                }
+                valueText += ", " + stringMessages.noColor();
             }
-
-            panel.add(colorListBox);
-            panel.add(nameBox);
-            panel.add(orderNoBox);
-            return panel;
+            valueText += ", " + stringMessages.rank() + " " + fleet.getOrderNo();
+            
+            hPanel.add(new Label(valueText));
+            
+            return hPanel;
         }
 
         private IntegerBox createOrderNoBox() {
@@ -117,7 +98,6 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
 
         private TextBox createNameBox() {
             final TextBox nameBox = new TextBox();
-            nameBox.setValue("Default");
             nameBox.setVisibleLength(40);
             nameBox.setWidth("175px");
             return nameBox;

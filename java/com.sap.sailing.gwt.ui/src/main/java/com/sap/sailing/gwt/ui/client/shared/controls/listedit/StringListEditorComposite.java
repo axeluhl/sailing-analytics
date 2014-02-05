@@ -99,7 +99,7 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         }
 
         @Override
-        protected Widget createValueWidget(String newValue) {
+        protected Widget createValueWidget(int row, String newValue) {
             return new Label(newValue);
         }
 
