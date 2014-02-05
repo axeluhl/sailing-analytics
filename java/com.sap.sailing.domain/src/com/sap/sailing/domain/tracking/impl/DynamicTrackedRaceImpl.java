@@ -3,13 +3,11 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -41,6 +39,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
@@ -812,13 +811,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             Bearing after = getTrackedLegStartingAt(w).getLegBearing(t).reverse();
             result = before.middle(after);
         } else if (instruction == PassingInstruction.Line) {
-            Iterator<Mark> it = w.getMarks().iterator();
-            List<Mark> marks = new ArrayList<>();
-            while (it.hasNext()) {
-                marks.add(it.next());
-            }
-            result = getOrCreateTrack(marks.get(0)).getEstimatedPosition(t, true).getBearingGreatCircle(
-                    getOrCreateTrack(marks.get(1)).getEstimatedPosition(t, true));
+            LineDetails line = (w==getRace().getCourse().getFirstWaypoint())?getStartLine(t):getFinishLine(t);
+            result = getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, true).getBearingGreatCircle(
+                    getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, true));
         } else if (instruction == PassingInstruction.Offset) {
             // TODO Bug 1712
         }

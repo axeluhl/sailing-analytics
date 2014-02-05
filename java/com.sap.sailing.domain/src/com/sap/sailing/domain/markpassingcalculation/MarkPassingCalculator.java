@@ -68,8 +68,6 @@ public class MarkPassingCalculator {
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
         }
     }
-    
-   
 
     private class Listen implements Runnable {
 
@@ -114,7 +112,6 @@ public class MarkPassingCalculator {
                     return arg0.getTimePoint().compareTo(arg1.getTimePoint());
                 }
             };
-            
             List<FutureTask<LinkedHashMap<Competitor, List<GPSFix>>>> markTasks = new ArrayList<>();
             for (Object o : combinedFixes.keySet()) {
                 if (o instanceof Mark) {
@@ -154,27 +151,22 @@ public class MarkPassingCalculator {
             }
         }
 
-
         private class ComputeMarkPassings implements Runnable {
             Competitor c;
             Set<GPSFix> fixes;
-        
             public ComputeMarkPassings(Competitor c, Set<GPSFix> fixes) {
                 this.c = c;
                 this.fixes = fixes;
             }
-        
             @Override
             public void run() {
                 chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c, fixes));
             }
         }
 
-
         private class FixesAffectedByNewMarkFixes implements Callable<LinkedHashMap<Competitor, List<GPSFix>>> {
             Mark m;
             Iterable<GPSFix> fixes;
-        
             public FixesAffectedByNewMarkFixes(Mark m, Iterable<GPSFix> fixes) {
                 this.m = m;
                 this.fixes = fixes;
@@ -182,7 +174,6 @@ public class MarkPassingCalculator {
             @Override
             public LinkedHashMap<Competitor, List<GPSFix>> call() {
                  return finder.calculateFixesAffectedByNewMarkFixes((Mark) m, fixes);
-                
             }
         }
     }

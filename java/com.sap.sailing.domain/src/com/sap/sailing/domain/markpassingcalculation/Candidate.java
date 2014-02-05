@@ -21,14 +21,16 @@ public class Candidate implements Comparable<Candidate> {
     private double distanceProbability;
     private Integer id;
     private boolean rightSide;
+    private boolean rightDirection;
     private String type;
 
-    public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w, boolean rightSide, String type) {
+    public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w, boolean rightSide, boolean rightDirection, String type) {
         this.w = w;
         this.p = p;
         this.distanceProbability = distanceProbability;
         this.id = id;
         this.rightSide = rightSide;
+        this.rightDirection=rightDirection;
         this.type = type;
     }
 
@@ -41,7 +43,8 @@ public class Candidate implements Comparable<Candidate> {
     }
 
     public Double getProbability() {
-        double cost = rightSide ? distanceProbability : distanceProbability * 0.3;
+        double factor= (rightSide&&rightDirection)?1:(rightSide||rightDirection)?0.75:0.5;
+        double cost = distanceProbability * factor;
         return cost;
     }
 

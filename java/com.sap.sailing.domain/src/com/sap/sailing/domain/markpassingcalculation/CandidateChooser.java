@@ -47,12 +47,11 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private static double strictness = 1000;
 
     public CandidateChooser(DynamicTrackedRace race) {
-        // Duplicate Edges?
         logger.setLevel(Level.INFO);
         this.race = race;
         raceStartTime = race.getStartOfRace();
-        start = new Candidate(0, raceStartTime, 1, null, true, "Proxy");
-        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1, null, true, "Proxy");
+        start = new Candidate(0, raceStartTime, 1, null, true, true, "Proxy");
+        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1, null, true, true, "Proxy");
         candidates = new LinkedHashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new TreeSet<Candidate>());
@@ -69,18 +68,16 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
-
         if (race.getStartOfRace() != raceStartTime) {
             raceStartTime = race.getStartOfRace();
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);
             }
-            start = new Candidate(0, raceStartTime, 1, null, true, "Proxy");
+            start = new Candidate(0, raceStartTime, 1, null, true, true, "Proxy");
             for (Competitor com : allEdges.keySet()) {
                 addCandidates(Arrays.asList(start), com);
             }
         }
-
         removeCandidates(candidateDeltas.getB(), c);
         addCandidates(candidateDeltas.getA(), c);
         findShortestPath(c);
@@ -103,7 +100,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         allEdges.get(co).add(e);
                     }
                 } else {
-
                     /*
                      * if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) >
                      * penaltyForSkipping) { allEdges.get(co).add(new Edge(early, late,

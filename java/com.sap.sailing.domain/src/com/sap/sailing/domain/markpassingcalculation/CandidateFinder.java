@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.LineDetails;
 
 /**
  * The standard implemantation of {@link AbstractCandidateFinder}. The fixes are evaluated for their distance to each
@@ -194,9 +195,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
                         break;
                     }
                 }
-                Double dis1 = fixBefore != null ? distances.get(c).get(fixBefore).get(w) : null;
-                Double dis2 = distances.get(c).get(fix).get(w);
-                Double dis3 = fixAfter != null ? distances.get(c).get(fixAfter).get(w) : null;
+                Double dis1 = fixBefore != null ? Math.abs(distances.get(c).get(fixBefore).get(w)) : null;
+                Double dis2 = Math.abs(distances.get(c).get(fix).get(w));
+                Double dis3 = fixAfter != null ? Math.abs(distances.get(c).get(fixAfter).get(w)) : null;
                 if (dis1 != null && dis3 != null && dis2 < dis1 && dis2 < dis3) {
                     t = fix.getTimePoint();
                     p = fix.getPosition();
@@ -206,14 +207,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     }
                 }
                 if (!wasCan && isCan) {
-                    Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t), "Distance");
+                    Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t), true, "Distance");
                     distanceCandidates.get(c).get(w).put(fix, newCan);
                     result.get(w).getA().add(newCan);
                 } else if (wasCan && !isCan) {
                     distanceCandidates.get(c).get(w).remove(fix);
                     result.get(w).getB().add(oldCan);
                 } else if (wasCan && isCan && oldCan.getProbability() != cost) {
-                    Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t), "Distance");
+                    Candidate newCan = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t), true, "Distance");
                     distanceCandidates.get(c).get(w).put(fix, newCan);
                     result.get(w).getA().add(newCan);
                     result.get(w).getB().add(oldCan);
@@ -345,7 +346,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         TimePoint t = start.plus((long) (differenceInMillis * ratio));
         Position p = race.getTrack(c).getEstimatedPosition(t, true);
         double cost = getDistanceLikelyhood(w, p, t);
-        return new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t,cost, w, isOnCorrectSideOfWaypoint(w, p, t), "CTE");
+        return new Candidate(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t), passesInTheRightDirection(w, cte1, cte2), "CTE");
     }
 
     private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t) {
@@ -354,36 +355,39 @@ public class CandidateFinder implements AbstractCandidateFinder {
                 || passingInstructions.get(w) == PassingInstruction.FixedBearing) {
             result = p.crossTrackError(race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, true),
                     race.getCrossingBearing(w, t).add(new DegreeBearingImpl(90))).getMeters() < 0;
-        } else if (w.getPassingInstructions() == PassingInstruction.Gate) {
+        } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
             // TODO
-        } else if (w.getPassingInstructions() == PassingInstruction.Offset) {
+        } else if (passingInstructions.get(w) == PassingInstruction.Offset) {
             // TODO
         }
         return result;
     }
 
-    private double passesInTheRightDirection(Waypoint w, double cte1, double cte2) {
-        if (w.getPassingInstructions() == PassingInstruction.Port) {
-            return cte1 > cte2 ? 1 : 0.5;
+    private boolean passesInTheRightDirection(Waypoint w, double cte1, double cte2) {
+        boolean result = true;
+        if (passingInstructions.get(w) == PassingInstruction.Port) {
+            result = cte1 > cte2 ? true : false;
+        } else if (passingInstructions.get(w) == PassingInstruction.Starboard) {
+            result = cte1 < cte2 ? true : false;
+        } else if (passingInstructions.get(w) == PassingInstruction.Line) {
+            result = cte1 > cte2 ? true : false;
+        } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
+            // TODO
+        } else if (passingInstructions.get(w) == PassingInstruction.Offset) {
+            // TODO
+        } else if (passingInstructions.get(w) == PassingInstruction.FixedBearing) {
+            // TODO
         }
-        if (w.getPassingInstructions() == PassingInstruction.Starboard) {
-            return cte1 < cte2 ? 1 : 0.5;
-        } else if (w.getPassingInstructions() == PassingInstruction.Gate) {
-            // TODO
-        } else if (w.getPassingInstructions() == PassingInstruction.Line) {
-            // TODO
-        } else if (w.getPassingInstructions() == PassingInstruction.Offset) {
-            // TODO
-        } else if (w.getPassingInstructions() == PassingInstruction.FixedBearing) {
-            // TODO
+        if (result == false) {
+            System.currentTimeMillis();
         }
-        return 1;
+        return result;
     }
 
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (10 * Math.abs( distance/legLength ) + 1);
+        double result = 1 / (10 * Math.abs(distance / legLength) + 1);
         // Auch NormalVerteilung??!
         return result;
     }
@@ -402,16 +406,20 @@ public class CandidateFinder implements AbstractCandidateFinder {
         double distance = 0;
         PassingInstruction instruction = passingInstructions.get(w);
         ArrayList<Position> positions = new ArrayList<>();
-        for (Mark m : w.getMarks()) {
-            positions.add(race.getOrCreateTrack(m).getEstimatedPosition(t, false));
+        if (w.getPassingInstructions() == PassingInstruction.Line) {
+            LineDetails line = race.getRace().getCourse().getFirstWaypoint() == w ? race.getStartLine(t) : race.getFinishLine(t);
+            positions.add(0, race.getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, false));
+            positions.add(1, race.getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, false));
+        } else {
+            for (Mark m : w.getMarks()) {
+                positions.add(race.getOrCreateTrack(m).getEstimatedPosition(t, false));
+            }
         }
         if (instruction.equals(PassingInstruction.Port) || instruction.equals(PassingInstruction.Starboard) || instruction.equals(PassingInstruction.Offset)) {
             distance = p.getDistance(positions.get(0)).getMeters();
         }
         if (instruction.equals(PassingInstruction.Line)) {
             distance = p.getDistanceToLine(positions.get(0), positions.get(1)).getMeters();
-            if (race.getRace().getCourse().getIndexOfWaypoint(w) == 0) {
-            }
         }
         if (instruction.equals(PassingInstruction.Gate)) {
             if (p.getDistance(positions.get(0)).getMeters() < p.getDistance(positions.get(1)).getMeters()) {
