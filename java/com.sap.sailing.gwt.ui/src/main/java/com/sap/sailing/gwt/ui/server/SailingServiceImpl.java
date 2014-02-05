@@ -53,11 +53,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.datamining.DataMiningFactory;
 import com.sap.sailing.datamining.DataMiningService;
 import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
+import com.sap.sailing.datamining.factories.DataMiningFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.DataTypes;

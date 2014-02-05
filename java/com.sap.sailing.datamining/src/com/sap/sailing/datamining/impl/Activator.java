@@ -15,11 +15,11 @@ import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.DataMiningClassesWithFunctionsService;
-import com.sap.sailing.datamining.function.impl.PartitionParallelExternalFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.function.impl.RegistryFunctionsProvider;
-import com.sap.sailing.datamining.function.impl.SimpleFunctionRegistry;
+import com.sap.sailing.datamining.impl.function.DataMiningClassesWithFunctionsService;
+import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
+import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
+import com.sap.sailing.datamining.impl.function.RegistryFunctionsProvider;
+import com.sap.sailing.datamining.impl.function.SimpleFunctionRegistry;
 
 public class Activator implements BundleActivator {
 

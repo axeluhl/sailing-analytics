@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.data.impl;
+package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
 

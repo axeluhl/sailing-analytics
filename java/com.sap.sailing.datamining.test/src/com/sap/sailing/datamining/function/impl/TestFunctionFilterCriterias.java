@@ -8,6 +8,9 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sailing.datamining.impl.function.MethodIsCorrectDimensionFilterCriteria;
+import com.sap.sailing.datamining.impl.function.MethodIsCorrectExternalFunctionFilterCriteria;
+import com.sap.sailing.datamining.impl.function.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 
 public class TestFunctionFilterCriterias {

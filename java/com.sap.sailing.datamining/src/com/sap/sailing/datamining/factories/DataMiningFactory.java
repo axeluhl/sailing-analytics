@@ -1,13 +1,17 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.factories;
 
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.factories.AggregatorFactory;
-import com.sap.sailing.datamining.factories.DataRetrieverFactory;
-import com.sap.sailing.datamining.factories.ExtractorFactory;
-import com.sap.sailing.datamining.factories.FilterFactory;
-import com.sap.sailing.datamining.factories.GrouperFactory;
+import com.sap.sailing.datamining.DataMiningStringMessages;
+import com.sap.sailing.datamining.FiltrationWorker;
+import com.sap.sailing.datamining.ParallelAggregator;
+import com.sap.sailing.datamining.ParallelDataRetriever;
+import com.sap.sailing.datamining.ParallelExtractor;
+import com.sap.sailing.datamining.ParallelFilter;
+import com.sap.sailing.datamining.ParallelGrouper;
+import com.sap.sailing.datamining.Query;
+import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.i18n.DataMiningResourceBundleManager;
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.QueryImpl;

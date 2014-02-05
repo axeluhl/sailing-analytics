@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
+import com.sap.sailing.datamining.impl.function.MethodWrappingFunction;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
