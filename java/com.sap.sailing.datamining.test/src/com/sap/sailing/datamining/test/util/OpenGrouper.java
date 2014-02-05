@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.impl.MultiDimensionalGroupingWorker;
-import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
 
 public class OpenGrouper<DataType> extends MultiDimensionalGroupingWorker<DataType, String> {
 

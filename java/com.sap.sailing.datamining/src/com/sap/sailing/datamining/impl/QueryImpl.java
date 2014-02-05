@@ -16,7 +16,7 @@ import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.shared.GroupKey;
 import com.sap.sailing.datamining.shared.Message;
 import com.sap.sailing.datamining.shared.QueryResult;
-import com.sap.sailing.datamining.shared.QueryResultImpl;
+import com.sap.sailing.datamining.shared.impl.QueryResultImpl;
 
 public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
 

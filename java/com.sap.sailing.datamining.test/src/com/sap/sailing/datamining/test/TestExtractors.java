@@ -10,8 +10,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sailing.datamining.test.util.StringLengthExtractor;
 

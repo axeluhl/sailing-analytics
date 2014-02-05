@@ -13,8 +13,8 @@ import com.sap.sailing.datamining.AggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SumAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
-import com.sap.sailing.datamining.shared.GenericGroupKey;
 import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.shared.impl.GenericGroupKey;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 
 public class TestAggregators {

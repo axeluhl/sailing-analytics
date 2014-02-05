@@ -5,14 +5,14 @@ import java.util.List;
 
 public interface FunctionDTO extends Serializable {
 
-    public abstract boolean isDimension();
+    public boolean isDimension();
 
-    public abstract String getDisplayName();
+    public String getDisplayName();
 
-    public abstract List<String> getParameters();
+    public List<String> getParameters();
 
-    public abstract String getReturnTypeName();
+    public String getReturnTypeName();
 
-    public abstract String getSourceTypeName();
+    public String getSourceTypeName();
 
 }

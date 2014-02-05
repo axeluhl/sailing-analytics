@@ -1,7 +1,11 @@
-package com.sap.sailing.datamining.shared;
+package com.sap.sailing.datamining.shared.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.sap.sailing.datamining.shared.GroupKey;
+import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.datamining.shared.Unit;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = -8347731622150585715L;

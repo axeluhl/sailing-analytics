@@ -1,4 +1,6 @@
-package com.sap.sailing.datamining.shared;
+package com.sap.sailing.datamining.shared.impl;
+
+import com.sap.sailing.datamining.shared.GroupKey;
 
 
 public class GenericGroupKey<T> extends AbstractGroupKey {
