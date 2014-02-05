@@ -15,6 +15,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_EDIT = "ACTION_EDIT";
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
+    public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
     
     private final StringMessages stringMessages;
     private final SelectedLeaderboardProvider selectedLeaderboardProvider;
@@ -25,7 +26,7 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         this.selectedLeaderboardProvider = selectedLeaderboardProvider;
         this.stringMessages = stringConstants;
     }
-
+ 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         List<ImageSpec> result = new ArrayList<ImageSpec>();
@@ -37,7 +38,8 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
             result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
         }
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
-        result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clock())));
+        result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
+        result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         return result;
     }
 }

@@ -31,4 +31,8 @@ public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implem
         return courseDesign;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "courseDesign=" + courseDesign != null ? courseDesign.getName() : "null";
+    }
 }

@@ -86,5 +86,14 @@ public interface RaceLogEvent extends Timed, WithID, Serializable {
      */
     void accept(RaceLogEventVisitor visitor);
 
+    /**
+     * Gets the {@link RaceLogEventAuthor} author of this event.
+     */
     RaceLogEventAuthor getAuthor();
+
+    /**
+     * Gets a short info about the most relevant data of the event.
+     * @return
+     */
+    String getShortInfo();
 }

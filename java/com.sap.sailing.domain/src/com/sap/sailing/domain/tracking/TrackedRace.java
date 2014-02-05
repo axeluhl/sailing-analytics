@@ -619,9 +619,17 @@ public interface TrackedRace extends Serializable {
      */
     TimePoint getStartTimeReceived();
     
-    LineLengthAndAdvantage getStartLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the start waypoint does not have two marks or the course
+     * is empty or the start waypoint is the only waypoint
+     */
+    LineDetails getStartLine(TimePoint at);
     
-    LineLengthAndAdvantage getFinishLine(TimePoint at);
+    /**
+     * @return <code>null</code> if the finish waypoint does not have two marks or the course
+     * is empty or the finish waypoint is the only waypoint
+     */
+    LineDetails getFinishLine(TimePoint at);
     
     /**
      * Length of course if there are mark passings for competitors.
@@ -633,5 +641,4 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
-
 }

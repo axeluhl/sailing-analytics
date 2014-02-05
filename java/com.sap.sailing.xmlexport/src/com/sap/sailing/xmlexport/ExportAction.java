@@ -17,7 +17,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -77,7 +79,12 @@ public abstract class ExportAction {
         }
         return newRaceName;
     }
-
+    
+    public Position getOrthogonalProjectionOntoLine(Position positionToProject, Position lineMarkPosition1, Position lineMarkPosition2) {
+        Bearing bearing = lineMarkPosition1.getBearingGreatCircle(lineMarkPosition2);
+        return positionToProject.projectToLineThrough(lineMarkPosition2, bearing);
+    }
+    
     public Long getTotalTimeSailedInMilliseconds(final Competitor competitor, final TimePoint timePoint, boolean alsoReturnTimeIfCompetitorHasNotFinishedRace) throws IOException, ServletException {
         Long result = null;
         for (TrackedRace trackedRace : getLeaderboard().getTrackedRaces()) {
