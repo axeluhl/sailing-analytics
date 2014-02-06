@@ -55,11 +55,10 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         protected Widget createValueWidget(int row, SeriesDTO seriesDTO) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(5);
-            Label seriesLabel = new Label(stringMessages.series() + " " + row + ": ");
+            Label seriesLabel = new Label(stringMessages.series() + " '" + seriesDTO.getName() + "' :");
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             hPanel.add(seriesLabel);
-            hPanel.add(new Label(seriesDTO.getName() + ", "));
             
             String fleetText = seriesDTO.getFleets().size() + " ";
             

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,9 +17,11 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -173,8 +177,14 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         additionalWidgetPanel.add(useSeriesResultDiscardingThresholdsCheckbox);
         additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
         discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
+        
         raceNamesEditor = new StringListEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(stringMessages, resources.removeIcon(), seriesName));
-        additionalWidgetPanel.add(raceNamesEditor);
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(raceNamesEditor, stringMessages.races());
+        tabPanel.selectTab(0);
+        additionalWidgetPanel.add(tabPanel);
+
         return additionalWidgetPanel;
     }
     
@@ -197,61 +207,132 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     
     private class RaceNamesEditorUi extends StringListEditorComposite.ExpandedUi {
         
-        private final ListBox addRacesListBox;
+        private final ListBox addRacesFromListBox;
+        private final ListBox addRacesToListBox;
         private final TextBox raceNamePrefixTextBox;
         private final Button addRacesBtn;
         
         private final String seriesName;
+        private final Label addRacesHintLabel;
         
         public RaceNamesEditorUi(StringMessages stringMessages, ImageResource removeImage, String seriesName) {
             super(stringMessages, removeImage, Collections.<String>emptyList());
-            this.addRacesListBox = createListBox(false);
+            this.addRacesFromListBox = createListBox(false);
+            this.addRacesToListBox = createListBox(false);
             this.raceNamePrefixTextBox = createTextBox(null);
             this.addRacesBtn = new Button(stringMessages.add());
+            this.addRacesHintLabel = new Label("");
             this.seriesName = seriesName;
         }
         
+        private List<String> resolveRaceNamesToAdd() {
+            List<String> result = new ArrayList<String>();
+            String racePrefix = raceNamePrefixTextBox.getText();
+            int to = addRacesToListBox.getSelectedIndex() + 1; 
+            int from = addRacesFromListBox.getSelectedIndex() + 1;
+            int racesToCreate = to - from + 1;
+            if(racesToCreate > 0) {
+                for(int i = from; i <= to; i++) {
+                    String raceName = racePrefix + i;
+                    result.add(raceName);
+                }
+            }
+            
+            return result;
+        }
+        
+        private void updateHintLabel() {
+            List<String> resolveRaceNamesToAdd = resolveRaceNamesToAdd();
+            String hintText = "Hint: 'Add' will create the races: ";
+            for(String raceName: resolveRaceNamesToAdd) {
+                hintText += raceName + " ";
+            }
+            addRacesHintLabel.setText(hintText);
+        }
+
+        private void updateFromToListboxesSelection() {
+            int currentSize = context.getValue().size();
+            addRacesFromListBox.setSelectedIndex(currentSize);
+            addRacesToListBox.setSelectedIndex(currentSize);
+        }
+
         @Override
         protected Widget createAddWidget() {
+            VerticalPanel vPanel = new VerticalPanel();
+            
             HorizontalPanel addRacesPanel = new HorizontalPanel();
-            addRacesPanel.setSpacing(3);
-            addRacesPanel.add(new Label(stringMessages.add()));
-            addRacesPanel.add(addRacesListBox);
+            addRacesPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+            addRacesPanel.setSpacing(5);
+            addRacesPanel.add(new Label("Add races"));
+
             for(int i = 1; i <= 50; i++) {
-                addRacesListBox.addItem("" + i);
+                addRacesFromListBox.addItem("" + i);
+                addRacesToListBox.addItem("" + i);
             }
-            addRacesListBox.setSelectedIndex(0);
+            updateFromToListboxesSelection();
+
+            addRacesFromListBox.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+                    updateHintLabel();
+                }
+            });
+            addRacesToListBox.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+                    updateHintLabel();
+                }
+            });
+            
+            addRacesPanel.add(addRacesFromListBox);
+            addRacesPanel.add(new Label("to"));
+            addRacesPanel.add(addRacesToListBox);
+            addRacesPanel.add(new Label("with name prefix"));
+
+            raceNamePrefixTextBox.setWidth("20px");
             if ("Default".equals(seriesName)) {
                 raceNamePrefixTextBox.setText("R");
             } else {
                 raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
             }
-            raceNamePrefixTextBox.setWidth("20px");
+            
+            raceNamePrefixTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    updateHintLabel();
+                }
+            });
+            
             addRacesPanel.add(raceNamePrefixTextBox);
             addRacesBtn.addStyleName("inlineButton");
+            
             addRacesBtn.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     SeriesDTO selectedSeries = getSelectedSeries();
                     if(selectedSeries != null) {
-                        String racePrefix = raceNamePrefixTextBox.getText();
-                        int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
-                        int currentSize = context.getValue().size();
-                        for(int i = 1; i <= racesCountToCreate; i++) {
-                            String raceName = racePrefix;
-                            if(racesCountToCreate != 1 || selectedSeries.getRaceColumns().size() > 0) {
-                                raceName += (currentSize + i);
-                            }
-                            addValue(raceName);
+                        List<String> raceNamesToAdd = resolveRaceNamesToAdd();
+                        for(String raceToAdd: raceNamesToAdd) {
+                            addValue(raceToAdd);
                         }
                         validate();
+                        updateFromToListboxesSelection();
+                        updateHintLabel();
                     } else {
                         Window.alert("Please select a series first.");
                     }
                 }
             });
             addRacesPanel.add(addRacesBtn);
-            return addRacesPanel;
+            
+            vPanel.add(addRacesPanel);
+            
+            addRacesHintLabel.getElement().getStyle().setColor("gray");
+            vPanel.add(addRacesHintLabel);
+            updateFromToListboxesSelection();
+            updateHintLabel();
+            
+            return vPanel;
         }
     }
 }

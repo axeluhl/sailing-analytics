@@ -12,6 +12,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -151,8 +152,12 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(3, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
         formGrid.setWidget(4, 1, useSeriesResultDiscardingThresholdsCheckbox);
         formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
-        panel.add(createHeadlineLabel(stringMessages.fleets()));
-        panel.add(fleetListComposite);
+        
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(fleetListComposite, stringMessages.fleets());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
         return panel;
     }
     

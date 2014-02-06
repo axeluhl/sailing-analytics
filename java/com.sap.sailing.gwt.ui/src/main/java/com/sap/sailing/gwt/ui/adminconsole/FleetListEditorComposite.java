@@ -9,8 +9,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
@@ -37,10 +35,9 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
 
         @Override
         protected Widget createAddWidget() {
-            CaptionPanel captionPanel = new CaptionPanel(stringMessages.addFleet());
-
-            HorizontalPanel panel = new HorizontalPanel();
-            panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+            HorizontalPanel hPanel = new HorizontalPanel();
+            hPanel.setSpacing(4);
+            hPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
             final TextBox nameBox = createNameBox();
             final IntegerBox orderNoBox = createOrderNoBox();
@@ -53,34 +50,29 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
                 }
             });
 
-            Grid fleetsGrid = new Grid(2, 3);
-            fleetsGrid.setCellSpacing(4);
-            fleetsGrid.setHTML(0, 0, stringMessages.color());
-            fleetsGrid.setHTML(0, 1, stringMessages.name());
-            fleetsGrid.setHTML(0, 2, stringMessages.rank());
-            fleetsGrid.setWidget(1, 0, colorListBox);
-            fleetsGrid.setWidget(1, 1, nameBox);
-            fleetsGrid.setWidget(1, 2, orderNoBox);
-
-            panel.add(fleetsGrid);
-            panel.add(addButton);
-            captionPanel.add(panel);
-            return captionPanel;
+            hPanel.add(new Label(stringMessages.color() + ":"));
+            hPanel.add(colorListBox);
+            hPanel.add(new Label(stringMessages.name() + ":"));
+            hPanel.add(nameBox);
+            hPanel.add(new Label(stringMessages.rank() + ":"));
+            hPanel.add(orderNoBox);
+            hPanel.add(addButton);
+            return hPanel;
         }
 
         @Override
         protected Widget createValueWidget(int row, FleetDTO fleet) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(4);
-            Label fleetLabel = new Label(row + ". " + stringMessages.fleet() + ":");
+            Label fleetLabel = new Label(stringMessages.fleet() + " '" + fleet.getName() + "' :");
             fleetLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             hPanel.add(fleetLabel);
             
-            String valueText = fleet.getName();
+            String valueText = "";
             if(fleet.getColor() != null) {
-                valueText += ", " + stringMessages.color() + " '" + fleet.getColor().toString() + "'";
+                valueText += stringMessages.color() + " '" + fleet.getColor().toString() + "'";
             } else {
-                valueText += ", " + stringMessages.noColor();
+                valueText += stringMessages.noColor();
             }
             valueText += ", " + stringMessages.rank() + " " + fleet.getOrderNo();
             

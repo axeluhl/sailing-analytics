@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
@@ -103,8 +104,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-        panel.add(createHeadlineLabel(stringMessages.series()));
-        panel.add(seriesEditor);
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
     }
 
     @Override
