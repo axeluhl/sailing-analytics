@@ -84,11 +84,63 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     /**
-     * This value indicated how many stored data packets we allow that are not in the right sequence
-     * Background: It can happen that the progress for storedData hops around and delivers a progress
-     * that is lower than one received before. This can happen but only at a maximum of times this constant describes.
+     * This value indicated how many stored data packets we allow that are not in the right sequence Background: It can
+     * happen that the progress for storedData hops around and delivers a progress that is lower than one received
+     * before. This can happen but only at a maximum of times this constant describes. To provide some background, here
+     * is an excerpt of a description received from Jorge Piera Llodra from TracTrac on 2014-02-05:
+     * 
+     * <i>
+     * <p>
+     * "Our library creates a new thread per data type where a data type is associated with a subscription. e.g: there
+     * is a data type for the competitor positions, other for the mark positions, other for the course update, other for
+     * the start/stop times... Every thread calculates its individual progress and its weight and the progress that you
+     * receive in the "storedDataProgress" method is a function of all the individual progresses and all the weights
+     * reported by the threads. The function that calculates the total progress is:
+     * 
+     * <pre>
+     *   total_progress = sum(progress(thread_i)) / sum(weight(thread_i))</pre>
+     * The weight is also the maximum individual progress that a thread can send: if a thread has a weight = 10 its
+     * progress only can be between 0 and 10, e.g,:
+     * <p>
+     * 
+     * You are subscribed to receive competitor positions and the current course. All the threads have a default weight
+     * and the beginning the send the values:
+     * <ul>
+     * <li>Competitor positions thread -> weight = 10, progress = 0</li>
+     * <li>Course thread -> weight = 1, progress = 0</li>
+     * </ul>
+     * The total progress that you receive is:
+     * 
+     * <pre>
+     *   total_progress = 0 + 0 / 10 + 1 = 0 / 11 = 0</pre>
+     * 
+     * Then, the "Course thread" retrieves the course from the server and it sends a new progress message to the system:
+     * 
+     * <pre>
+     *   Course thread -&gt; weight = 1, progress = 1  ---&gt total_progress = 0 + 1 /  10 + 1 = 1 / 11 = 0.090909091</pre>
+     * 
+     * Then, the "Competitor positions thread" goes to the server and it checks that there is a high number of positions
+     * for the competitors. It decides to change its weight:
+     * 
+     * <pre>
+     *   Competitor positions thread -&gt weight = 50, progress = 0 --&gt total_progress = 0 + 1 / 50 + 1 = 1 / 51 = 0.019607843</pre>
+     * 
+     * Then, the "Competitor positions thread" starts to retrieve positions and it sends several messages updating the
+     * progress:
+     * <ul>
+     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 1 --&gt; total_progress = 1 + 1 / 50 + 1 = 2 / 51 = 0.039215686</pre></li>
+     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 2 --&gt total_progress = 2 + 1 / 50 + 1 = 3 / 51 = 0.058823529</pre></li>
+     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 3 --&gt total_progress = 3 + 1 / 50 + 1 = 4 / 51 = 0.078431373</pre></li>
+     * <li><pre>...</pre></li>
+     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 50 --&gt total_progress = 50 + 1 / 50 + 1 = 51 / 51 = 1.0</pre></li>
+     * </ul>
+     * 
+     * This example shows that is possible to receive more that 3 values of the progress lower than one already
+     * received. It happens because the weight of the threads changes."</i><p>
+     * 
+     * We assume that there won't be more than six threads in TTCM receiving data for the same race.
      */
-    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 3;
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 6;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;
