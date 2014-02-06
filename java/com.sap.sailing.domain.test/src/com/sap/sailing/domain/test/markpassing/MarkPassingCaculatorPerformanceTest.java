@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.test.markpassing;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +52,10 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
     
     @Test
     public void testChooserPerformance() {
-        testAddingCandidatesToChooser(200, 1);
-    }
+        assertTrue(timeToAddCandidatesToChooser(500, 1)<800);
+        }
 
-    private void testAddingCandidatesToChooser(int numberOfCandidates, int numberToAdd) {
+    private long timeToAddCandidatesToChooser(int numberOfCandidates, int numberToAdd) {
         ArrayList<Candidate> newCans = new ArrayList<>();
         for (int i = 0; i < numberOfCandidates; i++) {
             newCans.add(randomCan());
@@ -62,7 +64,6 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         CandidateChooser c = new CandidateChooser(trackedRace);
         c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
-
         ArrayList<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             ArrayList<Candidate> old = new ArrayList<>();
@@ -79,7 +80,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         for (long l : times) {
             total = total + l;
         }
-        Assert.assertTrue(total / times.size()<500);
+       return total / times.size();
     }
 
     private Candidate randomCan() {
@@ -88,5 +89,4 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
                 (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
                 waypoints.get(id), true, true, "Test");
     }
-
 }

@@ -17,8 +17,8 @@ public class Edge implements Comparable<Edge> {
     private Candidate start;
     private Candidate end;
     private static int numberOfWaypoints;
-    private static double penaltyForSkipped = 0.8;
-    private static double penaltyForSkippedToEnd = 0.7;
+    private static double penaltyForSkipped = 0.7;
+    private static double penaltyForSkippedToEnd = 0.6;
     private double timeEstimationOrCloseStartsProbability;
 
     public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {

@@ -4,13 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,25 +18,47 @@ import junit.framework.Assert;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
-    protected boolean forceReload = true;
-
+public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
     }
 
-    protected void testRace() {
+    protected abstract String getFileName();
+
+    protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
+        setUp(raceNumber);
+        testWholeRace();
+        testStartOfRace();
+    }
+
+    private void setUp(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
+        super.setUp();
+        URI storedUri = new URI("file:///" + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
+        /* liveUri */null, /* storedUri */storedUri,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RAWPOSITIONS });
+        getTrackedRace().recordWind(new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
+                new WindSourceImpl(WindSourceType.WEB));
+    }
+
+    private void testWholeRace() {
         ArrayList<Waypoint> waypoints = new ArrayList<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
         LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
@@ -72,8 +92,9 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         int correctlyNotComputed = 0;
         int correctPasses = 0;
         int incorrectPasses = 0;
+        int incorrectStarts = 0;
 
-        boolean printRight = true;
+        boolean printRight = false;
         boolean printWrong = true;
         boolean printResult = true;
 
@@ -89,7 +110,9 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                     }
                 } else if (computedPasses.get(c).get(w) == null && !(givenPasses.get(c).get(w) == null)) {
                     wronglyNotComputed++;
-                    if (printWrong) {
+                    if (waypoints.indexOf(w) == 0) {
+                        incorrectStarts++;
+                    } else if (printWrong) {
                         System.out.println(waypoints.indexOf(w));
                         System.out.println("Computed is null");
                         System.out.println(givenPasses.get(c).get(w) + "\n");
@@ -111,13 +134,16 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                             System.out.println(timedelta / 1000 + " s\n");
                         }
                     } else {
-                        if (printWrong) {
+                        incorrectPasses++;
+                        if (waypoints.indexOf(w) == 0) {
+                            incorrectStarts++;
+                        } else if (printWrong) {
                             System.out.println(waypoints.indexOf(w));
                             System.out.println("Calculated: " + computedPasses.get(c).get(w));
                             System.out.println("Given: " + givenPasses.get(c).get(w));
                             System.out.println(timedelta / 1000 + "\n");
                         }
-                        incorrectPasses++;
+
                     }
                 }
             }
@@ -130,6 +156,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             System.out.println("Total theoretical Passes: " + totalMarkPasses);
             System.out.println("Correct comparison: " + correctPasses);
             System.out.println("Incorrect comparison: " + incorrectPasses);
+            System.out.println("Incorrect Starts: " + incorrectStarts);
             System.out.println("Correctly Null: " + correctlyNotComputed);
             System.out.println("Should be null but arent:" + wronglyComputed);
             System.out.println("Should not be null but are: " + wronglyNotComputed);
@@ -139,7 +166,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         assertTrue(accuracy >= 0.9);
     }
 
-    protected void testStartOfRace() {
+    private void testStartOfRace() {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
         int mistakes = 0;
@@ -162,7 +189,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             boolean gotFirst = false;
             boolean gotOther = false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-              //  System.out.println(getTrackedRace().getMarkPassing(c, w));
+                // System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if (w == w1) {
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else {
@@ -178,7 +205,8 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         Assert.assertTrue(mistakes == 0);
     }
 
-    protected void testFirstTwoWaypoints() {
+    @SuppressWarnings("unused") //TODO
+    private void testFirstTwoWaypoints() {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
         int mistakes = 0;
@@ -203,7 +231,7 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             boolean gotSecond = false;
             boolean gotOther = false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-    //            System.out.println(getTrackedRace().getMarkPassing(c, w));
+                // System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if (w == w1) {
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else if (w == w2) {
@@ -213,109 +241,43 @@ public class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
                 }
             }
-            if (!gotFirst|| !gotSecond || gotOther) {
+            if (!gotFirst || !gotSecond || gotOther) {
                 mistakes++;
             }
         }
         Assert.assertTrue(mistakes == 0);
     }
-
-    /**
-     * Loads stored data for the given raceID or returns false if no data is present.
-     * 
-     * @param raceID
-     *            - ID of the race to load from disk
-     * @return true if data was loaded, false if not
-     */
-    protected boolean loadData(String raceID) {
-        String path = null;
-        File file = new File("resources/");
-        if (file.exists() && file.isDirectory()) {
-            for (String fileName : file.list()) {
-                if (fileName.endsWith(".data") && fileName.contains(raceID)) {
-                    path = "resources/" + fileName;
-                    break;
-                }
-            }
-        }
-        if (path == null)
-            return false;
-        FileInputStream fs = null;
-        ObjectInputStream os = null;
-        Object obj = null;
-
-        try {
-            System.out.print("Loading cached data for raceID " + raceID + "...");
-            fs = new FileInputStream(path);
-            os = new ObjectInputStream(fs);
-            obj = os.readObject();
-            System.out.println("done!");
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-            if (fs != null) {
-                try {
-                    fs.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }
-
-        if (obj != null && obj instanceof DynamicTrackedRace) {
-            setTrackedRace((DynamicTrackedRace) obj);
-            setRace(getTrackedRace().getRace());
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Saves current result of getTrackedRace to disk for future reuse.
-     */
-    protected void saveData() {
-
-        DynamicTrackedRace trackedRace = getTrackedRace();
-        String racePath = "resources/" + trackedRace.getRace().getId() + ".data";
-        FileOutputStream fs = null;
-        ObjectOutputStream os = null;
-        try {
-            System.out.println("Caching data for raceID " + trackedRace.getRace().getId());
-            File f = new File(racePath);
-            f.createNewFile();
-            fs = new FileOutputStream(f);
-            os = new ObjectOutputStream(fs);
-            os.writeObject(trackedRace);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-            if (fs != null) {
-                try {
-                    fs.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        }
-    }
 }
+/*
+ * /** Loads stored data for the given raceID or returns false if no data is present.
+ * 
+ * @param raceID - ID of the race to load from disk
+ * 
+ * @return true if data was loaded, false if not
+ *//*
+    * protected boolean loadData(String raceID) { String path = null; File file = new File("resources/"); if
+    * (file.exists() && file.isDirectory()) { for (String fileName : file.list()) { if (fileName.endsWith(".data") &&
+    * fileName.contains(raceID)) { path = "resources/" + fileName; break; } } } if (path == null) return false;
+    * FileInputStream fs = null; ObjectInputStream os = null; Object obj = null;
+    * 
+    * try { System.out.print("Loading cached data for raceID " + raceID + "..."); fs = new FileInputStream(path); os =
+    * new ObjectInputStream(fs); obj = os.readObject(); System.out.println("done!"); } catch (ClassNotFoundException |
+    * IOException e) { e.printStackTrace(); return false; } finally { if (os != null) { try { os.close(); } catch
+    * (IOException e) { e.printStackTrace(); return false; } } if (fs != null) { try { fs.close(); } catch (IOException
+    * e) { e.printStackTrace(); return false; } } }
+    * 
+    * if (obj != null && obj instanceof DynamicTrackedRace) { setTrackedRace((DynamicTrackedRace) obj);
+    * setRace(getTrackedRace().getRace()); return true; } return false; }
+    * 
+    * /** Saves current result of getTrackedRace to disk for future reuse.
+    *//*
+       * protected void saveData() {
+       * 
+       * DynamicTrackedRace trackedRace = getTrackedRace(); String racePath = "resources/" +
+       * trackedRace.getRace().getId() + ".data"; FileOutputStream fs = null; ObjectOutputStream os = null; try {
+       * System.out.println("Caching data for raceID " + trackedRace.getRace().getId()); File f = new File(racePath);
+       * f.createNewFile(); fs = new FileOutputStream(f); os = new ObjectOutputStream(fs); os.writeObject(trackedRace);
+       * } catch (IOException e) { e.printStackTrace(); return; } finally { if (os != null) { try { os.close(); } catch
+       * (IOException e) { e.printStackTrace(); return; } } if (fs != null) { try { fs.close(); } catch (IOException e)
+       * { e.printStackTrace(); return; } } } } }
+       */

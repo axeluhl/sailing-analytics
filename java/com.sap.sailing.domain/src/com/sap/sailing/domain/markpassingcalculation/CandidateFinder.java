@@ -387,7 +387,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (10 * Math.abs(distance / legLength) + 1);
+        double result = 1 / (20 * Math.abs(distance / legLength) + 1);
         // Auch NormalVerteilung??!
         return result;
     }
@@ -406,10 +406,11 @@ public class CandidateFinder implements AbstractCandidateFinder {
         double distance = 0;
         PassingInstruction instruction = passingInstructions.get(w);
         ArrayList<Position> positions = new ArrayList<>();
-        if (w.getPassingInstructions() == PassingInstruction.Line) {
-            LineDetails line = race.getRace().getCourse().getFirstWaypoint() == w ? race.getStartLine(t) : race.getFinishLine(t);
-            positions.add(0, race.getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, false));
-            positions.add(1, race.getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, false));
+        if (instruction == PassingInstruction.Line) {
+            boolean isStart = (race.getRace().getCourse().getFirstWaypoint() == w);
+            LineDetails line =  isStart? race.getStartLine(t) : race.getFinishLine(t);
+            positions.add(0, race.getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, true));
+            positions.add(1, race.getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, true));
         } else {
             for (Mark m : w.getMarks()) {
                 positions.add(race.getOrCreateTrack(m).getEstimatedPosition(t, false));
