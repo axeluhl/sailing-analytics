@@ -430,6 +430,8 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(legElement, "mark_from", leg.getFrom().getName());
         addNamedElementWithValue(legElement, "mark_to", leg.getTo().getName());
         addNamedElementWithValue(legElement, "leg_type", trackedLeg.getLegType(trackedLeg.getTrackedRace().getStartOfRace()).name());
+        addNamedElementWithValue(legElement, "great_circle_distance_at_start_of_race_in_meters", trackedLeg.getGreatCircleDistance(trackedLeg.getTrackedRace().getStartOfRace()).getMeters());
+        addNamedElementWithValue(legElement, "great_circle_distance_at_end_of_race_in_meters", trackedLeg.getGreatCircleDistance(trackedLeg.getTrackedRace().getEndOfRace()).getMeters());
         
         for (Competitor competitor : trackedLeg.getTrackedRace().getCompetitorsFromBestToWorst(/*timePoint*/ trackedLeg.getTrackedRace().getEndOfRace())) {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
