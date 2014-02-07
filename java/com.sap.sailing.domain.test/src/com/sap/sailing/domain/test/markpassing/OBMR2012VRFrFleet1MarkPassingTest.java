@@ -24,7 +24,6 @@ public class OBMR2012VRFrFleet1MarkPassingTest extends AbstractMarkPassingTest {
 
     @Override
     protected String getFileName() {
-        // TODO Auto-generated method stub
         return "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_";
     }
 }

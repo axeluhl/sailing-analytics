@@ -15,6 +15,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.AfterClass;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -22,8 +24,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
@@ -41,6 +43,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     protected abstract String getFileName();
+
+    private static List<Double> accuracys = new ArrayList<>();
 
     protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceNumber);
@@ -85,7 +89,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 20000;
+        final int tolerance = 10000;
         int numberOfCompetitors = 0;
         int wronglyComputed = 0;
         int wronglyNotComputed = 0;
@@ -163,6 +167,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             System.out.println("accuracy: " + accuracy);
             System.out.println("Computation time: " + time + " ms");
         }
+        accuracys.add(accuracy);
         assertTrue(accuracy >= 0.9);
     }
 
@@ -205,7 +210,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         Assert.assertTrue(mistakes == 0);
     }
 
-    @SuppressWarnings("unused") //TODO
+    @SuppressWarnings("unused")
+    // TODO
     private void testFirstTwoWaypoints() {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
@@ -247,37 +253,14 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
         Assert.assertTrue(mistakes == 0);
     }
+
+    @AfterClass
+    public static void outPutAccuracy() {
+        double total = 0;
+        for (double d : accuracys) {
+            total += d;
+        }
+        double average = total / accuracys.size();
+        System.out.println("<measurement><name>Average Accuracy</name><value>" + average + "</value></measurement>");
+    }
 }
-/*
- * /** Loads stored data for the given raceID or returns false if no data is present.
- * 
- * @param raceID - ID of the race to load from disk
- * 
- * @return true if data was loaded, false if not
- *//*
-    * protected boolean loadData(String raceID) { String path = null; File file = new File("resources/"); if
-    * (file.exists() && file.isDirectory()) { for (String fileName : file.list()) { if (fileName.endsWith(".data") &&
-    * fileName.contains(raceID)) { path = "resources/" + fileName; break; } } } if (path == null) return false;
-    * FileInputStream fs = null; ObjectInputStream os = null; Object obj = null;
-    * 
-    * try { System.out.print("Loading cached data for raceID " + raceID + "..."); fs = new FileInputStream(path); os =
-    * new ObjectInputStream(fs); obj = os.readObject(); System.out.println("done!"); } catch (ClassNotFoundException |
-    * IOException e) { e.printStackTrace(); return false; } finally { if (os != null) { try { os.close(); } catch
-    * (IOException e) { e.printStackTrace(); return false; } } if (fs != null) { try { fs.close(); } catch (IOException
-    * e) { e.printStackTrace(); return false; } } }
-    * 
-    * if (obj != null && obj instanceof DynamicTrackedRace) { setTrackedRace((DynamicTrackedRace) obj);
-    * setRace(getTrackedRace().getRace()); return true; } return false; }
-    * 
-    * /** Saves current result of getTrackedRace to disk for future reuse.
-    *//*
-       * protected void saveData() {
-       * 
-       * DynamicTrackedRace trackedRace = getTrackedRace(); String racePath = "resources/" +
-       * trackedRace.getRace().getId() + ".data"; FileOutputStream fs = null; ObjectOutputStream os = null; try {
-       * System.out.println("Caching data for raceID " + trackedRace.getRace().getId()); File f = new File(racePath);
-       * f.createNewFile(); fs = new FileOutputStream(f); os = new ObjectOutputStream(fs); os.writeObject(trackedRace);
-       * } catch (IOException e) { e.printStackTrace(); return; } finally { if (os != null) { try { os.close(); } catch
-       * (IOException e) { e.printStackTrace(); return; } } if (fs != null) { try { fs.close(); } catch (IOException e)
-       * { e.printStackTrace(); return; } } } } }
-       */
