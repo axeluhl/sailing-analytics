@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
@@ -15,16 +17,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.json.simple.JSONObject;
-
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.masterdata.impl.TopLevelMasterDataSerializer;
+import com.sap.sailing.server.gateway.masterdata.TopLevelMasterData;
 
 @Path("/v1/masterdata")
 public class MasterDataResource extends AbstractSailingServerResource {
@@ -32,58 +31,118 @@ public class MasterDataResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(MasterDataResource.class.getName());
     
     @GET
-    @Produces("application/json;charset=UTF-8")
+    @Produces("application/x-java-serialized-object")
     @Path("leaderboardgroups")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
             @QueryParam("compress") Boolean compress) throws UnsupportedEncodingException {
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
+        logger.info("Masterdataexport has started");
         if (compress == null) {
             compress = false;
         }
-        Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        Set<String> requestedLeaderboardGroupNames = new HashSet<String>();
+        logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
+        Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
+
+        Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
 
         if (leaderboardGroupNames.size() > 0) {
             for (String name : leaderboardGroupNames) {
-                requestedLeaderboardGroupNames.add(name);
+                LeaderboardGroup group = allLeaderboardGroups.get(name);
+                if (group != null) {
+                    groupsToExport.add(group);
+                }
             }
         } else {
-            // No range supplied. Export all for now
-            requestedLeaderboardGroupNames.addAll(leaderboardGroups.keySet());
+            groupsToExport = new HashSet<LeaderboardGroup>();
+            groupsToExport.addAll(allLeaderboardGroups.values());
         }
 
-        TopLevelMasterDataSerializer masterSerializer = new TopLevelMasterDataSerializer(leaderboardGroups,
+        final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
                         .getAllMediaTracks());
 
-        JSONObject masterData = masterSerializer.serialize(requestedLeaderboardGroupNames);
         ResponseBuilder resp;
         if (compress) {
-            final byte[] uncompressedResult = masterData.toJSONString().getBytes("UTF-8");
-
             StreamingOutput streamingOutput = new StreamingOutput() {
 
                 @Override
                 public void write(OutputStream output) throws IOException, WebApplicationException {
-                    GZIPOutputStream gzip = null;
+                    ObjectOutputStream objectOutputStream = null;
                     try {
-                        gzip = new GZIPOutputStream(output);
-                        gzip.write(uncompressedResult);
+                        GZIPOutputStream gzip = new GZIPOutputStream(output);
+                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(gzip);
+                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+
+                        // Actual start of streaming
+                        objectOutputStream.writeObject(masterData);
                     } finally {
-                        gzip.close();
+                        objectOutputStream.close();
+                    }
+                    long timeToExport = System.currentTimeMillis() - startTime;
+                    logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
+                }
+            };
+            resp = Response.ok(streamingOutput).header("Content-Encoding", "gzip");
+        } else {
+            StreamingOutput streamingOutput = new StreamingOutput() {
+
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    ObjectOutputStream objectOutputStream = null;
+                    try {
+                        OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(output);
+                        objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+
+                        // Actual start of streaming
+                        objectOutputStream.writeObject(masterData);
+                    } finally {
+                        objectOutputStream.close();
+                        long timeToExport = System.currentTimeMillis() - startTime;
+                        logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
                     }
                 }
             };
-            resp = Response.ok(streamingOutput, MediaType.APPLICATION_JSON).header("Content-Encoding", "gzip");
-        } else {
-            String result = masterData.toJSONString();
-            resp = Response.ok(result, MediaType.APPLICATION_JSON);
+            resp = Response.ok(streamingOutput);
         }
 
         Response builtResponse = resp.build();
         long timeToExport = System.currentTimeMillis() - startTime;
-        logger.info(String.format("Took %s ms to export master data.", timeToExport));
+        logger.info(String.format("Took %s ms to start masterdataexport-streaming.", timeToExport));
         return builtResponse;
+    }
+
+    private class ByteCountOutputStreamDecorator extends FilterOutputStream {
+
+        private long byteCount = 0;
+
+        public ByteCountOutputStreamDecorator(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            byteCount++;
+            super.write(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            byteCount = byteCount + len;
+            super.write(b, off, len);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            byteCount++;
+            super.write(b);
+        }
+
+        @Override
+        public void close() throws IOException {
+            logger.info(String.format("Uncompressed data size of masterdataexport: %s bytes", byteCount));
+            super.close();
+        }
+
     }
 
 }

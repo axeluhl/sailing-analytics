@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.LeaderboardMasterData;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -47,16 +46,6 @@ public class LeaderboardGroupMasterData {
         this.displayGroupsRevese = displayGroupsRevese;
         this.events = events;
         this.regattas = regattas;
-    }
-    
-    public Competitor getCompetitorById(Serializable id) {
-        for (LeaderboardMasterData leaderboard : leaderboards) {
-            Competitor c = leaderboard.getCompetitorsById().get(id);
-            if (c != null) {
-                return c;
-            }
-        }
-        return null;
     }
 
     public String getName() {

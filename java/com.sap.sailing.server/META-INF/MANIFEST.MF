@@ -8,6 +8,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.masterdata.impl,
+ com.sap.sailing.server.gateway.masterdata,
  com.sap.sailing.server.gateway.serialization.masterdata.impl,
  org.json.simple,
  org.json.simple.parser,

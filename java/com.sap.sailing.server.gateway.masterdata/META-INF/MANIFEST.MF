@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sailing Server Gateway Master-Data
+Bundle-SymbolicName: com.sap.sailing.server.gateway.masterdata
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sap.sailing.domain,
+  com.sap.sailing.domain.common
+Bundle-ClassPath: .
+Export-Package: com.sap.sailing.server.gateway.masterdata

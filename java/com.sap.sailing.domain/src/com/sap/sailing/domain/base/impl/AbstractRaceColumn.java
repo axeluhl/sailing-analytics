@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,6 +37,16 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
      */
     private transient RaceLogInformation raceLogInformation;
     private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
+
+    /**
+     * we don't want the TrackedRaces to be serialized during a master data export. Thus, we need this thread flag which
+     * is true only during master data export
+     */
+    private transient ThreadLocal<Boolean> ongoingMasterDataExport = new ThreadLocal<Boolean>() {
+        protected Boolean initialValue() {
+            return false;
+        };
+    };
 
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
@@ -195,6 +206,28 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
             raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+        }
+    }
+
+    /**
+     * While set to true, any serialization in the current thread will not include the tracked races. Make sure to set
+     * back to false, after serialization. (in finally block)
+     * 
+     * @param flagValue
+     *            set to false for default behavior, set to true to exclude tracked races
+     */
+    public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
+        ongoingMasterDataExport.set(flagValue);
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        if (ongoingMasterDataExport.get()) {
+            stream.writeObject(new HashMap<Fleet, TrackedRace>());
+            stream.writeObject(raceIdentifiers);
+            stream.writeObject(raceLogs);
+            stream.writeObject(raceLogIdentifierTemplate);
+        } else {
+            stream.defaultWriteObject();
         }
     }
 }

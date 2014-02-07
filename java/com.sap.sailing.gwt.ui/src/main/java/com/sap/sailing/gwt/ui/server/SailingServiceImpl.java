@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.io.BufferedReader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -15,7 +14,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -240,6 +238,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -247,7 +246,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -271,6 +269,7 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.gateway.masterdata.TopLevelMasterData;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -3363,7 +3362,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         URL serverAddress = null;
         InputStream inputStream = null;
-        BufferedReader rd = null;
+        ObjectInputStream objectInputStream = null;
         try {
             serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
@@ -3385,13 +3384,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
 
-            rd = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-            return importFromHttpResponse(sb.toString(), override);
+            objectInputStream = new ObjectInputStream(inputStream);
+            TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+            return importFromHttpResponse(topLevelMasterData, override);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -3404,8 +3399,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (inputStream != null) {
                     inputStream.close();
                 }
-                if (rd != null) {
-                    rd.close();
+                if (objectInputStream != null) {
+                    objectInputStream.close();
                 }
             } catch (IOException e) {
             }
@@ -3416,9 +3411,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
     }
     
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
+            boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(string, override);
+        return importer.importMasterData(topLevelMasterData, override);
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {

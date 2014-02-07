@@ -65,7 +65,8 @@ public class WindTrackMasterDataJsonDeserializer implements JsonDeserializer<Win
             Wind wind = windDeserializer.deserialize(json);
             fixes.add(wind);
         }
-        return new WindTrackMasterData(windSourceTypeName, windSourceId, fixes, regattaName, raceName, id);
+        // return new WindTrackMasterData(windSourceTypeName, windSourceId, fixes, regattaName, raceName, id);
+        return null;
     }
 
 }
