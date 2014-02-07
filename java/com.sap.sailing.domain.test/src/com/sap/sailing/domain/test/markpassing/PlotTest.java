@@ -9,13 +9,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Test;
+import org.junit.Ignore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class PlotTest {
 
-    @Test
+    @Ignore
     public void test() {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

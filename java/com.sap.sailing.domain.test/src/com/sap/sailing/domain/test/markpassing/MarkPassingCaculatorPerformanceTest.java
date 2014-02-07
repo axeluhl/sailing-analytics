@@ -40,6 +40,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         time = System.currentTimeMillis();
         f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
+        System.out.println("<measurement><name>FinderPerformance</name><value>"+time+"</value></measurement>");
         Assert.assertTrue(time<2000);
     }
 
