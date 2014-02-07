@@ -16,6 +16,6 @@ We need to understand what the ideal UI approach supporting this would be. Is th
 * Wind change/trend
 * Results
 * Course and course geometry analysis
-* Integration of our race simulator
+* Race simulation (based on Christophers simulator)
 * Sailor profile
 * Sailor comparison
