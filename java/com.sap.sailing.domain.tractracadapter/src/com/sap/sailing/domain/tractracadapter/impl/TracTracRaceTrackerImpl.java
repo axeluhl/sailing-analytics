@@ -317,7 +317,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         
         // check if there is a directory configured where stored data files can be cached
         // only cache files for races in REPLAY state
-        if (raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+        if (raceStatus != null && raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) {
             storedURI = checkForCachedStoredData(storedURI);
         }
         
