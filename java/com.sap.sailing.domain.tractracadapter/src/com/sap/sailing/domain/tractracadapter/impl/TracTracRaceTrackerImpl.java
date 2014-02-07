@@ -363,8 +363,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private URI checkForCachedStoredData(URI storedURI){
-        if (System.getProperty("tractrac.mtb.cache.dir") != null) {
-            final String directory = System.getProperty("tractrac.mtb.cache.dir");
+        final String CACHE_DIR_PROPERTY = "tractrac.mtb.cache.dir";
+        if (System.getProperty(CACHE_DIR_PROPERTY) != null) {
+            final String directory = System.getProperty(CACHE_DIR_PROPERTY);
             if (new File(directory).exists()) {
                 final String[] pathFragments = storedURI.getPath().split("\\/");
                 final String mtbFileName = pathFragments[pathFragments.length-1];
