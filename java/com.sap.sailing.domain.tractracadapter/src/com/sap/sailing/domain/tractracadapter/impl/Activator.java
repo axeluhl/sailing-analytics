@@ -13,7 +13,7 @@ public class Activator implements BundleActivator {
     
     private final TracTracAdapterFactory tracTracAdapterFactory;
     
-    private boolean useTracTracMarkPassings = true;
+    private static boolean useTracTracMarkPassings = true;
 
     public Activator() {
         // there is exactly one instance of the racingEventService in the whole server

@@ -22,6 +22,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
@@ -774,5 +777,46 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
-
+    /**
+     * @return The Bearing of a line starting at w that needs to be crossed to pass a mark.
+     */
+    @Override
+    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
+        Bearing result = null;
+        PassingInstruction instruction = w.getPassingInstructions();
+        if (instruction == PassingInstruction.None||instruction == null) {
+            if (w.equals(getRace().getCourse().getFirstWaypoint())
+                    || w.equals(getRace().getCourse().getLastWaypoint())) {
+                instruction = PassingInstruction.Line;
+            } else {
+                int numberofMarks = 0;
+                Iterator<Mark> it = w.getMarks().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    numberofMarks++;
+                }
+                if (numberofMarks == 2) {
+                    instruction = PassingInstruction.Gate;
+                } else if (numberofMarks == 1) {
+                    instruction = PassingInstruction.Port;
+                } 
+            }
+        }
+        if (instruction == PassingInstruction.FixedBearing) {
+            result = w.getFixedBearing();
+        } else if (instruction == PassingInstruction.Gate
+                || instruction == PassingInstruction.Port
+                || instruction == PassingInstruction.Starboard) {
+            Bearing before = getTrackedLegFinishingAt(w).getLegBearing(t);
+            Bearing after = getTrackedLegStartingAt(w).getLegBearing(t).reverse();
+            result = before.middle(after);
+        } else if (instruction == PassingInstruction.Line) {
+            LineDetails line = (w==getRace().getCourse().getFirstWaypoint())?getStartLine(t):getFinishLine(t);
+            result = getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, true).getBearingGreatCircle(
+                    getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, true));
+        } else if (instruction == PassingInstruction.Offset) {
+            // TODO Bug 1712
+        }
+        return result;
+    }
 }
