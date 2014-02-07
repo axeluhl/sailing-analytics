@@ -21,7 +21,7 @@ import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
-import com.sap.sailing.domain.test.measurements.MeasurementGenerator;
+import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -44,11 +44,10 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         time = System.currentTimeMillis();
         f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
-        MeasurementGenerator performanceReport = new MeasurementGenerator("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest");
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest");
         MeasurementCase performanceReportCase = performanceReport.addCase("testFinderPerformance");
         performanceReportCase.addMeasurement(new Measurement("FinderPerformance", time));
-        performanceReport.writeMeasurementsToFile();
-        System.out.println("<measurement><name>FinderPerformance</name><value>"+time+"</value></measurement>");
+        performanceReport.write();
         Assert.assertTrue(time<2000);
     }
 

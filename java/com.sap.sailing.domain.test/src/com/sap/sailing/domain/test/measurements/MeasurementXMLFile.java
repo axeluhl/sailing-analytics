@@ -13,19 +13,19 @@ import com.sap.sailing.domain.common.impl.Util;
 /**
  * A utility for generating output files that contain an artificial test result with a &lt;system-out&gt; tag that has
  * &lt;measurement&gt; tags embedded which list named values for use by the Hudson/Jenkins Measurements Plot plug-in.
- * The output is written by the {@link #writeMeasurementsToFile()} method, but only if a <code>bin/</code> directory
+ * The output is written by the {@link #write()} method, but only if a <code>bin/</code> directory
  * exists as subdirectory of the current working directory.
  * 
  * @author Axel Uhl (D043530)
  * 
  */
-public class MeasurementGenerator {
+public class MeasurementXMLFile {
     
     private final String reportFileName;
     private final String testSuiteName;
     private final Set<MeasurementCase> cases;
     
-    public MeasurementGenerator(String reportFileName, String testSuiteName) {
+    public MeasurementXMLFile(String reportFileName, String testSuiteName) {
         this.reportFileName = reportFileName;
         this.testSuiteName = testSuiteName;
         cases = new HashSet<>();
@@ -41,7 +41,7 @@ public class MeasurementGenerator {
         return cases;
     }
     
-    public void writeMeasurementsToFile() throws IOException {
+    public void write() throws IOException {
         File binDir = new File("./bin");
         if (binDir.exists() && binDir.isDirectory()) {
             Writer w = new BufferedWriter(new FileWriter(new File(binDir, reportFileName)));
