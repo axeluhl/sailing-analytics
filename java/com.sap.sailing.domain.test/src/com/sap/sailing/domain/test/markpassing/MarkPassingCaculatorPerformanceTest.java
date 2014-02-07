@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.test.markpassing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -24,6 +25,8 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 
 public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
+    private static double finderTime;
+    
     public MarkPassingCaculatorPerformanceTest() {
         super();
     }
@@ -40,6 +43,9 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         time = System.currentTimeMillis();
         f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
+        finderTime = time;
+        System.out.println("<measurement><name>FinderPerformance</name><value>"+time+"</value></measurement>");
+        System.err.println("<measurement><name>FinderPerformanceErr</name><value>"+time+"</value></measurement>");
         Assert.assertTrue(time<2000);
     }
 
@@ -89,4 +95,11 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
                 (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
                 waypoints.get(id), true, true, "Test");
     }
+    
+    @AfterClass
+    public static void finderOutputAfterClass(){
+        System.out.println("<measurement><name>FinderPerformanceAfterClass</name><value>"+finderTime+"</value></measurement>");
+        System.err.println("<measurement><name>FinderPerformanceErrAfterClass</name><value>"+finderTime+"</value></measurement>");
+    }
+    
 }
