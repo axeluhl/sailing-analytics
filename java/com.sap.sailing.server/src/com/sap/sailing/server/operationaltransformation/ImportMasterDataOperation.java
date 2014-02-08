@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,8 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -74,6 +77,7 @@ public class ImportMasterDataOperation extends
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
             LeaderboardGroup leaderboardGroup) {
+        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = extractRaceLogEvents(leaderboardGroup);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(toState, leaderboardGroup);
@@ -106,6 +110,7 @@ public class ImportMasterDataOperation extends
             }
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
+                addRaceLogEvents(leaderboard, raceLogEvents);
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
             }
@@ -156,6 +161,41 @@ public class ImportMasterDataOperation extends
             }
             toState.getMongoObjectFactory().storeLeaderboardGroup(leaderboardGroup); // store changes to overall leaderboard
         }
+    }
+
+    private void addRaceLogEvents(Leaderboard leaderboard,
+            Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RaceLog log = raceColumn.getRaceLog(fleet);
+                Iterable<RaceLogEvent> raceLogsForColumnAndFleet = raceLogEvents.get(raceColumn).get(fleet);
+                for (RaceLogEvent event : raceLogsForColumnAndFleet) {
+                    log.add(event);
+                }
+            }
+        }
+
+    }
+
+    private Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> extractRaceLogEvents(LeaderboardGroup group) {
+        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = new HashMap<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>>();
+        for (Leaderboard leaderboard : group.getLeaderboards()) {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                HashMap<Fleet, Iterable<RaceLogEvent>> raceLogEventsForRaceColumn = new HashMap<Fleet, Iterable<RaceLogEvent>>();
+                raceLogEvents.put(raceColumn, raceLogEventsForRaceColumn);
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    raceLog.lockForRead();
+                    try {
+                        Iterable<RaceLogEvent> fixes = raceLog.getRawFixes();
+                        raceLogEventsForRaceColumn.put(fleet, fixes);
+                    } finally {
+                        raceLog.unlockAfterRead();
+                    }
+                }
+            }
+        }
+        return raceLogEvents;
     }
 
     private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {
