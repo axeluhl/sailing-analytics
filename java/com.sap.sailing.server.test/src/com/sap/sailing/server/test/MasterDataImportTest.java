@@ -199,7 +199,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         List<Competitor> competitors = new ArrayList<Competitor>();
@@ -263,7 +264,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -376,7 +377,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -431,7 +433,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -523,7 +525,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -546,7 +549,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -633,7 +636,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -684,7 +688,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -770,7 +774,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -827,7 +832,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1001,7 +1006,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1050,7 +1055,7 @@ public class MasterDataImportTest {
         // Import in new service
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(masterdata, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(masterdata, true);
 
         // ---Asserts---
         // Test correct number of creations
@@ -1105,11 +1110,12 @@ public class MasterDataImportTest {
                 "testDisplayName", new int[] { 1, 2, 3, 4 });
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1159,7 +1165,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1216,7 +1223,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1273,7 +1280,8 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
+        LeaderboardGroup group = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1334,7 +1342,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1373,7 +1381,6 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1438,8 +1445,10 @@ public class MasterDataImportTest {
                 "testDisplayName", discardRule);
         List<String> leaderboardNames = new ArrayList<String>();
         leaderboardNames.add(leaderboard.getName());
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false, leaderboardNames, null, null);
-        sourceService.addLeaderboardGroup(TEST_GROUP_NAME2, "testGroupDesc2", false, leaderboardNames, null, null);
+        LeaderboardGroup group1 = sourceService.addLeaderboardGroup(TEST_GROUP_NAME, "testGroupDesc", false,
+                leaderboardNames, null, null);
+        LeaderboardGroup group2 = sourceService.addLeaderboardGroup(TEST_GROUP_NAME2, "testGroupDesc2", false,
+                leaderboardNames, null, null);
 
         // Set tracked Race with competitors
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -1473,7 +1482,8 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(group1);
+        groupsToExport.add(group2);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);
@@ -1527,7 +1537,7 @@ public class MasterDataImportTest {
 
         // Serialize
         HashSet<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
-        groupsToExport.addAll(groupsToExport);
+        groupsToExport.add(sourceGroup);
         TopLevelMasterData masterdata = new TopLevelMasterData(groupsToExport, sourceService.getAllEvents(),
                 sourceService.getPersistentRegattasForRaceIDs(), sourceService.getAllMediaTracks());
         Assert.assertNotNull(masterdata);

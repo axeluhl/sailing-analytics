@@ -3384,7 +3384,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
 
-            objectInputStream = new ObjectInputStream(inputStream);
+            objectInputStream = getService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
+                    inputStream);
             TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
             return importFromHttpResponse(topLevelMasterData, override);
         } catch (Exception e) {

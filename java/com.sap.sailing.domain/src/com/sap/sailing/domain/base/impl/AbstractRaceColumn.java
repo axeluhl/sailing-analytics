@@ -25,10 +25,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
 
-    private final Map<Fleet, TrackedRace> trackedRaces;
-    private final Map<Fleet, RaceIdentifier> raceIdentifiers;
+    private Map<Fleet, TrackedRace> trackedRaces;
+    private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
-    private final Map<Fleet, RaceLog> raceLogs;
+    private Map<Fleet, RaceLog> raceLogs;
     
     /**
      * holds the race log identifier template needed to create the appropriate RaceLogIdentifer that is constructed from the 
@@ -200,8 +200,19 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     /**
      * When deserializing, replication listeners are registered on all race logs.
      */
+    @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
+
+        // Check if master data export is ongoing
+        boolean masterDataImportOngoing = ois.readBoolean();
+        if (masterDataImportOngoing) {
+            this.trackedRaces = new HashMap<Fleet, TrackedRace>();
+            this.raceIdentifiers = (Map<Fleet, RaceIdentifier>) ois.readObject();
+            this.raceLogs = (Map<Fleet, RaceLog>) ois.readObject();
+            this.raceLogIdentifierTemplate = (RaceLogIdentifierTemplate) ois.readObject();
+        } else {
+            ois.defaultReadObject();
+        }
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
@@ -209,24 +220,19 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
     }
 
-    /**
-     * While set to true, any serialization in the current thread will not include the tracked races. Make sure to set
-     * back to false, after serialization. (in finally block)
-     * 
-     * @param flagValue
-     *            set to false for default behavior, set to true to exclude tracked races
-     */
+    @Override
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         ongoingMasterDataExport.set(flagValue);
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         if (ongoingMasterDataExport.get()) {
-            stream.writeObject(new HashMap<Fleet, TrackedRace>());
+            stream.writeBoolean(true);
             stream.writeObject(raceIdentifiers);
             stream.writeObject(raceLogs);
             stream.writeObject(raceLogIdentifierTemplate);
         } else {
+            stream.writeBoolean(false);
             stream.defaultWriteObject();
         }
     }

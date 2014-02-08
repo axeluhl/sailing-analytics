@@ -1,10 +1,16 @@
 package com.sap.sailing.server.masterdata;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.masterdata.TopLevelMasterData;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 public class MasterDataImporter {
     private final DomainFactory baseDomainFactory;
@@ -18,50 +24,33 @@ public class MasterDataImporter {
 
     public MasterDataImportObjectCreationCount importMasterData(TopLevelMasterData topLevelMasterData, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        // JsonDeserializer<LeaderboardGroupMasterData> leaderboardGroupMasterDataDeserializer =
-        // LeaderboardGroupMasterDataJsonDeserializer.create(baseDomainFactory);
-        // JSONParser parser = new JSONParser();
-        // try {
-        // JSONObject masterDataOverall = (JSONObject) parser.parse(topLevelMasterData);
-        // JSONArray leaderboardGroupsMasterDataJsonArray = (JSONArray)
-        // masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_PER_LG);
-        // for (Object leaderBoardGroupMasterData : leaderboardGroupsMasterDataJsonArray) {
-        // JSONObject leaderBoardGroupMasterDataJson = (JSONObject) leaderBoardGroupMasterData;
-        // LeaderboardGroupMasterData masterData = leaderboardGroupMasterDataDeserializer
-        // .deserialize(leaderBoardGroupMasterDataJson);
-        // ImportMasterDataOperation op = new ImportMasterDataOperation(masterData, override, creationCount,
-        // baseDomainFactory);
-        // creationCount = racingEventService.apply(op);
-        // }
-        // JsonDeserializer<MediaTrack> mediaTrackDeserializer = new MediaTrackJsonDeserializer();
-        // JSONArray mediaTracks = (JSONArray) masterDataOverall.get(TopLevelMasterDataSerializer.FIELD_MEDIA);
-        // List<MediaTrack> tracks = new ArrayList<MediaTrack>();
-        // for (Object obj : mediaTracks) {
-        // tracks.add(mediaTrackDeserializer.deserialize((JSONObject) obj));
-        // }
-        // Collection<MediaTrack> existingMediaTracks = racingEventService.getAllMediaTracks();
-        // Map<String, MediaTrack> existingMap = new HashMap<String, MediaTrack>();
-        //
-        // for (MediaTrack oneTrack : existingMediaTracks) {
-        // existingMap.put(oneTrack.dbId, oneTrack);
-        // }
-        //
-        // for (MediaTrack oneNewTrack : tracks) {
-        // if (existingMap.containsKey(oneNewTrack.dbId)) {
-        // if (override) {
-        // racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
-        // } else {
-        // continue;
-        // }
-        // }
-        // racingEventService.mediaTrackAdded(oneNewTrack);
-        // }
-        // } catch (org.json.simple.parser.ParseException e) {
-        // throw new RuntimeException(e);
-        // } catch (JsonDeserializationException e) {
-        // throw new RuntimeException(e);
-        // }
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, override, creationCount,
+                baseDomainFactory);
+        creationCount = racingEventService.apply(op);
+        createMediaTracks(topLevelMasterData, override);
+
         return creationCount;
+    }
+
+    private void createMediaTracks(TopLevelMasterData topLevelMasterData, boolean override) {
+        Collection<MediaTrack> tracks = topLevelMasterData.getAllMediaTracks();
+        Collection<MediaTrack> existingMediaTracks = racingEventService.getAllMediaTracks();
+        Map<String, MediaTrack> existingMap = new HashMap<String, MediaTrack>();
+
+        for (MediaTrack oneTrack : existingMediaTracks) {
+            existingMap.put(oneTrack.dbId, oneTrack);
+        }
+
+        for (MediaTrack oneNewTrack : tracks) {
+            if (existingMap.containsKey(oneNewTrack.dbId)) {
+                if (override) {
+                    racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
+                } else {
+                    continue;
+                }
+            }
+            racingEventService.mediaTrackAdded(oneNewTrack);
+        }
     }
 
 }
