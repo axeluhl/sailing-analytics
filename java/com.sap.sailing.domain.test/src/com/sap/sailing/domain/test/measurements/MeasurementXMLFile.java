@@ -25,10 +25,12 @@ public class MeasurementXMLFile {
     private final String reportFileName;
     private final String testSuiteName;
     private final Set<MeasurementCase> cases;
+    private final String testClassName;
     
-    public MeasurementXMLFile(String reportFileName, String testSuiteName) {
+    public MeasurementXMLFile(String reportFileName, String testSuiteName, String testClassName) {
         this.reportFileName = reportFileName;
         this.testSuiteName = testSuiteName;
+        this.testClassName = testClassName;
         cases = new HashSet<>();
     }
     
@@ -54,7 +56,7 @@ public class MeasurementXMLFile {
             w.write("<testsuite name=\"" + getSuiteName() + "\" tests=\"" + getNumberOfTests() + "\" >\n");
             for (MeasurementCase measurementCase : getCases()) {
                 w.write("<testcase name=\"" + measurementCase.getName() + "\" status=\"run\" time=\"0\" classname=\""
-                        + measurementCase.getName() + "\">\n");
+                        + getTestClassName() + "\">\n");
                 w.write("<system-out>\n");
                 for (Measurement measurement : measurementCase.getMeasurements()) {
                     w.write("&lt;measurement&gt;&lt;name&gt;" + measurement.getName() + "&lt;/name&gt;&lt;value&gt;"
@@ -70,6 +72,10 @@ public class MeasurementXMLFile {
 
     private int getNumberOfTests() {
         return Util.size(getCases());
+    }
+
+    private String getTestClassName() {
+        return testClassName;
     }
 
     private String getSuiteName() {
