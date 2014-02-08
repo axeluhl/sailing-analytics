@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import com.sap.sailing.domain.markpassingcalculation.AbstractCandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.test.measurements.Measurement;
+import com.sap.sailing.domain.test.measurements.MeasurementCase;
+import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -29,7 +33,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
     }
 
     @Test
-    public void testFinderPerformance() {
+    public void testFinderPerformance() throws IOException {
         AbstractCandidateFinder f = new CandidateFinder(trackedRace);
         List<GPSFix> fixesAdded = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -40,7 +44,10 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         time = System.currentTimeMillis();
         f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
-        System.out.println("<measurement><name>FinderPerformance</name><value>"+time+"</value></measurement>");
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest");
+        MeasurementCase performanceReportCase = performanceReport.addCase("testFinderPerformance");
+        performanceReportCase.addMeasurement(new Measurement("FinderPerformance", time));
+        performanceReport.write();
         Assert.assertTrue(time<2000);
     }
 
