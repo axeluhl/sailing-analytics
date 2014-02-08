@@ -51,7 +51,7 @@ public class MeasurementXMLFile {
             }
             Writer w = new BufferedWriter(new FileWriter(new File(surefire_reports, reportFileName)));
             w.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            w.write("<testsuite name=\"" + getSuiteName() + " tests=\"" + getNumberOfTests() + "\" >\n");
+            w.write("<testsuite name=\"" + getSuiteName() + "\" tests=\"" + getNumberOfTests() + "\" >\n");
             for (MeasurementCase measurementCase : getCases()) {
                 w.write("<testcase name=\"" + measurementCase.getName() + "\" status=\"run\" time=\"0\" classname=\""
                         + measurementCase.getName() + "\">\n");
