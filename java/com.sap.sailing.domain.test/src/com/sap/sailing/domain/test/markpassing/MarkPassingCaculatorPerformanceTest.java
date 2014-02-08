@@ -44,7 +44,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         time = System.currentTimeMillis();
         f.getCandidateDeltas(bob, fixesAdded);
         time = System.currentTimeMillis() - time;
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest");
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "com.sap.sailing.domain.test.markpassing.MarkPassingCaculatorPerformanceTest");
         MeasurementCase performanceReportCase = performanceReport.addCase("testFinderPerformance");
         performanceReportCase.addMeasurement(new Measurement("FinderPerformance", time));
         performanceReport.write();
