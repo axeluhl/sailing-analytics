@@ -12,7 +12,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  net.sf.marineapi;bundle-version="0.5.0",
  javax.servlet;bundle-version="2.5.0",
- com.sap.sailing.domain.shared.android
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
 Import-Package: org.osgi.framework;version="1.6.0",
  org.json.simple,
  org.json.simple.parser
