@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.gateway.jaxrs.spi;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

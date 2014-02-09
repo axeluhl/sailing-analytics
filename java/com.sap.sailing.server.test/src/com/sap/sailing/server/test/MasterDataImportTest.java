@@ -79,6 +79,7 @@ import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.CompetitorResults;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
@@ -369,6 +370,13 @@ public class MasterDataImportTest {
         Assert.assertNotNull(raceColumnOnTarget.getRaceLog(fleet1OnTarget).getFirstFixAtOrAfter(logTimePoint2));
         Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(fleet1OnTarget)
                 .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
+
+        // Check for persisting of race log events:
+        RacingEventService dest2 = new RacingEventServiceImplMock();
+        Leaderboard lb2 = dest2.getLeaderboardByName(TEST_LEADERBOARD_NAME);
+        RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
+        RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
+        Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
     }
 
     @Test
@@ -441,18 +449,6 @@ public class MasterDataImportTest {
         RaceLogStartTimeEvent logEvent = factory.createStartTimeEvent(logTimePoint, author, 1, logTimePoint);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         storedLogUUIDs.add(logEvent.getId());
-
-        // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
-        TimePoint logTimePoint2 = logTimePoint.plus(10);
-        CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
-        positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor.getId(), competitor
-                .getName(), MaxPointsReason.BFD));
-        positionedCompetitors.add(new Triple<Serializable, String, MaxPointsReason>(competitor2.getId(), competitor2
-                .getName(), MaxPointsReason.NONE));
-        RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = factory
-                .createFinishPositioningConfirmedEvent(logTimePoint2, author, 1, positionedCompetitors);
-        raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
-        storedLogUUIDs.add(finishPositioningConfirmedEvent.getId());
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -655,14 +651,6 @@ public class MasterDataImportTest {
 
     }
 
-    /**
-     * When a race log entry references a competitor, e.g., by its UUID, these cannot be resolved when the TrackedRace
-     * isn't connected to the race column / leaderboard yet. Such a resolution would occur if importing the race log
-     * event triggered a listener which would try to resolve the competitor ID. This test ensures that the import does
-     * not fail due to such a look-up.
-     * 
-     * @throws ClassNotFoundException
-     */
     @Test
     public void testMasterDataImportForRaceLogEventsReferencingCompetitors() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {

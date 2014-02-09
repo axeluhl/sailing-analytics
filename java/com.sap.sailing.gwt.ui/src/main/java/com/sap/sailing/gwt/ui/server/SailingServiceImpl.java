@@ -3409,7 +3409,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
+        return new URL("http://" + host + ":" + port + "/sailingserver/spi/v1/masterdata/leaderboardgroups?" + query);
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
