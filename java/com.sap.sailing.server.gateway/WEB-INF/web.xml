@@ -249,5 +249,14 @@
     	<servlet-name>Jersey REST SPI</servlet-name>
     	<url-pattern>/spi/*</url-pattern>
   	</servlet-mapping>
+
+	<servlet>
+    	<servlet-name>Record GPS Fixes</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RecordFixesPostServlet</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>Record GPS Fixes</servlet-name>
+    	<url-pattern>/recordFixes</url-pattern>
+  	</servlet-mapping>
   	
  </web-app>
