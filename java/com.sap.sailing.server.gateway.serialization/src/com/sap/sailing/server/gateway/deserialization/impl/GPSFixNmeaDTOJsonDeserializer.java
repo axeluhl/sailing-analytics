@@ -7,24 +7,28 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 
-public class GPSFixNmeaDTOJsonDeserializer implements
-JsonDeserializer<GPSFix> {
+public class GPSFixNmeaDTOJsonDeserializer extends TypeBasedJsonDeserializer<GPSFix> {
+    public static final String TYPE = "GPSFixNmea";
 
     public static final String FIELD_TIME = "unixtime";
     public static final String FIELD_NMEA = "nmea";
 
     @Override
-    public GPSFix deserialize(JSONObject object)
-            throws JsonDeserializationException {
+    protected String getType() {
+        return TYPE;
+    }
+
+    @Override
+    protected GPSFix deserializeAfterCheckingType(JSONObject object) throws JsonDeserializationException {
         Date time = new Date((Long) object.get(FIELD_TIME));
         String nmea = (String) object.get(FIELD_NMEA);
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -13,7 +13,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdent
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceIdentifier, F extends GPSFix> implements
-        JsonSerializer<Triple<D, UUID, List<F>>> {
+        JsonSerializer<Triple<D, Serializable, List<F>>> {
     
     private final JsonSerializer<D> deviceSerializer;
     private  JsonSerializer<F> fixSerializer;
@@ -25,7 +25,7 @@ public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceId
     }
 
     @Override
-    public JSONObject serialize(Triple<D, UUID, List<F>> data) {
+    public JSONObject serialize(Triple<D, Serializable, List<F>> data) {
         JSONObject result = new JSONObject();
         
         JSONObject deviceIdJson = deviceSerializer.serialize(data.getA());

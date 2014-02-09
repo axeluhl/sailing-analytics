@@ -5,6 +5,8 @@ import net.sf.marineapi.nmea.parser.RMCParser;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingNmeaDTOJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixNmeaDTOJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -24,6 +26,7 @@ public class GPSFixMovingNmeaDTOJsonSerializer implements JsonSerializer<GPSFixM
 
         String nmea = parser.toSentence();
 
+        result.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixMovingNmeaDTOJsonDeserializer.TYPE);
         result.put(GPSFixNmeaDTOJsonDeserializer.FIELD_NMEA, nmea);
         result.put(GPSFixNmeaDTOJsonDeserializer.FIELD_TIME, object.getTimePoint().asMillis());
 

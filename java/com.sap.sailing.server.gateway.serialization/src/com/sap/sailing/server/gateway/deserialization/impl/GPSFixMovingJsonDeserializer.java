@@ -10,17 +10,16 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 
-public class GPSFixMovingJsonDeserializer implements
-JsonDeserializer<GPSFixMoving> {
-
+public class GPSFixMovingJsonDeserializer extends TypeBasedJsonDeserializer<GPSFixMoving> {
+    public static final String TYPE = "GPSFixMoving";
+    
     public static final String FIELD_BEARING_DEG = "bearing_deg";
     public static final String FIELD_SPEED_KNOTS = "speed_knots";
 
     @Override
-    public GPSFixMoving deserialize(JSONObject object)
-            throws JsonDeserializationException {
+    protected GPSFixMoving deserializeAfterCheckingType(JSONObject object) throws JsonDeserializationException {        
         double bearingDeg = (Double) object.get(FIELD_BEARING_DEG);
         double speedKnots = (Double) object.get(FIELD_SPEED_KNOTS);
 
@@ -39,4 +38,8 @@ JsonDeserializer<GPSFixMoving> {
         return fix;
     }
 
+    @Override
+    protected String getType() {
+        return TYPE;
+    }
 }

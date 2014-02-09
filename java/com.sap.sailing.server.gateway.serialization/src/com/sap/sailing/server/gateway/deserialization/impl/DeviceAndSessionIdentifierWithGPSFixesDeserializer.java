@@ -1,56 +1,55 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.devices.DeviceIdentifier;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
+import com.sap.sailing.server.gateway.serialization.devices.GPSFixJsonSerializationHandler;
 
-public class DeviceAndSessionIdentifierWithGPSFixesDeserializer<D extends DeviceIdentifier, F extends GPSFix>
-        implements JsonDeserializer<Triple<D, UUID, List<F>>> {
+public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
+    implements JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {
 
     public static final String FIELD_DEVICE_ID = "deviceId";
     public static final String FIELD_SESSION_UUID = "sessionId";
     public static final String FIELD_FIXES = "fixes";
 
-    private final JsonDeserializer<D> deviceDeserializer;
-    private final JsonDeserializer<F> fixDeserializer;
+    private final TypeBasedServiceFinder<GPSFixJsonSerializationHandler> fixServiceFinder;
+    private final TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder;
 
-    public DeviceAndSessionIdentifierWithGPSFixesDeserializer(JsonDeserializer<D> deviceDeserializer,
-            JsonDeserializer<F> fixDeserializer) {
-        this.deviceDeserializer = deviceDeserializer;
-        this.fixDeserializer = fixDeserializer;
+    public DeviceAndSessionIdentifierWithGPSFixesDeserializer(
+            TypeBasedServiceFinder<GPSFixJsonSerializationHandler> fixServiceFinder,
+            TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder) {
+        this.fixServiceFinder = fixServiceFinder;
+        this.deviceServiceFinder = deviceServiceFinder;
     }
 
     @Override
-    public Triple<D, UUID, List<F>> deserialize(JSONObject object) throws JsonDeserializationException {
+    public Triple<DeviceIdentifier, Serializable, List<GPSFix>> deserialize(JSONObject object) throws JsonDeserializationException {
         JSONObject deviceIdJson = Helpers.getNestedObjectSafe(object, FIELD_DEVICE_ID);
-        D deviceId = deviceDeserializer.deserialize(deviceIdJson);
+        DeviceIdentifier deviceId = TypeBasedJsonDeserializer.deserialize(deviceServiceFinder, deviceIdJson);
 
-        String sessionIdString = (String) object.get(FIELD_SESSION_UUID);
-        UUID sessionId = null;
-        try {
-            if (sessionIdString != null) {
-                UUID.fromString((String) object.get(FIELD_SESSION_UUID));
-            }
-        } catch (IllegalArgumentException e) {
-            throw new JsonDeserializationException(e);
-        }
+        Serializable sessionId = Helpers.tryUuidConversion(((Serializable) object.get(FIELD_SESSION_UUID)));
 
         JSONArray fixesJson = Helpers.getNestedArraySafe(object, FIELD_FIXES);
-        List<F> fixes = new ArrayList<F>();
-        for (Object fixJson : fixesJson) {
-            fixes.add(fixDeserializer.deserialize((JSONObject) fixJson));
+        List<GPSFix> fixes = new ArrayList<GPSFix>();
+        for (Object fixObject : fixesJson) {
+            JSONObject fixJson = (JSONObject) fixObject;
+            GPSFix fix = TypeBasedJsonDeserializer.deserialize(fixServiceFinder, fixJson);
+            fixes.add(fix);
         }
 
-        return new Triple<D, UUID, List<F>>(deviceId, sessionId, fixes);
+        return new Triple<DeviceIdentifier, Serializable, List<GPSFix>>(deviceId, sessionId, fixes);
     }
 
 }

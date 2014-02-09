@@ -5,22 +5,26 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 
-public class GPSFixMovingNmeaDTOJsonDeserializer implements
-JsonDeserializer<GPSFixMoving> {
+public class GPSFixMovingNmeaDTOJsonDeserializer extends TypeBasedJsonDeserializer<GPSFixMoving> {
+    public static final String TYPE = "GPSFixMovingNmea";
 
     @Override
-    public GPSFixMoving deserialize(JSONObject object)
-            throws JsonDeserializationException {
+    protected String getType() {
+        return TYPE;
+    }
+
+    @Override
+    protected GPSFixMoving deserializeAfterCheckingType(JSONObject object) throws JsonDeserializationException {
         String nmea = (String) object.get(GPSFixNmeaDTOJsonDeserializer.FIELD_NMEA);
 
         RMCSentence sentence = new RMCParser(nmea);

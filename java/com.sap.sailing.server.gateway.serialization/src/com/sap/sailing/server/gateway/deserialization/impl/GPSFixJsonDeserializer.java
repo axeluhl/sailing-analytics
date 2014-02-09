@@ -11,19 +11,18 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 
-public class GPSFixJsonDeserializer implements
-JsonDeserializer<GPSFix> {
-
+public class GPSFixJsonDeserializer extends TypeBasedJsonDeserializer<GPSFix> {
+    public static final String TYPE = "GPSFix";
+    
     public static final String FIELD_LAT_DEG = "lat_deg";
     public static final String FIELD_LON_DEG = "lon_deg";
     public static final String FIELD_TIME = "unixtime";
 
 
     @Override
-    public GPSFix deserialize(JSONObject object)
-            throws JsonDeserializationException {
+    protected GPSFix deserializeAfterCheckingType(JSONObject object) throws JsonDeserializationException {
         Date time = new Date((Long) object.get(FIELD_TIME));
         double latDeg = (Double) object.get(FIELD_LAT_DEG);
         double lonDeg = (Double) object.get(FIELD_LON_DEG);
@@ -34,6 +33,12 @@ JsonDeserializer<GPSFix> {
         GPSFix fix = new GPSFixImpl(position, timePoint);
 
         return fix;
+    }
+
+
+    @Override
+    protected String getType() {
+        return TYPE;
     }
 
 }

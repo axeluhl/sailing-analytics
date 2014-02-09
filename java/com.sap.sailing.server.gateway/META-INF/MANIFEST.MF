@@ -42,3 +42,4 @@ Require-Bundle: com.sap.sailing.domain,
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway
+Bundle-Activator: com.sap.sailing.server.gateway.impl.Activator
