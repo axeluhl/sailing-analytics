@@ -39,7 +39,9 @@ public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
         JSONObject deviceIdJson = Helpers.getNestedObjectSafe(object, FIELD_DEVICE_ID);
         DeviceIdentifier deviceId = TypeBasedJsonDeserializer.deserialize(deviceServiceFinder, deviceIdJson);
 
-        Serializable sessionId = Helpers.tryUuidConversion(((Serializable) object.get(FIELD_SESSION_UUID)));
+        Object sessionObject = object.get(FIELD_SESSION_UUID);
+        Serializable sessionId = sessionObject == null ?
+        		null : Helpers.tryUuidConversion(((Serializable) sessionObject));
 
         JSONArray fixesJson = Helpers.getNestedArraySafe(object, FIELD_FIXES);
         List<GPSFix> fixes = new ArrayList<GPSFix>();

@@ -15,7 +15,8 @@ public abstract class TypeBasedJsonDeserializer<T> implements JsonDeserializer<T
     @Override
     public T deserialize(JSONObject object) throws JsonDeserializationException {
         if (!getType().equals(object.get(FIELD_TYPE))) {
-            throw new JsonDeserializationException("Wrong type found");
+            throw new JsonDeserializationException(
+            		"Wrong type found (expected: " + getType() + ", but got: " + object.get(FIELD_TYPE) + ")");
         }
         return deserializeAfterCheckingType(object);
     }
