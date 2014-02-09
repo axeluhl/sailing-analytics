@@ -1480,7 +1480,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         GPSFix fix = null;
 
-        if (GPSFixMoving.class.getSimpleName().equals(object.get(FieldNames.GPSFIX_TYPE.name()))) {
+        String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
+        if (GPSFixMoving.class.getSimpleName().equals(type)) {
             SpeedWithBearing speed = loadSpeedWithBearing(object);
             fix = new GPSFixMovingImpl(position, timePoint, speed);
         } else {

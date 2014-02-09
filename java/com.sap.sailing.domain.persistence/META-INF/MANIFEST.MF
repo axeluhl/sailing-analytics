@@ -14,7 +14,11 @@ Require-Bundle: com.sap.sailing.mongodb,
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.devices,
- com.sap.sailing.domain.persistence.impl;x-friends:="com.sap.sailing.mongodb.test,com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.domain.persistence.test",
+ com.sap.sailing.domain.persistence.impl;
+  x-friends:="com.sap.sailing.mongodb.test,
+   com.sap.sailing.domain.swisstimingadapter.test,
+   com.sap.sailing.domain.persistence.test,
+   com.sap.sailing.server.gateway.test",
  com.sap.sailing.domain.persistence.media
 Bundle-ActivationPolicy: lazy
 Import-Package: org.json.simple,

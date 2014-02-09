@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
@@ -20,16 +23,17 @@ import com.sap.sailing.server.gateway.serialization.devices.GPSFixJsonSerializat
 
 public class RecordFixesPostServlet extends AbstractJsonPostServlet<Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {    
     private static final long serialVersionUID = 2778739335260621119L;
-    private final DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer;
-    
-    public RecordFixesPostServlet() {
+    private DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {  
+    	super.init(config);
     	TypeBasedServiceFinderFactory serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(getContext());
         TypeBasedServiceFinder<GPSFixJsonSerializationHandler> fixServiceFinder =
                 serviceFinderFactory.createServiceFinder(GPSFixJsonSerializationHandler.class);
         TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder =
         		serviceFinderFactory.createServiceFinder(DeviceIdentifierJsonSerializationHandler.class);
         deserializer = new DeviceAndSessionIdentifierWithGPSFixesDeserializer(fixServiceFinder, deviceServiceFinder);
-        
     }
 
     @Override

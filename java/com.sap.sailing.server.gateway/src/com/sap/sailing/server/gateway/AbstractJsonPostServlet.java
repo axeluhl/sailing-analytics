@@ -21,7 +21,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends SailingServerHttpServlet {
+public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 8474205424939759851L;
     private final List<String> requiredParameters;
     private final ArrayList<String> optionalParameters;
@@ -78,6 +78,7 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Saili
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                         String.format("Invalid JSON in request body:\n%s", e));
                 logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
+                e.printStackTrace();
                 return;
             }
         }
@@ -88,9 +89,11 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Saili
         } catch (HttpExceptionWithMessage e) {
             e.sendError(resp);
             logger.warning(String.format("Exception while processing post request:\n%s", e.toString()));
+            e.printStackTrace();
             return;
         }
 
+        setJsonResponseHeader(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         if (getResponseSerializer() != null && responseObject != null) {
             resp.getWriter().write(getResponseSerializer().serialize(responseObject).toJSONString());

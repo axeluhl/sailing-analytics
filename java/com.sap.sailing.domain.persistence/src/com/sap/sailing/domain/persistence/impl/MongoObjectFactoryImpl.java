@@ -983,23 +983,26 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
         configurationsCollections.remove(query);
     }
+    
+    public DBCollection getGPSFixCollection() {
+    	return database.getCollection(CollectionNames.GPS_FIXES.name());
+    }
 
 	@Override
 	public void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes) {
-		DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES.name());
 		DBObject dbDeviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, device);
-
+		DBCollection collection = getGPSFixCollection();
 		for (GPSFix fix : fixes) {
 			DBObject entry = new BasicDBObject(FieldNames.DEVICE_ID.name(), dbDeviceId);
 			storeTimed(fix, entry);
 			storePositioned(fix, entry);
 
 			String type = GPSFix.class.getSimpleName();
-	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
 			if (fix instanceof GPSFixMoving) {
 				type = GPSFixMoving.class.getSimpleName();
 				storeSpeedWithBearing(((GPSFixMoving) fix).getSpeed(), entry);
 			}
+	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
 
 	        collection.insert(entry);
 		}
