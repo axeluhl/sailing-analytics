@@ -22,8 +22,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.masterdata.TopLevelMasterData;
 
 @Path("/v1/masterdata")
 public class MasterDataResource extends AbstractSailingServerResource {

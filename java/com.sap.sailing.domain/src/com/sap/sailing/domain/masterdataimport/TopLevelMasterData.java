@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.masterdata;
+package com.sap.sailing.domain.masterdataimport;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 

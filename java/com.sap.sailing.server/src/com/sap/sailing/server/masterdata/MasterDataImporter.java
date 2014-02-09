@@ -8,8 +8,8 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.gateway.masterdata.TopLevelMasterData;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 public class MasterDataImporter {

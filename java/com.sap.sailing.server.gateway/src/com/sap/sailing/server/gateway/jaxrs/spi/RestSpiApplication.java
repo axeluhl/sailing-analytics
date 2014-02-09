@@ -9,7 +9,6 @@ import javax.ws.rs.core.Application;
 public class RestSpiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
-        classes.add(LeaderboardGroupsStructureResource.class);
         
         return classes;
     }
