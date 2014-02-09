@@ -10,6 +10,7 @@ import org.osgi.framework.BundleContext;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.server.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.server.RacingEventService;
 
 public class Activator implements BundleActivator {

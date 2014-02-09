@@ -14,4 +14,5 @@ public interface PersistenceFactory {
     MongoObjectFactory getDefaultMongoObjectFactory();
     MongoObjectFactory getMongoObjectFactory(MongoDBService mongoDBService);
     MongoObjectFactory getDefaultMongoObjectFactory(TypeBasedServiceFinderFactory serviceFinderFactory);
+    MongoObjectFactory getMongoObjectFactory(MongoDBService mongoDBService, TypeBasedServiceFinderFactory serviceFinderFactory);
 }

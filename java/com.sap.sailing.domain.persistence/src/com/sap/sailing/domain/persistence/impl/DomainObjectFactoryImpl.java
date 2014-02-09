@@ -25,6 +25,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -81,7 +82,7 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.devices.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
 import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
@@ -101,6 +102,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -124,9 +126,15 @@ import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -144,7 +152,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
-    private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
 
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -156,7 +164,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
-        this.serviceFinderFactory = serviceFinderFactory;
+        this.deviceIdentifierServiceFinder = serviceFinderFactory == null ?
+        		null : serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.database = db;
@@ -172,7 +181,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new WindImpl(loadPosition(object), loadTimePoint(object), loadSpeedWithBearing(object));
     }
 
-    private Position loadPosition(DBObject object) {
+    public Position loadPosition(DBObject object) {
         Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
         Double lat = latNumber == null ? null : latNumber.doubleValue();
         Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());
@@ -191,11 +200,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     /**
      * Loads a {@link TimePoint} on the given object at {@link FieldNames#TIME_AS_MILLIS}.
      */
-    private TimePoint loadTimePoint(DBObject object) {
+    public TimePoint loadTimePoint(DBObject object) {
         return loadTimePoint(object, FieldNames.TIME_AS_MILLIS);
     }
 
-    private SpeedWithBearing loadSpeedWithBearing(DBObject object) {
+    public SpeedWithBearing loadSpeedWithBearing(DBObject object) {
         return new KnotSpeedWithBearingImpl(((Number) object.get(FieldNames.KNOT_SPEED.name())).doubleValue(),
                 new DegreeBearingImpl(((Number) object.get(FieldNames.DEGREE_BEARING.name())).doubleValue()));
     }
@@ -1462,4 +1471,82 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return configuration;
     }
+
+    private GPSFix loadGPSFix(DBObject object) {
+        TimePoint timePoint = loadTimePoint(object);
+        Position position = loadPosition(object);
+
+        GPSFix fix = null;
+
+        if (GPSFixMoving.class.getSimpleName().equals(object.get(FieldNames.GPSFIX_TYPE.name()))) {
+            SpeedWithBearing speed = loadSpeedWithBearing(object);
+            fix = new GPSFixMovingImpl(position, timePoint, speed);
+        } else {
+            fix = new GPSFixImpl(position, timePoint);
+        }
+
+        return fix;
+    }
+    
+    private void ensureIndicesOnGPSFixCollection() {
+        DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
+        DBObject index = new BasicDBObject();
+        index.put(FieldNames.DEVICE_ID.name(), null);
+        index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        gpsFixCollection.ensureIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
+    }
+    
+    private DBCollection getGPSFixCollection() {        
+        return database.getCollection(CollectionNames.GPS_FIXES.name());
+    }
+    
+    public static DeviceIdentifier loadDeviceId(
+    		TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder, DBObject deviceId) {
+    	String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
+    	Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
+    	return deviceIdentifierServiceFinder.findService(deviceType).load(deviceTypeId);
+    }
+    
+    public static DBObject storeDeviceId(
+    		TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder, DeviceIdentifier device) {
+    	Object deviceTypeId = deviceIdentifierServiceFinder.findService(device.getIdentifierType()).store(device);
+    	return new BasicDBObjectBuilder()
+    			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
+    			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();
+    }
+
+    @Override
+    public DynamicTrack<GPSFix> loadGPSFixTrack(DeviceIdentifier device) throws ClassCastException {
+        DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(
+        		storeDeviceId(deviceIdentifierServiceFinder, device)).get();
+//        .and(FieldNames.TIME_AS_MILLIS.name()).greaterThan(from.asMillis())
+//        .and(FieldNames.TIME_AS_MILLIS.name()).lessThan(to.asMillis()).get();
+
+    	DynamicTrack<GPSFix> track = new DynamicTrackImpl<GPSFix>(DynamicTrack.class.getName());
+    	DBCollection collection = getGPSFixCollection();
+        DBCursor result = collection.find(query);
+        for (DBObject fixObject : result) {
+            GPSFix fix = loadGPSFix(fixObject);
+            track.add(fix);
+        }
+        return track;
+    }
+
+	@Override
+	public Map<DeviceIdentifier, DynamicTrack<GPSFix>> loadAllGPSFixTracks() {
+		Map<DeviceIdentifier, DynamicTrack<GPSFix>> result = new HashMap<>();
+		try {
+			DBCollection collection = getGPSFixCollection();
+			ensureIndicesOnGPSFixCollection();
+			for (Object dbDeviceId : collection.distinct(FieldNames.DEVICE_ID.name())) {
+				DeviceIdentifier deviceId = loadDeviceId(deviceIdentifierServiceFinder, (DBObject) dbDeviceId);
+				result.put(deviceId, loadGPSFixTrack(deviceId));
+			}
+		} catch (Exception e) {
+			// something went wrong during DB access; report, then use empty new wind track
+			logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded GPSFix data. Check MongoDB settings.");
+			logger.log(Level.SEVERE, "loadAllGPSFixTracks", e);
+		}
+		return result;
+	}
 }

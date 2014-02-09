@@ -12,8 +12,10 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -107,4 +109,6 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+    
+    void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes);
 }

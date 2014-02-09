@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server;
 
 import java.util.HashMap;
 import java.util.HashSet;

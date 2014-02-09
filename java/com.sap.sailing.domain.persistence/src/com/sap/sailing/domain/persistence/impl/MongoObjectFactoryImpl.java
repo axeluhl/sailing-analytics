@@ -48,6 +48,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
 import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -57,6 +59,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -73,6 +76,8 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -83,11 +88,11 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
 
-public class MongoObjectFactoryImpl implements MongoObjectFactory {
+public class MongoObjectFactoryImpl implements MongoObjectFactory {    
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-    private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
     
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
@@ -100,7 +105,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public MongoObjectFactoryImpl(DB database, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this.database = database;
-        this.serviceFinderFactory = serviceFinderFactory;
+        this.deviceIdentifierServiceFinder = serviceFinderFactory == null ?
+        		null : serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
     }
     
     @Override
@@ -116,29 +122,29 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
+    public void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
         result.put(field.name(), timePoint.asMillis());
     }
 
-    private void storeTimed(Timed timed, DBObject result) {
+    public void storeTimed(Timed timed, DBObject result) {
         storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
     }
 
-    private void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
+    public void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
         storeSpeed(speedWithBearing, result);
         storeBearing(speedWithBearing.getBearing(), result);
 
     }
 
-    private void storeBearing(Bearing bearing, DBObject result) {
+    public void storeBearing(Bearing bearing, DBObject result) {
         result.put(FieldNames.DEGREE_BEARING.name(), bearing.getDegrees());
     }
 
-    private void storeSpeed(Speed speed, DBObject result) {
+    public void storeSpeed(Speed speed, DBObject result) {
         result.put(FieldNames.KNOT_SPEED.name(), speed.getKnots());
     }
 
-    private void storePositioned(Positioned positioned, DBObject result) {
+    public void storePositioned(Positioned positioned, DBObject result) {
         if (positioned.getPosition() != null) {
             result.put(FieldNames.LAT_DEG.name(), positioned.getPosition().getLatDeg());
             result.put(FieldNames.LNG_DEG.name(), positioned.getPosition().getLngDeg());
@@ -156,7 +162,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.ensureIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
         return result;
     }
-
+    
     /**
      * @param regattaName
      *            the regatta name is stored only for human readability purposes because a time stamp may be a bit unhandy for
@@ -976,4 +982,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
         configurationsCollections.remove(query);
     }
+
+	@Override
+	public void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes) {
+		DBCollection collection = database.getCollection(CollectionNames.GPS_FIXES.name());
+		DBObject dbDeviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, device);
+
+		for (GPSFix fix : fixes) {
+			DBObject entry = new BasicDBObject(FieldNames.DEVICE_ID.name(), dbDeviceId);
+			storeTimed(fix, entry);
+			storePositioned(fix, entry);
+
+			String type = GPSFix.class.getSimpleName();
+	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
+			if (fix instanceof GPSFixMoving) {
+				type = GPSFixMoving.class.getSimpleName();
+				storeSpeedWithBearing(((GPSFixMoving) fix).getSpeed(), entry);
+			}
+
+	        collection.insert(entry);
+		}
+	}
 }
