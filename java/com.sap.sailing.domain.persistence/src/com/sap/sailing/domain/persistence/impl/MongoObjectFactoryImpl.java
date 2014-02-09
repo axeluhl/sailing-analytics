@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -1002,5 +1003,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
 	        collection.insert(entry);
 		}
+	}
+
+	@Override
+	public void storeGPSFix(DeviceIdentifier device, GPSFix fix) {
+		storeGPSFixes(device, Collections.singleton(fix));
 	}
 }

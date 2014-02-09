@@ -102,6 +102,7 @@ import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -247,6 +248,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
+    
+    /**
+     * These tracks are not replicated in any way. They are only loaded on the master instance.
+     * All management of device mappings has to occur via the master instance anyway, and as soon
+     * as a portion of the track is mapped to an actual race, all the relevant fixes are replicated
+     * with the existing replication features through that race.
+     */
+    private final Map<DeviceIdentifier, DynamicTrack<GPSFix>> tracksByDevice;
 
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
@@ -359,6 +368,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
+        tracksByDevice = new ConcurrentHashMap<>();
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
@@ -384,6 +394,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
+        loadStoredTracks();
     }
 
     @Override
@@ -448,6 +459,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 configurationMap.put(entry.getKey(), entry.getValue());
             }
         }
+    }
+    
+    private void loadStoredTracks() {
+    	/*
+    	 * TODO load tracks in seperate thread, or even better: use proxy tracks, that on first load only
+    	 * load metadata (beginning and end TimePoints of individual tracking sessions in track, and then
+    	 * load the fixes when really needed.
+    	 */
+    	synchronized(tracksByDevice) {
+    		tracksByDevice.putAll(domainObjectFactory.loadAllGPSFixTracks());
+    	}
     }
 
     @Override
@@ -2171,4 +2193,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         return result;
     }
+    
+    private DynamicTrack<GPSFix> getStoredGPSFixTrack(DeviceIdentifier device) {
+		//test first outside of sync block for the likely case that the track already exists in {@link #tracksByDevice}
+		DynamicTrack<GPSFix> track = tracksByDevice.get(device);
+		
+		if (track == null) {
+			synchronized(tracksByDevice) {
+				//now test again in sync, in case a track was added in the meantime
+				if (tracksByDevice.get(device) == null) {
+					track = domainObjectFactory.loadGPSFixTrack(device);
+					tracksByDevice.put(device, track);
+				}
+			}
+		}
+		return track;
+    }
+
+	@Override
+	public void storeGPSFix(DeviceIdentifier device, GPSFix fix) {
+		getStoredGPSFixTrack(device).add(fix);
+	}
 }

@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -51,6 +52,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -478,4 +480,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DomainObjectFactory getDomainObjectFactory();
     
     WindStore getWindStore();
+    
+    /**
+     * Store {@link GPSFix}es, that originate from devices that are not managed by a tracking provider
+     * who himself persists the tracking data, e.g. in the case of smartphone tracking.
+     * 
+     * Currently tracked races with a device mapping for this {@code device} are notified of this new fix.
+     * @param device
+     * @param fix
+     */
+    void storeGPSFix(DeviceIdentifier device, GPSFix fix);
 }

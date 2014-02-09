@@ -111,4 +111,6 @@ public interface MongoObjectFactory {
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
     
     void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes);
+    
+    void storeGPSFix(DeviceIdentifier device, GPSFix fix);
 }

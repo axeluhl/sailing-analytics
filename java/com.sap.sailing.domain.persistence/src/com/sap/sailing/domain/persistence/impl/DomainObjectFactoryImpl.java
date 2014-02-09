@@ -153,6 +153,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -164,6 +165,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
+        this.serviceFinderFactory = serviceFinderFactory;
         this.deviceIdentifierServiceFinder = serviceFinderFactory == null ?
         		null : serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
         this.baseDomainFactory = baseDomainFactory;
@@ -1529,6 +1531,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             GPSFix fix = loadGPSFix(fixObject);
             track.add(fix);
         }
+        
+        track.addTrackListener(new MongoGPSFixTrackListener(device,
+        		new MongoObjectFactoryImpl(database, serviceFinderFactory)));
         return track;
     }
 
