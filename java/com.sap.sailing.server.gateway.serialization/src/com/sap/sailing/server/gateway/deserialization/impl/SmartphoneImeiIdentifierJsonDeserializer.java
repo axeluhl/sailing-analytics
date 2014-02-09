@@ -7,12 +7,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 
 public class SmartphoneImeiIdentifierJsonDeserializer extends TypeBasedJsonDeserializer<SmartphoneImeiIdentifier> {
-    public static final String TYPE = "imei";
     public static final String FIELD_IMEI = "imei";
 
     @Override
     protected String getType() {
-        return TYPE;
+    	return SmartphoneImeiIdentifier.TYPE;
     }
 
     @Override

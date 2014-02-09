@@ -13,7 +13,7 @@ public class SmartphoneImeiIdentifierJsonSerializer implements JsonSerializer<Sm
     public JSONObject serialize(SmartphoneImeiIdentifier identifier) {
         JSONObject result = new JSONObject();
 
-        result.put(TypeBasedJsonDeserializer.FIELD_TYPE, SmartphoneImeiIdentifierJsonDeserializer.TYPE);
+        result.put(TypeBasedJsonDeserializer.FIELD_TYPE, SmartphoneImeiIdentifier.TYPE);
         result.put(SmartphoneImeiIdentifierJsonDeserializer.FIELD_IMEI, identifier.getImei());
         return result;
     }

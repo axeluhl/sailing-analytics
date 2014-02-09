@@ -15,6 +15,6 @@ public class NoCorrespondingServiceRegisteredException extends RuntimeException 
 
     @Override
     public String toString() {
-        return super.toString() + "(Type: " + type + ")";
+        return super.toString() + " (Type: " + type + ")";
     }
 }
