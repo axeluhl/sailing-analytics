@@ -25,14 +25,13 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 
-@Path("/v1/masterdata")
+@Path("/v1/masterdata/leaderboardgroups")
 public class MasterDataResource extends AbstractSailingServerResource {
     
     private static final Logger logger = Logger.getLogger(MasterDataResource.class.getName());
     
     @GET
     @Produces("application/x-java-serialized-object")
-    @Path("leaderboardgroups")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
             @QueryParam("compress") Boolean compress) throws UnsupportedEncodingException {
         final long startTime = System.currentTimeMillis();
