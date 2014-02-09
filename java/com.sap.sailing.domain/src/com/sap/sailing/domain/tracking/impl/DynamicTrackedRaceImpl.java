@@ -219,6 +219,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             public boolean isTransient() {
                 return false;
             }
+
+			@Override
+			public void fixReceived(GPSFix fix) {}
         });
         return result;
     }
@@ -774,5 +777,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
+
+	@Override
+	public void fixReceived(GPSFixMoving fix) {}
 
 }

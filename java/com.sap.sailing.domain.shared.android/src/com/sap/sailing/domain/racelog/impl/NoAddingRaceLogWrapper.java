@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.tracking.TrackListener;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -199,4 +200,10 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Iterable<RaceLogEvent> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
         return innerRaceLog.getFixes(from, fromInclusive, to, toInclusive);
     }
+
+	@Override
+	public void addTrackListener(TrackListener<RaceLogEvent> listener) {}
+
+	@Override
+	public void removeTrackListener(TrackListener<RaceLogEvent> listener) {}
 }

@@ -132,4 +132,6 @@ public interface Track<FixType extends Timed> extends Serializable {
      */
     Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
 
+    void addTrackListener(TrackListener<FixType> listener);
+    void removeTrackListener(TrackListener<FixType> listener);
 }

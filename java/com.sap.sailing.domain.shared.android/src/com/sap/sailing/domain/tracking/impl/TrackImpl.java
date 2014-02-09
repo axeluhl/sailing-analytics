@@ -9,6 +9,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackListener;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -22,6 +23,8 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private final NavigableSet<Timed> fixes;
 
     private final NamedReentrantReadWriteLock readWriteLock;
+    
+    private final TrackListeners<TrackListener<FixType>> listeners;
 
     protected static class DummyTimed implements Timed {
         private static final long serialVersionUID = 6047311973718918856L;
@@ -47,6 +50,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     protected TrackImpl(NavigableSet<Timed> fixes, String nameForReadWriteLock) {
         this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
+        this.listeners = new TrackListeners<TrackListener<FixType>>();
     }
     
     /**
@@ -296,12 +300,27 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
 
     protected boolean add(FixType fix) {
+    	boolean result;
         lockForWrite();
         try {
-            return getInternalRawFixes().add(fix);
+            result = getInternalRawFixes().add(fix);
         } finally {
             unlockAfterWrite();
         }
+        for (TrackListener<FixType> listener : listeners.getListeners()) {
+            listener.fixReceived(fix);
+        }
+        return result;
+    }
+
+    @Override
+    public void addTrackListener(TrackListener<FixType> listener) {
+        listeners.addListener(listener);
+    }
+    
+    @Override
+    public void removeTrackListener(TrackListener<FixType> listener) {
+        listeners.removeListener(listener);
     }
 
 }
