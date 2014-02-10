@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 
 public class DeviceMarkMappingEventImpl extends AbstractDeviceMappingEventImpl<Mark>

@@ -26,8 +26,8 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Abstr
     private final List<String> requiredParameters;
     private final ArrayList<String> optionalParameters;
     
-    protected abstract JsonDeserializer<RequestT> getRequestDeserializer();
-    protected abstract JsonSerializer<ResponseT> getResponseSerializer();
+    public abstract JsonDeserializer<RequestT> getRequestDeserializer();
+    public abstract JsonSerializer<ResponseT> getResponseSerializer();
 
     public AbstractJsonPostServlet(List<String> requiredParameters,
             List<String> optionalParameters) {
@@ -46,7 +46,7 @@ public abstract class AbstractJsonPostServlet<RequestT, ResponseT> extends Abstr
 
     protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
-    protected abstract ResponseT process(Map<String, String> parameterValues, RequestT domainObject)
+    public abstract ResponseT process(Map<String, String> parameterValues, RequestT domainObject)
             throws HttpExceptionWithMessage;
 
     @Override

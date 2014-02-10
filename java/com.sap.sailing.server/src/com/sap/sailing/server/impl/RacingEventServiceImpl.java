@@ -70,9 +70,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -101,6 +100,7 @@ import com.sap.sailing.domain.racelog.state.RaceState;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -467,7 +467,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     	 * load the fixes when really needed.
     	 */
     	synchronized(tracksByDevice) {
-    		tracksByDevice.putAll(domainObjectFactory.loadAllGPSFixTracks());
+    		try {
+				tracksByDevice.putAll(domainObjectFactory.loadAllGPSFixTracks());
+			} catch (Exception e) {
+				logger.log(Level.WARNING, "Could not load tracks", e);
+			}
     	}
     }
 
@@ -2201,7 +2205,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 			synchronized(tracksByDevice) {
 				//now test again in sync, in case a track was added in the meantime
 				if (tracksByDevice.get(device) == null) {
-					track = domainObjectFactory.loadGPSFixTrack(device);
+					try {
+						track = domainObjectFactory.loadGPSFixTrack(device);
+					} catch (Exception e) {
+						logger.log(Level.WARNING, "Could not load track", e);
+					}
 					tracksByDevice.put(device, track);
 				}
 			}

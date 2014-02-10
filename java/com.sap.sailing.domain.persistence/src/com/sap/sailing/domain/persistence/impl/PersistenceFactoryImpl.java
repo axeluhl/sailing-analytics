@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;

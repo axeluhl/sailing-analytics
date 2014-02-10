@@ -2,8 +2,9 @@ package com.sap.sailing.server.gateway.deserialization;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
-import com.sap.sailing.server.gateway.serialization.devices.JsonSerializationHandler;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 
 public abstract class TypeBasedJsonDeserializer<T> implements JsonDeserializer<T> {
     public static final String FIELD_TYPE = "type";
@@ -21,8 +22,8 @@ public abstract class TypeBasedJsonDeserializer<T> implements JsonDeserializer<T
         return deserializeAfterCheckingType(object);
     }
 
-    public static <T> T deserialize(TypeBasedServiceFinder<? extends JsonSerializationHandler<T>> serviceFinder, JSONObject object)
-            throws JsonDeserializationException {
-        return serviceFinder.findService((String) object.get(FIELD_TYPE)).deserialize(object);
+    public static <T> T deserialize(TypeBasedServiceFinder<? extends TransformationHandler<T, JSONObject>> serviceFinder, JSONObject object)
+            throws TransformationException {
+        return serviceFinder.findService((String) object.get(FIELD_TYPE)).transformBack(object);
     }
 }

@@ -9,8 +9,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
-import com.sap.sailing.domain.persistence.devices.GPSFixPersistenceHandler;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -26,11 +28,11 @@ public class Activator implements BundleActivator {
 		DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
-        registrations.add(context.registerService(GPSFixPersistenceHandler.class,
-        		new GPSFixPersistenceHandlerImpl(mof, dof), properties));
+        registrations.add(context.registerService(GPSFixMongoHandler.class,
+        		new GPSFixMongoHandlerImpl(mof, dof), properties));
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
-        registrations.add(context.registerService(GPSFixPersistenceHandler.class,
-        		new GPSFixMovingPersistenceHandlerImpl(mof, dof), properties));
+        registrations.add(context.registerService(GPSFixMongoHandler.class,
+        		new GPSFixMovingMongoHandlerImpl(mof, dof), properties));
 	}
 
 	@Override

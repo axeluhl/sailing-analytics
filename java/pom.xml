@@ -29,9 +29,9 @@
 		<module>com.sap.sailing.domain.igtimiadapter</module>
 		<module>com.sap.sailing.domain.igtimiadapter.persistence</module>
 		<module>com.sap.sailing.domain.igtimiadapter.test</module>
-		<module>com.sap.sailing.domain.smartphoneadapter</module>
-		<module>com.sap.sailing.domain.smartphoneadapter.test</module>
-		<module>com.sap.sailing.domain.smartphoneadapter.testsupport</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
+		<module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>

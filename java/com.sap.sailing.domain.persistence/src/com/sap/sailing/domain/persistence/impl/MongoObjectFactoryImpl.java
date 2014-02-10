@@ -49,9 +49,10 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -60,8 +61,8 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
-import com.sap.sailing.domain.persistence.devices.GPSFixPersistenceHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -81,6 +82,7 @@ import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -98,8 +100,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-    private final TypeBasedServiceFinder<GPSFixPersistenceHandler> fixServiceFinder;
-    private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<GPSFixMongoHandler> fixServiceFinder;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
@@ -113,8 +115,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public MongoObjectFactoryImpl(DB database, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this.database = database;
         if (serviceFinderFactory != null) {
-            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
-            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixPersistenceHandler.class);
+            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
         } else {
         	this.deviceIdentifierServiceFinder = null;
         	this.fixServiceFinder = null;
@@ -778,7 +780,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
-        DBObject deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());   
+        DBObject deviceId = null;
+		try {
+			deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
+			e.printStackTrace();
+		}
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
@@ -791,7 +799,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
-        DBObject deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());   
+        DBObject deviceId = null;
+		try {
+			deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
+			e.printStackTrace();
+		}
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
@@ -1093,14 +1107,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
 	@Override
-	public void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes) {
+	public void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes)
+			throws TransformationException, NoCorrespondingServiceRegisteredException {
 		DBObject dbDeviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, device);
 		DBCollection collection = getGPSFixCollection();
 		for (GPSFix fix : fixes) {
 			DBObject entry = new BasicDBObject(FieldNames.DEVICE_ID.name(), dbDeviceId);
 			String type = fix.getClass().getName();
 	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
-			Object fixObject = fixServiceFinder.findService(type).store(fix);
+			Object fixObject = fixServiceFinder.findService(type).transformForth(fix);
 			entry.put(FieldNames.GPSFIX.name(), fixObject);
 
 	        collection.insert(entry);
@@ -1108,7 +1123,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	}
 
 	@Override
-	public void storeGPSFix(DeviceIdentifier device, GPSFix fix) {
+	public void storeGPSFix(DeviceIdentifier device, GPSFix fix)
+			 throws TransformationException, NoCorrespondingServiceRegisteredException {
 		storeGPSFixes(device, Collections.singleton(fix));
 	}
 }

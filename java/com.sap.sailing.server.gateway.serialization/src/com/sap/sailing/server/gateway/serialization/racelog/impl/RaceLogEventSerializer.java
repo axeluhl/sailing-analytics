@@ -3,9 +3,8 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.devices.SingleTypeBasedServiceFinderImpl;
-import com.sap.sailing.domain.devices.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.SingleTypeBasedServiceFinderImpl;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -26,25 +25,26 @@ import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
-import com.sap.sailing.server.gateway.serialization.devices.SmartphoneImeiJsonSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerImpl;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
 	public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
 		return create(competitorSerializer,
-				new SingleTypeBasedServiceFinderImpl<DeviceIdentifierJsonSerializationHandler>(
-						new SmartphoneImeiJsonSerializationHandler(), SmartphoneImeiIdentifier.TYPE));
+				new SingleTypeBasedServiceFinderImpl<DeviceIdentifierJsonHandler>(
+						new SmartphoneImeiJsonHandlerImpl(), SmartphoneImeiIdentifier.TYPE));
 	}
     public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer,
-    		TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder) {
+    		TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
         return new RaceLogEventSerializer(
                 new RaceLogFlagEventSerializer(competitorSerializer), 
                 new RaceLogStartTimeEventSerializer(competitorSerializer), 

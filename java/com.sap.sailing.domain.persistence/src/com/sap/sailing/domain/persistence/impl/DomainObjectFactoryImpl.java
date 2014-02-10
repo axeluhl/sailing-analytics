@@ -82,9 +82,10 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -102,8 +103,9 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
-import com.sap.sailing.domain.persistence.devices.GPSFixPersistenceHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixTrackListenerImpl;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -130,6 +132,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -155,8 +158,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
-    private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
-    private final TypeBasedServiceFinder<GPSFixPersistenceHandler> fixServiceFinder;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<GPSFixMongoHandler> fixServiceFinder;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
@@ -171,8 +174,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         super();
         this.serviceFinderFactory = serviceFinderFactory;
         if (serviceFinderFactory != null) {
-            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
-            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixPersistenceHandler.class);
+            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
         } else {
         	this.deviceIdentifierServiceFinder = null;
         	this.fixServiceFinder = null;
@@ -1186,8 +1189,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogDeviceCompetitorMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	DeviceIdentifier device = loadDeviceId(deviceIdentifierServiceFinder,
-    			(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+    	DeviceIdentifier device = null;
+		try {
+			device = loadDeviceId(deviceIdentifierServiceFinder,
+					(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+			e.printStackTrace();
+		}
     	Competitor mappedTo = DomainFactory.INSTANCE.getExistingCompetitorById(
     			(Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
@@ -1197,8 +1206,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogDeviceMarkMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	DeviceIdentifier device = loadDeviceId(deviceIdentifierServiceFinder,
-    			(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+    	DeviceIdentifier device = null;
+		try {
+			device = loadDeviceId(deviceIdentifierServiceFinder,
+					(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+			e.printStackTrace();
+		}
     	Mark mappedTo = DomainFactory.INSTANCE.getOrCreateMark(
     			(Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
@@ -1534,10 +1549,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return configuration;
     }
 
-    private GPSFix loadGPSFix(DBObject object) {
+    private GPSFix loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
         Object fixObject = object.get(FieldNames.GPSFIX.name());
-        return fixServiceFinder.findService(type).load(fixObject);
+        return fixServiceFinder.findService(type).transformBack(fixObject);
     }
     
     private void ensureIndicesOnGPSFixCollection() {
@@ -1553,23 +1568,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     public static DeviceIdentifier loadDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder, DBObject deviceId) {
+    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DBObject deviceId)
+    				throws TransformationException, NoCorrespondingServiceRegisteredException {
     	String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
     	Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
-    	return deviceIdentifierServiceFinder.findService(deviceType).load(deviceTypeId);
+    	return deviceIdentifierServiceFinder.findService(deviceType).transformBack(deviceTypeId);
     }
-    
+
     public static DBObject storeDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder, DeviceIdentifier device) {
-    	Object deviceTypeId = deviceIdentifierServiceFinder.findService(device.getIdentifierType()).store(device);
+    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
+    				throws TransformationException, NoCorrespondingServiceRegisteredException{
+    	Object deviceTypeId = deviceIdentifierServiceFinder.findService(device.getIdentifierType()).transformForth(device);
     	return new BasicDBObjectBuilder()
     			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
     			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();
     }
 
     @Override
-    public DynamicTrack<GPSFix> loadGPSFixTrack(DeviceIdentifier device) throws ClassCastException {
-        DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(
+    public DynamicTrack<GPSFix> loadGPSFixTrack(DeviceIdentifier device) throws ClassCastException,
+    TransformationException, NoCorrespondingServiceRegisteredException {
+    	DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(
         		storeDeviceId(deviceIdentifierServiceFinder, device)).get();
 //        .and(FieldNames.TIME_AS_MILLIS.name()).greaterThan(from.asMillis())
 //        .and(FieldNames.TIME_AS_MILLIS.name()).lessThan(to.asMillis()).get();
@@ -1582,7 +1600,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             track.add(fix);
         }
         
-        track.addTrackListener(new MongoGPSFixTrackListener(device,
+        track.addTrackListener(new MongoGPSFixTrackListenerImpl(device,
         		new MongoObjectFactoryImpl(database, serviceFinderFactory)));
         return track;
     }

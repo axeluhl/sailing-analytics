@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.tracking.impl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimeRange;
 import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 
 public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping<ItemType> {

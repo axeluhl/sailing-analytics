@@ -6,9 +6,9 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 
 public abstract class AbstractDeviceMappingEventImpl<ItemType extends WithID> extends RaceLogEventImpl implements

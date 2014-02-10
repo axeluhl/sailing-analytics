@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 
 public class DeviceCompetitorMappingEventImpl extends AbstractDeviceMappingEventImpl<Competitor>
 	implements DeviceCompetitorMappingEvent {

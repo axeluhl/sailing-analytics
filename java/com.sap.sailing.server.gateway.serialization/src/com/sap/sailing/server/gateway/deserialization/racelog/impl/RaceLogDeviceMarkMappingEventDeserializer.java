@@ -6,18 +6,18 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 public class RaceLogDeviceMarkMappingEventDeserializer extends
 		RaceLogDeviceMappingEventDeserializer<Mark> {
 	public RaceLogDeviceMarkMappingEventDeserializer(
 			JsonDeserializer<Competitor> competitorDeserializer,
-			TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder) {
+			TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
 		super(competitorDeserializer, deviceServiceFinder);
 	}
 

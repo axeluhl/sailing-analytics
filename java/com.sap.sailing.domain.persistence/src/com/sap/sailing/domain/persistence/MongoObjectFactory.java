@@ -12,9 +12,11 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -110,7 +112,7 @@ public interface MongoObjectFactory {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
     
-    void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes);
+    void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes) throws TransformationException, NoCorrespondingServiceRegisteredException;
     
-    void storeGPSFix(DeviceIdentifier device, GPSFix fix);
+    void storeGPSFix(DeviceIdentifier device, GPSFix fix) throws TransformationException, NoCorrespondingServiceRegisteredException;
 }

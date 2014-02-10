@@ -8,14 +8,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.devices.DeviceIdentifier;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
-import com.sap.sailing.server.gateway.serialization.devices.GPSFixJsonSerializationHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 
 public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
     implements JsonDeserializer<Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {
@@ -24,12 +25,12 @@ public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
     public static final String FIELD_SESSION_UUID = "sessionId";
     public static final String FIELD_FIXES = "fixes";
 
-    private final TypeBasedServiceFinder<GPSFixJsonSerializationHandler> fixServiceFinder;
-    private final TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder;
+    private final TypeBasedServiceFinder<GPSFixJsonHandler> fixServiceFinder;
+    private final TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder;
 
     public DeviceAndSessionIdentifierWithGPSFixesDeserializer(
-            TypeBasedServiceFinder<GPSFixJsonSerializationHandler> fixServiceFinder,
-            TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder) {
+            TypeBasedServiceFinder<GPSFixJsonHandler> fixServiceFinder,
+            TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
         this.fixServiceFinder = fixServiceFinder;
         this.deviceServiceFinder = deviceServiceFinder;
     }
@@ -37,7 +38,12 @@ public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
     @Override
     public Triple<DeviceIdentifier, Serializable, List<GPSFix>> deserialize(JSONObject object) throws JsonDeserializationException {
         JSONObject deviceIdJson = Helpers.getNestedObjectSafe(object, FIELD_DEVICE_ID);
-        DeviceIdentifier deviceId = TypeBasedJsonDeserializer.deserialize(deviceServiceFinder, deviceIdJson);
+        DeviceIdentifier deviceId;
+		try {
+			deviceId = TypeBasedJsonDeserializer.deserialize(deviceServiceFinder, deviceIdJson);
+		} catch (TransformationException e) {
+			throw new JsonDeserializationException(e);
+		}
 
         Object sessionObject = object.get(FIELD_SESSION_UUID);
         Serializable sessionId = sessionObject == null ?
@@ -47,7 +53,12 @@ public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         for (Object fixObject : fixesJson) {
             JSONObject fixJson = (JSONObject) fixObject;
-            GPSFix fix = TypeBasedJsonDeserializer.deserialize(fixServiceFinder, fixJson);
+            GPSFix fix;
+			try {
+				fix = TypeBasedJsonDeserializer.deserialize(fixServiceFinder, fixJson);
+			} catch (TransformationException e) {
+				throw new JsonDeserializationException(e);
+			}
             fixes.add(fix);
         }
 

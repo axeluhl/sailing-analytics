@@ -10,8 +10,8 @@ import org.osgi.framework.BundleContext;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.server.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.racelog.tracking.CachedOsgiTypeBasedServiceFinderFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());

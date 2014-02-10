@@ -17,7 +17,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -28,22 +28,22 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
 
     private final static Logger logger = Logger.getLogger(AddEntryToRaceLogJsonPostServlet.class.getName());
     
-    private TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceJsonServiceFinder;
+    private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonServiceFinder;
     
     @Override
     public void init(ServletConfig config) throws ServletException {
     	super.init(config);
     	deviceJsonServiceFinder = getServiceFinderFactory()
-    			.createServiceFinder(DeviceIdentifierJsonSerializationHandler.class);
+    			.createServiceFinder(DeviceIdentifierJsonHandler.class);
     }
 
     @Override
