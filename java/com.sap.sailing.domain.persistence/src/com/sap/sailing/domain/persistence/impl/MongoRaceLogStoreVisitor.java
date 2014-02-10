@@ -20,6 +20,11 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 
 public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
 
@@ -118,5 +123,35 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         storeEventInCollection(object);
     }
+
+	@Override
+	public void visit(DeviceCompetitorMappingEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+	}
+
+	@Override
+	public void visit(DeviceMarkMappingEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+	}
+
+	@Override
+	public void visit(DenoteForTrackingEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+	}
+
+	@Override
+	public void visit(CreateRaceEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+	}
+
+	@Override
+	public void visit(RevokeEvent event) {
+        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        storeEventInCollection(object);
+	}
 
 }

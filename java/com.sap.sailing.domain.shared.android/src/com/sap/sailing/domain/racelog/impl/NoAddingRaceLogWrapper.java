@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +13,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -199,4 +201,19 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Iterable<RaceLogEvent> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
         return innerRaceLog.getFixes(from, fromInclusive, to, toInclusive);
     }
+
+	@Override
+	public RaceLogEvent getEventById(Serializable id) {
+		return innerRaceLog.getEventById(id);
+	}
+
+	@Override
+	public boolean isEventRevokedBy(RevokeEvent revokeEvent) {
+		return innerRaceLog.isEventRevokedBy(revokeEvent);
+	}
+
+	@Override
+	public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
+		return innerRaceLog.getUnrevokedEvents();
+	}
 }

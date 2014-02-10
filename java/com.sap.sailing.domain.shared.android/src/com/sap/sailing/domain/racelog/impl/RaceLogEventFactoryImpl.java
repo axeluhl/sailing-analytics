@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
@@ -27,6 +30,16 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.events.CreateRaceEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.DenoteForTrackingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.DeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.RevokeEventImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
@@ -199,5 +212,35 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
             List<Competitor> competitors, int passId, Wind wind) {
         return new RaceLogWindFixEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, wind);
     }
+
+	@Override
+	public DeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
+			DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to) {
+		return new DeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(),
+				passId, mappedTo, device, from, to);
+	}
+
+	@Override
+	public DeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
+			DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to) {
+		return new DeviceMarkMappingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(),
+				passId, mappedTo, device, from, to);
+	}
+	
+	@Override
+	public DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
+			String raceName, BoatClass boatClass) {
+		return new DenoteForTrackingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId, raceName, boatClass);
+	}
+	
+	@Override
+	public CreateRaceEvent createCreateRaceEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId) {
+		return new CreateRaceEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId);
+	}
+	
+	@Override
+	public RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId) {
+		return new RevokeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId, revokedEventId);
+	}
 
 }
