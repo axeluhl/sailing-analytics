@@ -72,7 +72,7 @@ public class RaceTrackerTest {
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
-                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         logger.info("Calling raceHandle.getRaces()");
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained races: "+races);
@@ -130,7 +130,7 @@ public class RaceTrackerTest {
         service.removeRegatta(raceHandle.getRegatta());
         RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
-                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedRegatta, newTrackedRegatta);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
@@ -156,7 +156,7 @@ public class RaceTrackerTest {
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramUrl, liveUri, storedUri, courseDesignUpdateUri, EmptyRaceLogStore.INSTANCE,
-                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword);
+                        /* timeoutInMilliseconds */60000, tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking

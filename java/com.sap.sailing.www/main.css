@@ -125,6 +125,11 @@ a {
       #yield_content #keyVisual #infoBox p {
         color: white;
         font-size: 12px; }
+			#yield_content #keyVisual #infoBox a {
+        font-size: 12px; 
+				text-decoration: none;
+				float: right; }	
+				
   /* line 72, site.css.sass */
   #yield_content #mainContent {
     padding: 0 10px 10px 10px;

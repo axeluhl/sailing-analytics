@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence.impl;
+package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
