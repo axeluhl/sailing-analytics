@@ -727,6 +727,7 @@ public interface StringMessages extends Messages {
     String finishAt();
     String protestEndsAt();
     String unknown();
+    String raceLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
@@ -954,4 +955,5 @@ public interface StringMessages extends Messages {
     String toCalculateThe();
     String groupingProvider();
     String use();
+    String releaseNotes();
 }

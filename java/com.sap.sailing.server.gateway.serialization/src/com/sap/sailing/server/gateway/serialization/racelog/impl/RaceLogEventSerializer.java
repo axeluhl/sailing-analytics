@@ -3,6 +3,9 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.devices.SingleTypeBasedServiceFinderImpl;
+import com.sap.sailing.domain.devices.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -18,18 +21,30 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
+import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
+import com.sap.sailing.server.gateway.serialization.devices.SmartphoneImeiJsonSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
-
-    public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
+	public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
+		return create(competitorSerializer,
+				new SingleTypeBasedServiceFinderImpl<DeviceIdentifierJsonSerializationHandler>(
+						new SmartphoneImeiJsonSerializationHandler(), SmartphoneImeiIdentifier.TYPE));
+	}
+    public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer,
+    		TypeBasedServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder) {
         return new RaceLogEventSerializer(
                 new RaceLogFlagEventSerializer(competitorSerializer), 
                 new RaceLogStartTimeEventSerializer(competitorSerializer), 
@@ -50,7 +65,12 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogProtestStartTimeEventSerializer(competitorSerializer),
                 new RaceLogWindFixEventSerializer(competitorSerializer, 
                         new WindJsonSerializer(
-                                new PositionJsonSerializer())));
+                                new PositionJsonSerializer())),
+                new RaceLogDeviceCompetitorMappingEventSerializer(competitorSerializer, deviceServiceFinder),
+                new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, deviceServiceFinder),
+                new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
+                new RaceLogCreateRaceEventSerializer(competitorSerializer),
+                new RaceLogRevokeEventSerializer(competitorSerializer));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -66,6 +86,11 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer;
     private final JsonSerializer<RaceLogEvent> windFixEventSerializer;
+    private final JsonSerializer<RaceLogEvent> deviceCompetitorMappingSerializer;
+    private final JsonSerializer<RaceLogEvent> deviceMarkMappingSerializer;
+    private final JsonSerializer<RaceLogEvent> denoteForTrackingSerializer;
+    private final JsonSerializer<RaceLogEvent> createRaceSerializer;
+    private final JsonSerializer<RaceLogEvent> revokeSerializer;
     
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -82,7 +107,12 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> gateLineOpeningTimeEventSerializer,
             JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer,
             JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer,
-            JsonSerializer<RaceLogEvent> windFixEventSerializer) {
+            JsonSerializer<RaceLogEvent> windFixEventSerializer,
+            JsonSerializer<RaceLogEvent> deviceCompetitorMappingSerializer,
+            JsonSerializer<RaceLogEvent> deviceMarkMappingSerializer,
+            JsonSerializer<RaceLogEvent> denoteForTrackingSerializer,
+            JsonSerializer<RaceLogEvent> createRaceSerializer,
+            JsonSerializer<RaceLogEvent> revokeSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -96,6 +126,11 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.startProcedureChangedEventSerializer = startProcedureChangedEventSerializer;
         this.protestStartTimeEventSerializer = protestStartTimeEventSerializer;
         this.windFixEventSerializer = windFixEventSerializer;
+        this.deviceCompetitorMappingSerializer = deviceCompetitorMappingSerializer;
+        this.deviceMarkMappingSerializer = deviceMarkMappingSerializer;
+        this.denoteForTrackingSerializer = denoteForTrackingSerializer;
+        this.createRaceSerializer = createRaceSerializer;
+        this.revokeSerializer = revokeSerializer;
         
         this.chosenSerializer = null;
     }
@@ -180,5 +215,28 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     public void visit(RaceLogWindFixEvent event) {
         chosenSerializer = windFixEventSerializer;
     }
+    
+	@Override
+	public void visit(DeviceCompetitorMappingEvent event) {
+		chosenSerializer = deviceCompetitorMappingSerializer;
+	}
+	
+	@Override
+	public void visit(DeviceMarkMappingEvent event) {
+		chosenSerializer = deviceMarkMappingSerializer;
+	}
+	
+	@Override
+	public void visit(DenoteForTrackingEvent event) {
+		chosenSerializer = denoteForTrackingSerializer;
+	}
+	@Override
+	public void visit(CreateRaceEvent event) {
+		chosenSerializer = createRaceSerializer;
+	}
+	@Override
+	public void visit(RevokeEvent event) {
+		chosenSerializer = revokeSerializer;
+	}
 
 }

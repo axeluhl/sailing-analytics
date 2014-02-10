@@ -3,13 +3,21 @@ package com.sap.sailing.domain.racelog;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.tracking.Wind;
 
 public interface RaceLogEventFactory {
@@ -87,5 +95,18 @@ public interface RaceLogEventFactory {
     
     RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
             Serializable id, List<Competitor> competitors, int passId, Wind wind);
+
+    DeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
+            DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to);
+
+    DeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author,
+            DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to);
+
+    DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId,
+    		String raceName, BoatClass boatClass);
+
+    CreateRaceEvent createCreateRaceEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId);
+    
+    RevokeEvent createRevokeEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId, Serializable revokedEventId);
 
 }

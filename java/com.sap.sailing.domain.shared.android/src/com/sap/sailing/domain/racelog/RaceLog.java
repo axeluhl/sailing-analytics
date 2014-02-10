@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.racelog;
 
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.tracking.Track;
 
 /**
@@ -98,4 +101,26 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      *         in this race log yet
      */
     boolean load(RaceLogEvent event);
+    
+    /**
+     * Search for the event by its {@code id}, which will perform poorly for a large number
+     * of events, as they are ordered by {@link TimePoint}.
+     * @param id
+     * @return
+     */
+    RaceLogEvent getEventById(Serializable id);
+    
+    /**
+     * Check, whether the {@code revokeEvent} actually revokes the event it specifies by its
+     * {@link RevokeEvent#getRevokedEventId()}.
+     * @param revokeEvent
+     * @return
+     */
+    boolean isEventRevokedBy(RevokeEvent revokeEvent);
+    
+    /**
+     * Get a {@link NavigableSet} of unrevoked events.
+     * @return
+     */
+    NavigableSet<RaceLogEvent> getUnrevokedEvents();
 }

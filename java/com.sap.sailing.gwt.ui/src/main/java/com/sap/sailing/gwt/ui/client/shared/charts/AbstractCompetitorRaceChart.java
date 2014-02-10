@@ -73,7 +73,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
-    private static final int MAX_SERIES_POINTS = 10000;
     
     private final Label noCompetitorsSelectedLabel;
     private final Label noDataFoundLabel;

@@ -23,7 +23,7 @@ If we look at the "Events"  tab of the administration console, we can see that w
         }
     }
 
-In addition we need all the text fields and the checkbox of the dialog for creating a new event, which are instantiated by the class ´EventCreateDialog`, as well as for the dialog itself (Listing 2).
+In addition we need all the text fields and the checkbox of the dialog for creating a new event, which are instantiated by the class `EventCreateDialog`, as well as for the dialog itself (Listing 2).
 
     public class EventCreateDialog extends EventDialog<EventDTO> {
         public EventCreateDialog(Collection<EventDTO> existingEvents, StringMessages stringConstants,
@@ -143,7 +143,7 @@ For the dialog you should define the variables for the 3 different text fields a
         }
     }
 
-Now that you have access to the web elements, you can add your service methods to the page object. Usually the service methods are coarse granular, like `login(String user, String password)`, but since the dialog has an error state for the case of invalid input, which you may test later, you should add methods to interact with the single widgets (Listing 6). The methods for clicking the “Ok” or the “Cancel” button are already implemented in the base class `DataEntryDialog`. After finishing the dialog with “Ok”, our base class also waits for all pending asynchrony requests and returns immediately if there is none.
+Now that you have access to the web elements, you can add your service methods to the page object. Usually the service methods are coarse granular, like `login(String user, String password)`, but since the dialog has an error state for the case of invalid input, which you may test later, you should add methods to interact with the single widgets (Listing 6). The methods for clicking the “Ok” or the “Cancel” button are already implemented in the base class `DataEntryDialogPO`. After finishing the dialog with “Ok”, our base class also waits for all pending asynchrony requests and returns immediately if there is none.
 
     public class EventCreateDialogPO extends DataEntryDialogPO {
         ...
@@ -212,7 +212,7 @@ The page object for the event management panel is written in a similar fashion (
 
 In the last step, you have to plug your new page object for the event management in the page object for the administration console, which contains a method to switch to a tab. You should add a new method that calls the existing one with the right parameters and return your page object for the event management (Listing 8).
 
-    public class AdminConsolePagePO extends HostPage {
+    public class AdminConsolePage extends HostPage {
         ...
         
         private static final String EVENT_MANAGEMENT_TAB_LABEL = "Events"; //$NON-NLS-1$
@@ -242,7 +242,7 @@ Writing the test is straight forward and there are no big differences to other t
         
         @Test
         public void testCreateEvent() {
-            AdminConsolePagePO adminConsole = AdminConsolePagePO.goToPage(getWebDriver(), getContextRoot());
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             SailingEventManagementPanelPO eventManagement = adminConsole.goToEventManagement();
             
             eventManagement.createEvent("Test Event", "Test Venue", "", false);
@@ -256,3 +256,9 @@ Writing the test is straight forward and there are no big differences to other t
 
 
 ## Advanced Topics
+
+TODO by Riccardo
+
+* Extend DataEntryPO
+* Query Framework
+* WindowManager

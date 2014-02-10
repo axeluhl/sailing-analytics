@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
@@ -40,6 +41,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private static final long serialVersionUID = -176745401321893502L;
     private static final String DefaultLockName = RaceLogImpl.class.getName() + ".lock";
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+    private final Set<Serializable> revokedEventIds = new HashSet<Serializable>();
 
     /**
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
@@ -108,6 +110,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
@@ -127,11 +130,29 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         if (isAdded) {
             logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
         } else {
             logger.warning(String
                     .format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
         }
         return isAdded;
+    }
+    
+    private void revokeIfNecessary(RaceLogEvent newEvent) {
+        if (newEvent instanceof RevokeEvent) {
+            RevokeEvent revokeEvent = (RevokeEvent) newEvent;
+            lockForRead();
+            RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+            unlockAfterRead();
+
+            if (! (revokedEvent instanceof RevokeEvent) && isEventRevokedBy(revokeEvent)) {
+                lockForWrite();
+                revokedEventIds.add(revokeEvent.getRevokedEventId());
+                unlockAfterWrite();
+            } else {
+                logger.log(Level.FINE, "Not revoking event " + revokedEvent);
+            }
+        }
     }
 
     @Override
@@ -148,6 +169,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+            revokeIfNecessary(event);
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
@@ -277,5 +299,31 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         edtc.addAll(result);
         return result;
+    }
+
+    @Override
+    public RaceLogEvent getEventById(Serializable id) {
+        for (RaceLogEvent e : getRawFixes()) {
+            if (e.getId().equals(id)) return e;
+        }
+        return null;
+    }
+    
+    @Override
+    public boolean isEventRevokedBy(RevokeEvent revokeEvent) {
+        lockForRead();
+        RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+        unlockAfterRead();
+        return getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) > 0;
+    }
+    
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
+        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes()) {
+            @Override
+            protected boolean isValid(RaceLogEvent e) {
+            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
+            }
+        };
     }
 }

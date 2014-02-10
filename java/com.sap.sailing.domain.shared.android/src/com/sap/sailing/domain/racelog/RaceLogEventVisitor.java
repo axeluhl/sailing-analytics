@@ -1,5 +1,11 @@
 package com.sap.sailing.domain.racelog;
 
+import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+
 
 public interface RaceLogEventVisitor {
     public void visit(RaceLogFlagEvent event);
@@ -27,4 +33,14 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogProtestStartTimeEvent event);
     
     public void visit(RaceLogWindFixEvent event);
+    
+    public void visit(DeviceCompetitorMappingEvent event);
+    
+    public void visit(DeviceMarkMappingEvent event);
+    
+    public void visit(DenoteForTrackingEvent event);
+    
+    public void visit(CreateRaceEvent event);
+    
+    public void visit(RevokeEvent event);
 }
