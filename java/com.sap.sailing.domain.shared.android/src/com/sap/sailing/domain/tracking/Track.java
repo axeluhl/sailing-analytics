@@ -131,5 +131,4 @@ public interface Track<FixType extends Timed> extends Serializable {
      * will be thrown in case the caller has failed to do so.
      */
     Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
-
 }
