@@ -220,6 +220,11 @@ public class FixesAndTails {
      * competitor's tail, the tail is adjusted by inserting the corresponding fix.
      * <p>
      * 
+     * If the last fix so far was an {@link GPSFixDTO#extrapolated extrapolated} fix, and the merge leads to a different
+     * fix being the last one shown, the previously last fix that was extrapolated will be removed. This way, at most
+     * one extrapolated fix is shown, avoiding jitter on the map as actual fixes are received that obsolete the
+     * extrapolated ones.<p>
+     * 
      * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
      * 
      * @param mergeThis
