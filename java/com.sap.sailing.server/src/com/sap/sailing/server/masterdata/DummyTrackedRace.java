@@ -1,4 +1,4 @@
-package com.sap.sailing.server.operationaltransformation;
+package com.sap.sailing.server.masterdata;
 
 import java.io.Serializable;
 import java.util.HashSet;
