@@ -48,13 +48,15 @@ import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+import com.sap.sailing.domain.test.mock.MockServiceFinderFactory;
 
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
-            .getMongoObjectFactory(getMongoService());
+            .getMongoObjectFactory(getMongoService(), new MockServiceFinderFactory());
     protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
-            .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+            .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE,
+            		new MockServiceFinderFactory());
     protected RaceLogEventRestoreFactory eventFactory = RaceLogEventRestoreFactory.INSTANCE;
 
     protected RaceLogIdentifier logIdentifier;

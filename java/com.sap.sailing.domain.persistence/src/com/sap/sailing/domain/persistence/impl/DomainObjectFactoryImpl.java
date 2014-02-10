@@ -1186,8 +1186,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogDeviceCompetitorMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	//TODO
-    	DeviceIdentifier device = null;
+    	DeviceIdentifier device = loadDeviceId(deviceIdentifierServiceFinder,
+    			(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
     	Competitor mappedTo = DomainFactory.INSTANCE.getExistingCompetitorById(
     			(Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
@@ -1197,8 +1197,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogDeviceMarkMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	//TODO
-    	DeviceIdentifier device = null;
+    	DeviceIdentifier device = loadDeviceId(deviceIdentifierServiceFinder,
+    			(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
     	Mark mappedTo = DomainFactory.INSTANCE.getOrCreateMark(
     			(Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);

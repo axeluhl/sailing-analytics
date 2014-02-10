@@ -778,7 +778,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
-        //TODO
+        DBObject deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());   
+        result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
         storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
@@ -790,7 +791,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
-        //TODO
+        DBObject deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());   
+        result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
         storeTimePoint(event.getTo(), result, FieldNames.RACE_LOG_TO);
