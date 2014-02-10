@@ -11,6 +11,7 @@ public interface TracTracConnectionConstants {
     final int PORT_STORED = PORT_LIVE + 1;                      //For official usage use 4401;
     
     final String HIDDEN_STATUS = "HIDDEN";
+    final String ONLINE_STATUS = "ONLINE";
     final Object REPLAY_STATUS = "REPLAY";
 
 }
