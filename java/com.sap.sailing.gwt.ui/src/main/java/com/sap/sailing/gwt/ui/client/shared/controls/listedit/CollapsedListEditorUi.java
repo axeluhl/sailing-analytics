@@ -103,5 +103,13 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
             return expandedComposite.getValue();
         }
     }
+
+    @Override
+    public void onRowAdded() {
+    }
+
+    @Override
+    public void onRowRemoved() {
+    }
 }
 

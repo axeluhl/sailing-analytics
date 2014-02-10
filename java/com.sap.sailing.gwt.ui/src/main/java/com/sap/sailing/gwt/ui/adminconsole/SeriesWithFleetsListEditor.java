@@ -52,7 +52,7 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         }
 
         @Override
-        protected Widget createValueWidget(int row, SeriesDTO seriesDTO) {
+        protected Widget createValueWidget(int rowIndex, SeriesDTO seriesDTO) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(5);
             Label seriesLabel = new Label(stringMessages.series() + " '" + seriesDTO.getName() + "' :");

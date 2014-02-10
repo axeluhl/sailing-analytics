@@ -10,4 +10,7 @@ public interface ListEditorUiStrategy<ValueType> {
     void setContext(ListEditorComposite<ValueType> context);
 
     boolean isCollapsed();
+    
+    void onRowAdded();
+    void onRowRemoved();
 }

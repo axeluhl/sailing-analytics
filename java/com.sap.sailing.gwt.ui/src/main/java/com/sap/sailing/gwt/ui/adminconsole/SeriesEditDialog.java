@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog;
@@ -43,7 +44,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private final StringMessages stringMessages;
     private VerticalPanel additionalWidgetPanel;
     private final SeriesDTO selectedSeries;
+    private final RegattaDTO regatta;
     private final DiscardThresholdBoxes discardThresholdBoxes;
+    private StringListEditorComposite raceNamesEditor;
     
     private static class RaceDialogValidator implements Validator<SeriesDescriptor> {
         private StringMessages stringMessages;
@@ -109,6 +112,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     public SeriesEditDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringMessages,DialogCallback<SeriesDescriptor> callback) {
         super(stringMessages.actionEditSeries(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(regatta, stringMessages), callback);
+        this.regatta = regatta;
         this.selectedSeries = selectedSeries;
         this.stringMessages = stringMessages;
         discardThresholdBoxes = new DiscardThresholdBoxes(this, selectedSeries.getDiscardThresholds(), stringMessages);
@@ -178,7 +182,14 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         additionalWidgetPanel.add(discardThresholdBoxes.getWidget());
         discardThresholdBoxes.getWidget().setVisible(useSeriesResultDiscardingThresholdsCheckbox.getValue());
         
-        raceNamesEditor = new StringListEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(stringMessages, resources.removeIcon(), seriesName));
+        raceNamesEditor = new StringListInlineEditorComposite(getExistingRacesOfSeries(), new RaceNamesEditorUi(regatta, stringMessages, resources.removeIcon(), seriesName));
+        raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<String>> event) {
+                validate();
+            }
+        });
+        
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(raceNamesEditor, stringMessages.races());
@@ -188,8 +199,6 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         return additionalWidgetPanel;
     }
     
-    private StringListEditorComposite raceNamesEditor;
-
     private List<String> getExistingRacesOfSeries() {
         List<String> names = new ArrayList<String>();
         SeriesDTO selectedSeries = getSelectedSeries();
@@ -205,7 +214,8 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         return selectedSeries;
     }
     
-    private class RaceNamesEditorUi extends StringListEditorComposite.ExpandedUi {
+    private class RaceNamesEditorUi extends StringListInlineEditorComposite.ExpandedUi {
+        private final RegattaDTO regatta;
         
         private final ListBox addRacesFromListBox;
         private final ListBox addRacesToListBox;
@@ -215,8 +225,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         private final String seriesName;
         private final Label addRacesHintLabel;
         
-        public RaceNamesEditorUi(StringMessages stringMessages, ImageResource removeImage, String seriesName) {
+        public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
             super(stringMessages, removeImage, Collections.<String>emptyList());
+            this.regatta = regatta;
             this.addRacesFromListBox = createListBox(false);
             this.addRacesToListBox = createListBox(false);
             this.raceNamePrefixTextBox = createTextBox(null);
@@ -241,7 +252,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             return result;
         }
         
-        private void updateHintLabel() {
+        public void updateHintLabel() {
             List<String> resolveRaceNamesToAdd = resolveRaceNamesToAdd();
             String hintText = "Hint: 'Add' will create the races: ";
             for(String raceName: resolveRaceNamesToAdd) {
@@ -250,12 +261,40 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             addRacesHintLabel.setText(hintText);
         }
 
-        private void updateFromToListboxesSelection() {
-            int currentSize = context.getValue().size();
-            addRacesFromListBox.setSelectedIndex(currentSize);
-            addRacesToListBox.setSelectedIndex(currentSize);
+        public void updateFromToListboxesSelection() {
+            int nextNumber = calculateNextValidRaceNumber(raceNamePrefixTextBox.getValue());
+            addRacesFromListBox.setSelectedIndex(nextNumber-1);
+            addRacesToListBox.setSelectedIndex(nextNumber-1);
         }
 
+        private int calculateNextValidRaceNumber(String prefix) {
+            int maxNumber = 0;
+            List<String> allRaces = new ArrayList<String>();
+            for (SeriesDTO seriesDTO: regatta.series) {
+                if(seriesName.equals(seriesDTO.getName())) {
+                    allRaces.addAll(context.getValue());
+                } else {
+                    for (RaceColumnDTO raceColumn : seriesDTO.getRaceColumns()) {
+                        allRaces.add(raceColumn.getName());
+                    }                    
+                }
+            }
+            for(String name: allRaces) {
+                if(prefix != null && !prefix.isEmpty() && name.startsWith(prefix)) {
+                    String withoutPrefix = name.substring(prefix.length(), name.length());
+                    try {
+                        int number = Integer.parseInt(withoutPrefix);
+                        if(number > maxNumber) {
+                            maxNumber = number;
+                        }
+                    } catch ( NumberFormatException nbe) {
+                        // do nothing
+                    }
+                }
+            }
+            return maxNumber+1;
+        }
+            
         @Override
         protected Widget createAddWidget() {
             VerticalPanel vPanel = new VerticalPanel();
@@ -316,8 +355,8 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                             addValue(raceToAdd);
                         }
                         validate();
-                        updateFromToListboxesSelection();
-                        updateHintLabel();
+//                        updateFromToListboxesSelection();
+//                        updateHintLabel();
                     } else {
                         Window.alert("Please select a series first.");
                     }
@@ -333,6 +372,18 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             updateHintLabel();
             
             return vPanel;
+        }
+
+        @Override
+        public void onRowAdded() {
+            updateFromToListboxesSelection();
+            updateHintLabel();
+        }
+
+        @Override
+        public void onRowRemoved() {
+            updateFromToListboxesSelection();
+            updateHintLabel();
         }
     }
 }

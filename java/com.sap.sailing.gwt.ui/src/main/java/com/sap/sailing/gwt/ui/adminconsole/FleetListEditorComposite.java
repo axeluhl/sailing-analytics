@@ -61,7 +61,7 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
         }
 
         @Override
-        protected Widget createValueWidget(int row, FleetDTO fleet) {
+        protected Widget createValueWidget(int rowIndex, FleetDTO fleet) {
             HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setSpacing(4);
             Label fleetLabel = new Label(stringMessages.fleet() + " '" + fleet.getName() + "' :");

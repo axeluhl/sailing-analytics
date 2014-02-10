@@ -6,6 +6,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,6 +20,10 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         super(stringMessages);
         this.removeImage = removeImage;
     }
+
+    protected abstract Widget createAddWidget();
+
+    protected abstract Widget createValueWidget(int rowIndex, ValueType newValue);
 
     @Override
     public Widget initWidget() {
@@ -53,23 +58,48 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
             @Override
             public void onClick(ClickEvent event) {
                 int rowToRemove = expandedValuesGrid.getCellForEvent(event).getRowIndex();
-                expandedValuesGrid.removeRow(rowToRemove);
-                context.getValue().remove(rowToRemove);
-                context.onChange();
+                removeRow(rowToRemove);
             }
         });
 
-        expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(rowIndex+1, newValue));
+        expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(rowIndex, newValue));
         expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
+    }
+
+    private void removeRow(int rowIndexToRemove) {
+        expandedValuesGrid.removeRow(rowIndexToRemove);
+        context.getValue().remove(rowIndexToRemove);
+        context.onChange();
+        
+        onRowRemoved();
+    }
+    
+    protected void setValueFromValueWidget(ValueBoxBase<ValueType> valueWidget, ValueType newValue, boolean fireEvents) {
+        for(int i = 0; i < expandedValuesGrid.getRowCount(); i++) {
+            Widget gridWidget = expandedValuesGrid.getWidget(i, 0);
+            if(gridWidget.getElement() == valueWidget.getElement()) {
+                context.getValue().set(i, newValue);
+                if (fireEvents) {
+                    context.onChange();
+                }
+                break;
+            }
+        }
     }
 
     protected void addValue(ValueType newValue) {
         context.getValue().add(newValue);
         addRow(newValue);
         context.onChange();
+        
+        onRowAdded();
     }
 
-    protected abstract Widget createAddWidget();
+    @Override
+    public void onRowAdded() {
+    }
 
-    protected abstract Widget createValueWidget(int row, ValueType newValue);
+    @Override
+    public void onRowRemoved() {
+    }
 }

@@ -208,7 +208,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
                 
-        allowedCourseAreasList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(), suggestedCourseAreaNames);
+        allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), resources.removeIcon(), suggestedCourseAreaNames);
         allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
                 
@@ -220,7 +220,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
         
-        courseNamesList = StringListEditorComposite.createCollapsed(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames);
+        courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), resources.removeIcon(), suggestedCourseNames);
         courseNamesList.setWidth("80%");
         courseNamesList.addValueChangeHandler(dirtyValueMarker);
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseNames()));
