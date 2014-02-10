@@ -280,10 +280,21 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 }
             }
             for(String name: allRaces) {
-                if(prefix != null && !prefix.isEmpty() && name.startsWith(prefix)) {
-                    String withoutPrefix = name.substring(prefix.length(), name.length());
+                if(prefix != null && !prefix.isEmpty()) {
+                    if(name.startsWith(prefix)) {
+                        String withoutPrefix = name.substring(prefix.length(), name.length());
+                        try {
+                            int number = Integer.parseInt(withoutPrefix);
+                            if(number > maxNumber) {
+                                maxNumber = number;
+                            }
+                        } catch ( NumberFormatException nbe) {
+                            // do nothing
+                        }
+                    }
+                } else {
                     try {
-                        int number = Integer.parseInt(withoutPrefix);
+                        int number = Integer.parseInt(name);
                         if(number > maxNumber) {
                             maxNumber = number;
                         }
