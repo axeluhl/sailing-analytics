@@ -2,10 +2,10 @@ package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.Duration;
 
-public class MillisecondDurationImpl implements Duration {
+public class MillisecondsDurationImpl implements Duration {
     private final long millis;
     
-    public MillisecondDurationImpl(long millis) {
+    public MillisecondsDurationImpl(long millis) {
         super();
         this.millis = millis;
     }
@@ -13,5 +13,10 @@ public class MillisecondDurationImpl implements Duration {
     @Override
     public long asMillis() {
         return millis;
+    }
+
+    @Override
+    public Duration divide(long divisor) {
+        return new MillisecondsDurationImpl(asMillis() / divisor);
     }
 }

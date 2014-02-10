@@ -8,4 +8,6 @@ package com.sap.sailing.domain.common;
  */
 public interface Duration {
     long asMillis();
+    
+    Duration divide(long divisor);
 }

@@ -46,7 +46,7 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public Duration until(TimePoint later) {
-        return new MillisecondDurationImpl(later.asMillis()-asMillis());
+        return new MillisecondsDurationImpl(later.asMillis()-asMillis());
     }
 
     @Override
