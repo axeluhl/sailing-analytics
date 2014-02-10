@@ -1,0 +1,13 @@
+package com.sap.sailing.domain.persistence.devices;
+
+import com.sap.sailing.domain.tracking.GPSFix;
+
+/**
+ * For GPS Fixes, the fully qualified class name is the type used to identify
+ * the handlers, as the fixes are domain objects and are not intended to carry
+ * some separate type attribute.
+ * @author Fredrik Teschke
+ *
+ */
+public interface GPSFixPersistenceHandler extends MongoPersistenceHandler<GPSFix> {
+}

@@ -25,7 +25,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
-import com.sap.sailing.domain.test.mock.MockDeviceTypeServiceFinderFactory;
+import com.sap.sailing.domain.test.mock.MockServiceFinderFactory;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -45,7 +45,7 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     
     @Test
     public void testStoreAndLoadFixes() {
-    	TypeBasedServiceFinderFactory factory = new MockDeviceTypeServiceFinderFactory();
+    	TypeBasedServiceFinderFactory factory = new MockServiceFinderFactory();
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), factory);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
         

@@ -18,7 +18,8 @@ Export-Package: com.sap.sailing.domain.persistence,
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.domain.swisstimingadapter.test,
    com.sap.sailing.domain.persistence.test,
-   com.sap.sailing.server.gateway.test",
+   com.sap.sailing.server.gateway.test,
+   com.sap.sailing.domain.smartphoneadapter.testsupport",
  com.sap.sailing.domain.persistence.media
 Bundle-ActivationPolicy: lazy
 Import-Package: org.json.simple,

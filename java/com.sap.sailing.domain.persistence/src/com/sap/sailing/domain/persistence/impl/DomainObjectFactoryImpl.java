@@ -103,6 +103,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
+import com.sap.sailing.domain.persistence.devices.GPSFixPersistenceHandler;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -128,13 +129,10 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -153,6 +151,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<GPSFixPersistenceHandler> fixServiceFinder;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
@@ -166,8 +165,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
         this.serviceFinderFactory = serviceFinderFactory;
-        this.deviceIdentifierServiceFinder = serviceFinderFactory == null ?
-        		null : serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
+        if (serviceFinderFactory != null) {
+            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
+            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixPersistenceHandler.class);
+        } else {
+        	this.deviceIdentifierServiceFinder = null;
+        	this.fixServiceFinder = null;
+        }
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
         this.database = db;
@@ -1475,20 +1479,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private GPSFix loadGPSFix(DBObject object) {
-        TimePoint timePoint = loadTimePoint(object);
-        Position position = loadPosition(object);
-
-        GPSFix fix = null;
-
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
-        if (GPSFixMoving.class.getSimpleName().equals(type)) {
-            SpeedWithBearing speed = loadSpeedWithBearing(object);
-            fix = new GPSFixMovingImpl(position, timePoint, speed);
-        } else {
-            fix = new GPSFixImpl(position, timePoint);
-        }
-
-        return fix;
+        Object fixObject = object.get(FieldNames.GPSFIX.name());
+        return fixServiceFinder.findService(type).load(fixObject);
     }
     
     private void ensureIndicesOnGPSFixCollection() {

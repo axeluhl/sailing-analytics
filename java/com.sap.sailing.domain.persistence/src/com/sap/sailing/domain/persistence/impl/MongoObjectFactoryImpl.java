@@ -61,6 +61,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.devices.DeviceIdentifierPersistenceHandler;
+import com.sap.sailing.domain.persistence.devices.GPSFixPersistenceHandler;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -78,7 +79,6 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -93,6 +93,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final TypeBasedServiceFinder<GPSFixPersistenceHandler> fixServiceFinder;
     private final TypeBasedServiceFinder<DeviceIdentifierPersistenceHandler> deviceIdentifierServiceFinder;
     
     /**
@@ -106,8 +107,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public MongoObjectFactoryImpl(DB database, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this.database = database;
-        this.deviceIdentifierServiceFinder = serviceFinderFactory == null ?
-        		null : serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
+        if (serviceFinderFactory != null) {
+            this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierPersistenceHandler.class);
+            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixPersistenceHandler.class);
+        } else {
+        	this.deviceIdentifierServiceFinder = null;
+        	this.fixServiceFinder = null;
+        }
     }
     
     @Override
@@ -994,15 +1000,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 		DBCollection collection = getGPSFixCollection();
 		for (GPSFix fix : fixes) {
 			DBObject entry = new BasicDBObject(FieldNames.DEVICE_ID.name(), dbDeviceId);
-			storeTimed(fix, entry);
-			storePositioned(fix, entry);
-
-			String type = GPSFix.class.getSimpleName();
-			if (fix instanceof GPSFixMoving) {
-				type = GPSFixMoving.class.getSimpleName();
-				storeSpeedWithBearing(((GPSFixMoving) fix).getSpeed(), entry);
-			}
+			String type = fix.getClass().getName();
 	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
+			Object fixObject = fixServiceFinder.findService(type).store(fix);
+			entry.put(FieldNames.GPSFIX.name(), fixObject);
 
 	        collection.insert(entry);
 		}

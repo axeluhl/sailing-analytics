@@ -23,17 +23,14 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.devices.DeviceIdentifier;
 import com.sap.sailing.domain.devices.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.test.mock.MockDeviceTypeServiceFinder;
-import com.sap.sailing.domain.test.mock.MockDeviceTypeServiceFinderFactory;
-import com.sap.sailing.domain.test.mock.MockGPSFixJsonSerializationServiceFinder;
+import com.sap.sailing.domain.test.mock.MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer;
+import com.sap.sailing.domain.test.mock.MockServiceFinderFactory;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
-import com.sap.sailing.server.gateway.impl.RecordFixesPostServlet;
-import com.sap.sailing.server.gateway.serialization.devices.DeviceIdentifierJsonSerializationHandler;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class RecordFixesTest {
@@ -43,11 +40,9 @@ public class RecordFixesTest {
 
 	@Before
 	public void before() {
-		MockDeviceTypeServiceFinderFactory serviceFinderFactory = new MockDeviceTypeServiceFinderFactory();
-		MockDeviceTypeServiceFinder<DeviceIdentifierJsonSerializationHandler> deviceServiceFinder = new MockDeviceTypeServiceFinder<DeviceIdentifierJsonSerializationHandler>();
-		MockGPSFixJsonSerializationServiceFinder fixServiceFinder = new MockGPSFixJsonSerializationServiceFinder();
-		DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer = new DeviceAndSessionIdentifierWithGPSFixesDeserializer(
-				fixServiceFinder, deviceServiceFinder);
+		MockServiceFinderFactory serviceFinderFactory = new MockServiceFinderFactory();
+		DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
+				new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
 		service = new RacingEventServiceImpl(null, serviceFinderFactory);
 		servlet = new RecordFixesPostServlet();
 		servlet = spy(servlet);
