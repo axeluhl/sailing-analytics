@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -86,10 +87,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    
+    /**
+     * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
+     * Use this constructor only for testing purposes or in cases where there will happen absolutely no access to
+     * {@link DeviceIdentifier} objects.
+     */
     public MongoObjectFactoryImpl(DB database) {
-        super();
+        this(database, /* deviceTypeServiceFinder */ null);
+    }
+    
+    public MongoObjectFactoryImpl(DB database, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this.database = database;
+        this.serviceFinderFactory = serviceFinderFactory;
     }
     
     @Override
@@ -965,5 +976,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
         configurationsCollections.remove(query);
     }
-
 }

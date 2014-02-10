@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.devices.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.impl.PersistenceFactoryImpl;
 import com.sap.sailing.mongodb.MongoDBService;
 
@@ -9,6 +10,8 @@ public interface PersistenceFactory {
     
     DomainObjectFactory getDefaultDomainObjectFactory();
     DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService, DomainFactory baseDomainFactory);
+    DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory);
     MongoObjectFactory getDefaultMongoObjectFactory();
     MongoObjectFactory getMongoObjectFactory(MongoDBService mongoDBService);
+    MongoObjectFactory getDefaultMongoObjectFactory(TypeBasedServiceFinderFactory serviceFinderFactory);
 }

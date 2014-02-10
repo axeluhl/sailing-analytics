@@ -107,5 +107,4 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
-
 }
