@@ -37,14 +37,13 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
-public class AbstractMockedRaceMarkPassingTest extends AbstractRaceChangeListener {
+public class AbstractMockedRaceMarkPassingTest {
     protected Competitor bob = new CompetitorImpl("Bob", "Bob", null, null, null);
     protected Competitor joe = new CompetitorImpl("Joe", "Joe", null, null, null);
     protected Competitor mike = new CompetitorImpl("Mike", "Mike", null, null, null);
@@ -63,21 +62,16 @@ public class AbstractMockedRaceMarkPassingTest extends AbstractRaceChangeListene
         Waypoint w1 = new WaypointImpl(cp, PassingInstruction.Line);
         Waypoint w2 = new WaypointImpl(m, PassingInstruction.Port);
         Waypoint w3 = new WaypointImpl(cp, PassingInstruction.Line);
-        Regatta r = new RegattaImpl("regatta", new BoatClassImpl("boat", true), Arrays.asList(new SeriesImpl("Series",
-                true, Arrays.asList(new FleetImpl("fleet")), new ArrayList<String>(), null)), true, new HighPoint(),
-                "ID", new CourseAreaImpl("area", new UUID(5, 5)));
+        Regatta r = new RegattaImpl("regatta", new BoatClassImpl("boat", true), Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
+                new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", Arrays.asList(w1, w2, w3));
-        RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true),
-                Arrays.asList(bob));
-        trackedRace = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), race, new ArrayList<Sideline>(),
-                new EmptyWindStore(), 0, 10000, 10000);
+        RaceDefinition race = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(bob));
+        trackedRace = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), race, new ArrayList<Sideline>(), new EmptyWindStore(), 0, 10000, 10000);
         trackedRace.setStartTimeReceived(new MillisecondsTimePoint(System.currentTimeMillis() - 120000));
-        List<MillisecondsTimePoint> tps = Arrays.asList(new MillisecondsTimePoint(System.currentTimeMillis()),
-                new MillisecondsTimePoint(System.currentTimeMillis() - 30000),
+        List<MillisecondsTimePoint> tps = Arrays.asList(new MillisecondsTimePoint(System.currentTimeMillis()), new MillisecondsTimePoint(System.currentTimeMillis() - 30000),
                 new MillisecondsTimePoint(System.currentTimeMillis() + 30000));
-        List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)),
-                new Pair<Mark, Position>(m2, new DegreePosition(-0.001, -0.00005)), new Pair<Mark, Position>(m3,
-                        new DegreePosition(-0.001, 0.00005)));
+        List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)), new Pair<Mark, Position>(m2, new DegreePosition(-0.001, -0.00005)),
+                new Pair<Mark, Position>(m3, new DegreePosition(-0.001, 0.00005)));
         for (Pair<Mark, Position> pair : pos) {
             for (TimePoint t : tps) {
                 trackedRace.recordFix(pair.getA(), new GPSFixImpl(pair.getB(), t));
@@ -89,10 +83,8 @@ public class AbstractMockedRaceMarkPassingTest extends AbstractRaceChangeListene
     }
 
     protected GPSFixMoving rndFix() {
-        DegreePosition position = new DegreePosition(37.8878 + rnd.nextDouble() * 0.0019, -122.268 - rnd.nextDouble()
-                * 0.012);
-        TimePoint p = new MillisecondsTimePoint(
-                (long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000))));
+        DegreePosition position = new DegreePosition(37.8878 + rnd.nextDouble() * 0.0019, -122.268 - rnd.nextDouble() * 0.012);
+        TimePoint p = new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000))));
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
 
         return new GPSFixMovingImpl(position, p, speed);
