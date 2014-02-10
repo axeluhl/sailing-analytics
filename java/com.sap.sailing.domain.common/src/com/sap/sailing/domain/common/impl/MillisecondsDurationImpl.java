@@ -4,7 +4,9 @@ import com.sap.sailing.domain.common.Duration;
 
 public class MillisecondsDurationImpl implements Duration {
     private static final long serialVersionUID = -4257982564719184723L;
-    private final long millis;
+    private long millis;
+    
+    MillisecondsDurationImpl() {} // for serialization only
     
     public MillisecondsDurationImpl(long millis) {
         super();
