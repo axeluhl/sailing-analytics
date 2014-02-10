@@ -31,6 +31,9 @@ import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
+import com.sap.sailing.domain.test.measurements.Measurement;
+import com.sap.sailing.domain.test.measurements.MeasurementCase;
+import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -40,9 +43,16 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
+        className = getClass().getName();
+        fileName = getFileName();
+        eventName = getExpectedEventName();
     }
 
     protected abstract String getFileName();
+    
+    protected static String fileName;
+    protected static String className;
+    protected static String eventName;
 
     private static List<Double> accuracys = new ArrayList<>();
 
@@ -99,8 +109,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         int incorrectStarts = 0;
 
         boolean printRight = false;
-        boolean printWrong = true;
-        boolean printResult = true;
+        boolean printWrong = false;
+        boolean printResult = false;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
@@ -255,12 +265,14 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     @AfterClass
-    public static void outPutAccuracy() {
-        double total = 0;
-        for (double d : accuracys) {
-            total += d;
+    public static void createXML() {
+        double result = 0;
+        for(Double d : accuracys){
+            result += d;
         }
-        double average = total / accuracys.size();
-        System.out.println("<measurement><name>Average Accuracy</name><value>" + average + "</value></measurement>");
+        result /= accuracys.size();
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-"+fileName+"Test.xml", "MarkPassingTest", className);
+        MeasurementCase performanceReportCase = performanceReport.addCase(eventName+" accuracy");
+        performanceReportCase.addMeasurement(new Measurement(eventName+" accuracy", result));
     }
 }
