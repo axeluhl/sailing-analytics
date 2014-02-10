@@ -193,4 +193,8 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void removeRaceIdentifier(Fleet fleet) {
     }
+
+    @Override
+    public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
+    }
 }

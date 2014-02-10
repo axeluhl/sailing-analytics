@@ -34,20 +34,16 @@ public class TrackingQualityColumn extends DetailTypeColumn<Double, Double> {
                 }
 
                 @Override
-                public void render(Double timeSinceLastPositionFixInSeconds, SafeHtmlBuilder builder) {
-                    if (timeSinceLastPositionFixInSeconds != null) {
+                public void render(Double ratioOfLagAndAverageSamplingInterval, SafeHtmlBuilder builder) {
+                    if (ratioOfLagAndAverageSamplingInterval != null) {
                         builder.append(SafeHtmlUtils.fromTrustedString("<div class=\"" + STYLE_TRACKING_QUALITY_CIRCLE + " "));
-
-                        // builder.append(SafeHtmlUtils.fromTrustedString(diffInSeconds + "s"));
-
-                        if(timeSinceLastPositionFixInSeconds < 5.0) {
+                        if (ratioOfLagAndAverageSamplingInterval < 3.0) {
                             builder.append(SafeHtmlUtils.fromTrustedString(STYLE_TRACKING_QUALITY_CIRCLE_GREEN));
-                        } else if(timeSinceLastPositionFixInSeconds < 10) {
+                        } else if (ratioOfLagAndAverageSamplingInterval < 5) {
                             builder.append(SafeHtmlUtils.fromTrustedString(STYLE_TRACKING_QUALITY_CIRCLE_YELLOW));
                         } else {
                             builder.append(SafeHtmlUtils.fromTrustedString(STYLE_TRACKING_QUALITY_CIRCLE_RED));
                         }
-
                         builder.append(SafeHtmlUtils.fromTrustedString("\"></div>"));
                     } else {
                         builder.append(SafeHtmlUtils.fromTrustedString(STYLE_TRACKING_QUALITY_CIRCLE_GREEN));

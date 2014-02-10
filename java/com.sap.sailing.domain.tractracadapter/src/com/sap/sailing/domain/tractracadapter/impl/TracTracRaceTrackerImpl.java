@@ -370,12 +370,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 final String[] pathFragments = storedURI.getPath().split("\\/");
                 final String mtbFileName = pathFragments[pathFragments.length-1];
                 final String directoryAndFileName = directory+"/"+mtbFileName;
-                if (!new File(directoryAndFileName).exists()) {
+                final File f = new File(directoryAndFileName);
+                if (!f.exists()) {
                     FileOutputStream mtbOutStream = null;
                     try {
                         logger.info("Starting to download " + storedURI + " to cache dir " + directoryAndFileName);
                         InputStream in = storedURI.toURL().openStream();
-                        mtbOutStream = new FileOutputStream(new File(directoryAndFileName));
+                        mtbOutStream = new FileOutputStream(f);
                         byte data[] = new byte[1024];
                         int count;
                         while ((count = in.read(data, 0, 1024)) != -1)
