@@ -23,11 +23,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 /**
- * The standard implementation of {@link AbstractCandidateChooser}. First two proxy-candidates are created, It makes
- * creates {@link Edge}s out of the {@link Candidate}s for each competitor, creating a DAG. The shortest path from A
- * shortest path-algorithm is then used to find the most likely sequence of {@link MarkPassing}s. An estimation of the
- * time between two {@link Candidate}s and the distance between their {@link Waypoint}s is used to further increase the
- * edges correctness.
+ * The standard implementation of {@link AbstractCandidateChooser}. A graph is created, with each {@link Candidate} as a
+ * vertices between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an {@link Edge} is
+ * equal to the probability of the two Candidates plus and estimation of the distance traveled between the them. A
+ * shortest path-algorithm is then used to find the most likely sequence of {@link MarkPassing}s.
  * 
  * @author Nicolas Klose
  * 
@@ -44,7 +43,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
-    private static double strictness = 1000;
+    private static double strictness = 1000; // Lower = stricter
 
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);

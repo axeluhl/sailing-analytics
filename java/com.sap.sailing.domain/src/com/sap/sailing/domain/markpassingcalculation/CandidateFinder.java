@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
@@ -27,9 +26,10 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.LineDetails;
 
 /**
- * The standard implemantation of {@link AbstractCandidateFinder}. The fixes are evaluated for their distance to each
- * Waypoint. Every local minimum is a Candidate, and its probability depends on its ratio to the average lengths of the
- * {@link Leg}s before and after it.
+ * The standard implemantation of {@link AbstractCandidateFinder}. There are two ways {@link Candidate}s can be created.
+ * First of all, all local distance minima to a waypoint are a candidate. Secondly, every time a competitor passes the
+ * crossing Bearing of a Waypoint a Candidate is created through linear interpolation. The probability of a Candidate
+ * depends on its distance to the waypoint, whether it is on the right side and if it passes in the right direction. 
  * 
  * @author Nicolas Klose
  * 
@@ -52,6 +52,8 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
     };
 
+    private double strictness = 20; // Higher = stricter
+
     // TODO Identical Waypoints (ControlPoint and PassingInstruction) are calculated twice.
     // => Distance to Mark instead of Waypoint?
 
@@ -65,30 +67,32 @@ public class CandidateFinder implements AbstractCandidateFinder {
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
                 cteCandidates.get(c).put(w, new LinkedHashMap<List<GPSFix>, Candidate>());
                 distanceCandidates.get(c).put(w, new LinkedHashMap<GPSFix, Candidate>());
-                PassingInstruction instruction = w.getPassingInstructions();
-                if (instruction == PassingInstruction.None || instruction == null) {
-                    if (w.equals(race.getRace().getCourse().getFirstWaypoint()) || w.equals(race.getRace().getCourse().getLastWaypoint())) {
-                        instruction = PassingInstruction.Line;
+            }
+        }
+        for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
+            PassingInstruction instruction = w.getPassingInstructions();
+            if (instruction == PassingInstruction.None || instruction == null) {
+                if (w.equals(race.getRace().getCourse().getFirstWaypoint()) || w.equals(race.getRace().getCourse().getLastWaypoint())) {
+                    instruction = PassingInstruction.Line;
+                } else {
+                    int numberofMarks = 0;
+                    Iterator<Mark> it = w.getMarks().iterator();
+                    while (it.hasNext()) {
+                        it.next();
+                        numberofMarks++;
+                    }
+                    if (numberofMarks == 2) {
+                        instruction = PassingInstruction.Gate;
+                    } else if (numberofMarks == 1) {
+                        instruction = PassingInstruction.Port;
                     } else {
-                        int numberofMarks = 0;
-                        Iterator<Mark> it = w.getMarks().iterator();
-                        while (it.hasNext()) {
-                            it.next();
-                            numberofMarks++;
-                        }
-                        if (numberofMarks == 2) {
-                            instruction = PassingInstruction.Gate;
-                        } else if (numberofMarks == 1) {
-                            instruction = PassingInstruction.Port;
-                        } else {
-                            instruction = PassingInstruction.None;
-                        }
+                        instruction = PassingInstruction.None;
                     }
                 }
-                passingInstructions.put(w, instruction);
             }
-            Edge.setNumberOfWayoints(passingInstructions.keySet().size());
+            passingInstructions.put(w, instruction);
         }
+        Edge.setNumberOfWayoints(passingInstructions.keySet().size());
     }
 
     @Override
@@ -387,7 +391,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private double getDistanceLikelyhood(Waypoint w, Position p, TimePoint t) {
         double distance = calculateDistance(p, w, t);
         double legLength = getLegLength(t, w);
-        double result = 1 / (20 * Math.abs(distance / legLength) + 1);
+        double result = 1 / (strictness * Math.abs(distance / legLength) + 1);
         // Auch NormalVerteilung??!
         return result;
     }
@@ -408,7 +412,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         ArrayList<Position> positions = new ArrayList<>();
         if (instruction == PassingInstruction.Line) {
             boolean isStart = (race.getRace().getCourse().getFirstWaypoint() == w);
-            LineDetails line =  isStart? race.getStartLine(t) : race.getFinishLine(t);
+            LineDetails line = isStart ? race.getStartLine(t) : race.getFinishLine(t);
             positions.add(0, race.getOrCreateTrack(line.getPortMarkWhileApproachingLine()).getEstimatedPosition(t, true));
             positions.add(1, race.getOrCreateTrack(line.getStarboardMarkWhileApproachingLine()).getEstimatedPosition(t, true));
         } else {

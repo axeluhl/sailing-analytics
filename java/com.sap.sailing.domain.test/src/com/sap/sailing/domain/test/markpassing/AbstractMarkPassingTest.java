@@ -44,15 +44,14 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
         className = getClass().getName();
-        fileName = getFileName();
-        eventName = getExpectedEventName();
+        simpleName = getClass().getSimpleName();
+        
     }
 
     protected abstract String getFileName();
     
-    protected static String fileName;
     protected static String className;
-    protected static String eventName;
+    protected static String simpleName;
 
     private static List<Double> accuracys = new ArrayList<>();
 
@@ -265,14 +264,15 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     @AfterClass
-    public static void createXML() {
+    public static void createXML() throws IOException {
         double result = 0;
         for(Double d : accuracys){
             result += d;
         }
         result /= accuracys.size();
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-"+fileName+"Test.xml", "MarkPassingTest", className);
-        MeasurementCase performanceReportCase = performanceReport.addCase(eventName+" accuracy");
-        performanceReportCase.addMeasurement(new Measurement(eventName+" accuracy", result));
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-"+simpleName+".xml", simpleName, className);
+        MeasurementCase performanceReportCase = performanceReport.addCase(simpleName+" accuracy");
+        performanceReportCase.addMeasurement(new Measurement(simpleName+" accuracy", result));
+        performanceReport.write();
     }
 }

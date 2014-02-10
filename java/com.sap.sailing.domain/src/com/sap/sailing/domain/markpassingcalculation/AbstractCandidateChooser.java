@@ -9,8 +9,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 /**
- * Takes the CandidateDeltas from a {@link AbstractCandidateFinder} and calculates the most likely sequence of
- * MarkPassings. The race should then be notified about these new MarkPassings.
+ * Takes the {@link Candidate}s from an {@link AbstractCandidateFinder} and calculates any new {@link MarkPassing}s. The
+ * race should then be notified about these new MarkPassings.
  * 
  * @author Nicolas Klose
  * 
