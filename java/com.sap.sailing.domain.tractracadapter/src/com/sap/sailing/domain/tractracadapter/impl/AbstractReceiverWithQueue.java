@@ -13,8 +13,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
@@ -29,7 +29,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
-    private final com.tractrac.clientmodule.Event tractracEvent;
+    private final IEvent tractracEvent;
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
     private Thread thread;
@@ -40,7 +40,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     private boolean receivedEventDuringTimeout;
     
-    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent,
+    public AbstractReceiverWithQueue(DomainFactory domainFactory, IEvent tractracEvent,
             DynamicTrackedRegatta trackedRegatta, Simulator simulator) {
         super();
         this.tractracEvent = tractracEvent;
@@ -59,7 +59,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         return domainFactory;
     }
     
-    protected com.tractrac.clientmodule.Event getTracTracEvent() {
+    protected IEvent getTracTracEvent() {
         return tractracEvent;
     }
     
@@ -154,7 +154,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      * returned. If the {@link TrackedRace} for <code>race</code> isn't found in the {@link TrackedRegatta},
      * <code>null</code> is returned, too.
      */
-    protected DynamicTrackedRace getTrackedRace(Race race) {
+    protected DynamicTrackedRace getTrackedRace(IRace race) {
         DynamicTrackedRace result = null;
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(),
                 RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);

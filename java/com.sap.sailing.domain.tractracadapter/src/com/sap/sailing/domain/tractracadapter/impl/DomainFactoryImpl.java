@@ -74,10 +74,14 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
 import com.sap.sailing.util.WeakIdentityHashMap;
-import com.tractrac.clientmodule.CompetitorClass;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
+import com.tractrac.model.lib.api.data.IPosition;
+import com.tractrac.model.lib.api.event.ICompetitor;
+import com.tractrac.model.lib.api.event.ICompetitorClass;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
 import difflib.PatchFailedException;
 
@@ -106,7 +110,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * class needs to be determined for an regatta. Synchronization for additions / removals is tied to the
      * synchronization for {@link #regattaCache}.
      */
-    private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
+    private final WeakIdentityHashMap<IEvent, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
     
     /**
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
@@ -133,12 +137,12 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Position createPosition(
-            com.tractrac.clientmodule.data.Position position) {
+            IPosition position) {
         return new DegreePosition(position.getLatitude(), position.getLongitude());
     }
    
     @Override
-    public GPSFixMoving createGPSFixMoving(com.tractrac.clientmodule.data.Position position) {
+    public GPSFixMoving createGPSFixMoving(IPosition position) {
         GPSFixMoving result = new GPSFixMovingImpl(createPosition(position), new MillisecondsTimePoint(position.getTimestamp()),
                 new KilometersPerHourSpeedWithBearingImpl(position.getSpeed(), new DegreeBearingImpl(position.getDirection())));
         return result;
@@ -223,7 +227,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
+    public Competitor getOrCreateCompetitor(ICompetitor competitor) {
         // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
         final UUID competitorId = competitor.getId();
         final String competitorClassName = competitor.getCompetitorClass()==null?null:competitor.getCompetitorClass().getName();
@@ -338,7 +342,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, com.tractrac.clientmodule.Event event, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, IEvent event, TrackedRegattaRegistry trackedRegattaRegistry) {
         synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -355,10 +359,7 @@ public class DomainFactoryImpl implements DomainFactory {
             // compute the dominant boat class which requires a lot more effort
             Regatta result = weakRegattaCache.get(event);
             if (result == null) {
-                Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-                for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
-                    competitorClassList.add(c.getCompetitorClass());
-                }
+                Collection<ICompetitorClass> competitorClassList = event.getCompetitorClasses();
                 BoatClass boatClass = getDominantBoatClass(competitorClassList);
                 Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
                         : boatClass.getName());
@@ -381,7 +382,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
+            IEvent tractracEvent, WindStore windStore, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, ReceiverType... types) {
@@ -429,12 +430,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Serializable getRaceID(Race tractracRace) {
+    public Serializable getRaceID(IRace tractracRace) {
         return tractracRace.getId();
     }
 
     @Override
-    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public void removeRace(IEvent tractracEvent, IRace tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceDefinition raceDefinition;
         synchronized (raceCache) {
             raceDefinition = getExistingRaceDefinitionForRace(tractracRace.getId());
@@ -444,8 +445,8 @@ public class DomainFactoryImpl implements DomainFactory {
             }
         }
         if (raceDefinition != null) {
-            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-            for (com.tractrac.clientmodule.Competitor c : tractracEvent.getCompetitorList()) {
+            Collection<ICompetitorClass> competitorClassList = new ArrayList<ICompetitorClass>();
+            for (ICompetitor c : tractracEvent.getCompetitors()) {
                 competitorClassList.add(c.getCompetitorClass());
             }
             BoatClass boatClass = getDominantBoatClass(competitorClassList);
@@ -537,10 +538,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race) {
-        List<CompetitorClass> competitorClasses = new ArrayList<CompetitorClass>();
+    public Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
+        List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
-        for (RaceCompetitor rc : race.getRaceCompetitorList()) {
+        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
             competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
@@ -552,9 +553,9 @@ public class DomainFactoryImpl implements DomainFactory {
         return competitorsAndDominantBoatClass;
     }
 
-    private BoatClass getDominantBoatClass(Collection<CompetitorClass> competitorClasses) {
+    private BoatClass getDominantBoatClass(Collection<ICompetitorClass> competitorClasses) {
         List<String> competitorClassNames = new ArrayList<>();
-        for (CompetitorClass competitorClass : competitorClasses) {
+        for (ICompetitorClass competitorClass : competitorClasses) {
             competitorClassNames.add(competitorClass==null?null:competitorClass.getName());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClassNames);

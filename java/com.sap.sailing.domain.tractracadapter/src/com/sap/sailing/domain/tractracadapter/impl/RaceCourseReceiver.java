@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -27,10 +26,13 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.Route;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.RouteData;
+import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
+import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.route.IControlPoint;
+import com.tractrac.model.lib.api.route.IRoute;
 
 import difflib.PatchFailedException;
 
@@ -44,7 +46,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteData, Race>  {
+public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteData, IRace>  {
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
     private final long millisecondsOverWhichToAverageWind;
@@ -56,7 +58,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final String tracTracPassword;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
+            IEvent tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator);
@@ -95,29 +97,29 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     }
     
     @Override
-    protected void handleEvent(Triple<Route, RouteData, Race> event) {
+    protected void handleEvent(Triple<IRoute, RouteData, IRace> event) {
         System.out.print("R");
-        final Route route = event.getA();
+        final IRoute route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        final LinkedHashMap<com.tractrac.clientmodule.ControlPoint, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
-        for (com.tractrac.clientmodule.ControlPoint cp : event.getC().getEvent().getControlPointList()) {
+        final LinkedHashMap<IControlPoint, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
+        for (IControl cp : event.getC().getEvent().getControlPointList()) {
             ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
         }
         final List<TracTracControlPoint> routeControlPoints = new ArrayList<>();
-        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+        for (IControl cp : event.getB().getPoints()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
         List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
-        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+        for (IControl cp : event.getB().getPoints()) {
             PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 
         Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
-        Race race = event.getC();
+        IRace race = event.getC();
         List<Sideline> sidelines = getDomainFactory().createSidelines(
                 race.getMetadata() != null ? race.getMetadata().getText() : null,
                 ttControlPointsForAllOriginalEventControlPoints.values());

@@ -8,16 +8,16 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
 
 public class RaceHandleImpl implements RacesHandle {
-    private final Event tractracEvent;
+    private final IEvent tractracEvent;
     private final DomainFactory domainFactory;
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedRegatta, RaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, IEvent tractracEvent, DynamicTrackedRegatta trackedRegatta, RaceTracker raceTracker) {
         this.domainFactory = domainFactory;
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
@@ -32,7 +32,7 @@ public class RaceHandleImpl implements RacesHandle {
     @Override
     public Set<RaceDefinition> getRaces() {
         Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (Race r : tractracEvent.getRaceList()) {
+        for (IRace r : tractracEvent.getRaces()) {
             result.add(domainFactory.getAndWaitForRaceDefinition(r.getId()));
         }
         return result;
@@ -51,7 +51,7 @@ public class RaceHandleImpl implements RacesHandle {
     @Override
     public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
         Set<RaceDefinition> result = new HashSet<RaceDefinition>();
-        for (Race race : tractracEvent.getRaceList()) {
+        for (IRace race : tractracEvent.getRaces()) {
             result.add(domainFactory.getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds));
         }
         return result;
