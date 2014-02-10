@@ -283,6 +283,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
 
@@ -297,6 +298,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -470,6 +472,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -483,6 +486,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -604,6 +608,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -617,6 +622,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -754,6 +760,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -767,6 +774,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -922,6 +930,7 @@ public class MasterDataImportTest {
         LeaderboardGroup groupNotToOverride;
         String raceColumnNameNotToOveride;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -966,6 +975,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1114,6 +1124,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         RegattaAndRaceIdentifier identifierOfRegattaTrackedRace;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1163,6 +1174,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1239,6 +1251,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1252,6 +1265,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1364,6 +1378,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1377,6 +1392,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1500,6 +1516,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1513,6 +1530,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1556,6 +1574,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1569,6 +1588,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1676,6 +1696,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1689,6 +1710,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
@@ -1747,6 +1769,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         try {
+            masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
 
             outputStream.flush();
@@ -1760,6 +1783,7 @@ public class MasterDataImportTest {
             ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
             deserializedMasterData = (TopLevelMasterData) ois.readObject();
         } finally {
+            masterdata.setMasterDataExportFlagOnRaceColumns(false);
             oos.close();
             ois.close();
         }
