@@ -7,10 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -48,7 +49,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (!boatClassNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterABoatClass();
             } else if (!unique) {
                 errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }
@@ -98,13 +99,16 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
         super(new RegattaDTO(), existingEvents, stringConstants.addRegatta(), stringConstants.ok(), stringConstants,
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         
-        this.seriesEditor = SeriesWithFleetsListEditor.createExpanded(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon());
+        this.seriesEditor = new SeriesWithFleetsListEditor(Collections.<SeriesDTO>emptyList(), stringMessages, resources.removeIcon());
     }
 
     @Override
     protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-        panel.add(createHeadlineLabel(stringMessages.series()));
-        panel.add(seriesEditor);
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(seriesEditor, stringMessages.series());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
     }
 
     @Override

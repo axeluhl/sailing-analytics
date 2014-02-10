@@ -8,26 +8,22 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ExpandedListEditorUi;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
     
-    public static ListEditorComposite<SeriesDTO> createExpanded(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
-        return new SeriesWithFleetsListEditor(initialValues, new ExpandedUi(stringMessages, removeImage));
-    }
-
-    protected SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, ListEditorUiStrategy<SeriesDTO> activeUi) {
-        super(initialValues, activeUi);
+    public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage));
     }
     
     private static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
-
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage) {
             super(stringMessages, removeImage);
         }
@@ -56,24 +52,29 @@ public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
         }
 
         @Override
-        protected Widget createValueWidget(SeriesDTO seriesDTO) {
-            Grid seriesGrid = new Grid(2, 3);
-            seriesGrid.setCellSpacing(3);
-            Label seriesLabel = new Label(stringMessages.series() + ":");
+        protected Widget createValueWidget(int rowIndex, SeriesDTO seriesDTO) {
+            HorizontalPanel hPanel = new HorizontalPanel();
+            hPanel.setSpacing(5);
+            Label seriesLabel = new Label(stringMessages.series() + " '" + seriesDTO.getName() + "' :");
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            seriesGrid.setWidget(0, 0, seriesLabel);
-            seriesGrid.setHTML(0, 1, seriesDTO.getName());
+            hPanel.add(seriesLabel);
+            
+            String fleetText = seriesDTO.getFleets().size() + " ";
+            
             if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                seriesGrid.setHTML(1, 1, seriesDTO.getFleets().size() + " fleets: "
-                        + seriesDTO.getFleets().toString());
+                if(seriesDTO.getFleets().size() == 1) {
+                    fleetText = "1 " + stringMessages.fleet();
+                } else {
+                    fleetText = seriesDTO.getFleets().size() + " " + stringMessages.fleets();
+                }
+                fleetText += ": " + seriesDTO.getFleets().toString();
             } else {
-                seriesGrid.setHTML(1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
+                fleetText = "No fleets defined.";
             }
-            return seriesGrid;
-
+            hPanel.add(new Label(fleetText));
+            
+            return hPanel;
         }
-        
     }
-    
 }

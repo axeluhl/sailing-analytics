@@ -12,12 +12,13 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog;
 
@@ -114,7 +115,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         discardThresholdBoxes.getWidget().setVisible(false);
-        fleetListComposite = FleetListEditorComposite.createExpanded(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
+        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
             
             @Override
@@ -151,8 +152,12 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         formGrid.setWidget(3, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
         formGrid.setWidget(4, 1, useSeriesResultDiscardingThresholdsCheckbox);
         formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
-        panel.add(createHeadlineLabel(stringMessages.fleets()));
-        panel.add(fleetListComposite);
+        
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(fleetListComposite, stringMessages.fleets());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
         return panel;
     }
     
