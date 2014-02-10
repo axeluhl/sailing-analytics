@@ -163,7 +163,8 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
     
     protected void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        if (forceReload && !loadData(raceID)) {
+        //is reload is forced, or otherwise if the data didn't load correctly from file -> reload from server
+        if (forceReload || !loadData(raceID)) {
             System.out.println("Downloading new data from the web.");
             setUp("event_20131112_ESSFlorian",
             /* raceId */raceID, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,

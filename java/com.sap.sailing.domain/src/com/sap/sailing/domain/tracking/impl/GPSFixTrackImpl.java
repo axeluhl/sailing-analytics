@@ -49,7 +49,16 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
-    private final TrackListeners<GPSTrackListener<ItemType, FixType>> listeners;
+    
+    /*
+     * This subclassing is necessary, as otherwise OSGi modularity hell breaks loose when deserializing.
+     * {@link GPSFixTrackListener} implementations are defined within this bundle, and if {@link TrackListeners}
+     * attempts deserialization from the OSGi visiility space of the ~.shared.android bundle, it has no
+     * access to these implementations, and therefore cannot instantiate them.
+     */
+    private class GPSTrackListeners extends TrackListeners<GPSTrackListener<ItemType, FixType>> {
+		private static final long serialVersionUID = -6262919032501010923L;}
+    private final GPSTrackListeners listeners;
     
     /**
      * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the
@@ -122,7 +131,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
-        this.listeners = new TrackListeners<GPSTrackListener<ItemType, FixType>>();
+        this.listeners = new GPSTrackListeners();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }

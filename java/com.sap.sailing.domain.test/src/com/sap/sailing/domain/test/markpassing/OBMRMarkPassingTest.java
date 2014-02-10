@@ -148,7 +148,7 @@ public class OBMRMarkPassingTest extends OnlineTracTracBasedTest {
     
     protected void setUp(String raceID) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
-        if (forceReload && !loadData(raceID)) {
+        if (forceReload || !loadData(raceID)) {
             System.out.println("Downloading new data from the web.");
             setUp("event_20121031_OBMR",
             /* raceId */raceID, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
