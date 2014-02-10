@@ -82,7 +82,7 @@ public class SimulatorUtils {
         String tractracPassword = "";
         RacesHandle raceHandle = tracTracAdapterFactory.getOrCreateTracTracAdapter(service.getBaseDomainFactory())
                 .addTracTracRace(service, paramURL, liveURI, storedURI, null, raceLogStore,
-                        timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.LIVE_STATUS);
+                        timeoutInMilliseconds, tractracUsername, tractracPassword, TracTracConnectionConstants.ONLINE_STATUS);
         return raceHandle;
     }
 
