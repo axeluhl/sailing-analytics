@@ -3,7 +3,10 @@ package com.sap.sailing.domain.common.impl;
 import com.sap.sailing.domain.common.Duration;
 
 public class MillisecondsDurationImpl implements Duration {
-    private final long millis;
+    private static final long serialVersionUID = -4257982564719184723L;
+    private long millis;
+    
+    MillisecondsDurationImpl() {} // for serialization only
     
     public MillisecondsDurationImpl(long millis) {
         super();
@@ -13,6 +16,11 @@ public class MillisecondsDurationImpl implements Duration {
     @Override
     public long asMillis() {
         return millis;
+    }
+
+    @Override
+    public double asSeconds() {
+        return ((double) asMillis()) / 1000.;
     }
 
     @Override
