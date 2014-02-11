@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 
 /**
  * A variant of the {@link HighPoint} scoring system where the winner gets a fixed number of points, and
- * all subsequent ranks get one point less. No negative scores are returned. 0.0 is the worst score a
+ * all subsequent ranks get one point less. No negative scores are returned. 1.0 is the worst score a
  * competitor can score.
  * 
  * @author Axel Uhl (D043530)
