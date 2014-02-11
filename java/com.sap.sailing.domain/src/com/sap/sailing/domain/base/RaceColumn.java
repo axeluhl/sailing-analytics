@@ -199,5 +199,14 @@ public interface RaceColumn extends Named {
      * 
      * @param fleet
      */
-    void removeRaceIdentifier(Fleet fleet);    
+    void removeRaceIdentifier(Fleet fleet);
+
+    /**
+     * While set to true, any serialization in the current thread will not include the tracked races. Make sure to set
+     * back to false, after serialization. (in finally block)
+     * 
+     * @param flagValue
+     *            set to false for default behavior, set to true to exclude tracked races
+     */
+    public void setMasterDataExportOngoingThreadFlag(boolean flagValue);
 }
