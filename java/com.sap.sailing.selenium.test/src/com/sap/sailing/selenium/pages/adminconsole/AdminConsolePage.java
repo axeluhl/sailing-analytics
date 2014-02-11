@@ -2,29 +2,23 @@ package com.sap.sailing.selenium.pages.adminconsole;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.interactions.Actions;
-
 import org.openqa.selenium.support.CacheLookup;
-
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.HostPage;
-
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
-
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
-
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 
@@ -72,6 +66,8 @@ public class AdminConsolePage extends HostPage {
     
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard Group Configuration"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
+    
+    private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
@@ -158,6 +154,7 @@ public class AdminConsolePage extends HostPage {
     }
     
     private WebElement goToTab(String label, final String id) {
+        logger.info("Try to got to tab " + label);
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
         
@@ -185,7 +182,7 @@ public class AdminConsolePage extends HostPage {
         
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
-        org.openqa.selenium.interactions.Actions actions = new Actions(this.driver);
+        Actions actions = new Actions(this.driver);
         actions.moveToElement(tab, determineOffsetForClick(tab), 5);
         actions.click();
         actions.perform();
@@ -199,6 +196,11 @@ public class AdminConsolePage extends HostPage {
     
     private ScrollDirection getScrollDirection(WebElement tab) {
         int tabIndex = getTabIndex(tab);
+        
+        logger.info("Try to determine scroll direction");
+        logger.info("Index for tab " + tab.getText() + " is " + tabIndex);
+        logger.info("First visible tab is " + getFirstVisibleTabIndex());
+        logger.info("Last visible tab is " + getLastVisibleTabIndex());
         
         if(tabIndex < getFirstVisibleTabIndex())
             return ScrollDirection.Left;
@@ -235,7 +237,10 @@ public class AdminConsolePage extends HostPage {
     
     private int determineOffsetForClick(WebElement tab) {
         int tabIndex = getTabIndex(tab);
-        
+        logger.info("Try to determine offset for click");
+        logger.info("Index for tab " + tab.getText() + " is " + tabIndex);
+        logger.info("First visible tab is " + getFirstVisibleTabIndex());
+        logger.info("Last visible tab is " + getLastVisibleTabIndex());
         if(tabIndex == getFirstVisibleTabIndex())
             return -1;
         
