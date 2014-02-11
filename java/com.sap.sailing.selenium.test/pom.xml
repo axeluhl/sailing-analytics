@@ -73,8 +73,7 @@
                                 
                                 <dependency>
                                     <type>eclipse-plugin</type>
-                                    <artifactId>com.sap.sailing.server.gatway.test.support</artifactId>
-                                    <version>0.0.0</version>
+                                    <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
                                 </dependency>
                             </dependencies>
                             
