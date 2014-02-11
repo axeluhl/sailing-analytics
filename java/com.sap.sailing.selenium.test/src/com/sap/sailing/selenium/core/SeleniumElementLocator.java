@@ -139,6 +139,11 @@ public class SeleniumElementLocator implements ElementLocator {
         return this.by;
     }
     
+    @Override
+    public String toString() {
+        return "SeleniumElementLocator->" + this.by;
+    }
+    
     /**
      * <p>By default, elements are considered as "found" if they are in the DOM and displayed. You can override this
      *   method in order to change whether or not an element is considered as loaded.</p>
