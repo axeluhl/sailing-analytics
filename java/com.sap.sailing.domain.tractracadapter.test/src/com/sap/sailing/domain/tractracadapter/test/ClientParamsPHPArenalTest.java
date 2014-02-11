@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -16,8 +18,10 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.ControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.setup.KeyValue;
+import com.tractrac.model.lib.api.ModelLocator;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.route.IControl;
 
 public class ClientParamsPHPArenalTest extends AbstractClientParamsPHPTest {
     
@@ -40,18 +44,18 @@ public class ClientParamsPHPArenalTest extends AbstractClientParamsPHPTest {
     }
     
     @Test
-    public void testReadWithTracTracKeyValue() throws MalformedURLException, IOException {
-        Event event = KeyValue.setup(getClass().getResource("/clientparamsArenalEmptyCourse.php"));
-        com.tractrac.clientmodule.ControlPoint controlPoint2 = event.getControlPointById(UUID.fromString("59d18d06-6ec7-11e1-b933-406186cbf87c"));
+    public void testReadWithTracTracKeyValue() throws MalformedURLException, IOException, CreateModelException, URISyntaxException {
+        IEvent event = ModelLocator.getEventFactory().createEvent(new URI(getClass().getResource("/clientparamsArenalEmptyCourse.php").toString()));
+        IControl controlPoint2 = event.getControl(UUID.fromString("59d18d06-6ec7-11e1-b933-406186cbf87c"));
         assertEquals("P1.Color=Green\nP1.Type=Conical", controlPoint2.getMetadata().getText());
     }
 
     @Test
-    public void compareReadWithTracTracKeyValueWithLocalClientParamsPHP() throws MalformedURLException, IOException {
-        Event event = KeyValue.setup(getClass().getResource("/clientparamsArenalEmptyCourse.php"));
+    public void compareReadWithTracTracKeyValueWithLocalClientParamsPHP() throws MalformedURLException, IOException, CreateModelException, URISyntaxException {
+        IEvent event = ModelLocator.getEventFactory().createEvent(new URI(getClass().getResource("/clientparamsArenalEmptyCourse.php").toString()));
         assertEquals(3, Util.size(clientParams.getRace().getDefaultRoute().getControlPoints()));
         for (TracTracControlPoint ttcp : clientParams.getRace().getDefaultRoute().getControlPoints()) {
-            ControlPointAdapter eventControlPoint = new ControlPointAdapter(event.getControlPointById(ttcp.getId()));
+            ControlPointAdapter eventControlPoint = new ControlPointAdapter(event.getControl(ttcp.getId()));
             assertEquals(ttcp, eventControlPoint); // assert that comparison by UUID matches
             assertEquals(eventControlPoint.getName(), ttcp.getName());
             assertEquals(eventControlPoint.getHasTwoPoints(), ttcp.getHasTwoPoints());

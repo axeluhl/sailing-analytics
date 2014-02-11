@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -20,11 +19,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.MarkPassingsData;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
 
 public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
@@ -44,7 +40,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : getTracTracEvent().getRaceList()) {
+        for (final IRace race : getTracTracEvent().getRaces()) {
             TypeController controlPointListener = MarkPassingsData.subscribe(race,
                 new ICallbackData<RaceCompetitor, MarkPassingsData>() {
                     @Override
@@ -68,7 +64,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             // Note: the entries always describe all mark passings for the competitor so far in the current race in
             // order
             for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
-                ControlPoint controlPointPassed = passing.getControlPoint();
+                IControl controlPointPassed = passing.getControlPoint();
                 com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
                         .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
                 Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
