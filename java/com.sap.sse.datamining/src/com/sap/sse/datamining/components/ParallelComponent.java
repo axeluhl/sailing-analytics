@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sse.datamining.components;
 
 import java.util.concurrent.Future;
 

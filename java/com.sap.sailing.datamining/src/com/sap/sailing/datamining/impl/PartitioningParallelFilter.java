@@ -8,8 +8,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.FiltrationWorker;
-import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.WorkerBuilder;
+import com.sap.sse.datamining.components.ParallelFilter;
 
 public class PartitioningParallelFilter<DataType> extends AbstractParallelComponent<Collection<DataType>, Collection<DataType>>
                                                   implements ParallelFilter<DataType> {

@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.ParallelFilter;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.WorkerBuilder;
@@ -20,6 +19,7 @@ import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sse.datamining.components.ParallelFilter;
 
 public final class FilterFactory {
 

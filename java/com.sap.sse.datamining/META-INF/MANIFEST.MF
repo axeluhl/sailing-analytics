@@ -6,3 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.7.0"
+Export-Package: com.sap.sse.datamining.components
+Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"

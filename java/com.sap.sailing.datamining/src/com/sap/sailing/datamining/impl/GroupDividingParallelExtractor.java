@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.ParallelExtractor;
 import com.sap.sailing.datamining.WorkerBuilder;
+import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.Unit;
 

@@ -5,12 +5,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.AggregationWorker;
 import com.sap.sailing.datamining.DataMiningStringMessages;
-import com.sap.sailing.datamining.ParallelAggregator;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.AggregationWorkerBuilder;
 import com.sap.sailing.datamining.impl.GroupDividingParallelAggregator;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.ValueType;
+import com.sap.sse.datamining.components.ParallelAggregator;
 
 public final class AggregatorFactory {
     

@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.sap.sailing.datamining.ParallelFilter;
+import com.sap.sse.datamining.components.ParallelFilter;
 
 public class NonFilteringFilter<DataType> implements ParallelFilter<DataType> {
 

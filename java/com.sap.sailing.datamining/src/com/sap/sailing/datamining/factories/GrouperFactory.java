@@ -7,7 +7,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.GroupingWorker;
-import com.sap.sailing.datamining.ParallelGrouper;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.MultiDimensionalGroupingWorkerBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
@@ -16,6 +15,7 @@ import com.sap.sailing.datamining.impl.PartitioningParallelGrouper;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sse.datamining.components.ParallelGrouper;
 
 public final class GrouperFactory {
     

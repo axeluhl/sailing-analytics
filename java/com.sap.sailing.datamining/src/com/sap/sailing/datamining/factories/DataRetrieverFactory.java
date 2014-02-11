@@ -3,13 +3,13 @@ package com.sap.sailing.datamining.factories;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.DataRetrievalWorker;
-import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.DataRetrieverWorkerBuilder;
 import com.sap.sailing.datamining.impl.GroupDividingParallelDataRetriever;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.components.ParallelDataRetriever;
 
 public final class DataRetrieverFactory {
 

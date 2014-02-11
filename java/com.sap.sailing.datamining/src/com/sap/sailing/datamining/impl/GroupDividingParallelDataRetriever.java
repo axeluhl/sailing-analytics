@@ -7,10 +7,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.DataRetrievalWorker;
-import com.sap.sailing.datamining.ParallelDataRetriever;
 import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.components.ParallelDataRetriever;
 
 /**
  * Retrieves elements of type <code>DataType</code> from all {@link LeaderboardGroup}s known to the
