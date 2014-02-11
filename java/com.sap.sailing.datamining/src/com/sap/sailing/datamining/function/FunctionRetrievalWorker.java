@@ -3,13 +3,13 @@ package com.sap.sailing.datamining.function;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.function.FilteringFunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectDimensionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectExternalFunctionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectSideEffectFreeValueFilterCriteria;
+import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 import com.sap.sse.datamining.workers.WorkReceiver;
 
@@ -35,7 +35,7 @@ public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Cl
             worker.setSource(classesToScan);
             worker.setReceiver(receiver);
             
-            ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
+            FilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
             worker.setFilter(filterCriteria);
             
             return worker;

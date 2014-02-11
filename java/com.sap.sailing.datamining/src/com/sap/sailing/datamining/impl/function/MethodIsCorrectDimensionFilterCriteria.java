@@ -2,10 +2,10 @@ package com.sap.sailing.datamining.impl.function;
 
 import java.lang.reflect.Method;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.annotations.Dimension;
+import com.sap.sse.datamining.components.FilterCriteria;
 
-public class MethodIsCorrectDimensionFilterCriteria implements ConcurrentFilterCriteria<Method> {
+public class MethodIsCorrectDimensionFilterCriteria implements FilterCriteria<Method> {
 
     @Override
     public boolean matches(Method method) {

@@ -7,7 +7,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.Query;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.factories.DataMiningFactory;
@@ -16,6 +15,7 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;

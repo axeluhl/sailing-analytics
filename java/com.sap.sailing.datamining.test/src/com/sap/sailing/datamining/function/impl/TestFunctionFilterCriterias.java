@@ -7,17 +7,17 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectDimensionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectExternalFunctionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.components.FilterCriteria;
 
 public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectDimensionFilterCriteria() {
-        ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectDimensionFilterCriteria();
+        FilterCriteria<Method> filterCriteria = new MethodIsCorrectDimensionFilterCriteria();
         
         Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         assertThat(filterCriteria.matches(dimension), is(true));
@@ -31,7 +31,7 @@ public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectSideEffectFreeValueFilterCriteria() {
-        ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectSideEffectFreeValueFilterCriteria();
+        FilterCriteria<Method> filterCriteria = new MethodIsCorrectSideEffectFreeValueFilterCriteria();
         
         Method sideEffectFreeValue = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
         assertThat(filterCriteria.matches(sideEffectFreeValue), is(true));
@@ -42,7 +42,7 @@ public class TestFunctionFilterCriterias {
 
     @Test
     public void testMethodIsCorrectExternalLibraryFunctionFilterCriteria() {
-        ConcurrentFilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
+        FilterCriteria<Method> filterCriteria = new MethodIsCorrectExternalFunctionFilterCriteria();
         
         Method foo = FunctionTestsUtil.getMethodFromExternalLibraryClass("foo");
         assertThat(filterCriteria.matches(foo), is(true));

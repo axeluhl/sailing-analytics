@@ -1,12 +1,12 @@
 package com.sap.sailing.datamining.impl;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sse.datamining.components.FilterCriteria;
 
 public class CriteriaFiltrationWorker<DataType> extends AbstractFiltrationWorker<DataType> {
     
-    private ConcurrentFilterCriteria<DataType> criteria;
+    private FilterCriteria<DataType> criteria;
 
-    public CriteriaFiltrationWorker(ConcurrentFilterCriteria<DataType> criteria) {
+    public CriteriaFiltrationWorker(FilterCriteria<DataType> criteria) {
         this.criteria = criteria;
     }
 

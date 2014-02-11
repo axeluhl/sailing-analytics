@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
@@ -17,6 +16,7 @@ import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.DimensionValuesFilterCriteria;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
@@ -30,7 +30,7 @@ public final class FilterFactory {
     }
 
     public static <DataType> WorkerBuilder<FiltrationWorker<DataType>> createDimensionFilterBuilder(DataTypes dataType, Map<DimensionIdentifier, Iterable<?>> selection) {
-        ConcurrentFilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
+        FilterCriteria<DataType> criteria = createAndCompoundDimensionFilterCritera(dataType, selection);
         WorkerBuilder<FiltrationWorker<DataType>> builder = new FilterByCriteriaBuilder<DataType>(criteria); 
         return builder;
     }
@@ -42,14 +42,14 @@ public final class FilterFactory {
         return new NonFilteringFilter<DataType>();
     }
 
-    private static <DataType> ConcurrentFilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<DimensionIdentifier, Iterable<?>> selection) {
+    private static <DataType> FilterCriteria<DataType> createAndCompoundDimensionFilterCritera(DataTypes dataType, Map<DimensionIdentifier, Iterable<?>> selection) {
         DimensionManager<DataType> dimensionManager = DimensionManagerProvider.getDimensionManagerFor(dataType);
         CompoundFilterCriteria<DataType> compoundCriteria = new AndCompoundFilterCriteria<DataType>();
 
         for (Entry<DimensionIdentifier, Iterable<?>> entry : selection.entrySet()) {
             Dimension<DataType, ?> dimension = dimensionManager.getDimensionFor(entry.getKey());
             if (dimension != null) {
-                ConcurrentFilterCriteria<DataType> criteria = createDimensionFilterCriteria(dimension, entry.getValue());
+                FilterCriteria<DataType> criteria = createDimensionFilterCriteria(dimension, entry.getValue());
                 compoundCriteria.addCriteria(criteria);
             }
         }
@@ -57,7 +57,7 @@ public final class FilterFactory {
     }
     
     @SuppressWarnings("unchecked")
-    private static <DataType, ValueType> ConcurrentFilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Iterable<?> values) {
+    private static <DataType, ValueType> FilterCriteria<DataType> createDimensionFilterCriteria(Dimension<DataType, ValueType> dimension, Iterable<?> values) {
         return new DimensionValuesFilterCriteria<DataType, ValueType>(dimension, (Collection<ValueType>) values);
     }
 

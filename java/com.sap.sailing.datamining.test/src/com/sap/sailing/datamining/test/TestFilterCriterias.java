@@ -11,7 +11,6 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
@@ -24,12 +23,13 @@ import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.StringRegexFilterCriteria;
+import com.sap.sse.datamining.components.FilterCriteria;
 
 public class TestFilterCriterias {
 
     @Test
     public void testRegexFilterCriteria() {
-        ConcurrentFilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
+        FilterCriteria<String> regexFilterCriteria = new StringRegexFilterCriteria(".*");
         assertTrue(regexFilterCriteria.matches("some Random stuff"));
         assertFalse(regexFilterCriteria.matches(null));
         
@@ -51,7 +51,7 @@ public class TestFilterCriterias {
     @Test
     public void testRangeFilterCriteria() {
         ClusterOfComparable<Integer> cluster = new ClusterOfComparableImpl<Integer>("Test", 3, 1);
-        ConcurrentFilterCriteria<Integer> rangeFilterCriteria = new SimpleRangeFilterCriteria<Integer>(cluster);
+        FilterCriteria<Integer> rangeFilterCriteria = new SimpleRangeFilterCriteria<Integer>(cluster);
 
         assertTrue(rangeFilterCriteria.matches(1));
         assertTrue(rangeFilterCriteria.matches(2));
@@ -86,7 +86,7 @@ public class TestFilterCriterias {
     public void testNullaryFunctionValuesFilterCriteria() {
         Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        ConcurrentFilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionFilterCriteria<>(getRegattaName, valuesToMatch);
+        FilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionFilterCriteria<>(getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriteria.matches(regatta), is(true));

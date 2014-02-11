@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.function.Function;
+import com.sap.sse.datamining.components.FilterCriteria;
 
-public class NullaryFunctionFilterCriteria<DataType, ValueType> implements ConcurrentFilterCriteria<DataType> {
+public class NullaryFunctionFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
 
     private Function<ValueType> function;
     private Collection<ValueType> valuesToMatch;

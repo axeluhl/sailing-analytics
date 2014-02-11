@@ -9,11 +9,11 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
+import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 
 public class TestFilters {
@@ -23,7 +23,7 @@ public class TestFilters {
         List<Integer> data = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         
         ClusterOfComparable<Integer> cluster = new ClusterOfComparableImpl<Integer>("Test", 5, 1);
-        ConcurrentFilterCriteria<Integer> criteria = new SimpleRangeFilterCriteria<Integer>(cluster);
+        FilterCriteria<Integer> criteria = new SimpleRangeFilterCriteria<Integer>(cluster);
         FiltrationWorker<Integer> filter = new CriteriaFiltrationWorker<Integer>(criteria);
         filter.setDataToFilter(data);
 

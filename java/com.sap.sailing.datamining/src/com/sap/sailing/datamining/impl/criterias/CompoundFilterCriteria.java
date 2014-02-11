@@ -4,21 +4,21 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sse.datamining.components.FilterCriteria;
 
-public abstract class CompoundFilterCriteria<DataType> implements ConcurrentFilterCriteria<DataType> {
+public abstract class CompoundFilterCriteria<DataType> implements FilterCriteria<DataType> {
     
-    private Collection<ConcurrentFilterCriteria<DataType>> criterias;
+    private Collection<FilterCriteria<DataType>> criterias;
 
     public CompoundFilterCriteria() {
-        this.criterias = Collections.newSetFromMap(new ConcurrentHashMap<ConcurrentFilterCriteria<DataType>, Boolean>());
+        this.criterias = Collections.newSetFromMap(new ConcurrentHashMap<FilterCriteria<DataType>, Boolean>());
     }
     
-    public void addCriteria(ConcurrentFilterCriteria<DataType> criteria) {
+    public void addCriteria(FilterCriteria<DataType> criteria) {
         criterias.add(criteria);
     }
     
-    protected Collection<ConcurrentFilterCriteria<DataType>> getCriterias() {
+    protected Collection<FilterCriteria<DataType>> getCriterias() {
         return criterias;
     }
 

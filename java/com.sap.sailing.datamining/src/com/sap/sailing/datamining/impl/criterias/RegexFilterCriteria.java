@@ -1,8 +1,8 @@
 package com.sap.sailing.datamining.impl.criterias;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
+import com.sap.sse.datamining.components.FilterCriteria;
 
-public abstract class RegexFilterCriteria<DataType> implements ConcurrentFilterCriteria<DataType> {
+public abstract class RegexFilterCriteria<DataType> implements FilterCriteria<DataType> {
     
     private String regex;
 

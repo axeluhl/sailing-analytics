@@ -6,13 +6,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionProvider;
 import com.sap.sailing.datamining.function.FunctionRegistry;
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
+import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.workers.FiltrationWorker;
@@ -39,7 +39,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     }
     
     private Collection<Function<?>> filterForDeclaringType(Collection<Function<?>> functions, Class<?> sourceType) {
-        ConcurrentFilterCriteria<Function<?>> declaringTypeFilterCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
+        FilterCriteria<Function<?>> declaringTypeFilterCriteria = new DeclaringTypeOrParameterTypeCriteria(sourceType);
         ParallelFilter<Function<?>> functionsForDeclaringTypeFilter = createFilterForCriteria(declaringTypeFilterCriteria);
         
         return executeFilter(functionsForDeclaringTypeFilter, functions);
@@ -57,7 +57,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
         return filteredFunctions;
     }
 
-    private ParallelFilter<Function<?>> createFilterForCriteria(ConcurrentFilterCriteria<Function<?>> filterCriteria) {
+    private ParallelFilter<Function<?>> createFilterForCriteria(FilterCriteria<Function<?>> filterCriteria) {
         WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(filterCriteria);
         return new PartitioningParallelFilter<>(workerBuilder, Activator.getExecutor());
     }
@@ -68,7 +68,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
             return null;
         }
         
-        ConcurrentFilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionDTOFilterCriteria(functionDTO);
+        FilterCriteria<Function<?>> functionDTOFilterCriteria = new FunctionDTOFilterCriteria(functionDTO);
         ParallelFilter<Function<?>> functionMatchesDTOFilter = createFilterForCriteria(functionDTOFilterCriteria);
         
         Collection<Function<?>> functionsMatchingDTO = executeFilter(functionMatchesDTOFilter, functionRegistry.getAllRegisteredFunctions());

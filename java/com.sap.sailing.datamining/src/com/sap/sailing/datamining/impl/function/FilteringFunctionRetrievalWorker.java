@@ -4,16 +4,16 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sailing.datamining.ConcurrentFilterCriteria;
 import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.AbstractComponentWorker;
+import com.sap.sse.datamining.components.FilterCriteria;
 
 public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function<?>>> implements FunctionRetrievalWorker {
 
     private Iterable<Class<?>> classesToScan;
-    private ConcurrentFilterCriteria<Method> filter;
+    private FilterCriteria<Method> filter;
 
     @Override
     protected Collection<Function<?>> doWork() {
@@ -39,7 +39,7 @@ public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Co
         this.classesToScan = classesToScan;
     }
     
-    public void setFilter(ConcurrentFilterCriteria<Method> filterCriteria) {
+    public void setFilter(FilterCriteria<Method> filterCriteria) {
         this.filter = filterCriteria;
     }
 
