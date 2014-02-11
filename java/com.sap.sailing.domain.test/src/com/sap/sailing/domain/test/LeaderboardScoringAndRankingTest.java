@@ -813,6 +813,16 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 leaderboardHighPointESSOverall.getFleet(null));
         assertEquals(16, leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPointESSOverall.getTotalPoints(competitors[0], later));
+        assertEquals(new Double(9), leaderboardHighPointESSOverall.getTotalPoints(competitors[1], later));
+        assertEquals(new Double(8), leaderboardHighPointESSOverall.getTotalPoints(competitors[2], later));
+        assertEquals(new Double(7), leaderboardHighPointESSOverall.getTotalPoints(competitors[3], later));
+        assertEquals(new Double(6), leaderboardHighPointESSOverall.getTotalPoints(competitors[4], later));
+        assertEquals(new Double(5), leaderboardHighPointESSOverall.getTotalPoints(competitors[5], later));
+        assertEquals(new Double(4), leaderboardHighPointESSOverall.getTotalPoints(competitors[6], later));
+        assertEquals(new Double(3), leaderboardHighPointESSOverall.getTotalPoints(competitors[7], later));
+        assertEquals(new Double(2), leaderboardHighPointESSOverall.getTotalPoints(competitors[8], later));
+        assertEquals(new Double(1), leaderboardHighPointESSOverall.getTotalPoints(competitors[9], later));
+        assertEquals(new Double(1), leaderboardHighPointESSOverall.getTotalPoints(competitors[14], later));
         assertEquals(new Double(1), leaderboardHighPointESSOverall.getTotalPoints(competitors[15], later));
     }
 
