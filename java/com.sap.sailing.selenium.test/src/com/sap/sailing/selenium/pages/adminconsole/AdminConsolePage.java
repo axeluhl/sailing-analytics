@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.By.ByXPath;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -81,6 +82,7 @@ public class AdminConsolePage extends HostPage {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         logger.info("Window is " + driver.manage().window().getSize().width + ", " + driver.manage().window().getSize().height);
+        //driver.manage().window().setSize(new Dimension(994, 730));
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
@@ -169,16 +171,21 @@ public class AdminConsolePage extends HostPage {
                 arrow.click();
                 
                 // QUESTION: Do we need some kind of delay because of the scrolling?
-//                FluentWait<WebElement> wait = createFluentWait(tab, 2, 1, TimeoutException.class);
-//                wait.until(new Function<WebElement, Boolean>() {
-//                    int counter = 0;
-//                    @Override
-//                    public Boolean apply(WebElement tab) {
-//                        System.out.println(counter++);
-//                        return Boolean.valueOf(tab.isDisplayed());
-//                    }
-//                });
             }
+            
+            
+            
+            // Workaround for "Offset within element cannot be scrolled into view: (-1, 5)".
+            // We try to scroll one more time to make the tab completely visible
+            //
+            // TODO: Create a bug report for this!
+            int tabIndex = (direction == ScrollDirection.Left ? getFirstVisibleTabIndex() : getLastVisibleTabIndex());
+            
+            if(scroller.isDisplayed() && getTabIndex(tab) == tabIndex) {
+                WebElement arrow = scroller.findElement(By.tagName("img"));
+                arrow.click();
+            }
+                
         }
         
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
