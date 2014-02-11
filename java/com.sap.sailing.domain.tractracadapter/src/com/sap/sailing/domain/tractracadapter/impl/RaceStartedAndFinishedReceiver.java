@@ -34,7 +34,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
 
     public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, Simulator simulator, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator);
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
     }
 
     /**

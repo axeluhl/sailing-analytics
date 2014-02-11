@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.tractrac.model.lib.api.event.CreateModelException;
 
 public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConnectivityParameters {
     private final URL paramURL;
@@ -52,7 +53,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore) throws MalformedURLException,
-            FileNotFoundException, URISyntaxException {
+            FileNotFoundException, URISyntaxException, CreateModelException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
         return tracker;

@@ -15,6 +15,8 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
 /**
  * Some event receiver that can be executed in a thread because it's a runnable, and
@@ -30,6 +32,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final IEvent tractracEvent;
+    private final IEventSubscriber eventSubscriber;
+    private final IRaceSubscriber raceSubscriber;
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
     private Thread thread;
@@ -41,8 +45,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, IEvent tractracEvent,
-            DynamicTrackedRegatta trackedRegatta, Simulator simulator) {
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super();
+        this.eventSubscriber = eventSubscriber;
+        this.raceSubscriber = raceSubscriber;
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
@@ -50,6 +56,14 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
     
+    protected IEventSubscriber getEventSubscriber() {
+        return eventSubscriber;
+    }
+
+    protected IRaceSubscriber getRaceSubscriber() {
+        return raceSubscriber;
+    }
+
     protected synchronized void setAndStartThread(Thread thread) {
         this.thread = thread;
         thread.start();
@@ -81,6 +95,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     protected Simulator getSimulator() {
         return simulator;
     }
+    
+    protected abstract void unsubscribe();
     
     @Override
     public void stopAfterNotReceivingEventsForSomeTime(final long timeoutInMilliseconds) {
@@ -127,6 +143,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         if (simulator != null) {
             simulator.stop();
         }
+        unsubscribe();
     }
 
     @Override

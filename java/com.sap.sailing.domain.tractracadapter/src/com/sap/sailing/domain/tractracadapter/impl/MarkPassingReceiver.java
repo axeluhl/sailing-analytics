@@ -19,15 +19,21 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.tractrac.model.lib.api.data.IControlPassing;
+import com.tractrac.model.lib.api.data.IControlPassings;
+import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
-public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
+public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, IControlPassings, Void> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
-    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            Simulator simulator, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator);
+    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
+            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
     }
 
     /**
@@ -41,20 +47,14 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final IRace race : getTracTracEvent().getRaces()) {
-            TypeController controlPointListener = MarkPassingsData.subscribe(race,
-                new ICallbackData<RaceCompetitor, MarkPassingsData>() {
-                    @Override
-                    public void gotData(RaceCompetitor competitor, MarkPassingsData record, boolean isLiveData) {
-                        enqueue(new Triple<RaceCompetitor, MarkPassingsData, Boolean>(competitor, record, isLiveData));
-                    }
-                });
+            TypeController controlPointListener = MarkPassingsData.subscribe();
             result.add(controlPointListener);
         }
         setAndStartThread(new Thread(this, getClass().getName()));
         return result;
     }
     
-    protected void handleEvent(Triple<RaceCompetitor, MarkPassingsData, Boolean> event) {
+    protected void handleEvent(Triple<IRaceCompetitor, IControlPassings, Void> event) {
         System.out.print("L"); // as in "Leg"
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());
         if (trackedRace != null) {
@@ -63,8 +63,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
             // Note: the entries always describe all mark passings for the competitor so far in the current race in
             // order
-            for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
-                IControl controlPointPassed = passing.getControlPoint();
+            for (IControlPassing passing : event.getB().getPassings()) {
+                IControl controlPointPassed = passing.getControl();
                 com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
                         .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
                 Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
@@ -76,7 +76,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     passingsByWaypoint.put(passed, markPassing);
                 } else {
                     logger.warning("Didn't find waypoint in course " + course + " for mark passing around "
-                            + passing.getControlPoint());
+                            + passing.getControl());
                 }
             }
             List<MarkPassing> markPassings = new ArrayList<MarkPassing>();

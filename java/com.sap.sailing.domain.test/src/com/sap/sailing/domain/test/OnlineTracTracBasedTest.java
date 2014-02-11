@@ -38,7 +38,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
-import com.tractrac.clientmodule.Race;
+import com.tractrac.model.lib.api.event.IRace;
 
 /**
  * Connects to TracTrac data. Subclasses should implement a @Before method which calls
@@ -107,11 +107,11 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, receiverTypes)) {
+                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
+        IRace tractracRace = getTracTracEvent().getRaces().iterator().next();
         // we used to expect here that there is no RaceDefinition for the TracTrac race yet; however,
         // loading the race from an .mtb file stored locally, things work so fast that the race arrives through
         // a background thread (actually the RaceCourseReceiver) that it's initialized before we can check it here.

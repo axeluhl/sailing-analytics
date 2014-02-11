@@ -15,24 +15,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
-import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.tractrac.clientmodule.ControlPoint;
-import com.tractrac.clientmodule.Event;
-import com.tractrac.clientmodule.data.DataController;
-import com.tractrac.clientmodule.data.DataController.Listener;
-import com.tractrac.clientmodule.setup.KeyValue;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.route.IControl;
 
 /**
  * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
@@ -47,7 +46,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private Event event;
+    private IEvent event;
     private final Collection<Receiver> receivers;
     
     private Thread ioThread;
@@ -155,7 +154,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     }
 
     
-    protected Event getTracTracEvent() {
+    protected IEvent getTracTracEvent() {
         return event;
     }
 
@@ -204,17 +203,17 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         System.err.println("Error with live data "+arg0);
     }
 
-    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<ControlPoint> controlPoints) {
+    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {
         List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, PassingInstruction>>();
-        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+        for (IControl cp : controlPoints) {
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
         }
         return ttControlPoints;
     }
     
-    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<ControlPoint> controlPoints) {
+    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<IControl> controlPoints) {
         List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
-        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+        for (IControl cp : controlPoints) {
             ttControlPoints.add(new ControlPointAdapter(cp));
         }
         return ttControlPoints;

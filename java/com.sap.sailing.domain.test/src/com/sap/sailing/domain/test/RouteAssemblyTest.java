@@ -39,23 +39,7 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
                 final TypeController routeListener[] = new TypeController[1];
-                routeListener[0] = RouteData.subscribe(getTracTracEvent().getRaceList().iterator().next(),
-                        new ICallbackData<Route, RouteData>() {
-                            private boolean first = true;
-
-                            @Override
-                            public void gotData(Route route, RouteData record, boolean isLiveData) {
-                                if (first) {
-                                    synchronized (semaphor) {
-                                        firstRoute[0] = route;
-                                        firstData[0] = record;
-                                        semaphor.notifyAll();
-                                        getController().remove(routeListener[0]);
-                                    }
-                                    first = false;
-                                }
-                            }
-                        });
+                routeListener[0] = RouteData.subscribe();
                 return Collections.singleton(routeListener[0]);
             }
 

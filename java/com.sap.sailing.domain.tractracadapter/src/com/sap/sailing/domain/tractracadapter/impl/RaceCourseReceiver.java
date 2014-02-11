@@ -27,12 +27,13 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.model.lib.api.route.IControlPoint;
 import com.tractrac.model.lib.api.route.IRoute;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
 import difflib.PatchFailedException;
 
@@ -60,8 +61,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteD
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             IEvent tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator);
+            long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         if (simulator == null) {
@@ -84,12 +85,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteD
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         for (final Race race : getTracTracEvent().getRaceList()) {
-            TypeController routeListener = RouteData.subscribe(race, new ICallbackData<Route, RouteData>() {
-                @Override
-                public void gotData(Route route, RouteData record, boolean isLiveData) {
-                    enqueue(new Triple<Route, RouteData, Race>(route, record, race));
-                }
-            });
+            TypeController routeListener = RouteData.subscribe();
             setAndStartThread(new Thread(this, getClass().getName()));
             result.add(routeListener);
         }

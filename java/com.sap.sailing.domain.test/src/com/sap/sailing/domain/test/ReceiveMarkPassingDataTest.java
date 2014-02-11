@@ -53,22 +53,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
                 final TypeController[] markPassingsListener = new TypeController[1];
-                markPassingsListener[0] = MarkPassingsData.subscribe(race,
-                        new ICallbackData<RaceCompetitor, MarkPassingsData>() {
-                            private boolean first = true;
-
-                            @Override
-                            public void gotData(RaceCompetitor route, MarkPassingsData record, boolean isLiveData) {
-                                if (first) {
-                                    synchronized (semaphor) {
-                                        firstData[0] = record;
-                                        semaphor.notifyAll();
-                                        getController().remove(markPassingsListener[0]);
-                                    }
-                                    first = false;
-                                }
-                            }
-                        });
+                markPassingsListener[0] = MarkPassingsData.subscribe();
                 return Collections.singleton(markPassingsListener[0]);
             }
 
@@ -101,7 +86,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 },
-                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
