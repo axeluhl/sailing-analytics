@@ -109,7 +109,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
         boolean printRight = false;
         boolean printWrong = false;
-        boolean printResult = false;
+        boolean printResult = true;
 
         for (Competitor c : getRace().getCompetitors()) {
             numberOfCompetitors++;
