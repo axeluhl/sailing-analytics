@@ -70,6 +70,12 @@
                                     <artifactId>com.sap.sailing.feature.runtime</artifactId>
                                     <version>0.0.0</version>
                                 </dependency>
+                                
+                                <dependency>
+                                    <type>eclipse-plugin</type>
+                                    <artifactId>com.sap.sailing.server.gatway.test.support</artifactId>
+                                    <version>0.0.0</version>
+                                </dependency>
                             </dependencies>
                             
                             <bundleStartLevel>
