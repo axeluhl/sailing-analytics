@@ -123,6 +123,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> hasSplitFleetContiguousScoringColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -213,6 +220,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(discardsColumn, stringMessages.discarding());
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
+        table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;

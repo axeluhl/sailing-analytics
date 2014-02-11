@@ -15,13 +15,15 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final boolean hasSplitFleetContiguousScoring;
 
-    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetScore) {
+    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring) {
         super(regattaIdentifier, seriesName);
         this.isMedal = isMedal;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.startsWithZeroScore = startsWithZeroScore;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
-        this.hasSplitFleetContiguousScoring = hasSplitFleetScore;
+        this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
     }
 
     @Override
