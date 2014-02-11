@@ -45,20 +45,24 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         super();
         className = getClass().getName();
         simpleName = getClass().getSimpleName();
-        
+
     }
 
     protected abstract String getFileName();
-    
+
     protected static String className;
     protected static String simpleName;
 
-    private static List<Double> accuracys = new ArrayList<>();
+    private static double totalPasses = 0;
+    private static double correct = 0;
+    private static double incorrect = 0;
+    private static double skipped = 0;
+    private static double extra = 0;
 
     protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceNumber);
         testWholeRace();
-        testStartOfRace();
+      //  testStartOfRace();
     }
 
     private void setUp(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
@@ -99,13 +103,13 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
         // Compare computed and calculated MarkPassings
         final int tolerance = 10000;
-        int numberOfCompetitors = 0;
-        int wronglyComputed = 0;
-        int wronglyNotComputed = 0;
-        int correctlyNotComputed = 0;
-        int correctPasses = 0;
-        int incorrectPasses = 0;
-        int incorrectStarts = 0;
+        double numberOfCompetitors = 0;
+        double wronglyComputed = 0;
+        double wronglyNotComputed = 0;
+        double correctlyNotComputed = 0;
+        double correctPasses = 0;
+        double incorrectPasses = 0;
+        double incorrectStarts = 0;
 
         boolean printRight = false;
         boolean printWrong = false;
@@ -162,8 +166,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             }
         }
 
-        int totalMarkPasses = numberOfCompetitors * waypoints.size();
-        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed + wronglyComputed);
+        double totalMarkPasses = numberOfCompetitors * waypoints.size();
+        assertEquals(totalMarkPasses, incorrectPasses + correctPasses + wronglyNotComputed + correctlyNotComputed + wronglyComputed, 0);
         double accuracy = (double) (correctPasses + correctlyNotComputed) / totalMarkPasses;
         if (printResult) {
             System.out.println("Total theoretical Passes: " + totalMarkPasses);
@@ -176,7 +180,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             System.out.println("accuracy: " + accuracy);
             System.out.println("Computation time: " + time + " ms");
         }
-        accuracys.add(accuracy);
+        totalPasses +=totalMarkPasses;
+        correct+=correctPasses + correctlyNotComputed;
+        incorrect+=incorrectPasses;
+        skipped+=wronglyNotComputed;
+        extra+=wronglyComputed;
         assertTrue(accuracy >= 0.9);
     }
 
@@ -265,14 +273,16 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     @AfterClass
     public static void createXML() throws IOException {
-        double result = 0;
-        for(Double d : accuracys){
-            result += d;
-        }
-        result /= accuracys.size();
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-"+simpleName+".xml", simpleName, className);
-        MeasurementCase performanceReportCase = performanceReport.addCase(simpleName+" accuracy");
-        performanceReportCase.addMeasurement(new Measurement(simpleName+" accuracy", result));
+        double accuracy = correct/totalPasses;
+        double different = incorrect /totalPasses;
+        double allSkipped = skipped/totalPasses;
+        double allExtra = extra/totalPasses;
+        MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName, className);
+        MeasurementCase performanceReportCase = performanceReport.addCase(simpleName);
+        performanceReportCase.addMeasurement(new Measurement("Accurate", accuracy));
+        performanceReportCase.addMeasurement(new Measurement("Different", different));
+        performanceReportCase.addMeasurement(new Measurement("Skipped", allSkipped));
+        performanceReportCase.addMeasurement(new Measurement("Extra", allExtra));
         performanceReport.write();
     }
 }

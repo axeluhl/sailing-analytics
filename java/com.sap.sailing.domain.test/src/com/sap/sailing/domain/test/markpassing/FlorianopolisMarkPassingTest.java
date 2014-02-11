@@ -31,6 +31,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         testRace(4);
     }
+
     @Test
     public void testRace5() throws IOException, InterruptedException, URISyntaxException {
         testRace(5);
@@ -50,6 +51,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace8() throws IOException, InterruptedException, URISyntaxException {
         testRace(8);
     }
+
     @Test
     public void testRace9() throws IOException, InterruptedException, URISyntaxException {
         testRace(9);
@@ -69,6 +71,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace12() throws IOException, InterruptedException, URISyntaxException {
         testRace(12);
     }
+
     @Test
     public void testRace13() throws IOException, InterruptedException, URISyntaxException {
         testRace(13);
@@ -88,6 +91,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace16() throws IOException, InterruptedException, URISyntaxException {
         testRace(16);
     }
+
     @Test
     public void testRace17() throws IOException, InterruptedException, URISyntaxException {
         testRace(17);
@@ -107,6 +111,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace20() throws IOException, InterruptedException, URISyntaxException {
         testRace(20);
     }
+
     @Test
     public void testRace21() throws IOException, InterruptedException, URISyntaxException {
         testRace(21);
@@ -126,6 +131,7 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace24() throws IOException, InterruptedException, URISyntaxException {
         testRace(24);
     }
+
     @Test
     public void testRace25() throws IOException, InterruptedException, URISyntaxException {
         testRace(25);
@@ -140,9 +146,9 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     protected String getExpectedEventName() {
         return "ESS Florianopolis 2013";
     }
-    
+
     @Override
-    protected String getFileName(){
+    protected String getFileName() {
         return "event_20131112_ESSFlorian-Race_";
     }
 }
