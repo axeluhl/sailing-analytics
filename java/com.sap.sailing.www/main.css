@@ -105,7 +105,7 @@ a {
   /* line 47, site.css.sass */
   #yield_content #pageHeadline {
     color: white;
-    margin: 0 0 10px 0;
+    margin: 10px 0 10px 0;
     font-size: 18px; }
   /* line 53, site.css.sass */
   #yield_content #keyVisual {
@@ -115,7 +115,7 @@ a {
     /* line 58, site.css.sass */
     #yield_content #keyVisual #infoBox {
       width: 502px;
-      height: 80px;
+      height: 100px;
       background: #999999;
       position: absolute;
       right: 0;
@@ -126,9 +126,13 @@ a {
         color: white;
         font-size: 12px; }
 			#yield_content #keyVisual #infoBox a {
-        font-size: 12px; 
 				text-decoration: none;
-				float: right; }	
+				float: right; 
+				background: #fcb913; 
+				color: white; 
+				font-size: 18px; 
+				font-family: OpenSansRegular, Arial, Verdana, sans-serif; 
+				padding: 6px 12px 6px 12px; }
 				
   /* line 72, site.css.sass */
   #yield_content #mainContent {
