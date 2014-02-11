@@ -1128,6 +1128,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             totalPoints.put(rankedCompetitor, leaderboard.getTotalPoints(rankedCompetitor, later));
         }
         double lastScore = Double.MAX_VALUE;
+        // assert that only the points matter for ranking; not the fleet assignment
         for (Competitor rankedCompetitor : rankedCompetitors) {
             // with a high-point scoring scheme, assert that as competitors get worse, scores get less
             double rankedCompetitorScore = totalPoints.get(rankedCompetitor);
@@ -1136,6 +1137,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                     + " to have worse (lesser) score than its immediate better competitor who scored " + lastScore
                     + " but was " + rankedCompetitorScore, rankedCompetitorScore <= lastScore);
             lastScore = rankedCompetitorScore;
+            // assert that the qualification race consistently has zero points for all competitors because it is discarded
+            assertTrue(leaderboard.isDiscarded(rankedCompetitor, qColumn, later));
         }
     }
 }
