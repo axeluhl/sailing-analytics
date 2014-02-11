@@ -5,7 +5,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 public class LaserVectorGraphics extends BoatClassVectorGraphics {
     
     public LaserVectorGraphics(String... compatibleBoatClassNames) {
-        super("LASER", 4.23, 1.37, 2.1, compatibleBoatClassNames);
+        super("LASER", 4.23, 1.37, 4.23, compatibleBoatClassNames);
     }
 
     @Override

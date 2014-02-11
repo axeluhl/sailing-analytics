@@ -6,7 +6,7 @@ import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 public class Extreme40VectorGraphics extends BoatClassVectorGraphics {
     
     public Extreme40VectorGraphics(String... compatibleBoatClassNames) {
-        super("EXTREME40", 16.0, 7.6, 6.1, compatibleBoatClassNames);
+        super("EXTREME40", 16.0, 7.6, 12.2, compatibleBoatClassNames);
     }
 
     @Override
