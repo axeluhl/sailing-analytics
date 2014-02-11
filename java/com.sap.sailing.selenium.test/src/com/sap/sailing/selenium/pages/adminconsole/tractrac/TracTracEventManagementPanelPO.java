@@ -102,7 +102,7 @@ public class TracTracEventManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackableRacesCellTable")
     private WebElement trackableRacesCellTable;
     
-    @FindBy(how = BySeleniumId.class, using = "StartTracking")
+    @FindBy(how = BySeleniumId.class, using = "StartTrackingButton")
     private WebElement startTrackingButton;
     
     /**
