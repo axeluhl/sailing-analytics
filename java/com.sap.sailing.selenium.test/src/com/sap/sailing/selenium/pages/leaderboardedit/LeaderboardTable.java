@@ -14,7 +14,7 @@ public class LeaderboardTable extends PageArea {
 
     public LeaderboardTable(WebDriver driver, WebElement element) {
         super(driver, element);
-        this.table = new GenericCellTablePO<>(driver, (WebElement) context, DataEntryPO.class);
+        this.table = new GenericCellTablePO<>(driver, element, DataEntryPO.class);
     }
 
     public Iterable<String> getColumnNames() {

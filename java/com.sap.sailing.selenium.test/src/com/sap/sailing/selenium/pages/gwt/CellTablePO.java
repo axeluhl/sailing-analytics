@@ -50,11 +50,11 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
+    private static final String LOADING_ANIMATION_XPATH = ".//td/div/div/div/img";
+    
     private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
     
     protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
-    
-    private static final String LOADING_ANIMATION_XPATH = ".//td/div/div/div/img";
     
     private static final String LOADING_ANIMATION_IMAGE = "url(\"data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
@@ -254,7 +254,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         WebElement element = getWebElement();
         String tagName = element.getTagName();
         
-        if(!TABLE_TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, CELL_TABLE_CSS_CLASS))
+        if(!TABLE_TAG_NAME.equalsIgnoreCase(tagName) /*|| !CSSHelper.hasCSSClass(element, CELL_TABLE_CSS_CLASS)*/)
             throw new IllegalArgumentException("WebElement does not represent a CellTable");
     }
     
