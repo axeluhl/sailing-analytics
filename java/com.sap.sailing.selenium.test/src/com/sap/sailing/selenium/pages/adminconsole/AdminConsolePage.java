@@ -183,7 +183,9 @@ public class AdminConsolePage extends HostPage {
         // We have to determine the location where we have to click at the tab for the case its not completely visible.
         // NOTE: We assume that the browser window is big enough to display at least 2 tabs!
         Actions actions = new Actions(this.driver);
-        actions.moveToElement(tab, determineOffsetForClick(tab), 5);
+        int offset = determineOffsetForClick(tab);
+        logger.info("Try to click on tab " + label + " at posstion " + offset + ", 5");
+        actions.moveToElement(tab, offset, 5);
         actions.click();
         actions.perform();
         
