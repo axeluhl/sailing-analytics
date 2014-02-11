@@ -301,6 +301,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
         logger.info("Created " + this);
+        if (windStore == null) {
+            try {
+                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
+        }
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
@@ -322,13 +329,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaLibrary = new MediaLibrary();
-        if (windStore == null) {
-            try {
-                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } 
-        }
         this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
