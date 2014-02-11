@@ -3,7 +3,6 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.DataRetrievalWorker;
 import com.sap.sailing.datamining.data.TrackedLegContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.TrackedLegContextImpl;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.datamining.workers.DataRetrievalWorker;
 
 public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
                       extends AbstractComponentWorker<Collection<DataType>> 

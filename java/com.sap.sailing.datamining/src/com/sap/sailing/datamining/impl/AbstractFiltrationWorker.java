@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.FiltrationWorker;
+import com.sap.sse.datamining.workers.FiltrationWorker;
 
 public abstract class AbstractFiltrationWorker<DataType> extends AbstractComponentWorker<Collection<DataType>>
                                                          implements FiltrationWorker<DataType> {

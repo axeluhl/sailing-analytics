@@ -10,11 +10,11 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
 import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
+import com.sap.sse.datamining.workers.FiltrationWorker;
 
 public class TestFilters {
 

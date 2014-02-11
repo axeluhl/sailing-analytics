@@ -1,11 +1,11 @@
 package com.sap.sailing.datamining.builders;
 
-import com.sap.sailing.datamining.DataRetrievalWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.gps_fix.GPSFixLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.datamining.workers.DataRetrievalWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class DataRetrieverWorkerBuilder<DataType> implements WorkerBuilder<DataRetrievalWorker<LeaderboardGroup, DataType>> {
 

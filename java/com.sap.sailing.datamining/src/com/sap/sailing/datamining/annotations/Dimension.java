@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  *      <li>a primitive type or wrapper class.</li>
  *      <li>classes that implement <code>equals()</code>, <code>hashCode()</code> and <code>toString()</code>.
  * </ul>
- * Otherwise the grouping could become incorrect and the result presentation could be unreadable.
+ * Otherwise the grouping could become incorrect and the result presentation will be unreadable.
  * 
  * 
  * @author Lennart Hensler (D054527)

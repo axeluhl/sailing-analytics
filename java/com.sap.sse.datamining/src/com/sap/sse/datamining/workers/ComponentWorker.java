@@ -1,5 +1,4 @@
-package com.sap.sailing.datamining;
-
+package com.sap.sse.datamining.workers;
 
 public interface ComponentWorker<ResultType> extends Runnable {
 

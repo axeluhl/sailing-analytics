@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.datamining.GroupingWorker;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.workers.GroupingWorker;
 
 public abstract class AbstractGroupingWorker<DataType> extends AbstractComponentWorker<Map<GroupKey, Collection<DataType>>>
                                                        implements GroupingWorker<DataType> {

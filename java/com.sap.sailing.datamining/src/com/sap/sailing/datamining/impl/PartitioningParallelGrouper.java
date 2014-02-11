@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.GroupingWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sse.datamining.components.ParallelGrouper;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.workers.GroupingWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class PartitioningParallelGrouper<DataType> extends AbstractParallelComponent<Collection<DataType>, Map<GroupKey, Collection<DataType>>>
                                                    implements ParallelGrouper<DataType> {

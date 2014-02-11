@@ -15,7 +15,7 @@ Export-Package: com.sap.sailing.datamining,
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.datamining.shared;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
- com.sap.sse.datamining;bundle-version="1.0.0"
+ com.sap.sse.datamining;bundle-version="1.0.0",
+ com.sap.sse.datamining.shared;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Bundle-Activator: com.sap.sailing.datamining.impl.Activator

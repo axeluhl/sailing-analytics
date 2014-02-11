@@ -1,7 +1,5 @@
 package com.sap.sailing.datamining.builders;
 
-import com.sap.sailing.datamining.AggregationWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleMedianAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
@@ -11,6 +9,8 @@ import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleDoubleSumAggreg
 import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.ValueType;
+import com.sap.sse.datamining.workers.AggregationWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements WorkerBuilder<AggregationWorker<ExtractedType, AggregatedType>> {
 

@@ -4,14 +4,14 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.DataRetrievalWorker;
-import com.sap.sailing.datamining.WorkReceiver;
 import com.sap.sailing.datamining.impl.criterias.CompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.criterias.OrCompoundFilterCriteria;
 import com.sap.sailing.datamining.impl.function.FilteringFunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectDimensionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectExternalFunctionFilterCriteria;
 import com.sap.sailing.datamining.impl.function.MethodIsCorrectSideEffectFreeValueFilterCriteria;
+import com.sap.sse.datamining.workers.DataRetrievalWorker;
+import com.sap.sse.datamining.workers.WorkReceiver;
 
 public interface FunctionRetrievalWorker extends DataRetrievalWorker<Iterable<Class<?>>, Function<?>> {
     

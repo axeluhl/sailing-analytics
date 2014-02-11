@@ -1,10 +1,10 @@
 package com.sap.sailing.datamining.builders;
 
-import com.sap.sailing.datamining.ExtractionWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.SpeedInKnotsExtractionWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.DistanceTraveledExtractionWorker;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sse.datamining.workers.ExtractionWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class ExtractionWorkerBuilder<DataType, ExtractedType> implements WorkerBuilder<ExtractionWorker<DataType, ExtractedType>> {
 

@@ -9,13 +9,13 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.AggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.SumAggregationWorker;
 import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.workers.AggregationWorker;
 
 public class TestAggregators {
 

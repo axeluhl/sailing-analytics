@@ -7,8 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.datamining.ConcurrentFilterCriteria;
-import com.sap.sailing.datamining.FiltrationWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
 import com.sap.sailing.datamining.function.Function;
 import com.sap.sailing.datamining.function.FunctionProvider;
@@ -17,6 +15,8 @@ import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.datamining.workers.FiltrationWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class RegistryFunctionsProvider implements FunctionProvider {
     

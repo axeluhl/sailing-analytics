@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.test.util;
 
-import com.sap.sailing.datamining.WorkReceiver;
+import com.sap.sse.datamining.workers.WorkReceiver;
 
 public class OpenDataReceiver<ResultType> implements WorkReceiver<ResultType> {
     

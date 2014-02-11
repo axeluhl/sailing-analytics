@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.impl;
 
-import com.sap.sailing.datamining.ComponentWorker;
-import com.sap.sailing.datamining.WorkReceiver;
+import com.sap.sse.datamining.workers.ComponentWorker;
+import com.sap.sse.datamining.workers.WorkReceiver;
 
 public abstract class AbstractComponentWorker<ResultType> implements ComponentWorker<ResultType> {
 

@@ -3,9 +3,9 @@ package com.sap.sailing.datamining.builders;
 import java.util.Collection;
 
 import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.GroupingWorker;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.impl.MultiDimensionalGroupingWorker;
+import com.sap.sse.datamining.workers.GroupingWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class MultiDimensionalGroupingWorkerBuilder<DataType, ValueType> implements WorkerBuilder<GroupingWorker<DataType>> {
 

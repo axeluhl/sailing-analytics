@@ -4,9 +4,7 @@ import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.DataMiningStringMessages;
-import com.sap.sailing.datamining.FiltrationWorker;
 import com.sap.sailing.datamining.Query;
-import com.sap.sailing.datamining.WorkerBuilder;
 import com.sap.sailing.datamining.i18n.DataMiningResourceBundleManager;
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.QueryImpl;
@@ -17,6 +15,8 @@ import com.sap.sse.datamining.components.ParallelDataRetriever;
 import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.components.ParallelGrouper;
+import com.sap.sse.datamining.workers.FiltrationWorker;
+import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataMiningFactory {
     

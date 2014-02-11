@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sap.sailing.datamining.AggregationWorker;
 import com.sap.sailing.datamining.impl.AbstractComponentWorker;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.workers.AggregationWorker;
 
 public abstract class AbstractAggregationWorker<ExtractedType, AggregatedType> extends AbstractComponentWorker<Map<GroupKey, AggregatedType>>
                                                                                implements AggregationWorker<ExtractedType, AggregatedType> {
