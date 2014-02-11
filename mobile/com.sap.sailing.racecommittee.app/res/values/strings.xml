@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="empty_array"/>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="empty_array" tools:ignore="UnusedResources"/>
 
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
@@ -85,6 +85,8 @@
         <item>Port</item>
         <item>Starboard</item>
         <item>Gate</item>
+        <item >Line</item>
+        <item >Offset</item>
     </string-array>
 
     <string name="publish">Publish</string>
@@ -126,19 +128,22 @@
     <string name="store_wind">Store wind</string>
     
 	<!-- SETTINGS -->
-    <string name="settings_category_general">General</string>    
+    <string name="settings_category_general">Other</string>    
     <string name="settings_general_manageareas_header">Managed Course Areas</string>
     <string name="settings_general_language_header">Select Language</string>
     <string name="settings_general_language_description">Select the language. You might need to restart the app to have changes applied.</string>
     
-    <string name="override_default_start_procedure_type_header">Override default start procedure type</string>
-    <string name="override_default_start_procedure_type_description">Check the box if races should use the start procedure type defined below as a default.</string>
     <string name="override_default_start_procedure_type_select_header">Default start procedure type when overriden</string>
     <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
     
     <string name="settings_please_reload">Please execute action \'Reload\' to apply changes.</string>
     <string name="settings_advanced_service_header">Webservice URL</string>
     <string name="settings_advanced_mail_header">Positioning mail recipient</string>
+    
+    <string name="settings_category_polling">Polling</string>
+    <string name="settings_polling_active_header">Activate Polling</string>
+    <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
+    <string name="settings_polling_interval_header">Polling Interval (seconds)</string>
     
     <string name="compass_view_compass">Compass</string>
     <string name="compass_view_needle">Needle</string>
@@ -163,13 +168,13 @@
 	<string name="today">Today</string>
 	<string name="start">Start</string>
 	
-	<string name="application_information">Application Information</string>
-	<string name="application_identifier">Identifier</string>
-	<string name="application_version">Version</string>
-	<string name="application_install_date">Install Date</string>
-	<string name="persistence_information">Persistence Status</string>
-	<string name="persistence_waiting_events">Waiting events</string>
-	<string name="persistence_waiting_clear_events">Clear events</string>
+	<string name="application_information" translatable="false">Application Information</string>
+	<string name="application_identifier" translatable="false">Identifier</string>
+	<string name="application_install_date" translatable="false">Install Date</string>
+	<string name="persistence_information" translatable="false">Persistence Status</string>
+	<string name="persistence_waiting_clear_events" translatable="false">Clear events</string>
+	<string name="persistence_waiting_events" translatable="false">Waiting events</string>
+	<string name="application_version" translatable="false">Version</string>
 	
 	<string name="generic_error">Error</string>
 	
@@ -193,8 +198,6 @@
 	<string name="settings_category_regatta_defaults">Regatta Configuration (default)</string>
 	<string name="settings_category_regattas">Regatta Configuration (specific)</string>
 	<string name="settings_category_course_designer">Course Designer Configuration</string>
-	<string name="override_default_course_designer_type_header">Override Course Designer type</string>
-	<string name="override_default_course_designer_type_description">Use configured Course Designer instead of race\'s.</string>
 	<string name="override_default_course_designer_type_select_header">Course Designer type</string>
 	
 	<string name="settings_course_designer_by_name_course_names_header">Course Names</string>
@@ -226,4 +229,22 @@
 	<string name="preference_regatta_specific_title">Regatta Configuration - %1$s</string>
 	<string name="preference_regatta_specific_save_title">Save %1$s configuration</string>
 	<string name="preference_regatta_specific_save_description">This will save the shown configuration for all races of %1$s.</string>
+	<string name="auto_update">Auto-Update</string>
+	<string name="auto_update_checking_version">Checking for version information on server&#8230;</string>
+	<string name="auto_update_downloading_version">Trying to download auto-update info from %1$s</string>
+	<string name="auto_update_version_file_url_invalid">The version file link was not valid.</string>
+	<string name="auto_update_click_install">Click \'Install\' to perform the update to version %1$d.</string>
+	<string name="auto_update_force_install">You already have installed the version offered by the server (version %1$d).</string>
+	<string name="auto_update_already_up_to_date">You are already up to date!</string>
+	<string name="auto_update_downloading_apk">Downloading APK from server&#8230;</string>
+	<string name="auto_update_apk_link_invalid">The download link was not valid.</string>
+	<string name="auto_update_apk_file_error">The download file couldn\'t be created.</string>
+	<string name="auto_update_error">Error while trying to auto-update.</string>
+	<string name="auto_update_completed">Auto-Update completed</string>
+	<string name="auto_update_completed_text">The automatic update has been completed. You should now re-synchronize your connection settings with the server.</string>
+	<string name="auto_update_completed_take_me_there">Take me there</string>
+	<string name="wind_gps_is_disabled">Your GPS seems to be disabled, do you want to enable it?</string>
+	<string name="rrs26_start_mode_changed_to">Start mode flag changed to %1$s</string>
+	<string name="preference_there_are_no_regattas">There are no regattas loaded.</string>
+	<string name="configure_regatta">Configure regatta %1$s</string>
 </resources>

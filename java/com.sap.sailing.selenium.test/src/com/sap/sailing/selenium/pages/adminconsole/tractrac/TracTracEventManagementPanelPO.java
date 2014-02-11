@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,16 +10,12 @@ import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
-
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -222,6 +219,10 @@ public class TracTracEventManagementPanelPO extends PageArea {
         setSelection(this.simulateWithStartTimeNowCheckBox, simulateWithNow);
     }
     
+    public void startTrackingForRace(TrackableRaceDescriptor race) {
+        startTrackingForRaces(Arrays.asList(race));
+    }
+    
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {
         CellTablePO<DataEntryPO> table = getTrackableRacesTable();
         List<DataEntryPO> entries = table.getEntries();
@@ -243,6 +244,8 @@ public class TracTracEventManagementPanelPO extends PageArea {
         table.selectEntries(entries);
         
         this.startTrackingButton.click();
+        
+        // TODO: Dialog ignore
         
         waitForAjaxRequests();
     }

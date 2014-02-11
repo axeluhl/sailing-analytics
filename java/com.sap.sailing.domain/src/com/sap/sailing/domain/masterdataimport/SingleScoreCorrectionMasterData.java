@@ -1,18 +1,21 @@
 package com.sap.sailing.domain.masterdataimport;
 
+import java.io.Serializable;
+
 public class SingleScoreCorrectionMasterData {
 
-    private String competitorId;
+    private Serializable competitorId;
     private Double explicitScoreCorrection;
     private String maxPointsReason;
 
-    public SingleScoreCorrectionMasterData(String competitorId, Double explicitScoreCorrection, String maxPointsReason) {
+    public SingleScoreCorrectionMasterData(Serializable competitorId, Double explicitScoreCorrection,
+            String maxPointsReason) {
         this.competitorId = competitorId;
         this.explicitScoreCorrection = explicitScoreCorrection;
         this.maxPointsReason = maxPointsReason;
     }
 
-    public String getCompetitorId() {
+    public Serializable getCompetitorId() {
         return competitorId;
     }
 

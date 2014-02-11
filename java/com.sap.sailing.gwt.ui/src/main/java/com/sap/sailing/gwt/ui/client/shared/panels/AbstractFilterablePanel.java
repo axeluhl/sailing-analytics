@@ -2,16 +2,16 @@ package com.sap.sailing.gwt.ui.client.shared.panels;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
 
 /**
- * This Panel contains a label and a text box. Text entered into the text box filters the {@link CellTable} passed to
+ * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to
  * the constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the {@link
  * applyFilter(String, List)} of the {@link AbstractListFilter} and then sorting the table again according the the
  * sorting criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be
@@ -25,10 +25,11 @@ import com.sap.sailing.gwt.ui.client.shared.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-    private Iterable<T> all;
-    private final CellTable<T> display;
-    private final ListDataProvider<T> filtered;
-    private final TextBox textBox;
+
+    protected Iterable<T> all;
+    protected final AbstractCellTable<T> display;
+    protected final ListDataProvider<T> filtered;
+    protected final TextBox textBox;
     private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
 
         @Override
@@ -37,14 +38,13 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     };
 
-    public AbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, final ListDataProvider<T> filtered) {
+    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         setSpacing(5);
         this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
         this.all = all;
-        add(label);
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override

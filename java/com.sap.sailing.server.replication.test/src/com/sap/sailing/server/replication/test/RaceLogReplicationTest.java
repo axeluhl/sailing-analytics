@@ -13,18 +13,18 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -337,23 +337,23 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     protected CourseBase createCourseData() {
         CourseBase course = new CourseDataImpl("Test Course");
         
-        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
+        course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
                 "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), NauticalSide.PORT));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), PassingInstruction.Port));
         
         return course;
     }
     
     protected void compareCourseBase(CourseBase masterCourse, CourseBase replicatedCourse) {
-        assertEquals(masterCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(replicatedCourse.getFirstWaypoint().getPassingSide(), null);
-        Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
-        Assert.assertTrue(replicatedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        assertEquals(masterCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(replicatedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
+        Assert.assertTrue(replicatedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         
-        Gate masterGate = (Gate) masterCourse.getFirstWaypoint().getControlPoint();
-        Gate replicatedGate = (Gate) replicatedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks masterGate = (ControlPointWithTwoMarks) masterCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks replicatedGate = (ControlPointWithTwoMarks) replicatedCourse.getFirstWaypoint().getControlPoint();
         
         assertEquals(masterGate.getId(), replicatedGate.getId());
         assertEquals(masterGate.getName(), replicatedGate.getName());
@@ -361,8 +361,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         compareMarks(masterGate.getLeft(), replicatedGate.getLeft());
         compareMarks(masterGate.getRight(), replicatedGate.getRight());
         
-        assertEquals(masterCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(replicatedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(masterCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(replicatedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(masterCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(replicatedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         

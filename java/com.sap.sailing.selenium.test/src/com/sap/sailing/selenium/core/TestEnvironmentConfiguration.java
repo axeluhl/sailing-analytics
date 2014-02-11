@@ -140,7 +140,7 @@ public class TestEnvironmentConfiguration {
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
-        List<DriverDefinition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
+        List<DriverDefinition> driverDefenitions = createDriverDefinitions(testEnvironmentNode);
         
         return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefenitions);
     }
@@ -183,17 +183,16 @@ public class TestEnvironmentConfiguration {
         return properties;
     }
     
-    private static List<DriverDefinition> createDriverDefenitions(Element testEnvironmentNode) {
-        List<DriverDefinition> defenitions = new LinkedList<>();
+    private static List<DriverDefinition> createDriverDefinitions(Element testEnvironmentNode) {
+        List<DriverDefinition> definitions = new LinkedList<>();
         
-        List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION,
-                NAMESPACE_URI);
+        List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION, NAMESPACE_URI);
         
-        for(Element driverDefinitionNode : driverDefinitionNodes) {
-            defenitions.add(createDriverDefinition(driverDefinitionNode));
+        for (Element driverDefinitionNode : driverDefinitionNodes) {
+            definitions.add(createDriverDefinition(driverDefinitionNode));
         }
         
-        return defenitions;
+        return definitions;
     }
     
     private static DriverDefinition createDriverDefinition(Element driverDefinitionNode) {

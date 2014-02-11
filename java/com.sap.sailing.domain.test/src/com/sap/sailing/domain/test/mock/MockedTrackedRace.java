@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Distance;
@@ -39,7 +40,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -145,12 +146,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
         return 0;
-    }
-
-    @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -851,13 +846,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+    public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+    public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -880,13 +875,37 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+    public LineDetails getStartLine(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+    public LineDetails getFinishLine(TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getCourseLength() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

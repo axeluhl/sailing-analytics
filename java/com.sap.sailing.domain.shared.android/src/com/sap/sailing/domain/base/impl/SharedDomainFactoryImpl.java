@@ -17,8 +17,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -28,7 +28,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcher
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
@@ -169,20 +169,20 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public Gate createGate(Mark left, Mark right, String name) {
-       return new GateImpl(left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(left, right, name);
     }
 
     @Override
-    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
-       return new GateImpl(id, left, right, name);
+    public ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name) {
+       return new ControlPointWithTwoMarksImpl(id, left, right, name);
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint, passingSide);
+            Waypoint result = passingInstruction==null?new WaypointImpl(controlPoint):new WaypointImpl(controlPoint, passingInstruction);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }

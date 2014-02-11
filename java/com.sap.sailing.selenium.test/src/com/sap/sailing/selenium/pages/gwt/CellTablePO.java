@@ -198,7 +198,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      *   The entry to select.
      */
     public void selectEntry(T entry) {
-        if(entry.table == this) {
+        if(this.getWebElement().equals(entry.table.getWebElement())) {
             entry.select();
         }
     }
@@ -219,7 +219,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         
         // Select all specified entries
         for(T entry : entries) {
-            if(entry.table == this) {
+            if(this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
         }

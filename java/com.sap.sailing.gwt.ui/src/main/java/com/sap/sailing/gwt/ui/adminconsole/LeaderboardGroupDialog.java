@@ -18,10 +18,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDialog.LeaderboardGroupDescriptor> {
     protected StringMessages stringMessages;

@@ -39,10 +39,12 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
@@ -63,8 +65,10 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -81,7 +85,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -315,10 +319,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     TrackedRaceImpl.this.notifyAll();
                 }
                 try {
+                    logger.info("Started loading wind tracks for " + getRace().getName());
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta.getRegatta().getName(), TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                     windTracks.putAll(loadedWindTracks);
                     updateEventTimePoints(loadedWindTracks);
+                    logger.info("Finished loading wind tracks for " + getRace().getName() + "! Found " + windTracks.size() + " wind tracks for this race!");
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         windLoadingCompleted = WindLoadingState.FINISHED;
@@ -769,6 +775,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     && timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
                 // competitor has finished race; use time point of crossing the finish line
                 end = markPassings.last().getTimePoint();
+            } else if (markPassings.last().getWaypoint() != getRace().getCourse().getLastWaypoint() &&
+                    timePoint.after(markPassings.last().getTimePoint())) {
+                // if competitor has not finished the race (and the requested timepoint
+                // is after the last mark passing) then we can not tell anything about
+                // the distance traveled - this is in line with AbstractSimpleLeaderboardImpl#getTotalTimeSailedInMilliseconds
+                return null;
             }
             return getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
         }
@@ -1656,7 +1668,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                         if (legType != LegType.REACHING) {
                             GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                            if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                            if (!track.hasDirectionChange(timePoint,
+                                    /* be even more conservative than maneuver detection to really try to get "straight line" behavior */
+                                    getManeuverDegreeAngleThreshold()/2.)) {
                                 SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
                                         .getEstimatedSpeed(timePoint, weigher);
                                 if (estimatedSpeedWithConfidence != null
@@ -1810,7 +1824,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
@@ -1865,7 +1879,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             } // else competitor has no fixes to consider; remove any maneuver cache entry
         } // else competitor hasn't started yet; remove any maneuver cache entry
-        logger.fine("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
@@ -1873,7 +1887,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Tries to detect maneuvers on the <code>competitor</code>'s track based on a number of approximating fixes. The
      * fixes contain bearing information, but this is not the bearing leading to the next approximation fix but the
-     * bearing the boat had at the time of the approximating fix which is taken from the original track.
+     * bearing the boat had at the time of the approximating fix which is taken from the original track.<p>
      * 
      * The time period assumed for a maneuver duration is taken from the
      * {@link BoatClass#getApproximateManeuverDurationInMilliseconds() boat class}. If no maneuver is detected, an empty
@@ -2355,19 +2369,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Distance getStartAdvantage(Competitor competitor, double secondsIntoTheRace) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Distance getDistanceToStartLine(Competitor competitor, double secondsBeforeRaceStart) {
+    public Distance getDistanceToStartLine(Competitor competitor, long millisecondsBeforeRaceStart) {
+        final Distance result;
         if (getStartOfRace() == null) {
-            return null;
+            result = null;
+        } else {
+            TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
+            result = getDistanceToStartLine(competitor, beforeStart);
         }
-
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
-        return getDistanceToStartLine(competitor, beforeStart);
+        return result;
     }
 
     @Override
@@ -2411,12 +2421,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Speed getSpeed(Competitor competitor, double secondsBeforeRaceStart) {
+    public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         if (getStartOfRace() == null) {
             return null;
         }
 
-        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - (long) (secondsBeforeRaceStart * 1000));
+        TimePoint beforeStart = new MillisecondsTimePoint(getStartOfRace().asMillis() - millisecondsBeforeRaceStart);
         return getTrack(competitor).getEstimatedSpeed(beforeStart);
     }
 
@@ -2440,51 +2450,60 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
+    @Override
+    public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        if (timePoint != null) {
+            Position competitorPositionWhenPassingStart = getTrack(competitor).getEstimatedPosition(
+                    timePoint, /* extrapolate */false);
+            final Position starboardMarkPosition = getStarboardMarkOfStartlinePosition(timePoint);
+            if (competitorPositionWhenPassingStart != null && starboardMarkPosition != null) {
+                result = starboardMarkPosition == null ? null : competitorPositionWhenPassingStart.getDistance(starboardMarkPosition);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
     /**
-     * The method has protected scope in order to allow for testing. Based on the bearing from the start waypoint to the
-     * next mark, identifies which of the two marks of the start line is on starboard. If the start waypoint has only
+     * Based on the bearing from the start waypoint to the next mark, identifies which of the two marks of the start
+     * line is on starboard. If the start waypoint has only one mark, that mark is returned. If the start line has two
+     * marks but the course has no other waypoint,
+     * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.<p>
+     * 
+     * The method has protected visibility largely for testing purposes.
+     */
+    protected Mark getStarboardMarkOfStartlineOrSingleStartMark(TimePoint at) {
+        LineDetails startLine = getStartLine(at);
+        final Mark result;
+        if (startLine != null) {
+            result = startLine.getStarboardMarkWhileApproachingLine();
+        } else {
+            Waypoint startWaypoint = getRace().getCourse().getFirstWaypoint();
+            if (startWaypoint != null && startWaypoint.getMarks().iterator().hasNext()) {
+                result = startWaypoint.getMarks().iterator().next();
+            } else {
+                result = null;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Based on the bearing from the start waypoint to the
+     * next mark, identifies which of the two marks of the start line is on starboard and returns its position. If the start waypoint has only
      * one mark, that mark is returned. If the start line has two marks but the course has no other waypoint,
      * <code>null<code> is returned. If the course has no waypoints at all, <code>null</code> is returned.
      */
-    protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-        final Position starboardMarkPosition;
-        final Course course = getRace().getCourse();
-        Iterator<Waypoint> waypointsIter = course.getWaypoints().iterator();
-        if (waypointsIter.hasNext()) {
-            Waypoint startWaypoint = waypointsIter.next();
-            if (Util.size(startWaypoint.getMarks()) == 1) {
-                starboardMarkPosition = getOrCreateTrack(startWaypoint.getMarks().iterator().next())
-                        .getEstimatedPosition(at, /* extrapolate */false);
-            } else {
-                if (waypointsIter.hasNext()) {
-                    final Position approximatePositionOfStart = getApproximatePosition(startWaypoint, at);
-                    // find out which of the marks is the starboard side of the line by checking the angle
-                    // between competitor's COG and bearing to mark
-                    Iterator<Mark> markIter = startWaypoint.getMarks().iterator();
-                    Mark mark1 = markIter.next();
-                    Mark mark2 = markIter.next();
-                    final Position estimatedPositionMark1 = getOrCreateTrack(mark1).getEstimatedPosition(at, /* extrapolate */false);
-                    final Position estimatedPositionMark2 = getOrCreateTrack(mark2).getEstimatedPosition(at, /* extrapolate */false);
-                    Bearing bearingFromMark1ToMark2 = estimatedPositionMark1.getBearingGreatCircle(estimatedPositionMark2);
-                    Waypoint nextWaypoint = waypointsIter.next();
-                    Bearing bearingFromStartToNextWaypoint = approximatePositionOfStart
-                            .getBearingGreatCircle(getApproximatePosition(nextWaypoint, at));
-                    Bearing diffBetweenFromMark1ToMark2AndNextWaypoint = bearingFromMark1ToMark2.getDifferenceTo(bearingFromStartToNextWaypoint);
-                    if (diffBetweenFromMark1ToMark2AndNextWaypoint.getDegrees() > 0) {
-                        starboardMarkPosition = estimatedPositionMark1;
-                    } else {
-                        starboardMarkPosition = estimatedPositionMark2;
-                    }
-                } else {
-                    // only one waypoint in course; cannot determine bearing to next mark
-                    starboardMarkPosition = null;
-                }
-            }
-        } else {
-            // only one waypoint in course; can't determine bearing to next waypoint
-            starboardMarkPosition = null;
+    private Position getStarboardMarkOfStartlinePosition(TimePoint at) {
+        Mark starboardMark = getStarboardMarkOfStartlineOrSingleStartMark(at);
+        if (starboardMark != null) {
+            return getOrCreateTrack(starboardMark).getEstimatedPosition(at, /*extrapolate*/ false);
         }
-        return starboardMarkPosition;
+        return null;
     }
 
     protected NamedReentrantReadWriteLock getWindLoadingLock() {
@@ -2493,68 +2512,101 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     /**
      * If the <code>waypoint</code> is not a line, or no position can be determined for one of its marks at <code>timePoint</code>,
-     * <code>null</code> is returned. If no wind information is available but required to compute the advantage, <code>null</code> is
-     * returned.
+     * <code>null</code> is returned. If no wind information is available but required to compute the advantage, <code>null</code> values
+     * are returned in those fields that depend on wind data. If the <code>waypoint</code> is <code>null</code>
+     * or is the only waypoint, <code>null</code> is returned because no reasonable statement can be
+     * made about the direction from which the line is to be passed.
      */
-    private LineLengthAndAdvantage getLineLengthAndAdvantage(TimePoint timePoint, Waypoint waypoint) {
+    private LineDetails getLineLengthAndAdvantage(TimePoint timePoint, Waypoint waypoint) {
         List<Position> markPositions = new ArrayList<Position>();
         int numberOfMarks = 0;
         boolean allMarksHavePositions = true;
-        for (Mark lineMark : waypoint.getMarks()) {
-            numberOfMarks++;
-            final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(timePoint, /* extrapolate */false);
-            if (estimatedMarkPosition != null) {
-                markPositions.add(estimatedMarkPosition);
-            } else {
-                allMarksHavePositions = false;
-            }
-        }
-        LineLengthAndAdvantage result = null;
-        final List<Leg> legs = getRace().getCourse().getLegs();
-        // need at least one leg to make sense of a line
-        if (!legs.isEmpty()) {
-            try {
-                if (allMarksHavePositions && numberOfMarks == 2) {
-                    Wind combinedWind = getWind(markPositions.get(0), timePoint);
-                    Distance distanceFromFirstToSecondMark;
-                    final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
-                    final boolean isStartLine = indexOfWaypoint == 0;
-                    final TrackedLeg legDeterminingDirection = getTrackedLeg(legs.get(isStartLine ? 0
-                            : indexOfWaypoint - 1));
-                    distanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(markPositions.get(0),
-                            markPositions.get(1), timePoint);
-                    final Position worseMark;
-                    final Position betterMark;
-                    final Distance distanceAdvantage;
-                    if ((isStartLine && distanceFromFirstToSecondMark.getMeters() > 0)
-                            || (!isStartLine && distanceFromFirstToSecondMark.getMeters() < 0)) {
-                        // first mark is worse than second mark
-                        worseMark = markPositions.get(0);
-                        betterMark = markPositions.get(1);
-                    } else {
-                        // second mark is worse than first mark
-                        worseMark = markPositions.get(1);
-                        betterMark = markPositions.get(0);
-                    }
-                    if (distanceFromFirstToSecondMark.getMeters() >= 0) {
-                        distanceAdvantage = distanceFromFirstToSecondMark;
-                    } else {
-                        distanceAdvantage = new CentralAngleDistance(
-                                -distanceFromFirstToSecondMark.getCentralAngleRad());
-                    }
-                    final NauticalSide advantageousSide;
-                    if (betterMark.crossTrackError(worseMark, legDeterminingDirection.getLegBearing(timePoint))
-                            .getCentralAngleRad() > 0) {
-                        advantageousSide = NauticalSide.STARBOARD;
-                    } else {
-                        advantageousSide = NauticalSide.PORT;
-                    }
-                    result = new LineLengthAndAdvantageImpl(timePoint, waypoint, worseMark.getDistance(betterMark),
-                            worseMark.getBearingGreatCircle(betterMark).getDifferenceTo(combinedWind.getFrom()),
-                            advantageousSide, distanceAdvantage);
+        LineDetails result = null;
+        if (waypoint != null) {
+            for (Mark lineMark : waypoint.getMarks()) {
+                numberOfMarks++;
+                final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(timePoint, /* extrapolate */
+                        false);
+                if (estimatedMarkPosition != null) {
+                    markPositions.add(estimatedMarkPosition);
+                } else {
+                    allMarksHavePositions = false;
                 }
-            } catch (NoWindException e) {
-                // result remains null;
+            }
+            final List<Leg> legs = getRace().getCourse().getLegs();
+            // need at least one leg to make sense of a line
+            if (!legs.isEmpty()) {
+                try {
+                    if (allMarksHavePositions && numberOfMarks == 2) {
+                        final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(waypoint);
+                        final boolean isStartLine = indexOfWaypoint == 0;
+                        final TrackedLeg legDeterminingDirection = getTrackedLeg(legs.get(isStartLine ? 0
+                                : indexOfWaypoint - 1));
+                        Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0)
+                                .crossTrackError(markPositions.get(1), legDeterminingDirection.getLegBearing(timePoint));
+                        final Mark starboardMarkWhileApproachingLine;
+                        final Mark portMarkWhileApproachingLine;
+                        final Position starboardMarkPositionWhileApproachingLine;
+                        final Position portMarkPositionWhileApproachingLine;
+                        if (crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint.getMeters() < 0) {
+                            portMarkWhileApproachingLine = Util.get(waypoint.getMarks(), 0);
+                            starboardMarkWhileApproachingLine = Util.get(waypoint.getMarks(), 1);
+                        } else {
+                            portMarkWhileApproachingLine = Util.get(waypoint.getMarks(), 1);
+                            starboardMarkWhileApproachingLine = Util.get(waypoint.getMarks(), 0);
+                        }
+                        portMarkPositionWhileApproachingLine = getOrCreateTrack(portMarkWhileApproachingLine)
+                                .getEstimatedPosition(timePoint, /* extrapolate */false);
+                        starboardMarkPositionWhileApproachingLine = getOrCreateTrack(starboardMarkWhileApproachingLine)
+                                .getEstimatedPosition(timePoint, /* extrapolate */false);
+                        final Bearing differenceToCombinedWind;
+                        final NauticalSide advantageousSideWhileApproachingLine;
+                        final Distance distanceAdvantage;
+                        Wind combinedWind = getWind(markPositions.get(0), timePoint);
+                        if (combinedWind != null) {
+                            differenceToCombinedWind = portMarkPositionWhileApproachingLine.getBearingGreatCircle(
+                                    starboardMarkPositionWhileApproachingLine).getDifferenceTo(combinedWind.getFrom());
+                            Distance windwardDistanceFromFirstToSecondMark;
+                            windwardDistanceFromFirstToSecondMark = legDeterminingDirection.getWindwardDistance(
+                                    markPositions.get(0), markPositions.get(1), timePoint);
+                            final Position worseMarkPosition;
+                            final Position betterMarkPosition;
+                            if ((isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() > 0)
+                                    || (!isStartLine && windwardDistanceFromFirstToSecondMark.getMeters() < 0)) {
+                                // first mark is worse than second mark
+                                worseMarkPosition = markPositions.get(0);
+                                betterMarkPosition = markPositions.get(1);
+                            } else {
+                                // second mark is worse than first mark
+                                worseMarkPosition = markPositions.get(1);
+                                betterMarkPosition = markPositions.get(0);
+                            }
+                            if (windwardDistanceFromFirstToSecondMark.getMeters() >= 0) {
+                                distanceAdvantage = windwardDistanceFromFirstToSecondMark;
+                            } else {
+                                distanceAdvantage = new CentralAngleDistance(
+                                        -windwardDistanceFromFirstToSecondMark.getCentralAngleRad());
+                            }
+                            if (betterMarkPosition.crossTrackError(worseMarkPosition,
+                                    legDeterminingDirection.getLegBearing(timePoint)).getCentralAngleRad() > 0) {
+                                advantageousSideWhileApproachingLine = NauticalSide.STARBOARD;
+                            } else {
+                                advantageousSideWhileApproachingLine = NauticalSide.PORT;
+                            }
+                        } else {
+                            differenceToCombinedWind = null;
+                            advantageousSideWhileApproachingLine = null;
+                            distanceAdvantage = null;
+                        }
+                        result = new LineDetailsImpl(timePoint, waypoint,
+                                portMarkPositionWhileApproachingLine
+                                        .getDistance(starboardMarkPositionWhileApproachingLine),
+                                differenceToCombinedWind, advantageousSideWhileApproachingLine, distanceAdvantage,
+                                portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+                    }
+                } catch (NoWindException e) {
+                    // result remains null;
+                }
             }
         }
         return result;
@@ -2562,13 +2614,92 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
 
     @Override
-    public LineLengthAndAdvantage getStartLine(TimePoint at) {
+    public LineDetails getStartLine(TimePoint at) {
         return getLineLengthAndAdvantage(at, getRace().getCourse().getFirstWaypoint());
     }
 
     @Override
-    public LineLengthAndAdvantage getFinishLine(TimePoint at) {
+    public LineDetails getFinishLine(TimePoint at) {
         return getLineLengthAndAdvantage(at, getRace().getCourse().getLastWaypoint());
     }
 
+    @Override
+    public SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis) {
+        SpeedWithConfidence<TimePoint> result = null;
+        if (getEndOfRace() != null) {
+            TimePoint fromTimePoint = getStartOfRace();
+            TimePoint toTimePoint = getEndOfRace();
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMillis);
+            WindTrack windTrack = getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMillis);
+            }
+            if (speedCounter > 0) {
+                Speed averageWindSpeed = new KnotSpeedImpl(sumWindSpeed / speedCounter);
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+                result = new SpeedWithConfidenceImpl<TimePoint>(averageWindSpeed, averageWindSpeedConfidence, toTimePoint);
+            }
+        } 
+        return result;
+    }
+
+    @Override
+    public Distance getCourseLength() {
+        List<Leg> legs = getRace().getCourse().getLegs();
+        Distance raceDistance = new NauticalMileDistance(0);
+        for (Leg leg : legs) {
+            Waypoint from = leg.getFrom();
+            Iterable<MarkPassing> markPassings = getMarkPassingsInOrder(from);
+            Iterator<MarkPassing> markPassingsIterator = markPassings.iterator();
+            if (!markPassingsIterator.hasNext()) {
+                return null;
+            }
+            MarkPassing firstPassing = markPassingsIterator.next();
+            TimePoint timePointOfFirstPassing = firstPassing.getTimePoint();
+            Waypoint to = leg.getTo();
+            Position fromPos = getApproximatePosition(from, timePointOfFirstPassing);
+            Position toPos = getApproximatePosition(to, timePointOfFirstPassing);
+            Distance legDistance = fromPos.getDistance(toPos);
+            raceDistance = raceDistance.add(legDistance);
+        }
+        return raceDistance;
+    }
+    
+    @Override
+    public Speed getSpeedWhenCrossingStartLine(Competitor competitor) {
+        NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
+        Speed competitorSpeedWhenPassingStart = null;
+        lockForRead(competitorMarkPassings);
+        try {
+            if (!competitorMarkPassings.isEmpty()) {
+                TimePoint competitorStartTime = competitorMarkPassings.first().getTimePoint();
+                competitorSpeedWhenPassingStart = getTrack(competitor).getEstimatedSpeed(
+                        competitorStartTime);
+            }
+        } finally {
+            unlockAfterRead(competitorMarkPassings);
+        }
+        return competitorSpeedWhenPassingStart;
+    }
 }

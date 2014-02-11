@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -32,15 +33,15 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLEncoder;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
@@ -57,7 +58,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
     private MultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventProvider;
     private List<EventDTO> allEvents;
-    private AbstractFilterablePanel<EventDTO> filterTextbox;
+    private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
     private Button removeEventsButton;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -206,7 +207,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         allEvents = new ArrayList<EventDTO>();
         eventTable.addColumnSortHandler(getEventTableColumnSortHandler(eventProvider.getList(), eventNameColumn,
                 venueNameColumn, publicationUrlColumn, isPublicColumn, courseAreasColumn));
-        filterTextbox = new AbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
+        filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label("Filter events by name: "), allEvents,
                 eventTable, eventProvider) {
 
             @Override
@@ -267,7 +268,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private void removeEvents(Collection<EventDTO> events) {
         if (!events.isEmpty()) {
-            Collection<String> eventIds = new HashSet<String>();
+            Collection<UUID> eventIds = new HashSet<UUID>();
             for (EventDTO event : events) {
                 eventIds.add(event.id);
             }
@@ -421,7 +422,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
-                                
             }
 
             @Override

@@ -37,15 +37,15 @@ public class SeleniumElementLocatorFactory implements ElementLocatorFactory {
      * 
      * @param context
      *   The context for search of an element or a list of elements.
-     * @param timeOut
-     *   The maximum amount of time to wait for the element or the list of elements.
-     * @param interval
-     *   The frequency with which to check the search context.
+     * @param timeOutSeconds
+     *   The maximum amount of time to wait for the element or the list of elements in seconds
+     * @param intervalMilliseconds
+     *   The frequency with which to check the search context in milliseconds
      */
-    public SeleniumElementLocatorFactory(SearchContext context, int timeOut, int interval) {
+    public SeleniumElementLocatorFactory(SearchContext context, int timeOutSeconds, int intervalMilliseconds) {
         this.context = context;
-        this.timeOut = timeOut;
-        this.interval = interval;
+        this.timeOut = timeOutSeconds;
+        this.interval = intervalMilliseconds;
     }
 
     /**
@@ -58,9 +58,10 @@ public class SeleniumElementLocatorFactory implements ElementLocatorFactory {
      */
     @Override
     public ElementLocator createLocator(Field field) {
-        if (!Annotations.isAnnotationPresent(field))
+        if (!Annotations.isAnnotationPresent(field)) {
             return null;
-
+        }
+        
         return new SeleniumElementLocator(this.context, field, this.timeOut, this.interval);
     }
 }

@@ -135,6 +135,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForWrite(lock);
         try {
             competitorCache.clear();
+            competitorsByIdAsString.clear();
+            competitorsToUpdateDuringGetOrCreate.clear();
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }

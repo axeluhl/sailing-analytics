@@ -2,6 +2,8 @@ package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -111,7 +113,7 @@ public class WebSocketTest {
     }
     
     @Test
-    public void simpleWebSockeEchoTest() throws Exception {
+    public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
         WebSocketClient client = new WebSocketClient();
         SimpleEchoTestSocket socket = new SimpleEchoTestSocket();
@@ -154,9 +156,15 @@ public class WebSocketTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(client, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9");
+        // the following is an access token for an account allowing axel.uhl@gmx.de to access
+        // the data from baur@stg-academy.org, particularly containing the Berlin test data
+        Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
         IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-        LiveDataConnection liveDataConnection = conn.createLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        LiveDataConnection liveDataConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        LiveDataConnection redundantSecondSharedConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        assertTrue(liveDataConnection instanceof LiveDataConnectionWrapper);
+        assertTrue(redundantSecondSharedConnection instanceof LiveDataConnectionWrapper);
+        assertSame(((LiveDataConnectionWrapper) liveDataConnection).getActualConnection(), ((LiveDataConnectionWrapper) redundantSecondSharedConnection).getActualConnection());
         liveDataConnection.addListener(new BulkFixReceiver() {
             @Override
             public void received(Iterable<Fix> fixes) {
@@ -165,6 +173,11 @@ public class WebSocketTest {
         });
         assertNotNull(liveDataConnection);
         assertTrue("Connection handshake not successful within 5s", liveDataConnection.waitForConnection(5000l));
-        liveDataConnection.stop();
+        liveDataConnection.stop(); // this won't stop the actual connection because it's still shared with redundantSecondSharedConnection
+        redundantSecondSharedConnection.stop(); // now this should stop the actual connection
+        LiveDataConnection secondRedundantSecondSharedConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
+        assertTrue(secondRedundantSecondSharedConnection instanceof LiveDataConnectionWrapper);
+        // a new actual connection is expected to have been created
+        assertNotSame(((LiveDataConnectionWrapper) liveDataConnection).getActualConnection(), ((LiveDataConnectionWrapper) secondRedundantSecondSharedConnection).getActualConnection());
     }
 }

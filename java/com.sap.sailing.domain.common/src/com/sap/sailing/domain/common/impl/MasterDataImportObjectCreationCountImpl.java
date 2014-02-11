@@ -29,6 +29,8 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     private Set<String> createdEvents = new HashSet<String>(); 
     private Set<String> createdRegattas = new HashSet<String>(); 
     
+    private Set<String> overwrittenRegattas = new HashSet<String>();
+
     //For GWT serialization
     public MasterDataImportObjectCreationCountImpl() {};
 
@@ -98,6 +100,15 @@ public class MasterDataImportObjectCreationCountImpl implements MasterDataImport
     @Override
     public int getRegattaCount() {
         return regattaCount;
+    }
+
+    @Override
+    public Set<String> getOverwrittenRegattaNames() {
+        return overwrittenRegattas;
+    }
+
+    public void addOverwrittenRegattaName(String name) {
+        overwrittenRegattas.add(name);
     }
    
 }

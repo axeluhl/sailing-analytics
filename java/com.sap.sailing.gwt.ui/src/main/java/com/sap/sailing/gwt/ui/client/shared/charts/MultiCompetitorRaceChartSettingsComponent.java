@@ -8,10 +8,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
         SettingsDialogComponent<MultiCompetitorRaceChartSettings> {
@@ -31,6 +31,8 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
+        availableDetailsTypes.add(DetailType.BEAT_ANGLE);
         
         if (hasOverallLeaderboard) {
             availableDetailsTypes.add(DetailType.OVERALL_RANK);

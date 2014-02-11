@@ -1,0 +1,216 @@
+@import url(fontface.css);
+@import url(CommonControls.css);
+
+/** Add css rules here for your application. */
+/*
+    body #calendar:after
+      content: " ";
+      display: block;
+      height: 0;
+      clear: both;
+      visibility: hidden;
+*/
+.clearafter {
+	clear: both;
+	font-size: 1px;
+	height: 0px;
+	line-height: 0px;
+	margin: -1px 0 0;
+	width: 100%;
+}
+
+.cover {
+	left: -1000px;
+	overflow: hidden;
+	position: absolute;
+	top: -1000px;
+}
+
+
+body {
+	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
+	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
+	line-height: 1;
+	font-size: 14px;
+	font-weight: 400;
+	padding: 85px 0 0 0;
+	margin: 0;
+	color: #3b3b3b;
+}
+
+a {
+	color: #2968c0;
+	text-decoration: underline;
+}
+
+table td,select,button {
+	line-height: 1;
+	font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
+	font-size: 14px;
+}
+
+.contentOuterPanel {
+	background: #dddcdc;
+	margin: 0 12px 0 12px;
+	padding: 12px;
+}
+
+/** Example rules used by the template application (remove for your app) */
+h1 {
+	font-size: 2em;
+	font-weight: bold;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
+}
+
+table {
+	border-collapse: separate;
+}
+
+.LogoAndTitlePanel {
+	height: 68px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+}
+
+.LogoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.RaceBoardHeaderPanel {
+	margin: 0 12px 18px 12px;
+}
+
+.sapLogo {
+	float: left;
+	margin: 13px 0 0 12px;
+}
+
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
+
+.sailingAnalyticsLabel {
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}
+
+.leaderboardLabel {
+	border-bottom: 2px solid #007dc0;
+	font-weight: bold;
+	padding: 0 0 6px 0;
+}
+
+.refreshAndSettings {
+	background: #f2f2f2;
+	border-bottom: 2px solid #fff;
+	border-top: 2px solid #fff;
+	height: 30px;
+}
+
+.refreshAndSettings table td {
+	padding: 0 10px 0 0;
+}
+
+.refreshAndSettings table table td {
+	padding: 0 0 0 0;
+}
+
+.race-name {
+	margin: 2px 10px 0 0;
+	line-height: 1.0;
+	float: left;
+}
+
+input.magnifier {
+	display: block;
+	margin: 3px auto 0 auto !important;
+}
+
+.footerShadowPanel {
+	position: fixed;
+	height: 50px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;
+	width: 100%;
+	z-index: 2000;
+}
+
+.mainPanel {
+	width: 100%;
+	margin-left: 13px;
+}
+
+.errorLabel {
+	color: #FF0000;
+}
+
+.chart-importantMessage {
+    font-family: 'OpenSansSemiBold',Arial,Verdana,sans-serif;
+    font-size: 20px;
+    height: 70px;
+    margin: 0 auto;
+    padding: 49px 0 0 80px;
+    width: 400px;
+    color: #7c7c7c;
+	background: url(images/important-message.png) left center no-repeat;
+}
+
+.dataMiningPanel {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.dataMiningPanel-filledElement {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+	color: #FFFFFF;
+    cursor: pointer;
+    font-family: OpenSansSemiBold,Verdana,Arial,sans-serif;
+    font-size: 14px;
+    margin: 0 0 0 0;
+    padding: 2px 7px 2px 3px;
+    height: 18px;
+    display: inline-block;
+    text-decoration: none;
+    -moz-border-radius: 5px 0 0 5px;
+    -webkit-border-radius: 5px 0 0 5px;
+    border-radius: 5px 0 0 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.dataMiningPanel-settingsButton {
+	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;
+    margin: 0 12px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px;
+}
+
+.dataTypeLabel {
+	font-weight: bold;
+}

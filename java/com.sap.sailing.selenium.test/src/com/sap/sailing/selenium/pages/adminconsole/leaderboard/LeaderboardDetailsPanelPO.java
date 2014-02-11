@@ -87,12 +87,40 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "RacesCellTable")
     private WebElement racesCellTable;
     
+    // TODO: Only available for flexible leader boards
+    @FindBy(how = BySeleniumId.class, using = "AddRacesButton")
+    private WebElement addRacesButton;
+    
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
     
     public LeaderboardDetailsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
+    
+//    /**
+//     * Assuming that the leaderboard is already selected, clicks the "Add Races..." button 
+//     * @param i
+//     */
+//    // TODO: Must be a flexible leaderboard
+    public void addRacesToFlexibleLeaderboard(int i) {
+        this.addRacesButton.click();
+        WebElement dialog = findElementBySeleniumId(this.driver, "RaceColumnsInLeaderboardDialog");
+        RaceColumnsInLeaderboardDialog raceColumnsInLeaderboardDialog = new RaceColumnsInLeaderboardDialog(this.driver, dialog);
+        raceColumnsInLeaderboardDialog.addRaces(2);
+        //selectRaceColumn("R1", "Default");
+    }
+//    
+//    public void selectRaceColumn(String raceColumnName, String fleetName) {
+//        CellTable table = getRaceColumnsTable();
+//        for (WebElement row : table.getRows()) {
+//            List<WebElement> fields = row.findElements(By.tagName("td"));
+//            if (raceColumnName.equals(fields.get(0).getText()) && fleetName.equals(fields.get(1).getText())) {
+//                fields.get(1).click();
+//                break;
+//            }
+//        }
+//    }
     
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();

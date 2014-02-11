@@ -46,13 +46,16 @@ This document describes the onboarding process for a new team member (developer)
 
 3. Setup and configure Eclipse
   - Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
-  - Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse, you need the Gogle WebToolkit SDK from the same update site, too)
+  - Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse, you need the Google WebToolkit SDK from the same update site, too)
+  - Install the Google Android SDK from the same Google Plugin for Eclipse update site
   - Install Eclipse eGit (optional)
   - Check that JDK 1.7 is available and has been set for compilation in Eclipse
   - Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   - Check that JDK 1.6 has been matched to JavaSE-1.6 and that JDK 1.7 has been matched to JavaSE-1.7 (...>Installed JREs>Execution Environments)
   - It is also possible to match the SAPJVM 6 or 7 to the JavaSE-1.6 (for profiling purposes)
-  - Import all Race Analysis projects from the /java(!!!) subdirectory of the git main folder
+  - Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
+  - Import all Race Analysis projects from the `java/` subdirectory of the git main folder
+  - Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   - Set the Eclipse target platform to race-analysis-p2-ide-local.target (located in com.sap.sailing.targetplatform/definitions)
   - Wait until the target platform has been resolved completely
   - In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF

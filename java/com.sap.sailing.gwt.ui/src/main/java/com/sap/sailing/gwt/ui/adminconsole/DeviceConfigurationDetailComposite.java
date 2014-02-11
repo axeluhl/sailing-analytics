@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfiguration
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.StringListEditorComposite;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class DeviceConfigurationDetailComposite extends Composite {
     

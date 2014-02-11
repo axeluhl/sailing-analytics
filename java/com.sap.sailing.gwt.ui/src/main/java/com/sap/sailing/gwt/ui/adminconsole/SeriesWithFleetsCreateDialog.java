@@ -16,10 +16,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     

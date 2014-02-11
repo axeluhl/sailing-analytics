@@ -61,7 +61,6 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
     private static final int LINE_WIDTH = 1;
-    private static final int MAX_SERIES_POINTS = 10000;
 
     private final WindChartSettings settings;
     

@@ -164,17 +164,19 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     class EntryImpl implements Entry {
         private final Callable<Integer> trackedRankProvider;
         private final Double netPoints;
+        private final Double netPointsUncorrected;
         private final boolean isNetPointsCorrected;
         private final Double totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
         private final Fleet fleet;
 
-        private EntryImpl(Callable<Integer> trackedRankProvider, Double netPoints, boolean isNetPointsCorrected, Double totalPoints,
-                MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
+        private EntryImpl(Callable<Integer> trackedRankProvider, Double netPoints, Double netPointsUncorrected, boolean isNetPointsCorrected,
+                Double totalPoints, MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedRankProvider = trackedRankProvider;
             this.netPoints = netPoints;
+            this.netPointsUncorrected = netPointsUncorrected;
             this.isNetPointsCorrected = isNetPointsCorrected;
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
@@ -212,6 +214,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         @Override
         public Fleet getFleet() {
             return fleet;
+        }
+        @Override
+        public Double getNetPointsUncorrected() throws NoWindException {
+            return netPointsUncorrected;
         }
     }
     
@@ -424,6 +430,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public double getCarriedPoints(Competitor competitor) {
         Double result = carriedPoints.get(competitor);
         return result == null ? 0 : result;
+    }
+
+    @Override
+    public Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints() {
+        return Collections.unmodifiableMap(carriedPoints);
     }
 
     @Override
@@ -651,10 +662,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint);
         final Double correctedScore = correctedResults.getCorrectedScore();
-        return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.isCorrected(),
-                discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()),
-                        correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
+        return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.getUncorrectedScore(),
+                correctedResults.isCorrected(),
+                        discarded ? DOUBLE_0
+                                : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()), correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
     @Override
@@ -690,10 +701,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 final Double correctedScore = correctedResults.getCorrectedScore();
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScore,
-                        correctedResults.isCorrected(), discarded ? DOUBLE_0 : (correctedScore==null?null:
-                                Double.valueOf((correctedScore * raceColumn.getFactor()))),
-                                correctedResults.getMaxPointsReason(), discarded,
-                                raceColumn.getFleetOfCompetitor(competitor));
+                        correctedResults.getUncorrectedScore(), correctedResults.isCorrected(),
+                                discarded ? DOUBLE_0 : (correctedScore==null?null:
+                                        Double.valueOf((correctedScore * raceColumn.getFactor()))), correctedResults.getMaxPointsReason(),
+                                discarded, raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
@@ -852,6 +863,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Speed result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = markPassings.first().getTimePoint();
+                    TimePoint to;
+                    if (timePoint.after(markPassings.last().getTimePoint()) &&
+                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                        // stop counting when competitor finished the race
+                        to = markPassings.last().getTimePoint();
+                    } else {
+                        if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
+                                timePoint.after(markPassings.last().getTimePoint())) {
+                            result = null;
+                            break;
+                        }
+                        to = timePoint;
+                    }
+                    Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
+                    if (distanceTraveled != null) {
+                        result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Override
     public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
         Long result = null;
         // TODO should we ensure that competitor participated in all race columns?
@@ -918,9 +960,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         } else {
                             if (trackedRace.getEndOfTracking() != null
                                     && timePoint.after(trackedRace.getEndOfTracking())) {
-                                result = null; // race not finished until end of tracking; no reasonable value can be
-                                               // computed for competitor
-                                break;
+                                    result = null; // race not finished until end of tracking; no reasonable value can be
+                                    // computed for competitor
+                                    break;
                             } else {
                                 to = timePoint;
                             }
@@ -950,6 +992,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     } else {
                         result = result.add(distanceSailedInRace);
                     }
+                } else {
+                    // if competitor has not finished one single race in the whole
+                    // series then we can not return a meaningful value for all
+                    // all races
+                    return null;
                 }
             }
         }
@@ -1201,6 +1248,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
+        entryDTO.netPointsUncorrected = entry.getNetPointsUncorrected();
         entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
@@ -1231,10 +1279,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         if (!competitorMarkPassings.isEmpty()) {
                             final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
                             if (firstMarkPassing.getWaypoint() == startWaypoint) {
-                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, 5);
+                                Distance distanceToStartLineFiveSecondsBeforeStartOfRace = trackedRace.getDistanceToStartLine(competitor, /*milliseconds before start*/ 5000);
                                 entryDTO.distanceToStartLineFiveSecondsBeforeStartInMeters = distanceToStartLineFiveSecondsBeforeStartOfRace == null ? null
                                         : distanceToStartLineFiveSecondsBeforeStartOfRace.getMeters();
-                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, 5);
+                                Speed speedFiveSecondsBeforeStartOfRace = trackedRace.getSpeed(competitor, /*milliseconds before start*/ 5000);
                                 entryDTO.speedOverGroundFiveSecondsBeforeStartInKnots = speedFiveSecondsBeforeStartOfRace == null ? null
                                         : speedFiveSecondsBeforeStartOfRace.getKnots();
                                 Distance distanceToStartLineAtStartOfRace = trackedRace.getDistanceToStartLine(

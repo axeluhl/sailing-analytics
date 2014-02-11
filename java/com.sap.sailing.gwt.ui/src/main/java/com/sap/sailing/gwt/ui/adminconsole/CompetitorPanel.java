@@ -32,12 +32,12 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.AbstractFilterablePanel;
+import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows an administrator to view and edit the set of competitors currently maintained by the server.
@@ -54,7 +54,7 @@ public class CompetitorPanel extends SimplePanel {
     private ListDataProvider<CompetitorDTO> competitorProvider;
     private List<CompetitorDTO> allCompetitors;
     private final String leaderboardName;
-    private AbstractFilterablePanel<CompetitorDTO> filterField;
+    private LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -200,7 +200,7 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         competitorTable = new CellTable<CompetitorDTO>(10000, tableRes);
-        filterField = new AbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
+        filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
                 allCompetitors, competitorTable, competitorProvider) {
 
             @Override

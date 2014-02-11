@@ -11,7 +11,6 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * Production Environment
-  * [[PIRONET (Hosting Provider, Emergency Procedures)|wiki/prionet-related-information]]
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[Production Environment|wiki/production-environment]]
   * [[TracTrac Lifecycle for Event Managers|wiki/tractrac-lifecycle]]
@@ -29,6 +28,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
+  * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]

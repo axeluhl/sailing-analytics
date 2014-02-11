@@ -1,18 +1,21 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
+import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.QueryResult;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -180,9 +183,9 @@ public interface SailingServiceAsync {
     void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, String newCourseAreaIdAsId, AsyncCallback<StrippedLeaderboardDTO> callback);
+            int[] newDiscardingThreasholds, UUID newCourseAreaId, AsyncCallback<StrippedLeaderboardDTO> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId,
+    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds,
@@ -320,28 +323,26 @@ public interface SailingServiceAsync {
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
 
-    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
-
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
      * <code>newName</code> a {@link IllegalArgumentException} is thrown.
      */
-    void renameEvent(String eventIdAsString, String newName, AsyncCallback<Void> callback);
+    void renameEvent(UUID eventId, String newName, AsyncCallback<Void> callback);
 
     /**
      * Removes the event with the id <code>id</code> from the service and the persistence store.
      */
-    void removeEvent(String eventIdAsString, AsyncCallback<Void> callback);
+    void removeEvent(UUID eventId, AsyncCallback<Void> callback);
 
-    void removeEvents(Collection<String> eventIdsAsStrings, AsyncCallback<Void> asyncCallback);
+    void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
-    void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,
+    void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames, AsyncCallback<Void> callback);
 
-    void createCourseArea(String eventIdAsString, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
+    void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
@@ -361,7 +362,7 @@ public interface SailingServiceAsync {
 
     void createRegatta(String regattaName, String boatClassName,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -383,7 +384,7 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints, AsyncCallback<Void> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<String>> callback);
 
@@ -425,11 +426,9 @@ public interface SailingServiceAsync {
 
     void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
-    
-    void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
 
 
-    void updateRegatta(RegattaIdentifier regattaIdentifier, String defaultCourseAreaUuidAsString, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
+    void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 
@@ -442,9 +441,9 @@ public interface SailingServiceAsync {
 
     void stopReplicatingFromMaster(AsyncCallback<Void> asyncCallback);
     
-    void getRegattaStructureForEvent(String eventIdAsString, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
+    void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
-    void getRaceStateEntriesForRaceGroup(String eventIdAsString, List<String> visibleCourseAreas,
+    void getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay,
             AsyncCallback<List<RegattaOverviewEntryDTO>> markedAsyncCallback);
 
@@ -457,6 +456,14 @@ public interface SailingServiceAsync {
 
     void importMasterData(String host, String[] names, boolean override, boolean compress,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
+
+    <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
+    
+    /**
+     * This method does nothing, but is needed to ensure, that GenericGroupKey&ltString&gt in the GWT serialization policy.<br />
+     * This is necessary, because the type is somehow covered from GWT. For Further information look at bug 1503.<br />
+     */
+    void pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<DataMiningSerializationDummy> asyncCallback);
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
@@ -474,8 +481,16 @@ public interface SailingServiceAsync {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
 
+    /**
+     * Sets the a new start time.
+     * @param dto {@link RaceLogSetStartTimeDTO} identifying the race to set the start time on and the new start time.
+     */
     void setStartTime(RaceLogSetStartTimeDTO dto, AsyncCallback<Boolean> callback);
 
+    /**
+     * Gets the race's current start time and current pass identifier. If no start time is set, the pass identifier will
+     * still be returned, but the start time field will be <code>null</code>.
+     */
     void getStartTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<Date, Integer>> callback);
 
@@ -488,5 +503,7 @@ public interface SailingServiceAsync {
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+
+    void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 }
 

@@ -146,12 +146,10 @@ public class AbstractPosition implements Position {
                 .getDegrees());
         if (toLeft > 90) {
             distance = this.getDistance(left);
-        } else {
-            if (toRight > 90) {
+        } else if (toRight > 90) {
                 distance = this.getDistance(right);
             } else {
                 distance = this.absoluteCrossTrackError(left, left.getBearingGreatCircle(right));
-            }
         }
         // Right now this always returns a positiv value. It might be possible to change it so that the sign indicates
         // which side of the Line the Position is on.

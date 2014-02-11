@@ -62,7 +62,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
-    String totalRank();
+    String totalRegattaRank();
     String collapse();
     String expand();
     String leg();
@@ -186,6 +186,7 @@ public interface StringMessages extends Messages {
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();
+    String actionExportXML();
     String filterLeaderboardsByName();
     String actions();
     String islinked();
@@ -556,7 +557,7 @@ public interface StringMessages extends Messages {
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
     String tracTracUpdateUrl();
-    String passingSide();
+    String passingInstructions();
     String refreshNow();
     String stopUpdating();
     String startUpdating();
@@ -685,6 +686,7 @@ public interface StringMessages extends Messages {
     String startsWithZeroScore();
     String masterDataImportPanel();
     String importSuccess(int leaderboardGroups, int leaderboards, int events, int regattas);
+    String importSuccessOverwriteInfo();
     String regattaOverviewConfiguration();
     String firstRaceIsNonDiscardableCarryForward();
     String addReplicationMaster();
@@ -774,13 +776,31 @@ public interface StringMessages extends Messages {
     String timeSinceLastPositionFix();
     String timeSinceLastPositionFixTooltip();
     String trackingQuality();
+    String legType();
     String seriesLeaderboard();
     String regattaLeaderboards();
     String polars();
+    String sailID();
+    String clearSelection();
+    String running();
     String distanceToLineFiveSecondsBeforeStart();
     String speedOverGroundFiveSecondsBeforeStart();
     String distanceToLineFiveSecondsBeforeStartTooltip();
     String speedOverGroundFiveSecondsBeforeStartTooltip();
+    String runAsSubstantive();
+    String done();
+    String lastFinished();
+    String run();
+    String times();
+    String numberOfGPSFixes();
+    String averageCleanedServerTime();
+    String averageCleanedOverallTime();
+    String dataMiningBenchmarkResults();
+    String serverTime();
+    String cleanedServerTime();
+    String overallTime();
+    String cleanedOverallTime();
+    String dataMiningResult();
     String confidenceShouldBeBetween();
     String minDataValuesNeedToBeAtLeastZero();
     String numberOfColumnsAtLeast2();
@@ -795,6 +815,15 @@ public interface StringMessages extends Messages {
     String removeAllSheets();
     String removeAll();
     String selectSheet();
+    String groupBy();
+    String statisticToCalculate();
+    String queryResultsChartSubtitle(int retrievedDataAmount, int filteredDataAmount, double calculationTime);
+    String noQuerySelected();
+    String runAutomatically();
+    String noStatisticSelectedError();
+    String noCustomGrouperScriptTextError();
+    String noDimensionToGroupBySelectedError();
+    String noGrouperSelectedError();
     String windImport_Upload();
     String windImport_Title();
     String windImport_BoatId();
@@ -820,12 +849,16 @@ public interface StringMessages extends Messages {
     String raceTimeDownwindTooltip();
     String raceTimeReachingTooltip();
     String raceTimeUpwindTooltip();
+    String queryNotValidBecause();
+    String dataMining();
     String hideToolbar();
     String showSeriesLeaderboards();
     String showOverallLeaderboard();
     String exchangeHost();
     String explainExchangeHostName();
-
+    String errorRunningDataMiningQuery();
+    String offset();
+    String line();
     String lineAngleToWindAndAdvantage(String startLineLength, String startLineAngleToCombinedWind, String startLineAdvantageousSide, String startLineAdvantageInMeters);
     String doYouReallyWantToRemoveEvents();
     String doYouReallyWantToRemoveEvent(String eventName);
@@ -839,6 +872,10 @@ public interface StringMessages extends Messages {
     String id();
     String compress();
     String compressTooltip();
+    String queryRunner();
+    String rerunQueryAfterRefresh();
+    String refreshIntervalMustntBeEmpty();
+    String selectionTables();
 
     String addConfiguration();
     String noConfigurations();
@@ -905,5 +942,16 @@ public interface StringMessages extends Messages {
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);
     String resultFromIgtimiWindImport(String string);
-    String countDownInMillis(String timeToStartInFractionalSeconds);
+    String timeToStart(String timeToStart);
+    String timeSinceStart(String timeSince);
+    String distanceToLine();
+    String beatAngleTooltip();
+    String beatAngle();
+    String runAutomaticallyTooltip();
+    String rerunQueryAfterRefreshTooltip();
+    String queryDefinitionProvider();
+    String statisticProvider();
+    String toCalculateThe();
+    String groupingProvider();
+    String use();
 }

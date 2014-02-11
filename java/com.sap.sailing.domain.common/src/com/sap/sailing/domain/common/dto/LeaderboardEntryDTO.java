@@ -31,6 +31,7 @@ public class LeaderboardEntryDTO implements Serializable {
     public MaxPointsReason reasonForMaxPoints;
     
     public Double netPoints;
+    public Double netPointsUncorrected;
     
     /**
      * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.

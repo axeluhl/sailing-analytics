@@ -4,22 +4,32 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PassingInstruction;
 
 public class WaypointImpl implements Waypoint {
     private static final long serialVersionUID = 1600863368078653897L;
     private final ControlPoint controlPoint;
     private static int idCounter = 1;
     private final int id;
-    private final NauticalSide passingSide;    
+    private final PassingInstruction passingInstructions; 
+    private final Bearing fixedBearing;
 
     public WaypointImpl(ControlPoint controlPoint) {
-        this(controlPoint, null);
+        this(controlPoint, PassingInstruction.None, /*Bearing*/null);
     }
     
-    public WaypointImpl(ControlPoint controlPoint, NauticalSide passingSide) {
+    public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions) {
+        this(controlPoint, passingInstructions, /*Bearing*/null);
+    }
+    
+    public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions, Bearing fixedBearing) {
+        if (passingInstructions == null){
+            throw new IllegalArgumentException("PassingInstructions cannot be null");
+        }
         this.controlPoint = controlPoint;
-        this.passingSide = passingSide;
+        this.passingInstructions = passingInstructions;
+        this.fixedBearing=fixedBearing;
         id = idCounter++;
     }
     
@@ -54,8 +64,13 @@ public class WaypointImpl implements Waypoint {
     }
 
     @Override
-    public NauticalSide getPassingSide() {
-        return passingSide;
+    public PassingInstruction getPassingInstructions() {
+        return passingInstructions;
+    }
+    
+    @Override
+    public Bearing getFixedBearing(){
+        return fixedBearing;
     }
     
 }
