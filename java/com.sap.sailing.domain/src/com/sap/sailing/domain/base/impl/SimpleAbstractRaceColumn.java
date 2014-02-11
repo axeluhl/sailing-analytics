@@ -95,4 +95,19 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
         return false;
     }
 
+    /**
+     * Implements this by delegating to {@link #hasSplitFleetScore()}. This is a reasonable default implementation because
+     * if the score is not split up by fleet but scored contiguously ascending/descending, this usually means that the
+     * fleets re-convene after this series instead of remaining split.
+     */
+    @Override
+    public boolean isTotalOrderDefinedByFleet() {
+        return hasSplitFleetScore();
+    }
+
+    @Override
+    public boolean hasSplitFleetScore() {
+        return true;
+    }
+
 }

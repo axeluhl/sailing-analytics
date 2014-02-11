@@ -250,6 +250,11 @@ public class LeaderboardCacheManager {
                     }
 
                     @Override
+                    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+                        removeFromCache(leaderboard);
+                    }
+
+                    @Override
                     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
                             boolean firstColumnIsNonDiscardableCarryForward) {
                         removeFromCache(leaderboard);

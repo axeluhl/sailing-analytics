@@ -132,6 +132,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
     }

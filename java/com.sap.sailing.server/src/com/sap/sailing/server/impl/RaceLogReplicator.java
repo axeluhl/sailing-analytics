@@ -77,6 +77,10 @@ public class RaceLogReplicator implements RaceColumnListener {
     }
 
     @Override
+    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+    }
+
+    @Override
     public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
         return true;
     }

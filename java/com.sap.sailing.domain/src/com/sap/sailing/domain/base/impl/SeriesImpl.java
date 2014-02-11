@@ -48,6 +48,15 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean firstColumnIsNonDiscardableCarryForward;
     
     /**
+     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
+     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
+     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
+     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>true</code> which is
+     * also the default.
+     */
+    private boolean hasSplitFleetScore;
+    
+    /**
      * @param fleets
      *            must be non-empty
      * @param trackedRegattaRegistry
@@ -76,6 +85,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
+        hasSplitFleetScore = true;
     }
 
     @Override
@@ -226,7 +236,13 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void setIsMedal(boolean isMedal) {
+        boolean oldIsMedal = this.isMedal;
         this.isMedal = isMedal;
+        if (oldIsMedal != isMedal) {
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, isMedal);
+            }
+        }
     }
 
     @Override
@@ -247,6 +263,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
+    }
+
+    @Override
+    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+        raceColumnListeners.notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
     }
 
     @Override
@@ -353,6 +374,17 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
+    public void setHasSplitFleetScore(boolean hasSplitFleetScore) {
+        boolean oldHasSplitFleetScore = this.hasSplitFleetScore;
+        if (oldHasSplitFleetScore != this.hasSplitFleetScore) {
+            this.hasSplitFleetScore = hasSplitFleetScore;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+            }
+        }
+    }
+
+    @Override
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
@@ -370,5 +402,8 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
 
-    
+    @Override
+    public boolean hasSplitFleetScore() {
+        return hasSplitFleetScore;
+    }
 }

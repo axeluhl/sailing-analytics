@@ -752,6 +752,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+    }
+
+    @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
     }
