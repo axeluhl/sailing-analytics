@@ -256,6 +256,7 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
+        final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());       
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
@@ -302,10 +303,11 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged) {
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged
+                || hasSplitFleetContiguousScoringChanged) {
             sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
-                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetScore(),
+                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetContiguousScoring(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

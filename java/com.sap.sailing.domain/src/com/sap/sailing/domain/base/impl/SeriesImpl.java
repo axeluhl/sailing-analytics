@@ -374,8 +374,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
-        boolean oldHasSplitFleetContiguousScoring = this.hasSplitFleetContiguousScoring;
-        if (oldHasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
+        if (hasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
             this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
             for (RaceColumn raceColumn : getRaceColumns()) {
                 raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);

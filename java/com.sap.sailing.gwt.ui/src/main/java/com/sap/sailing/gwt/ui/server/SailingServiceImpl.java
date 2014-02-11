@@ -2943,10 +2943,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetScore) {
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring) {
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds,
-                        startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetScore));
+                        startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring));
     }
 
     @Override
