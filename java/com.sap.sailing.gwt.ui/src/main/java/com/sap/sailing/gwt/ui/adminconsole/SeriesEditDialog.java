@@ -39,6 +39,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
+    private CheckBox hasSplitFleetScoreCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final StringMessages stringMessages;
@@ -133,7 +134,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
-                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
+                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetScoreCheckbox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -167,6 +168,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());
         additionalWidgetPanel.add(startWithZeroScoreCheckbox);
+        hasSplitFleetScoreCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
+        startWithZeroScoreCheckbox.setValue(selectedSeries.hasSplitFleetContiguousScoring());
+        additionalWidgetPanel.add(hasSplitFleetScoreCheckbox);
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
         additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);

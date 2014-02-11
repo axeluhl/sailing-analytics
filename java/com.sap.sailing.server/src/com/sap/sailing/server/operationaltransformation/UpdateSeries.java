@@ -13,13 +13,15 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final int[] resultDiscardingThresholds;
     private final boolean startsWithZeroScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
+    private final boolean hasSplitFleetContiguousScoring;
 
-    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
+    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetScore) {
         super(regattaIdentifier, seriesName);
         this.isMedal = isMedal;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.startsWithZeroScore = startsWithZeroScore;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+        this.hasSplitFleetContiguousScoring = hasSplitFleetScore;
     }
 
     @Override
@@ -30,6 +32,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
                 null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
         series.setStartsWithZeroScore(startsWithZeroScore);
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
+        series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
         if (series.getRegatta().isPersistent()) {
             toState.updateStoredRegatta(series.getRegatta());
         }

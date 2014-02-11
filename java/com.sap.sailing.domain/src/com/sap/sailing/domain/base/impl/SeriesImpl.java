@@ -51,10 +51,10 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
      * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
      * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
-     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>true</code> which is
+     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code> which is
      * also the default.
      */
-    private boolean hasSplitFleetScore;
+    private boolean hasSplitFleetContiguousScoring;
     
     /**
      * @param fleets
@@ -85,7 +85,6 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
-        hasSplitFleetScore = true;
     }
 
     @Override
@@ -266,8 +265,8 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
-    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
-        raceColumnListeners.notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
     }
 
     @Override
@@ -374,12 +373,12 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
-    public void setHasSplitFleetScore(boolean hasSplitFleetScore) {
-        boolean oldHasSplitFleetScore = this.hasSplitFleetScore;
-        if (oldHasSplitFleetScore != this.hasSplitFleetScore) {
-            this.hasSplitFleetScore = hasSplitFleetScore;
+    public void setSplitFleetContiguousScoring(boolean hasSplitFleetContiguousScoring) {
+        boolean oldHasSplitFleetContiguousScoring = this.hasSplitFleetContiguousScoring;
+        if (oldHasSplitFleetContiguousScoring != this.hasSplitFleetContiguousScoring) {
+            this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
             for (RaceColumn raceColumn : getRaceColumns()) {
-                raceColumnListeners.notifyListenersAboutHasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+                raceColumnListeners.notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
             }
         }
     }
@@ -403,7 +402,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
-    public boolean hasSplitFleetScore() {
-        return hasSplitFleetScore;
+    public boolean hasSplitFleetContiguousScoring() {
+        return hasSplitFleetContiguousScoring;
     }
 }

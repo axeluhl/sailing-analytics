@@ -91,9 +91,9 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
-    public void notifyListenersAboutHasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+    public void notifyListenersAboutHasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.hasSplitFleetScoreChanged(raceColumn, hasSplitFleetScore);
+            listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
         }
     }
 

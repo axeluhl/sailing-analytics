@@ -18,7 +18,7 @@ public interface RaceColumnListener extends Serializable {
     
     void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward);
 
-    void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore);
+    void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring);
 
     boolean canAddRaceColumnToContainer(RaceColumn raceColumn);
     

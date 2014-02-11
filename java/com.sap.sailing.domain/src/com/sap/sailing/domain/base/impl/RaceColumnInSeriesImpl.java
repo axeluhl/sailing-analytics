@@ -113,11 +113,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
     /**
-     * Delegates to {@link Series#hasSplitFleetScore()}.
+     * Delegates to {@link Series#hasSplitFleetContiguousScoring()}.
      */
     @Override
     public boolean hasSplitFleetScore() {
-        return getSeries().hasSplitFleetScore();
+        return getSeries().hasSplitFleetContiguousScoring();
     }
     
     

@@ -411,7 +411,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
-    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
     }
 
     @Override

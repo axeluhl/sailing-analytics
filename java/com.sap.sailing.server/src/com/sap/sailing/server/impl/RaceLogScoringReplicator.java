@@ -56,7 +56,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     @Override
-    public void hasSplitFleetScoreChanged(RaceColumn raceColumn, boolean hasSplitFleetScore) {
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
     }
 
     @Override

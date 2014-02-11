@@ -17,14 +17,18 @@ public class SeriesDescriptor {
     private final List<RaceColumnDTO> races;
     private final boolean isMedal;
     private final boolean startsWithZeroScore;
+    private final boolean hasSplitFleetScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final int[] resultDiscardingThresholds;
     
-    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races, boolean isMedal, int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
+    public SeriesDescriptor(SeriesDTO series, List<RaceColumnDTO> races, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetScore) {
         this.series = series;
         this.races = races;
         this.isMedal = isMedal;
         this.startsWithZeroScore = startsWithZeroScore;
+        this.hasSplitFleetScore = hasSplitFleetScore;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
@@ -47,6 +51,10 @@ public class SeriesDescriptor {
 
     public boolean isStartsWithZeroScore() {
         return startsWithZeroScore;
+    }
+    
+    public boolean hasSplitFleetScore() {
+        return hasSplitFleetScore;
     }
 
     public boolean isFirstColumnIsNonDiscardableCarryForward() {
