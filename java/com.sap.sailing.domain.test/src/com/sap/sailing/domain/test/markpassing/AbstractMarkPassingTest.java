@@ -62,7 +62,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceNumber);
         testWholeRace();
-      //  testStartOfRace();
+        // testStartOfRace();
     }
 
     private void setUp(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
@@ -102,7 +102,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 10000;
+        final int tolerance = 15000;
         double numberOfCompetitors = 0;
         double wronglyComputed = 0;
         double wronglyNotComputed = 0;
@@ -112,7 +112,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         double incorrectStarts = 0;
 
         boolean printRight = false;
-        boolean printWrong = false;
+        boolean printWrong = true;
         boolean printResult = true;
 
         for (Competitor c : getRace().getCompetitors()) {
@@ -129,7 +129,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                     wronglyNotComputed++;
                     if (waypoints.indexOf(w) == 0) {
                         incorrectStarts++;
-                    } else if (printWrong) {
+                    }
+                    if (printWrong) {
                         System.out.println(waypoints.indexOf(w));
                         System.out.println("Computed is null");
                         System.out.println(givenPasses.get(c).get(w) + "\n");
@@ -154,7 +155,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         incorrectPasses++;
                         if (waypoints.indexOf(w) == 0) {
                             incorrectStarts++;
-                        } else if (printWrong) {
+                        }
+                        if (printWrong) {
                             System.out.println(waypoints.indexOf(w));
                             System.out.println("Calculated: " + computedPasses.get(c).get(w));
                             System.out.println("Given: " + givenPasses.get(c).get(w));
@@ -180,11 +182,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             System.out.println("accuracy: " + accuracy);
             System.out.println("Computation time: " + time + " ms");
         }
-        totalPasses +=totalMarkPasses;
-        correct+=correctPasses + correctlyNotComputed;
-        incorrect+=incorrectPasses;
-        skipped+=wronglyNotComputed;
-        extra+=wronglyComputed;
+        totalPasses += totalMarkPasses;
+        correct += correctPasses + correctlyNotComputed;
+        incorrect += incorrectPasses;
+        skipped += wronglyNotComputed;
+        extra += wronglyComputed;
         assertTrue(accuracy >= 0.9);
     }
 
@@ -205,7 +207,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            Pair<List<Candidate>, List<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+            Pair<Iterable<Candidate>,Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
             chooser.calculateMarkPassDeltas(c, f);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst = false;
@@ -246,7 +248,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            Pair<List<Candidate>, List<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+            Pair<Iterable<Candidate>,Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
             chooser.calculateMarkPassDeltas(c, f);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             Waypoint w2 = getRace().getCourse().getFirstLeg().getTo();
@@ -273,10 +275,15 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     @AfterClass
     public static void createXML() throws IOException {
-        double accuracy = correct/totalPasses;
-        double different = incorrect /totalPasses;
-        double allSkipped = skipped/totalPasses;
-        double allExtra = extra/totalPasses;
+        double accuracy = correct / totalPasses;
+        double different = incorrect / totalPasses;
+        double allSkipped = skipped / totalPasses;
+        double allExtra = extra / totalPasses;
+        System.out.println(totalPasses);
+        System.out.println(accuracy);
+        System.out.println(different);
+        System.out.println(allSkipped);
+        System.out.println(allExtra);
         MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + simpleName + ".xml", simpleName, className);
         MeasurementCase performanceReportCase = performanceReport.addCase(simpleName);
         performanceReportCase.addMeasurement(new Measurement("Accurate", accuracy));

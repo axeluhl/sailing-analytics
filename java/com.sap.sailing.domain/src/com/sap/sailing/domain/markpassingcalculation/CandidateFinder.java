@@ -97,7 +97,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c) {
+    public Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c) {
         Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
         try {
             race.getTrack(c).lockForRead();
@@ -115,7 +115,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public LinkedHashMap<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps) {
+    public LinkedHashMap<Competitor,List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps) {
         TreeSet<GPSFix> fixes = new TreeSet<GPSFix>(comp);
         for (GPSFix fix : gps) {
             fixes.add(fix);
@@ -145,12 +145,12 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     @Override
-    public Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes) {
+    public Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes) {
         if (logger.getLevel() == Level.FINEST) {
             logger.finest("Reevaluating MarkPasses for" + c);
         }
-        ArrayList<Candidate> newCans = new ArrayList<>();
-        ArrayList<Candidate> wrongCans = new ArrayList<>();
+        Set<Candidate> newCans = new TreeSet<>();
+        Set<Candidate> wrongCans = new TreeSet<>();
         LinkedHashMap<Waypoint, Pair<List<Candidate>, List<Candidate>>> distanceCandidates = checkForDistanceCandidateChanges(c, fixes);
         LinkedHashMap<Waypoint, Pair<List<Candidate>, List<Candidate>>> cteCandidates = checkForCTECandidatesChanges(c, fixes);
         for (Waypoint w : passingInstructions.keySet()) {
@@ -162,7 +162,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         if (newCans.size() != 0 || wrongCans.size() != 0) {
             logger.fine(newCans.size() + " new Candidates and " + wrongCans.size() + " removed Candidates for " + c);
         }
-        return new Pair<List<Candidate>, List<Candidate>>(newCans, wrongCans);
+        return new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
     private LinkedHashMap<Waypoint, Pair<List<Candidate>, List<Candidate>>> checkForDistanceCandidateChanges(Competitor c, Iterable<GPSFix> fixes) {
@@ -339,14 +339,14 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private boolean crossTrackErrorSignChanges(GPSFix fix, GPSFix fix2, Waypoint w, Competitor c) {
         Double cte = crossTrackErrors.get(c).get(fix).get(w).getA();
         Double cte2 = crossTrackErrors.get(c).get(fix2).get(w).getA();
-        if (cte != null && cte2 != null && (cte < 0) != (cte2 <= 0)) {
+        if (cte!=null&&cte2!=null&&( cte< 0) != (cte2<= 0)) {
             return true;
-        } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
+        } else if (passingInstructions.get(w) == PassingInstruction.Gate){
             cte = crossTrackErrors.get(c).get(fix).get(w).getB();
             cte2 = crossTrackErrors.get(c).get(fix2).get(w).getB();
-            if (cte != null && cte2 != null && (cte < 0) != (cte2 <= 0)) {
+            if (cte!=null&&cte2!=null&&( cte< 0) != (cte2<= 0)) {
                 return true;
-            }
+            } 
         }
         return false;
     }

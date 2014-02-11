@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -38,16 +39,16 @@ public class CandidateFinderTest extends AbstractMockedRaceMarkPassingTest {
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         fixes.add(fix1);
         fixes.add(fix2);
-        assertEquals(0, finder.getCandidateDeltas(bob, fixes).getA().size());
+        assertEquals(0, Util.size(finder.getCandidateDeltas(bob, fixes).getA()));
         
         trackedRace.recordFix(bob, fix3);
         fixes.clear();
         fixes.add(fix3);
-        assertEquals(1, finder.getCandidateDeltas(bob, fixes).getA().size()); // CTE candidate
+        assertEquals(1, Util.size(finder.getCandidateDeltas(bob, fixes).getA())); // CTE candidate
         
         trackedRace.recordFix(bob, fix4);
         fixes.clear();
         fixes.add(fix4);
-        assertEquals(1, finder.getCandidateDeltas(bob, fixes).getA().size()); // Distance Candidate
+        assertEquals(1, Util.size(finder.getCandidateDeltas(bob, fixes).getA())); // Distance Candidate
     }
 }

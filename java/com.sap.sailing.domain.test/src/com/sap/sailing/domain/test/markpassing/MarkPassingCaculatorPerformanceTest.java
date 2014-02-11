@@ -74,7 +74,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
         }
         time = System.currentTimeMillis();
         CandidateChooser c = new CandidateChooser(trackedRace);
-        c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(newCans, new ArrayList<Candidate>()));
+        c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
         ArrayList<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -84,7 +84,7 @@ public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkP
                 ne.add(randomCan());
             }
             time = System.currentTimeMillis();
-            c.calculateMarkPassDeltas(bob, new Pair<List<Candidate>, List<Candidate>>(ne, old));
+            c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(ne, old));
             times.add(System.currentTimeMillis() - time);
             old = ne;
         }

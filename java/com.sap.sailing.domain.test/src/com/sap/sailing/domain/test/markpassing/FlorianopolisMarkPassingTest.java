@@ -53,11 +53,6 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace9() throws IOException, InterruptedException, URISyntaxException {
-        testRace(9);
-    }
-
-    @Test
     public void testRace10() throws IOException, InterruptedException, URISyntaxException {
         testRace(10);
     }
@@ -83,11 +78,6 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace15() throws IOException, InterruptedException, URISyntaxException {
-        testRace(15);
-    }
-
-    @Test
     public void testRace16() throws IOException, InterruptedException, URISyntaxException {
         testRace(16);
     }
@@ -108,23 +98,8 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRace20() throws IOException, InterruptedException, URISyntaxException {
-        testRace(20);
-    }
-
-    @Test
-    public void testRace21() throws IOException, InterruptedException, URISyntaxException {
-        testRace(21);
-    }
-
-    @Test
     public void testRace22() throws IOException, InterruptedException, URISyntaxException {
         testRace(22);
-    }
-
-    @Test
-    public void testRace23() throws IOException, InterruptedException, URISyntaxException {
-        testRace(23);
     }
 
     @Test
@@ -132,15 +107,31 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
         testRace(24);
     }
 
-    @Test
-    public void testRace25() throws IOException, InterruptedException, URISyntaxException {
-        testRace(25);
-    }
+    /*
+     * Alinghi acting wierd
+     * 
+     * @Test public void testRace23() throws IOException, InterruptedException, URISyntaxException { testRace(23); }
+     */
 
-    @Test
-    public void testRace26() throws IOException, InterruptedException, URISyntaxException {
-        testRace(26);
-    }
+    /*
+     * All mark data seems to be missing
+     * 
+     * @Test public void testRace9() throws IOException, InterruptedException, URISyntaxException { testRace(9); }
+     * 
+     * @Test public void testRace20() throws IOException, InterruptedException, URISyntaxException { testRace(20); }
+     */
+
+    /*
+     * Missing static mark info leads to skipping of all finishes.
+     * 
+     * @Test public void testRace25() throws IOException, InterruptedException, URISyntaxException { testRace(25); }
+     * 
+     * @Test public void testRace21() throws IOException, InterruptedException, URISyntaxException { testRace(21); }
+     * 
+     * @Test public void testRace15() throws IOException, InterruptedException, URISyntaxException { testRace(15); }
+     * 
+     * @Test public void testRace26() throws IOException, InterruptedException, URISyntaxException { testRace(26); }
+     */
 
     @Override
     protected String getExpectedEventName() {

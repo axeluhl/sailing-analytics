@@ -66,7 +66,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     @Override
-    public void calculateMarkPassDeltas(Competitor c, Pair<List<Candidate>, List<Candidate>> candidateDeltas) {
+    public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
         if (race.getStartOfRace() != raceStartTime) {
             raceStartTime = race.getStartOfRace();
             for (Competitor com : allEdges.keySet()) {
@@ -82,8 +82,8 @@ public class CandidateChooser implements AbstractCandidateChooser {
         findShortestPath(c);
     }
 
-    private void createNewEdges(Competitor co, List<Candidate> newCans) {
-        for (Candidate newCan : newCans) {
+    private void createNewEdges(Competitor co, Iterable<Candidate> newCandidates) {
+        for (Candidate newCan : newCandidates) {
             for (Candidate oldCan : candidates.get(co)) {
                 Candidate early = newCan;
                 Candidate late = oldCan;
@@ -149,7 +149,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             marker = candidateWithParent.get(marker).getA();
         }
         if (changed) {
-            logger.info("New MarkPasses for " + co);
+           //TODO logger.info("New MarkPasses for " + co);
             List<MarkPassing> markPassDeltas = new ArrayList<>();
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
@@ -238,7 +238,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
         return leg.getGreatCircleDistance(t).scale(1.3);
     }
 
-    private void addCandidates(List<Candidate> newCandidates, Competitor co) {
+    private void addCandidates(Iterable<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
             if (!candidates.get(co).contains(c)) {
                 candidates.get(co).add(c);
@@ -250,7 +250,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
         createNewEdges(co, newCandidates);
     }
 
-    private void removeCandidates(List<Candidate> wrongCandidates, Competitor co) {
+    private void removeCandidates(Iterable<Candidate> wrongCandidates, Competitor co) {
         for (Candidate c : wrongCandidates) {
             candidates.get(co).remove(c);
             List<Edge> toRemove = new ArrayList<>();

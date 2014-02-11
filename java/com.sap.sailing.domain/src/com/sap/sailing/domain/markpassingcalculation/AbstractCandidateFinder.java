@@ -31,7 +31,7 @@ public interface AbstractCandidateFinder {
      * @param c
      * @return
      */
-    Pair<List<Candidate>, List<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
+    Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
     /**
      * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the Candidates
@@ -41,5 +41,5 @@ public interface AbstractCandidateFinder {
      *            the competitor whose {@link Candidate}s should be returned
      * @return all of the Candidates for the specified competitor
      */
-    Pair<List<Candidate>, List<Candidate>> getAllCandidates(Competitor c);
+    Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
 }
