@@ -71,20 +71,20 @@
                                     <version>0.0.0</version>
                                 </dependency>
                                 
+                                <!-- This bundle should only be deployed in a test environment! -->
                                 <dependency>
                                     <type>eclipse-plugin</type>
                                     <artifactId>com.sap.sailing.server.gateway.test.support</artifactId>
+                                    <version>0.0.0</version>
                                 </dependency>
                             </dependencies>
                             
                             <bundleStartLevel>
-                                <!-- This bundle should only be deployed in a test environment! -->
                                 <bundle>
-                                    <id>com.sap.sailing.server.gatway.test.support</id>
-                                    <level>5</level>
+                                    <id>com.sap.sailing.server.gateway.test.support</id>
+                                    <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
-                                
                                 
                                 <bundle>
                                     <id>com.sap.sailing.ess40.resultimport</id>
