@@ -34,6 +34,8 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
     protected UserAgentDetails userAgent;
     protected Label persistentAlertLabel;
     
+    private String baseURL;
+    
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
      */
@@ -79,16 +81,23 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
         persistentAlertLabel = new Label("");
         persistentAlertLabel.setStyleName("global-alert-message");
         
-        ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
-        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
-        ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
-        String moduleBaseURL = GWT.getModuleBaseURL();
-        String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
-        sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
-        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
-        userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
+        setServiceEntryPoint((ServiceDefTarget) mediaService, "media");
+        setServiceEntryPoint((ServiceDefTarget) userManagementService, "usermanagement");
+        setServiceEntryPoint((ServiceDefTarget) sailingService, "sailing");
     }
     
+    protected void setServiceEntryPoint(ServiceDefTarget serviceDefTarget, String serviceRelativePath) {
+        serviceDefTarget.setServiceEntryPoint(getBaseURL() + serviceRelativePath);
+    }
+
+    private String getBaseURL() {
+        if (baseURL == null) {
+            String moduleBaseURL = GWT.getModuleBaseURL();
+            baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
+        }
+        return baseURL;
+    }
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);
