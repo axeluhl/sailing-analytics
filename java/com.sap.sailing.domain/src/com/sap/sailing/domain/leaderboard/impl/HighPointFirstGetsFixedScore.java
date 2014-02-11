@@ -29,7 +29,7 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
         if (rank == 0) {
             result = null;
         } else {
-            result = Math.max(0.0, (double) (scoreForRaceWinner - rank + 1));
+            result = Math.max(1.0, (double) (scoreForRaceWinner - rank + 1));
         }
         return result;
     }
