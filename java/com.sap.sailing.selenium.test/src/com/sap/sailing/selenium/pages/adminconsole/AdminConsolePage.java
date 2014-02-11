@@ -80,6 +80,7 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
+        logger.info("Window is " + driver.manage().window().getSize().width + ", " + driver.manage().window().getSize().height);
         driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
