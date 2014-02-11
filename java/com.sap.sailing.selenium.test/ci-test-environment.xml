@@ -34,18 +34,18 @@
     NOTE: For the Chrome and the InternetExplorer driver an additional "server", which acts as a bridge between the
           browser and the driver, is needed.
   -->
-  <!--
   <system-properties>
      <system-property>
-        <name>webdriver.chrome.driver</name>
-        <value>[path to]\chromedriver.exe</value>
+        <name>webdriver.enable.native.events </name>
+        <value>true</value>
      </system-property>
+  <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
         <value>[path to]\firefox.exe</value>
      </system-property>
-  </system-properties>
   -->
+  </system-properties>
   
   <!--
     The driver definitions define all web drivers (browsers) which should be used for the execution of the tests. This
