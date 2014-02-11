@@ -8,8 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -32,7 +32,12 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     private static final String BMW_CUP_REGATTA = "BMW Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J80";
-
+    
+    @Before
+    public void clearDatabase() {
+        clearState(getContextRoot());
+    }
+    
     @Test
     public void testSimpleLeaderboardEditing() throws UnsupportedEncodingException, InterruptedException {
         final String leaderboardName = "Humba Humba";
