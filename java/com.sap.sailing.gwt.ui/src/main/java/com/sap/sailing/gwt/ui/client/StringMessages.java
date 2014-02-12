@@ -957,4 +957,5 @@ public interface StringMessages extends Messages {
     String groupingProvider();
     String use();
     String releaseNotes();
+    String hasSplitFleetContiguousScoring();
 }

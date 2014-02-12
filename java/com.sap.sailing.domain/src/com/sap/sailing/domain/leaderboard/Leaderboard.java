@@ -457,4 +457,6 @@ public interface Leaderboard extends Named {
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
             InterruptedException, ExecutionException;
+
+    NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 }

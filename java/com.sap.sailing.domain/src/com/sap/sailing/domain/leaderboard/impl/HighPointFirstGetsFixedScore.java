@@ -4,11 +4,12 @@ import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 
 /**
  * A variant of the {@link HighPoint} scoring system where the winner gets a fixed number of points, and
- * all subsequent ranks get one point less. No negative scores are returned. 0.0 is the worst score a
+ * all subsequent ranks get one point less. No negative scores are returned. 1.0 is the worst score a
  * competitor can score.
  * 
  * @author Axel Uhl (D043530)
@@ -24,12 +25,22 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
-        Double result;
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+        final int effectiveRank;
+        final Double result;
+        int competitorFleetOrdering;
         if (rank == 0) {
+            effectiveRank = 0;
+        } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
+            int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn, competitorFleetOrdering);
+            effectiveRank = rank + numberOfCompetitorsInBetterFleets;
+        } else {
+            effectiveRank = rank;
+        }
+        if (effectiveRank == 0) {
             result = null;
         } else {
-            result = Math.max(1.0, (double) (scoreForRaceWinner - rank + 1));
+            result = Math.max(1.0, (double) (scoreForRaceWinner - effectiveRank + 1));
         }
         return result;
     }

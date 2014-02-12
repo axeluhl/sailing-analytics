@@ -111,4 +111,14 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public boolean isCarryForward() {
         return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
     }
+
+    /**
+     * Delegates to {@link Series#hasSplitFleetContiguousScoring()}.
+     */
+    @Override
+    public boolean hasSplitFleetContiguousScoring() {
+        return getSeries().hasSplitFleetContiguousScoring();
+    }
+    
+    
 }
