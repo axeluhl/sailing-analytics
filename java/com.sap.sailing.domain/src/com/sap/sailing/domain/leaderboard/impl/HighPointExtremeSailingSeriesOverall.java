@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
@@ -30,12 +31,12 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher) {
+            Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
         if (rank == 0) {
             result = null;
         } else {
-            result = Math.max(0.0, (double) (MAX_POINTS - rank + 1));
+            result = Math.max(1.0, (double) (MAX_POINTS - rank + 1));
         }
         return result;
     }
