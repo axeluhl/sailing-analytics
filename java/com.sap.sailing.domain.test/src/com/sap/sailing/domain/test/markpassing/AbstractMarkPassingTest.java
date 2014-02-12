@@ -60,7 +60,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     }
 
-    private void setUp(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
+    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException {
         super.setUp();
         URI storedUri = new URI("file:///" + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
@@ -87,7 +87,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceNumber);
         testWholeRace();
         testStartOfRace();
@@ -104,7 +104,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 15000;
+        final int tolerance = 10000;
         double numberOfCompetitors = 0;
         double wronglyComputed = 0;
         double wronglyNotComputed = 0;

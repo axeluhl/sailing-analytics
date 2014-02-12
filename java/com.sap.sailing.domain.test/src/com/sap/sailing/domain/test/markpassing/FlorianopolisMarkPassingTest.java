@@ -14,97 +14,97 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
 
     @Test
     public void testRace1() throws IOException, InterruptedException, URISyntaxException {
-        testRace(1);
+        testRace("1");
     }
 
     @Test
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
-        testRace(2);
+        testRace("2");
     }
 
     @Test
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
-        testRace(3);
+        testRace("3");
     }
 
     @Test
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
-        testRace(4);
+        testRace("4");
     }
 
     @Test
     public void testRace5() throws IOException, InterruptedException, URISyntaxException {
-        testRace(5);
+        testRace("5");
     }
 
     @Test
     public void testRace6() throws IOException, InterruptedException, URISyntaxException {
-        testRace(6);
+        testRace("6");
     }
 
     @Test
     public void testRace7() throws IOException, InterruptedException, URISyntaxException {
-        testRace(7);
+        testRace("7");
     }
 
     @Test
     public void testRace8() throws IOException, InterruptedException, URISyntaxException {
-        testRace(8);
+        testRace("8");
     }
 
     @Test
     public void testRace10() throws IOException, InterruptedException, URISyntaxException {
-        testRace(10);
+        testRace("10");
     }
 
     @Test
     public void testRace11() throws IOException, InterruptedException, URISyntaxException {
-        testRace(11);
+        testRace("11");
     }
 
     @Test
     public void testRace12() throws IOException, InterruptedException, URISyntaxException {
-        testRace(12);
+        testRace("12");
     }
 
     @Test
     public void testRace13() throws IOException, InterruptedException, URISyntaxException {
-        testRace(13);
+        testRace("13");
     }
 
     @Test
     public void testRace14() throws IOException, InterruptedException, URISyntaxException {
-        testRace(14);
+        testRace("14");
     }
 
     @Test
     public void testRace16() throws IOException, InterruptedException, URISyntaxException {
-        testRace(16);
+        testRace("16");
     }
 
     @Test
     public void testRace17() throws IOException, InterruptedException, URISyntaxException {
-        testRace(17);
+        testRace("17");
     }
 
     @Test
     public void testRace18() throws IOException, InterruptedException, URISyntaxException {
-        testRace(18);
+        testRace("18");
     }
 
     @Test
     public void testRace19() throws IOException, InterruptedException, URISyntaxException {
-        testRace(19);
+        testRace("19");
     }
 
     @Test
     public void testRace22() throws IOException, InterruptedException, URISyntaxException {
-        testRace(22);
+        testRace("22");
     }
 
     @Test
     public void testRace24() throws IOException, InterruptedException, URISyntaxException {
-        testRace(24);
+        testRace("24");
     }
 
     /*

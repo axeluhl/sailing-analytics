@@ -14,15 +14,15 @@ public class Kiel2011505MarkPassingTest extends AbstractMarkPassingTest {
 
     @Ignore
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
-        testRace(2);
+        testRace("2");
     }
     @Ignore
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
-        testRace(3);
+        testRace("3");
     }
     @Ignore
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
-        testRace(4);
+        testRace("4");
     }
 
     @Override
