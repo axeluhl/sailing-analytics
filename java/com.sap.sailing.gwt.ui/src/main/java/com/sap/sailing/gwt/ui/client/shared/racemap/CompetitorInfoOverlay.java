@@ -41,6 +41,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
         canvasHeight = 100;
 
         setCanvasSize(canvasWidth, canvasHeight);
+        canvas.addStyleName("competitorInfo-Canvas");
     }
 
     @Override
