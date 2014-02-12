@@ -153,6 +153,10 @@ img.openColumn {
 	text-decoration: none;
 }
 
+.competitorInfo-Canvas {
+	pointer-events: none;
+}
+
 .gwt-DialogBox {
 	z-index: 20;
 }
