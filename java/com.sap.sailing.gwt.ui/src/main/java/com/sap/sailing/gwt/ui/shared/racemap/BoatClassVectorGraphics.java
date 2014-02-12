@@ -18,10 +18,9 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public abstract class BoatClassVectorGraphics {
-    protected double boatOverallLengthInMeters;
-    protected double boatHullLengthInMeters;
-    protected double boatBeamInMeters;
-//    protected double boatCenterAlongLengthInMeters;
+    protected double overallLengthInPx;
+    protected double hullLengthInPx;
+    protected double beamInPx;
     
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
@@ -29,11 +28,11 @@ public abstract class BoatClassVectorGraphics {
     protected final String SAIL_FILLCOLOR = "#555555";
     protected final String SAIL_STROKECOLOR = "#000000";
 
-    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInMeters, double boatBeamInMeters, double boatHullLengthInMeters) {
+    BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
         this.mainBoatClassName = mainBoatClassName;
-        this.boatOverallLengthInMeters = boatOverallLengthInMeters;
-        this.boatBeamInMeters = boatBeamInMeters;
-        this.boatHullLengthInMeters = boatHullLengthInMeters;
+        this.overallLengthInPx = overallLengthInPx;
+        this.beamInPx = beamInPx;
+        this.hullLengthInPx = hullLengthInPx;
         this.compatibleBoatClassNames = new ArrayList<String>();
     }
     
@@ -113,7 +112,7 @@ public abstract class BoatClassVectorGraphics {
         ctx.translate(width / 2.0, height / 2.0);
         ctx.rotate(angleInRadians);
         ctx.scale(scaleFactor, scaleFactor);
-        ctx.translate(-boatHullLengthInMeters * 100 / 2.0,- boatBeamInMeters * 100 / 2.0);
+        ctx.translate(-hullLengthInPx / 2.0,- beamInPx / 2.0);
 
         drawBoat(ctx, isSelected, color);
         drawSails(ctx, legType, tack);
@@ -121,16 +120,16 @@ public abstract class BoatClassVectorGraphics {
         ctx.restore();
     }
 
-    public double getBoatHullLengthInMeters() {
-        return boatHullLengthInMeters;
+    public double getHullLengthInPx() {
+        return hullLengthInPx;
     }
     
-    public double getBoatOverallLengthInMeters() {
-        return boatOverallLengthInMeters;
+    public double getOverallLengthInPx() {
+        return overallLengthInPx;
     }
 
-    public double getBoatBeamInMeters() {
-        return boatBeamInMeters;
+    public double getBeamInPx() {
+        return beamInPx;
     }
 
     public boolean isBoatClassNameCompatible(String boatClass) {
