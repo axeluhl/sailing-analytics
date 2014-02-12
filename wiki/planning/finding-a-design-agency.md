@@ -18,6 +18,75 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 9. Technlogie-Kompetenzen 
 10. Anzahl möglicher paralleler Projekte
 
+## Decision Matrix
+
+<table>
+<tr>
+  <td>Objective</td>
+  <td>Creative Workline</td>
+  <td>Ubilabs</td>
+  <td>GMR</td>
+  <td>Digitalsunray</td>
+  <td>Medienfabrik</td>
+</tr>
+<tr>
+  <td>Android Knowledge, References and Developers?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Mobile HTML Knowledge, References and Developers?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Professional Meeting in terms of preparation and participants?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>GWT Knowledge?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Technical Knowledge (GIT, SVN, ...)?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Knowledge of Sailing Domain?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Team size of developers and designers (10+)?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+</table>
+
 # Meeting Notes (20.01.2014)
 
 Participants: Axel, Frank, Simon
