@@ -1073,6 +1073,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             List<String> finalRaceColumnNames = new ArrayList<String>();
             finalRaceColumnNames.add("F");
             Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            finalSeries.setSplitFleetContiguousScoring(true);
             series.add(finalSeries);
         }
         // -------- after series ------------

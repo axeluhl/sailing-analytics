@@ -226,5 +226,5 @@ public interface RaceColumn extends Named {
      * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
      * in the column as many times as there are fleets in the column. For the latter case, this method returns <code>true</code>.
      */
-    boolean hasSplitFleetScore();
+    boolean hasSplitFleetContiguousScoring();
 }

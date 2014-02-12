@@ -49,7 +49,7 @@ public interface ScoringScheme extends Serializable {
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
      * 
-     * FIXME Bug 1260: if the raceColumn does not have {@link RaceColumn#hasSplitFleetScore()}, the competitors of all better fleets need to be counted and the sum of these counts need to be added to the rank before evaluating the score for the rank
+     * FIXME Bug 1260: if the raceColumn does not have {@link RaceColumn#hasSplitFleetContiguousScoring()}, the competitors of all better fleets need to be counted and the sum of these counts need to be added to the rank before evaluating the score for the rank
      */
     Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher);
     
