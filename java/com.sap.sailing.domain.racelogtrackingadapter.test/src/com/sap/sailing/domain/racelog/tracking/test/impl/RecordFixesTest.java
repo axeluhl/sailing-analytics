@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtrackingadapter.test.impl;
+package com.sap.sailing.domain.racelog.tracking.test.impl;
 
 import static com.sap.sailing.domain.common.impl.Util.size;
 import static junit.framework.Assert.assertEquals;
@@ -26,8 +26,8 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.servlet.RecordFixesPostServlet;
-import com.sap.sailing.domain.test.mock.MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer;
-import com.sap.sailing.domain.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;

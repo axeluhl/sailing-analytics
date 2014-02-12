@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
@@ -17,7 +17,7 @@ public abstract class AbstractRaceLogTrackingTest {
     protected final RaceLogEventAuthor author1 = new RaceLogEventAuthorImpl("author1", 1);
     
     protected final TimePoint now = MillisecondsTimePoint.now();
-    protected final RaceLogEventFactory factory = RaceLogEventFactory.INSTANCE;
+    protected final RaceLogEventRestoreFactory factory = RaceLogEventRestoreFactory.INSTANCE;
 
     public AbstractRaceLogTrackingTest() {
         super();

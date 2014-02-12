@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.mock;
+package com.sap.sailing.domain.racelog.tracking.test.mock;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtrackingadapter.test.manual;
+package com.sap.sailing.domain.racelog.tracking.test.manual;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtrackingadapter.test.JsonOverHttpTest;
+import com.sap.sailing.domain.racelog.tracking.test.AbstractJsonOverHttpTest;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -27,7 +27,7 @@ import com.sap.sailing.server.gateway.serialization.impl.DeviceAndSessionIdentif
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SmartphoneImeiIdentifierJsonSerializer;
 
-public class PostFixes extends JsonOverHttpTest {
+public class PostFixes extends AbstractJsonOverHttpTest {
     protected static final SmartphoneImeiIdentifier device = new SmartphoneImeiIdentifier("a");
     
 	private final DeviceAndSessionIdentifierWithGPSFixesSerializer<SmartphoneImeiIdentifier, GPSFixMoving> fixSerializer =

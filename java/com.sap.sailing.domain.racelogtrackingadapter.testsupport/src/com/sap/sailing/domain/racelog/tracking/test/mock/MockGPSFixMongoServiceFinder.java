@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.mock;
+package com.sap.sailing.domain.racelog.tracking.test.mock;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;

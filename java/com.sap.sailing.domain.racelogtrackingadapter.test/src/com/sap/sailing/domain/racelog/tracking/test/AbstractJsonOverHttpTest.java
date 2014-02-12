@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtrackingadapter.test;
+package com.sap.sailing.domain.racelog.tracking.test;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,7 +11,7 @@ import java.net.URL;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-public abstract class JsonOverHttpTest {
+public abstract class AbstractJsonOverHttpTest {
     protected static final String URL_BASE = "127.0.0.1";
     protected static final int PORT = 8888;
     protected static final String URL_SS = "/sailingserver";
