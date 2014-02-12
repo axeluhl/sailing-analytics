@@ -53,7 +53,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     private static double skipped = 0;
     private static double extra = 0;
 
-    protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
+    public AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
         super();
         className = getClass().getName();
         simpleName = getClass().getSimpleName();
