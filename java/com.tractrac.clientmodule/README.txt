@@ -17,18 +17,5 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
-
-- Fixing a bug reading MTB files. In some scenarios when the positions of one boat arrive with a big delay, 
-they can be discarded by the library. The positions are in the MTB file and it is not necessary to 
-regenerate the files again. It is just a bug in the reading process. 
-
-
-********************************************
-******* TracTracClientModule 2.0.11 ********
-********************************************
-
-This release only contains changes in its implementation (it keeps the previous API). 
-
-1) New features
  
 

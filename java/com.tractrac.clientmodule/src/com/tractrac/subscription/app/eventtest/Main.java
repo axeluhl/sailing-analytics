@@ -4,12 +4,6 @@ package com.tractrac.subscription.app.eventtest;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.IEventFactory;
 import com.tractrac.model.lib.api.event.IRace;
@@ -18,6 +12,11 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * 
