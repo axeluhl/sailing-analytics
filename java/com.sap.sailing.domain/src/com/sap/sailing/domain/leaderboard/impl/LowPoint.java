@@ -27,15 +27,27 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
-        return rank == 0 ? null : (double) rank;
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+        final int effectiveRank;
+        final Double result;
+        int competitorFleetOrdering;
+        if (rank == 0) {
+            effectiveRank = 0;
+        } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
+            int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn, competitorFleetOrdering);
+            effectiveRank = rank + numberOfCompetitorsInBetterFleets;
+        } else {
+            effectiveRank = rank;
+        }
+        result = effectiveRank == 0 ? null : (double) effectiveRank;
+        return result;
     }
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
-        if (numberOfCompetitorsInRace == null) {
+        if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
             result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
         } else {
             result = (double) (numberOfCompetitorsInRace+1);

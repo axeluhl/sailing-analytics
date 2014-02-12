@@ -27,7 +27,9 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
         if (rank == 0) {
             result = null;
@@ -35,10 +37,23 @@ public class HighPoint extends AbstractScoringSchemeImpl {
             Integer numberOfCompetitorsInRace;
             try {
                 numberOfCompetitorsInRace = numberOfCompetitorsInRaceFetcher.call();
+                int competitorFleetOrdering;
                 if (numberOfCompetitorsInRace == null) {
                     result = null;
                 } else {
-                    result = Math.max(1.0, (double) (numberOfCompetitorsInRace - rank + 1));
+                    final int effectiveRank;
+                    final int numberOfCompetitorsDeterminingMaxPoints;
+                    if (raceColumn.hasSplitFleetContiguousScoring()
+                            && (competitorFleetOrdering = raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
+                        int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn,
+                                competitorFleetOrdering);
+                        effectiveRank = rank + numberOfCompetitorsInBetterFleets;
+                        numberOfCompetitorsDeterminingMaxPoints = numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard();
+                    } else {
+                        effectiveRank = rank;
+                        numberOfCompetitorsDeterminingMaxPoints = numberOfCompetitorsInRace;
+                    }
+                    result = (double) (numberOfCompetitorsDeterminingMaxPoints - effectiveRank + 1);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
