@@ -37,7 +37,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
@@ -48,6 +47,7 @@ import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 import difflib.PatchFailedException;
 
@@ -134,7 +134,7 @@ public interface DomainFactory {
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException, CreateModelException;
+            URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
@@ -143,7 +143,7 @@ public interface DomainFactory {
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException, CreateModelException;
+            URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
@@ -204,13 +204,14 @@ public interface DomainFactory {
 
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
+     * @param tractracRace TODO
      * @param eventSubscriber TODO
      * @param raceSubscriber TODO
      */
-    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent, WindStore windStore,
-            long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, String tracTracUsername, 
-            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
+    Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, IEvent tractracEvent,
+            WindStore windStore, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, 
+            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, 
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

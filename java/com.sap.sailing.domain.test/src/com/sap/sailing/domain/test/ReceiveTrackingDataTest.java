@@ -78,20 +78,20 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* delayToLiveInMillis */0l,
-        /* simulator */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
-            @Override
-            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-            }
-        },
-                /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, tractracRace, getTracTracEvent(),
+        /* delayToLiveInMillis */0l, /* simulator */ null, EmptyWindStore.INSTANCE,
+                new DynamicRaceDefinitionSet() {
+                    @Override
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                    }
+                }, /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                /* delayToLiveInMillis */0l, /* simulator */ null, EmptyWindStore.INSTANCE, /* simulateWithStartTimeNow */
-                new DynamicRaceDefinitionSet() {
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, tractracRace,
+                getTracTracEvent(), /* delayToLiveInMillis */0l, /* simulator */ null, /* simulateWithStartTimeNow */
+                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }

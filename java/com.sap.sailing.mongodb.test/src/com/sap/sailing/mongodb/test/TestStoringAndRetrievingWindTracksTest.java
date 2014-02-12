@@ -75,10 +75,10 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                EmptyWindStore.INSTANCE,
-                0l, /* simulator */ null, /* delayToLiveInMillis */
-                new DynamicRaceDefinitionSet() {
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, tractracRace,
+                getTracTracEvent(),
+                EmptyWindStore.INSTANCE, 0l, /* delayToLiveInMillis */
+                /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
