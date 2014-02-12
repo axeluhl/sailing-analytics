@@ -6,13 +6,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.google.common.base.Function;
-
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -107,7 +107,9 @@ public class TrackedRacesListPO extends PageArea {
     
     //@FindBy(how = BySeleniumId.class, using = "ExportPopup")
     
-    protected TrackedRacesListPO(WebDriver driver, WebElement element) {
+    private static final Logger logger = Logger.getLogger(TrackedRacesListPO.class.getName());
+    
+    public TrackedRacesListPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
@@ -168,12 +170,20 @@ public class TrackedRacesListPO extends PageArea {
         return result;
     }
     
+    public void stopTracking(TrackedRaceDescriptor race) {
+        stopTracking(Arrays.asList(race));
+    }
+    
     public void stopTracking(List<TrackedRaceDescriptor> races) {
         selectRaces(races);
         
         this.stopTrackingButton.click();
         
         waitForAjaxRequests();
+    }
+    
+    public void remove(TrackedRaceDescriptor race) {
+        remove(Arrays.asList(race));
     }
     
     public void remove(List<TrackedRaceDescriptor> races) {
@@ -190,8 +200,21 @@ public class TrackedRacesListPO extends PageArea {
         waitForAjaxRequests();
     }
     
+    public void waitForTrackedRace(TrackedRaceDescriptor race) {
+        waitForTrackedRaces(Arrays.asList(race));
+    }
+    
+    public void waitForTrackedRace(TrackedRaceDescriptor race, int timeout) {
+        waitForTrackedRaces(Arrays.asList(race), timeout);
+    }
+    
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races) {
-        FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races);
+        waitForTrackedRaces(races, DEFAULT_WAIT_TIMEOUT);
+    }
+    
+    public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, int timeout) {
+        logger.info("Try to resolve status for races. WebElement for table is " + this.trackedRacesTable.getTagName());
+        FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_WAIT_POLLING);
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
             public Object apply(List<TrackedRaceDescriptor> races) {

@@ -12,8 +12,6 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.pages.PageArea;
 
 import com.sap.sailing.selenium.pages.common.CSSConstants;
-import com.sap.sailing.selenium.pages.common.CSSHelper;
-
 
 /**
  * <p>Abstract base implementation for a page objects representing a GWT CellTable. The abstract implementation provides
@@ -52,7 +50,8 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String LOADING_ANIMATION_XPATH = ".//td/div/div/div/img";
     
-    private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
+    // It seems that the css class is not allways the same
+    //private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
     
     protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
     

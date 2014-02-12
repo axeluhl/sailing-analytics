@@ -16,6 +16,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -104,6 +105,9 @@ public class TracTracEventManagementPanelPO extends PageArea {
     
     @FindBy(how = BySeleniumId.class, using = "StartTrackingButton")
     private WebElement startTrackingButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
+    private WebElement trackedRacesListComposite;
     
     /**
      * <p></p>
@@ -248,6 +252,10 @@ public class TracTracEventManagementPanelPO extends PageArea {
         // TODO: Dialog ignore
         
         waitForAjaxRequests();
+    }
+    
+    public TrackedRacesListPO getTrackedRacesList() {
+        return new TrackedRacesListPO(this.driver, this.trackedRacesListComposite);
     }
     
     private CellTablePO<DataEntryPO> getTrackableRacesTable() {
