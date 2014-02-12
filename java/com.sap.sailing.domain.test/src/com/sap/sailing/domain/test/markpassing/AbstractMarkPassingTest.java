@@ -104,7 +104,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         computedPasses = markPassCreator.getAllPasses();
 
         // Compare computed and calculated MarkPassings
-        final int tolerance = 10000;
+        final int tolerance = 13000;
         double numberOfCompetitors = 0;
         double wronglyComputed = 0;
         double wronglyNotComputed = 0;
@@ -196,16 +196,23 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
         int mistakes = 0;
-        TimePoint start = getTrackedRace().getStartOfRace();
-        TimePoint secondMarkPassing = getTrackedRace().getMarkPassingsInOrder(getRace().getCourse().getFirstLeg().getTo()).iterator().next().getTimePoint();
-        TimePoint delta = secondMarkPassing.minus(start.asMillis()).minus(18000);
+        Waypoint start = getRace().getCourse().getFirstWaypoint();
+        Waypoint second = getRace().getCourse().getFirstLeg().getTo();
         for (Competitor c : getRace().getCompetitors()) {
-
+            TimePoint startTime;
+            TimePoint secondPass;
+            try {
+                startTime = givenPasses.get(c).get(start).getTimePoint();
+                secondPass = givenPasses.get(c).get(second).getTimePoint();
+            } catch (NullPointerException e) {
+                continue;
+            }
+            TimePoint delta = new MillisecondsTimePoint(startTime.plus(secondPass.asMillis()).asMillis() / 2);
             List<GPSFix> fixes = new ArrayList<GPSFix>();
             try {
                 getTrackedRace().getTrack(c).lockForRead();
                 for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                    if (fix.getTimePoint().minus(delta.asMillis()).before(start)) {
+                    if (fix.getTimePoint().before(delta)) {
                         fixes.add(fix);
                     }
                 }
@@ -214,7 +221,6 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             }
             Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
             chooser.calculateMarkPassDeltas(c, f);
-            Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst = false;
             boolean gotOther = false;
             System.out.println(c);
@@ -223,7 +229,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
                 System.out.println(newm);
 
-                if (w == w1) {
+                if (w == start) {
                     if ((old == null) == (newm == null)) {
                         gotFirst = true;
                     }

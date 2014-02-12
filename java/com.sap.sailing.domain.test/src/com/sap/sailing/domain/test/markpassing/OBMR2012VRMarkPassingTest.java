@@ -67,11 +67,6 @@ public class OBMR2012VRMarkPassingTest extends AbstractMarkPassingTest {
         testRace("Sa-Vm_Fleet_2_2");
     }
     
-    @Test
-    public void testRaceSaVm23() throws IOException, InterruptedException, URISyntaxException {
-        testRace("Sa-Vm_Fleet_2_3");
-    }
-    
     @Override
     protected String getExpectedEventName() {
         return "OBMR 2012";
