@@ -5,17 +5,20 @@ import com.google.gwt.canvas.dom.client.Context2d;
 public class LaserVectorGraphics extends BoatClassVectorGraphics {
     
     public LaserVectorGraphics(String... compatibleBoatClassNames) {
-        super("LASER", 4.23, 1.37, 2.1, compatibleBoatClassNames);
+        super("LASER", 4.23, 1.37, 4.23, compatibleBoatClassNames);
     }
 
     @Override
     protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
+        // outer part of the hull
         if(isSelected) {
-            ctx.setFillStyle("#FF0000");
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
         } else {
-            ctx.setFillStyle("#FFFFFF");
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
         }
-        ctx.setStrokeStyle(color);
+        
         ctx.setLineWidth(2.0);
         ctx.beginPath();
         ctx.moveTo(1.72,27);
@@ -28,8 +31,15 @@ public class LaserVectorGraphics extends BoatClassVectorGraphics {
         ctx.fill();
         ctx.stroke();
 
-        ctx.setFillStyle(color);
-        ctx.setStrokeStyle(color);
+        // inner part of the hull
+        if(isSelected) {
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+        } else {
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+        }
+
         ctx.setLineWidth(1.0);
         ctx.beginPath();
         ctx.moveTo(48.2,44.2);
