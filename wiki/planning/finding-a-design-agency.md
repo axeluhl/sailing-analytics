@@ -18,6 +18,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 9. Technlogie-Kompetenzen 
 10. Anzahl möglicher paralleler Projekte
 
+## Possible Process per Project
+
+1. We define the basic page flow and describe a minimal feature set in a document.
+2. A ramp-up workshop with the analytics team and the agency makes sure that everyone at the agency is on the same level
+3. Agency creates a design that shows all relevant pages (mockup). This step is delivered by using images.
+4. The agency creates a clickable prototype based on the mockups. This prototype must work on all target devices and be implemented in HTML or native UI.
+5. Sailing team starts integration with the server.
+6. Agency provides long-term support for changes. Lifecycle is communicated with agency.
+
 ## Decision Matrix
 
 <table>
