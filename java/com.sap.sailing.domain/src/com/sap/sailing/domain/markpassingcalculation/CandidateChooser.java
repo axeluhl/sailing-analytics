@@ -149,7 +149,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             marker = candidateWithParent.get(marker).getA();
         }
         if (changed) {
-           //TODO logger.info("New MarkPasses for " + co);
+            logger.info("New MarkPasses for " + co);
             List<MarkPassing> markPassDeltas = new ArrayList<>();
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);

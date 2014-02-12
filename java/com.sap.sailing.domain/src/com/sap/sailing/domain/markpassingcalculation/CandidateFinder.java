@@ -53,7 +53,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
     };
 
-    private double strictness = 20; // Higher = stricter
+    private double strictness = 10; // Higher = stricter
 
     // TODO Identical Waypoints (ControlPoint and PassingInstruction) are calculated twice.
     // => Distance to Mark instead of Waypoint?
