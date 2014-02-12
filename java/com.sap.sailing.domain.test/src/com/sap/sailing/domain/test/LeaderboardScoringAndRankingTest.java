@@ -1173,7 +1173,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         double scoreInFinalRace = 10.0;
         for (Competitor rankedCompetitor : leaderboard.getCompetitorsFromBestToWorst(f1Column, later)) {
             assertEquals(scoreInFinalRace, leaderboard.getTotalPoints(rankedCompetitor, f1Column, later), 0.000001);
-            scoreInFinalRace = Math.max(scoreInFinalRace-1, 0);
+            scoreInFinalRace = Math.max(scoreInFinalRace-1, 1);
         }
         double lastScore = Double.MAX_VALUE;
         // assert that only the points matter for ranking; not the fleet assignment

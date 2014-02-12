@@ -26,11 +26,21 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        Double result;
+        final int effectiveRank;
+        final Double result;
+        int competitorFleetOrdering;
         if (rank == 0) {
+            effectiveRank = 0;
+        } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
+            int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn, competitorFleetOrdering);
+            effectiveRank = rank + numberOfCompetitorsInBetterFleets;
+        } else {
+            effectiveRank = rank;
+        }
+        if (effectiveRank == 0) {
             result = null;
         } else {
-            result = Math.max(1.0, (double) (scoreForRaceWinner - rank + 1));
+            result = Math.max(1.0, (double) (scoreForRaceWinner - effectiveRank + 1));
         }
         return result;
     }
