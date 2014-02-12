@@ -2,27 +2,21 @@ package com.sap.sailing.selenium.test;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 import org.junit.Rule;
-
 import org.junit.rules.TestWatchman;
-
 import org.junit.runner.RunWith;
-
 import org.junit.runners.model.FrameworkMethod;
-
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -49,11 +43,6 @@ public abstract class AbstractSeleniumTest {
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     
-    // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
-    //private class ScreenShotRule2 extends TestWatcher {
-    //    
-    //}
-    
     /**
      * <p></p>
      * 
@@ -77,11 +66,12 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
+    // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
     private class ScreenShotRule extends TestWatchman {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
-                captureScreenshot(method.getName());
+                captureScreenshot(UUID.randomUUID().toString());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
