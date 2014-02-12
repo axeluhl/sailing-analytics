@@ -1,7 +1,9 @@
 package com.sap.sailing.selenium.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -150,15 +152,16 @@ public abstract class AbstractSeleniumTest {
             driver = new Augmenter().augment(driver);
         }
         
-        File source = getScreenshotNotSupportedImage();
+        InputStream source = getScreenshotNotSupportedImage();
         
-        if(driver instanceof TakesScreenshot)
-            source = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        if(driver instanceof TakesScreenshot) {
+            source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+        }
         
         URL destination = new URL(screenshotFolder, filename + ".png"); //$NON-NLS-1$
         
         try {
-            Files.copy(source.toPath(), new File(destination.toURI()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(source, new File(destination.toURI()).toPath(), StandardCopyOption.REPLACE_EXISTING);
             
             // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
             System.out.println(String.format(ATTACHMENT_FORMAT, destination));
@@ -167,17 +170,17 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    private File getScreenshotNotSupportedImage() {
-        try {
+    private InputStream getScreenshotNotSupportedImage() {
+//        try {
             //BundleContext context = SeleniumTestsActivator.getContext();
             //Bundle bundle = context.getBundle();
             //URL pictureURL = bundle.getResource("/com/sap/sailing/selenium/resources/not-supported.png");
-            URL pictureURL = AbstractSeleniumTest.class.getResource(NOT_SUPPORTED_IMAGE);
-            URI pictureURI = pictureURL.toURI();
-            logger.info("URI for not-supported.png is " + pictureURI);
-            return new File(pictureURI);
-        } catch(URISyntaxException exception) {
-            throw new RuntimeException(exception);
-        }
+            return AbstractSeleniumTest.class.getResourceAsStream(NOT_SUPPORTED_IMAGE);
+//            URI pictureURI = pictureURL.toURI();
+//            logger.info("URI for not-supported.png is " + pictureURI);
+//            return new File(pictureURI);
+//        } catch(URISyntaxException exception) {
+//            throw new RuntimeException(exception);
+//        }
     }
 }
