@@ -41,28 +41,23 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
-    protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
-        super();
-        className = getClass().getName();
-        simpleName = getClass().getSimpleName();
 
-    }
-
-    protected abstract String getFileName();
+    private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
+    private ArrayList<Waypoint> waypoints = new ArrayList<>();
 
     protected static String className;
     protected static String simpleName;
-
     private static double totalPasses = 0;
     private static double correct = 0;
     private static double incorrect = 0;
     private static double skipped = 0;
     private static double extra = 0;
 
-    protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
-        setUp(raceNumber);
-        testWholeRace();
-        // testStartOfRace();
+    protected AbstractMarkPassingTest() throws MalformedURLException, URISyntaxException {
+        super();
+        className = getClass().getName();
+        simpleName = getClass().getSimpleName();
+
     }
 
     private void setUp(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
@@ -73,12 +68,6 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RAWPOSITIONS });
         getTrackedRace().recordWind(new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
                 new WindSourceImpl(WindSourceType.WEB));
-    }
-
-    private void testWholeRace() {
-        ArrayList<Waypoint> waypoints = new ArrayList<>();
-        LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
-        LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
 
         // Get Waypoints
         for (Waypoint w : getRace().getCourse().getWaypoints()) {
@@ -94,6 +83,19 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             }
             givenPasses.put(c, givenMarkPasses);
         }
+    }
+
+    protected abstract String getFileName();
+
+    protected void testRace(int raceNumber) throws IOException, InterruptedException, URISyntaxException {
+        setUp(raceNumber);
+        testWholeRace();
+        testStartOfRace();
+    }
+
+    private void testWholeRace() {
+
+        LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
 
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
@@ -194,30 +196,39 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         CandidateFinder finder = new CandidateFinder(getTrackedRace());
         CandidateChooser chooser = new CandidateChooser(getTrackedRace());
         int mistakes = 0;
-        TimePoint t = getTrackedRace().getStartOfRace();
+        TimePoint start = getTrackedRace().getStartOfRace();
+        TimePoint secondMarkPassing = getTrackedRace().getMarkPassingsInOrder(getRace().getCourse().getFirstLeg().getTo()).iterator().next().getTimePoint();
+        TimePoint delta = secondMarkPassing.minus(start.asMillis()).minus(18000);
         for (Competitor c : getRace().getCompetitors()) {
+
             List<GPSFix> fixes = new ArrayList<GPSFix>();
             try {
                 getTrackedRace().getTrack(c).lockForRead();
                 for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                    if (fix.getTimePoint().minus(120000).before(t)) {
+                    if (fix.getTimePoint().minus(delta.asMillis()).before(start)) {
                         fixes.add(fix);
                     }
                 }
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            Pair<Iterable<Candidate>,Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+            Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
             chooser.calculateMarkPassDeltas(c, f);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             boolean gotFirst = false;
             boolean gotOther = false;
+            System.out.println(c);
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-                // System.out.println(getTrackedRace().getMarkPassing(c, w));
+                MarkPassing old = givenPasses.get(c).get(w);
+                MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
+                System.out.println(newm);
+
                 if (w == w1) {
-                    gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
+                    if ((old == null) == (newm == null)) {
+                        gotFirst = true;
+                    }
                 } else {
-                    if (getTrackedRace().getMarkPassing(c, w) != null) {
+                    if (newm != null) {
                         gotOther = true;
                     }
                 }
@@ -248,7 +259,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             } finally {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
-            Pair<Iterable<Candidate>,Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+            Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
             chooser.calculateMarkPassDeltas(c, f);
             Waypoint w1 = getRace().getCourse().getFirstWaypoint();
             Waypoint w2 = getRace().getCourse().getFirstLeg().getTo();
@@ -256,7 +267,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             boolean gotSecond = false;
             boolean gotOther = false;
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
-                // System.out.println(getTrackedRace().getMarkPassing(c, w));
+                System.out.println(getTrackedRace().getMarkPassing(c, w));
                 if (w == w1) {
                     gotFirst = (getTrackedRace().getMarkPassing(c, w) != null) ? true : false;
                 } else if (w == w2) {
