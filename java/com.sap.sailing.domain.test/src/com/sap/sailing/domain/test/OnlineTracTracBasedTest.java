@@ -102,12 +102,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
-        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
-                new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber, receiverTypes)) {
+        /* delayToLiveInMillis */0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
+            @Override
+            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+            }
+        }, /* trackedRegattaRegistry */ null,
+                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

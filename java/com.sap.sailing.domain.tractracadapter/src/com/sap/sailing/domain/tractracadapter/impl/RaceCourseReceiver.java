@@ -26,14 +26,14 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Race;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
-import com.tractrac.model.lib.api.route.IControlPoint;
+import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.route.IRoute;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
 
 import difflib.PatchFailedException;
 
@@ -47,7 +47,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteData, IRace>  {
+public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute, Long, Void>  {
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
     private final long millisecondsOverWhichToAverageWind;
@@ -57,12 +57,16 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteD
     private final URI tracTracUpdateURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
+    private final IRace tractracRace;
+    private final IControlRouteChangeListener listener;
     
-    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
-            IEvent tractracEvent, WindStore windStore,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
+            IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
+            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+        this.tractracRace = tractracRace;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         if (simulator == null) {
@@ -74,56 +78,55 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteD
         this.tracTracUpdateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
+        listener = new IControlRouteChangeListener() {
+            @Override
+            public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
+                enqueue(new Triple<IControlRoute, Long, Void>(controlRoute, timeStamp, null));
+            }
+        };
     }
 
-    /**
-     * The listeners returned will, when added to a controller, receive events about the
-     * course definition of a race. When this happens, a new {@link RaceDefinition} is
-     * created with the respective {@link Course} and added to the {@link #event event}.
-     */
     @Override
-    public Iterable<TypeController> getTypeControllersAndStart() {
-        List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : getTracTracEvent().getRaceList()) {
-            TypeController routeListener = RouteData.subscribe();
-            setAndStartThread(new Thread(this, getClass().getName()));
-            result.add(routeListener);
-        }
-        return result;
+    public void subscribe() {
+        getRaceSubscriber().subscribeRouteChanges(listener);
     }
     
     @Override
-    protected void handleEvent(Triple<IRoute, RouteData, IRace> event) {
+    protected void unsubscribe() {
+        getRaceSubscriber().unsubscribeRouteChanges(listener);
+    }
+
+    @Override
+    protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
         System.out.print("R");
         final IRoute route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        final LinkedHashMap<IControlPoint, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
-        for (IControl cp : event.getC().getEvent().getControlPointList()) {
+        final LinkedHashMap<IControl, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
+        for (IControl cp : getTracTracEvent().getControls()) {
             ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
         }
         final List<TracTracControlPoint> routeControlPoints = new ArrayList<>();
-        for (IControl cp : event.getB().getPoints()) {
+        for (IControl cp : event.getA().getControls()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
         List<Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 1;
-        for (IControl cp : event.getB().getPoints()) {
+        for (IControl cp : event.getA().getControls()) {
             PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 
         Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
-        IRace race = event.getC();
         List<Sideline> sidelines = getDomainFactory().createSidelines(
-                race.getMetadata() != null ? race.getMetadata().getText() : null,
+                tractracRace.getMetadata() != null ? tractracRace.getMetadata().getText() : null,
                 ttControlPointsForAllOriginalEventControlPoints.values());
 
-        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(race.getId());
+        RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(tractracRace.getId());
         if (existingRaceDefinitionForRace != null) {
-            logger.log(Level.INFO, "Received course update for existing race "+race.getName()+": "+
-                    event.getB().getPoints());
+            logger.log(Level.INFO, "Received course update for existing race "+tractracRace.getName()+": "+
+                    event.getA().getControls());
             // Race already exists; this means that we obviously found a course change.
             // Create TrackedRace only if it doesn't exist (which is unlikely because it is usually created
             // in the else block below together with the RaceDefinition).
@@ -137,11 +140,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IRoute, RouteD
                 logger.log(Level.SEVERE, "handleEvent", e);
             }
         } else {
-            logger.log(Level.INFO, "Received course for non-existing race "+race.getName()+". Creating RaceDefinition.");
+            logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(race);
+            Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), race.getId(), race.getName(), competitorsAndDominantBoatClass.getA(),
+                    getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword);

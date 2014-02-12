@@ -148,32 +148,24 @@ public interface DomainFactory {
     BoatClass getOrCreateBoatClass(String competitorClassName);
 
     /**
-     * For each race listed by the <code>tractracEvent</code>, produces {@link TypeController listeners} that, when
-     * {@link DataController#add(TypeController) registered} with the controller, create a {@link RaceDefinition} with
-     * the {@link Course} defined in proper order, and {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition)
-     * add} it to the <code>event</code>. Other listeners of those returned will listen for raw position and aggregated
-     * position data and update the {@link TrackedRegatta}'s content accordingly.
+     * For <code>tractracRace</code>, produces listeners that, when subscribed with either the <code>eventSubscriber</code>
+     * or the <code>raceSubscriber</code>, create a {@link RaceDefinition} with the {@link Course} defined in proper order,
+     * and {@link com.sap.sailing.domain.base.Regatta#addRace(RaceDefinition) add} it to the <code>event</code>. Other
+     * listeners of those returned will listen for raw position and aggregated position data and update the
+     * {@link TrackedRegatta}'s content accordingly.
      * 
      * @param trackedRegatta
      *            must have been created before through
-     *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to the
-     *            {@link IEvent} can't be established
-     * @param startOfTracking
-     *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
-     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this start time.
-     * @param endOfTracking
-     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
-     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this end time.
+     *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
+     *            the {@link IEvent} can't be established
      * @param tokenToRetrieveAssociatedRace
-     *            used to update the set of{@link RaceDefinition}s received by the
-     *            {@link RaceCourseReceiver} created by this call
+     *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
+     *            this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
-            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber);
+            long delayToLiveInMillis, Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            TrackedRegattaRegistry trackedRegattaRegistry, IRace tractracRace,
+            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -216,9 +208,9 @@ public interface DomainFactory {
      * @param raceSubscriber TODO
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
+            long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
+            URI courseDesignUpdateURI, String tracTracUsername, 
+            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

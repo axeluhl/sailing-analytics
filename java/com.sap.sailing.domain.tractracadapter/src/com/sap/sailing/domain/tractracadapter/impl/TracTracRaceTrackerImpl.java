@@ -360,9 +360,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         for (IRace tractracRace : tractracEvent.getRaces()) {
             for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent,
-                    startOfTracking, endOfTracking, delayToLiveInMillis, simulator, windStore, this,
-                    trackedRegattaRegistry, tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber,
-                    raceSubscribers.get(tractracRace))) {
+                    delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, tractracRace,
+                    tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscribers.get(tractracRace))) {
                 receivers.add(receiver);
             }
         }
@@ -685,20 +684,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public com.sap.sailing.domain.base.Regatta getRegatta() {
         return regatta;
-    }
-    
-    /**
-     * Called when the {@link #storedDataEnd()} event was received. Adds the listeners
-     * returned to the {@link #getController() controller}, presumably for live data.
-     * This default implementation returns an empty iterable. Subclasses may override
-     * to return more.
-     */
-    protected Iterable<TypeController> getListenersForLiveData() {
-        return Collections.emptySet();
-    }
-
-    protected void startController() {
-        ioThread.start();
     }
     
     @Override

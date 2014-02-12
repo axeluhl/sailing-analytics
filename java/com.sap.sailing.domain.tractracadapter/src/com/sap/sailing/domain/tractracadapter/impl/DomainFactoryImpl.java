@@ -385,23 +385,22 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            WindStore windStore, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, String tracTracUsername,
-            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
-            ReceiverType... types) {
+            WindStore windStore, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI,
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
-                result.add(new RaceCourseReceiver(this, trackedRegatta, tractracEvent, windStore,
-                        raceDefinitionSetToUpdate, delayToLiveInMillis,
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator, courseDesignUpdateURI,
-                        tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber));
+                result.add(new RaceCourseReceiver(this, trackedRegatta, tractracEvent, tractracRace,
+                        windStore, raceDefinitionSetToUpdate,
+                        delayToLiveInMillis, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator,
+                        courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, simulator, this, eventSubscriber, raceSubscriber));
+                        trackedRegatta, tractracEvent, simulator, this, eventSubscriber, raceSubscriber));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
@@ -423,14 +422,14 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
-            IEvent tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, Simulator simulator, WindStore windStore,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulator, raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword,
-                eventSubscriber, raceSubscriber, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+            IEvent tractracEvent, long delayToLiveInMillis, Simulator simulator,
+            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
+            IRace tractracRace, URI courseDesignUpdateURI, 
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, delayToLiveInMillis, simulator,
+                raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
+                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override

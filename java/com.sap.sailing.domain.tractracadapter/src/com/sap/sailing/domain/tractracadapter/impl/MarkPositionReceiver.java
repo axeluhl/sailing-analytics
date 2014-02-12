@@ -6,14 +6,11 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -43,37 +40,13 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     
     private int received;
 
-    /**
-     * if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has to provide,
-     * particularly for the mark positions which are stored per event, not per race; otherwise, particularly the mark
-     * position loading will be constrained to this start time.
-     */
-    private final TimePoint startOfTracking;
-
-    /**
-     * if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to provide,
-     * particularly for the mark positions which are stored per event, not per race; otherwise, particularly the mark
-     * position loading will be constrained to this end time.
-     */
-    private final TimePoint endOfTracking;
-    
     final IControlPointPositionListener listener;
 
     /**
-     * @param startOfTracking
-     *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
-     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this start time.
-     * @param endOfTracking
-     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
-     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
-     *            particularly the mark position loading will be constrained to this end time.
      */
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            Simulator simulator, final DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
-        this.startOfTracking = startOfTracking;
-        this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object
         if (tractracEvent.getRaces().isEmpty()) {
             throw new IllegalArgumentException("Can't receive mark positions from event "+tractracEvent.getName()+" that has no race");
@@ -86,12 +59,6 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
         };
     }
     
-    /**
-     * The listeners returned will, when added to a controller, receive events about the
-     * position changes of marks during a race. Receiving such an event updates the mark's
-     * {@link GPSFixTrack} in the {@link TrackedRegatta}. Starts a thread for this receiver,
-     * blocking for events received.
-     */
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribeControlPositions(listener);

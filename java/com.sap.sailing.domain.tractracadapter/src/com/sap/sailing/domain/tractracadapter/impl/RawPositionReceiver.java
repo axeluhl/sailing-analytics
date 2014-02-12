@@ -1,62 +1,59 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.CompetitorPositionRawData;
-import com.tractrac.clientmodule.data.ICallbackData;
+import com.tractrac.model.lib.api.data.IPosition;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.competitor.IPositionListener;
 
-public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetitor, CompetitorPositionRawData, Boolean> {
+public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, IPosition, Void> {
     private static final Logger logger = Logger.getLogger(RawPositionReceiver.class.getName());
 
     private int received;
 
-    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            DomainFactory domainFactory, Simulator simulator) {
+    private final IPositionListener listener;
+
+    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
+            DomainFactory domainFactory, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
-    }
-    
-    /**
-     * Obtains the listener and starts a thread of this object which will block for events received.
-     */
-    @Override
-    public Iterable<TypeController> getTypeControllersAndStart() {
-        ICallbackData<RaceCompetitor, CompetitorPositionRawData> positionListener = new ICallbackData<RaceCompetitor, CompetitorPositionRawData>() {
-            public void gotData(RaceCompetitor tracked,
-                    CompetitorPositionRawData record, boolean isLiveData) {
-                enqueue(new Triple<RaceCompetitor, CompetitorPositionRawData, Boolean>(tracked, record, isLiveData));
+        listener = new IPositionListener() {
+            @Override
+            public void gotPosition(IRaceCompetitor controlPoint, IPosition position) {
+                enqueue(new Triple<IRaceCompetitor, IPosition, Void>(controlPoint, position, null));
             }
         };
-        List<TypeController> listeners = new ArrayList<TypeController>();
-        for (Race race : getTracTracEvent().getRaceList()) {
-            TypeController listener = CompetitorPositionRawData.subscribe(race,
-                positionListener, /* fromTime */0 /* means ALL */, /* toTime */Long.MAX_VALUE);
-            listeners.add(listener);
-        }
-        setAndStartThread(new Thread(this, getClass().getName()));
-        return listeners;
+    }
+    
+    @Override
+    public void subscribe() {
+        getRaceSubscriber().subscribePositions(listener);
+    }
+    
+    @Override
+    protected void unsubscribe() {
+        getRaceSubscriber().unsubscribePositions(listener);
     }
 
     @Override
-    protected void handleEvent(Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
+    protected void handleEvent(Triple<IRaceCompetitor, IPosition, Void> event) {
         if (received++ % 1000 == 0) {
             System.out.print("P");
             if ((received / 1000 + 1) % 80 == 0) {
                 System.out.println();
             }
         }
-        Race race = event.getA().getRace();
+        IRace race = event.getA().getRace();
         DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());

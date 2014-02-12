@@ -1,13 +1,9 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -15,9 +11,12 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.StartStopTimesData;
+import com.tractrac.model.lib.api.data.IStartStopData;
+import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.race.IRaceStartStopTimesChangeListener;
 
 /**
  * The ordering of the {@link ControlPoint}s of a {@link Course} are received
@@ -29,56 +28,72 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
  * @author Axel Uhl (d043530)
  * 
  */
-public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
+public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IRace, IStartStopData, IStartStopData> {
     private static final Logger logger = Logger.getLogger(RaceStartedAndFinishedReceiver.class.getName());
+    private final IRaceStartStopTimesChangeListener listener;
 
-    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta,
-            com.tractrac.clientmodule.Event tractracEvent, Simulator simulator, DomainFactory domainFactory) {
+    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
+            Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+        listener = new IRaceStartStopTimesChangeListener() {
+            @Override
+            public void gotTrackingStartStopTime(IRace race, IStartStopData startStopData) {
+                enqueue(new Triple<IRace, IStartStopData, IStartStopData>(race, startStopData, null));
+            }
+            
+            @Override
+            public void gotRaceStartStopTime(IRace race, IStartStopData startStopData) {
+                enqueue(new Triple<IRace, IStartStopData, IStartStopData>(race, null, startStopData));
+            }
+        };
+    }
+
+    @Override
+    public void subscribe() {
+        getRaceSubscriber().subscribeRaceTimesChanges(listener);
+    }
+    
+    @Override
+    protected void unsubscribe() {
+        getRaceSubscriber().unsubscribeRaceTimesChanges(listener);
     }
 
     /**
-     * The listeners returned will, when added to a controller, receive events about the
-     * course definition of a race. When this happens, a new {@link RaceDefinition} is
-     * created with the respective {@link Course} and added to the {@link #event event}.
+     * The B component is tracking start/stop times; the C component is race start/end times
      */
     @Override
-    public Iterable<TypeController> getTypeControllersAndStart() {
-        List<TypeController> result = new ArrayList<TypeController>();
-        for (final Race race : getTracTracEvent().getRaceList()) {
-            TypeController startStopListener = StartStopTimesData.subscribeRace(race, new ICallbackData<Race, StartStopTimesData>() {
-                @Override
-                public void gotData(Race race, StartStopTimesData record, boolean isLiveData) {
-                    enqueue(new Triple<Race, StartStopTimesData, Boolean>(race, record, isLiveData));
-                }
-            });
-            result.add(startStopListener);
-        }
-        setAndStartThread(new Thread(this, getClass().getName()));
-        return result;
-    }
-
-    @Override
-    protected void handleEvent(Triple<Race, StartStopTimesData, Boolean> event) {
+    protected void handleEvent(Triple<IRace, IStartStopData, IStartStopData> event) {
         System.out.print("StartStop");
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
         if (trackedRace != null) {
-            StartStopTimesData startStopTimesData = event.getB();
-            if (startStopTimesData != null) {
-                final long startTime = startStopTimesData.getStartTime();
+            IStartStopData startEndTrackingTimesData = event.getB();
+            if (startEndTrackingTimesData != null) {
+                final long startTrackingTime = startEndTrackingTimesData.getStartTime();
                 TimePoint startOfTracking = getSimulator() == null ?
+                        new MillisecondsTimePoint(startTrackingTime) :
+                            getSimulator().advance(new MillisecondsTimePoint(startTrackingTime));
+                if (startTrackingTime > 0) {
+                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                }
+                final long endTrackingTime = startEndTrackingTimesData.getStopTime();
+                TimePoint endOfTracking = getSimulator() == null ?
+                        new MillisecondsTimePoint(endTrackingTime) :
+                            getSimulator().advance(new MillisecondsTimePoint(endTrackingTime));
+                if (endTrackingTime > 0) {
+                    trackedRace.setEndOfTrackingReceived(endOfTracking);
+                }
+            }
+            IStartStopData startEndRaceTimesData = event.getC();
+            if (startEndRaceTimesData != null) {
+                final long startTime = startEndRaceTimesData.getStartTime();
+                TimePoint startOfRace = getSimulator() == null ?
                         new MillisecondsTimePoint(startTime) :
                             getSimulator().advance(new MillisecondsTimePoint(startTime));
                 if (startTime > 0) {
-                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                    trackedRace.setStartTimeReceived(startOfRace);
                 }
-                final long stopTime = startStopTimesData.getStopTime();
-                TimePoint endOfTracking = getSimulator() == null ?
-                        new MillisecondsTimePoint(stopTime) :
-                            getSimulator().advance(new MillisecondsTimePoint(stopTime));
-                if (stopTime > 0) {
-                    trackedRace.setEndOfTrackingReceived(endOfTracking);
-                }
+                // Note that end of race can't currently be set on a tracked race
             }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getName()

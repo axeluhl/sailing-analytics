@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -22,38 +21,37 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.model.lib.api.data.IControlPassing;
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.event.IEvent;
-import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
 
 public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, IControlPassings, Void> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
+    private final IControlPassingsListener listener;
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             Simulator simulator, DomainFactory domainFactory, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+        listener = new IControlPassingsListener() {
+            @Override
+            public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                enqueue(new Triple<IRaceCompetitor, IControlPassings, Void>(raceCompetitor, controlPassings, null));
+            }
+        };
     }
 
-    /**
-     * The listeners returned will, when added to a controller, receive events about the
-     * course definition of a race. When this happens, a new {@link RaceDefinition} is
-     * created with the respective {@link Course} and added to the {@link #event event}.
-     * Starts a thread for this object, blocking for events received which are then handled
-     * asynchronously.
-     */
     @Override
-    public Iterable<TypeController> getTypeControllersAndStart() {
-        List<TypeController> result = new ArrayList<TypeController>();
-        for (final IRace race : getTracTracEvent().getRaces()) {
-            TypeController controlPointListener = MarkPassingsData.subscribe();
-            result.add(controlPointListener);
-        }
-        setAndStartThread(new Thread(this, getClass().getName()));
-        return result;
+    public void subscribe() {
+        getRaceSubscriber().subscribeControlPassings(listener);
     }
     
+    @Override
+    protected void unsubscribe() {
+        getRaceSubscriber().unsubscribeControlPassings(listener);
+    }
+
     protected void handleEvent(Triple<IRaceCompetitor, IControlPassings, Void> event) {
         System.out.print("L"); // as in "Leg"
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA().getRace());

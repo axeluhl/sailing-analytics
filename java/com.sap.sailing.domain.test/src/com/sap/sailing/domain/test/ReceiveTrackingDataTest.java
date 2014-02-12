@@ -78,24 +78,24 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* start of tracking */ null,
-        /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
-                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
-                    @Override
-                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
-                    }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* delayToLiveInMillis */0l,
+        /* simulator */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+            @Override
+            public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+            }
+        },
+                /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
         }
         addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                /* start of tracking */null, /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
-                /* simulator */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                /* delayToLiveInMillis */0l, /* simulator */ null, EmptyWindStore.INSTANCE, /* simulateWithStartTimeNow */
+                new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber));
+                }, /* trackedRegattaRegistry */ null, tractracRace, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber));
     }
 
     @Test

@@ -75,11 +75,11 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(),
-                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                tractracRace, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
-                }, /* delayToLiveInMillis */ 0l, 
-                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber) {
+                }, 
+                /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, eventSubscriber, raceSubscriber) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 super.handleEvent(event);
