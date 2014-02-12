@@ -31,22 +31,18 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         testRace("4");
     }
-
     @Test
     public void testRace5() throws IOException, InterruptedException, URISyntaxException {
         testRace("5");
     }
-
     @Test
     public void testRace6() throws IOException, InterruptedException, URISyntaxException {
         testRace("6");
     }
-
     @Test
     public void testRace7() throws IOException, InterruptedException, URISyntaxException {
         testRace("7");
     }
-
     @Test
     public void testRace8() throws IOException, InterruptedException, URISyntaxException {
         testRace("8");
