@@ -19,7 +19,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -39,6 +38,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -389,16 +389,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
             sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
-                    new AsyncCallback<Void>() {
+                    new MarkedAsyncCallback<Void>() {
                         @Override
-                        public void onFailure(Throwable caught) {
+                        public void handleFailure(Throwable caught) {
                             errorReporter
                                     .reportError("Exception trying to set the delay to live for the selected tracked races: "
                                             + caught.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
+                        public void handleSuccess(Void result) {
                             regattaRefresher.fillRegattas();
                         }
                     });
