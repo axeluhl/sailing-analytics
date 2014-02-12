@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 
 /**
@@ -24,7 +25,7 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
         Double result;
         if (rank == 0) {
             result = null;

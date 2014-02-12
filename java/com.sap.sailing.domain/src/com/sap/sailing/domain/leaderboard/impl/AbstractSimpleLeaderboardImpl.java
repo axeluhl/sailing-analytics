@@ -1685,4 +1685,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getName() + " " + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " " + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 
+    @Override
+    public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
+        return new NumberOfCompetitorsFetcherImpl();
+    }
 }
