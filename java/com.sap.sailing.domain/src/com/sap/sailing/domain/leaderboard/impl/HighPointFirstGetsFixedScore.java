@@ -9,7 +9,7 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 
 /**
  * A variant of the {@link HighPoint} scoring system where the winner gets a fixed number of points, and
- * all subsequent ranks get one point less. No negative scores are returned. 0.0 is the worst score a
+ * all subsequent ranks get one point less. No negative scores are returned. 1.0 is the worst score a
  * competitor can score.
  * 
  * @author Axel Uhl (D043530)
@@ -30,7 +30,7 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
         if (rank == 0) {
             result = null;
         } else {
-            result = Math.max(0.0, (double) (scoreForRaceWinner - rank + 1));
+            result = Math.max(1.0, (double) (scoreForRaceWinner - rank + 1));
         }
         return result;
     }

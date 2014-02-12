@@ -13,7 +13,8 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 
 /**
  * The scoring system as used by the Extreme Sailing Series. Disqualified competitors get 0 points; the winner gets as
- * many points as there are competitors in the race. Higher scores are better.
+ * many points as there are competitors in the race. Higher scores are better. No negative scores are returned. Worst
+ * score a competitor can get is 1.0.
  * 
  * @author Axel Uhl (D043530)
  * 
