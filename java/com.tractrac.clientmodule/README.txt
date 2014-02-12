@@ -1,5 +1,5 @@
 ********************************************
-******* TracTracClientModule 2.0.11 ********
+******* TracTracClientModule 2.0.12 ********
 ********************************************
 
 This release only contains changes in its implementation (it keeps the previous API). 
@@ -19,6 +19,19 @@ It contains also some files:
  - params.txt -> file that contains the race parameters used in the example.
  
 2) New features
+
+- Fixing a bug reading MTB files. In some scenarios when the positions of one boat arrive with a big delay, 
+they can be discarded by the library. The positions are in the MTB file and it is not necessary to 
+regenerate the files again. It is just a bug in the reading process. 
+
+
+********************************************
+******* TracTracClientModule 2.0.11 ********
+********************************************
+
+This release only contains changes in its implementation (it keeps the previous API). 
+
+1) New features
 
 - Fixed a deadlock in the code. If the consummer aplication invokes a method in the datacontroller,
 a deadlock can happen because the stack of pending messages is locked. Now, it is always possible to

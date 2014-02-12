@@ -430,6 +430,8 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(legElement, "mark_from", leg.getFrom().getName());
         addNamedElementWithValue(legElement, "mark_to", leg.getTo().getName());
         addNamedElementWithValue(legElement, "leg_type", trackedLeg.getLegType(trackedLeg.getTrackedRace().getStartOfRace()).name());
+        addNamedElementWithValue(legElement, "great_circle_distance_at_start_of_race_in_meters", trackedLeg.getGreatCircleDistance(trackedLeg.getTrackedRace().getStartOfRace()).getMeters());
+        addNamedElementWithValue(legElement, "great_circle_distance_at_end_of_race_in_meters", trackedLeg.getGreatCircleDistance(trackedLeg.getTrackedRace().getEndOfRace()).getMeters());
         
         for (Competitor competitor : trackedLeg.getTrackedRace().getCompetitorsFromBestToWorst(/*timePoint*/ trackedLeg.getTrackedRace().getEndOfRace())) {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
@@ -665,9 +667,9 @@ public class LeaderboardData extends ExportAction {
         TrackedRace raceBefore = null; int sameDayGroupIndex = 0; int raceCounter = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
-                sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasGPSData()) {
+                    sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                     TimePoint timeSpentForRace = MillisecondsTimePoint.now();
                     Pair<Double, Vector<String>> raceConfidenceAndErrorMessages = checkData(trackedRace);
                     final List<Element> legs = new ArrayList<Element>();

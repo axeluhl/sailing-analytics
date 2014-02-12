@@ -14,8 +14,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.junit.Test;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -140,7 +138,6 @@ public class OBMRMarkPassingTest extends OnlineTracTracBasedTest {
     
     }
 
-    @Test
     public void testRace1() throws IOException, InterruptedException, URISyntaxException {
         setUp("65099a64-245d-11e2-9635-10bf48d758ce");
         testRace();

@@ -752,6 +752,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+    }
+
+    @Override
     public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
     }
@@ -1254,9 +1259,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (trackedRace != null) {
-            entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
-            if(entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
-                long timeDifferenceInMs = timePoint.asMillis() - entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
+            Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
+            entryDTO.averageSamplingInterval = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
+            if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
+                long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
                 entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
@@ -1679,4 +1685,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getName() + " " + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " " + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 
+    @Override
+    public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
+        return new NumberOfCompetitorsFetcherImpl();
+    }
 }

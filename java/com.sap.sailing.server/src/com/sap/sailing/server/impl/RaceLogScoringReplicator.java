@@ -56,6 +56,10 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+    }
+
+    @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
     }
 
@@ -184,7 +188,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                     public Integer call() {
                         return numberOfCompetitorsInRace;
                     }
-                });
+                }, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher());
         
         // Do ALWAYS apply score corrections from race committee
         applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);

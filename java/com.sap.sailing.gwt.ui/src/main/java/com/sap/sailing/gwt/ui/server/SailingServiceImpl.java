@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.io.BufferedReader;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -15,7 +14,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -164,6 +162,7 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
+import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -240,6 +239,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -247,7 +247,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -704,7 +703,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward());
+                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring());
         return result;
     }
     
@@ -905,7 +904,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                     new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, 
+                    tracTracUsername, tracTracPassword,
+                    record.getRaceStatus());
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
                     public void run() {
@@ -2941,8 +2942,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward) {
-        getService().apply(new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds, startsWithZeroScore, firstColumnIsNonDiscardableCarryForward));
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring) {
+        getService().apply(
+                new UpdateSeries(regattaIdentifier, seriesName, isMedal, resultDiscardingThresholds,
+                        startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring));
     }
 
     @Override
@@ -3363,7 +3367,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         URL serverAddress = null;
         InputStream inputStream = null;
-        BufferedReader rd = null;
+        ObjectInputStream objectInputStream = null;
         try {
             serverAddress = createUrl(hostname, port, query);
             //set up out communications stuff
@@ -3385,13 +3389,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
             }
 
-            rd = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-            return importFromHttpResponse(sb.toString(), override);
+            objectInputStream = getService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
+                    inputStream);
+            TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+            return importFromHttpResponse(topLevelMasterData, override);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -3404,8 +3405,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (inputStream != null) {
                     inputStream.close();
                 }
-                if (rd != null) {
-                    rd.close();
+                if (objectInputStream != null) {
+                    objectInputStream.close();
                 }
             } catch (IOException e) {
             }
@@ -3413,12 +3414,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URL("http://" + host + ":" + port + "/sailingserver/api/v1/masterdata/leaderboardgroups?" + query);
+        return new URL("http://" + host + ":" + port + "/sailingserver/spi/v1/masterdata/leaderboardgroups?" + query);
     }
     
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(String string, boolean override) {
+    protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
+            boolean override) {
         MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(string, override);
+        return importer.importMasterData(topLevelMasterData, override);
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {

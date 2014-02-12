@@ -12,12 +12,13 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ListEditorComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.listedit.ListEditorComposite;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog;
 
@@ -31,6 +32,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private TextBox nameEntryField;
     private CheckBox isMedalSeriesCheckbox;
     private CheckBox startsWithZeroScoreCheckbox;
+    private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private DiscardThresholdBoxes discardThresholdBoxes;
@@ -104,6 +106,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField.setVisibleLength(40);
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
+        hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -114,9 +117,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         });
         discardThresholdBoxes = new DiscardThresholdBoxes(this, stringMessages);
         discardThresholdBoxes.getWidget().setVisible(false);
-        fleetListComposite = FleetListEditorComposite.createExpanded(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
+        fleetListComposite = new FleetListEditorComposite(Arrays.asList(new FleetDTO("Default", 0, null)), stringMessages, resources.removeIcon());
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<List<FleetDTO>>() {
-            
             @Override
             public void onValueChange(ValueChangeEvent<List<FleetDTO>> event) {
                 validate();
@@ -129,6 +131,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
+        series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
         series.setFleets(fleetListComposite.getValue());
         series.setDiscardThresholds(useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds() : null);
@@ -142,17 +145,22 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(6, 2);
+        Grid formGrid = new Grid(7, 2);
         panel.add(formGrid);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
         formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
-        formGrid.setWidget(3, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
-        formGrid.setWidget(4, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(5, 1, discardThresholdBoxes.getWidget());
-        panel.add(createHeadlineLabel(stringMessages.fleets()));
-        panel.add(fleetListComposite);
+        formGrid.setWidget(3, 1, hasSplitFleetContiguousScoringCheckbox);
+        formGrid.setWidget(4, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(5, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(6, 1, discardThresholdBoxes.getWidget());
+        
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.setWidth("100%");
+        tabPanel.add(fleetListComposite, stringMessages.fleets());
+        tabPanel.selectTab(0);
+        panel.add(tabPanel);
         return panel;
     }
     

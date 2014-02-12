@@ -169,7 +169,8 @@ public interface SailingService extends RemoteService {
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstRaceIsNonDiscardableCarryForward);
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -343,7 +344,7 @@ public interface SailingService extends RemoteService {
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
 
     Iterable<CompetitorDTO> getCompetitors();
-
+    
     DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
     
     Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);

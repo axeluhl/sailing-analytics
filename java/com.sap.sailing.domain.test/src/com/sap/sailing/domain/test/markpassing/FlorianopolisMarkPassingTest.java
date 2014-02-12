@@ -14,8 +14,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import org.junit.Test;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -140,22 +138,18 @@ public class FlorianopolisMarkPassingTest extends OnlineTracTracBasedTest {
     
     }
 
-    @Test
     public void testRace1() throws IOException, InterruptedException, URISyntaxException {
         setUp("bca3b490-2dce-0131-27f0-60a44ce903c3");
         testRace();
     }
-    @Test
     public void testRace2() throws IOException, InterruptedException, URISyntaxException {
         setUp("52697ec0-2dd0-0131-2802-60a44ce903c3");
         testRace();
     }
-    @Test
     public void testRace3() throws IOException, InterruptedException, URISyntaxException {
         setUp("528a0f30-2dd0-0131-2819-60a44ce903c3");
         testRace();
     }
-    @Test
     public void testRace4() throws IOException, InterruptedException, URISyntaxException {
         setUp("529a4150-2dd0-0131-2830-60a44ce903c3");
         testRace();

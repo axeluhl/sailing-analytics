@@ -63,6 +63,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.ControlPoint;
@@ -98,7 +99,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * reported by the threads. The function that calculates the total progress is:
      * 
      * <pre>
-     *   total_progress = sum(progress(thread_i)) / sum(weight(thread_i))</pre>
+     * total_progress = sum(progress(thread_i)) / sum(weight(thread_i))
+     * </pre>
+     * 
      * The weight is also the maximum individual progress that a thread can send: if a thread has a weight = 10 its
      * progress only can be between 0 and 10, e.g,:
      * <p>
@@ -112,35 +115,81 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * The total progress that you receive is:
      * 
      * <pre>
-     *   total_progress = 0 + 0 / 10 + 1 = 0 / 11 = 0</pre>
+     *   total_progress = 0 + 0 / 10 + 1 = 0 / 11 = 0
+     * </pre>
      * 
      * Then, the "Course thread" retrieves the course from the server and it sends a new progress message to the system:
      * 
      * <pre>
-     *   Course thread -&gt; weight = 1, progress = 1  ---&gt total_progress = 0 + 1 /  10 + 1 = 1 / 11 = 0.090909091</pre>
+     *   Course thread -&gt; weight = 1, progress = 1  ---&gt total_progress = 0 + 1 /  10 + 1 = 1 / 11 = 0.090909091
+     * </pre>
      * 
      * Then, the "Competitor positions thread" goes to the server and it checks that there is a high number of positions
      * for the competitors. It decides to change its weight:
      * 
      * <pre>
-     *   Competitor positions thread -&gt weight = 50, progress = 0 --&gt total_progress = 0 + 1 / 50 + 1 = 1 / 51 = 0.019607843</pre>
+     *   Competitor positions thread -&gt weight = 50, progress = 0 --&gt total_progress = 0 + 1 / 50 + 1 = 1 / 51 = 0.019607843
+     * </pre>
      * 
      * Then, the "Competitor positions thread" starts to retrieve positions and it sends several messages updating the
      * progress:
      * <ul>
-     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 1 --&gt; total_progress = 1 + 1 / 50 + 1 = 2 / 51 = 0.039215686</pre></li>
-     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 2 --&gt total_progress = 2 + 1 / 50 + 1 = 3 / 51 = 0.058823529</pre></li>
-     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 3 --&gt total_progress = 3 + 1 / 50 + 1 = 4 / 51 = 0.078431373</pre></li>
-     * <li><pre>...</pre></li>
-     * <li><pre>Competitor positions thread -&gt weight = 50, progress = 50 --&gt total_progress = 50 + 1 / 50 + 1 = 51 / 51 = 1.0</pre></li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 1 --&gt; total_progress = 1 + 1 / 50 + 1 = 2 / 51 = 0.039215686
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 2 --&gt total_progress = 2 + 1 / 50 + 1 = 3 / 51 = 0.058823529
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 3 --&gt total_progress = 3 + 1 / 50 + 1 = 4 / 51 = 0.078431373
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * ...
+     * </pre>
+     * 
+     * </li>
+     * <li>
+     * 
+     * <pre>
+     * Competitor positions thread -&gt weight = 50, progress = 50 --&gt total_progress = 50 + 1 / 50 + 1 = 51 / 51 = 1.0
+     * </pre>
+     * 
+     * </li>
      * </ul>
      * 
      * This example shows that is possible to receive more that 3 values of the progress lower than one already
-     * received. It happens because the weight of the threads changes."</i><p>
+     * received. It happens because the weight of the threads changes."</i>
+     * <p>
      * 
-     * We assume that there won't be more than six threads in TTCM receiving data for the same race.
+     * We assume that there won't be more than eight threads in TTCM receiving data for the same race, based on Jorge's
+     * statement from 2014-02-06: "One thread per subscription where the subscriptions are:
+     * <ul>
+     * <li>Competitor positions</li>
+     * <li>Mark positions</li>
+     * <li>Mark passings</li>
+     * <li>Route</li>
+     * <li>Start/Stop times for race</li>
+     * <li>Start/Stop times for event</li>
+     * <li>Messages for race</li>
+     * <li>Messages for event</li>
+     * </ul>
+     * Potentially, you can create 8 threads per TTCM (connecting only with one single race)."
      */
-    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 6;
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 8;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;
@@ -200,19 +249,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
-                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     /**
@@ -223,11 +272,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
-                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
+                tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     /**
@@ -244,7 +293,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
+            WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
@@ -267,7 +316,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         
         // check if there is a directory configured where stored data files can be cached
-        storedURI = checkForCachedStoredData(storedURI);
+        // only cache files for races in REPLAY state
+        if (raceStatus != null && raceStatus.equals(TracTracConnectionConstants.REPLAY_STATUS)) {
+            storedURI = checkForCachedStoredData(storedURI);
+        }
         
         logger.info("Starting race tracker: " + tractracEvent.getName() + " " + paramURL + " " + liveURI + " "
                 + storedURI + " startOfTracking:" + (startOfTracking != null ? startOfTracking.asMillis() : "n/a") + " endOfTracking:" + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
@@ -311,18 +363,20 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private URI checkForCachedStoredData(URI storedURI){
-        if (System.getProperty("tractrac.mtb.cache.dir") != null) {
-            final String directory = System.getProperty("tractrac.mtb.cache.dir");
+        final String CACHE_DIR_PROPERTY = "tractrac.mtb.cache.dir";
+        if (System.getProperty(CACHE_DIR_PROPERTY) != null) {
+            final String directory = System.getProperty(CACHE_DIR_PROPERTY);
             if (new File(directory).exists()) {
                 final String[] pathFragments = storedURI.getPath().split("\\/");
                 final String mtbFileName = pathFragments[pathFragments.length-1];
                 final String directoryAndFileName = directory+"/"+mtbFileName;
-                if (!new File(directoryAndFileName).exists()) {
+                final File f = new File(directoryAndFileName);
+                if (!f.exists()) {
                     FileOutputStream mtbOutStream = null;
                     try {
                         logger.info("Starting to download " + storedURI + " to cache dir " + directoryAndFileName);
                         InputStream in = storedURI.toURL().openStream();
-                        mtbOutStream = new FileOutputStream(new File(directoryAndFileName));
+                        mtbOutStream = new FileOutputStream(f);
                         byte data[] = new byte[1024];
                         int count;
                         while ((count = in.read(data, 0, 1024)) != -1)

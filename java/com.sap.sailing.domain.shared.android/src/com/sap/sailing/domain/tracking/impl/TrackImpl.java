@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackListener;
@@ -20,7 +21,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     /**
      * The fixes, ordered by their time points
      */
-    private final NavigableSet<Timed> fixes;
+    private final ArrayListNavigableSet<Timed> fixes;
 
     private final NamedReentrantReadWriteLock readWriteLock;
     
@@ -47,7 +48,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE), nameForReadWriteLock);
     }
     
-    protected TrackImpl(NavigableSet<Timed> fixes, String nameForReadWriteLock) {
+    protected TrackImpl(ArrayListNavigableSet<Timed> fixes, String nameForReadWriteLock) {
         this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
         this.listeners = new TrackListeners<TrackListener<FixType>>();
@@ -323,4 +324,23 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         listeners.removeListener(listener);
     }
 
+    @Override
+    public Duration getAverageIntervalBetweenFixes() {
+        lockForRead();
+        try {
+            return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
+        } finally {
+            unlockAfterRead();
+        }
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenRawFixes() {
+        lockForRead();
+        try {
+            return getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(getRawFixes().size()-1);
+        } finally {
+            unlockAfterRead();
+        }
+    }
 }

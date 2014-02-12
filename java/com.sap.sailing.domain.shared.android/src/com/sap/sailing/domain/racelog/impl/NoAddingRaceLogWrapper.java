@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -223,4 +224,14 @@ public class NoAddingRaceLogWrapper implements RaceLog {
 	public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
 		return innerRaceLog.getUnrevokedEvents();
 	}
+
+    @Override
+    public Duration getAverageIntervalBetweenFixes() {
+        return innerRaceLog.getAverageIntervalBetweenFixes();
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenRawFixes() {
+        return innerRaceLog.getAverageIntervalBetweenRawFixes();
+    }
 }
