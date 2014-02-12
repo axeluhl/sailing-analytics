@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.junit.Rule;
 import org.junit.rules.TestWatchman;
@@ -42,6 +43,8 @@ public abstract class AbstractSeleniumTest {
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
+    
+    private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
     
     /**
      * <p></p>
@@ -171,7 +174,7 @@ public abstract class AbstractSeleniumTest {
             //URL pictureURL = bundle.getResource("/com/sap/sailing/selenium/resources/not-supported.png");
             URL pictureURL = AbstractSeleniumTest.class.getResource(NOT_SUPPORTED_IMAGE);
             URI pictureURI = pictureURL.toURI();
-            
+            logger.info("URI for not-supported.png is " + pictureURI);
             return new File(pictureURI);
         } catch(URISyntaxException exception) {
             throw new RuntimeException(exception);
