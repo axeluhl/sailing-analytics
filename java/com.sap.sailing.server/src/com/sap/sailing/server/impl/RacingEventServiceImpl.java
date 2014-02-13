@@ -362,11 +362,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+            logger.info("Putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
             regatta.addRaceColumnListener(raceLogScoringReplicator);
+            
+            for (Event event : this.getAllEvents()) {
+                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    if (regatta.getDefaultCourseArea() != null && courseArea.getId().equals(regatta.getDefaultCourseArea().getId())) {
+                        logger.info("Associating regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
+                        event.addRegatta(regatta);
+                    }
+                }
+            }
         }
     }
 

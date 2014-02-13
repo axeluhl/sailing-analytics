@@ -120,4 +120,9 @@ public interface Regatta extends Named, WithID {
     boolean definesSeriesDiscardThresholds();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
+    
+    /**
+     * @return the associated event. Can be null.
+     */
+    Event getEvent();
 }

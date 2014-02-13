@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -409,6 +410,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 this.series = newSeriesList;
             }
         }
+    }
+
+    @Override
+    public Event getEvent() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
