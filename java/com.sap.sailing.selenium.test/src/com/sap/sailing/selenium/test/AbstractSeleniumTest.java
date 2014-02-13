@@ -158,10 +158,10 @@ public abstract class AbstractSeleniumTest {
             source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         }
         
-        URL destination = new URL(screenshotFolder, filename + ".png"); //$NON-NLS-1$
+        URL destination = new URL(screenshotFolder, getClass().getName() + "/" + filename + ".png"); //$NON-NLS-1$
         try {
             logger.info("URI for screenshot is " + destination.toURI());
-            logger.info("Path for screenshot is " + new File(destination.toURI()).toPath());
+            logger.info("Path for screenshot is " + new File(destination.toURI()).toPath().toAbsolutePath());
             Files.copy(source, new File(destination.toURI()).toPath(), StandardCopyOption.REPLACE_EXISTING);
             
             // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
