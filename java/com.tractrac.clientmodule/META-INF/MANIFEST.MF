@@ -53,3 +53,5 @@ Export-Package: com.tractrac.asio.lib.api,
  com.tractrac.util.lib.api.sortedset.btree
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: TracTrac
+Import-Package: org.osgi.framework
+Bundle-Activator: com.tractrac.osgi.Activator

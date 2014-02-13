@@ -36,7 +36,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final IRaceSubscriber raceSubscriber;
     private final DynamicTrackedRegatta trackedRegatta;
     private final Simulator simulator;
-    private Thread thread;
+    private final Thread thread;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -54,6 +54,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.domainFactory = domainFactory;
         this.simulator = simulator;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
+        this.thread = new Thread(this, getClass().getName());
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -64,8 +65,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         return raceSubscriber;
     }
 
-    protected synchronized void setAndStartThread(Thread thread) {
-        this.thread = thread;
+    protected synchronized void startThread() {
         thread.start();
     }
     

@@ -45,6 +45,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribeControlPassings(listener);
+        startThread();
     }
     
     @Override

@@ -62,6 +62,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IControl, IP
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribeControlPositions(listener);
+        startThread();
     }
     
     @Override

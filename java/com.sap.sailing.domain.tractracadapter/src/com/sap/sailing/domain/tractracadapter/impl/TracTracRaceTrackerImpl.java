@@ -234,7 +234,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
-        this(ModelLocator.getEventFactory().createEvent(new URI(paramURL.toString())), domainFactory,
+        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())).getEvent(), domainFactory,
                 paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername,
                 tracTracPassword, raceStatus, trackedRegattaRegistry);
@@ -259,9 +259,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
             RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, String raceStatus, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
-        this(ModelLocator.getEventFactory().createEvent(new URI(paramURL.toString())), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
-                tracTracUsername, tracTracPassword, raceStatus, trackedRegattaRegistry);
+        this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())).getEvent(), regatta,
+                domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername,
+                tracTracPassword, raceStatus, trackedRegattaRegistry);
     }
     
     /**
@@ -426,6 +427,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (Receiver receiver : listenersForStoredData) {
             receiver.subscribe();
         }
+        for (IRaceSubscriber raceSubscriber : raceSubscribers.values()) {
+            raceSubscriber.start();
+        }
     }
     
     @Override
@@ -439,6 +443,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+        for (IRaceSubscriber raceSubscriber : raceSubscribers.values()) {
+            raceSubscriber.stop();
+        }
         for (Receiver receiver : receivers) {
             if (stopReceiversPreemtively) {
                 receiver.stopPreemptively();

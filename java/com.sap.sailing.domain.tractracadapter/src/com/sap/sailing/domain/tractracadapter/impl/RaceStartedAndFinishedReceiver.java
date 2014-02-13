@@ -52,6 +52,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribeRaceTimesChanges(listener);
+        startThread();
     }
     
     @Override

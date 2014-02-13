@@ -38,6 +38,7 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribePositions(listener);
+        startThread();
     }
     
     @Override

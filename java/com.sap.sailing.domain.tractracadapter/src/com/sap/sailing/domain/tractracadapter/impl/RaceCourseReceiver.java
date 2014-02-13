@@ -89,6 +89,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     @Override
     public void subscribe() {
         getRaceSubscriber().subscribeRouteChanges(listener);
+        startThread();
     }
     
     @Override
