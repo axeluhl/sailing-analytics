@@ -28,6 +28,9 @@ public abstract class BoatClassVectorGraphics {
     protected final String SAIL_FILLCOLOR = "#555555";
     protected final String SAIL_STROKECOLOR = "#000000";
 
+    /** the minimal length of the hull in pixel when the boat is drawn */
+    protected double minHullLengthInPx = 25;
+
     BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
         this.mainBoatClassName = mainBoatClassName;
         this.overallLengthInPx = overallLengthInPx;
@@ -158,6 +161,10 @@ public abstract class BoatClassVectorGraphics {
 
     public List<String> getCompatibleBoatClassNames() {
         return compatibleBoatClassNames;
+    }
+
+    public double getMinHullLengthInPx() {
+        return minHullLengthInPx;
     }
 
 }

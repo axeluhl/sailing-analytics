@@ -41,7 +41,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>Medienfabrik</td>
 </tr>
 <tr>
-  <td>Android Knowledge, References and Developers?</td>
+  <td>Mobile HTML Knowledge, References and Developers?</td>
   <td></td>
   <td></td>
   <td></td>
