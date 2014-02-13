@@ -48,12 +48,12 @@ import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
 public class PageObject {
     public static final int DEFAULT_WAIT_TIMEOUT = 30;
     
-    public static final int DEFAULT_WAIT_POLLING = 5;
+    public static final int DEFAULT_POLLING_INTERVAL = 5;
     
     /**
-     * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
+     * </p>The default timeout of 5 seconds for the lookup of other elements.</p>
      */
-    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
+    protected static final int DEFAULT_LOOKUP_TIMEOUT = 5;
     
     /**
      * <p>The web driver to use.</p>
@@ -103,7 +103,7 @@ public class PageObject {
      *   
      */
     public static <T> FluentWait<T> createFluentWait(T input, Collection<Class<? extends Throwable>> exceptions) {
-        return createFluentWait(input, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING, exceptions);
+        return createFluentWait(input, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL, exceptions);
     }
     
     /**
@@ -241,7 +241,7 @@ public class PageObject {
      *   the default implementation.</p>
      */
     protected void initElements() {
-        SeleniumElementLocatorFactory factory = new SeleniumElementLocatorFactory(this.context, getPageLoadTimeOut());
+        SeleniumElementLocatorFactory factory = new SeleniumElementLocatorFactory(this.context, getLookupTimeOut());
         SeleniumFieldDecorator decorator = new SeleniumFieldDecorator(factory);
         
         PageFactory.initElements(decorator, this);
@@ -253,8 +253,8 @@ public class PageObject {
      * @return
      *   The timeout duration for the initialization of the page object.
      */
-    protected int getPageLoadTimeOut() {
-        return DEFAULT_PAGE_LOAD_TIMEOUT;
+    protected int getLookupTimeOut() {
+        return DEFAULT_LOOKUP_TIMEOUT;
     }
     
     /**
@@ -323,7 +323,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests() {
-        waitForAjaxRequests(DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING);
+        waitForAjaxRequests(DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
     }
     
     /**
@@ -338,7 +338,7 @@ public class PageObject {
      * @see #waitForAjaxRequests(int timeout, int polling)
      */
     protected void waitForAjaxRequests(String category) {
-        waitForAjaxRequests(category, DEFAULT_WAIT_TIMEOUT, DEFAULT_WAIT_POLLING);
+        waitForAjaxRequests(category, DEFAULT_WAIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
     }
     
     /**

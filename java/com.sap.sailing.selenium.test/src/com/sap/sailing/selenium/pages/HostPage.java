@@ -14,6 +14,11 @@ public class HostPage extends PageObject {
     
     protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
     
+    /**
+     * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
+     */
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
+    
     protected static final String getGWTCodeServer() {
         String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
         
@@ -41,8 +46,12 @@ public class HostPage extends PageObject {
      */
     @Override
     protected void initElements() {
-        waitForAjaxRequests(super.getPageLoadTimeOut(), 5);
+        waitForAjaxRequests(getPageLoadTimeOut(), 5);
         
         super.initElements();
+    }
+    
+    protected int getPageLoadTimeOut() {
+        return DEFAULT_PAGE_LOAD_TIMEOUT;
     }
 }
