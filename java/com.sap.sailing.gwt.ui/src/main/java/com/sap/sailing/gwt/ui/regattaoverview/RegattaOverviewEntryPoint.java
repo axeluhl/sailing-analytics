@@ -81,7 +81,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
 
     private void createAndAddRegattaPanel(UUID eventId) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventId, settings);
+        regattaPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventId, settings, userAgent);
         Panel centerPanel = new FlowPanel();
         centerPanel.add(regattaPanel);
         ScrollPanel scrollPanel = new ScrollPanel(centerPanel);

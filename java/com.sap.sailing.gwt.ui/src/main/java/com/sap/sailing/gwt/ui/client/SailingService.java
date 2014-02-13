@@ -132,7 +132,9 @@ public interface SailingService extends RemoteService {
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta);
+    
+    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 

@@ -1860,7 +1860,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta) {
+    public List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
+        List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
+        if (event != null) {
+            for (RegattaDTO regatta : event.regattas) {
+                results.addAll(getLeaderboardsByRegatta(regatta));
+            }
+            HashSet<StrippedLeaderboardDTO> set = new HashSet<StrippedLeaderboardDTO>(results);
+            results.clear();
+            results.addAll(set);
+        }
+        return results;
+    }
+
+    @Override
+    public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         for (RaceDTO race : regatta.races) {
             List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
@@ -3749,4 +3763,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
     }
+
 }
