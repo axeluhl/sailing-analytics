@@ -42,7 +42,7 @@ import com.tractrac.model.lib.api.route.IControl;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
+public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private static final Logger logger = Logger.getLogger(AbstractTracTracLiveTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
@@ -50,7 +50,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     private final Collection<Receiver> receivers;
     
     private Thread ioThread;
-    private DataController controller;
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
 
@@ -95,9 +94,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
                 e.printStackTrace();
             }
         }
-        controller = new DataController(liveUri, storedUri, this);
-        // Start live and stored data streams
-        ioThread = new Thread(controller, "I/O for event "+event.getName()+", paramURL "+paramUrl);
+        // TODO Start live and stored data subscribers
         // test cases need to start the thread calling startController
         // after adding their listeners
     }
@@ -116,16 +113,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         startController();
     }
     
-    /**
-     * Called when the {@link #storedDataEnd()} event was received. Adds the listeners
-     * returned to the {@link #getController() controller}, presumably for live data.
-     * This default implementation returns an empty iterable. Subclasses may override
-     * to return more.
-     */
-    protected Iterable<TypeController> getListenersForLiveData() {
-        return Collections.emptySet();
-    }
-
     protected void startController() {
         ioThread.start();
     }
@@ -135,8 +122,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         logger.info("entering "+getClass().getName()+".tearDown()");
         Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
         // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
-        if (getController() != null) // the controller (and the ioThread see below) are null if the data is being read from a local file.
-            controller.stop(/* abortStored */ true);
+        // TODO unsubscribe all listeners
     logger.info("successfully stopped controller");
         try {
             if (ioThread != null) {
@@ -156,51 +142,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     protected IEvent getTracTracEvent() {
         return event;
-    }
-
-    protected DataController getController() {
-        return controller;
-    }
-
-    @Override
-    public void liveDataConnected() {
-        System.out.println("Live data connected");
-    }
-
-    @Override
-    public void liveDataDisconnected() {
-        System.out.println("Live data disconnected");
-    }
-
-    @Override
-    public void stopped() {
-        System.out.println("stopped");
-    }
-
-    @Override
-    public void storedDataBegin() {
-        System.out.println("Stored data begin");
-    }
-
-    @Override
-    public void storedDataEnd() {
-        System.out.println("Stored data end");
-    }
-
-    @Override
-    public void storedDataProgress(float progress) {
-        System.out.println("Stored data progress: "+progress);
-        
-    }
-
-    @Override
-    public void storedDataError(String arg0) {
-        System.err.println("Error with stored data "+arg0);
-    }
-
-    @Override
-    public void liveDataConnectError(String arg0) {
-        System.err.println("Error with live data "+arg0);
     }
 
     public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {

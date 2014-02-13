@@ -65,7 +65,6 @@
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
 	        <module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
 		<module>com.sap.sailing.operationaltransformation.test</module>
