@@ -142,7 +142,7 @@ public abstract class AbstractSeleniumTest {
      */
     protected void captureScreenshot(String filename) throws IOException {
         URL screenshotFolder = this.environment.getScreenshotFolder();
-        
+        logger.info("Screenshot folder is " + screenshotFolder);
         if(screenshotFolder == null)
             return;
         
