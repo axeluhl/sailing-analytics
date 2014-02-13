@@ -336,6 +336,18 @@ public abstract class CanvasOverlayV3 {
         return Math.min(diffX, diffY);  
     }
 
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, LatLng position, double distanceXInMeter) {
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+
+        Point point = projection.fromLatLngToDivPixel(position);
+        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
+
+        return Math.abs(pointX.getX() - point.getX());
+    }
+    
     protected Size calculateBoundingBox(MapCanvasProjection projection, LatLng position, double distanceXInMeter, double distanceYInMeter) {
         Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));

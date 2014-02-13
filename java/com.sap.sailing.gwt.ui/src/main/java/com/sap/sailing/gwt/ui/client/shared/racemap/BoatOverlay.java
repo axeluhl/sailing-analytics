@@ -96,20 +96,21 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     public Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
-        double minBoatLength = 25;
+        // the minimum boat length is related to the hull of the boat, not the overall length 
+        double minBoatHullLengthInPx = 25;
 
-        Size boatSizeInPixel = calculateBoundingBox(mapProjection,
-                LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg),
-                boatVectorGraphics.getBoatLengthInMeters(), boatVectorGraphics.getBoatBeamInMeters());
+        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
+                LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
         
-        double boatLengthInPixel = boatSizeInPixel.getWidth();
-        if(boatLengthInPixel < minBoatLength)
-            boatLengthInPixel = minBoatLength;
+        if(boatHullLengthInPixel < minBoatHullLengthInPx) {
+            boatHullLengthInPixel = minBoatHullLengthInPx;
+        }
 
-        // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
-        // To calculate the display real boat size the scale factor from canvas units to the real   
-        double boatSizeScaleFactor = boatLengthInPixel / (boatVectorGraphics.getBoatLengthInMeters() * 100);
+        double boatSizeScaleFactor = boatHullLengthInPixel / (boatVectorGraphics.getHullLengthInPx());
 
-        return new Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(boatLengthInPixel + boatLengthInPixel / 2.0, boatLengthInPixel + boatLengthInPixel / 2.0));
+        // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length 
+        double scaledCanvasSize = (boatVectorGraphics.getOverallLengthInPx()) * boatSizeScaleFactor; 
+
+        return new Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
     }
 }
