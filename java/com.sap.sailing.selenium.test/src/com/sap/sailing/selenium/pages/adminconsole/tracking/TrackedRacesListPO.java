@@ -213,7 +213,7 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, int timeout) {
-        logger.info("Try to resolve status for races. WebElement for table is " + this.trackedRacesTable.getTagName());
+        logger.info("Try to resolve status for races.");
         FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_WAIT_POLLING);
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
@@ -244,6 +244,10 @@ public class TrackedRacesListPO extends PageArea {
 //    }
     
     private CellTablePO<DataEntryPO> getTrackedRacesTable() {
+//        if(!this.trackedRacesTable.isDisplayed()) {
+//            return null;
+//        }
+        
         return new GenericCellTablePO<>(this.driver, this.trackedRacesTable, DataEntryPO.class);
     }
     
