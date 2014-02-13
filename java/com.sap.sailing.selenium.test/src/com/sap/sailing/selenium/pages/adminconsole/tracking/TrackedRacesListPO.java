@@ -218,13 +218,14 @@ public class TrackedRacesListPO extends PageArea {
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
             public Object apply(List<TrackedRaceDescriptor> races) {
-                refresh();
+                logger.info("Try to refresh and resolve status for races.");
+                refreshButton.click();
                 
                 for(Status status : getStatus(races)) {
                     if(status != Status.TRACKING)
                         return Boolean.FALSE;
                 }
-                
+                waitForAjaxRequests();
                 return Boolean.TRUE;
             }
         });
