@@ -170,7 +170,7 @@ public interface SailingService extends RemoteService {
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore);
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 

@@ -45,7 +45,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
-    private final Iterable<? extends Series> series;
+    private Iterable<? extends Series> series;
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
     private final Serializable id;
@@ -391,6 +391,22 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     public String toString() {
         return getId() + " " + getName() + " " + getScoringScheme().getType().name();
+    }
+
+    @Override
+    public void addSeries(Series seriesToAdd) {
+        Series existingSeries = getSeriesByName(seriesToAdd.getName());
+        if (existingSeries == null) {
+            seriesToAdd.setRegatta(this);
+            seriesToAdd.addRaceColumnListener(this);
+            registerRaceLogsOnRaceColumns(seriesToAdd);
+            ArrayList<Series> newSeriesList = new ArrayList<Series>();
+            for (Series seriesObject : this.series) {
+                newSeriesList.add(seriesObject);
+            }
+            newSeriesList.add(seriesToAdd);
+            this.series = newSeriesList;
+        }
     }
 
 }

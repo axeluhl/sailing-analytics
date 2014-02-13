@@ -438,6 +438,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public void addSeries(Series series) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 

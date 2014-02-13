@@ -370,7 +370,8 @@ public interface SailingServiceAsync {
     
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, AsyncCallback<Void> callback);
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets,
+            AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);

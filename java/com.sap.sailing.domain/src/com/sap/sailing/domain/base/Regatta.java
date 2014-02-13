@@ -51,6 +51,11 @@ public interface Regatta extends Named, WithID {
     Iterable<? extends Series> getSeries();
     
     /**
+     * Adds the provided series to this regatta
+     */
+    void addSeries(Series series);
+    
+    /**
      * @return the first series from {@link #getSeries} whose {@link Series#getName() name} equals
      *         <code>seriesName<code>,
      * or <code>null</code> if no such series exists
