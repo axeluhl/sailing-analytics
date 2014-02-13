@@ -51,7 +51,7 @@ public interface Regatta extends Named, WithID {
     Iterable<? extends Series> getSeries();
     
     /**
-     * Adds the provided series to this regatta
+     * Adds the provided series to this regatta if a series with the name does not exist already.
      */
     void addSeries(Series series);
     

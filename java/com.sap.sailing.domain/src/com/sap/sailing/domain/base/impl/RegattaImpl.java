@@ -400,12 +400,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             seriesToAdd.setRegatta(this);
             seriesToAdd.addRaceColumnListener(this);
             registerRaceLogsOnRaceColumns(seriesToAdd);
-            ArrayList<Series> newSeriesList = new ArrayList<Series>();
-            for (Series seriesObject : this.series) {
-                newSeriesList.add(seriesObject);
+            synchronized(this.series) {
+                ArrayList<Series> newSeriesList = new ArrayList<Series>();
+                for (Series seriesObject : this.series) {
+                    newSeriesList.add(seriesObject);
+                }
+                newSeriesList.add(seriesToAdd);
+                this.series = newSeriesList;
             }
-            newSeriesList.add(seriesToAdd);
-            this.series = newSeriesList;
         }
     }
 

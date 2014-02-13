@@ -1275,7 +1275,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
-           RegattaConfiguration newRegattaConfiguration) {
+           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
@@ -1283,6 +1283,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regatta.setDefaultCourseArea(newCourseArea);
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);
+        if (series != null) {
+            for (Series seriesObj : series) {
+                regatta.addSeries(seriesObj);
+            }
+        }
         mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }
