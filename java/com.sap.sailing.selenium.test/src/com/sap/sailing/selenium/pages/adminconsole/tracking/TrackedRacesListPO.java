@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -214,18 +215,22 @@ public class TrackedRacesListPO extends PageArea {
     
     public void waitForTrackedRaces(List<TrackedRaceDescriptor> races, int timeout) {
         logger.info("Try to resolve status for races.");
-        FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_WAIT_POLLING);
+        FluentWait<List<TrackedRaceDescriptor>> wait = createFluentWait(races, timeout, DEFAULT_POLLING_INTERVAL);
         wait.until(new Function<List<TrackedRaceDescriptor>, Object>() {
             @Override
             public Object apply(List<TrackedRaceDescriptor> races) {
                 logger.info("Try to refresh and resolve status for races.");
-                refreshButton.click();
-                
-                for(Status status : getStatus(races)) {
-                    if(status != Status.TRACKING)
-                        return Boolean.FALSE;
+                try {
+                    refresh();
+                    
+                    for(Status status : getStatus(races)) {
+                        if(status != Status.TRACKING)
+                            return Boolean.FALSE;
+                    }
+                } catch(TimeoutException exception) {
+                    return Boolean.FALSE;
                 }
-                waitForAjaxRequests();
+                
                 return Boolean.TRUE;
             }
         });
