@@ -49,7 +49,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td></td>
 </tr>
 <tr>
-  <td>Mobile HTML Knowledge, References and Developers?</td>
+  <td>Android Knowledge, References and Developers?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>iOS skills, References and Developers?</td>
   <td></td>
   <td></td>
   <td></td>
