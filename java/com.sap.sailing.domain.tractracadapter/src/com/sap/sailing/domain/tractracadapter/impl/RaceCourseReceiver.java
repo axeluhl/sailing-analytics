@@ -125,6 +125,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 ttControlPointsForAllOriginalEventControlPoints.values());
 
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(tractracRace.getId());
+        DynamicTrackedRace trackedRace = null;
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+tractracRace.getName()+": "+
                     event.getA().getControls());
@@ -134,7 +135,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
-                    createTrackedRace(existingRaceDefinitionForRace, sidelines);
+                    trackedRace = createTrackedRace(existingRaceDefinitionForRace, sidelines);
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
@@ -144,7 +145,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
-            DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
+            trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
@@ -153,25 +154,35 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 getSimulator().setTrackedRace(trackedRace);
             }
         }
+        updateLiveDelay(tractracRace, trackedRace);
     }
 
-    private void createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
+    private void updateLiveDelay(IRace tractracRace, DynamicTrackedRace trackedRace) {
+        final Number liveDelayInSeconds = (Number) tractracRace.getProperty("LiveDelaySecs");
+        if (liveDelayInSeconds != null) {
+            long delayInMillis = liveDelayInSeconds.longValue() * 1000;
+            if (trackedRace != null) {
+                trackedRace.setDelayToLiveInMillis(delayInMillis);
+            }
+        }
+    }
+
+    private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines) {
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
-        
         TracTracCourseDesignUpdateHandler courseDesignHandler = new TracTracCourseDesignUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword,
                 getTracTracEvent().getId(), race.getId());
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
-        
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(tracTracUpdateURI, 
                 tracTracUsername, tracTracPassword, getTracTracEvent().getId(), race.getId());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
-        if(!Activator.getInstance().isUseTracTracMarkPassings()){
+        if (!Activator.getInstance().isUseTracTracMarkPassings()) {
             new MarkPassingCalculator(trackedRace, true);
         }
+        return trackedRace;
     }
 
 }
