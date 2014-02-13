@@ -43,7 +43,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
-    private static double strictness = 1000; // Lower = stricter
+    private static double strictness = 900; // Lower = stricter
 
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
