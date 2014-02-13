@@ -18,7 +18,7 @@
   <!--
     The folder where screenshots (attachments) are stored.
   -->
-  <screenshots-folder>file://./target/surefire-reports/</screenshots-folder>
+  <screenshots-folder>file://{user.dir}/surefire-reports/</screenshots-folder>
   
   <!--
     In this section necessary system properties for the different web drivers can be provided if needed. For more

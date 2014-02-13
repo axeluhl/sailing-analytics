@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
@@ -253,7 +255,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
             }
 
             TestClass test = getTestClass();
-            URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(screenshotsFolder) : null);
+            URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(resolveScreenshotFolder(screenshotsFolder)) : null);
             
             for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
                 SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
@@ -264,5 +266,20 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
         } catch (Exception exception) {
             throw new InitializationError(exception);
         }
+    }
+    
+    private String resolveScreenshotFolder(String screenshotsFolder) {
+        StringBuffer buffer = new StringBuffer();
+        Pattern pattern = Pattern.compile("\\{(\\w+((\\.\\w+)+))\\}");
+        Matcher matcher = pattern.matcher(screenshotsFolder);
+        
+        while (matcher.find()) {
+            String replacement = System.getProperty(matcher.group(1), "");
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement));
+        }
+        
+        matcher.appendTail(buffer);
+        
+        return buffer.toString();
     }
 }
