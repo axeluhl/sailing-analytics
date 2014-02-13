@@ -770,6 +770,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
+        for (Event event : getAllEvents()) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
         return regatta;
     }
 
@@ -1295,6 +1302,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (series != null) {
             for (Series seriesObj : series) {
                 regatta.addSeries(seriesObj);
+            }
+        }
+        for (Event event : getAllEvents()) {
+            event.removeRegatta(regatta);
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
             }
         }
         mongoObjectFactory.storeRegatta(regatta);

@@ -1878,7 +1878,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
-                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
+                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRaceAndRegatta(race, regatta.getRegattaIdentifier());
                 if (leaderboard != null && !leaderboard.isEmpty()) {
                     results.addAll(leaderboard);
                 }
@@ -1892,19 +1892,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race) {
+    public List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (Leaderboard leaderboard : leaderboards.values()) {
-            Iterable<RaceColumn> races = leaderboard.getRaceColumns();
-            for (RaceColumn raceInLeaderboard : races) {
-                for (Fleet fleet : raceInLeaderboard.getFleets()) {
-                    TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
-                    if (trackedRace != null) {
-                        RaceDefinition trackedRaceDef = trackedRace.getRace();
-                        if (trackedRaceDef.getName().equals(race.getName())) {
-                            results.add(createStrippedLeaderboardDTO(leaderboard, false));
-                            break;
+            if (leaderboard instanceof RegattaLeaderboard && ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier().equals(regattaIdentifier)) {
+                Iterable<RaceColumn> races = leaderboard.getRaceColumns();
+                for (RaceColumn raceInLeaderboard : races) {
+                    for (Fleet fleet : raceInLeaderboard.getFleets()) {
+                        TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
+                        if (trackedRace != null) {
+                            RaceDefinition trackedRaceDef = trackedRace.getRace();
+                            if (trackedRaceDef.getName().equals(race.getName())) {
+                                results.add(createStrippedLeaderboardDTO(leaderboard, false));
+                                break;
+                            }
                         }
                     }
                 }
@@ -2841,6 +2843,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
             regattaDTO.setName(regatta.getName());
+            regattaDTO.races = convertToRaceDTOs(regatta);
             eventDTO.regattas.add(regattaDTO);
         }
         eventDTO.venue.setCourseAreas(new ArrayList<CourseAreaDTO>());

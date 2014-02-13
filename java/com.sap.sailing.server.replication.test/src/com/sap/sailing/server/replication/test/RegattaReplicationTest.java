@@ -101,6 +101,26 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
     }
     
     @Test
+    public void testRegattaToEventAssociationBeingReplicated() throws InterruptedException {
+        final UUID tvCourseAreaId = UUID.randomUUID();
+        final UUID golfCourseAreaId = UUID.randomUUID();
+        Event event = master.addEvent("Event", "Venue", ".", /*isPublic*/true, UUID.randomUUID());
+        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
+        master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
+        Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId);
+        event = master.getEvent(event.getId());
+        assertTrue(event.getRegattas().iterator().hasNext());
+        assertEquals("Kiel Week 2012", event.getRegattas().iterator().next().getBaseName());
+        Thread.sleep(1000);
+        Event replicatedEvent = replica.getEvent(event.getId());
+        Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
+        assertTrue(regattasInReplicatedEvent.hasNext());
+        assertEquals("Kiel Week 2012", regattasInReplicatedEvent.next().getBaseName());
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null));
+    }
+    
+    @Test
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
         Regatta replicatedRegatta;
         

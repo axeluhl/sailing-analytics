@@ -185,6 +185,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.add(regattaRaceStatesComponent);
         
         leaderboardsTabPanel = new TabPanel();
+        leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
         mainPanel.add(leaderboardsTabPanel);
         
         onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
@@ -208,8 +209,9 @@ public class RegattaOverviewPanel extends SimplePanel {
                             competitorSelectionProvider, 
                             null, leaderboard.name, 
                             errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
-                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName());
+                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
                 }
+                leaderboardsTabPanel.selectTab(0);
             }
             @Override
             public void onFailure(Throwable caught) {

@@ -2,8 +2,6 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -27,14 +25,6 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null);
-        for (Event event : toState.getAllEvents()) {
-            event.removeRegatta(regatta);
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
         return regatta;
     }
 

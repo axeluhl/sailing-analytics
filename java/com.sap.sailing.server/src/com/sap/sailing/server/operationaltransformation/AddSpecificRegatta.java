@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -43,13 +41,6 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getBaseRegattaName(), getBoatClassName(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId);
-        for (Event event : toState.getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
         return regatta;
     }
 
