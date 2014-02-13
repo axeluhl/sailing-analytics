@@ -15,10 +15,12 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     private final ImageResource removeImage;
 
     private Grid expandedValuesGrid;
+    private final boolean canRemoveItems;
 
-    public ExpandedListEditorUi(StringMessages stringMessages, ImageResource removeImage) {
+    public ExpandedListEditorUi(StringMessages stringMessages, ImageResource removeImage, boolean canRemoveItems) {
         super(stringMessages);
         this.removeImage = removeImage;
+        this.canRemoveItems = canRemoveItems;
     }
 
     protected abstract Widget createAddWidget();
@@ -51,19 +53,21 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     private void addRow(ValueType newValue) {
         int rowIndex = expandedValuesGrid.insertRow(expandedValuesGrid.getRowCount());
 
-        PushButton removeButton = new PushButton(new Image(removeImage));
-        removeButton.setTitle(stringMessages.remove());
-        removeButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                int rowToRemove = expandedValuesGrid.getCellForEvent(event).getRowIndex();
-                removeRow(rowToRemove);
-            }
-        });
+        if (canRemoveItems) {
+            PushButton removeButton = new PushButton(new Image(removeImage));
+            removeButton.setTitle(stringMessages.remove());
+            removeButton.addClickHandler(new ClickHandler() {
+    
+                @Override
+                public void onClick(ClickEvent event) {
+                    int rowToRemove = expandedValuesGrid.getCellForEvent(event).getRowIndex();
+                    removeRow(rowToRemove);
+                }
+            });
+            expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
+        }
 
         expandedValuesGrid.setWidget(rowIndex, 0, createValueWidget(rowIndex, newValue));
-        expandedValuesGrid.setWidget(rowIndex, 1, removeButton);
     }
 
     private void removeRow(int rowIndexToRemove) {

@@ -70,7 +70,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         regattaConfigurationCheckbox.setValue(regatta.configuration != null);
         regattaConfigurationButton.setEnabled(regatta.configuration != null);
 
-        this.seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon());
+        this.seriesEditor = new SeriesWithFleetsListEditor(regatta.series, stringMessages, resources.removeIcon(), /*enableFleetRemoval*/false);
     }
 
     @Override

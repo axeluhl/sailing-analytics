@@ -44,7 +44,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         Series series = getSeries(toState);
         if (series == null) {
             series = createSeries(toState);
-        }
+        } 
         series.setIsMedal(isMedal);
         series.setResultDiscardingRule(resultDiscardingThresholds == null ?
                 null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
