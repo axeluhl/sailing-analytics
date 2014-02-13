@@ -371,7 +371,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             for (Event event : this.getAllEvents()) {
                 for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                     if (regatta.getDefaultCourseArea() != null && courseArea.getId().equals(regatta.getDefaultCourseArea().getId())) {
-                        logger.info("Associating regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
+                        logger.info("Associating loaded regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
                         event.addRegatta(regatta);
                     }
                 }

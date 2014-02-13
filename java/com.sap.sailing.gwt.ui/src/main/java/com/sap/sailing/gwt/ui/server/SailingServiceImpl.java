@@ -1876,10 +1876,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
-        for (RaceDTO race : regatta.races) {
-            List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
-            if (leaderboard != null && !leaderboard.isEmpty()) {
-                results.addAll(leaderboard);
+        if (regatta != null && regatta.races != null) {
+            for (RaceDTO race : regatta.races) {
+                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
+                if (leaderboard != null && !leaderboard.isEmpty()) {
+                    results.addAll(leaderboard);
+                }
             }
         }
         // Removing duplicates
