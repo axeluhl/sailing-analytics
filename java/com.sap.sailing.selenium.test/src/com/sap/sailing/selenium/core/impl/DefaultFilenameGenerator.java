@@ -7,12 +7,9 @@ import org.junit.runner.Description;
 import com.sap.sailing.selenium.core.ScreenShotFilenameGenerator;
 
 public class DefaultFilenameGenerator implements ScreenShotFilenameGenerator {
-
     @Override
     public String getTargetFilename(Description description) {
-        Class<?> clazz = description.getTestClass();
-        
-        return clazz.getName() + "/" + UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
 }
