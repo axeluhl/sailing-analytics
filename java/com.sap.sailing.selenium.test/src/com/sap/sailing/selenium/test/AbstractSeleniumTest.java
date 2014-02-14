@@ -154,7 +154,7 @@ public abstract class AbstractSeleniumTest {
      * @throws IOException
      *   if an I/O error occurs.
      */
-    protected void captureScreenshot(String filename) throws IOException {
+    protected void captureScreenshot(String filename) {
         URL screenshotFolder = this.environment.getScreenshotFolder();
         
         if(screenshotFolder == null)
@@ -172,9 +172,10 @@ public abstract class AbstractSeleniumTest {
             source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         }
         
-        URL destination = new URL(screenshotFolder, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
         
         try {
+            URL destination = new URL(screenshotFolder, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+            
             Path path = Paths.get(destination.toURI());
             Path parent = path.getParent();
             
@@ -188,6 +189,8 @@ public abstract class AbstractSeleniumTest {
             System.out.println(String.format(ATTACHMENT_FORMAT, destination));
         } catch(URISyntaxException exception) {
             // This should never happen, but it's a checked exception.
+        } catch(IOException exception) {
+            throw new RuntimeException(exception);
         }
     }
     
