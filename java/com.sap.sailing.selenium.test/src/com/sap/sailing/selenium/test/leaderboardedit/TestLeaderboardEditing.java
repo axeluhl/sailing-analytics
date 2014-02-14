@@ -53,20 +53,6 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         assertEquals("Expected 6 rows for the six competitors but found only "+Util.size(rows), 6, Util.size(rows));
     }
     
-    // Temporary test which uses the TrackedRacesListPO of the TrackedRacesManagementPanelPO (tab Tracked races)
-    @Test
-    public void testSimpleLeaderboardEditing2() {
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        
-        createLeaderboard(LEADERBOARD, adminConsole);
-        startTrackingRaceAndWait2(adminConsole, BMW_CUP_JSON_URL, TRACKABLE_RACE, TRACKED_RACE, 30000 /* 30s timeout */);
-        // now create two race columns
-        LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
-        LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
-        leaderboardDetails.addRacesToFlexibleLeaderboard(2);
-        leaderboardDetails.linkRace(RACE_COLUMN, TRACKED_RACE);
-    }
-
     private void createNewLeaderboardLoadRaceAndLink(String leaderboardName) {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         
@@ -83,23 +69,11 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
             TrackedRaceDescriptor trackedRace, long waitingTime) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listTrackableRaces(jsonUrl);
+        captureScreenshot("beforeStartTracking");
         tracTracEvents.setTrackSettings(false, true, false);
         tracTracEvents.startTrackingForRace(trackableRace);
-        
+        captureScreenshot("afterStartTracking");
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(trackedRace);
-        trackedRacesList.stopTracking(trackedRace);
-    }
-    
-    private void startTrackingRaceAndWait2(AdminConsolePage adminConsole, String jsonUrl, TrackableRaceDescriptor trackableRace,
-            TrackedRaceDescriptor trackedRace, long waitingTime) {
-        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(jsonUrl);
-        tracTracEvents.setTrackSettings(false, true, false);
-        tracTracEvents.startTrackingForRace(trackableRace);
-        
-        TrackedRacesManagementPanelPO trackedRaces = adminConsole.goToTrackedRaces();
-        TrackedRacesListPO trackedRacesList = trackedRaces.getTrackedRacesList();
         trackedRacesList.waitForTrackedRace(trackedRace);
         trackedRacesList.stopTracking(trackedRace);
     }
