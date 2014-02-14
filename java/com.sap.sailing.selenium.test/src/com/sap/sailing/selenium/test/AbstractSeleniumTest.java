@@ -3,31 +3,22 @@ package com.sap.sailing.selenium.test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-
 import java.net.URL;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-
 import java.util.UUID;
 
 import org.junit.Rule;
-
 import org.junit.rules.TestWatchman;
-
 import org.junit.runner.RunWith;
-
 import org.junit.runners.model.FrameworkMethod;
-
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -46,6 +37,11 @@ import com.sap.sailing.selenium.core.WindowManager;
  */
 @RunWith(SeleniumRunner.class)
 public abstract class AbstractSeleniumTest {
+    /**
+     * <p>File extension for screenshots captured with a Selenium web driver.</p>
+     */
+    public static final String SCREENSHOT_FILE_EXTENSION = ".png"; //$NON-NLS-1$
+    
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
     private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
@@ -176,7 +172,7 @@ public abstract class AbstractSeleniumTest {
             source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         }
         
-        URL destination = new URL(screenshotFolder, filename + ".png"); //$NON-NLS-1$
+        URL destination = new URL(screenshotFolder, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
         
         try {
             Path path = Paths.get(destination.toURI());
