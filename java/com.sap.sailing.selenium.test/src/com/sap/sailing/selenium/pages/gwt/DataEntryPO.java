@@ -72,7 +72,7 @@ public class DataEntryPO extends CellTableRowPO {
         Mouse mouse = devices.getMouse();
         
         CompositeAction action = new CompositeAction();
-        action.addAction(new MoveToOffsetAction(mouse, locatable, 1, 1));
+        action.addAction(new MoveToOffsetAction(mouse, locatable, 3, 3));
         action.addAction(new ClickAction(mouse, locatable));
         
         return action;
