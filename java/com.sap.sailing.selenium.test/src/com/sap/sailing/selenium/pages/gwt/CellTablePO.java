@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.logging.Logger;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.common.CSSConstants;
 
 /**
@@ -54,6 +55,8 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     //private static final String CELL_TABLE_CSS_CLASS = "GJTB2DRDFQ"; //$NON-NLS-1$
     
     protected static final String SELECTED_ROW_CSS_CLASS = "GJTB2DRDPP"; //$NON-NLS-1$
+    
+    private static final Logger logger = Logger.getLogger(CellTablePO.class.getName());
     
     private static final String LOADING_ANIMATION_IMAGE = "url(\"data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
@@ -216,8 +219,10 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             entry.deselect();
         }
         
+        logger.info("Try to select " + entries.size() + " entries");
         // Select all specified entries
         for(T entry : entries) {
+            logger.info("Entry belongs " + (this.getWebElement().equals(entry.table.getWebElement()) ? "" : "not ") + "to the table");
             if(this.getWebElement().equals(entry.table.getWebElement())) {
                 entry.appendToSelection();
             }
