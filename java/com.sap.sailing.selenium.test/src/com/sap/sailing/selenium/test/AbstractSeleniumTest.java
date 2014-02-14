@@ -1,29 +1,33 @@
 package com.sap.sailing.selenium.test;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.net.URL;
-import java.net.URLConnection;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import org.junit.Rule;
+
 import org.junit.rules.TestWatchman;
+
 import org.junit.runner.RunWith;
+
 import org.junit.runners.model.FrameworkMethod;
+
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -50,8 +54,6 @@ public abstract class AbstractSeleniumTest {
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     
-    private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
-    
     /**
      * <p></p>
      * 
@@ -76,11 +78,23 @@ public abstract class AbstractSeleniumTest {
     }
     
     // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
+    //private class ScreenShotRule extends TestWatcher {
+    //    ScreenShotFilenameGenerator  generator;
+    //    
+    //    public ScreenShotRule(ScreenShotFilenameGenerator generator) {
+    //        this.generator = generator;
+    //    }
+    //    
+    //    protected void failed(Throwable error, Description description) {
+    //        captureScreenshot(this.generator.getTargetFilename(description));
+    //    }
+    //}
+    
     private class ScreenShotRule extends TestWatchman {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
-                captureScreenshot(UUID.randomUUID().toString());
+                captureScreenshot(getClass().getName() + "/" + UUID.randomUUID().toString());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -91,7 +105,7 @@ public abstract class AbstractSeleniumTest {
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotRule takeScreenshoot = new ScreenShotRule();
+    public final ScreenShotRule takeScreenshoot = new ScreenShotRule(/*new DefaultFilenameGenerator()*/);
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>
@@ -146,7 +160,7 @@ public abstract class AbstractSeleniumTest {
      */
     protected void captureScreenshot(String filename) throws IOException {
         URL screenshotFolder = this.environment.getScreenshotFolder();
-        logger.info("Screenshot folder is " + screenshotFolder);
+        
         if(screenshotFolder == null)
             return;
         
@@ -162,13 +176,9 @@ public abstract class AbstractSeleniumTest {
             source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         }
         
-        URL destination = new URL(screenshotFolder, getClass().getName() + "/" + getClass().getName() + "/" +filename + ".png"); //$NON-NLS-1$
+        URL destination = new URL(screenshotFolder, filename + ".png"); //$NON-NLS-1$
         
         try {
-            logger.info("Working directory is " + new File(".").toPath().toAbsolutePath());
-            logger.info("URI for screenshot is " + destination.toURI());
-            logger.info("Path for screenshot is " + new File(destination.toURI()).toPath().toAbsolutePath());
-            
             Path path = Paths.get(destination.toURI());
             Path parent = path.getParent();
             
@@ -186,16 +196,6 @@ public abstract class AbstractSeleniumTest {
     }
     
     private InputStream getScreenshotNotSupportedImage() {
-//        try {
-            //BundleContext context = SeleniumTestsActivator.getContext();
-            //Bundle bundle = context.getBundle();
-            //URL pictureURL = bundle.getResource("/com/sap/sailing/selenium/resources/not-supported.png");
-            return AbstractSeleniumTest.class.getResourceAsStream(NOT_SUPPORTED_IMAGE);
-//            URI pictureURI = pictureURL.toURI();
-//            logger.info("URI for not-supported.png is " + pictureURI);
-//            return new File(pictureURI);
-//        } catch(URISyntaxException exception) {
-//            throw new RuntimeException(exception);
-//        }
+        return AbstractSeleniumTest.class.getResourceAsStream(NOT_SUPPORTED_IMAGE);
     }
 }
