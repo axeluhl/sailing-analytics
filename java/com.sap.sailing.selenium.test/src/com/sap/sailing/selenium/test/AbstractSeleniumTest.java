@@ -23,9 +23,11 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.core.Managed;
+import com.sap.sailing.selenium.core.ScreenShotFilenameGenerator;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.core.impl.DefaultFilenameGenerator;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -90,18 +92,20 @@ public abstract class AbstractSeleniumTest {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
-                captureScreenshot(getClass().getName() + "/" + UUID.randomUUID().toString());
+                captureScreenshot(UUID.randomUUID().toString());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
         }
     }
     
+    private final ScreenShotFilenameGenerator generator = new DefaultFilenameGenerator();
+    
     /**
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotRule takeScreenshoot = new ScreenShotRule(/*new DefaultFilenameGenerator()*/);
+    public final ScreenShotRule takeScreenshoot = new ScreenShotRule(/*generator*/);
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>
@@ -174,7 +178,7 @@ public abstract class AbstractSeleniumTest {
         
         
         try {
-            URL destination = new URL(screenshotFolder, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+            URL destination = new URL(screenshotFolder, getClass().getName() + "/" + filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
             
             Path path = Paths.get(destination.toURI());
             Path parent = path.getParent();
