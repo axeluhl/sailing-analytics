@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
@@ -159,11 +161,18 @@ public abstract class AbstractSeleniumTest {
         }
         
         URL destination = new URL(screenshotFolder, getClass().getName() + "/" + filename + ".png"); //$NON-NLS-1$
+        
         try {
             logger.info("Working directory is " + new File(".").toPath().toAbsolutePath());
             logger.info("URI for screenshot is " + destination.toURI());
             logger.info("Path for screenshot is " + new File(destination.toURI()).toPath().toAbsolutePath());
-            Files.copy(source, new File(destination.toURI()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            File file = new File(destination.toURI());
+            File directory = file.getParentFile();
+            
+            directory.mkdirs();
+            
+            Files.copy(source, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             
             // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
             System.out.println(String.format(ATTACHMENT_FORMAT, destination));
