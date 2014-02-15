@@ -14,8 +14,7 @@ public abstract class AbstractTimePoint implements TimePoint {
 
         @Override
         public int compare(TimePoint o1, TimePoint o2) {
-            long milliDiff = o1.asMillis() - o2.asMillis();
-            return milliDiff<0 ?  -1 : milliDiff == 0 ? 0 : 1;
+        	return Long.compare(o1.asMillis(), o2.asMillis());
         }
     };
 
