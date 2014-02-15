@@ -15,6 +15,7 @@ import org.openqa.selenium.interactions.KeyUpAction;
 import org.openqa.selenium.interactions.Keyboard;
 import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.MoveToOffsetAction;
+
 import org.openqa.selenium.internal.Locatable;
 
 import com.sap.sailing.selenium.core.FindBy;
@@ -67,15 +68,19 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     protected Action getSelectAction() {
-        Locatable locatable = (Locatable) this.context;
         HasInputDevices devices = (HasInputDevices) this.driver;
         Mouse mouse = devices.getMouse();
+        Locatable locatable = getLocatableForSelect();
         
         CompositeAction action = new CompositeAction();
-        action.addAction(new MoveToOffsetAction(mouse, locatable, 3, 3));
+        action.addAction(new MoveToOffsetAction(mouse, locatable, 1, 1));
         action.addAction(new ClickAction(mouse, locatable));
         
         return action;
+    }
+    
+    protected Locatable getLocatableForSelect() {
+        return (Locatable) (this.columns.isEmpty() ? this.context : this.columns.get(0));
     }
     
     protected Action getModifiedSelectAction() {
