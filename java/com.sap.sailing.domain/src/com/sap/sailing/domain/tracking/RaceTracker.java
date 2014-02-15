@@ -5,9 +5,10 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
@@ -62,6 +63,7 @@ public interface RaceTracker {
     DynamicTrackedRegatta getTrackedRegatta();
     
     WindStore getWindStore();
+    GPSFixStore getGPSFixStore();
 
     /**
      * returns a unique key for this tracker which can, e.g., be used as a key in a {@link Map}

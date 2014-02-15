@@ -13,6 +13,7 @@ Require-Bundle: org.junit4;bundle-version="4.8.2",
  org.hamcrest;bundle-version="1.1.0",
  com.mongodb.driver;bundle-version="2.6.2"
 Import-Package: com.sap.sailing.domain.persistence.impl,
+ com.sap.sailing.domain.persistence.racelog.tracking.impl,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.server.impl,
  javax.servlet.http;version="2.5.0"

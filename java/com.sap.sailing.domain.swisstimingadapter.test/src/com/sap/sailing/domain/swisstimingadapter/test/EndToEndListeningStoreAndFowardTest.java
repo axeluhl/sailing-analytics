@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -111,6 +112,7 @@ public class EndToEndListeningStoreAndFowardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         EmptyWindStore emptyWindStore = EmptyWindStore.INSTANCE;
+        EmptyGPSFixStore emptyGPSFixStore = EmptyGPSFixStore.INSTANCE;
         emptyRaceLogStore = EmptyRaceLogStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
@@ -121,7 +123,7 @@ public class EndToEndListeningStoreAndFowardTest {
         final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         swissTimingAdapter = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(baseDomainFactory, swissTimingAdapterPersistence);
         racingEventService = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(
-                mongoDBService, baseDomainFactory), PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDB.TEST_STUB, emptyWindStore);
+                mongoDBService, baseDomainFactory), PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService), MediaDB.TEST_STUB, emptyWindStore, emptyGPSFixStore);
         raceHandles = new ArrayList<RacesHandle>();
     }
 

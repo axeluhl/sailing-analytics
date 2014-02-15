@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -80,19 +81,19 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
-            RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
+            RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException,
             ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, raceLogStore, windStore, domainFactory, this, messageLoader,
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, raceLogStore, windStore, gpsFixStore, domainFactory, this, messageLoader,
                 trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, String raceID, String hostname, int port,
-            boolean canSendRequests, long delayToLiveInMillis, WindStore windStore, RaceSpecificMessageLoader messageLoader,
+            boolean canSendRequests, long delayToLiveInMillis, WindStore windStore, GPSFixStore gpsFixStore, RaceSpecificMessageLoader messageLoader,
             DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
             InterruptedException, IOException, ParseException {
-        return new SwissTimingRaceTrackerImpl(regatta, raceID, hostname, port, windStore, domainFactory, this,
+        return new SwissTimingRaceTrackerImpl(regatta, raceID, hostname, port, windStore, gpsFixStore, domainFactory, this,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
 

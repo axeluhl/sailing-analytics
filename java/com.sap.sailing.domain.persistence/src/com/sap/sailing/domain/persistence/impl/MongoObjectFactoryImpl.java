@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -12,6 +11,7 @@ import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -62,7 +62,6 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -85,7 +84,6 @@ import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -100,7 +98,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
-    private final TypeBasedServiceFinder<GPSFixMongoHandler> fixServiceFinder;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     
     /**
@@ -116,10 +113,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         this.database = database;
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
-            this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
         } else {
         	this.deviceIdentifierServiceFinder = null;
-        	this.fixServiceFinder = null;
         }
     }
     
@@ -175,6 +170,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection result = database.getCollection(CollectionNames.WIND_TRACKS.name());
         result.ensureIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
         return result;
+    }
+
+    public DBCollection getGPSFixCollection() {
+        DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
+        DBObject index = new BasicDBObject();
+        index.put(FieldNames.DEVICE_ID.name(), null);
+        index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        return gpsFixCollection;
     }
     
     /**
@@ -783,7 +786,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
         DBObject deviceId = null;
 		try {
-			deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+			deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
 			e.printStackTrace();
@@ -802,7 +805,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
         DBObject deviceId = null;
 		try {
-			deviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+			deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
 			e.printStackTrace();
@@ -1103,29 +1106,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         configurationsCollections.remove(query);
     }
     
-    public DBCollection getGPSFixCollection() {
-    	return database.getCollection(CollectionNames.GPS_FIXES.name());
+    public static DBObject storeDeviceId(
+    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
+    				throws TransformationException, NoCorrespondingServiceRegisteredException{
+    	Object deviceTypeId = deviceIdentifierServiceFinder.findService(device.getIdentifierType()).transformForth(device);
+    	return new BasicDBObjectBuilder()
+    			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
+    			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();
     }
-
-	@Override
-	public void storeGPSFixes(DeviceIdentifier device, Iterable<GPSFix> fixes)
-			throws TransformationException, NoCorrespondingServiceRegisteredException {
-		DBObject dbDeviceId = DomainObjectFactoryImpl.storeDeviceId(deviceIdentifierServiceFinder, device);
-		DBCollection collection = getGPSFixCollection();
-		for (GPSFix fix : fixes) {
-			DBObject entry = new BasicDBObject(FieldNames.DEVICE_ID.name(), dbDeviceId);
-			String type = fix.getClass().getName();
-	        entry.put(FieldNames.GPSFIX_TYPE.name(), type);
-			Object fixObject = fixServiceFinder.findService(type).transformForth(fix);
-			entry.put(FieldNames.GPSFIX.name(), fixObject);
-
-	        collection.insert(entry);
-		}
-	}
-
-	@Override
-	public void storeGPSFix(DeviceIdentifier device, GPSFix fix)
-			 throws TransformationException, NoCorrespondingServiceRegisteredException {
-		storeGPSFixes(device, Collections.singleton(fix));
-	}
 }

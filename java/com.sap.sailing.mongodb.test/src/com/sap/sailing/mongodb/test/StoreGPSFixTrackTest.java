@@ -4,15 +4,16 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -25,12 +26,20 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixStoreImpl;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
-import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
@@ -48,31 +57,47 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndLoadFixes() throws TransformationException, NoCorrespondingServiceRegisteredException {
     	TypeBasedServiceFinderFactory factory = new MockServiceFinderFactory();
+    	RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
+    	Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
+    	Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), factory);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
+        GPSFixStore store = new MongoGPSFixStoreImpl(mongoObjectFactory, domainObjectFactory, factory);
         
-        List<GPSFix> fixes = new ArrayList<>();
-        fixes.add(new GPSFixMovingImpl(new DegreePosition(30, 40), new MillisecondsTimePoint(0),
-        		new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0))));
-        fixes.add(new GPSFixImpl(new DegreePosition(40, 50), new MillisecondsTimePoint(1)));
+        TimePoint time0 = new MillisecondsTimePoint(0);
+        TimePoint time1 = new MillisecondsTimePoint(1);
+        TimePoint time2 = new MillisecondsTimePoint(2);
+        
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(30, 40), time0,
+        		new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(30, 40), time1,
+        		new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
+        //lies outside of mapping range
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(30, 40), time2,
+        		new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
         DeviceIdentifier device1 = new SmartphoneImeiIdentifier("a");
-        mongoObjectFactory.storeGPSFixes(device1, fixes);
+        store.storeFix(device1, fix1);
+        store.storeFix(device1, fix2);
+        store.storeFix(device1, fix3);
         
-        fixes.clear();
-        fixes.add(new GPSFixImpl(new DegreePosition(40, 50), new MillisecondsTimePoint(0)));
-        DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");        
-        mongoObjectFactory.storeGPSFixes(device2, fixes);
+        GPSFix fix4 = new GPSFixImpl(new DegreePosition(40, 50), time0);
+        DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+        store.storeFix(device2, fix4);
         
-        DynamicTrack<GPSFix> loadedTrack1 = domainObjectFactory.loadGPSFixTrack(device1);
-        DynamicTrack<GPSFix> loadedTrack2 = domainObjectFactory.loadGPSFixTrack(device2);
-        loadedTrack1.lockForRead();
-        assertEquals(2, Util.size(loadedTrack1.getRawFixes()));
-        assertTrue(loadedTrack1.getFirstRawFix() instanceof GPSFixMoving);
-        loadedTrack1.unlockAfterRead();
-        loadedTrack2.lockForRead();
-        assertEquals(1, Util.size(loadedTrack2.getRawFixes()));
-        loadedTrack2.unlockAfterRead();
+        RaceLog raceLog = new RaceLogImpl("racelog");
+        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(time0, author, device1, comp, 0, time0, time1));
+        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time0, author, device2, mark, 0, time0, time1));
         
-        assertEquals(2, domainObjectFactory.loadAllGPSFixTracks().size());
+        DynamicGPSFixMovingTrackImpl<Competitor> track1 = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
+        store.loadTrack(track1, raceLog, comp);
+        DynamicGPSFixTrackImpl<Mark> track2 = new DynamicGPSFixTrackImpl<>(mark, 0);
+        store.loadTrack(track2, raceLog, mark);
+        track1.lockForRead();
+        assertEquals(2, Util.size(track1.getRawFixes()));
+        assertTrue(track1.getFirstRawFix() instanceof GPSFixMoving);
+        track1.unlockAfterRead();
+        track2.lockForRead();
+        assertEquals(1, Util.size(track2.getRawFixes()));
+        track2.unlockAfterRead();
     }
 }
