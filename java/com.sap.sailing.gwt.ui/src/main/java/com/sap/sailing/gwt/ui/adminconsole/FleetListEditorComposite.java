@@ -30,7 +30,7 @@ public class FleetListEditorComposite extends ListEditorComposite<FleetDTO> {
     private static class ExpandedUi extends ExpandedListEditorUi<FleetDTO> {
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage) {
-            super(stringMessages, removeImage);
+            super(stringMessages, removeImage, /*canRemoveItems*/true);
         }
 
         @Override

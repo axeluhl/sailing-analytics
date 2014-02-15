@@ -31,7 +31,7 @@ body {
   background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
   font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
   line-height: 1;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   padding: 85px 0 120px 0;
   margin: 0;
@@ -46,7 +46,7 @@ a {
 table td,select,button {
   line-height: 1;
   font-family: 'OpenSansRegular', Arial, Verdana, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .contentOuterPanel {
@@ -206,3 +206,7 @@ table {
   padding-right: 20px;
 }
 
+.RegattaOverview-Leaderboards {
+  padding-top: 20px;	
+  font-size: 16px;
+}

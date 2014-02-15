@@ -308,6 +308,7 @@ public class RegattaDetailsComposite extends Composite {
             sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
                     seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetContiguousScoring(),
+                    series.getFleets(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
