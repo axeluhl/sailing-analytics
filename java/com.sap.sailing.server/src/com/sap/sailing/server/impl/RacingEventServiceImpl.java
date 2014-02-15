@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -66,8 +65,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.domain.common.impl.Function;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -96,8 +93,8 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -106,11 +103,6 @@ import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingState;
-import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceInformationFinder;
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -256,14 +248,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
-    
-    /**
-     * These tracks are not replicated in any way. They are only loaded on the master instance.
-     * All management of device mappings has to occur via the master instance anyway, and as soon
-     * as a portion of the track is mapped to an actual race, all the relevant fixes are replicated
-     * with the existing replication features through that race.
-     */
-    private final Map<DeviceIdentifier, DynamicTrack<GPSFix>> tracksByDevice;
+    private final GPSFixStore gpsFixStore;
 
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
@@ -284,8 +269,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(true, null);
     }
     
-    public RacingEventServiceImpl(WindStore windStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(true, windStore, serviceFinderFactory);
+    public RacingEventServiceImpl(WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this(true, windStore, gpsFixStore, serviceFinderFactory);
     }
     
     void setBundleContext(BundleContext bundleContext) {
@@ -305,7 +290,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            created and stored during previous service executions will initially be loaded.
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory), clearPersistentCompetitorStore, serviceFinderFactory), null, serviceFinderFactory);
+        this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory), clearPersistentCompetitorStore, serviceFinderFactory), null, null, serviceFinderFactory);
     }
     
     /**
@@ -322,9 +307,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            of {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor
      *            associations per race tracked.
      */
-    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
+    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this(new PersistentCompetitorStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
-                clearPersistentCompetitorStore, serviceFinderFactory), windStore, serviceFinderFactory);
+                clearPersistentCompetitorStore, serviceFinderFactory), windStore, gpsFixStore, serviceFinderFactory);
     }
     
     /**
@@ -336,9 +321,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor associations
      *            per race tracked.
      */
-    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
+    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(), 
-                persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore);
+                persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(), persistentCompetitorStore, windStore, gpsFixStore, serviceFinderFactory);
     }
 
     /**
@@ -346,8 +331,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * {@link PersistenceFactory#getDefaultDomainObjectFactory() default domain object factory}. This constructor should
      * be used for testing because it provides a transient {@link CompetitorStore} as required for competitor persistence.
      */
-    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore) {
-        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore);
+    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore, GPSFixStore gpsFixStore) {
+        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB, domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore, gpsFixStore, null);
     }
 
     /**
@@ -360,7 +345,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            per race tracked.
      */
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
+            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore,
+            WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
@@ -376,7 +362,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        tracksByDevice = new ConcurrentHashMap<>();
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
@@ -389,6 +374,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             } 
         }
         this.windStore = windStore;
+        if (gpsFixStore == null) {
+            try {
+                gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(mongoObjectFactory, domainObjectFactory, serviceFinderFactory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
+        }
+        this.gpsFixStore = gpsFixStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
@@ -402,7 +395,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredLeaderboardsAndGroups();
         loadMediaLibary();
         loadStoredDeviceConfigurations();
-        loadStoredTracks();
     }
 
     @Override
@@ -467,21 +459,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 configurationMap.put(entry.getKey(), entry.getValue());
             }
         }
-    }
-    
-    private void loadStoredTracks() {
-    	/*
-    	 * TODO load tracks in seperate thread, or even better: use proxy tracks, that on first load only
-    	 * load metadata (beginning and end TimePoints of individual tracking sessions in track, and then
-    	 * load the fixes when really needed.
-    	 */
-    	synchronized(tracksByDevice) {
-    		try {
-				tracksByDevice.putAll(domainObjectFactory.loadAllGPSFixTracks());
-			} catch (Exception e) {
-				logger.log(Level.WARNING, "Could not load tracks", e);
-			}
-    	}
     }
 
     @Override
@@ -933,10 +910,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore);
+                    tracker = params.createRaceTracker(this, windStore, gpsFixStore);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore);
+                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore);
                     assert tracker.getRegatta() == regatta;
                 }
                 synchronized (raceTrackersByRegatta) {
@@ -970,6 +947,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
                             + ". Wind store in use by existing tracker: " + existingTrackersWindStore);
+                }
+                GPSFixStore existingTrackersGPSFixStore = tracker.getGPSFixStore();
+                if (!existingTrackersGPSFixStore.equals(gpsFixStore)) {
+                    logger.warning("GPSFix store mismatch. Requested GPSFix store: " + gpsFixStore
+                            + ". GPSFix store in use by existing tracker: " + existingTrackersGPSFixStore);
                 }
             }
             if (timeoutInMilliseconds != -1) {
@@ -1044,11 +1026,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
+        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null);
     }
@@ -1101,7 +1083,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         public void raceAdded(TrackedRace trackedRace) {
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
-                    trackedRace.getDelayToLiveInMillis(), trackedRace.getMillisecondsOverWhichToAverageWind(),
+                    trackedRace.getGPSFixStore(), trackedRace.getDelayToLiveInMillis(), trackedRace.getMillisecondsOverWhichToAverageWind(),
                     trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);

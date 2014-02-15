@@ -1,78 +1,125 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.impl.FieldNames;
+import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 	private static final Logger logger = Logger.getLogger(MongoGPSFixStore.class.getName());
+	private final TypeBasedServiceFinder<GPSFixMongoHandler> fixServiceFinder;
+    private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;
+	private final DBCollection collection;
+	private final MongoObjectFactoryImpl mongoOF;
 	
-	private final MongoObjectFactory mongoObjectFactory;
-	private final DomainObjectFactory domainObjectFactory;
+	public MongoGPSFixStoreImpl(MongoObjectFactory mongoObjectFactory,
+			DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
+		mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
+		fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
+        deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+		collection = mongoOF.getGPSFixCollection();
+	}
 	
-    private final ConcurrentHashMap<DeviceIdentifier, DynamicTrack<GPSFix>> tracksByDevice = new ConcurrentHashMap<>();
-    
-    private void addListener(DeviceIdentifier device, DynamicTrack<GPSFix> track) {
-        track.addTrackListener(new MongoGPSFixTrackListenerImpl(device, mongoObjectFactory));
+    private GPSFix loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
+        String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
+        Object fixObject = object.get(FieldNames.GPSFIX.name());
+        return fixServiceFinder.findService(type).transformBack(fixObject);
     }
 
-	public MongoGPSFixStoreImpl(MongoObjectFactory mongoObjectFactory,
-			DomainObjectFactory domainObjectFactory) {
-		this.mongoObjectFactory = mongoObjectFactory;
-		this.domainObjectFactory = domainObjectFactory;
+    private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
+    		TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException {
+    	long fromMillis = from.asMillis() - (inclusive ? 1 : 0);
+    	long toMillis = to.asMillis() + (inclusive ? 1 : 0);
+    	
+    	Object dbDeviceId = null;
+    	try {
+    		dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
+    	} catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+    		logger.log(Level.WARNING, "Could not serialize Device ID for MongoDB: " + e.getMessage());
+    		return;
+    	}
+    	
+    	DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
+	        .and(FieldNames.TIME_AS_MILLIS.name()).greaterThan(fromMillis)
+	        .and(FieldNames.TIME_AS_MILLIS.name()).lessThan(toMillis).get();
+
+        DBCursor result = collection.find(query);
+        for (DBObject fixObject : result) {
+        	try {
+        		@SuppressWarnings("unchecked")
+        		FixT fix = (FixT) loadGPSFix(fixObject);
+        		track.add(fix);
+        	} catch (TransformationException e) {
+        		logger.log(Level.WARNING, "Could not read fix from MongoDB: " + fixObject);
+        	} catch (ClassCastException e) {
+        		String type = (String) fixObject.get(FieldNames.GPSFIX_TYPE.name());
+        		logger.log(Level.WARNING, "Unexpected fix type (" + type + ") encountered when trying to load track for " + track.getTrackedItem());
+        	}
+        }
+    }
+    
+	@Override
+	public void loadTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor) {
+		List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
+		
+		for (DeviceMapping<Competitor> mapping : mappings) {
+			loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+		}
 	}
 
 	@Override
-	public DynamicTrack<GPSFix> getTrack(DeviceIdentifier device) {
-		DynamicTrack<GPSFix> track = tracksByDevice.get(device);
-		if (track == null) {
-			synchronized (tracksByDevice) {
-				track = tracksByDevice.get(device);
-				if (track == null) {
-					try {
-						track = domainObjectFactory.loadGPSFixTrack(device);
-					} catch (Exception e) {
-						logger.log(Level.WARNING, "Failed to get GPS track", e);
-						e.printStackTrace();
-					}
-					addListener(device, track);
-					tracksByDevice.put(device, track);
-				}
-			}
+	public void loadTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) {
+		List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder(raceLog).analyze().get(mark);
+		
+		for (DeviceMapping<Mark> mapping : mappings) {
+			loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
 		}
-		return track;
 	}
 
 	@Override
-	public Map<DeviceIdentifier, DynamicTrack<GPSFix>> loadTracks() {
-		/*
-		 * TODO load tracks in seperate thread, or even better: use proxy
-		 * tracks, that on first load only load metadata (beginning and end
-		 * TimePoints of individual tracking sessions in track, and then load
-		 * the fixes when really needed.
-		 */
-		try {
-			for (Entry<DeviceIdentifier, DynamicTrack<GPSFix>> entry : domainObjectFactory
-					.loadAllGPSFixTracks().entrySet()) {
-				synchronized (tracksByDevice) {
-					tracksByDevice.put(entry.getKey(), entry.getValue());
-					addListener(entry.getKey(), entry.getValue());
-				}
-			}
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Failed to load GPS tracks", e);
-			e.printStackTrace();
-		}
-		return tracksByDevice;
-	}
+	public void storeFix(DeviceIdentifier device, GPSFix fix) {
+    	try {
+    		Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
+    		String type = fix.getClass().getName();
+    		    		
+    		Object fixObject = fixServiceFinder.findService(type).transformForth(fix);
+    		DBObject entry = new BasicDBObjectBuilder()
+					.add(FieldNames.DEVICE_ID.name(), dbDeviceId)
+					.add(FieldNames.GPSFIX_TYPE.name(), type)
+					.add(FieldNames.GPSFIX.name(), fixObject).get();
+    		mongoOF.storeTimed(fix, entry);
 
+    		collection.insert(entry);
+    	} catch (TransformationException e) {
+    		logger.log(Level.WARNING, "Could not store fix in MongoDB");
+    		e.printStackTrace();
+    	}
+	}
 }

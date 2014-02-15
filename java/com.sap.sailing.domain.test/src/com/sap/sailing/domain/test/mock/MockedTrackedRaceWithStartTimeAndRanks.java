@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -438,7 +439,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void waitUntilWindLoadingComplete() {
+    public void waitUntilLoadingFromStoresComplete() {
         // TODO Auto-generated method stub
 
     }
@@ -594,5 +595,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	public GPSFixStore getGPSFixStore() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -65,6 +66,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
+    private final GPSFixStore gpsFixStore;
 
     /**
      * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
@@ -87,15 +89,15 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      */
     private final TMDMessageQueue tmdMessageQueue;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore,
+    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, gpsFixStore, domainFactory, factory,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
     
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore, GPSFixStore gpsFixStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
@@ -107,6 +109,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         this.windStore = windStore;
+        this.gpsFixStore = gpsFixStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
@@ -196,6 +199,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public WindStore getWindStore() {
         return windStore;
+    }
+
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        return gpsFixStore;
     }
 
     @Override
@@ -348,7 +356,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
-        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
+        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {

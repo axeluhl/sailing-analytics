@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -67,9 +68,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
-        super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.logListener = new DynamicTrackedRaceLogListener(this);
         this.courseDesignChangedListeners = new HashSet<CourseDesignChangedListener>();
@@ -110,13 +111,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.<p>
      * 
      * Loading wind tracks from the <code>windStore</code> happens asynchronously which means that when the constructor returns,
-     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilWindLoadingComplete()}
+     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromStoresComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, long delayToLiveInMillis,
+            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind/2);
     }
 
@@ -246,14 +247,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     /**
      * If the listener wants to be notified about the wind fixes already loaded, this method will obtain the read lock
-     * of the {@link #getWindLoadingLock() wind loading lock}, locking against the wind loading thread which uses the
+     * of the {@link #getLoadingFromStoresLock() wind loading lock}, locking against the wind loading thread which uses the
      * corresponding write lock. This ensures that either all wind fixes have been loaded already or that wind loading
      * hasn't started yet.
      */
     @Override
     public void addListener(RaceChangeListener listener, final boolean notifyAboutWindFixesAlreadyLoaded) {
         if (notifyAboutWindFixesAlreadyLoaded) {
-            LockUtil.lockForRead(getWindLoadingLock());
+            LockUtil.lockForRead(getLoadingFromStoresLock());
         }
         try {
             addListener(listener);
@@ -279,7 +280,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
         } finally {
             if (notifyAboutWindFixesAlreadyLoaded) {
-                LockUtil.unlockAfterRead(getWindLoadingLock());
+                LockUtil.unlockAfterRead(getLoadingFromStoresLock());
             }
         }
     }

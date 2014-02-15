@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -518,7 +519,7 @@ public interface TrackedRace extends Serializable {
      * results. Clients that want to wait for the wind loading process to complete can do so by calling this method
      * which will block until the wind loading has completed.
      */
-    void waitUntilWindLoadingComplete() throws InterruptedException;
+    void waitUntilLoadingFromStoresComplete() throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 
@@ -641,4 +642,6 @@ public interface TrackedRace extends Serializable {
      * a reference point.
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
+    
+    GPSFixStore getGPSFixStore();
 }

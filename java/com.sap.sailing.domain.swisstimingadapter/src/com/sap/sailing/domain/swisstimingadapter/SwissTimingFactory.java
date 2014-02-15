@@ -7,6 +7,7 @@ import java.text.ParseException;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -52,10 +53,10 @@ public interface SwissTimingFactory {
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis, RaceLogStore raceLogStore, WindStore windStore, GPSFixStore gpsFixStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     RaceTracker createRaceTracker(Regatta regatta, String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
-            WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
+            WindStore windStore, GPSFixStore gpsFixStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException, InterruptedException,
             IOException, ParseException;
 

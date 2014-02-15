@@ -1,23 +1,26 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import java.util.Collections;
-import java.util.Map;
-
-import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public enum EmptyGPSFixStore implements GPSFixStore {
     INSTANCE;
 
 	@Override
-	public DynamicTrack<GPSFix> getTrack(DeviceIdentifier device) {
-		return new DynamicTrackImpl<GPSFix>(DynamicTrackImpl.class.getName());
+	public void storeFix(DeviceIdentifier device, GPSFix fix) {
 	}
 
 	@Override
-	public Map<DeviceIdentifier, DynamicTrack<GPSFix>> loadTracks() {
-		return Collections.emptyMap();
+	public void loadTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+			RaceLog raceLog, Competitor competitor) {
 	}
 
+	@Override
+	public void loadTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
+			RaceLog raceLog, Mark mark) {
+	}
 }
