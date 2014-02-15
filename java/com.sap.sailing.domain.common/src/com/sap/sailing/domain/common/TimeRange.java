@@ -2,13 +2,9 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
-/**
- * A TimeRange defined by a starting timepoint {@link #from()}, and an ending timepoint {@link #to()}, which are both inclusive.
- * @author Fredrik Teschke
- *
- */
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
     TimePoint from();
+    
     TimePoint to();
     
     /**
@@ -36,6 +32,16 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     boolean endsAfter(TimeRange other);
     
     /**
+     * Is the time range open ended towards older timepoints?
+     */
+    boolean openBeginning();
+    
+    /**
+     * Is the time range open ended towards newer timepoints?
+     */
+    boolean openEnd();
+    
+    /**
      * Get time-difference between the timepoint and this timerange.
      * It will be 0 if the timepoint lies within the timerange, otherwise the time-difference
      * to either the start or end of the timerange, depending on which is closer
@@ -43,4 +49,14 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * @return
      */
     long timeDifference(TimePoint timePoint);
+    
+    /**
+     * Merges the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     */
+    TimeRange union(TimeRange other);
+    
+    /**
+     * Intersection of the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     */
+    TimeRange intersection(TimeRange other);
 }
