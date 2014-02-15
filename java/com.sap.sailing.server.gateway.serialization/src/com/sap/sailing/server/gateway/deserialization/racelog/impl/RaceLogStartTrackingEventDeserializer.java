@@ -12,14 +12,14 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
-public class RaceLogCreateRaceEventDeserializer extends BaseRaceLogEventDeserializer {	
-    public RaceLogCreateRaceEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+public class RaceLogStartTrackingEventDeserializer extends BaseRaceLogEventDeserializer {	
+    public RaceLogStartTrackingEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return factory.createCreateRaceEvent(createdAt, author, timePoint, id, passId);
+        return factory.createStartTrackingEvent(createdAt, author, timePoint, id, passId);
     }
 }

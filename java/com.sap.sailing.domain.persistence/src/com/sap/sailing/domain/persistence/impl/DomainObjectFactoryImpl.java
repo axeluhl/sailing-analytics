@@ -127,7 +127,7 @@ import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
-import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -1166,8 +1166,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(DenoteForTrackingEvent.class.getSimpleName())) {
             return loadRaceLogDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(CreateRaceEvent.class.getSimpleName())) {
-            return loadRaceLogCreateRaceEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(StartTrackingEvent.class.getSimpleName())) {
+            return loadRaceLogStartEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RevokeEvent.class.getSimpleName())) {
             return loadRaceLogRevokeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
@@ -1222,9 +1222,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, raceName, boatClass);
     }
 
-    private RaceLogEvent loadRaceLogCreateRaceEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+    private RaceLogEvent loadRaceLogStartEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        return raceLogEventFactory.createCreateRaceEvent(createdAt, author, logicalTimePoint, id, passId);
+        return raceLogEventFactory.createStartTrackingEvent(createdAt, author, logicalTimePoint, id, passId);
     }
 
     private RaceLogEvent loadRaceLogRevokeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,

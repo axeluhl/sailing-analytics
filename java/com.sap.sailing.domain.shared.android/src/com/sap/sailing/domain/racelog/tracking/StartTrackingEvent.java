@@ -11,5 +11,5 @@ import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEve
  * @author Fredrik Teschke
  *
  */
-public interface CreateRaceEvent extends RaceLogEvent {
+public interface StartTrackingEvent extends RaceLogEvent {
 }

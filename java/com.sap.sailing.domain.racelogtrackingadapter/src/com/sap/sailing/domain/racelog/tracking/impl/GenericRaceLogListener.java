@@ -21,7 +21,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
@@ -30,7 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceLogListener;
 
 /**
- * Handles race creation upon receiving a {@link CreateRaceEvent}.
+ * Handles race creation upon receiving a {@link StartTrackingEvent}.
  * 
  * Note that the start time is expected to be updated to the {@link TrackedRace} by the
  * {@link DynamicTrackedRaceLogListener} which by default should be observing the race log for each tracked race.
@@ -111,7 +111,7 @@ public class GenericRaceLogListener implements RaceLogEventVisitor {
 	}
 
 	@Override
-	public void visit(CreateRaceEvent event) {
+	public void visit(StartTrackingEvent event) {
         tracker.onRaceCreated();
 	}
 

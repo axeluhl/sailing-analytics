@@ -29,13 +29,13 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
-import com.sap.sailing.domain.racelog.tracking.events.CreateRaceEventImpl;
+import com.sap.sailing.domain.racelog.tracking.events.StartTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DenoteForTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceMarkMappingEventImpl;
@@ -234,8 +234,8 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 	}
 	
 	@Override
-	public CreateRaceEvent createCreateRaceEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId) {
-		return new CreateRaceEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId);
+	public StartTrackingEvent createStartTrackingEvent(TimePoint logicalTimePoint, RaceLogEventAuthor author, int passId) {
+		return new StartTrackingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, UUID.randomUUID(), passId);
 	}
 	
 	@Override

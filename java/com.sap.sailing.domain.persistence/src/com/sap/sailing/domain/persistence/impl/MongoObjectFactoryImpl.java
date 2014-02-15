@@ -78,7 +78,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
-import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -726,11 +726,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, CreateRaceEvent event) {
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, StartTrackingEvent event) {
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
 
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCreateRaceEvent(event));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTrackingEvent(event));
         return result;
     }
 
@@ -827,11 +827,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    private Object storeRaceLogCreateRaceEvent(CreateRaceEvent event) {
+    private Object storeRaceLogStartTrackingEvent(StartTrackingEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
 
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), CreateRaceEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), StartTrackingEvent.class.getSimpleName());
         return result;
     }
 

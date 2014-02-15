@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventRestoreFactoryImpl;
-import com.sap.sailing.domain.racelog.tracking.CreateRaceEvent;
+import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -74,7 +74,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass);
 
-    CreateRaceEvent createCreateRaceEvent(TimePoint createdAt, RaceLogEventAuthor author,
+    StartTrackingEvent createStartTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, int passId);
     
     RevokeEvent createRevokeEvent(TimePoint createdAt, RaceLogEventAuthor author,
