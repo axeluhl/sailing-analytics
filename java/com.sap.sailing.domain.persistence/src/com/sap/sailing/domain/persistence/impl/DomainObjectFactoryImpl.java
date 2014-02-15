@@ -106,7 +106,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixTrackListenerImpl;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -161,7 +160,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
     private final TypeBasedServiceFinder<GPSFixMongoHandler> fixServiceFinder;
-    private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -173,7 +171,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
-        this.serviceFinderFactory = serviceFinderFactory;
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
@@ -1605,8 +1602,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             track.add(fix);
         }
         
-        track.addTrackListener(new MongoGPSFixTrackListenerImpl(device,
-        		new MongoObjectFactoryImpl(database, serviceFinderFactory)));
         return track;
     }
 

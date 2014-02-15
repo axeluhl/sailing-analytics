@@ -4,6 +4,8 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -11,6 +13,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -28,6 +31,8 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerImpl;
 
 public class Activator implements BundleActivator {
+	private static final Logger logger = Logger.getLogger(Activator.class.getName());
+	
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     private Dictionary<String, String> getDict(String type) {
@@ -51,6 +56,9 @@ public class Activator implements BundleActivator {
         registerGPSFixJsonService(context, new GPSFixMovingJsonDeserializer(), new GPSFixMovingJsonSerializer(), GPSFixMovingJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixNmeaDTOJsonDeserializer(), new GPSFixNmeaDTOJsonSerializer(), GPSFixNmeaDTOJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixMovingNmeaDTOJsonDeserializer(), new GPSFixMovingNmeaDTOJsonSerializer(), GPSFixMovingNmeaDTOJsonDeserializer.TYPE);
+        
+        registrations.add(context.registerService(RaceLogTrackingAdapterFactory.class, RaceLogTrackingAdapterFactoryImpl.INSTANCE, null));
+        logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
 
     @Override

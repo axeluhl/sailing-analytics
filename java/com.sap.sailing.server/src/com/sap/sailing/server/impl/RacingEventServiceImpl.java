@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -65,6 +66,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.impl.Function;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -94,6 +97,7 @@ import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -101,6 +105,11 @@ import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceInformationFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -2196,29 +2205,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         return result;
     }
-    
-    private DynamicTrack<GPSFix> getStoredGPSFixTrack(DeviceIdentifier device) {
-		//test first outside of sync block for the likely case that the track already exists in {@link #tracksByDevice}
-		DynamicTrack<GPSFix> track = tracksByDevice.get(device);
-		
-		if (track == null) {
-			synchronized(tracksByDevice) {
-				//now test again in sync, in case a track was added in the meantime
-				if (tracksByDevice.get(device) == null) {
-					try {
-						track = domainObjectFactory.loadGPSFixTrack(device);
-					} catch (Exception e) {
-						logger.log(Level.WARNING, "Could not load track", e);
-					}
-					tracksByDevice.put(device, track);
-				}
-			}
-		}
-		return track;
-    }
 
 	@Override
-	public void storeGPSFix(DeviceIdentifier device, GPSFix fix) {
-		getStoredGPSFixTrack(device).add(fix);
+	public GPSFixStore getGPSFixStore() {
+		return gpsFixStore;
 	}
 }

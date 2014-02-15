@@ -52,7 +52,7 @@ public class RecordFixesPostServlet extends AbstractJsonPostServlet<Triple<Devic
         List<GPSFix> fixes = domainObject.getC();
         
         for (GPSFix fix : fixes) {
-        	getService().storeGPSFix(device, fix);
+//        	getService().storeGPSFix(device, fix);
         }
                
         return null;        
