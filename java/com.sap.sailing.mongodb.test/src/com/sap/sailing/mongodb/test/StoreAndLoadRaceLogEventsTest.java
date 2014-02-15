@@ -46,6 +46,7 @@ import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
@@ -233,6 +234,19 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(revokedEventId, actualEvent.getRevokedEventId());
+    }
+
+    @Test
+    public void testStoreAndLoadRegisterCompetitorEvent() {
+        RegisterCompetitorEvent expectedEvent = eventFactory.createRegisterCompetitorEvent(
+        		expectedEventTime, author, expectedEventTime, expectedId, expectedPassId,
+        		DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null));
+
+        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        RegisterCompetitorEvent actualEvent = loadEvent(dbObject);
+
+        assertBaseFields(expectedEvent, actualEvent);
+        assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());
     }
 
     /**

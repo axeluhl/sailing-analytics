@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -37,6 +38,7 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> denoteForTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> startTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> revokeEventSerializer;
+    private JsonSerializer<RaceLogEvent> registerCompetitorEventSerializer;
 
     private RaceLogEventFactory factory;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
@@ -62,6 +64,7 @@ public class RaceLogEventSerializerTest {
         denoteForTrackingEventSerializer = mock(JsonSerializer.class);
         startTrackingEventSerializer = mock(JsonSerializer.class);
         revokeEventSerializer = mock(JsonSerializer.class);
+        registerCompetitorEventSerializer = mock(JsonSerializer.class);
 
         serializer = new RaceLogEventSerializer(flagEventSerializer, startTimeSerializer, raceStatusSerializer,
                 courseAreaChangedEventSerializer, passChangedSerializer, courseDesignChangedEventSerializer,
@@ -69,7 +72,7 @@ public class RaceLogEventSerializerTest {
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
                 deviceCompetitorMappingEventSerializer, deviceMarkMappingEventSerializer, denoteForTrackingEventSerializer,
-                startTrackingEventSerializer, revokeEventSerializer);
+                startTrackingEventSerializer, revokeEventSerializer, registerCompetitorEventSerializer);
 
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -216,6 +219,15 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = factory.createRevokeEvent(null, author, 0, null);
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
+    }
+    
+    @Test
+    public void testRegisterCompetitorEventSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createRegisterCompetitorEvent(null, author, 0,
+        		DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null));
+        serializer.serialize(event);
+        verify(registerCompetitorEventSerializer).serialize(event);
     }
 
 }
