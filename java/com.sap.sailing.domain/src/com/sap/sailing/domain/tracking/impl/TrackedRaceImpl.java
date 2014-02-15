@@ -2260,9 +2260,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         public boolean isTransient() {
             return false;
         }
-
-		@Override
-		public void fixReceived(GPSFix fix) {}
     }
 
     @Override

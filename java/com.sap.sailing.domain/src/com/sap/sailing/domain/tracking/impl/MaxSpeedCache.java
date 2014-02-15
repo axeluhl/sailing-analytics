@@ -273,7 +273,4 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
             track.unlockAfterRead();
         }
     }
-
-	@Override
-	public void fixReceived(FixType fix) {}
 }

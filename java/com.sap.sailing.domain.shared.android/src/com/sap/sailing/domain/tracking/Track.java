@@ -132,9 +132,6 @@ public interface Track<FixType extends Timed> extends Serializable {
      * will be thrown in case the caller has failed to do so.
      */
     Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
-
-    void addTrackListener(TrackListener<FixType> listener);
-    void removeTrackListener(TrackListener<FixType> listener);
     
     /**
      * @return the average duration between two fixes (outliers removed) in this track or <code>null</code> if there is not
