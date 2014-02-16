@@ -817,6 +817,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
+        for (Event event : getAllEvents()) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
         return regatta;
     }
 
