@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -341,6 +342,8 @@ public interface SailingService extends RemoteService {
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
+    String getRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, Serializable eventId);
+
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
@@ -382,4 +385,9 @@ public interface SailingService extends RemoteService {
     void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
     
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+    
+    void addOrUpdateRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, String jsonEvent)
+    		throws Exception;
+    
+    void deleteRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, Serializable eventId);
 }

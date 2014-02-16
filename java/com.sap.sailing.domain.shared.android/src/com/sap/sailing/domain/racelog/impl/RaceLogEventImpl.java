@@ -78,4 +78,12 @@ public abstract class RaceLogEventImpl implements RaceLogEvent {
     public String getShortInfo() {
         return "";
     }
+    
+    @Override
+    public boolean equals(Object arg0) {
+    	if (arg0 instanceof RaceLogEvent) {
+    		return getId().equals(((RaceLogEvent) arg0).getId());
+    	}
+    	return super.equals(arg0);
+    }
 }

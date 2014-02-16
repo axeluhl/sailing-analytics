@@ -30,7 +30,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.datamining;bundle-version="1.0.0",
  com.sap.sse.gwt;bundle-version="1.0.0",
- com.sap.sailing.domain.racelogtrackingadapter;bundle-version="1.0.0"
+ com.sap.sailing.domain.racelogtrackingadapter;bundle-version="1.0.0",
+ com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",

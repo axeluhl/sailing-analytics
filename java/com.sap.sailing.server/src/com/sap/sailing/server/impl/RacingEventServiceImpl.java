@@ -251,6 +251,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
     
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
+    
     /**
      * This author should be used for server generated race log events
      */
@@ -372,6 +374,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
+        this.serviceFinderFactory = serviceFinderFactory;
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -2228,5 +2231,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 	@Override
 	public RaceLogEventAuthor getServerAuthor() {
 		return raceLogEventAuthorForServer;
+	}
+	
+	@Override
+	public TypeBasedServiceFinderFactory getServiceFinderFactory() {
+		return serviceFinderFactory;
 	}
 }

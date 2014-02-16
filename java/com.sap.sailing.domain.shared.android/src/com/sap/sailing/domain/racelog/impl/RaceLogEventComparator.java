@@ -34,12 +34,17 @@ public enum RaceLogEventComparator implements Comparator<Timed>, Serializable {
     }
 
     private int compareEvents(RaceLogEvent e1, RaceLogEvent e2) {
-        int result = comparePasses(e1, e2);
-        return result == 0 ? compareAuthorPriorities(e1, e2) : result;
+        boolean result = compareIds(e1, e2);
+        return result ? 0 : comparePasses(e1, e2);
+    }
+
+    private boolean compareIds(RaceLogEvent e1, RaceLogEvent e2) {
+        return e1.getId().equals(e2.getId());
     }
 
     private int comparePasses(RaceLogEvent e1, RaceLogEvent e2) {
-        return e1.getPassId() - e2.getPassId();
+        int result = e1.getPassId() - e2.getPassId();
+        return result == 0 ? compareAuthorPriorities(e1, e2) : result;
     }
 
     private int compareAuthorPriorities(RaceLogEvent e1, RaceLogEvent e2) {
@@ -49,11 +54,7 @@ public enum RaceLogEventComparator implements Comparator<Timed>, Serializable {
 
     private int compareCreatedAtTimes(RaceLogEvent e1, RaceLogEvent e2) {
         int result = e1.getCreatedAt().compareTo(e2.getCreatedAt());
-        return result == 0 ? compareIds(e1, e2) : result;
-    }
-
-    private int compareIds(RaceLogEvent e1, RaceLogEvent e2) {
-        return e1.getId().toString().compareTo(e2.getId().toString());
+        return result == 0 ? -1 : result;
     }
 
 }

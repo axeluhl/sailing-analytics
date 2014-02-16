@@ -227,4 +227,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Duration getAverageIntervalBetweenRawFixes() {
         return innerRaceLog.getAverageIntervalBetweenRawFixes();
     }
+
+	@Override
+	public void update(RaceLogEvent event) {
+	}
+
+	@Override
+	public void delete(RaceLogEvent event) {
+	}
 }

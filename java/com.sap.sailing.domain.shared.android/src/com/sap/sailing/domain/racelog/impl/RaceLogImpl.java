@@ -303,10 +303,15 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public RaceLogEvent getEventById(Serializable id) {
-        for (RaceLogEvent e : getRawFixes()) {
-            if (e.getId().equals(id)) return e;
-        }
-        return null;
+    	lockForRead();
+    	try {
+    		for (RaceLogEvent e : getRawFixes()) {
+    			if (e.getId().equals(id)) return e;
+    		}
+    		return null;
+    	} finally {
+    		unlockAfterRead();
+    	}
     }
     
     @Override
@@ -325,5 +330,28 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
             }
         };
+    }
+    
+    @Override
+    public void update(RaceLogEvent event) {
+    	lockForWrite();
+    	try {
+    		getInternalRawFixes().remove(event);
+        	getInternalFixes().add(event);
+    	}
+    	finally {
+    		unlockAfterWrite();
+    	}
+    }
+    
+    @Override
+    public void delete(RaceLogEvent event) {
+    	lockForWrite();
+    	try {
+    		getInternalRawFixes().remove(event);
+    	}
+    	finally {
+    		unlockAfterWrite();
+    	}
     }
 }
