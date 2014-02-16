@@ -32,6 +32,8 @@ public abstract class RaceLogDeviceMappingEventSerializer<ItemT extends WithID> 
 		DeviceMappingEvent<ItemT> event = (DeviceMappingEvent<ItemT>) object;
         JSONObject result = super.serialize(event);
         String deviceType = event.getDevice().getIdentifierType();
+        result.put(FIELD_FROM_MILLIS, event.getFrom().asMillis());
+        result.put(FIELD_TO_MILLIS, event.getTo().asMillis());
         result.put(FIELD_ITEM, serializeItem(event.getMappedTo()));
         result.put(FIELD_DEVICE_TYPE, deviceType);        
         try {
