@@ -30,6 +30,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -96,6 +97,14 @@ public class CompetitorPanel extends SimplePanel {
             }
         });
         buttonPanel.add(allowReloadButton);
+        Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				openAddCompetitorDialog();
+			}
+		});
+        buttonPanel.add(addCompetitorButton);
         competitorsPanel.add(buttonPanel);
 
         // competitors table
@@ -252,6 +261,10 @@ public class CompetitorPanel extends SimplePanel {
         });
     }
 
+    private void openAddCompetitorDialog() {
+        openEditCompetitorDialog(new CompetitorDTOImpl());
+    }
+
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
         new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
@@ -265,13 +278,18 @@ public class CompetitorPanel extends SimplePanel {
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
                         // replace updated competitor in competitor list
+                    	boolean found = false;
                         for (int i=0; i<allCompetitors.size(); i++) {
                             if (allCompetitors.get(i).getIdAsString().equals(updatedCompetitor.getIdAsString())) {
+                            	found = true;
                                 allCompetitors.set(i, updatedCompetitor);
-                                filterField.updateAll(allCompetitors);
                                 break;
                             }
                         }
+                        if (!found) {
+                        	allCompetitors.add(updatedCompetitor);
+                        }
+                        filterField.updateAll(allCompetitors);
                     }
                 });
             }
