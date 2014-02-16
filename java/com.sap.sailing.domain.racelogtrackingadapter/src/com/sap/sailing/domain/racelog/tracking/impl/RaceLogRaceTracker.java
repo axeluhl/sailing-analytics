@@ -318,6 +318,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         
         Iterable<Sideline> sidelines = Collections.<Sideline>emptyList();
         
+        //set race definition, so race is linked to leaderboard automatically
+        regatta.getRegatta().addRace(raceDef);
+        raceColumn.setRaceIdentifier(fleet, regatta.getRegatta().getRaceIdentifier(raceDef));
+        
         trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore, params.getDelayToLiveInMillis(),
         		WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, boatClass.getApproximateManeuverDurationInMilliseconds(),
         		null);
@@ -346,22 +350,26 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 	@Override
 	public void fixReceived(DeviceIdentifier device, GPSFix fix) {
 		TimePoint timePoint = fix.getTimePoint();
-		for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
-			Mark mark = mapping.getMappedTo();
-			if (mapping.getTimeRange().includes(timePoint)) {
-				trackedRace.recordFix(mark, fix);
+		if (markMappingsByDevices.get(device) != null) {
+			for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
+				Mark mark = mapping.getMappedTo();
+				if (mapping.getTimeRange().includes(timePoint)) {
+					trackedRace.recordFix(mark, fix);
+				}
 			}
 		}
 
-		for (DeviceMapping<Competitor> mapping : competitorMappingsByDevices.get(device)) {
-			Competitor comp = mapping.getMappedTo();
-			if (mapping.getTimeRange().includes(timePoint)) {
-				if (fix instanceof GPSFixMoving) {
-					trackedRace.recordFix(comp, (GPSFixMoving) fix);
-				} else {
-					logger.log(Level.WARNING,
-							String.format("Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving",
-									comp, params.getRaceLog()));
+		if (competitorMappingsByDevices.get(device) != null) {
+			for (DeviceMapping<Competitor> mapping : competitorMappingsByDevices.get(device)) {
+				Competitor comp = mapping.getMappedTo();
+				if (mapping.getTimeRange().includes(timePoint)) {
+					if (fix instanceof GPSFixMoving) {
+						trackedRace.recordFix(comp, (GPSFixMoving) fix);
+					} else {
+						logger.log(Level.WARNING,
+								String.format("Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving",
+										comp, params.getRaceLog()));
+					}
 				}
 			}
 		}

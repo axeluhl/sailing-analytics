@@ -26,7 +26,6 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.NotDenotableForTrackingException;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingState;
@@ -34,7 +33,6 @@ import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
@@ -50,7 +48,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
 	@Override
 	public RacesHandle addRace(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
-			RaceColumn raceColumn, Fleet fleet, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds)
+			RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
 			throws MalformedURLException, FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception {
 		RaceLog raceLog = raceColumn.getRaceLog(fleet);
 		Regatta regatta = service.getRegatta(regattaToAddTo);

@@ -11,11 +11,9 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 
 public interface RaceLogTrackingAdapter {
@@ -26,8 +24,7 @@ public interface RaceLogTrackingAdapter {
 	 */
 	RacesHandle addRace(RacingEventService service,
 			RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
-			RaceColumn raceColumn, Fleet fleet, RaceLogStore raceLogStore,
-			WindStore windStore, long timeoutInMilliseconds)
+			RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
 			throws MalformedURLException, FileNotFoundException,
 			URISyntaxException, Exception;
 

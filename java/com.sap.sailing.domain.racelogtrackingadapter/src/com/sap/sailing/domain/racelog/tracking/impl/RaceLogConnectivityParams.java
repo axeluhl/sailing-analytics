@@ -12,6 +12,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -45,13 +46,13 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
 	@Override
 	public RaceTracker createRaceTracker(
-			TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+			TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) {
 		return createRaceTracker(regatta, trackedRegattaRegistry, windStore, gpsFixStore);
 	}
 
 	@Override
 	public RaceTracker createRaceTracker(Regatta regatta,
-			TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) throws Exception {
+			TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) {
 		if (regatta == null) {
 			BoatClass boatClass = new RaceInformationFinder(raceLog).analyze().getB();
 			regatta = service.getOrCreateDefaultRegatta("RaceLog-tracking default Regatta", boatClass.getName(), UUID.randomUUID());
@@ -59,7 +60,8 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 		if (regatta == null) {
 			throw new RaceNotCreatedException("No regatta for race-log tracked race");
 		}
-		return new RaceLogRaceTracker(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta), this, windStore, gpsFixStore);
+		DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
+		return new RaceLogRaceTracker(trackedRegatta, this, windStore, gpsFixStore);
 	}
 
     @Override

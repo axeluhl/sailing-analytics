@@ -384,6 +384,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             try {
                 gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(mongoObjectFactory, domainObjectFactory, serviceFinderFactory);
             } catch (Exception e) {
+            	e.printStackTrace();
                 throw new RuntimeException(e);
             } 
         }

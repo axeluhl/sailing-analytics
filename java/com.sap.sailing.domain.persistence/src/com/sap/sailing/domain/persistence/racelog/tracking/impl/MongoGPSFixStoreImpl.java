@@ -45,8 +45,13 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 	public MongoGPSFixStoreImpl(MongoObjectFactory mongoObjectFactory,
 			DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
 		mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
-		fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
-        deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+		if (serviceFinderFactory != null) {
+			fixServiceFinder = serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
+	        deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+		} else {
+			fixServiceFinder = null;
+			deviceServiceFinder = null;
+		}
 		collection = mongoOF.getGPSFixCollection();
 	}
 	
@@ -91,9 +96,11 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 	@Override
 	public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor) {
 		List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
-		
-		for (DeviceMapping<Competitor> mapping : mappings) {
-			loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+
+		if (mappings != null) {
+			for (DeviceMapping<Competitor> mapping : mappings) {
+				loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+			}
 		}
 	}
 
@@ -101,8 +108,10 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) {
 		List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder(raceLog).analyze().get(mark);
 		
-		for (DeviceMapping<Mark> mapping : mappings) {
-			loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+		if (mappings != null) {
+			for (DeviceMapping<Mark> mapping : mappings) {
+				loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+			}
 		}
 	}
 
