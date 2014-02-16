@@ -89,4 +89,8 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     public Leaderboard getLeaderboard() {
         return leaderboard;
     }
+    
+    public RacingEventService getService() {
+    	return service;
+    }
 }

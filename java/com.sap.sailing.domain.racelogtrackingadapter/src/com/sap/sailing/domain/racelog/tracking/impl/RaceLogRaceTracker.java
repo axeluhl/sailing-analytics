@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -95,7 +96,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         
         //load race for which tracking already started
         if (new RaceLogTrackingStateAnalyzer(params.getRaceLog()).analyze() == RaceLogTrackingState.TRACKING) {
-            startTracking();
+            startTracking(null);
         }
     }
 
@@ -292,10 +293,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     
     @Override
     public void visit(StartTrackingEvent event) {
-    	if (trackedRace == null) startTracking();
+    	if (trackedRace == null) startTracking(event);
     }
     
-    private void startTracking() {
+    private void startTracking(StartTrackingEvent event) {
         RaceLog raceLog = params.getRaceLog();
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
@@ -304,6 +305,10 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         BoatClass boatClass = raceInfo.getB();
         CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (courseBase == null) {
+        	if (event != null) {
+        		raceLog.add(RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), 
+        				params.getService().getServerAuthor(), raceLog.getCurrentPassId(), event.getId()));
+        	}
             throw new RaceNotCreatedException(String.format("Course definition for racelog (%s) missing", raceLog));
         }
         

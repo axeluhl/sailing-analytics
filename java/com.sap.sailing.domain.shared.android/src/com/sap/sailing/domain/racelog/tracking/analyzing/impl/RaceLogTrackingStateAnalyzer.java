@@ -15,7 +15,7 @@ public class RaceLogTrackingStateAnalyzer extends RaceLogAnalyzer<RaceLogTrackin
 
     @Override
     protected RaceLogTrackingState performAnalysis() {
-        for (RaceLogEvent event : getAllEventsDescending()) {
+        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
             if (event instanceof StartTrackingEvent) {
                 return RaceLogTrackingState.TRACKING;
             } else if (event instanceof DenoteForTrackingEvent) {
