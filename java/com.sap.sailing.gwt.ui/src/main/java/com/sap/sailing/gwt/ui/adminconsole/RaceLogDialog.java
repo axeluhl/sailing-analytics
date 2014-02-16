@@ -1,16 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -188,9 +194,11 @@ public class RaceLogDialog extends DataEntryDialog<RaceLogDTO> {
         
         
         editPanel = new VerticalPanel();
+        HorizontalPanel editButtonPanel = new HorizontalPanel();
         editEventBox = new TextArea();
         editEventBox.setSize("880px", "70px");
         editPanel.add(editEventBox);
+        editPanel.add(editButtonPanel);
         saveButton = new Button(stringMessages.add());
         saveButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -198,13 +206,53 @@ public class RaceLogDialog extends DataEntryDialog<RaceLogDTO> {
 				saveEditedEvent(selectionModel.getSelectedObject(), editEventBox.getText());
 			}
 		});
-        editPanel.add(saveButton);
+        editButtonPanel.add(saveButton);
         selectionModel.addSelectionChangeHandler(new Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				loadEvent(selectionModel.getSelectedObject());
 			}
 		});
+        
+        Button addCourseButton = new Button(stringMessages.addTemplate("Course"));
+        editButtonPanel.add(addCourseButton);
+        addCourseButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				addTemplate("{\"@class\":\"RaceLogCourseDesignChangedEvent\",\"courseDesign\":{\"name\":\"courseData\",\"waypoints\":[{\"name\":\"gate\",\"passingInstruction\":\"None\",\"controlPoint\":{\"@class\":\"ControlPointWithTwoMarks\",\"name\":\"gate\",\"left\":{\"@class\":\"Mark\",\"name\":\"Gate left\",\"id\":\"Gate left\",\"type\":\"BUOY\"},\"right\":{\"@class\":\"Mark\",\"name\":\"Gate right\",\"id\":\"Gate right\",\"type\":\"BUOY\"}}},{\"name\":\"bouy\",\"passingInstruction\":\"None\",\"controlPoint\":{\"@class\":\"Mark\",\"name\":\"bouy\",\"id\":\"bouy\",\"type\":\"BUOY\"}}]}}");
+			}
+		});
+        
+        Button addStartTrackingButton = new Button(stringMessages.addTemplate("StartTracking"));
+        editButtonPanel.add(addStartTrackingButton);
+        addStartTrackingButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				addTemplate("{\"@class\":\"StartTrackingEvent\"}");
+			}
+		});
+        
+        Button addCompetitorMapping = new Button(stringMessages.addTemplate("CompetitorMapping"));
+        editButtonPanel.add(addCompetitorMapping);
+        addCompetitorMapping.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				addTemplate("{\"@class\":\"DeviceCompetitorMappingEvent\",\"fromMillis\":0,\"toMillis\":922337203685477600,\"item\":{\"idtype\":\"java.lang.String\",\"id\":\"comp-id\",\"name\":\"competitor\",\"displayColor\":\"#000000\",\"sailID\":\"abc\",\"nationality\":\"GER\",\"nationalityISO2\":\"DE\",\"nationalityISO3\":\"DEU\",\"team\":{\"name\":\"team\",\"coach\":null,\"sailors\":[{\"name\":\"comp\",\"description\":null,\"nationality\":{\"IOC\":\"GER\"}}]},\"boat\":{\"name\":\"boat\",\"sailId\":\"abc\",\"boatClass\":{\"name\":\"49er\",\"typicallyStartsUpwind\":false}}},\"deviceType\":\"smartphoneImei\",\"device\":{\"type\":\"smartphoneImei\",\"imei\":\"imei1\"}}");
+			}
+		});
+    }
+    
+    private void addTemplate(String jsonBase) {
+    	//selectionModel.setSelected(selectionModel.getSelectedObject(), false);
+    	JSONObject json = (JSONObject) JSONParser.parseStrict(jsonBase);
+    	json.put("id", new JSONString(BigInteger.valueOf(Random.nextInt()).toString(32)));
+    	json.put("createdAt", new JSONNumber(System.currentTimeMillis()));
+    	json.put("timestamp", new JSONNumber(System.currentTimeMillis()));
+    	json.put("passId", new JSONNumber(0));
+    	json.put("authorName", new JSONString("server"));
+    	json.put("authorPriority", new JSONNumber(1));
+    	json.put("competitors", new JSONArray());
+    	editEventBox.setText(json.toString());
     }
     
     private void updateRaceLog() {
