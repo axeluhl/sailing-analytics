@@ -68,7 +68,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                         new WindJsonSerializer(
                                 new PositionJsonSerializer())),
                 new RaceLogDeviceCompetitorMappingEventSerializer(competitorSerializer, deviceServiceFinder),
-                new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, deviceServiceFinder),
+                new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, new MarkJsonSerializer(), deviceServiceFinder),
                 new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
                 new RaceLogStartTrackingEventSerializer(competitorSerializer),
                 new RaceLogRevokeEventSerializer(competitorSerializer),

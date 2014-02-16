@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
+import org.json.simple.JSONObject;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -19,4 +21,9 @@ public class RaceLogDeviceCompetitorMappingEventSerializer extends RaceLogDevice
     protected String getClassFieldValue() {
         return VALUE_CLASS;
     }
+
+	@Override
+	protected JSONObject serializeItem(Competitor item) {
+		return competitorSerializer.serialize(item);
+	}
 }

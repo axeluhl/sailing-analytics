@@ -89,9 +89,11 @@ public class SerializeRaceLogEventsTest {
         raceLog.lockForRead();
         rl.lockForRead();
         try {
+        	DeviceCompetitorMappingEvent expected = ((DeviceCompetitorMappingEvent) raceLog.getFirstRawFix());
+        	DeviceCompetitorMappingEvent actual = ((DeviceCompetitorMappingEvent) rl.getFirstRawFix());
+        	
             assertEquals(Util.size(raceLog.getRawFixes()), Util.size(rl.getRawFixes()));
-            assertEquals(((DeviceCompetitorMappingEvent) raceLog.getFirstRawFix()).getDevice().getIdentifierType(),
-                    ((DeviceCompetitorMappingEvent) rl.getFirstRawFix()).getDevice().getIdentifierType());
+            assertEquals(expected.getDevice().getIdentifierType(), actual.getDevice().getIdentifierType());
         } finally {
             rl.unlockAfterRead();
             raceLog.unlockAfterRead();

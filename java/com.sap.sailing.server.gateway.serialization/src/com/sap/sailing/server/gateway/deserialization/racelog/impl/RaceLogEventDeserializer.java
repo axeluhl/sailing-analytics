@@ -73,7 +73,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                         new WindJsonDeserializer(
                                 new PositionJsonDeserializer())),
                 new RaceLogDeviceCompetitorMappingEventDeserializer(competitorDeserializer, deviceServiceFinder),
-                new RaceLogDeviceMarkMappingEventDeserializer(competitorDeserializer, deviceServiceFinder),
+                new RaceLogDeviceMarkMappingEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory), deviceServiceFinder),
                 new RaceLogDenoteForTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogStartTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogRevokeEventDeserializer(competitorDeserializer),

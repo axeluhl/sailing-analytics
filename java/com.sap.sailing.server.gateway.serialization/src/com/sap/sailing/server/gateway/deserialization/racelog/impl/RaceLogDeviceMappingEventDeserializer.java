@@ -15,6 +15,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogDeviceMappingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
@@ -29,8 +30,9 @@ public abstract class RaceLogDeviceMappingEventDeserializer<ItemT extends WithID
 		this.deviceServiceFinder = deviceServiceFinder;
 	}
 	
-	protected abstract RaceLogEvent furtherDeserialize(Serializable itemId, TimePoint from, TimePoint to,
-			DeviceIdentifier device,  Serializable id, TimePoint createdAt, RaceLogEventAuthor author, TimePoint timePoint, int passId);
+	protected abstract RaceLogEvent furtherDeserialize(JSONObject itemObject, TimePoint from, TimePoint to,
+			DeviceIdentifier device, Serializable id, TimePoint createdAt, RaceLogEventAuthor author,
+			TimePoint timePoint, int passId) throws JsonDeserializationException;
 	
 	@Override
 	protected RaceLogEvent deserialize(JSONObject object, Serializable id,
@@ -41,15 +43,15 @@ public abstract class RaceLogDeviceMappingEventDeserializer<ItemT extends WithID
 		DeviceIdentifier device;
 		try {
 			device = deviceServiceFinder.findService(deviceType).transformBack(
-					(JSONObject) object.get(RaceLogDeviceMappingEventSerializer.FIELD_DEVICE_ID));
+					(JSONObject) object.get(RaceLogDeviceMappingEventSerializer.FIELD_DEVICE));
 		} catch (Exception e) {
 			throw new JsonDeserializationException(e);
 		}
-		Serializable itemId = (Serializable) object.get(RaceLogDeviceMappingEventSerializer.FIELD_ITEM);
+		JSONObject itemObject = Helpers.getNestedObjectSafe(object, RaceLogDeviceMappingEventSerializer.FIELD_ITEM);
 		long fromMillis = Long.parseLong((String) object.get(RaceLogDeviceMappingEventSerializer.FIELD_FROM_MILLIS));
 		long toMillis = Long.parseLong((String) object.get(RaceLogDeviceMappingEventSerializer.FIELD_TO_MILLIS));
 		TimePoint from = new MillisecondsTimePoint(fromMillis);
 		TimePoint to = new MillisecondsTimePoint(toMillis);
-		return furtherDeserialize(itemId, from, to, device, id, createdAt, author, timePoint, passId);
+		return furtherDeserialize(itemObject, from, to, device, id, createdAt, author, timePoint, passId);
 	}
 }
