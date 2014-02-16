@@ -1194,7 +1194,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
 			e.printStackTrace();
 		}
-    	Competitor mappedTo = DomainFactory.INSTANCE.getExistingCompetitorById(
+    	Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
     			(Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
     	TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
@@ -1211,7 +1211,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
 			e.printStackTrace();
 		}
-    	Mark mappedTo = DomainFactory.INSTANCE.getOrCreateMark(
+    	Mark mappedTo = baseDomainFactory.getOrCreateMark(
     			(Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
     	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
     	TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
@@ -1221,7 +1221,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogDenoteForTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass((String) dbObject.get(FieldNames.BOAT_CLASS_NAME.name()));
+        BoatClass boatClass = baseDomainFactory.getOrCreateBoatClass((String) dbObject.get(FieldNames.BOAT_CLASS_NAME.name()));
         return raceLogEventFactory.createDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, raceName, boatClass);
     }
 
