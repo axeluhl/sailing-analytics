@@ -51,10 +51,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 			RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
 			throws MalformedURLException, FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception,
 			RaceNotCreatedException {
-		RaceLog raceLog = raceColumn.getRaceLog(fleet);
 		Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
 		RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta,
-				raceLog, raceColumn, fleet, leaderboard, delayToLiveInMillis);
+				raceColumn, fleet, leaderboard, delayToLiveInMillis);
 		return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
 	}
     

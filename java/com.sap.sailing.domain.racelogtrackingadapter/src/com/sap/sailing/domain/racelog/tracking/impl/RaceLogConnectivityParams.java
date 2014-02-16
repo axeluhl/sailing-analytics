@@ -21,26 +21,23 @@ import com.sap.sailing.server.RacingEventService;
 
 public class RaceLogConnectivityParams implements RaceTrackingConnectivityParameters {
 	private final RacingEventService service;
-    private final RaceLog raceLog;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
     private final Leaderboard leaderboard;
     private final long delayToLiveInMillis;
     private final Regatta regatta;
 
-    public RaceLogConnectivityParams(RacingEventService service, Regatta regatta,
-    		RaceLog raceLog, RaceColumn raceColumn, Fleet fleet, Leaderboard leaderboard, long delayToLiveInMillis)
+    public RaceLogConnectivityParams(RacingEventService service, Regatta regatta, RaceColumn raceColumn, Fleet fleet, Leaderboard leaderboard, long delayToLiveInMillis)
     	throws RaceNotCreatedException {
     	this.service = service;
     	this.regatta = regatta;
-        this.raceLog = raceLog;
         this.raceColumn = raceColumn;
         this.fleet = fleet;
         this.leaderboard = leaderboard;
         this.delayToLiveInMillis = delayToLiveInMillis;
         
-        if (! new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
-        	throw new RaceNotCreatedException(String.format("Racelog (%s) is not denoted for tracking", raceLog));
+        if (! new RaceLogTrackingStateAnalyzer(getRaceLog()).analyze().isForTracking()) {
+        	throw new RaceNotCreatedException(String.format("Racelog (%s) is not denoted for tracking", getRaceLog()));
         }
     }
 
@@ -54,7 +51,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 	public RaceTracker createRaceTracker(Regatta regatta,
 			TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore) {
 		if (regatta == null) {
-			BoatClass boatClass = new RaceInformationFinder(raceLog).analyze().getB();
+			BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getB();
 			regatta = service.getOrCreateDefaultRegatta("RaceLog-tracking default Regatta", boatClass.getName(), UUID.randomUUID());
 		}
 		if (regatta == null) {
@@ -66,7 +63,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
     @Override
     public Object getTrackerID() {
-        return raceLog.getId();
+        return getRaceLog().getId();
     }
 
     @Override
@@ -75,7 +72,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     }
 
     public RaceLog getRaceLog() {
-        return raceLog;
+        return raceColumn.getRaceLog(fleet);
     }
 
     public RaceColumn getRaceColumn() {
