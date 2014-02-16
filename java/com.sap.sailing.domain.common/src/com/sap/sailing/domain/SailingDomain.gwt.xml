@@ -6,4 +6,5 @@
   <source path='common/racelog'/>
   <source path='common/filter'/>
   <source path='common/media'/>
+  <source path='common/racelog/tracking'/>
 </module>

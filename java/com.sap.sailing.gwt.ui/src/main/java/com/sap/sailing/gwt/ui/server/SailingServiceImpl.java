@@ -3404,7 +3404,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	 if (raceLog != null) {
     		 RaceLogEvent event = RaceLogEventDeserializer.create(getBaseDomainFactory(), getDeviceJsonHandler()).
     		 	deserialize((JSONObject) JSONValue.parseWithException(jsonEvent));
-    		 raceLog.update(event);
+    		 if (raceLog.getEventById(event.getId()) != null) {
+        		 raceLog.update(event);
+    		 }  else {
+    			 raceLog.add(event);
+    		 }
     	 }
     	 RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
     	 RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(raceColumn.getFleetByName(fleetName));

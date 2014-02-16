@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.common.racelog.tracking;
 
 public class RaceNotCreatedException extends RuntimeException {
 

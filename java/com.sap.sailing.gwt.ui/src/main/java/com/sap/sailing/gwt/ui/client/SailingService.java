@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -380,9 +381,9 @@ public interface SailingService extends RemoteService {
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
     
-    void addRaceLogTrackers(String leaderboardName) throws Exception;
+    void addRaceLogTrackers(String leaderboardName) throws Exception, RaceNotCreatedException;
     
-    void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+    void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception, RaceNotCreatedException;
     
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
     

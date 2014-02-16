@@ -20,16 +20,16 @@ import com.sap.sailing.domain.common.impl.Function;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.tracking.NotDenotableForTrackingException;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -49,7 +49,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 	@Override
 	public RacesHandle addRace(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
 			RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
-			throws MalformedURLException, FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception {
+			throws MalformedURLException, FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception,
+			RaceNotCreatedException {
 		RaceLog raceLog = raceColumn.getRaceLog(fleet);
 		Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
 		RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta,
