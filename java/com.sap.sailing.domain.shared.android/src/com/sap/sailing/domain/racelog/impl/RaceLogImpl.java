@@ -333,6 +333,16 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     }
     
     @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
+        return new PartialNavigableSetView<RaceLogEvent>(super.getInternalFixes().descendingSet()) {
+            @Override
+            protected boolean isValid(RaceLogEvent e) {
+            	return ! (e instanceof RevokeEvent) && ! revokedEventIds.contains(e.getId());
+            }
+        };
+    }
+    
+    @Override
     public void update(RaceLogEvent event) {
     	lockForWrite();
     	try {
