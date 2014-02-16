@@ -376,4 +376,10 @@ public interface SailingService extends RemoteService {
     void removeIgtimiAccount(String eMailOfAccountToRemove);
 
     Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces) throws Exception;
+    
+    void addRaceLogTrackers(String leaderboardName) throws Exception;
+    
+    void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+    
+    void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
 }

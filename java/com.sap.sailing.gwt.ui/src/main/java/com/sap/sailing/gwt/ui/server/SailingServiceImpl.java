@@ -177,6 +177,9 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -345,6 +348,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterTracker;
 
     private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
+    
+    private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker; 
 
     private final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -385,6 +390,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         swissTimingAdapterTracker = createAndOpenSwissTimingAdapterTracker(context);
         tractracAdapterTracker = createAndOpenTracTracAdapterTracker(context);
+        raceLogTrackingAdapterTracker = createAndOpenRaceLogTrackingAdapterTracker(context);
         igtimiAdapterTracker = createAndOpenIgtimiTracker(context);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -461,6 +467,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             BundleContext context) {
         ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory> result = new ServiceTracker<SwissTimingReplayServiceFactory, SwissTimingReplayServiceFactory>(
                 context, SwissTimingReplayServiceFactory.class.getName(), null);
+        result.open();
+        return result;
+    }
+
+    protected ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> createAndOpenRaceLogTrackingAdapterTracker(
+            BundleContext context) {
+        ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> result =
+        		new ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory>(
+                context, RaceLogTrackingAdapterFactory.class.getName(), null);
         result.open();
         return result;
     }
@@ -1951,6 +1966,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.discardThresholds = null;
         }
+        leaderboardDTO.raceLogTrackedRacesCouldBeAdded = false;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceDTO raceDTO = null;
@@ -1966,6 +1982,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                 leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                fleetDTO.raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+                fleetDTO.raceLogTrackerForRaceExists = getService().getRaceTrackerById(raceLog.getId()) != null;
+                
+                if (getRaceLogTrackingAdapter().canRaceBeAdded(getService(), raceColumn, fleet)) {
+                	leaderboardDTO.raceLogTrackedRacesCouldBeAdded = true;
+                	fleetDTO.raceLogTrackedRaceCouldBeAdded = true;
+                }
             }
         }
         return leaderboardDTO;
@@ -3678,6 +3703,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return igtimiAdapterTracker.getService();
     }
 
+    protected RaceLogTrackingAdapter getRaceLogTrackingAdapter() {
+        return raceLogTrackingAdapterTracker.getService().getAdapter(getBaseDomainFactory());
+    }
+
     @Override
     public String getIgtimiAuthorizationUrl() {
         return getIgtimiConnectionFactory().getAuthorizationUrl();
@@ -3768,5 +3797,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
     }
+    
+    private void addRaceLogTracker(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) throws Exception {
+    	RegattaIdentifier regatta = null;
+    	if (leaderboard instanceof RegattaLeaderboard) {
+    		regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
+    	}
+    	
+    	getRaceLogTrackingAdapter().addRace(getService(), regatta, leaderboard, raceColumn, fleet, -1);
+    }
 
+    @Override
+    public void addRaceLogTracker(String leaderboardName,
+    		String raceColumnName, String fleetName) throws Exception {
+    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    	RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
+    	Fleet fleet = raceColumn.getFleetByName(fleetName);
+    	
+    	addRaceLogTracker(leaderboard, raceColumn, fleet);
+    }
+    
+    @Override
+    public void addRaceLogTrackers(String leaderboardName) throws Exception {
+    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    	RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
+    	
+    	Map<RaceColumn, Collection<Fleet>> canBeLoaded = adapter.listRacesThatCanBeAdded(getService(), leaderboard);
+    	for (RaceColumn raceColumn : canBeLoaded.keySet()) {
+    		if (canBeLoaded.get(raceColumn) != null) {
+    			for (Fleet fleet : canBeLoaded.get(raceColumn)) {
+    				addRaceLogTracker(leaderboard, raceColumn, fleet);
+    			}
+    		}
+    	}
+    }
+    
+    @Override
+    public void denoteForRaceLogTracking(String leaderboardName,
+    		String raceColumnName, String fleetName) throws Exception {
+    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    	RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
+    	Fleet fleet = raceColumn.getFleetByName(fleetName);
+    	
+    	getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+    }
 }

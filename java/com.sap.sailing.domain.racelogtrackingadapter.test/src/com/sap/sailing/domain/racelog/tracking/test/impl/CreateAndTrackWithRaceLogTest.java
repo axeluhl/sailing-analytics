@@ -116,7 +116,7 @@ public class CreateAndTrackWithRaceLogTest {
 		RaceLog raceLog = column.getRaceLog(fleet);
 		
 		//before denoting, it is not listed as loadable
-		Map<RaceColumn, Collection<Fleet>> loadable = adapter.listLoadableStoredRaceLogTrackedRaces(service, leaderboard);
+		Map<RaceColumn, Collection<Fleet>> loadable = adapter.listRacesThatCanBeAdded(service, leaderboard);
 		assertEquals(0, loadable.size());
 
 		//can denote racelog for tracking
@@ -132,7 +132,7 @@ public class CreateAndTrackWithRaceLogTest {
 		gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(15), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(5))));
 		
 		//then listed as loadable
-		loadable = adapter.listLoadableStoredRaceLogTrackedRaces(service, leaderboard);
+		loadable = adapter.listRacesThatCanBeAdded(service, leaderboard);
 		assertEquals(1, loadable.size());
 		assertEquals(1, loadable.get(column).size());
 		

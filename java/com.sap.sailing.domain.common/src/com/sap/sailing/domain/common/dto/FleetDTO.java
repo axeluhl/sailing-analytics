@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 
 public class FleetDTO extends NamedDTO {
     private static final long serialVersionUID = 1336494392278190103L;
     private Color color;
     private int orderNo;
+    
+    public boolean raceLogTrackedRaceCouldBeAdded;
+    public RaceLogTrackingState raceLogTrackingState;
+    public boolean raceLogTrackerForRaceExists;
     
     public FleetDTO() {}
 

@@ -9,6 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.impl.RaceLogRaceTracker;
@@ -29,13 +30,18 @@ public interface RaceLogTrackingAdapter {
 			URISyntaxException, Exception;
 
 	/**
-	 * List RaceLog-tracked races (such RaceLogs, in which a
-	 * {@link DenoteForTrackingEvent} exists. Will only return such elements
-	 * that do not already have an attached {@link TrackedRace}, and for which no
-	 * {@link RaceLogRaceTracker} is registered.
+	 * Lists all races for this leaderboards according to the rules in
+	 * {@link #canRaceBeAdded(RacingEventService, Leaderboard, RaceColumn, Fleet)}.
 	 */
-	Map<RaceColumn, Collection<Fleet>> listLoadableStoredRaceLogTrackedRaces(RacingEventService service,
+	Map<RaceColumn, Collection<Fleet>> listRacesThatCanBeAdded(RacingEventService service,
 			Leaderboard leaderboard);
+
+	/**
+	 * Returns {@code true}, if a {@link DenoteForTrackingEvent} exists within the {@link RaceLog},
+	 * and if it does not not already have an attached {@link TrackedRace},
+	 * and if there is no {@link RaceLogRaceTracker} registered for it already.
+	 */
+	boolean canRaceBeAdded(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
 
 	/**
 	 * Denotes the {@link RaceLog} for racelog-tracking, by inserting a

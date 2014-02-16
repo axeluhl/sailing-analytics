@@ -1,6 +1,5 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.common.racelog.tracking;
 
-import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 
 /**
  * The state of the race tracked via the racelog. This can be determined by inspecting the corresponding events

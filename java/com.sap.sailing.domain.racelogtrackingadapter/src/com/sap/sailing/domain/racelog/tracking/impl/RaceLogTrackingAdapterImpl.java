@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.impl.Function;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -28,7 +29,6 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.tracking.NotDenotableForTrackingException;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -51,7 +51,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 			RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds)
 			throws MalformedURLException, FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception {
 		RaceLog raceLog = raceColumn.getRaceLog(fleet);
-		Regatta regatta = service.getRegatta(regattaToAddTo);
+		Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
 		RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta,
 				raceLog, raceColumn, fleet, leaderboard, delayToLiveInMillis);
 		return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
@@ -76,19 +76,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
     
     @Override
-    public Map<RaceColumn, Collection<Fleet>> listLoadableStoredRaceLogTrackedRaces(final RacingEventService service,
+    public Map<RaceColumn, Collection<Fleet>> listRacesThatCanBeAdded(final RacingEventService service,
     		Leaderboard leaderboard) {
     	return findInLeaderboard(leaderboard, new Function<Util.Pair<RaceColumn,Fleet>, Boolean>() {
 			@Override
 			public Boolean perform(Pair<RaceColumn, Fleet> in) {
-	    		if (in.getA().getTrackedRace(in.getB()) == null) {
-	    			RaceLog raceLog = in.getA().getRaceLog(in.getB());
-	    			if (service.getRaceTrackerById(raceLog.getId()) == null) {
-	    				RaceLogTrackingState state = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-	    				return state.isForTracking();
-	    			}
-	    		}
-	    		return false;
+				return canRaceBeAdded(service, in.getA(), in.getB());
 			}
 		});
     }
@@ -118,5 +111,17 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 		RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDenoteForTrackingEvent(
 				MillisecondsTimePoint.now(), service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass);
 		raceLog.add(event);
+	}
+
+	@Override
+	public boolean canRaceBeAdded(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
+		if (raceColumn.getTrackedRace(fleet) == null) {
+			RaceLog raceLog = raceColumn.getRaceLog(fleet);
+			if (service.getRaceTrackerById(raceLog.getId()) == null) {
+				RaceLogTrackingState state = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+				return state.isForTracking();
+			}
+		}
+		return false;
 	}
 }

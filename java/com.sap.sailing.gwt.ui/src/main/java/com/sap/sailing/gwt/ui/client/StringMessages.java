@@ -959,4 +959,8 @@ public interface StringMessages extends Messages {
     String releaseNotes();
     String hasSplitFleetContiguousScoring();
     String eventOverview();
+    String addRaceLogTracker();
+    String denoteForRaceLogTracking();
+    String raceLogTrackerExists();
+    String raceLogTrackingState();
 }
