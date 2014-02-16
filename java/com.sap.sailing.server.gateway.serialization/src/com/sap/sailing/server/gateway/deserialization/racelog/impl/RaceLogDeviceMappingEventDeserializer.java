@@ -48,8 +48,8 @@ public abstract class RaceLogDeviceMappingEventDeserializer<ItemT extends WithID
 			throw new JsonDeserializationException(e);
 		}
 		JSONObject itemObject = Helpers.getNestedObjectSafe(object, RaceLogDeviceMappingEventSerializer.FIELD_ITEM);
-		long fromMillis = Long.parseLong((String) object.get(RaceLogDeviceMappingEventSerializer.FIELD_FROM_MILLIS));
-		long toMillis = Long.parseLong((String) object.get(RaceLogDeviceMappingEventSerializer.FIELD_TO_MILLIS));
+		long fromMillis = (Long) object.get(RaceLogDeviceMappingEventSerializer.FIELD_FROM_MILLIS);
+		long toMillis = (Long) object.get(RaceLogDeviceMappingEventSerializer.FIELD_TO_MILLIS);
 		TimePoint from = new MillisecondsTimePoint(fromMillis);
 		TimePoint to = new MillisecondsTimePoint(toMillis);
 		return furtherDeserialize(itemObject, from, to, device, id, createdAt, author, timePoint, passId);

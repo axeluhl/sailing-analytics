@@ -15,8 +15,12 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBase
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.NationalityJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.PersonJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
@@ -51,7 +55,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
 	
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory,
     		TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
-    	JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory, null, /* boatDeserializer */ null);
+    	JsonDeserializer<Competitor> competitorDeserializer = CompetitorJsonDeserializer.create(domainFactory);
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
