@@ -89,9 +89,9 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
         raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time0, author, device2, mark, 0, time0, time1));
         
         DynamicGPSFixMovingTrackImpl<Competitor> track1 = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
-        store.loadTrack(track1, raceLog, comp);
+        store.loadCompetitorTrack(track1, raceLog, comp);
         DynamicGPSFixTrackImpl<Mark> track2 = new DynamicGPSFixTrackImpl<>(mark, 0);
-        store.loadTrack(track2, raceLog, mark);
+        store.loadMarkTrack(track2, raceLog, mark);
         track1.lockForRead();
         assertEquals(2, Util.size(track1.getRawFixes()));
         assertTrue(track1.getFirstRawFix() instanceof GPSFixMoving);

@@ -482,4 +482,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     WindStore getWindStore();
     
     GPSFixStore getGPSFixStore();
+    
+    RaceTracker getRaceTrackerById(Object id);
+    
+    RaceLogEventAuthor getServerAuthor();
 }

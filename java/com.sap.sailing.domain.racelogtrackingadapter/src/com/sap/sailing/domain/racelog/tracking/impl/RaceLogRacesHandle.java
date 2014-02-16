@@ -59,7 +59,7 @@ public class RaceLogRacesHandle implements RacesHandle {
 
     @Override
     public DynamicTrackedRegatta getTrackedRegatta() {
-        return tracker.getParams().getService().getTrackedRegatta(tracker.getRegatta());
+        return tracker.getTrackedRegatta();
     }
 
     @Override

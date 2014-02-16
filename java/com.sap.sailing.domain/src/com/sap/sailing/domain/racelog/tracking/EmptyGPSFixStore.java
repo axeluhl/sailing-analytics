@@ -15,12 +15,33 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 	}
 
 	@Override
-	public void loadTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+	public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
 			RaceLog raceLog, Competitor competitor) {
 	}
 
 	@Override
-	public void loadTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
+	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
 			RaceLog raceLog, Mark mark) {
+	}
+
+	@Override
+	public void addListener(GPSFixReceivedListener listener) {
+	}
+
+	@Override
+	public void removeListener(GPSFixReceivedListener listener) {
+	}
+
+	@Override
+	public void loadCompetitorTrack(
+			DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+			DeviceMapping<Competitor> mapping) {
+		
+	}
+
+	@Override
+	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
+			DeviceMapping<Mark> mapping) {
+		
 	}
 }

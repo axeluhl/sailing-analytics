@@ -9,10 +9,34 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 
 public interface GPSFixStore {
-    void loadTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog,
+	/**
+	 * Load all fixes that correspond to the {@link DeviceCompetitorMappingEvent}s found in the {@code raceLog}.
+	 */
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog,
             Competitor competitor);
 
-    void loadTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark);
+	/**
+	 * Load all fixes that correspond to the {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
+	 */
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark);
+    
+	/**
+	 * Load all fixes that correspond to the {@code mapping}.
+	 */
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, DeviceMapping<Competitor> mapping);
+
+	/**
+	 * Load all fixes that correspond to the {@code mapping}.
+	 */
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping);
 
     void storeFix(DeviceIdentifier device, GPSFix fix);
+    
+    /**
+     * Listeners are notified, whenever a {@link GPSFix} is stored through the {@link #storeFix(DeviceIdentifier, GPSFix)}
+     * method.
+     */
+    void addListener(GPSFixReceivedListener listener);
+    
+    void removeListener(GPSFixReceivedListener listener);
 }

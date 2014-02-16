@@ -2372,13 +2372,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             		try {
             			logger.info("Started loading competitor tracks for " + getRace().getName());
             			for (Competitor competitor : race.getCompetitors()) {
-            				gpsFixStore.loadTrack((DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog, competitor);
+            				gpsFixStore.loadCompetitorTrack((DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), raceLog, competitor);
             			}
             			logger.info("Finished loading competitor tracks for " + getRace().getName());
 
             			logger.info("Started loading mark tracks for " + getRace().getName());
             			for (Mark mark : getMarks()) {
-            				gpsFixStore.loadTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog, mark);
+            				gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) markTracks.get(mark), raceLog, mark);
             			}
             			logger.info("Finished loading mark tracks for " + getRace().getName());
 

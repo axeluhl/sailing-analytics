@@ -92,4 +92,14 @@ public class TimeRangeImpl extends Pair<TimePoint, TimePoint> implements TimeRan
 		TimePoint newTo = endsAfter(other) ? other.to() : to();
 		return new TimeRangeImpl(newFrom, newTo);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj instanceof TimeRange) {
+			TimeRange other = (TimeRange) obj;
+			return from().equals(other.from()) && to().equals(other.to());
+		}
+		return super.equals(obj);
+	}
 }

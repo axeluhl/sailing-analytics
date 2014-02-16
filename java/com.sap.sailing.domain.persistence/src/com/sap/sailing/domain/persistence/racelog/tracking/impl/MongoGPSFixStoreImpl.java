@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
+import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -38,6 +40,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;
 	private final DBCollection collection;
 	private final MongoObjectFactoryImpl mongoOF;
+	private final ConcurrentHashMap<Object, GPSFixReceivedListener> listeners = new ConcurrentHashMap<>();
 	
 	public MongoGPSFixStoreImpl(MongoObjectFactory mongoObjectFactory,
 			DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
@@ -86,7 +89,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
     
 	@Override
-	public void loadTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor) {
+	public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RaceLog raceLog, Competitor competitor) {
 		List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder(raceLog).analyze().get(competitor);
 		
 		for (DeviceMapping<Competitor> mapping : mappings) {
@@ -95,7 +98,7 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
 	}
 
 	@Override
-	public void loadTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) {
+	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RaceLog raceLog, Mark mark) {
 		List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder(raceLog).analyze().get(mark);
 		
 		for (DeviceMapping<Mark> mapping : mappings) {
@@ -121,5 +124,33 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     		logger.log(Level.WARNING, "Could not store fix in MongoDB");
     		e.printStackTrace();
     	}
+    	
+    	notifyListeners(device, fix);
+	}
+	
+	private void notifyListeners(DeviceIdentifier device, GPSFix fix) {
+		for (GPSFixReceivedListener listener : listeners.values()) {
+			listener.fixReceived(device, fix);
+		}
+	}
+
+	@Override
+	public void addListener(GPSFixReceivedListener listener) {
+		listeners.put(listener.hashCode(), listener);
+	}
+
+	@Override
+	public void removeListener(GPSFixReceivedListener listener) {
+		listeners.remove(listener.hashCode());
+	}
+
+	@Override
+	public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, DeviceMapping<Competitor> mapping) {
+		loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+	}
+
+	@Override
+	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping) {
+		loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
 	}
 }

@@ -54,7 +54,7 @@ public class RecordFixesTest extends AbstractGPSFixStoreTest {
 		servlet.process(null, data);
 		
         DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
-        store.loadTrack(track, raceLog, comp);
+        store.loadCompetitorTrack(track, raceLog, comp);
 		track.lockForRead();
 		assertEquals(2, size(track.getRawFixes()));
 		assertEquals(timepoint, track.getFirstRawFix().getTimePoint().asMillis());

@@ -95,6 +95,7 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.state.RaceState;
@@ -249,6 +250,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
+    
+    /**
+     * This author should be used for server generated race log events
+     */
+    private final RaceLogEventAuthor raceLogEventAuthorForServer = new RaceLogEventAuthorImpl(RacingEventService.class.getName(), 1);
 
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
@@ -2211,5 +2217,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 	@Override
 	public GPSFixStore getGPSFixStore() {
 		return gpsFixStore;
+	}
+	
+	@Override
+	public RaceTracker getRaceTrackerById(Object id) {
+		return raceTrackersByID.get(id);
+	}
+	
+	@Override
+	public RaceLogEventAuthor getServerAuthor() {
+		return raceLogEventAuthorForServer;
 	}
 }
