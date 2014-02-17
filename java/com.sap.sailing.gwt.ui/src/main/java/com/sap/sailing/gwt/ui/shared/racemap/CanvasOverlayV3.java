@@ -86,6 +86,9 @@ public abstract class CanvasOverlayV3 {
      */
     private long transitionTimeInMilliseconds;
 
+    private final int minZoomLevel = 1;
+    private final int maxZoomLevel = 21;
+    
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
@@ -109,6 +112,18 @@ public abstract class CanvasOverlayV3 {
         return canvas;
     }
 
+    /** 
+     * This method can be used to calculate a value in a min-max range according to the zoom level.
+     * Sample 1: minZoom = 1, maxZoom = 21, currentZoom = 21 will return maxValue
+     * Sample 2: minZoom = 1, maxZoom = 21, currentZoom = 1 will return minValue
+     * Sample 3: minZoom = 1, maxZoom = 21, currentZoom = 11, minValue = 1, maxValue = 2 will return 1.5
+     */
+    public double fitValueToMapZoom(double minValue, double maxValue) {
+        double dZoom = maxZoomLevel - minZoomLevel;
+        double zoomInPercentage = (map.getZoom() - minZoomLevel) / dZoom; 
+        return  minValue + (maxValue - minValue) * zoomInPercentage; 
+    }
+    
     public boolean isVisible() {
         return getCanvas() != null && getCanvas().isVisible();
     }
@@ -321,6 +336,18 @@ public abstract class CanvasOverlayV3 {
         return Math.min(diffX, diffY);  
     }
 
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, LatLng position, double distanceXInMeter) {
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+
+        Point point = projection.fromLatLngToDivPixel(position);
+        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
+
+        return Math.abs(pointX.getX() - point.getX());
+    }
+    
     protected Size calculateBoundingBox(MapCanvasProjection projection, LatLng position, double distanceXInMeter, double distanceYInMeter) {
         Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
         Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));

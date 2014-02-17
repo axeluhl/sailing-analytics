@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
@@ -16,7 +17,10 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,10 +29,15 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.regattaoverview.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -49,12 +58,14 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
+    private final TabPanel leaderboardsTabPanel;
     private final Label eventNameLabel;
     private final Label venueNameLabel;
     private final Label timeLabel;
     private final Button settingsButton;
     private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
+    private final UserAgentDetails userAgent;
     
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
     
@@ -72,7 +83,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, 
-            UUID eventId, RegattaRaceStatesSettings settings) {
+            UUID eventId, RegattaRaceStatesSettings settings, UserAgentDetails userAgent) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -80,6 +91,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
+        this.userAgent = userAgent;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
         retrieveEvent();
@@ -171,7 +183,42 @@ public class RegattaOverviewPanel extends SimplePanel {
         
         mainPanel.add(flexTable);
         mainPanel.add(regattaRaceStatesComponent);
+        
+        leaderboardsTabPanel = new TabPanel();
+        leaderboardsTabPanel.setStyleName("RegattaOverview-Leaderboards");
+        mainPanel.add(leaderboardsTabPanel);
+        
         onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
+        
+    }
+    
+    private void loadLeaderboard() {
+        /*
+         * Load a tabbed widget with one tab per regatta. Each tab contains the leaderboard for the regatta.
+         */
+        final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+        sailingService.getLeaderboardsByEvent(eventDTO, new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+            @Override
+            public void onSuccess(List<StrippedLeaderboardDTO> result) {
+                leaderboardsTabPanel.clear();
+                for (StrippedLeaderboardDTO leaderboard : result) {
+                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
+                            new AsyncActionsExecutor(), leaderboardSettings, 
+                            /*preSelectedRace*/null, 
+                            competitorSelectionProvider, 
+                            null, leaderboard.name, 
+                            errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
+                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+                }
+                leaderboardsTabPanel.selectTab(0);
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+                
+            }
+        });
     }
 
     private HorizontalPanel getRefreshStartStopClockPanel() {
@@ -205,6 +252,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             protected void handleSuccess(EventDTO result) {
                 if (result != null) {
                     setEvent(result);
+                    loadLeaderboard();
                 }
             }
         });

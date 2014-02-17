@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class RegattaListComposite extends Composite implements RegattaDisplayer {
@@ -239,6 +240,25 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
                 regattaRefresher.fillRegattas();
             }
         });
+        
+        for (SeriesDTO series : editedRegatta.series) {
+            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(), 
+                    series.getDiscardThresholds(), series.isStartsWithZeroScore(), 
+                    series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                    series.getFleets(),
+                    new AsyncCallback<Void>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
+        }
     }
 
     private List<RegattaDTO> getSelectedRegattas() {

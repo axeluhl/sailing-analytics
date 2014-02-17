@@ -496,6 +496,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattasCollection.remove(query);
     }
+    
+    public void removeSeries(Series series) {
+        Regatta regatta = series.getRegatta();
+        regatta.removeSeries(series);
+        storeRegatta(regatta);
+    }
 
     private BasicDBList storeSeries(Iterable<? extends Series> series) {
         BasicDBList dbSeries = new BasicDBList();
@@ -509,6 +515,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbSeries = new BasicDBObject();
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
         dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
+        dbSeries.put(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name(), s.hasSplitFleetContiguousScoring());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());
         BasicDBList dbFleets = new BasicDBList();

@@ -136,6 +136,13 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
+        TextColumn<SeriesDTO> hasSplitFleetContiguousScoringColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
@@ -226,6 +233,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(discardsColumn, stringMessages.discarding());
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
+        table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
@@ -262,8 +270,10 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
+        final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());       
+        final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
@@ -308,15 +318,17 @@ public class RegattaDetailsComposite extends Composite {
                 regattaRefresher.fillRegattas();
             }
         });
-        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged) {
-            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
+        if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged
+                || hasSplitFleetContiguousScoringChanged || seriesNameChanged) {
+            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
-                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
+                    seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetContiguousScoring(),
+                    series.getFleets(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove race columns "
-                                    + raceColumnsToAdd + " from series " + series.getName()
+                            errorReporter.reportError("Error trying to update series "
+                                    + series.getName()
                                     + ": " + caught.getMessage());
                         }
 

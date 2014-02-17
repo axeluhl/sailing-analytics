@@ -49,6 +49,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -178,9 +179,10 @@ public interface SailingServiceAsync {
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+    void getLeaderboardsByRegatta(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+    void getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier,
+            AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, UUID newCourseAreaId, AsyncCallback<StrippedLeaderboardDTO> callback);
@@ -367,8 +369,10 @@ public interface SailingServiceAsync {
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
     
-    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal, int[] resultDiscardingThresholds,
-            boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward, AsyncCallback<Void> callback);
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets,
+            AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
@@ -451,8 +455,11 @@ public interface SailingServiceAsync {
 
     void stopSingleReplicaInstance(String identifier, AsyncCallback<Void> asyncCallback);
 
-    void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
+
+    void getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+            AsyncCallback<RaceLogDTO> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
@@ -505,5 +512,7 @@ public interface SailingServiceAsync {
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
+
+    void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 }
 

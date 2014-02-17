@@ -8,9 +8,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
@@ -40,12 +43,15 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         DockLayoutPanel dockPanel = new DockLayoutPanel(Unit.EM);
         rootPanel.add(dockPanel);
 
-        HorizontalPanel topInformationPanel = new HorizontalPanel();
+        DockPanel topInformationPanel = new DockPanel();
         topInformationPanel.setSize("100%", "95%");
         UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
         userStatusPanel.ensureDebugId("UserStatus");
-        topInformationPanel.add(userStatusPanel);
-        topInformationPanel.add(persistentAlertLabel);
+        topInformationPanel.add(userStatusPanel, DockPanel.WEST);
+        topInformationPanel.add(persistentAlertLabel, DockPanel.CENTER);
+        final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(stringMessages.releaseNotes()).toSafeHtml(), "/release_notes_admin.html");
+        topInformationPanel.add(releaseNotesLink, DockPanel.EAST);
+        topInformationPanel.setCellHorizontalAlignment(releaseNotesLink, HasHorizontalAlignment.ALIGN_RIGHT);
 
         dockPanel.addNorth(topInformationPanel, 2.5);
 

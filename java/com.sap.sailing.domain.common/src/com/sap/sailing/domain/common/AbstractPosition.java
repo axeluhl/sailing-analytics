@@ -139,21 +139,20 @@ public class AbstractPosition implements Position {
 
     @Override
     public Distance getDistanceToLine(Position left, Position right) {
-        final Distance distance;
+        final Distance result;
+        final int factor = this.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters()>0?1:-1;
         double toLeft = Math.abs(left.getBearingGreatCircle(this).getDifferenceTo(left.getBearingGreatCircle(right))
                 .getDegrees());
         double toRight = Math.abs(right.getBearingGreatCircle(this).getDifferenceTo(right.getBearingGreatCircle(left))
                 .getDegrees());
         if (toLeft > 90) {
-            distance = this.getDistance(left);
+            result = this.getDistance(left).scale(factor);
         } else if (toRight > 90) {
-                distance = this.getDistance(right);
+                result = this.getDistance(right).scale(factor);
             } else {
-                distance = this.absoluteCrossTrackError(left, left.getBearingGreatCircle(right));
+                result = this.crossTrackError(left, left.getBearingGreatCircle(right));
         }
-        // Right now this always returns a positiv value. It might be possible to change it so that the sign indicates
-        // which side of the Line the Position is on.
-        return distance;
+        return result;
     }
 
     @Override

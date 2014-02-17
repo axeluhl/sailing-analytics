@@ -63,7 +63,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util;
@@ -395,11 +394,20 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+            logger.info("Putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
             regatta.addRaceColumnListener(raceLogScoringReplicator);
+            
+            for (Event event : this.getAllEvents()) {
+                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    if (regatta.getDefaultCourseArea() != null && courseArea.getId().equals(regatta.getDefaultCourseArea().getId())) {
+                        logger.info("Associating loaded regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
+                        event.addRegatta(regatta);
+                    }
+                }
+            }
         }
     }
 
@@ -794,6 +802,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
+        for (Event event : getAllEvents()) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
         return regatta;
     }
 
@@ -969,7 +984,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                     s.getName(),
                     new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
-                            : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
+                            : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s.hasSplitFleetContiguousScoring()));
         }
         return new RegattaCreationParametersDTO(result);
     }
@@ -1305,10 +1320,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
     }
+    
+    @Override
+    public void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException {
+        if (series.getRegatta().isPersistent()) {
+            mongoObjectFactory.removeSeries(series);
+        } else {
+            series.getRegatta().removeSeries(series);
+        }
+    }
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
-           RegattaConfiguration newRegattaConfiguration) {
+           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
@@ -1316,6 +1340,19 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             regatta.setDefaultCourseArea(newCourseArea);
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);
+        if (series != null) {
+            for (Series seriesObj : series) {
+                regatta.addSeries(seriesObj);
+            }
+        }
+        for (Event event : getAllEvents()) {
+            event.removeRegatta(regatta);
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
         mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }
@@ -2044,12 +2081,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
-        Leaderboard leaderboard = getLeaderboardByName(selectedLeaderboardName);
+    public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnDTO.getName());
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleet.getName());
+                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
                 RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.setOrReloadRaceLogInformation(raceColumn.getRaceLogInformation(), fleetImpl);
@@ -2122,7 +2159,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         return null;
     }
     
-    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+    public RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);

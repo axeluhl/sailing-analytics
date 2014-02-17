@@ -425,7 +425,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     final int requestID = ++boatPositionRequestIDCounter;
 
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
-                            date, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
+                            date, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, new AsyncCallback<RaceMapDataDTO>() {
                   @Override
                   public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);

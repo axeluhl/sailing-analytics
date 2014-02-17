@@ -48,6 +48,7 @@ public interface StringMessages extends Messages {
     String leaderboardName();
     String cancel();
     String pleaseEnterAName();
+    String pleaseEnterABoatClass();
     String discardRacesFromHowManyStartedRacesOn();
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
@@ -727,6 +728,7 @@ public interface StringMessages extends Messages {
     String finishAt();
     String protestEndsAt();
     String unknown();
+    String raceLog();
     String refreshRaceLog();
     String raceLogReloaded();
     String reloadAllRaceLogs();
@@ -954,4 +956,7 @@ public interface StringMessages extends Messages {
     String toCalculateThe();
     String groupingProvider();
     String use();
+    String releaseNotes();
+    String hasSplitFleetContiguousScoring();
+    String eventOverview();
 }

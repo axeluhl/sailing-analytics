@@ -15,15 +15,18 @@ public class SeriesCreationParametersDTO implements Serializable {
     private boolean firstColumnIsNonDiscardableCarryForward;
 
     private int[] discardingThresholds;
+
+    private boolean hasSplitFleetContiguousScoring;
     
     SeriesCreationParametersDTO() {}
 
     public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean medal, boolean startsWithZero, boolean firstColumnIsNonDiscardableCarryForward,
-            int[] discardingThresholds) {
+            int[] discardingThresholds, boolean hasSplitFleetContiguousScoring) {
         super();
         this.fleets = fleets;
         this.medal = medal;
         this.startsWithZero = startsWithZero;
+        this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.discardingThresholds = discardingThresholds;
     }
@@ -38,6 +41,10 @@ public class SeriesCreationParametersDTO implements Serializable {
 
     public boolean isStartsWithZero() {
         return startsWithZero;
+    }
+
+    public boolean hasSplitFleetContiguousScoring() {
+        return hasSplitFleetContiguousScoring;
     }
 
     public int[] getDiscardingThresholds() {

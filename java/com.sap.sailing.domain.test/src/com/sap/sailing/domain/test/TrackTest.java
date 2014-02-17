@@ -1049,4 +1049,10 @@ public class TrackTest {
         GPSFixMoving fix = new GPSFixMovingImpl(position, timePoint, speed);
         return fix;
     }
+    
+    @Test
+    public void testFrequency() {
+        assertEquals(3, track.getAverageIntervalBetweenFixes().asMillis());
+        assertEquals(3, track.getAverageIntervalBetweenRawFixes().asMillis());
+    }
 }

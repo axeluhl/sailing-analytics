@@ -35,8 +35,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -48,6 +46,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -202,6 +201,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Removes the regatta as well as all regatta leaderboards for that regatta
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    
+    /**
+     * Removes the given series
+     */
+    void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -264,7 +268,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -400,7 +404,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Collection<MediaTrack> getAllMediaTracks();
 
-    void reloadRaceLog(String selectedLeaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+    void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+
+    RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during

@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public abstract class BoatClassVectorGraphics {
-    protected double boatLengthInMeters;
-    protected double boatBeamInMeters;
-    protected double boatCenterAlongLengthInMeters;
+    protected double overallLengthInPx;
+    protected double hullLengthInPx;
+    protected double beamInPx;
     
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
@@ -28,17 +28,20 @@ public abstract class BoatClassVectorGraphics {
     protected final String SAIL_FILLCOLOR = "#555555";
     protected final String SAIL_STROKECOLOR = "#000000";
 
-    BoatClassVectorGraphics(String mainBoatClassName, double boatLengthInMeters, double boatBeamInMeters, double boatCenterAlongLengthInMeters) {
+    /** the minimal length of the hull in pixel when the boat is drawn */
+    protected double minHullLengthInPx = 25;
+
+    BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
         this.mainBoatClassName = mainBoatClassName;
-        this.boatLengthInMeters = boatLengthInMeters;
-        this.boatBeamInMeters = boatBeamInMeters;
-        this.boatCenterAlongLengthInMeters = boatCenterAlongLengthInMeters;
+        this.overallLengthInPx = overallLengthInPx;
+        this.beamInPx = beamInPx;
+        this.hullLengthInPx = hullLengthInPx;
         this.compatibleBoatClassNames = new ArrayList<String>();
     }
     
-    BoatClassVectorGraphics(String mainBoatClassName, double boatLengthInMeters, double boatBeamInMeters, double boatCenterAlongLengthInMeters, 
+    BoatClassVectorGraphics(String mainBoatClassName, double boatOverallLengthInMeters, double boatBeamInMeters, double boatHullLengthInMeters, 
             String...compatibleBoatClassNames) {
-        this(mainBoatClassName, boatLengthInMeters, boatBeamInMeters, boatCenterAlongLengthInMeters);
+        this(mainBoatClassName, boatOverallLengthInMeters, boatBeamInMeters, boatHullLengthInMeters);
         for(String compatibleBoatClass: compatibleBoatClassNames) {
             this.compatibleBoatClassNames.add(compatibleBoatClass);
         }
@@ -112,7 +115,7 @@ public abstract class BoatClassVectorGraphics {
         ctx.translate(width / 2.0, height / 2.0);
         ctx.rotate(angleInRadians);
         ctx.scale(scaleFactor, scaleFactor);
-        ctx.translate(-boatCenterAlongLengthInMeters * 100,- boatBeamInMeters * 100 / 2.0);
+        ctx.translate(-hullLengthInPx / 2.0,- beamInPx / 2.0);
 
         drawBoat(ctx, isSelected, color);
         drawSails(ctx, legType, tack);
@@ -120,16 +123,16 @@ public abstract class BoatClassVectorGraphics {
         ctx.restore();
     }
 
-    public double getBoatLengthInMeters() {
-        return boatLengthInMeters;
+    public double getHullLengthInPx() {
+        return hullLengthInPx;
+    }
+    
+    public double getOverallLengthInPx() {
+        return overallLengthInPx;
     }
 
-    public double getBoatBeamInMeters() {
-        return boatBeamInMeters;
-    }
-
-    public double getBoatCenterAlongLengthInMeters() {
-        return boatCenterAlongLengthInMeters;
+    public double getBeamInPx() {
+        return beamInPx;
     }
 
     public boolean isBoatClassNameCompatible(String boatClass) {
@@ -158,6 +161,10 @@ public abstract class BoatClassVectorGraphics {
 
     public List<String> getCompatibleBoatClassNames() {
         return compatibleBoatClassNames;
+    }
+
+    public double getMinHullLengthInPx() {
+        return minHullLengthInPx;
     }
 
 }

@@ -166,7 +166,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         for (SeriesDTO seriesDTO : newRegatta.series) {
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                     seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore(),
-                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds());
+                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
+                    seriesDTO.hasSplitFleetContiguousScoring());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),

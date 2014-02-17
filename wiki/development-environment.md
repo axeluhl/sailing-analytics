@@ -63,6 +63,16 @@ As a special feature, release builds can automatically be performed and publishe
 
 You can follow the build triggered by this [here](http://hudson.sapsailing.com/job/SAPSailingAnalytics-release/).
 
+### Plotting test results with the Measurement Plugin
+
+By default the duration of each test is published and can be viewed in comparison with older builds. It is possible to publish other values using the Measurement Plugin, which reads them out of a `MeasurementXMLFile`. 
+
+```
+MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-" + getClass().getSimpleName() + ".xml", getClass().getSimpleName(), getClass().getName());
+MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+performanceReportCase.addMeasurement(new Measurement("MeasurementName", measurementValue));
+```
+
 ## Product, Features and Target Platform
 The result of the build process is a p2 repository with a product consisting of a number of features. The product configuration is provided by the file raceanalysis.product in the com.sap.sailing.feature.p2build project. In its dependencies it defines the features of which it is built, which currently are com.sap.sailing.feature and com.sap.sailing.feature.runtime, each described in an equal-named bundle. The feature specified by com.sap.sailing.feature lists the bundles we develop ourselves as part of the project. The com.sap.sailing.feature.runtime feature lists those 3rd-party bundles from the target platform which are required by the product.
 

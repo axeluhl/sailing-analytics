@@ -3,11 +3,13 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -22,12 +24,17 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -774,5 +781,81 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
+    /**
+     * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
+     */
+    @Override
+    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
+        Bearing result = null;
+        PassingInstruction instruction = w.getPassingInstructions();
+        if (instruction == PassingInstruction.None || instruction == null) {
+            if (w.equals(getRace().getCourse().getFirstWaypoint()) || w.equals(getRace().getCourse().getLastWaypoint())) {
+                instruction = PassingInstruction.Line;
+            } else {
+                int numberofMarks = 0;
+                Iterator<Mark> it = w.getMarks().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    numberofMarks++;
+                }
+                if (numberofMarks == 2) {
+                    instruction = PassingInstruction.Gate;
+                } else if (numberofMarks == 1) {
+                    instruction = PassingInstruction.Port;
+                }
+            }
+        }
+        if (instruction == PassingInstruction.FixedBearing) {
+            result = w.getFixedBearing();
+        } else if (instruction == PassingInstruction.Gate || instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard) {
+            Bearing before = getTrackedLegFinishingAt(w).getLegBearing(t);
+            Bearing after = getTrackedLegStartingAt(w).getLegBearing(t);
+            if (before != null && after != null) {
+                result = before.middle(after.reverse());
+            }
+        } else if (instruction == PassingInstruction.Line) {
+            Pair<Position, Position> pos = getLeftAndRightMarkPositions(t, w);
+            if (pos.getA() != null && pos.getB() != null) {
+                result = pos.getA().getBearingGreatCircle(pos.getB());
+            } 
+        } else if (instruction == PassingInstruction.Offset) {
+            // TODO Bug 1712
+        }
+        return result;
+    }
 
+    @Override
+    public Pair<Position, Position> getLeftAndRightMarkPositions(TimePoint t, Waypoint w) {
+        List<Position> markPositions = new ArrayList<Position>();
+        for (Mark lineMark : w.getMarks()) {
+            final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
+            false);
+            if (estimatedMarkPosition == null) {
+                return new Pair<Position, Position>(null,null);
+            }
+            markPositions.add(estimatedMarkPosition);
+        }
+        final List<Leg> legs = getRace().getCourse().getLegs();
+        final int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(w);
+        final boolean isStartLine = indexOfWaypoint == 0;
+        final Bearing legDeterminingDirectionBearing = getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
+        if (legDeterminingDirectionBearing == null) {
+            return new Pair<Position, Position>(null, null);
+        }
+        Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1), legDeterminingDirectionBearing);
+        final Mark starboardMarkWhileApproachingLine;
+        final Mark portMarkWhileApproachingLine;
+        final Position starboardMarkPositionWhileApproachingLine;
+        final Position portMarkPositionWhileApproachingLine;
+        if (crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint.getMeters() < 0) {
+            portMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
+            starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
+        } else {
+            portMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
+            starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
+        }
+        portMarkPositionWhileApproachingLine = getOrCreateTrack(portMarkWhileApproachingLine).getEstimatedPosition(t, /* extrapolate */false);
+        starboardMarkPositionWhileApproachingLine = getOrCreateTrack(starboardMarkWhileApproachingLine).getEstimatedPosition(t, /* extrapolate */false);
+        return new Pair<Position, Position>(portMarkPositionWhileApproachingLine, starboardMarkPositionWhileApproachingLine);
+    }
 }

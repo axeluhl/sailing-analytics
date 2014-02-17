@@ -68,6 +68,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -540,6 +541,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     refreshRaceLog(object.getA(), object.getB(), true);
                 } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
                     setStartTime(object.getA(), object.getB());
+                } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
+                    showRaceLog(object.getA(), object.getB());
                 }
             }
         });
@@ -759,6 +762,33 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void cancel() { }
         }).show();
+    }
+
+    private void showRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleetDTO) {
+        final String selectedLeaderboardName = getSelectedLeaderboardName();
+        sailingService.getRaceLog(selectedLeaderboardName, raceColumnDTO, fleetDTO, new AsyncCallback<RaceLogDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage(), true);
+            }
+            @Override
+            public void onSuccess(RaceLogDTO result) {
+                openRaceLogDialog(result);
+            }
+        });
+    }
+    
+    private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
+        RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(RaceLogDTO result) {
+            }
+        });
+        dialog.show();
     }
 
     private void refreshRaceLog(final RaceColumnDTO raceColumnDTO, final FleetDTO fleet, final boolean showAlerts) {
