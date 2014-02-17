@@ -39,7 +39,7 @@ public enum RaceLogEventComparator implements Comparator<Timed>, Serializable {
     }
 
     private boolean compareIds(RaceLogEvent e1, RaceLogEvent e2) {
-        return e1.getId().equals(e2.getId());
+        return e1.getId() != null && e1.getId().equals(e2.getId());
     }
 
     private int comparePasses(RaceLogEvent e1, RaceLogEvent e2) {
