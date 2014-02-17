@@ -418,4 +418,26 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return null;
     }
 
+    @Override
+    public void removeSeries(Series series) {
+        Series existingSeries = getSeriesByName(series.getName());
+        if (existingSeries != null) {
+            series.removeRaceColumnListener(this);
+            for (RaceColumn column : series.getRaceColumns()) {
+                for (Fleet fleet : column.getFleets()) {
+                    column.removeRaceIdentifier(fleet);
+                }
+            }
+            synchronized(this.series) {
+                ArrayList<Series> newSeriesList = new ArrayList<Series>();
+                for (Series seriesObject : this.series) {
+                    if (!seriesObject.getName().equals(series.getName())) {
+                        newSeriesList.add(seriesObject);
+                    }
+                }
+                this.series = newSeriesList;
+            }
+        }   
+    }
+
 }

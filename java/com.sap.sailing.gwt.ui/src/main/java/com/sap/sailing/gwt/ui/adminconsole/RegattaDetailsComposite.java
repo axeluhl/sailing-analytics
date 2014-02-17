@@ -259,6 +259,7 @@ public class RegattaDetailsComposite extends Composite {
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
                 seriesDescriptor.getResultDiscardingThresholds());       
+        final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
@@ -304,16 +305,16 @@ public class RegattaDetailsComposite extends Composite {
             }
         });
         if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged || isFirstColumnIsNonDiscardableCarryForwardChanged
-                || hasSplitFleetContiguousScoringChanged) {
-            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.isMedal(),
+                || hasSplitFleetContiguousScoringChanged || seriesNameChanged) {
+            sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(), seriesDescriptor.isMedal(),
                     seriesDescriptor.getResultDiscardingThresholds(), seriesDescriptor.isStartsWithZeroScore(),
                     seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(), seriesDescriptor.hasSplitFleetContiguousScoring(),
                     series.getFleets(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove race columns "
-                                    + raceColumnsToAdd + " from series " + series.getName()
+                            errorReporter.reportError("Error trying to update series "
+                                    + series.getName()
                                     + ": " + caught.getMessage());
                         }
 

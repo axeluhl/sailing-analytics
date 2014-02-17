@@ -237,7 +237,7 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
         });
         
         for (SeriesDTO series : editedRegatta.series) {
-            sailingService.updateSeries(regattaName, series.getName(), series.isMedal(), 
+            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(), 
                     series.getDiscardThresholds(), series.isStartsWithZeroScore(), 
                     series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                     series.getFleets(),

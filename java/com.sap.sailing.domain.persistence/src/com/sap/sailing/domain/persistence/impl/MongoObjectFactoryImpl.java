@@ -496,6 +496,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattasCollection.remove(query);
     }
+    
+    public void removeSeries(Series series) {
+        Regatta regatta = series.getRegatta();
+        regatta.removeSeries(series);
+        storeRegatta(regatta);
+    }
 
     private BasicDBList storeSeries(Iterable<? extends Series> series) {
         BasicDBList dbSeries = new BasicDBList();

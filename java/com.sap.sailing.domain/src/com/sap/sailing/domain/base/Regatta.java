@@ -83,6 +83,12 @@ public interface Regatta extends Named, WithID {
     BoatClass getBoatClass();
     
     Iterable<Competitor> getCompetitors();
+    
+    /**
+     * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to
+     * make sure that all raceLogs and race associations get removed for all race columns in this series.
+     */
+    void removeSeries(Series series);
 
     void addRace(RaceDefinition race);
 

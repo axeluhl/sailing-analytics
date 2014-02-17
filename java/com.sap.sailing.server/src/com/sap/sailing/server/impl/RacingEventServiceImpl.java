@@ -1288,6 +1288,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
     }
+    
+    @Override
+    public void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException {
+        if (series.getRegatta().isPersistent()) {
+            mongoObjectFactory.removeSeries(series);
+        } else {
+            series.getRegatta().removeSeries(series);
+        }
+    }
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
