@@ -317,7 +317,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         Regatta effectiveRegatta = regatta;
         raceSubscribers = new HashMap<>();
         for (IRace tractracRace : tractracEvent.getRaces()) {
-            IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace);
+            IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
             raceSubscribers.put(tractracRace, raceSubscriber);
             // Try to find a pre-associated event based on the Race ID
             if (effectiveRegatta == null) {
