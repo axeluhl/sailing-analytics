@@ -293,7 +293,15 @@ public class FixesAndTails {
                 if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                     intoThis.remove(intoThisIndex-1);
                     if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
-                        tail.getPath().removeAt(intoThisIndex-1 - indexOfFirstShownFix);
+                        final int finalIntoThisIndex = intoThisIndex;
+                        final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
+                        Timer timer = new Timer() {
+                            @Override
+                            public void run() {
+                                tail.getPath().removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
+                            }
+                        };
+                        runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                     }
                     if (intoThisIndex-1 < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
