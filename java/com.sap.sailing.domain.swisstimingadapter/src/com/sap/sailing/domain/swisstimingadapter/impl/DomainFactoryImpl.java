@@ -153,7 +153,7 @@ public class DomainFactoryImpl implements DomainFactory {
             List<ControlPoint> courseDefinition) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ null);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
@@ -234,7 +234,7 @@ public class DomainFactoryImpl implements DomainFactory {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         for (Mark mark : course.getMarks()) {
             ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices());
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ null);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
