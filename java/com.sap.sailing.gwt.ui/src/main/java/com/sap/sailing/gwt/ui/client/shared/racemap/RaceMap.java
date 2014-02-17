@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
+import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -1061,8 +1062,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 countDownOverlay = null;
             }
         } else {
-            final String countDownText = "-"+NumberFormat.getFormat("0.0").format(
-                    Math.round(((double) lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime()) / 100.)/10.) + "s";
+            long timeToStartInMs = lastRaceTimesInfo.startOfRace.getTime() - timer.getTime().getTime();
+            String countDownText = timeToStartInMs > 1000 ? stringMessages.timeToStart(DateAndTimeFormatterUtil
+                    .formatElapsedTime(timeToStartInMs)) : stringMessages.start();
             if (countDownOverlay == null) {
                 countDownOverlay = new SmallTransparentInfoOverlay(map, RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX,
                         countDownText);
