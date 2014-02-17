@@ -51,6 +51,11 @@ public interface Regatta extends Named, WithID {
     Iterable<? extends Series> getSeries();
     
     /**
+     * Adds the provided series to this regatta if a series with the name does not exist already.
+     */
+    void addSeries(Series series);
+    
+    /**
      * @return the first series from {@link #getSeries} whose {@link Series#getName() name} equals
      *         <code>seriesName<code>,
      * or <code>null</code> if no such series exists
@@ -115,4 +120,9 @@ public interface Regatta extends Named, WithID {
     boolean definesSeriesDiscardThresholds();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
+    
+    /**
+     * @return the associated event. Can be null.
+     */
+    Event getEvent();
 }

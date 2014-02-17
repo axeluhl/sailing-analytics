@@ -19,13 +19,13 @@ import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class SeriesWithFleetsListEditor extends ListEditorComposite<SeriesDTO> {
     
-    public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage) {
-        super(initialValues, new ExpandedUi(stringMessages, removeImage));
+    public SeriesWithFleetsListEditor(List<SeriesDTO> initialValues, StringMessages stringMessages, ImageResource removeImage, boolean enableFleetRemoval) {
+        super(initialValues, new ExpandedUi(stringMessages, removeImage, enableFleetRemoval));
     }
     
     private static class ExpandedUi extends ExpandedListEditorUi<SeriesDTO> {
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage) {
-            super(stringMessages, removeImage);
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, boolean canRemoveItems) {
+            super(stringMessages, removeImage, canRemoveItems);
         }
 
         @Override

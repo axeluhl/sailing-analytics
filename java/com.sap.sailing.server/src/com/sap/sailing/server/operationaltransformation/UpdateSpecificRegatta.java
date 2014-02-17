@@ -24,7 +24,8 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, newDefaultCourseAreaId, newConfiguration, null);
+        return regatta;
     }
 
     @Override
