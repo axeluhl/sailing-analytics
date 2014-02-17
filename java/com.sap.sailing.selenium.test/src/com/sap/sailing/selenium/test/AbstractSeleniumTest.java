@@ -42,15 +42,15 @@ public abstract class AbstractSeleniumTest {
     /**
      * <p>File extension for screenshots captured with a Selenium web driver.</p>
      */
-    public static final String SCREENSHOT_FILE_EXTENSION = ".png"; //$NON-NLS-1$
-    
-    private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
-    
-    private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
+    private static final String SCREENSHOT_FILE_EXTENSION = ".png"; //$NON-NLS-1$
     
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
+    
+    private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
+    
+    private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
     
     /**
      * <p></p>
@@ -77,14 +77,14 @@ public abstract class AbstractSeleniumTest {
     
     // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
     //private class ScreenShotRule extends TestWatcher {
-    //    ScreenShotFilenameGenerator  generator;
+    //    ScreenShotFilenameGenerator generator;
     //    
     //    public ScreenShotRule(ScreenShotFilenameGenerator generator) {
     //        this.generator = generator;
     //    }
     //    
     //    protected void failed(Throwable error, Description description) {
-    //        captureScreenshot(this.generator.getTargetFilename(description));
+    //        captureScreenshot(this.generator.getFilePath(description));
     //    }
     //}
     
