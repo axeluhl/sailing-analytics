@@ -24,12 +24,12 @@ import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
-public class MarkPassingCaculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
+public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
     private static LinkedHashMap<String, Long> result = new LinkedHashMap<>();
     private static String className;
 
-    public MarkPassingCaculatorPerformanceTest() {
+    public MarkPassingCalculatorPerformanceTest() {
         super();
         className = getClass().getName();
     }
