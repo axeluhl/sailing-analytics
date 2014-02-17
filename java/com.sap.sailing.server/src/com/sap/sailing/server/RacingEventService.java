@@ -201,6 +201,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Removes the regatta as well as all regatta leaderboards for that regatta
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    
+    /**
+     * Removes the given series
+     */
+    void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -263,7 +268,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

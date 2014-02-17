@@ -362,11 +362,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-            logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+            logger.info("Putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             regatta.addRaceColumnListener(raceLogReplicator);
             regatta.addRaceColumnListener(raceLogScoringReplicator);
+            
+            for (Event event : this.getAllEvents()) {
+                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    if (regatta.getDefaultCourseArea() != null && courseArea.getId().equals(regatta.getDefaultCourseArea().getId())) {
+                        logger.info("Associating loaded regatta " + regatta.getName() + " to course " + courseArea.getName() + " of event " + event.getName());
+                        event.addRegatta(regatta);
+                    }
+                }
+            }
         }
     }
 
@@ -760,6 +769,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
+        }
+        for (Event event : getAllEvents()) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
         }
         return regatta;
     }
@@ -1272,10 +1288,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         regatta.removeRaceColumnListener(raceLogReplicator);
         regatta.removeRaceColumnListener(raceLogScoringReplicator);
     }
+    
+    @Override
+    public void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException {
+        if (series.getRegatta().isPersistent()) {
+            mongoObjectFactory.removeSeries(series);
+        } else {
+            series.getRegatta().removeSeries(series);
+        }
+    }
 
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, 
-           RegattaConfiguration newRegattaConfiguration) {
+           RegattaConfiguration newRegattaConfiguration, Iterable<? extends Series> series) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
@@ -1283,6 +1308,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regatta.setDefaultCourseArea(newCourseArea);
         }
         regatta.setRegattaConfiguration(newRegattaConfiguration);
+        if (series != null) {
+            for (Series seriesObj : series) {
+                regatta.addSeries(seriesObj);
+            }
+        }
+        for (Event event : getAllEvents()) {
+            event.removeRegatta(regatta);
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (newDefaultCourseAreaId != null && courseArea.getId().equals(newDefaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
+        }
         mongoObjectFactory.storeRegatta(regatta);
         return regatta;
     }

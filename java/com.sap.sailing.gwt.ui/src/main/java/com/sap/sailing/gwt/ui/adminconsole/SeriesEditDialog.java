@@ -37,6 +37,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
+    private TextBox seriesNameTextBox;
     private CheckBox isMedalCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
@@ -131,7 +132,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             }
             races.add(raceColumnDTO);
         }
-        return new SeriesDescriptor(selectedSeries, races, isMedalCheckbox.getValue(),
+        return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue());
@@ -162,7 +163,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         String seriesName = getSelectedSeries().getName();
         seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
         additionalWidgetPanel.add(seriesPanel);
+        seriesNameTextBox = createTextBox(seriesName);
         isMedalCheckbox = createCheckbox(stringMessages.medalSeries());
+        additionalWidgetPanel.add(seriesNameTextBox);
         isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());

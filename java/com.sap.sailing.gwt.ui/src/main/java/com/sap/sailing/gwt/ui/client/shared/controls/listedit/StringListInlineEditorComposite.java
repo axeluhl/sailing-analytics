@@ -63,7 +63,7 @@ public class StringListInlineEditorComposite extends StringListEditorComposite {
         protected final MultiWordSuggestOracle inputOracle;
 
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues) {
-            super(stringMessages, removeImage);
+            super(stringMessages, removeImage, /*canRemoveItems*/true);
             this.inputOracle = new MultiWordSuggestOracle();
 
             inputOracle.addAll(suggestValues);

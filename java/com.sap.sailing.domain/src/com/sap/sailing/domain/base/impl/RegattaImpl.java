@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -45,7 +46,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
-    private final Iterable<? extends Series> series;
+    private Iterable<? extends Series> series;
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
     private final Serializable id;
@@ -391,6 +392,52 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     public String toString() {
         return getId() + " " + getName() + " " + getScoringScheme().getType().name();
+    }
+
+    @Override
+    public void addSeries(Series seriesToAdd) {
+        Series existingSeries = getSeriesByName(seriesToAdd.getName());
+        if (existingSeries == null) {
+            seriesToAdd.setRegatta(this);
+            seriesToAdd.addRaceColumnListener(this);
+            registerRaceLogsOnRaceColumns(seriesToAdd);
+            synchronized(this.series) {
+                ArrayList<Series> newSeriesList = new ArrayList<Series>();
+                for (Series seriesObject : this.series) {
+                    newSeriesList.add(seriesObject);
+                }
+                newSeriesList.add(seriesToAdd);
+                this.series = newSeriesList;
+            }
+        }
+    }
+
+    @Override
+    public Event getEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeSeries(Series series) {
+        Series existingSeries = getSeriesByName(series.getName());
+        if (existingSeries != null) {
+            series.removeRaceColumnListener(this);
+            for (RaceColumn column : series.getRaceColumns()) {
+                for (Fleet fleet : column.getFleets()) {
+                    column.removeRaceIdentifier(fleet);
+                }
+            }
+            synchronized(this.series) {
+                ArrayList<Series> newSeriesList = new ArrayList<Series>();
+                for (Series seriesObject : this.series) {
+                    if (!seriesObject.getName().equals(series.getName())) {
+                        newSeriesList.add(seriesObject);
+                    }
+                }
+                this.series = newSeriesList;
+            }
+        }   
     }
 
 }
