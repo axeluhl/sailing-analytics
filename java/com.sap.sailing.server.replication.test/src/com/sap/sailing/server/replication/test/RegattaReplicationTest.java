@@ -23,10 +23,13 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 
 public class RegattaReplicationTest extends AbstractServerReplicationTest {
@@ -95,6 +98,26 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
         assertNull(replicatedRegatta.getDefaultCourseArea());
+    }
+    
+    @Test
+    public void testRegattaToEventAssociationBeingReplicated() throws InterruptedException {
+        final UUID tvCourseAreaId = UUID.randomUUID();
+        final UUID golfCourseAreaId = UUID.randomUUID();
+        Event event = master.addEvent("Event", "Venue", ".", /*isPublic*/true, UUID.randomUUID());
+        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
+        master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
+        Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId);
+        event = master.getEvent(event.getId());
+        assertTrue(event.getRegattas().iterator().hasNext());
+        assertEquals("Kiel Week 2012", event.getRegattas().iterator().next().getBaseName());
+        Thread.sleep(1000);
+        Event replicatedEvent = replica.getEvent(event.getId());
+        Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
+        assertTrue(regattasInReplicatedEvent.hasNext());
+        assertEquals("Kiel Week 2012", regattasInReplicatedEvent.next().getBaseName());
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), golfCourseAreaId, null));
     }
     
     @Test
@@ -177,6 +200,78 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals(1, Util.size(replicatedMedal.getFleets()));
         assertNotNull(replicatedMedal.getFleetByName("Medal"));
         assertNull(replicatedRegatta.getDefaultCourseArea());
+    }
+    
+    @Test
+    public void testRegattaUpdateSeriesWithNewSeries() throws InterruptedException {
+        final String baseEventName = "Extreme Sailing Series 2020";
+        final String boatClassName = "Extreme40";
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+                Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        Thread.sleep(1000);
+        Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertTrue(replicatedRegatta.isPersistent());
+        assertFalse(Util.isEmpty((replicatedRegatta.getSeries())));
+        Iterator<? extends Series> seriesIter = replicatedRegatta.getSeries().iterator();
+        Series replicatedQualification = seriesIter.next();
+        assertEquals("Qualification", replicatedQualification.getName());
+        assertEquals(2, Util.size(replicatedQualification.getFleets()));
+        assertFalse(seriesIter.hasNext());
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false,
+                Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
+        FleetDTO finalsGoldFleet = new FleetDTO("Gold", 1, Color.GRAY);
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(),
+                new int[] {},
+                finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
+                finals.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertTrue(replicatedRegatta.isPersistent());
+        assertFalse(Util.isEmpty((replicatedRegatta.getSeries())));
+        seriesIter = replicatedRegatta.getSeries().iterator();
+        replicatedQualification = seriesIter.next();
+        assertEquals("Qualification", replicatedQualification.getName());
+        assertEquals(2, Util.size(replicatedQualification.getFleets()));
+        assertTrue(seriesIter.hasNext());
+        Series replicatedFinals = seriesIter.next();
+        assertEquals("Finals", replicatedFinals.getName());
+        assertEquals(1, Util.size(replicatedFinals.getFleets()));
+        assertNotNull(replicatedFinals.getFleetByName("Gold"));
+        assertEquals(1, replicatedFinals.getFleetByName("Gold").getOrdering());
+    }
+    
+    @Test
+    public void testSeriesNameChangeReplicationTest() throws InterruptedException {
+        final String baseEventName = "Extreme Sailing Series 2021";
+        final String boatClassName = "Extreme40";
+        final List<String> emptyRaceColumnNamesList = Collections.emptyList();
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+                Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        Thread.sleep(1000);
+        Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertTrue(replicatedRegatta.isPersistent());
+        Iterator<? extends Series> seriesIter = replicatedRegatta.getSeries().iterator();
+        Series replicatedQualification = seriesIter.next();
+        assertEquals("Qualification", replicatedQualification.getName());
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali", 
+                qualification.isMedal(),
+                new int[] {},
+                qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
+                qualification.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] {  })));
+        Thread.sleep(1000);
+        replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        seriesIter = replicatedRegatta.getSeries().iterator();
+        replicatedQualification = seriesIter.next();
+        assertEquals("Simons Quali", replicatedQualification.getName());
     }
     
     @Test

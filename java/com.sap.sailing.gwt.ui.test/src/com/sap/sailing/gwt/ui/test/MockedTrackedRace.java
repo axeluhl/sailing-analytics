@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -436,6 +437,24 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setRegattaConfiguration(RegattaConfiguration configuration) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void addSeries(Series series) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public Event getEvent() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void removeSeries(Series series) {
                         // TODO Auto-generated method stub
                         
                     }
