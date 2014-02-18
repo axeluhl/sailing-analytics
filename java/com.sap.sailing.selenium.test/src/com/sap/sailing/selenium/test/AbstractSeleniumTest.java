@@ -23,11 +23,9 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.core.Managed;
-import com.sap.sailing.selenium.core.ScreenShotFilenameGenerator;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
-import com.sap.sailing.selenium.core.impl.DefaultFilenameGenerator;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -98,8 +96,6 @@ public abstract class AbstractSeleniumTest {
             }
         }
     }
-    
-    private final ScreenShotFilenameGenerator generator = new DefaultFilenameGenerator();
     
     /**
      * <p>Rule for capturing of a screenshot if a test fails.</p>
