@@ -31,17 +31,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
-            @Override
-            public Iterable<String> getStrings(T t) {
-                return getSearchableStrings(t);
-            }
-        };
+
+        @Override
+        public Iterable<String> getStrings(T t) {
+            return getSearchableStrings(t);
+        }
+    };
 
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         setSpacing(5);
         this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
+        this.textBox.ensureDebugId("FilterTextBox");
         this.all = all;
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
@@ -66,23 +68,23 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * Updates the set of all objects to be shown in the table and applies the search filter to update the
      * table view.
      */
-    public void updateAll(Iterable<T> all) {
+    
+    public void updateAll(Iterable<T> all){
         this.all = all;
         filter();
     }
-
-    public void filter() {
+    
+    public void filter(){
         filtered.getList().clear(); 
         filtered.getList().addAll(filterer.applyFilter(getTextBox().getText(), all));
         sort();
     }
-
-    private void sort() {
+   
+    private void sort(){
         ColumnSortEvent.fire(display, display.getColumnSortList());
     }
 
     public TextBox getTextBox() {
         return textBox;
     }
-
 }

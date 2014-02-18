@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 
@@ -18,19 +19,19 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public abstract class BoatClassVectorGraphics {
-    protected double overallLengthInPx;
-    protected double hullLengthInPx;
-    protected double beamInPx;
+    private static final String SAIL_FILLCOLOR = "#555555";
+    private static final String SAIL_STROKECOLOR = "#000000";
+
+    /** the minimal length of the hull in pixel when the boat is drawn */
+    private static final double minHullLengthInPx = 25;
+
+    private final double overallLengthInPx;
+    private final double hullLengthInPx;
+    private final double beamInPx;
     
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
-
-    protected final String SAIL_FILLCOLOR = "#555555";
-    protected final String SAIL_STROKECOLOR = "#000000";
-
-    /** the minimal length of the hull in pixel when the boat is drawn */
-    protected double minHullLengthInPx = 25;
-
+    
     BoatClassVectorGraphics(String mainBoatClassName, double overallLengthInPx, double beamInPx, double hullLengthInPx) {
         this.mainBoatClassName = mainBoatClassName;
         this.overallLengthInPx = overallLengthInPx;
@@ -103,23 +104,15 @@ public abstract class BoatClassVectorGraphics {
         }
     }
 
-    public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, boolean isSelected, 
-            double width, double height, double angleInDegrees, double scaleFactor, String color) {
-
+    public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, boolean isSelected, double width,
+            double height, double scaleFactor, Color color) {
         ctx.save();
-
-        double angleInRadians = angleInDegrees / 180.0 * Math.PI;
-
-        ctx.clearRect(0,  0,  width, height);
-
+        ctx.clearRect(0, 0, width, height);
         ctx.translate(width / 2.0, height / 2.0);
-        ctx.rotate(angleInRadians);
         ctx.scale(scaleFactor, scaleFactor);
-        ctx.translate(-hullLengthInPx / 2.0,- beamInPx / 2.0);
-
-        drawBoat(ctx, isSelected, color);
+        ctx.translate(-hullLengthInPx / 2.0, -beamInPx / 2.0);
+        drawBoat(ctx, isSelected, color.getAsHtml());
         drawSails(ctx, legType, tack);
-        
         ctx.restore();
     }
 

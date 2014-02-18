@@ -363,11 +363,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if (!isAutoZoomInProgress() && !map.getBounds().equals(currentMapBounds)) {
                           // remove the canvas animations for boats 
                           for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
-                              boatOverlay.removeCanvasPositionTransition();
+                              boatOverlay.removeCanvasPositionAndRotationTransition();
                           }
                           // remove the canvas animations for the info overlays of the selected boats 
                           for(CompetitorInfoOverlay infoOverlay: competitorInfoOverlays.values()) {
-                              infoOverlay.removeCanvasPositionTransition();
+                              infoOverlay.removeCanvasPositionAndRotationTransition();
                           }
                       }
                       currentMapBounds = map.getBounds();

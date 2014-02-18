@@ -185,10 +185,13 @@ public class TestEnvironmentConfiguration {
     
     private static List<DriverDefinition> createDriverDefinitions(Element testEnvironmentNode) {
         List<DriverDefinition> definitions = new LinkedList<>();
+        
         List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION, NAMESPACE_URI);
+        
         for (Element driverDefinitionNode : driverDefinitionNodes) {
             definitions.add(createDriverDefinition(driverDefinitionNode));
         }
+        
         return definitions;
     }
     

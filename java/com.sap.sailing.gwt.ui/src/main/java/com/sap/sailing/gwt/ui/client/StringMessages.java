@@ -766,7 +766,7 @@ public interface StringMessages extends Messages {
     String importRemoteHost();
     String importFetchRemoteLgs();
     String importUrlInvalid(String url);
-    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importGetLeaderboardsFailed(String host, String errorMessage);
     String importNoDataReturned();
     String importServerError();
     String importLeaderboardGroups();

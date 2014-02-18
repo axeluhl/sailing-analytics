@@ -33,5 +33,7 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.gwt.ui.test,
    com.sap.sailing.server.replication.test",
  com.sap.sailing.server.masterdata,
- com.sap.sailing.server.operationaltransformation
+ com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.server.test.support;
+  x-friends:="com.sap.sailing.server.gateway.test.support"
 

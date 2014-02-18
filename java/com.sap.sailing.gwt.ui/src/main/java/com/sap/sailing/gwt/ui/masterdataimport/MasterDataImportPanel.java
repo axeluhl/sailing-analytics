@@ -13,14 +13,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -46,9 +38,6 @@ public class MasterDataImportPanel extends VerticalPanel {
     private Button fetchIdsButton;   
 
     private List<String> allLeaderboardGroupNames;
-
-    private RegExp urlValidator;
-    private RegExp urlPlusTldValidator;
 
     private final StringMessages stringMessages;
     private String currentHost;
@@ -219,38 +208,24 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
     }
 
-    private void fireLgIdRequestAndFillList(String host) {
+    private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
-        final String getLgsUrl = createGetLgsUrl(host);
-        if (!isValidUrl(getLgsUrl, false)) {
-            showErrorAlert(stringMessages.importUrlInvalid(getLgsUrl));
-            return;
-        }
         disableAllButtons();
-        RequestBuilder getLgsRequestBuilder = new RequestBuilder(RequestBuilder.GET, getLgsUrl);
-        getLgsRequestBuilder.setCallback(new RequestCallback() {
+        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, new AsyncCallback<List<String>>() {
 
             @Override
-            public void onResponseReceived(Request request, Response response) {
-                if (response.getStatusCode() != 200) {
-                    showErrorAlert(stringMessages.importGetLeaderboardsFailed(response.getStatusCode(), getLgsUrl));
-                }
+            public void onFailure(Throwable caught) {
+                showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
+                changeButtonStateAccordingToApplicationState();
+            }
+
+            @Override
+            public void onSuccess(List<String> result) {
                 clearListBox();
-                String body = response.getText();
-                if (body == null || body.isEmpty()) {
-                    showErrorAlert(stringMessages.importNoDataReturned());
-                    changeButtonStateAccordingToApplicationState();
-                    return;
-                }
-                JSONArray leaderboardGroups = JSONParser.parseStrict(body).isArray();
-                List<String> toSort = new ArrayList<String>();
-                for (int i = 0; i < leaderboardGroups.size(); i++) {
-                    toSort.add(leaderboardGroups.get(i).isString().stringValue());
-                }
-                Collections.sort(toSort);
-                allLeaderboardGroupNames = toSort;
-                leaderboardgroupListBox.setVisibleItemCount(leaderboardGroups.size());
-                for (String lgName : toSort) {
+                Collections.sort(result);
+                allLeaderboardGroupNames = result;
+                leaderboardgroupListBox.setVisibleItemCount(result.size());
+                for (String lgName : result) {
                     leaderboardgroupListBox.addItem(lgName);
                 }
                 changeButtonStateAccordingToApplicationState();
@@ -259,48 +234,11 @@ public class MasterDataImportPanel extends VerticalPanel {
                 }
             }
 
-            @Override
-            public void onError(Request request, Throwable exception) {
-                showErrorAlert(stringMessages.importServerError());
-                changeButtonStateAccordingToApplicationState();
-            }
         });
-        try {
-            getLgsRequestBuilder.send();
-        } catch (RequestException e) {
-            showErrorAlert(stringMessages.importServerError());
-            changeButtonStateAccordingToApplicationState();
-        }
-    }
-
-    private String createGetLgsUrl(String host) {
-        StringBuffer urlBuffer = new StringBuffer(host);
-        appendHttpAndSlashIfNeeded(host, urlBuffer);
-        urlBuffer.append("sailingserver/api/v1/leaderboardgroups");
-        return urlBuffer.toString();
-    }
-
-    private void appendHttpAndSlashIfNeeded(String host, StringBuffer urlBuffer) {
-        if (!host.endsWith("/")) {
-            urlBuffer.append("/");
-        }
-        if (!host.startsWith("http://")) {
-            urlBuffer.insert(0, "http://");
-        }
     }
 
     private void showErrorAlert(String string) {
         Window.alert(string);
-    }
-
-    public boolean isValidUrl(String url, boolean topLevelDomainRequired) {
-        if (urlValidator == null || urlPlusTldValidator == null) {
-            urlValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-            urlPlusTldValidator = RegExp
-                    .compile("^((ftp|http|https)://[\\w@.\\-\\_]+\\.[a-zA-Z]{2,}(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
-        }
-        return (topLevelDomainRequired ? urlPlusTldValidator : urlValidator).exec(url) != null;
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
