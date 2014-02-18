@@ -8,6 +8,8 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -46,6 +48,14 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private final BoatClassVectorGraphics boatVectorGraphics;
 
+    private LegType lastLegType;
+    private Tack lastTack;
+    private Boolean lastSelected;
+    private Integer lastWidth;
+    private Integer lastHeight;
+    private Double lastScale;
+    private Color lastColor;
+
     /**
      * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
      * the next update. The rotation property will always be animated according to the magnitude of the values. A
@@ -77,9 +87,20 @@ public class BoatOverlay extends CanvasOverlayV3 {
             double boatSizeScaleFactor = boatScaleAndSize.getA();
             canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
             canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
-            setCanvasSize(canvasWidth, canvasHeight);
-            boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
-                    canvasWidth, canvasHeight, boatSizeScaleFactor, color.getAsHtml());
+            if (lastWidth == null || canvasWidth != lastWidth || lastHeight == null || canvasHeight != lastHeight) {
+                setCanvasSize(canvasWidth, canvasHeight);
+            }
+            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor, color)) {
+                boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
+                        canvasWidth, canvasHeight, boatSizeScaleFactor, color);
+                lastLegType = boatFix.legType;
+                lastTack = boatFix.tack;
+                lastSelected = isSelected();
+                lastWidth = canvasWidth;
+                lastHeight = canvasHeight;
+                lastScale = boatSizeScaleFactor;
+                lastColor = color;
+            }
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
@@ -94,6 +115,18 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
     
+    /**
+     * Compares the drawing parameters to {@link #lastLegType} and the other <code>last...</code>. If anything has
+     * changed, the result is <code>true</code>.
+     */
+    private boolean needToDraw(LegType legType, Tack tack, boolean isSelected, double width, double height,
+            double scaleFactor, Color color) {
+        return lastLegType == null || lastLegType != legType || lastTack == null || lastTack != tack
+                || lastSelected == null || lastSelected != isSelected || lastWidth == null || lastWidth != width
+                || lastHeight == null || lastHeight != height || lastScale == null || lastScale != scaleFactor
+                || lastColor == null || !lastColor.equals(color);
+    }
+
     /**
      * Updates {@link #boatDrawingAngle} to that the CSS transition from the old {@link #boatDrawingAngle} to
      * <code>newBoatDrawingAngle</code> is minimal.
