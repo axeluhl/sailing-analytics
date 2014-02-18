@@ -66,6 +66,16 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
             }
             double boatSizeScaleFactor = boatScaleAndSize.getA();
+            canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
+            canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
+            setCanvasSize(canvasWidth, canvasHeight);
+            boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
+                    canvasWidth, canvasHeight, boatSizeScaleFactor, color.getAsHtml());
+            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+            Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
+            setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
+                    boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
+            // now rotate the canvas accordingly
             SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
@@ -74,23 +84,15 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (boatDrawingAngle < 0) {
                 boatDrawingAngle += 360;
             }
-            canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
-            canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
-            setCanvasSize(canvasWidth, canvasHeight);
-            boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
-                    canvasWidth, canvasHeight, boatDrawingAngle, boatSizeScaleFactor, color.getAsHtml());
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-            Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
-            setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
-                    boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
+            setCanvasRotation(boatDrawingAngle);
         }
     }
     
     public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
         if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionTransition();
+            removeCanvasPositionAndRotationTransition();
         } else {
-            setCanvasPositionTransition(timeForPositionTransitionMillis);
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
         }
         this.boatFix = boatFix;
     }

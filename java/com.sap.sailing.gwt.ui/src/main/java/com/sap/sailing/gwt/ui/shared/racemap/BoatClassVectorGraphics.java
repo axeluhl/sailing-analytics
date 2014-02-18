@@ -104,22 +104,14 @@ public abstract class BoatClassVectorGraphics {
     }
 
     public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, boolean isSelected, 
-            double width, double height, double angleInDegrees, double scaleFactor, String color) {
-
+            double width, double height, double scaleFactor, String color) {
         ctx.save();
-
-        double angleInRadians = angleInDegrees / 180.0 * Math.PI;
-
         ctx.clearRect(0,  0,  width, height);
-
         ctx.translate(width / 2.0, height / 2.0);
-        ctx.rotate(angleInRadians);
         ctx.scale(scaleFactor, scaleFactor);
         ctx.translate(-hullLengthInPx / 2.0,- beamInPx / 2.0);
-
         drawBoat(ctx, isSelected, color);
         drawSails(ctx, legType, tack);
-        
         ctx.restore();
     }
 

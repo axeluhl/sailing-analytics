@@ -275,23 +275,23 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
-    public void setCanvasPositionTransition(long durationInMilliseconds) {
+    public void setCanvasPositionAndRotationTransition(long durationInMilliseconds) {
         if (durationInMilliseconds != transitionTimeInMilliseconds) {
-            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear, transform "+durationInMilliseconds+"ms linear");
             transitionTimeInMilliseconds = durationInMilliseconds;
         }
     }
     
-    public void removeCanvasPositionTransition() {
+    public void removeCanvasPositionAndRotationTransition() {
         if (transitionTimeInMilliseconds != -1) {
             setProperty(canvas.getElement().getStyle(), "transition", "none");
             transitionTimeInMilliseconds = -1;
         }
     }
-
+    
     private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
         for (String browserTypePrefix : getBrowserTypePrefixes()) {
-                style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
+            style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
         }
     }
     
@@ -318,6 +318,11 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
     
+    protected void setCanvasRotation(double rotationInDegrees) {
+        setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
+        setProperty(canvas.getElement().getStyle(), "transform", "rotate("+rotationInDegrees+"deg");
+    }
+
     protected double calculateRadiusOfBoundingBox(MapCanvasProjection projection, LatLng centerPosition, double lengthInMeter) {
         Position centerPos = new DegreePosition(centerPosition.getLatitude(), centerPosition.getLongitude());
         Position translateRhumbX = centerPos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
