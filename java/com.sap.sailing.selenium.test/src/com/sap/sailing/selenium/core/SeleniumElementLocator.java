@@ -3,7 +3,6 @@ package com.sap.sailing.selenium.core;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -35,8 +34,6 @@ public class SeleniumElementLocator implements ElementLocator {
 
     private WebElement element;
     private List<WebElement> elements;
-    
-    private static final Logger logger = Logger.getLogger(SeleniumElementLocator.class.getName());
     
     /**
      * <p>Creates a new element locator for the given field using the specified context and timeout for the search.</p>
@@ -97,8 +94,7 @@ public class SeleniumElementLocator implements ElementLocator {
             public WebElement apply(SearchContext context) {
                 //return context.findElement(SeleniumElementLocator.this.getBy());
                 WebElement element = context.findElement(SeleniumElementLocator.this.getBy());
-                logger.info("findElement(" + getBy() + ") returned " + element + " which is " +
-                        (isElementUsable(element) ? "useable" : " not useable"));
+                
                 return (isElementUsable(element) ? element : null);
             }
         });
