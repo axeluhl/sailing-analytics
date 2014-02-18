@@ -46,6 +46,15 @@ public class BoatOverlay extends CanvasOverlayV3 {
 
     private final BoatClassVectorGraphics boatVectorGraphics;
 
+    /**
+     * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
+     * the next update. The rotation property will always be animated according to the magnitude of the values. A
+     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
+     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
+     * goes through 0.<p>
+     */
+    private Double boatDrawingAngle;
+
     public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color) {
         super(map, zIndex);
         this.boatClass = competitorDTO.getBoatClass();
@@ -80,14 +89,27 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
             }
-            double boatDrawingAngle = speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
-            if (boatDrawingAngle < 0) {
-                boatDrawingAngle += 360;
-            }
+            updateBoatDrawingAngle(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
             setCanvasRotation(boatDrawingAngle);
         }
     }
     
+    /**
+     * Updates {@link #boatDrawingAngle} to that the CSS transition from the old {@link #boatDrawingAngle} to
+     * <code>newBoatDrawingAngle</code> is minimal.
+     */
+    private void updateBoatDrawingAngle(double newBoatDrawingAngle) {
+        if (boatDrawingAngle == null) {
+            boatDrawingAngle = newBoatDrawingAngle;
+        } else {
+            double newMinusOld;
+            while (Math.abs(newMinusOld = newBoatDrawingAngle - boatDrawingAngle) > 180) {
+                newBoatDrawingAngle -= Math.signum(newMinusOld)*360;
+            }
+            boatDrawingAngle = boatDrawingAngle+newMinusOld;
+        }
+    }
+
     public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
         if (timeForPositionTransitionMillis == -1) {
             removeCanvasPositionAndRotationTransition();
