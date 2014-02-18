@@ -5,22 +5,21 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.QueryImpl;
-import com.sap.sailing.datamining.impl.i18n.DataMiningResourceBundleManager;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.ParallelAggregator;
 import com.sap.sse.datamining.components.ParallelDataRetriever;
 import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.components.ParallelGrouper;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataMiningFactory {
     
-    private static final DataMiningStringMessages stringMessages = new DataMiningResourceBundleManager(Locale.ENGLISH);
+    private static final DataMiningStringMessages stringMessages = DataMiningStringMessages.Util.getInstanceFor(Locale.ENGLISH);
     
     private DataMiningFactory() { }
 

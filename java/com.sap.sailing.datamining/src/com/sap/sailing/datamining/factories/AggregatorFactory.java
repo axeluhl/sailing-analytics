@@ -7,8 +7,8 @@ import com.sap.sailing.datamining.builders.AggregationWorkerBuilder;
 import com.sap.sailing.datamining.impl.GroupDividingParallelAggregator;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.ValueType;
-import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.components.ParallelAggregator;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

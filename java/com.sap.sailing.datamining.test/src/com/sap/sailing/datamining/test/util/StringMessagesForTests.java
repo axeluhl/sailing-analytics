@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.sap.sse.datamining.DataMiningStringMessages;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Message;
 
 public class StringMessagesForTests implements DataMiningStringMessages {

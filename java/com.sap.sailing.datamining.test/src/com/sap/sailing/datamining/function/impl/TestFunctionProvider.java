@@ -25,11 +25,11 @@ import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClas
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.StringMessagesForTests;
-import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class TestFunctionProvider {

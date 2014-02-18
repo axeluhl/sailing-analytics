@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.test;
+package com.sap.sse.datamining.impl.i18n;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,7 +8,7 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.test.util.OpenResourceBundleManager;
+import com.sap.sse.datamining.test.util.OpenResourceBundleManager;
 
 public class TestI18N {
 

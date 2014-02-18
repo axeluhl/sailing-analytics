@@ -1,11 +1,11 @@
-package com.sap.sailing.datamining.impl.i18n;
+package com.sap.sse.datamining.impl.i18n;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.sap.sse.datamining.DataMiningStringMessages;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.Message;
 
 public class DataMiningResourceBundleManager implements DataMiningStringMessages {
