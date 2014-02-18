@@ -10,28 +10,28 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
-
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
+import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.IEvent;
+import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.IRaceSubscriber;
+import com.tractrac.subscription.lib.api.ISubscriberFactory;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.SubscriptionLocator;
 
 /**
  * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
@@ -47,11 +47,13 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private IEvent event;
+    private IEventSubscriber eventSubscriber;
+    private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
     
-    private Thread ioThread;
-    
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    // TODO commented for debugging...
+    // timeout after two minutes
+    // @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();
@@ -59,9 +61,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
 
     /**
      * Default set-up for an STG training session in Weymouth, 2011
+     * @throws SubscriberInitializationException 
      */
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
         setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
@@ -80,9 +83,21 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
                 "&race="+raceID);
     }
     
-    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
+    protected IEventSubscriber getEventSubscriber() {
+        return eventSubscriber;
+    }
+
+    protected IRaceSubscriber getRaceSubscriber() {
+        return raceSubscriber;
+    }
+
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException {
         // Read event data from configuration file
-        event = KeyValue.setup(paramUrl);
+        final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
+        event = race.getEvent();
+        ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
+        eventSubscriber = subscriberFactory.createEventSubscriber(event, liveUri, storedUri);
+        raceSubscriber = subscriberFactory.createRaceSubscriber(race);
         assertNotNull(event);
         // Initialize data controller using live and stored data sources
         if (storedUri.toString().startsWith("file:")) {
@@ -105,40 +120,23 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     
     protected void addListenersForStoredDataAndStartController(Iterable<Receiver> receivers) {
         for (Receiver receiver : receivers) {
-            this.receivers.add(receiver);
-            for (TypeController typeController : receiver.getTypeControllersAndStart()) {
-                getController().add(typeController);
-            }
+            receiver.subscribe();
         }
-        startController();
-    }
-    
-    protected void startController() {
-        ioThread.start();
+        getEventSubscriber().start();
+        getRaceSubscriber().start();
     }
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         logger.info("entering "+getClass().getName()+".tearDown()");
-        Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
-        // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
-        // TODO unsubscribe all listeners
-    logger.info("successfully stopped controller");
-        try {
-            if (ioThread != null) {
-                ioThread.join(3000); // just wait a little bit, then give up
-            }
-        } catch (InterruptedException ex) {
-            Assert.fail(ex.getMessage());
-        }
-        logger.info("successfully joined ioThread");
         for (Receiver receiver : receivers) {
             receiver.stopPreemptively();
             logger.info("successfully stopped receiver "+receiver);
         }
+        getEventSubscriber().stop();
+        getRaceSubscriber().stop();
         logger.info("leaving "+getClass().getName()+".tearDown()");
     }
-
     
     protected IEvent getTracTracEvent() {
         return event;
