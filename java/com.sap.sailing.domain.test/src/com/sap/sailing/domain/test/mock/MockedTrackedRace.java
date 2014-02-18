@@ -937,7 +937,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Pair<Position, Position> getLeftAndRightMarkPositions(TimePoint t, Waypoint w) {
+    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         // TODO Auto-generated method stub
         return null;
     }

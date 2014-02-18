@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 public class Kiel2013505Test extends AbstractMarkPassingTest {
 
@@ -12,7 +12,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
         super();
     }
 
-    @Test
+    @Ignore
     public void testRace5() throws IOException, InterruptedException, URISyntaxException {
         testRace("5");
     }

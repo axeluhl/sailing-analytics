@@ -53,10 +53,7 @@ public class CandidateFinder implements AbstractCandidateFinder {
         }
     };
 
-    private double strictness = 9; // Higher = stricter
-
-    // TODO Identical Waypoints (ControlPoint and PassingInstruction) are calculated twice.
-    // => Distance to Mark instead of Waypoint?
+    private double strictness = 9; // Higher = stricter; 9
 
     public CandidateFinder(DynamicTrackedRace race) {
         this.race = race;
@@ -352,7 +349,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
     }
 
     private Candidate createCandidate(Competitor c, GPSFix fix1, GPSFix fix2, Waypoint w) {
-
         double cte1 = crossTrackErrors.get(c).get(fix1).get(w).getA();
         double cte2 = crossTrackErrors.get(c).get(fix2).get(w).getA();
         if ((cte1 < 0 && cte2 < 0) || (cte1 > 0 && cte2 > 0)) {
@@ -436,9 +432,9 @@ public class CandidateFinder implements AbstractCandidateFinder {
         Position p2 = null;
 
         if (instruction == PassingInstruction.Line) {
-            Pair<Position, Position> pos = race.getLeftAndRightMarkPositions(t, w);
-            p1 = pos.getA();
-            p2 = pos.getB();
+            Pair<Mark, Mark> pos = race.getPortAndStarboardMarks(t, w);
+            p1 = race.getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
+            p2 = race.getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
         } else {
             int i = 1;
             for (Mark m : w.getMarks()) {
