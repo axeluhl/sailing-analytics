@@ -277,15 +277,19 @@ public abstract class CanvasOverlayV3 {
     
     public void setCanvasPositionAndRotationTransition(long durationInMilliseconds) {
         if (durationInMilliseconds != transitionTimeInMilliseconds) {
-            StringBuilder transformPropertyList = new StringBuilder();
             for (String browserTypePrefix : getBrowserTypePrefixes()) {
-                transformPropertyList.append(", ");
+                StringBuilder transformPropertyList = new StringBuilder();
+                transformPropertyList.append("left ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, top ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, ");
                 transformPropertyList.append(getBrowserSpecificDashedPropertyName(browserTypePrefix, "transform"));
                 transformPropertyList.append(' ');
                 transformPropertyList.append(durationInMilliseconds);
                 transformPropertyList.append("ms linear");
+                canvas.getElement().getStyle().setProperty(getBrowserSpecificPropertyName(browserTypePrefix, "transition"), transformPropertyList.toString());
             }
-            setProperty(canvas.getElement().getStyle(), "transition", "all "+durationInMilliseconds+"ms linear");
             transitionTimeInMilliseconds = durationInMilliseconds;
         }
     }
