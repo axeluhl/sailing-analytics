@@ -3,8 +3,6 @@ package com.sap.sailing.selenium.test.leaderboardedit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.UnsupportedEncodingException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +13,6 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetail
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
