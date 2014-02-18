@@ -118,7 +118,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
@@ -150,11 +149,12 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.test.support.RacingEventServiceWithTestSupport;
 import com.sap.sailing.util.BuildVersion;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
+public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -300,9 +300,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb, CompetitorStore competitorStore, WindStore windStore) {
         logger.info("Created " + this);
+        if (windStore == null) {
+            try {
+                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
+        }
         this.baseDomainFactory = baseDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
+        this.mediaDB = mediaDb;
+        this.competitorStore = competitorStore;
+        this.windStore = windStore;
+        
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<>();
@@ -316,23 +327,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         this.raceLogReplicator = new RaceLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
-        this.mediaDB = mediaDb;
         this.mediaLibrary = new MediaLibrary();
-        if (windStore == null) {
-            try {
-                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } 
-        }
-        this.windStore = windStore;
         this.configurationMap = new DeviceConfigurationMapImpl();
 
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        this.competitorStore = competitorStore;
         loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -341,6 +342,37 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadStoredDeviceConfigurations();
     }
 
+    @Override
+    public void clearState() throws Exception {
+        for(String leaderboardGroupName : this.leaderboardGroupsByName.keySet()) {
+            removeLeaderboardGroup(leaderboardGroupName);
+        }
+        
+        for(String leaderboardName : this.leaderboardsByName.keySet()) {
+            removeLeaderboard(leaderboardName);
+        }
+        
+        for(Regatta regatta : this.regattasByName.values()) {
+            stopTracking(regatta);
+            removeRegatta(regatta);
+        }
+        
+        for(Event event : this.eventsById.values()) {
+            removeEvent(event.getId());
+        }
+        
+        for(MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
+            mediaTrackDeleted(mediaTrack);
+        }
+        
+        this.competitorStore.clear();
+        
+        // Add one default leaderboard that aggregates all races currently tracked by this service.
+        // This is more for debugging purposes than for anything else.
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
+                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+    }
+    
     @Override
     public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;

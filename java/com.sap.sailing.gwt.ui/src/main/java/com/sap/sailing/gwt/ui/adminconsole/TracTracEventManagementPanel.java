@@ -149,7 +149,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         liveURILabel.setTitle(stringMessages.leaveEmptyForDefault());
 
         liveURITextBox = new TextBox();
-        liveURITextBox.ensureDebugId("LiveURI");
+        liveURITextBox.ensureDebugId("LiveURITextBox");
         liveURITextBox.setVisibleLength(40);
         liveURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
@@ -160,7 +160,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         storedURILabel.setTitle(stringMessages.leaveEmptyForDefault());
 
         storedURITextBox = new TextBox();
-        storedURITextBox.ensureDebugId("StoredURI");
+        storedURITextBox.ensureDebugId("StoredURITextBox");
         storedURITextBox.setVisibleLength(40);
         storedURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
@@ -171,7 +171,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
 
         jsonURLTextBox = new TextBox();
-        jsonURLTextBox.ensureDebugId("JSONURL");
+        jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
 
         grid.setWidget(4, 0, jsonURLLabel);
@@ -181,7 +181,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label tracTracUpdateURLLabel = new Label(stringMessages.tracTracUpdateUrl() + ":");
         
         tracTracUpdateURITextBox = new TextBox();
-        tracTracUpdateURITextBox.ensureDebugId("TRACTRACUPDATEURI");
+        tracTracUpdateURITextBox.ensureDebugId("TracTracUpdateURITextBox");
         tracTracUpdateURITextBox.setVisibleLength(100);
         
         grid.setWidget(5, 0, tracTracUpdateURLLabel);
@@ -189,7 +189,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         // TracTrac Username
         tractracUsernameTextBox = new TextBox();
-        tractracUsernameTextBox.ensureDebugId("tractracUsername");
+        tractracUsernameTextBox.ensureDebugId("TracTracUsernameTextBox");
         tractracUsernameTextBox.setVisibleLength(40);
         
         grid.setWidget(6, 0, new Label(stringMessages.tractracUsername() + ":"));
@@ -197,7 +197,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         // TracTrac Password
         tractracPasswordTextBox = new TextBox();
-        tractracPasswordTextBox.ensureDebugId("tractracPassword");
+        tractracPasswordTextBox.ensureDebugId("TracTracPasswordTextBox");
         tractracPasswordTextBox.setVisibleLength(40);
         
         grid.setWidget(7, 0, new Label(stringMessages.tractracPassword() + ":"));
@@ -205,11 +205,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         grid.setWidget(8, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
+        showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(8, 1, showHiddenRacesCheckbox);
 
         // List Races
         Button listRacesButton = new Button(stringMessages.listRaces());
-        listRacesButton.ensureDebugId("ListRaces");
+        listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -265,17 +266,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label trackSettingsLabel = new Label(stringMessages.trackSettings() + ":");
 
         final CheckBox trackWindCheckBox = new CheckBox(stringMessages.trackWind());
-        trackWindCheckBox.ensureDebugId("TrackWind");
+        trackWindCheckBox.ensureDebugId("TrackWindCheckBox");
         trackWindCheckBox.setWordWrap(false);
         trackWindCheckBox.setValue(Boolean.TRUE);
 
         final CheckBox correctWindCheckBox = new CheckBox(stringMessages.declinationCheckbox());
-        correctWindCheckBox.ensureDebugId("CorrectWind");
+        correctWindCheckBox.ensureDebugId("CorrectWindCheckBox");
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
         final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithStartTimeNow());
-        simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNow");
+        simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
         
@@ -288,7 +289,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
-        racesTable.ensureDebugId("RacesTable");
+        racesTable.ensureDebugId("TrackableRacesCellTable");
         this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
@@ -298,7 +299,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return strings;
             }
         };
-        racesFilterablePanel.getTextBox().ensureDebugId("FilterRaces");
+        racesFilterablePanel.getTextBox().ensureDebugId("TrackableRacesFilterTextBox");
         layoutTable.setWidget(4, 0, racesFilterLabel);
         layoutTable.setWidget(4, 1, racesFilterablePanel);
 
@@ -340,7 +341,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         };
         raceStatusColumn.setSortable(true);
         
-        racesTable.ensureDebugId("RacesTable");
         racesTable.addColumn(regattaNameColumn, stringMessages.event());
         racesTable.addColumn(raceNameColumn, stringMessages.race());
         racesTable.addColumn(boatClassColumn, stringMessages.boatClass());
@@ -357,7 +357,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         cellFormatter.setColSpan(5, 0, 2);
         
         Button startTrackingButton = new Button(stringMessages.startTracking());
-        startTrackingButton.ensureDebugId("StartTracking");
+        startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
