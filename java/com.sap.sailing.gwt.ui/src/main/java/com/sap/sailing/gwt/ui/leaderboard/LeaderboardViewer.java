@@ -58,7 +58,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
         // Remark: For now we only add the overallLeaderboardPanel to the navigation menu in case it's visible from the beginning
         
         if(showCharts) {
-            multiCompetitorChart.timeChanged(timer.getTime());
+            multiCompetitorChart.timeChanged(timer.getTime(), null);
         }
         
         overallLeaderboardPanel = null;

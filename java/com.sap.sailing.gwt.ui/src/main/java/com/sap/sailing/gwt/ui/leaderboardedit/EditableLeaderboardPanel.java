@@ -698,7 +698,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     public void onSuccess(Void result) {
                         Window.setStatus("Successfully unsuppressed competitor "+object.getName());
                         // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                        timeChanged(getLeaderboardDisplayDate());
+                        timeChanged(getLeaderboardDisplayDate(), null);
                     }
                 });
             }
@@ -770,7 +770,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             @Override
                             public void onSuccess(Void result) {
                                 // force a reload of the entire editable leaderboard to hide the now suppressed competitor
-                                timeChanged(getLeaderboardDisplayDate());
+                                timeChanged(getLeaderboardDisplayDate(), null);
                             }
                         });
                     }

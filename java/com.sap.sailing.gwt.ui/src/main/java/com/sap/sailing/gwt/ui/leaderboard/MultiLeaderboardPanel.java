@@ -227,9 +227,9 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if(selectedLeaderboardPanel != null) {
-            selectedLeaderboardPanel.timeChanged(date);
+            selectedLeaderboardPanel.timeChanged(newTime, oldTime);
         }
     }
 

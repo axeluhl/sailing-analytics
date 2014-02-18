@@ -261,8 +261,8 @@ public class MediaSelector implements PlayStateListener, TimeListener,
     }
 
     @Override
-    public void timeChanged(Date raceTime) {
-        this.currentRaceTime = raceTime;
+    public void timeChanged(Date newRaceTime, Date oldRaceTime) {
+        this.currentRaceTime = newRaceTime;
         if (activeAudioPlayer != null) {
             activeAudioPlayer.raceTimeChanged(this.currentRaceTime);
             ensurePlayState(activeAudioPlayer);

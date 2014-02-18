@@ -421,7 +421,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
-                    leaderboardPanel.timeChanged(/* time point is ignored */ null); // reload leaderboard contents to reflect changes
+                    leaderboardPanel.timeChanged(/* time point is ignored */ null, null); // reload leaderboard contents to reflect changes
                     // leaderboard panel sets busy indicator to non-busy after done with updating
                 }
             });
