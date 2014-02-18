@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public abstract class BoatClassVectorGraphics {
-    protected double overallLengthInPx;
-    protected double hullLengthInPx;
-    protected double beamInPx;
+    private final double overallLengthInPx;
+    private final double hullLengthInPx;
+    private final double beamInPx;
     
     private final String mainBoatClassName;
     private final List<String> compatibleBoatClassNames;
