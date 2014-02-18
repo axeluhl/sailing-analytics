@@ -441,9 +441,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             startedProcessingRequestID = requestID;
                             // Do boat specific actions
                             Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this);
-                            showBoatsOnMap(newTime, oldTime, getCompetitorsToShow());
-                            showCompetitorInfoOnMap(newTime, oldTime, competitorSelection.getSelectedCompetitors());
+                            long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
+                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this, timeForPositionTransitionMillis);
+                            showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
+                            showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedCompetitors());
                             if (douglasMarkers != null) {
                                 removeAllMarkDouglasPeuckerpoints();
                             }
@@ -652,12 +653,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showCompetitorInfoOnMap(final Date newTime, final Date oldTime, final Iterable<CompetitorDTO> competitorsToShow) {
+    protected void showCompetitorInfoOnMap(final Date newTime, final long timeForPositionTransitionMillis, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
             if (settings.isShowSelectedCompetitorsInfo()) {
                 Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(
                         competitorInfoOverlays.keySet());
-                final long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
                     if (fixesAndTails.hasFixesFor(competitorDTO)) {
                         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, newTime);
@@ -701,14 +701,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return timeForPositionTransitionMillis;
     }
     
-    protected void showBoatsOnMap(final Date newTime, final Date oldTime, final Iterable<CompetitorDTO> competitorsToShow) {
+    protected void showBoatsOnMap(final Date newTime, final long timeForPositionTransitionMillis, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
             Date tailsFromTime = new Date(newTime.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = newTime;
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(fixesAndTails.getCompetitorsWithTails());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
-            long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
-                    
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
@@ -722,8 +720,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
                         tail.setOptions(newOptions);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime, 
-                            timeForPositionTransitionMillis);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime, timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
@@ -1518,7 +1515,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
-                showCompetitorInfoOnMap(timer.getTime(), timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
                 timeChanged(timer.getTime(), null);
@@ -1529,7 +1526,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.draw();
-                showCompetitorInfoOnMap(timer.getTime(), timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1571,7 +1568,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         removedBoatOverlay.removeFromMap();
                     }
                     fixesAndTails.removeTail(competitor);
-                    showCompetitorInfoOnMap(timer.getTime(), timer.getTime(), competitorSelection.getSelectedCompetitors());
+                    showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1580,7 +1577,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.draw();
                 }
-                showCompetitorInfoOnMap(timer.getTime(), timer.getTime(), competitorSelection.getSelectedCompetitors());
+                showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedCompetitors());
             }
         }
         //Trigger auto-zoom if needed
