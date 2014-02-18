@@ -92,10 +92,7 @@ public class SeleniumElementLocator implements ElementLocator {
         this.element = this.wait.until(new Function<SearchContext, WebElement>() {
             @Override
             public WebElement apply(SearchContext context) {
-                //return context.findElement(SeleniumElementLocator.this.getBy());
-                WebElement element = context.findElement(SeleniumElementLocator.this.getBy());
-                
-                return (isElementUsable(element) ? element : null);
+                return context.findElement(SeleniumElementLocator.this.getBy());
             }
         });
 
@@ -139,18 +136,5 @@ public class SeleniumElementLocator implements ElementLocator {
     @Override
     public String toString() {
         return "SeleniumElementLocator->" + this.by;
-    }
-    
-    /**
-     * <p>By default, elements are considered as "found" if they are in the DOM and displayed. You can override this
-     *   method in order to change whether or not an element is considered as loaded.</p>
-     * 
-     * @param element
-     *   The element to use.
-     * @return
-     *   {@code true} if the element is usable and {@code false} otherwise.
-     */
-    protected boolean isElementUsable(WebElement element) {
-        return element.isDisplayed();
     }
 }
