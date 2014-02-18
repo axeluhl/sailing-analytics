@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.test.util;
 
 import java.util.Locale;
 
-import com.sap.sailing.datamining.i18n.DataMiningResourceBundleManager;
+import com.sap.sailing.datamining.impl.i18n.DataMiningResourceBundleManager;
 
 public class OpenResourceBundleManager extends DataMiningResourceBundleManager {
 

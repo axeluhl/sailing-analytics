@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.i18n;
+package com.sap.sailing.datamining.impl.i18n;
 
 import java.util.HashMap;
 import java.util.Locale;
