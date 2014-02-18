@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.DateAndTimeFormatterUtil;
@@ -37,13 +36,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
         if (selectedRaceTimes.startOfRace != null) {
-            if(time.before(selectedRaceTimes.startOfRace)) {
-                String timeToStartInSeconds = NumberFormat.getFormat("0.0").format(((double) selectedRaceTimes.startOfRace.getTime()-time.getTime()) / 1000.) + "s";
-                result = stringMessages.timeToStart(timeToStartInSeconds);
-            } else if(time.after(selectedRaceTimes.startOfRace)) {
+            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+                long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
+                result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
+            } else {
                 long timeSinceStartInMs = time.getTime() - selectedRaceTimes.startOfRace.getTime();
                 result = stringMessages.timeSinceStart(DateAndTimeFormatterUtil.formatElapsedTime(timeSinceStartInMs));
-            }
+            } 
         }
         return result;
     }
