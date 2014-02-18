@@ -7,13 +7,13 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -60,14 +60,14 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 racesToStopTracking.add(race.getRaceIdentifier());
             }
         }
-        sailingService.stopTrackingRaces(racesToStopTracking, new AsyncCallback<Void>() {
+        sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void handleFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void handleSuccess(Void result) {
                 regattaRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                     listener.changeTrackingRace(racesToStopTracking, false);
@@ -82,15 +82,15 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             regattaNamesAndRaceNames.add((RegattaNameAndRaceName) race.getRaceIdentifier());
         }
         sailingService.removeAndUntrackRaces(regattaNamesAndRaceNames,
-                new AsyncCallback<Void>() {
+                new MarkedAsyncCallback<Void>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void handleFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to remove races " + regattaNamesAndRaceNames +
                                 ": " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
+                    public void handleSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.changeTrackingRace(regattaNamesAndRaceNames, false);
@@ -102,7 +102,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
         btnRemoveRace = new Button(stringMessages.remove());
-        btnRemoveRace.ensureDebugId("RemoveRace");
+        btnRemoveRace.ensureDebugId("RemoveRaceButton");
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -111,8 +111,9 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         });
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
+        
         btnUntrack = new Button(stringMessages.stopTracking());
-        btnUntrack.ensureDebugId("UntrackRace");
+        btnUntrack.ensureDebugId("StopTrackingButton");
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -121,10 +122,9 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         });
         btnUntrack.setEnabled(false);
         trackedRacesButtonPanel.add(btnUntrack);
-
         
         btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
-        btnSetDelayToLive.ensureDebugId("SetDelayToLive");
+        btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -135,6 +135,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
         exportPopup = new ExportPopup(stringMessages);
         btnExport = new Button(stringMessages.export());
+        btnExport.ensureDebugId("ExportButton");
         btnExport.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

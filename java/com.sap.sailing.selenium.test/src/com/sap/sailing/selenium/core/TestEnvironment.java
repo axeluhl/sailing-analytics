@@ -5,7 +5,7 @@ import java.net.URL;
 import org.openqa.selenium.WebDriver;
 
 /**
- * <p>Description of the test environment in which a test is executed by the {@link Selenium} runner. The environment is
+ * <p>Description of the test environment in which a test is executed by the {@link SeleniumRunner} runner. The environment is
  *   injected by the runner to fields annotated with {@link Managed} and consists of the web driver which is used, a
  *   folder where screenshots should be stored and a context root (base URL) against the tests is executed.</p>
  * 
@@ -20,6 +20,15 @@ public interface TestEnvironment {
      *   The web driver used for the execution of the test.
      */
     public WebDriver getWebDriver();
+    
+    /**
+     * <p>Returns the window manager for the used web driver, which can be used to open new windows and switching
+     *   between multiple windows.</p>
+     * 
+     * @return
+     *   The window manager for the used web driver.
+     */
+    public WindowManager getWindowManager();
     
     /**
      * <p>Returns the context root (base URL) against the tests should be executed. The context root identifies the

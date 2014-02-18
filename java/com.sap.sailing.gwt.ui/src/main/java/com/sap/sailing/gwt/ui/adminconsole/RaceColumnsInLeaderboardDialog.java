@@ -81,8 +81,9 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         this.existingRaces = existingRaces;
         this.stringMessages = stringMessages;
         addRacesListBox = createListBox(false);
-        addRacesListBox.ensureDebugId("AddRacesListBox");
+        addRacesListBox.ensureDebugId("NumberOfRacesListBox");
         raceNamePrefixTextBox = createTextBox(null);
+        raceNamePrefixTextBox.ensureDebugId("RaceNamePrefixTextBox");
         raceNameEntryFields = new ArrayList<TextBox>();
         isMedalRaceCheckboxes = new ArrayList<CheckBox>();
         raceColumnsGrid = new Grid(0, 0);
