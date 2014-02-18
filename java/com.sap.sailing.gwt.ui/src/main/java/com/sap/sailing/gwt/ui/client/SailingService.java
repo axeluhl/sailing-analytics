@@ -341,6 +341,8 @@ public interface SailingService extends RemoteService {
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
+    List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
+
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
     
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
