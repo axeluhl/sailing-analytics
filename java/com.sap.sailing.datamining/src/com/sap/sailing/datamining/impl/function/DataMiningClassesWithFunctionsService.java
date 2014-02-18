@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
+import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 
 public class DataMiningClassesWithFunctionsService implements ClassesWithFunctionsService {
     

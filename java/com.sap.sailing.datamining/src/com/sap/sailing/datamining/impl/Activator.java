@@ -11,15 +11,15 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.datamining.DataMiningService;
-import com.sap.sailing.datamining.function.ClassesWithFunctionsService;
-import com.sap.sailing.datamining.function.FunctionProvider;
-import com.sap.sailing.datamining.function.FunctionRegistry;
-import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.DataMiningClassesWithFunctionsService;
 import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.RegistryFunctionsProvider;
 import com.sap.sailing.datamining.impl.function.SimpleFunctionRegistry;
+import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
+import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 
 public class Activator implements BundleActivator {
 

@@ -8,5 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.components,
+ com.sap.sse.datamining.functions,
  com.sap.sse.datamining.workers
 Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"

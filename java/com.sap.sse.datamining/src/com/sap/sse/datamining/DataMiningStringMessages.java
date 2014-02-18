@@ -1,8 +1,8 @@
-package com.sap.sailing.datamining;
+package com.sap.sse.datamining;
 
 import java.util.Locale;
 
-import com.sap.sailing.datamining.shared.Message;
+import com.sap.sse.datamining.shared.Message;
 
 public interface DataMiningStringMessages {
 

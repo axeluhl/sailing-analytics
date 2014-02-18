@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
-import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
 import com.sap.sailing.datamining.impl.AbstractParallelComponent;
+import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.workers.ComponentWorker;
 
 public abstract class AbstractPartitioningParallelFunctionRetriever

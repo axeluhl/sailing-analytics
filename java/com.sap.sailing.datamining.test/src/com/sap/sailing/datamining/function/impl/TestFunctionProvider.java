@@ -12,12 +12,7 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.factories.FunctionFactory;
-import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.function.FunctionProvider;
-import com.sap.sailing.datamining.function.FunctionRegistry;
-import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.RegistryFunctionsProvider;
@@ -30,6 +25,11 @@ import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClas
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.StringMessagesForTests;
+import com.sap.sse.datamining.DataMiningStringMessages;
+import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class TestFunctionProvider {

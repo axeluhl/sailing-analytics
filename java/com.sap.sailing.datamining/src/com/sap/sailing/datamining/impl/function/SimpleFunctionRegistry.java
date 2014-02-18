@@ -11,9 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.datamining.factories.FunctionFactory;
-import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.function.FunctionRegistry;
-import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
+import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 
 public class SimpleFunctionRegistry implements FunctionRegistry {
     

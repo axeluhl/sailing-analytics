@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
-import com.sap.sailing.datamining.shared.Message;
+import com.sap.sse.datamining.DataMiningStringMessages;
+import com.sap.sse.datamining.shared.Message;
 
 public class StringMessagesForTests implements DataMiningStringMessages {
     

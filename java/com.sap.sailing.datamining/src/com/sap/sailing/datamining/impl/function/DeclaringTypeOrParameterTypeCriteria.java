@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.sap.sailing.datamining.function.Function;
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.functions.Function;
 
 public class DeclaringTypeOrParameterTypeCriteria implements FilterCriteria<Function<?>> {
 

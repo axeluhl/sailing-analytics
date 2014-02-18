@@ -5,8 +5,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.DataMiningService;
-import com.sap.sailing.datamining.function.FunctionProvider;
-import com.sap.sailing.datamining.function.FunctionRegistry;
+import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.functions.FunctionRegistry;
 
 public class DataMiningServiceImpl implements DataMiningService {
 

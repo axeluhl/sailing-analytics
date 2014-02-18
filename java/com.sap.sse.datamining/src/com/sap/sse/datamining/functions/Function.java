@@ -1,9 +1,9 @@
-package com.sap.sailing.datamining.function;
+package com.sap.sse.datamining.functions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
+import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;

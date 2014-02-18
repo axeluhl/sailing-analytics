@@ -10,8 +10,7 @@ Import-Package: com.google.gwt.i18n.client,
  org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.data,
- com.sap.sailing.datamining.factories,
- com.sap.sailing.datamining.function
+ com.sap.sailing.datamining.factories
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.datamining.shared;bundle-version="1.0.0",

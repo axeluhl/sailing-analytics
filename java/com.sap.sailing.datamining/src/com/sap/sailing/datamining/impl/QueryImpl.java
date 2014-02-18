@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
-import com.sap.sailing.datamining.shared.Message;
+import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.ParallelAggregator;
 import com.sap.sse.datamining.components.ParallelDataRetriever;
@@ -15,6 +14,7 @@ import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.components.ParallelGrouper;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 

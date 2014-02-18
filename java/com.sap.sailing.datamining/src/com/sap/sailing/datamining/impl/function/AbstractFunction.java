@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.function;
 
 import java.util.logging.Logger;
 
-import com.sap.sailing.datamining.function.Function;
+import com.sap.sse.datamining.functions.Function;
 
 public abstract class AbstractFunction<ReturnType> implements Function<ReturnType> {
     

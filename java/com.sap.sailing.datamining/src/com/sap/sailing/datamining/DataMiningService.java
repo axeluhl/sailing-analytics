@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining;
 
-import com.sap.sailing.datamining.function.FunctionProvider;
+import com.sap.sse.datamining.functions.FunctionProvider;
 
 public interface DataMiningService {
 

@@ -11,14 +11,14 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.function.Function;
-import com.sap.sailing.datamining.function.FunctionRetrievalWorker;
-import com.sap.sailing.datamining.function.ParallelFunctionRetriever;
+import com.sap.sailing.datamining.impl.function.FunctionRetrievalWorker;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
+import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 
 public class TestFunctionRetrievers {
 

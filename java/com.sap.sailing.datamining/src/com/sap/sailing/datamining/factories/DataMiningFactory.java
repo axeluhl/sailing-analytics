@@ -3,12 +3,12 @@ package com.sap.sailing.datamining.factories;
 import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.DataMiningStringMessages;
 import com.sap.sailing.datamining.i18n.DataMiningResourceBundleManager;
 import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.QueryImpl;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.DataMiningStringMessages;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.ParallelAggregator;
 import com.sap.sse.datamining.components.ParallelDataRetriever;

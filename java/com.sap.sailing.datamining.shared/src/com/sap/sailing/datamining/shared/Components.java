@@ -1,5 +1,6 @@
 package com.sap.sailing.datamining.shared;
 
+import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
 
 
