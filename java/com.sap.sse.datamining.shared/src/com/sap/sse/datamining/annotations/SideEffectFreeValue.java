@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.annotations;
+package com.sap.sse.datamining.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

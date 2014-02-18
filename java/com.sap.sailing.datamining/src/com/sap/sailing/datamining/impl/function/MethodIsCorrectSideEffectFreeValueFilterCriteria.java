@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.function;
 
 import java.lang.reflect.Method;
 
-import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.components.FilterCriteria;
 
 public class MethodIsCorrectSideEffectFreeValueFilterCriteria implements FilterCriteria<Method> {

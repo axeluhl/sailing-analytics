@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.test.function.test_classes;
 
-import com.sap.sailing.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Dimension;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!

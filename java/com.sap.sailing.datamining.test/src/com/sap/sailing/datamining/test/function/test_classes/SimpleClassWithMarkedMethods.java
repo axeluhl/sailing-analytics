@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.test.function.test_classes;
 
-import com.sap.sailing.datamining.annotations.Dimension;
-import com.sap.sailing.datamining.annotations.SideEffectFreeValue;
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!
