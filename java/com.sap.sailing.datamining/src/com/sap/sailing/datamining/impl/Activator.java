@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
         registerDataMiningClassesWithMarkedMethodsService();
 
         FunctionRegistry functionRegistry = createAndBuildFunctionRegistry();
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, getExecutor());
         
         dataMiningService = new DataMiningServiceImpl(functionRegistry, functionProvider);
         registerDataMiningService();

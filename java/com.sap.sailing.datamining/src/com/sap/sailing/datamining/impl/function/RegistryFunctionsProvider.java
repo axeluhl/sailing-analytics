@@ -3,11 +3,11 @@ package com.sap.sailing.datamining.impl.function;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.datamining.builders.FilterByCriteriaBuilder;
-import com.sap.sailing.datamining.impl.Activator;
 import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
@@ -23,9 +23,11 @@ public class RegistryFunctionsProvider implements FunctionProvider {
     private static final Logger LOGGER = Logger.getLogger(RegistryFunctionsProvider.class.getName());
 
     private FunctionRegistry functionRegistry;
+    private ThreadPoolExecutor executor;
 
-    public RegistryFunctionsProvider(FunctionRegistry functionRegistry) {
+    public RegistryFunctionsProvider(FunctionRegistry functionRegistry, ThreadPoolExecutor executor) {
         this.functionRegistry = functionRegistry;
+        this.executor = executor;
     }
 
     @Override
@@ -59,7 +61,7 @@ public class RegistryFunctionsProvider implements FunctionProvider {
 
     private ParallelFilter<Function<?>> createFilterForCriteria(FilterCriteria<Function<?>> filterCriteria) {
         WorkerBuilder<FiltrationWorker<Function<?>>> workerBuilder = new FilterByCriteriaBuilder<Function<?>>(filterCriteria);
-        return new PartitioningParallelFilter<>(workerBuilder, Activator.getExecutor());
+        return new PartitioningParallelFilter<>(workerBuilder, executor);
     }
     
     @Override

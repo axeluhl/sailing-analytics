@@ -58,7 +58,7 @@ public class TestFunctionProvider {
 
     @Test
     public void testGetDimensionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         
         Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
         
@@ -71,7 +71,7 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         Method getRegattaAndRaceName = FunctionTestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
         
         Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
@@ -93,7 +93,7 @@ public class TestFunctionProvider {
         Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
         FunctionDTO getRegattaNameDTO = getRegattaName.asDTO(Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
         Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionFor(getRegattaNameDTO);
         assertThat(providedFunction, is(getRegattaName));
@@ -105,13 +105,13 @@ public class TestFunctionProvider {
         Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
         FunctionDTO incrementDTO = increment.asDTO(Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(incrementDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(null), is(nullValue()));
     }
 
