@@ -814,10 +814,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 result = before.middle(after.reverse());
             }
         } else if (instruction == PassingInstruction.Line) {
-            Pair<Position, Position> pos = getLeftAndRightMarkPositions(t, w);
+            Pair<Mark, Mark> pos = getPortAndStarboardMarks(t, w);
             if (pos.getA() != null && pos.getB() != null) {
-                result = pos.getA().getBearingGreatCircle(pos.getB());
-            } 
+                Position portPosition = getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);
+                Position starboardPosition = getOrCreateTrack(pos.getB()).getEstimatedPosition(t, false);
+                if (portPosition != null && starboardPosition != null) {
+                    result = portPosition.getBearingGreatCircle(starboardPosition);
+                }
+            }
         } else if (instruction == PassingInstruction.Offset) {
             // TODO Bug 1712
         }
@@ -825,13 +829,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public Pair<Position, Position> getLeftAndRightMarkPositions(TimePoint t, Waypoint w) {
+    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark lineMark : w.getMarks()) {
             final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
             false);
             if (estimatedMarkPosition == null) {
-                return new Pair<Position, Position>(null,null);
+                return new Pair<Mark, Mark>(null,null);
             }
             markPositions.add(estimatedMarkPosition);
         }
@@ -840,13 +844,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final boolean isStartLine = indexOfWaypoint == 0;
         final Bearing legDeterminingDirectionBearing = getTrackedLeg(legs.get(isStartLine ? 0 : indexOfWaypoint - 1)).getLegBearing(t);
         if (legDeterminingDirectionBearing == null) {
-            return new Pair<Position, Position>(null, null);
+            return new Pair<Mark, Mark>(null, null);
         }
         Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0).crossTrackError(markPositions.get(1), legDeterminingDirectionBearing);
         final Mark starboardMarkWhileApproachingLine;
         final Mark portMarkWhileApproachingLine;
-        final Position starboardMarkPositionWhileApproachingLine;
-        final Position portMarkPositionWhileApproachingLine;
         if (crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint.getMeters() < 0) {
             portMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
@@ -854,8 +856,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             portMarkWhileApproachingLine = Util.get(w.getMarks(), 1);
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
         }
-        portMarkPositionWhileApproachingLine = getOrCreateTrack(portMarkWhileApproachingLine).getEstimatedPosition(t, /* extrapolate */false);
-        starboardMarkPositionWhileApproachingLine = getOrCreateTrack(starboardMarkWhileApproachingLine).getEstimatedPosition(t, /* extrapolate */false);
-        return new Pair<Position, Position>(portMarkPositionWhileApproachingLine, starboardMarkPositionWhileApproachingLine);
+        return new Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
     }
 }

@@ -69,22 +69,34 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel.add(vPanel);
         Grid grid = new Grid(5, 2);
         vPanel.add(grid);
+        
         regattaName = new Label();
+        regattaName.ensureDebugId("NameLabel");
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
         grid.setWidget(0 , 1, regattaName);
+        
         boatClassName = new Label();
+        boatClassName.ensureDebugId("BoatClassLabel");
         grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
         grid.setWidget(1 , 1, boatClassName);
+        
         defaultCourseArea = new Label();
+        defaultCourseArea.ensureDebugId("CourseAreaLabel");
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
+        
         configuration = new Label();
+        configuration.ensureDebugId("RacingProcedureLabel");
         grid.setWidget(3, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(3, 1, configuration);;
+        grid.setWidget(3, 1, configuration);
+        
         scoringSystem = new Label();
+        scoringSystem.ensureDebugId("ScoringSystemLabel");
         grid.setWidget(4 , 0, new Label(stringMessages.scoringSystem() + ":"));
         grid.setWidget(4 , 1, scoringSystem);
+        
         seriesTable = createRegattaSeriesTable();
+        seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -95,6 +107,7 @@ public class RegattaDetailsComposite extends Composite {
         seriesListDataProvider = new ListDataProvider<SeriesDTO>();
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
+        
         initWidget(mainPanel);
     }
 
@@ -247,6 +260,7 @@ public class RegattaDetailsComposite extends Composite {
                         updateRacesOfRegattaSeries(regatta, result);
                     }
                 });
+        raceDialog.ensureDebugId("SeriesEditDialog");
         raceDialog.show();
     }
 

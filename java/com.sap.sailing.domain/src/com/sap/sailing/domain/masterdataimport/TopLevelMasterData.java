@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -30,7 +31,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 public class TopLevelMasterData implements Serializable {
 
     private static final long serialVersionUID = 4820893865792553281L;
-    private final Map<Regatta, Set<String>> raceIdStringsForRegatta;
+    private final Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta;
     private final Set<MediaTrack> allMediaTracks;
     private final Set<LeaderboardGroup> leaderboardGroups;
     private final Set<WindTrackMasterData> windTrackMasterData;
@@ -83,14 +84,15 @@ public class TopLevelMasterData implements Serializable {
         return eventsForLeaderboardGroup;
     }
 
-    private Map<Regatta, Set<String>> convertToRaceIdStringsForRegattaMap(Map<String, Regatta> regattaForRaceIdString) {
-        Map<Regatta, Set<String>> raceIdStringsForRegatta = new HashMap<Regatta, Set<String>>();
+    private Map<RegattaIdentifier, Set<String>> convertToRaceIdStringsForRegattaMap(
+            Map<String, Regatta> regattaForRaceIdString) {
+        Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta = new HashMap<RegattaIdentifier, Set<String>>();
         for (Entry<String, Regatta> entry : regattaForRaceIdString.entrySet()) {
             Regatta regatta = entry.getValue();
             Set<String> raceIds = raceIdStringsForRegatta.get(regatta);
             if (raceIds == null) {
                 raceIds = new HashSet<String>();
-                raceIdStringsForRegatta.put(regatta, raceIds);
+                raceIdStringsForRegatta.put(regatta.getRegattaIdentifier(), raceIds);
             }
             raceIds.add(entry.getKey());
         }
@@ -158,7 +160,7 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    public Map<Regatta, Set<String>> getRaceIdStringsForRegatta() {
+    public Map<RegattaIdentifier, Set<String>> getRaceIdStringsForRegatta() {
         return raceIdStringsForRegatta;
     }
 
