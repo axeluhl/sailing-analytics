@@ -1,4 +1,5 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sse.datamining.impl.workers.aggregators;
+
 
 public class SimpleIntegerMedianAggregationWorker extends SimpleMedianAggregationWorker<Integer> {
 

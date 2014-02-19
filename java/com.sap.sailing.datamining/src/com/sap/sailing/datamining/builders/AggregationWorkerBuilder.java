@@ -1,14 +1,14 @@
 package com.sap.sailing.datamining.builders;
 
-import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
-import com.sap.sailing.datamining.impl.aggregators.SimpleDoubleMedianAggregationWorker;
-import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
-import com.sap.sailing.datamining.impl.aggregators.SimpleIntegerMedianAggregationWorker;
-import com.sap.sailing.datamining.impl.aggregators.SumAggregationWorker;
-import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleDoubleSumAggregator;
-import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.ValueType;
+import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
+import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleMedianAggregationWorker;
+import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
+import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerMedianAggregationWorker;
+import com.sap.sse.datamining.impl.workers.aggregators.SumAggregationWorker;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleDoubleSumAggregator;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregator;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

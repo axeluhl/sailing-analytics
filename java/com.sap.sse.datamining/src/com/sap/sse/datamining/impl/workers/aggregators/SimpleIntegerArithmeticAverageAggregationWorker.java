@@ -1,7 +1,7 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sse.datamining.impl.workers.aggregators;
 
-import com.sap.sailing.datamining.impl.aggregators.helpers.SimpleIntegerSumAggregator;
-import com.sap.sailing.datamining.impl.aggregators.helpers.SumAggregationHelper;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregator;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SumAggregationHelper;
 
 public class SimpleIntegerArithmeticAverageAggregationWorker extends SimpleArithmeticAverageAggregationWorker<Integer> {
 

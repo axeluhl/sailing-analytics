@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.aggregators.helpers;
+package com.sap.sse.datamining.impl.workers.aggregators.helpers;
 
 import java.util.Collection;
 import java.util.Iterator;

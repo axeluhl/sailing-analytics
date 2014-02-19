@@ -1,10 +1,11 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sse.datamining.impl.workers.aggregators;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.impl.aggregators.helpers.SumAggregationHelper;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SumAggregationHelper;
 
-public class SumAggregationWorker<ExtractedType, AggregatedType> extends AbstractAggregationWorker<ExtractedType, AggregatedType> {
+public class SumAggregationWorker<ExtractedType, AggregatedType>
+			 extends AbstractAggregationWorker<ExtractedType, AggregatedType> {
     
     private SumAggregationHelper<ExtractedType, AggregatedType> aggregator;
     

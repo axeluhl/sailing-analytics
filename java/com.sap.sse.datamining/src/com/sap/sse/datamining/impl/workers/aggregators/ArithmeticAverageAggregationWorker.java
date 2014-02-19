@@ -1,10 +1,11 @@
-package com.sap.sailing.datamining.impl.aggregators;
+package com.sap.sse.datamining.impl.workers.aggregators;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.impl.aggregators.helpers.SumAggregationHelper;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SumAggregationHelper;
 
-public abstract class ArithmeticAverageAggregationWorker<ExtractedType, AggregatedType> extends AbstractAggregationWorker<ExtractedType, AggregatedType>  {
+public abstract class ArithmeticAverageAggregationWorker<ExtractedType, AggregatedType> 
+					  extends AbstractAggregationWorker<ExtractedType, AggregatedType>  {
     
     private SumAggregationHelper<ExtractedType, AggregatedType> sumAggregator;
 
@@ -16,10 +17,6 @@ public abstract class ArithmeticAverageAggregationWorker<ExtractedType, Aggregat
     protected AggregatedType aggregate(Collection<ExtractedType> data) {
         return divide(sumAggregator.aggregate(data), data.size());
     }
-
-//    private AggregatedType aggregate(Collection<ExtractedType> data) {
-//        return divide(sumAggregator.aggregate(data), data.size());
-//    }
 
     protected abstract AggregatedType divide(AggregatedType sum, int dataAmount);
 
