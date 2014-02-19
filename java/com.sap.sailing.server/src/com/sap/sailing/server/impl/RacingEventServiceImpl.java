@@ -1323,10 +1323,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     @Override
     public void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException {
+        series.getRegatta().removeSeries(series);
         if (series.getRegatta().isPersistent()) {
-            mongoObjectFactory.removeSeries(series);
-        } else {
-            series.getRegatta().removeSeries(series);
+            mongoObjectFactory.storeRegatta(series.getRegatta());
         }
     }
 
