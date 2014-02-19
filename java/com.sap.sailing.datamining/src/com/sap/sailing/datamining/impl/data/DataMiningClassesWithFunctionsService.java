@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.function;
+package com.sap.sailing.datamining.impl.data;
 
 import java.util.Collection;
 import java.util.HashSet;

@@ -10,15 +10,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.datamining.impl.function.DataMiningClassesWithFunctionsService;
-import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
-import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
+import com.sap.sailing.datamining.impl.data.DataMiningClassesWithFunctionsService;
 import com.sap.sse.datamining.DataMiningService;
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.impl.DataMiningServiceImpl;
+import com.sap.sse.datamining.impl.functions.PartitionParallelExternalFunctionRetriever;
+import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
