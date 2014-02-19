@@ -441,8 +441,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             startedProcessingRequestID = requestID;
                             // Do boat specific actions
                             Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this);
-                            showBoatsOnMap(date, getCompetitorsToShow());
+                            final long timeForPositionTransitionMillis = timer.getPlayState() == PlayStates.Playing ? // animate when playing
+                                                1300*timer.getRefreshInterval()/1000 : -1;
+                            fixesAndTails.updateFixes(boatData, fromAndToAndOverlap.getC(), RaceMap.this, timeForPositionTransitionMillis);
+                            showBoatsOnMap(date, getCompetitorsToShow(), timeForPositionTransitionMillis);
                             showCompetitorInfoOnMap(date, competitorSelection.getSelectedCompetitors());
                             if (douglasMarkers != null) {
                                 removeAllMarkDouglasPeuckerpoints();
@@ -692,14 +694,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    protected void showBoatsOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
+    protected void showBoatsOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow, long timeForPositionTransitionMillis) {
         if (map != null) {
             Date tailsFromTime = new Date(date.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = date;
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(fixesAndTails.getCompetitorsWithTails());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatOverlays.keySet());
-            final long timeForPositionTransitionMillis = timer.getPlayState() == PlayStates.Playing ? // animate when playing
-                    1300*timer.getRefreshInterval()/1000 : -1;
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
@@ -713,8 +713,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
                         tail.setOptions(newOptions);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date, 
-                            timeForPositionTransitionMillis);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date, timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }

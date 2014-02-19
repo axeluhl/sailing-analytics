@@ -164,6 +164,8 @@ public interface SailingService extends RemoteService {
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName);
+
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration);

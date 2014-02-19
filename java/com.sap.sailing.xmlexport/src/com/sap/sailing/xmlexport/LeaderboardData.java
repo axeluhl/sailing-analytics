@@ -333,7 +333,7 @@ public class LeaderboardData extends ExportAction {
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
             boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitor, column, race.getEndOfRace());
-            addNamedElementWithValue(raceElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
+            addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
             Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getEndOfRace(), /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
             addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
