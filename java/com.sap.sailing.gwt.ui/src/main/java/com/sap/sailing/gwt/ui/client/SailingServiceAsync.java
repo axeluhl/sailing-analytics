@@ -516,5 +516,7 @@ public interface SailingServiceAsync {
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
 }
 
