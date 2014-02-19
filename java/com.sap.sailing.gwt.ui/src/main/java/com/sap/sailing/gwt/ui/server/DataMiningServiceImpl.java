@@ -25,7 +25,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private final BundleContext context;
 
-    private final ServiceTracker<com.sap.sailing.datamining.DataMiningService, com.sap.sailing.datamining.DataMiningService> dataMiningServiceTracker;
+    private final ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> dataMiningServiceTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     public DataMiningServiceImpl() {
@@ -34,16 +34,16 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
     }
 
-    private ServiceTracker<com.sap.sailing.datamining.DataMiningService, com.sap.sailing.datamining.DataMiningService> createAndOpenDataMiningServiceTracker(
+    private ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> createAndOpenDataMiningServiceTracker(
             BundleContext context) {
-        ServiceTracker<com.sap.sailing.datamining.DataMiningService, com.sap.sailing.datamining.DataMiningService> result = 
-                new ServiceTracker<com.sap.sailing.datamining.DataMiningService, com.sap.sailing.datamining.DataMiningService>(
-                context, com.sap.sailing.datamining.DataMiningService.class.getName(), null);
+        ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> result = 
+                new ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService>(
+                context, com.sap.sse.datamining.DataMiningService.class.getName(), null);
         result.open();
         return result;
     }
     
-    private com.sap.sailing.datamining.DataMiningService getService() {
+    private com.sap.sse.datamining.DataMiningService getService() {
         return dataMiningServiceTracker.getService();
     }
 
