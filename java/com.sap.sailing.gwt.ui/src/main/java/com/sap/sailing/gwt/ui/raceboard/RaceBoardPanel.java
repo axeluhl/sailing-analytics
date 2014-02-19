@@ -473,7 +473,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
                 if (visible && component instanceof TimeListener) {
                     // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime());
+                    ((TimeListener) component).timeChanged(timer.getTime(), null);
                 }
             }
         });
