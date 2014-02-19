@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.sap.sailing.datamining.factories.FunctionFactory;
-import com.sap.sailing.datamining.impl.AbstractComponentWorker;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.workers.AbstractComponentWorker;
 
 public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function<?>>> implements FunctionRetrievalWorker {
 

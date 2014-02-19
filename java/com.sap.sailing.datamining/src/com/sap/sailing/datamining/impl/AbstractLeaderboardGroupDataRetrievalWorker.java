@@ -18,6 +18,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.datamining.impl.workers.AbstractComponentWorker;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 
 public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>

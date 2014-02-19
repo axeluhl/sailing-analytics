@@ -1,7 +1,7 @@
-package com.sap.sailing.datamining.builders;
+package com.sap.sse.datamining.impl.workers.builders;
 
-import com.sap.sailing.datamining.impl.CriteriaFiltrationWorker;
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.impl.workers.CriteriaFiltrationWorker;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

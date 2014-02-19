@@ -14,5 +14,7 @@ Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.impl,
  com.sap.sse.datamining.impl.data,
  com.sap.sse.datamining.impl.i18n,
+ com.sap.sse.datamining.impl.workers,
+ com.sap.sse.datamining.impl.workers.builders,
  com.sap.sse.datamining.workers
 Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0"

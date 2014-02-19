@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sap.sse.datamining.impl.workers.AbstractComponentWorker;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.workers.ExtractionWorker;
 
