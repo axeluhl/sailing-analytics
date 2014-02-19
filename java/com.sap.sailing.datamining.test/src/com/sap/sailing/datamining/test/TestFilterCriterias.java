@@ -10,9 +10,6 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.impl.criterias.AndCompoundFilterCriteria;
-import com.sap.sailing.datamining.impl.criterias.NullaryFunctionFilterCriteria;
-import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
@@ -21,8 +18,11 @@ import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.data.ClusterOfComparable;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.NullaryFunctionFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.OrCompoundFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
 
 public class TestFilterCriterias {

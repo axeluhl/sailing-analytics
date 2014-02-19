@@ -1,7 +1,6 @@
-package com.sap.sailing.datamining.impl.criterias;
+package com.sap.sse.datamining.impl.criterias;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
 
 public class AndCompoundFilterCriteria<DataType> extends CompoundFilterCriteria<DataType> {
 

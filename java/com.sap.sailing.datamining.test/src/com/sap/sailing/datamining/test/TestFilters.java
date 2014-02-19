@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.data.ClusterOfComparable;
+import com.sap.sse.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
 import com.sap.sse.datamining.impl.workers.CriteriaFiltrationWorker;
 import com.sap.sse.datamining.workers.FiltrationWorker;

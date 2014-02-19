@@ -1,6 +1,6 @@
 package com.sap.sailing.datamining.test.util;
 
-import com.sap.sailing.datamining.impl.criterias.RegexFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.RegexFilterCriteria;
 
 public class StringRegexFilterCriteria extends RegexFilterCriteria<String> {
 
