@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -243,6 +244,12 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     private final WindStore windStore;
 
     /**
+     * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
+     * unpredictable fashion
+     */
+    private final ReentrantLock dataImportLock;
+
+    /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
      * object so that service lookups become possible.
      */
@@ -313,6 +320,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.mediaDB = mediaDb;
         this.competitorStore = competitorStore;
         this.windStore = windStore;
+        this.dataImportLock = new ReentrantLock(true);
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
@@ -2194,6 +2202,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
         }
         return result;
+    }
+
+    @Override
+    public ReentrantLock getDataImportLock() {
+        return dataImportLock;
     }
 
 }
