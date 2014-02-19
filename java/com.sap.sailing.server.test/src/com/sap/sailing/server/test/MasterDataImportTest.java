@@ -60,6 +60,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -283,6 +284,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -292,7 +294,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -307,8 +309,9 @@ public class MasterDataImportTest {
 
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
+
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -475,6 +478,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -483,7 +487,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -495,8 +499,9 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -612,6 +617,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -620,7 +626,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -632,8 +638,9 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -765,6 +772,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -773,7 +781,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -785,8 +793,9 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -936,6 +945,7 @@ public class MasterDataImportTest {
         RegattaLeaderboard leaderboardNotToOverride;
         LeaderboardGroup groupNotToOverride;
         String raceColumnNameNotToOveride;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -944,7 +954,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             venueNameNotToOverride = "doNotOverride";
@@ -987,8 +997,9 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // ---Asserts---
         // Test correct number of creations
@@ -1131,6 +1142,7 @@ public class MasterDataImportTest {
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         RegattaAndRaceIdentifier identifierOfRegattaTrackedRace;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1139,7 +1151,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             String venueNameToOverride = "Override";
@@ -1188,7 +1200,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), true);
+                randomUUID, true);
 
         // ---Asserts---
         // Test correct number of creations
@@ -1259,6 +1271,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1267,7 +1280,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1279,7 +1292,7 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        importer.importMasterData(deserializedMasterData, UUID.randomUUID(), false);
+        importer.importMasterData(deserializedMasterData, randomUUID, false);
 
         Regatta importedRegatta = destService.getRegattaByName(regatta.getName());
 
@@ -1386,6 +1399,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1394,7 +1408,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1407,7 +1421,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // ---Asserts---
         Assert.assertNotNull(creationCount);
@@ -1525,6 +1539,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1533,7 +1548,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1546,7 +1561,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // ---Asserts---
 
@@ -1584,6 +1599,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1592,7 +1608,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1605,7 +1621,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // ---Asserts---
 
@@ -1707,6 +1723,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1715,7 +1732,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1728,7 +1745,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // Test correct number of creations
         Assert.assertNotNull(creationCount);
@@ -1781,6 +1798,7 @@ public class MasterDataImportTest {
         ObjectInputStream ois = null;
         TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
+        UUID randomUUID = UUID.randomUUID();
         try {
             masterdata.setMasterDataExportFlagOnRaceColumns(true);
             oos.writeObject(masterdata);
@@ -1789,7 +1807,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteCreatedDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock();
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
             InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
@@ -1802,7 +1820,7 @@ public class MasterDataImportTest {
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
         MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                UUID.randomUUID(), false);
+                randomUUID, false);
 
         // Test correct number of creations
         Assert.assertEquals(1, creationCount.getLeaderboardGroupCount());
