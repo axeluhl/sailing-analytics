@@ -2,8 +2,8 @@ package com.sap.sailing.datamining.builders;
 
 import java.util.Collection;
 
-import com.sap.sailing.datamining.impl.MultiDimensionalGroupingWorker;
 import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.impl.workers.MultiDimensionalGroupingWorker;
 import com.sap.sse.datamining.workers.GroupingWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

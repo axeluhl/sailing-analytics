@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl.workers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sap.sse.datamining.impl.workers.AbstractComponentWorker;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.workers.ExtractionWorker;
 

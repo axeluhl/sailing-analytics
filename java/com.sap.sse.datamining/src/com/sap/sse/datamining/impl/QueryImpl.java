@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl;
 
 import java.util.Collection;
 import java.util.Locale;

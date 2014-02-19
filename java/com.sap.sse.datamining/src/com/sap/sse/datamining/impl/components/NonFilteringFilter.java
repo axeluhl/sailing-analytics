@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;

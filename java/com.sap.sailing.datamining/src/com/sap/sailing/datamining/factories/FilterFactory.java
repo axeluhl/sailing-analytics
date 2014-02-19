@@ -7,12 +7,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
-import com.sap.sailing.datamining.impl.NonFilteringFilter;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.impl.components.NonFilteringFilter;
 import com.sap.sse.datamining.impl.components.PartitioningParallelFilter;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
