@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.impl.function.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
@@ -20,6 +19,7 @@ import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
+import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 
 public class TestSimpleFunctionRegistryAccess {
     

@@ -12,10 +12,8 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.impl.function.SimpleFunctionRegistry;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextProcessor;
@@ -24,12 +22,14 @@ import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClas
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sailing.datamining.test.util.StringMessagesForTests;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
+import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 
 public class TestFunctionProvider {

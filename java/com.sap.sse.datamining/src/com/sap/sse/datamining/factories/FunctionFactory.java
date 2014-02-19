@@ -1,8 +1,8 @@
-package com.sap.sailing.datamining.factories;
+package com.sap.sse.datamining.factories;
 
 import java.lang.reflect.Method;
 
-import com.sap.sailing.datamining.impl.function.MethodWrappingFunction;
+import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 
 public class FunctionFactory {
     

@@ -10,7 +10,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
@@ -18,6 +17,7 @@ import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext
 import com.sap.sailing.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 
 public class FunctionTestsUtil {

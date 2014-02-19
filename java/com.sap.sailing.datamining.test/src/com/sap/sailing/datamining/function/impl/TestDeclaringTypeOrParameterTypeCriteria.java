@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.datamining.factories.FunctionFactory;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
@@ -14,6 +13,7 @@ import com.sap.sailing.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.DeclaringTypeOrParameterTypeCriteria;
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import java.util.logging.Logger;
 

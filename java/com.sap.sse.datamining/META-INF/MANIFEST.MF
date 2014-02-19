@@ -9,6 +9,7 @@ Import-Package: org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sse.datamining,
  com.sap.sse.datamining.components,
  com.sap.sse.datamining.data,
+ com.sap.sse.datamining.factories,
  com.sap.sse.datamining.functions,
  com.sap.sse.datamining.i18n,
  com.sap.sse.datamining.impl,
