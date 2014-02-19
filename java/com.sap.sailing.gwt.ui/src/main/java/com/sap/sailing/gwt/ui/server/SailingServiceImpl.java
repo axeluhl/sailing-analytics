@@ -294,6 +294,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -2932,6 +2933,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));
+    }
+    
+    @Override
+    public void removeSeries(RegattaIdentifier identifier, String seriesName) {
+        getService().apply(new RemoveSeries(identifier, seriesName));
     }
 
     private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
