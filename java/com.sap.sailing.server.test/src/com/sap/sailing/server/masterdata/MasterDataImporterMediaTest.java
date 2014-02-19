@@ -1,5 +1,12 @@
 package com.sap.sailing.server.masterdata;
 
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +28,6 @@ import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.RacingEventService;
-
-import static org.junit.Assert.*;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 
 public class MasterDataImporterMediaTest {
     
@@ -55,14 +58,16 @@ public class MasterDataImporterMediaTest {
     @Test
     public void testEmptyImportList_NoOverride() throws Exception {
         createMasterData();
-        MasterDataImportObjectCreationCount importResult = importer.importMasterData(topLevelMasterData, NO_OVERRIDE);
+        MasterDataImportObjectCreationCount importResult = importer.importMasterData(topLevelMasterData,
+                UUID.randomUUID(), NO_OVERRIDE);
         assertNull(importResult); //according to what the mocked racing event service returns
     }
 
     @Test
     public void testEmptyImportList_WithOverride() throws Exception {
         createMasterData();
-        MasterDataImportObjectCreationCount importResult = importer.importMasterData(topLevelMasterData, OVERRIDE);
+        MasterDataImportObjectCreationCount importResult = importer.importMasterData(topLevelMasterData,
+                UUID.randomUUID(), OVERRIDE);
         assertNull(importResult); //according to what the mocked racing event service returns
     }
 
@@ -70,7 +75,7 @@ public class MasterDataImporterMediaTest {
     public void testImportOneTrackToEmptyTarget_WithOverride() throws Exception {
         MediaTrack mediaTrackToImport = new MediaTrack("dbId", "title", "url", new Date(), 0, MimeType.mp3);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -86,7 +91,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -102,7 +107,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack("dbId2", existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -118,7 +123,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -134,7 +139,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, null, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -150,7 +155,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title + "x", existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, NO_OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), NO_OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -166,7 +171,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url + "x", existingMediaTrack.startTime, existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -182,7 +187,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, new Date(existingMediaTrack.startTime.getTime() + 1), existingMediaTrack.durationInMillis, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));
@@ -198,7 +203,7 @@ public class MasterDataImporterMediaTest {
         existingMediaTracks.add(existingMediaTrack);
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title, existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.durationInMillis + 1, existingMediaTrack.mimeType);
         createMasterData(mediaTrackToImport);
-        importer.importMasterData(topLevelMasterData, OVERRIDE);
+        importer.importMasterData(topLevelMasterData, UUID.randomUUID(), OVERRIDE);
         verify(racingEventService, never()).mediaTrackAdded(mediaTrackToImport);
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackTitleChanged(any(MediaTrack.class));

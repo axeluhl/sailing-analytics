@@ -204,12 +204,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if(!isVisible()) {
             return;
         }
         
-        loadChartData(timer.getPlayMode() == PlayModes.Live ? null : date);
+        loadChartData(timer.getPlayMode() == PlayModes.Live ? null : newTime);
     }
     
     protected void loadChartData(Date date) {
@@ -362,17 +362,17 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType> extends A
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     protected DetailType getSelectedDetailType() {

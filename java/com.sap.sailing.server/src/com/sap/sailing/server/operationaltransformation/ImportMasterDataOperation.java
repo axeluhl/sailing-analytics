@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -59,22 +60,44 @@ public class ImportMasterDataOperation extends
 
     private final boolean override;
 
-    public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, boolean override,
+    private final UUID importOperationId;
+
+    private DataImportProgress progress;
+
+    public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
             MasterDataImportObjectCreationCountImpl existingCreationCount, DomainFactory baseDomainFactory) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.baseDomainFactory = baseDomainFactory;
         this.masterData = topLevelMasterData;
         this.override = override;
+        this.importOperationId = importOperationId;
     }
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
-        for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
-            createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+        this.progress = toState.getDataImportLock().getProgress(importOperationId);
+        progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
+        toState.getDataImportLock().lock(importOperationId);
+        try {
+            progress.setNameOfCurrentSubProgress("Importing leaderboard groups");
+            progress.setCurrentSubProgressPct(0);
+            int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
+            int i = 0;
+            for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
+                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+                i++;
+                progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
+            }
+            progress.setNameOfCurrentSubProgress("Importing wind tracks");
+            progress.setOverAllProgressPct(0.5);
+            progress.setCurrentSubProgressPct(0);
+            createWindTracks(toState);
+            toState.getDataImportLock().getProgress(importOperationId).setResult(creationCount);
+            return creationCount;
+        } finally {
+            toState.getDataImportLock().unlock();
         }
-        createWindTracks(toState);
-        return creationCount;
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
@@ -241,12 +264,17 @@ public class ImportMasterDataOperation extends
     }
 
     private void createWindTracks(RacingEventService toState) {
+        int numOfWindTracks = masterData.getWindTrackMasterData().size();
+        int i = 0;
         for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
             DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
             WindTrack windTrack = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
             for (Wind fix : windMasterData.getFixes()) {
                 windTrack.add(fix);
-            }
+            }         
+            i++;
+            progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
+            progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
         }
     }
 

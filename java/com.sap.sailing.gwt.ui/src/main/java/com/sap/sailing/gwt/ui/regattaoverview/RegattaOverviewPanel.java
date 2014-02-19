@@ -140,15 +140,15 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
             @Override
-            public void timeChanged(Date date) {
+            public void timeChanged(Date newTime, Date oldTime) {
                 regattaRaceStatesComponent.onUpdateServer();
             }
         });
         this.serverUpdateTimer.play();
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
             @Override
-            public void timeChanged(Date date) {
-                onUpdateUI(date);
+            public void timeChanged(Date newTime, Date oldTime) {
+                onUpdateUI(newTime);
             }
         });
         this.uiUpdateTimer.play();

@@ -124,7 +124,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     protected void drawWindField() {
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         } else {
             drawWindField(windFieldDTO.getMatrix());
         }
@@ -158,17 +158,17 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
 
         List<SimulatorWindDTO> windDTOToDraw = new ArrayList<SimulatorWindDTO>();
 
-        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(newTime.getTime()+1));
 
         if (!headMap.isEmpty()) {
             windDTOToDraw = headMap.get(headMap.lastKey());
         }
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
-                + date);
+                + newTime);
 
         drawWindField(windDTOToDraw);
 
