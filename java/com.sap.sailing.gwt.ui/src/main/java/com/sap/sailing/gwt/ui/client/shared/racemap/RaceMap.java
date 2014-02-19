@@ -692,11 +692,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private long calculateTimeForPositionTransition(final Date newTime, final Date oldTime) {
-        long timeForPositionTransitionMillis = -1; // -1 means 'no transition
-        boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > timer.getRefreshInterval();
-        
-        if(timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
+        final long timeForPositionTransitionMillis;
+        boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > 3*timer.getRefreshInterval();
+        if (timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
+            // choose 130% of the refresh interval as transition period to make it unlikely that the transition
+            // stops before the next update has been received
             timeForPositionTransitionMillis = 1300 * timer.getRefreshInterval() / 1000; 
+        } else {
+            timeForPositionTransitionMillis = -1; // -1 means 'no transition
         }
         return timeForPositionTransitionMillis;
     }
