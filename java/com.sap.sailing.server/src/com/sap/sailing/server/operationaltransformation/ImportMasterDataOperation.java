@@ -70,11 +70,16 @@ public class ImportMasterDataOperation extends
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
-        for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
-            createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+        toState.getDataImportLock().lock();
+        try {
+            for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
+                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+            }
+            createWindTracks(toState);
+            return creationCount;
+        } finally {
+            toState.getDataImportLock().unlock();
         }
-        createWindTracks(toState);
-        return creationCount;
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
