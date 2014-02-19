@@ -12,11 +12,12 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
         super();
     }
 
+    //Takes longer than 2 minutes, so the rule in AbstractTracTracLiveTest needs to be deactivated first.
+    
     @Ignore
     public void testRace5() throws IOException, InterruptedException, URISyntaxException {
         testRace("5");
     }
-
 
     @Override
     protected String getFileName() {

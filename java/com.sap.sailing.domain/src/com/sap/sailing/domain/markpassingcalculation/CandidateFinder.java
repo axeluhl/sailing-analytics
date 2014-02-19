@@ -372,8 +372,8 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     race.getCrossingBearing(w, t).add(new DegreeBearingImpl(90))).getMeters() < 0;
         } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
             // TODO
-        } else if (passingInstructions.get(w) == PassingInstruction.Offset) {
-            // TODO
+        } else if (passingInstructions.get(w) == PassingInstruction.Line) {
+            // passes in between the marks?
         }
         return result;
     }
@@ -388,13 +388,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
             result = cte1 > cte2 ? true : false;
         } else if (passingInstructions.get(w) == PassingInstruction.Gate) {
             // TODO
-        } else if (passingInstructions.get(w) == PassingInstruction.Offset) {
-            // TODO
-        } else if (passingInstructions.get(w) == PassingInstruction.FixedBearing) {
-            // TODO
-        }
-        if (result == false) {
-            System.currentTimeMillis();
         }
         return result;
     }
@@ -430,7 +423,6 @@ public class CandidateFinder implements AbstractCandidateFinder {
         PassingInstruction instruction = passingInstructions.get(w);
         Position p1 = null;
         Position p2 = null;
-
         if (instruction == PassingInstruction.Line) {
             Pair<Mark, Mark> pos = race.getPortAndStarboardMarks(t, w);
             p1 = race.getOrCreateTrack(pos.getA()).getEstimatedPosition(t, false);

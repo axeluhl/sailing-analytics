@@ -822,8 +822,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     result = portPosition.getBearingGreatCircle(starboardPosition);
                 }
             }
-        } else if (instruction == PassingInstruction.Offset) {
-            // TODO Bug 1712
         }
         return result;
     }
