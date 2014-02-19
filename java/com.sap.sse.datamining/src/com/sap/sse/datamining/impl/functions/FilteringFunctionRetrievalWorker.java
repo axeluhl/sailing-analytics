@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -9,7 +9,8 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.workers.AbstractComponentWorker;
 
-public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function<?>>> implements FunctionRetrievalWorker {
+public class FilteringFunctionRetrievalWorker extends AbstractComponentWorker<Collection<Function<?>>>
+											  implements FunctionRetrievalWorker {
 
     private Iterable<Class<?>> classesToScan;
     private FilterCriteria<Method> filter;

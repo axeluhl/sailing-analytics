@@ -7,11 +7,11 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.impl.function.MethodIsCorrectDimensionFilterCriteria;
-import com.sap.sailing.datamining.impl.function.MethodIsCorrectExternalFunctionFilterCriteria;
-import com.sap.sailing.datamining.impl.function.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.impl.functions.MethodIsCorrectDimensionFilterCriteria;
+import com.sap.sse.datamining.impl.functions.MethodIsCorrectExternalFunctionFilterCriteria;
+import com.sap.sse.datamining.impl.functions.MethodIsCorrectSideEffectFreeValueFilterCriteria;
 
 public class TestFunctionFilterCriterias {
 

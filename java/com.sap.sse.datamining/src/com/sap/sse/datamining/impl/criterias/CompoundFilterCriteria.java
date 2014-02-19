@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.criterias;
+package com.sap.sse.datamining.impl.criterias;
 
 import java.util.Collection;
 import java.util.Collections;
