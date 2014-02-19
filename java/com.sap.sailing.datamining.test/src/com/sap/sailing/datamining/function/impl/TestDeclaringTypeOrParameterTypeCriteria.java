@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.datamining.factories.FunctionFactory;
-import com.sap.sailing.datamining.impl.function.DeclaringTypeOrParameterTypeCriteria;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeInterface;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sailing.datamining.test.function.test_classes.DataTypeWithContextImpl;
@@ -16,6 +15,7 @@ import com.sap.sailing.datamining.test.function.test_classes.ExternalLibraryClas
 import com.sap.sailing.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.functions.DeclaringTypeOrParameterTypeCriteria;
 
 public class TestDeclaringTypeOrParameterTypeCriteria {
 

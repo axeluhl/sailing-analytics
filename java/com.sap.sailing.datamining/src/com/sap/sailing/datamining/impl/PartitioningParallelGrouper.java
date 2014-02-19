@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sse.datamining.components.ParallelGrouper;
+import com.sap.sse.datamining.impl.components.AbstractParallelComponent;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.workers.GroupingWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;

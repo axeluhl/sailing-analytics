@@ -13,7 +13,6 @@ import org.osgi.framework.ServiceReference;
 import com.sap.sailing.datamining.impl.function.DataMiningClassesWithFunctionsService;
 import com.sap.sailing.datamining.impl.function.PartitionParallelExternalFunctionRetriever;
 import com.sap.sailing.datamining.impl.function.PartitioningParallelMarkedFunctionRetriever;
-import com.sap.sailing.datamining.impl.function.RegistryFunctionsProvider;
 import com.sap.sailing.datamining.impl.function.SimpleFunctionRegistry;
 import com.sap.sse.datamining.DataMiningService;
 import com.sap.sse.datamining.functions.ClassesWithFunctionsService;
@@ -21,6 +20,7 @@ import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
 import com.sap.sse.datamining.impl.DataMiningServiceImpl;
+import com.sap.sse.datamining.impl.functions.RegistryFunctionsProvider;
 
 public class Activator implements BundleActivator {
 

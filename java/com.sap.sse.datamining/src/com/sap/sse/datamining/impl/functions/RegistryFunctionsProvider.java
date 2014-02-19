@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.function;
+package com.sap.sse.datamining.impl.functions;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -7,12 +7,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.datamining.impl.PartitioningParallelFilter;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.components.PartitioningParallelFilter;
 import com.sap.sse.datamining.impl.workers.builders.FilterByCriteriaBuilder;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.workers.FiltrationWorker;
