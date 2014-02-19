@@ -1,8 +1,8 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl.data;
 
 import java.util.Comparator;
 
-import com.sap.sailing.datamining.Cluster;
+import com.sap.sse.datamining.data.Cluster;
 
 public class ClusterImpl<ValueType> implements Cluster<ValueType> {
 

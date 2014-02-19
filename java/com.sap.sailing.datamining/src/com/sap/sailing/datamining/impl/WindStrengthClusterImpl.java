@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl;
 
 
 import com.sap.sailing.datamining.WindStrengthCluster;
+import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
 
 public class WindStrengthClusterImpl extends ClusterOfComparableImpl<Double> implements WindStrengthCluster {
 

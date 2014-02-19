@@ -1,6 +1,6 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl.data;
 
-import com.sap.sailing.datamining.ClusterOfComparable;
+import com.sap.sse.datamining.data.ClusterOfComparable;
 
 public class ClusterOfComparableImpl<ValueType extends Comparable<ValueType>> extends ClusterImpl<ValueType> implements
         ClusterOfComparable<ValueType> {

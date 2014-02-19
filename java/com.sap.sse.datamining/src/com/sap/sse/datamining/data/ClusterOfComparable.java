@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sse.datamining.data;
 
 public interface ClusterOfComparable<ValueType extends Comparable<ValueType>> extends Cluster<ValueType> {
     

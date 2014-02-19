@@ -7,9 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.ClusterOfComparable;
 import com.sap.sailing.datamining.Clusters;
-import com.sap.sailing.datamining.impl.ClusterOfComparableImpl;
+import com.sap.sse.datamining.data.ClusterOfComparable;
+import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
 
 public class TestClusters {
     
