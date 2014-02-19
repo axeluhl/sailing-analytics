@@ -12,10 +12,10 @@ import java.util.Map.Entry;
 
 import org.junit.Test;
 
-import com.sap.sailing.datamining.Dimension;
-import com.sap.sailing.datamining.impl.AbstractDimension;
 import com.sap.sailing.datamining.test.util.OpenDataReceiver;
 import com.sap.sailing.datamining.test.util.OpenGrouper;
+import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.impl.data.AbstractDimension;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;

@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.sap.sailing.datamining.Dimension;
 import com.sap.sailing.datamining.builders.MultiDimensionalGroupingWorkerBuilder;
 import com.sap.sailing.datamining.dimensions.DimensionManager;
 import com.sap.sailing.datamining.dimensions.DimensionManagerProvider;
@@ -14,6 +13,7 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sse.datamining.components.ParallelGrouper;
+import com.sap.sse.datamining.data.Dimension;
 import com.sap.sse.datamining.workers.GroupingWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

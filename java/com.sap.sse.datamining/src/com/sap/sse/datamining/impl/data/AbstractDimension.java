@@ -1,6 +1,6 @@
-package com.sap.sailing.datamining.impl;
+package com.sap.sse.datamining.impl.data;
 
-import com.sap.sailing.datamining.Dimension;
+import com.sap.sse.datamining.data.Dimension;
 
 public abstract class AbstractDimension<DataType, ValueType> implements Dimension<DataType, ValueType> {
 
