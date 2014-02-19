@@ -7,6 +7,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.RacingEventService;
@@ -33,23 +34,39 @@ public class MasterDataImporter {
     }
 
     private void createMediaTracks(TopLevelMasterData topLevelMasterData, boolean override) {
-        Collection<MediaTrack> tracks = topLevelMasterData.getAllMediaTracks();
+        Collection<MediaTrack> tracksToImport = topLevelMasterData.getAllMediaTracks();
         Collection<MediaTrack> existingMediaTracks = racingEventService.getAllMediaTracks();
         Map<String, MediaTrack> existingMap = new HashMap<String, MediaTrack>();
 
-        for (MediaTrack oneTrack : existingMediaTracks) {
-            existingMap.put(oneTrack.dbId, oneTrack);
+        for (MediaTrack existingTrack : existingMediaTracks) {
+            existingMap.put(existingTrack.dbId, existingTrack);
         }
 
-        for (MediaTrack oneNewTrack : tracks) {
-            if (existingMap.containsKey(oneNewTrack.dbId)) {
+        for (MediaTrack trackToImport : tracksToImport) {
+            MediaTrack existingTrack = existingMap.get(trackToImport.dbId);
+            if (existingTrack == null) {
+                racingEventService.mediaTrackAdded(trackToImport);
+            } else {
                 if (override) {
-                    racingEventService.mediaTrackDeleted(existingMap.get(oneNewTrack.dbId));
-                } else {
-                    continue;
+                    
+                    // Using fine-grained update methods.
+                    // Rationale: Changes on more than one track property are rare 
+                    //            and don't justify the introduction of a new set 
+                    //            of methods (including replication).
+                    if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+                        racingEventService.mediaTrackTitleChanged(trackToImport);
+                    }
+                    if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+                        racingEventService.mediaTrackUrlChanged(trackToImport);
+                    }
+                    if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+                        racingEventService.mediaTrackStartTimeChanged(trackToImport);
+                    }
+                    if (existingTrack.durationInMillis != trackToImport.durationInMillis) {
+                        racingEventService.mediaTrackDurationChanged(trackToImport);
+                    }
                 }
             }
-            racingEventService.mediaTrackAdded(oneNewTrack);
         }
     }
 
