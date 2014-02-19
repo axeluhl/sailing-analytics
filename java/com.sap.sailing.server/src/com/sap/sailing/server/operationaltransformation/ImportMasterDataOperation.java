@@ -76,6 +76,7 @@ public class ImportMasterDataOperation extends
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
+        progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
         toState.getDataImportLock().lock(importOperationId);
         this.progress = toState.getDataImportLock().getProgress(importOperationId);
         try {

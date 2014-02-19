@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -113,11 +114,13 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
-        final ProgressBar overallProgressBar = new ProgressBar();
+        final Label overallName = new Label(stringMessages.overallProgress() + ":");
+        this.add(overallName);
+        final ProgressBar overallProgressBar = new ProgressBar(Style.ANIMATED);
         this.add(overallProgressBar);
         final Label subProgressName = new Label();
         this.add(subProgressName);
-        final ProgressBar subProgressBar = new ProgressBar();
+        final ProgressBar subProgressBar = new ProgressBar(Style.ANIMATED);
         this.add(subProgressBar);
         if (groupNames.length >= 1) {
             disableAllButtons();
@@ -150,18 +153,22 @@ public class MasterDataImportPanel extends VerticalPanel {
                                                 showErrorAlert(stringMessages.importServerError());
                                             } else {
                                                 if (result.failed()) {
-                                                    showErrorAlert(result.getErrorMessage());
+                                                    // Got error, cancel timer
                                                     cancel();
+                                                    deleteProgressIndication(overallName, overallProgressBar,
+                                                            subProgressName, subProgressBar);
+
+                                                    showErrorAlert(result.getErrorMessage());
+                                                    changeButtonStateAccordingToApplicationState();
                                                 } else {
                                                     MasterDataImportObjectCreationCount creationCount = result
                                                             .getResult();
                                                     if (creationCount != null) {
                                                         // Got result, cancel timer
                                                         cancel();
+                                                        deleteProgressIndication(overallName, overallProgressBar,
+                                                                subProgressName, subProgressBar);
                                                         showCreationMessage(creationCount);
-                                                        MasterDataImportPanel.this.remove(overallProgressBar);
-                                                        MasterDataImportPanel.this.remove(subProgressBar);
-                                                        MasterDataImportPanel.this.remove(subProgressName);
                                                     } else {
                                                         overallProgressBar.setPercent((int) (result
                                                                 .getOverallProgressPct() * 100));
@@ -369,6 +376,14 @@ public class MasterDataImportPanel extends VerticalPanel {
         }
         leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
         changeButtonStateAccordingToApplicationState();
+    }
+
+    private void deleteProgressIndication(final Label overallName, final ProgressBar overallProgressBar,
+            final Label subProgressName, final ProgressBar subProgressBar) {
+        this.remove(overallProgressBar);
+        this.remove(subProgressBar);
+        this.remove(subProgressName);
+        this.remove(overallName);
     }
 
 }

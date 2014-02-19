@@ -3498,8 +3498,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     objectInputStream = getService().getBaseDomainFactory()
                             .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
-                            "Reading Data",
-                            50.0);
+                            "Reading Data", 0.5);
                     TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
 
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
