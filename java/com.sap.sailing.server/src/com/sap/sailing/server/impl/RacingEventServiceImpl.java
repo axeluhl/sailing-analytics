@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +54,7 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -66,6 +66,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -121,6 +122,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
@@ -128,8 +130,10 @@ import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -247,7 +251,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
      * unpredictable fashion
      */
-    private final ReentrantLock dataImportLock;
+    private final DataImportLockWithProgress dataImportLock;
 
     /**
      * If this service runs in the context of an OSGi environment, the activator should {@link #setBundleContext set the bundle context} on this
@@ -320,7 +324,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         this.mediaDB = mediaDb;
         this.competitorStore = competitorStore;
         this.windStore = windStore;
-        this.dataImportLock = new ReentrantLock(true);
+        this.dataImportLock = new DataImportLockWithProgress();
         
         regattasByName = new ConcurrentHashMap<String, Regatta>();
         eventsById = new ConcurrentHashMap<Serializable, Event>();
@@ -2205,8 +2209,53 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public ReentrantLock getDataImportLock() {
+    public DataImportLockWithProgress getDataImportLock() {
         return dataImportLock;
+    }
+
+    @Override
+    public DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
+            double overallProgressPct, String subProgressName, double subProgressPct) {
+        // Create/Update locally
+        DataImportProgress progress = createOrUpdateDataImportProgressWithoutReplication(importOperationId,
+                overallProgressPct, subProgressName, subProgressPct);
+        // Create/Update on replicas
+        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgressName,
+                subProgressPct));
+        return progress;
+    }
+
+    @Override
+    public DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
+            double overallProgressPct, String subProgressName, double subProgressPct) {
+        DataImportProgress progress = dataImportLock.getProgress(importOperationId);
+        boolean newObject = false;
+        if (progress == null) {
+            progress = new DataImportProgressImpl(importOperationId);
+            newObject = true;
+        }
+        progress.setOverAllProgressPct(overallProgressPct);
+        progress.setNameOfCurrentSubProgress(subProgressName);
+        progress.setCurrentSubProgressPct(subProgressPct);
+        if (newObject) {
+            dataImportLock.addProgress(importOperationId, progress);
+        }
+        return progress;
+    }
+
+    @Override
+    public void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage) {
+        DataImportProgress progress = dataImportLock.getProgress(importOperationId);
+        if (progress != null) {
+            progress.setFailed();
+            progress.setErrorMessage(errorMessage);
+        }
+    }
+
+    @Override
+    public void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage) {
+        setDataImportFailedWithoutReplication(importOperationId, errorMessage);
+        replicate(new DataImportFailed(importOperationId, errorMessage));
     }
 
 }

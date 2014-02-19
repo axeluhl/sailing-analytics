@@ -3,6 +3,7 @@ package com.sap.sailing.server.masterdata;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -22,9 +23,11 @@ public class MasterDataImporter {
         this.racingEventService = racingEventService;
     }
 
-    public MasterDataImportObjectCreationCount importMasterData(TopLevelMasterData topLevelMasterData, boolean override) {
+    public MasterDataImportObjectCreationCount importMasterData(TopLevelMasterData topLevelMasterData,
+            UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, override, creationCount,
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
+                creationCount,
                 baseDomainFactory);
         creationCount = racingEventService.apply(op);
         createMediaTracks(topLevelMasterData, override);

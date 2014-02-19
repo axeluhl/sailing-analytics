@@ -307,7 +307,8 @@ public class MasterDataImportTest {
 
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -494,7 +495,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -630,7 +632,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -782,7 +785,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -983,7 +987,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // ---Asserts---
         // Test correct number of creations
@@ -1182,7 +1187,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, true);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), true);
 
         // ---Asserts---
         // Test correct number of creations
@@ -1273,7 +1279,7 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        importer.importMasterData(deserializedMasterData, false);
+        importer.importMasterData(deserializedMasterData, UUID.randomUUID(), false);
 
         Regatta importedRegatta = destService.getRegattaByName(regatta.getName());
 
@@ -1400,7 +1406,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // ---Asserts---
         Assert.assertNotNull(creationCount);
@@ -1538,7 +1545,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // ---Asserts---
 
@@ -1596,7 +1604,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // ---Asserts---
 
@@ -1718,7 +1727,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // Test correct number of creations
         Assert.assertNotNull(creationCount);
@@ -1791,7 +1801,8 @@ public class MasterDataImportTest {
             ois.close();
         }
         MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData, false);
+        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
+                UUID.randomUUID(), false);
 
         // Test correct number of creations
         Assert.assertEquals(1, creationCount.getLeaderboardGroupCount());

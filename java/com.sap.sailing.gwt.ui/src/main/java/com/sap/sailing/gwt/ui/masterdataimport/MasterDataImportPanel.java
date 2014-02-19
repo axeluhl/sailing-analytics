@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -13,6 +15,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -23,6 +26,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupRefresher;
@@ -109,44 +113,95 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     protected void importLeaderboardGroups() {
         String[] groupNames = createLeaderBoardGroupNamesFromListBox();
+        final ProgressBar overallProgressBar = new ProgressBar();
+        this.add(overallProgressBar);
+        final Label subProgressName = new Label();
+        this.add(subProgressName);
+        final ProgressBar subProgressBar = new ProgressBar();
+        this.add(subProgressBar);
         if (groupNames.length >= 1) {
             disableAllButtons();
             boolean override = overrideSwitch.getValue();
             boolean compress = compressSwitch.getValue();
-            sailingService.importMasterData(currentHost, groupNames, override, compress,
-                    new AsyncCallback<MasterDataImportObjectCreationCount>() {
-                        @Override
-                        public void onSuccess(MasterDataImportObjectCreationCount result) {
-                            int leaderboardsCreated = result.getLeaderboardCount();
-                            int leaderboardGroupsCreated = result.getLeaderboardGroupCount();
-                            int eventsCreated = result.getEventCount();
-                            int regattasCreated = result.getRegattaCount();
-                            if (regattasCreated > 0) {
-                                regattaRefresher.fillRegattas();
-                            }
-                            if (eventsCreated > 0) {
-                                eventRefresher.fillEvents();
-                            }
-                            if (leaderboardGroupsCreated > 0) {
-                                leaderboardGroupRefresher.fillLeaderboardGroups();
-                            }
-                            Set<String> overwrittenRegattas = result.getOverwrittenRegattaNames();
-                            showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated,
-                                    regattasCreated, overwrittenRegattas);
-                            changeButtonStateAccordingToApplicationState();
-                        }
+            sailingService.importMasterData(currentHost, groupNames, override, compress, new AsyncCallback<UUID>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    showErrorAlert(caught.getLocalizedMessage());
+                }
+
+                @Override
+                public void onSuccess(final UUID resultId) {
+                    final Timer timer = new Timer() {
 
                         @Override
-                        public void onFailure(Throwable caught) {
-                            showErrorAlert(caught.getLocalizedMessage());
-                            changeButtonStateAccordingToApplicationState();
+                        public void run() {
+                            sailingService.getImportOperationProgress(resultId,
+                                    new AsyncCallback<DataImportProgress>() {
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            showErrorAlert(stringMessages.importServerError());
+                                        }
+
+                                        @Override
+                                        public void onSuccess(DataImportProgress result) {
+                                            if (result == null) {
+                                                showErrorAlert(stringMessages.importServerError());
+                                            } else {
+                                                if (result.failed()) {
+                                                    showErrorAlert(result.getErrorMessage());
+                                                    cancel();
+                                                } else {
+                                                    MasterDataImportObjectCreationCount creationCount = result
+                                                            .getResult();
+                                                    if (creationCount != null) {
+                                                        // Got result, cancel timer
+                                                        cancel();
+                                                        showCreationMessage(creationCount);
+                                                        MasterDataImportPanel.this.remove(overallProgressBar);
+                                                        MasterDataImportPanel.this.remove(subProgressBar);
+                                                        MasterDataImportPanel.this.remove(subProgressName);
+                                                    } else {
+                                                        overallProgressBar.setPercent((int) (result
+                                                                .getOverallProgressPct() * 100));
+                                                        subProgressName.setText(result.getNameOfCurrentSubProgress());
+                                                        subProgressBar.setPercent((int) (result
+                                                                .getCurrentSubProgressPct() * 100));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
                         }
-                    });
+                    };
+                    timer.scheduleRepeating(200);
+                }
+            });
         } else {
             showErrorAlert(stringMessages.importSelectAtLeastOne());
         }
     }
 
+    private void showCreationMessage(MasterDataImportObjectCreationCount creationCount) {
+        int leaderboardsCreated = creationCount.getLeaderboardCount();
+        int leaderboardGroupsCreated = creationCount.getLeaderboardGroupCount();
+        int eventsCreated = creationCount.getEventCount();
+        int regattasCreated = creationCount.getRegattaCount();
+        if (regattasCreated > 0) {
+            regattaRefresher.fillRegattas();
+        }
+        if (eventsCreated > 0) {
+            eventRefresher.fillEvents();
+        }
+        if (leaderboardGroupsCreated > 0) {
+            leaderboardGroupRefresher.fillLeaderboardGroups();
+        }
+        Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
+        showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
+                overwrittenRegattas);
+        changeButtonStateAccordingToApplicationState();
+    }
 
     private void disableAllButtons() {
         boolean enabled = false;

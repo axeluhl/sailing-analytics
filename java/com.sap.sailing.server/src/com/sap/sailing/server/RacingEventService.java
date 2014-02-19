@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -29,6 +28,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -58,6 +58,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -490,5 +491,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * This lock exists to allow only one master data import at a time to avoid situation where multiple Imports
      * override each other in unpredictable fashion
      */
-    ReentrantLock getDataImportLock();
+    DataImportLockWithProgress getDataImportLock();
+
+    DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
+
+    void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage);
 }

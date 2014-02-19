@@ -90,13 +90,13 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
@@ -3444,67 +3444,91 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames,
-            boolean override, boolean compress) {
-        long startTime = System.currentTimeMillis();
-        Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
-        String hostname = hostnameAndPort.getA();
-        int port = hostnameAndPort.getB();
-        String query;
-        try {
-            query = createLeaderboardQuery(groupNames, compress);
-        } catch (UnsupportedEncodingException e1) {
-            throw new RuntimeException(e1);
-        }
-        HttpURLConnection connection = null;
+    public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress) {
+        final UUID importOperationId = UUID.randomUUID();
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, "Initializing", 0.0);
+        // Create a progress indicator for as long as the server gets data from the other server.
+        // As soon as the server starts the import operation, a progress object will be built on every server
+        Runnable masterDataImportTask = new Runnable() {
 
-        URL serverAddress = null;
-        InputStream inputStream = null;
-        ObjectInputStream objectInputStream = null;
-        try {
-            String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
-            serverAddress = createUrl(hostname, port, path, query);
-            //set up out communications stuff
-            connection = null;
-            //Set up the initial connection
-            connection = (HttpURLConnection)serverAddress.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
-            connection.setReadTimeout(60000);
-            connection.connect();
-
-            
-            if (compress) {
-                InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(connection.getInputStream(),
-                        connection);
-                inputStream = new GZIPInputStream(timeoutExtendingInputStream);
-            } else {
-                inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
-            }
-
-            objectInputStream = getService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
-                    inputStream);
-            TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
-            return importFromHttpResponse(topLevelMasterData, override);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            // close the connection, set all objects to null
-            connection.disconnect();
-            connection = null;
-            long timeToImport = System.currentTimeMillis() - startTime;
-            logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
+            @Override
+            public void run() {
+                long startTime = System.currentTimeMillis();
+                getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
+                        "Setting up connection", 0.5);
+                Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
+                String hostname = hostnameAndPort.getA();
+                int port = hostnameAndPort.getB();
+                String query;
+                try {
+                    query = createLeaderboardQuery(groupNames, compress);
+                } catch (UnsupportedEncodingException e1) {
+                    throw new RuntimeException(e1);
                 }
-                if (objectInputStream != null) {
-                    objectInputStream.close();
+                HttpURLConnection connection = null;
+
+                URL serverAddress = null;
+                InputStream inputStream = null;
+                ObjectInputStream objectInputStream = null;
+                try {
+                    String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
+                    serverAddress = createUrl(hostname, port, path, query);
+                    // set up out communications stuff
+                    connection = null;
+                    // Set up the initial connection
+                    connection = (HttpURLConnection) serverAddress.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setDoOutput(true);
+                    // Initial timeout needs to be big enough to allow the first parts of the response to reach this
+                    // server
+                    connection.setReadTimeout(60000);
+                    connection.connect();
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
+                            0.5);
+
+                    if (compress) {
+                        InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(
+                                connection.getInputStream(), connection);
+                        inputStream = new GZIPInputStream(timeoutExtendingInputStream);
+                    } else {
+                        inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
+                    }
+
+                    objectInputStream = getService().getBaseDomainFactory()
+                            .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
+                            "Reading Data",
+                            50.0);
+                    TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
+
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
+                            "Data-Transfer Complete, Initializing Import Operation", 0.5);
+                    importFromHttpResponse(topLevelMasterData, importOperationId, override);
+                } catch (Exception e) {
+                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage());
+                    throw new RuntimeException(e);
+                } finally {
+                    // close the connection, set all objects to null
+                    connection.disconnect();
+                    connection = null;
+                    long timeToImport = System.currentTimeMillis() - startTime;
+                    logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
+                    try {
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                        if (objectInputStream != null) {
+                            objectInputStream.close();
+                        }
+                    } catch (IOException e) {
+                    }
                 }
-            } catch (IOException e) {
             }
-        }
+        };
+        executor.execute(masterDataImportTask);
+
+        return importOperationId;
     }
     
     private URL createUrl(String host, Integer port, String path, String query) throws Exception {
@@ -3517,10 +3541,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return url;
     }
     
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
-            boolean override) {
-        MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(topLevelMasterData, override);
+    protected void importFromHttpResponse(final TopLevelMasterData topLevelMasterData, final UUID importOperationId,
+            final boolean override) {
+        final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
+        importer.importMasterData(topLevelMasterData, importOperationId, override);
+    }
+
+    public DataImportProgress getImportOperationProgress(UUID id) {
+        return getService().getDataImportLock().getProgress(id);
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {
