@@ -43,14 +43,15 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
-    private static double strictness = 900; // Lower = stricter
+    private static double strictness = 900; // Lower = stricter; 900
 
     public CandidateChooser(DynamicTrackedRace race) {
         logger.setLevel(Level.INFO);
         this.race = race;
-        raceStartTime = race.getStartOfRace().minus(2000);
-        start = new Candidate(0, raceStartTime, 1, null, true, true, "Proxy");
-        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, null, 1, null, true, true, "Proxy");
+        raceStartTime = race.getStartOfRace()!=null?race.getStartOfRace().minus(2000):null;
+        start = new Candidate(/*Index*/0, raceStartTime, /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
+        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /*TimePoint*/null, 
+                /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
         candidates = new LinkedHashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new TreeSet<Candidate>());
@@ -67,12 +68,12 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace().minus(2000) != raceStartTime) {
+        if (race.getStartOfRace()!=null&&!race.getStartOfRace().minus(2000).equals(raceStartTime)) {
             raceStartTime = race.getStartOfRace().minus(2000);
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);
             }
-            start = new Candidate(0, raceStartTime, 1, null, true, true, "Proxy");
+            start = new Candidate(0, raceStartTime, /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
             for (Competitor com : allEdges.keySet()) {
                 addCandidates(Arrays.asList(start), com);
             }
@@ -99,11 +100,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
                         allEdges.get(co).add(e);
                     }
                 } else {
-                    /*
-                     * if (early == start && late.getID() == 1 && numberOfCloseStarts(late.getTimePoint()) >
-                     * penaltyForSkipping) { allEdges.get(co).add(new Edge(early, late,
-                     * numberOfCloseStarts(late.getTimePoint()))); } else
-                     */if ((late == end || early == start) && early != late) {
+                    if ((late == end || early == start) && early != late) {
                         allEdges.get(co).add(new Edge(early, late, 1));
                     } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
                         allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late)));
@@ -134,15 +131,14 @@ public class CandidateChooser implements AbstractCandidateChooser {
                     }
                 }
             }
-            if (!candidateWithParent.containsKey(currentMostLikelyEdge.getA().getEnd())
-                    || candidateWithParent.get(currentMostLikelyEdge.getA().getEnd()).getB() > currentMostLikelyEdge.getB()) {
+            if (!candidateWithParent.containsKey(currentMostLikelyEdge.getA().getEnd())) {
                 candidateWithParent.put(currentMostLikelyEdge.getA().getEnd(), new Pair<Candidate, Double>(currentMostLikelyEdge.getA().getStart(), currentMostLikelyEdge.getB()));
             }
             all.remove(currentMostLikelyEdge.getA());
         }
         Candidate marker = candidateWithParent.get(end).getA();
         while (!(marker == start)) {
-            if (currentMarkPasses.get(co).get(marker.getWaypoint()) == null || currentMarkPasses.get(co).get(marker.getWaypoint()).getTimePoint() != marker.getTimePoint()) {
+            if (currentMarkPasses.get(co).get(marker.getWaypoint()) == null || !currentMarkPasses.get(co).get(marker.getWaypoint()).getTimePoint().equals(marker.getTimePoint())) {
                 currentMarkPasses.get(co).put(marker.getWaypoint(), new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co));
                 changed = true;
             }
@@ -156,48 +152,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
             }
             race.updateMarkPassings(co, markPassDeltas);
         }
-    }
-
-    @SuppressWarnings("unused")
-    private void reEvaluateStartingEdges() {
-        for (Competitor c : candidates.keySet()) {
-            ArrayList<Edge> newEdges = new ArrayList<>();
-            ArrayList<Edge> edgesToRemove = new ArrayList<>();
-            for (Edge e : allEdges.get(c)) {
-                if (e.getStart().getID() == 0 && e.getEnd().getID() == 1) {
-                    newEdges.add(new Edge(e.getStart(), e.getEnd(), numberOfCloseStarts(e.getEnd().getTimePoint())));
-                    edgesToRemove.add(e);
-                }
-            }
-            for (Edge e : edgesToRemove) {
-                allEdges.get(c).remove(e);
-            }
-            for (Edge e : newEdges) {
-                allEdges.get(c).add(e);
-            }
-        }
-    }
-
-    private double numberOfCloseStarts(TimePoint t) {
-        double numberOfCompetitors = 0;
-        double totalTimeDifference = 0;
-        for (Competitor c : candidates.keySet()) {
-            double closestCandidate = -1;
-            for (Candidate ca : candidates.get(c)) {
-                if (ca.getID() == 1) {
-                    if (closestCandidate == -1) {
-                        closestCandidate = Math.abs(ca.getTimePoint().asMillis() - t.asMillis());
-                    } else if (closestCandidate > Math.abs(ca.getTimePoint().asMillis() - t.asMillis())) {
-                        closestCandidate = Math.abs(ca.getTimePoint().asMillis() - t.asMillis());
-                    }
-                }
-            }
-            if (closestCandidate != -1) {
-                numberOfCompetitors++;
-                totalTimeDifference = totalTimeDifference + closestCandidate;
-            }
-        }
-        return 1 / (0.00001 * (totalTimeDifference / numberOfCompetitors) + 1);
     }
 
     private double estimatedDistance(Competitor c, Candidate c1, Candidate c2) {
@@ -243,9 +197,6 @@ public class CandidateChooser implements AbstractCandidateChooser {
             if (!candidates.get(co).contains(c)) {
                 candidates.get(co).add(c);
             }
-            /*
-             * if (c.getID() == 1 && race.getStartOfRace() == null) { reEvaluateStartingEdges(); }
-             */
         }
         createNewEdges(co, newCandidates);
     }
@@ -265,3 +216,19 @@ public class CandidateChooser implements AbstractCandidateChooser {
         }
     }
 }
+
+/*
+ * @SuppressWarnings("unused") private void reEvaluateStartingEdges() { for (Competitor c : candidates.keySet()) {
+ * ArrayList<Edge> newEdges = new ArrayList<>(); ArrayList<Edge> edgesToRemove = new ArrayList<>(); for (Edge e :
+ * allEdges.get(c)) { if (e.getStart().getID() == 0 && e.getEnd().getID() == 1) { newEdges.add(new Edge(e.getStart(),
+ * e.getEnd(), numberOfCloseStarts(e.getEnd().getTimePoint()))); edgesToRemove.add(e); } } for (Edge e : edgesToRemove)
+ * { allEdges.get(c).remove(e); } for (Edge e : newEdges) { allEdges.get(c).add(e); } } }
+ * 
+ * private double numberOfCloseStarts(TimePoint t) { double numberOfCompetitors = 0; double totalTimeDifference = 0; for
+ * (Competitor c : candidates.keySet()) { double closestCandidate = -1; for (Candidate ca : candidates.get(c)) { if
+ * (ca.getID() == 1) { if (closestCandidate == -1) { closestCandidate = Math.abs(ca.getTimePoint().asMillis() -
+ * t.asMillis()); } else if (closestCandidate > Math.abs(ca.getTimePoint().asMillis() - t.asMillis())) {
+ * closestCandidate = Math.abs(ca.getTimePoint().asMillis() - t.asMillis()); } } } if (closestCandidate != -1) {
+ * numberOfCompetitors++; totalTimeDifference = totalTimeDifference + closestCandidate; } } return 1 / (0.00001 *
+ * (totalTimeDifference / numberOfCompetitors) + 1); }
+ */
