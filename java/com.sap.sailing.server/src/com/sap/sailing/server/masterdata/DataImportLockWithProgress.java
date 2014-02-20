@@ -10,8 +10,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.sap.sailing.domain.common.DataImportProgress;
 
 public class DataImportLockWithProgress extends ReentrantLock {
-
-    private static final int TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED = 60000;
+    /**
+     * Defaults to 60s (60000ms).
+     */
+    private static final int TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED_IN_MILLIS = 60000;
 
     private static final long serialVersionUID = -3527221613483691340L;
 
@@ -43,7 +45,6 @@ public class DataImportLockWithProgress extends ReentrantLock {
      */
     private void setDeleteFromMapTimer(final DataImportProgress progressToDelete) {
         TimerTask deleteTask = new TimerTask() {
-
             @Override
             public void run() {
                 synchronized (progressPerId) {
@@ -52,7 +53,7 @@ public class DataImportLockWithProgress extends ReentrantLock {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(deleteTask, TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED);
+        timer.schedule(deleteTask, TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED_IN_MILLIS);
     }
 
     /**
