@@ -105,7 +105,7 @@ public class DataMiningActivator implements BundleActivator {
     }
 
     public static ThreadPoolExecutor getExecutor() {
-        return dataMiningService.getExecutor();
+        return DataMiningService.Util.getExecutor();
     }
 
     public static FunctionProvider getFunctionProvider() {
