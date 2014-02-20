@@ -9,7 +9,6 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
@@ -310,21 +309,31 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public Duration getAverageIntervalBetweenFixes() {
         lockForRead();
         try {
-            NavigableSet<?> fixes = getFixes();
-            if (fixes.size() > 0) {
-                return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
+            final Duration result;
+            final int size = getFixes().size();
+            if (size > 1) {
+                result = getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
             }
+            return result;
         } finally {
             unlockAfterRead();
         }
-        return new MillisecondsDurationImpl(0);
     }
 
     @Override
     public Duration getAverageIntervalBetweenRawFixes() {
         lockForRead();
         try {
-            return getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(getRawFixes().size()-1);
+            final Duration result;
+            final int size = getRawFixes().size();
+            if (size > 1) {
+                result = getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
+            }
+            return result;
         } finally {
             unlockAfterRead();
         }
