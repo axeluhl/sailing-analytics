@@ -126,8 +126,8 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
-        /* this will send tractrac the original start time */
-        trackedRace.onStartTimeChangedByRaceCommittee(trackedRace.getStartTimeReceived());
+        /* reset start time */
+        trackedRace.onStartTimeChangedByRaceCommittee(null);
     }
 
     @Override

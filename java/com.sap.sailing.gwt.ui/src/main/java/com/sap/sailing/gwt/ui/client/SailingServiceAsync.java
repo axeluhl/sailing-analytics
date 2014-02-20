@@ -464,6 +464,8 @@ public interface SailingServiceAsync {
     void importMasterData(String host, String[] names, boolean override, boolean compress,
             AsyncCallback<MasterDataImportObjectCreationCount> asyncCallback);
 
+    void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
+
     <ResultType extends Number> void runQuery(QueryDefinition queryDefinition, AsyncCallback<QueryResult<ResultType>> asyncCallback);
     
     /**
@@ -514,5 +516,7 @@ public interface SailingServiceAsync {
     void getEventById(UUID id, AsyncCallback<EventDTO> callback);
 
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName, AsyncCallback<Void> callback);
 }
 

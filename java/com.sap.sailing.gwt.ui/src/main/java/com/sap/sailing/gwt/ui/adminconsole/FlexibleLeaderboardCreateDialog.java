@@ -14,10 +14,11 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
         super(stringMessages.createFlexibleLeaderboard(), new LeaderboardDescriptor(), stringMessages, existingEvents,
                 errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
         nameTextBox = createTextBox(null);
-        nameTextBox.ensureDebugId("LeaderboardNameField");
-        displayNameTextBox = createTextBox(null);
-        displayNameTextBox.ensureDebugId("LeaderboardDisplayNameField");
+        nameTextBox.ensureDebugId("NameTextBox");
         nameTextBox.setVisibleLength(50);
+        
+        displayNameTextBox = createTextBox(null);
+        displayNameTextBox.ensureDebugId("DisplayNameTextBox");
         displayNameTextBox.setVisibleLength(50);
 
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);

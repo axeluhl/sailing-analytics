@@ -60,8 +60,8 @@ public class SeleniumElementLocatorFactory implements ElementLocatorFactory {
     public ElementLocator createLocator(Field field) {
         if (!Annotations.isAnnotationPresent(field)) {
             return null;
-        } else {
-            return new SeleniumElementLocator(this.context, field, this.timeOut, this.interval);
         }
+        
+        return new SeleniumElementLocator(this.context, field, this.timeOut, this.interval);
     }
 }

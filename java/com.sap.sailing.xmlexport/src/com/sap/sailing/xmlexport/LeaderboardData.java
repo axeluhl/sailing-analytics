@@ -210,6 +210,9 @@ public class LeaderboardData extends ExportAction {
         final List<Competitor> allCompetitors = race.getCompetitorsFromBestToWorst(/*timePoint*/ race.getEndOfRace());
         addNamedElementWithValue(raceElement, "race_participant_count", allCompetitors.size());
         
+        boolean isDiscarded = leaderboard.isDiscarded(allCompetitors.get(0), column, race.getEndOfRace());
+        addNamedElementWithValue(raceElement, "is_discarded_by_looking_at_first_competitor", isDiscarded == true ? "true" : "false");
+        
         // sort competitors according to their distance to the starboard side of the start line
         List<Competitor> allCompetitorsSortedByDistanceToStarboardSide = new ArrayList<Competitor>(allCompetitors.size());
         allCompetitorsSortedByDistanceToStarboardSide.addAll(allCompetitors);
@@ -329,6 +332,8 @@ public class LeaderboardData extends ExportAction {
             }
             Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
+            boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitor, column, race.getEndOfRace());
+            addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
             Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getEndOfRace(), /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
             addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 

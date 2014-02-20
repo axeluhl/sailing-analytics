@@ -76,7 +76,10 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
         @Override
         protected Widget createAddWidget() {
             final SuggestBox inputBox = new SuggestBox(inputOracle);
+            inputBox.ensureDebugId("InputSuggestBox");
+            
             final Button addButton = new Button(stringMessages.add());
+            addButton.ensureDebugId("AddButton");
             addButton.setEnabled(false);
             addButton.addClickHandler(new ClickHandler() {
 

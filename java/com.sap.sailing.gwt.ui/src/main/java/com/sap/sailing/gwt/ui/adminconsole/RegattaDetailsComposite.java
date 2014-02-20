@@ -8,7 +8,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -69,22 +69,34 @@ public class RegattaDetailsComposite extends Composite {
         mainPanel.add(vPanel);
         Grid grid = new Grid(5, 2);
         vPanel.add(grid);
+        
         regattaName = new Label();
+        regattaName.ensureDebugId("NameLabel");
         grid.setWidget(0 , 0, new Label(stringMessages.regattaName() + ":"));
         grid.setWidget(0 , 1, regattaName);
+        
         boatClassName = new Label();
+        boatClassName.ensureDebugId("BoatClassLabel");
         grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
         grid.setWidget(1 , 1, boatClassName);
+        
         defaultCourseArea = new Label();
+        defaultCourseArea.ensureDebugId("CourseAreaLabel");
         grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
         grid.setWidget(2 , 1, defaultCourseArea);
+        
         configuration = new Label();
+        configuration.ensureDebugId("RacingProcedureLabel");
         grid.setWidget(3, 0, new Label(stringMessages.racingProcedureConfiguration() + ":"));
-        grid.setWidget(3, 1, configuration);;
+        grid.setWidget(3, 1, configuration);
+        
         scoringSystem = new Label();
+        scoringSystem.ensureDebugId("ScoringSystemLabel");
         grid.setWidget(4 , 0, new Label(stringMessages.scoringSystem() + ":"));
         grid.setWidget(4 , 1, scoringSystem);
+        
         seriesTable = createRegattaSeriesTable();
+        seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -95,6 +107,7 @@ public class RegattaDetailsComposite extends Composite {
         seriesListDataProvider = new ListDataProvider<SeriesDTO>();
         seriesListDataProvider.addDataDisplay(seriesTable);
         vPanel.add(seriesTable);
+        
         initWidget(mainPanel);
     }
 
@@ -203,11 +216,24 @@ public class RegattaDetailsComposite extends Composite {
                 new SeriesConfigImagesBarCell(stringMessages));
         seriesActionColumn.setFieldUpdater(new FieldUpdater<SeriesDTO, String>() {
             @Override
-            public void update(int index, SeriesDTO series, String value) {
+            public void update(int index, final SeriesDTO series, String value) {
                 if (SeriesConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    Window.alert("This function is not implemented yet. To delete a series you have to recreate the regatta!");
+                    RegattaIdentifier identifier = new RegattaName(regatta.getName());
+                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>() {
+
+                        @Override
+                        protected void handleFailure(Throwable cause) {
+                            errorReporter.reportError("Error trying to remove series " + series.getName()
+                                    + ": " + cause.getMessage());
+                        }
+
+                        @Override
+                        protected void handleSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
                 }
 
             }
@@ -247,6 +273,7 @@ public class RegattaDetailsComposite extends Composite {
                         updateRacesOfRegattaSeries(regatta, result);
                     }
                 });
+        raceDialog.ensureDebugId("SeriesEditDialog");
         raceDialog.show();
     }
 

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
@@ -203,9 +204,12 @@ public class ImportMasterDataOperation extends
         if (newLeaderboard instanceof FlexibleLeaderboard) {
             for (RaceColumn raceColumn : newLeaderboard.getRaceColumns()) {
                 for (Fleet fleet : raceColumn.getFleets()) {
-                    DynamicTrackedRace trackedRace = toState.getTrackedRace((RegattaAndRaceIdentifier) raceColumn
-                            .getRaceIdentifier(fleet));
-                    raceColumn.setTrackedRace(fleet, trackedRace);
+                    RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+                    if (raceIdentifier != null) {
+                        DynamicTrackedRace trackedRace = toState
+                                .getTrackedRace((RegattaAndRaceIdentifier) raceIdentifier);
+                        raceColumn.setTrackedRace(fleet, trackedRace);
+                    }
                 }
             }
         }
@@ -310,7 +314,7 @@ public class ImportMasterDataOperation extends
                         series, isPersistent, baseDomainFactory.createScoringScheme(scoringSchemeType),
                         defaultCourseAreaId).getA();
                 createdRegatta.setRegattaConfiguration(regatta.getRegattaConfiguration());
-                Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta);
+                Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta.getRegattaIdentifier());
                 if (raceIdStrings != null) {
                     toState.setPersistentRegattaForRaceIDs(createdRegatta, raceIdStrings, override);
                 }

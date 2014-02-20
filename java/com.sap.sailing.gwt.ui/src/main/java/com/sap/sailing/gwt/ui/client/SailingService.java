@@ -164,6 +164,8 @@ public interface SailingService extends RemoteService {
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName);
+
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration);
@@ -340,6 +342,8 @@ public interface SailingService extends RemoteService {
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
+
+    List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
     MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
     

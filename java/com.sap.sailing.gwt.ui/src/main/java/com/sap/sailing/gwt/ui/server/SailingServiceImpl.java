@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.server;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -293,6 +294,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -2932,6 +2934,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));
     }
+    
+    @Override
+    public void removeSeries(RegattaIdentifier identifier, String seriesName) {
+        getService().apply(new RemoveSeries(identifier, seriesName));
+    }
 
     private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
         RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getSeries().getName(),
@@ -3356,14 +3363,67 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
-        long startTime = System.currentTimeMillis();
+    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
+        Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
+        String hostname = hostnameAndPort.getA();
+        int port = hostnameAndPort.getB();
+        final String path = "/sailingserver/api/v1/leaderboardgroups";
+        final String query = null;
+
+        HttpURLConnection connection = null;
+
+        URL serverAddress = null;
+        InputStream inputStream = null;
+        try {
+            serverAddress = createUrl(hostname, port, path, query);
+            // set up out communications stuff
+            connection = null;
+            // Set up the initial connection
+            connection = (HttpURLConnection) serverAddress.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+            connection.setReadTimeout(10000);
+            connection.connect();
+
+            inputStream = connection.getInputStream();
+
+            InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
+
+            org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+            org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
+            List<String> names = new ArrayList<String>();
+            for (Object obj : array) {
+                names.add((String) obj);
+            }
+            return names;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            // close the connection
+            if (connection != null) {
+                connection.disconnect();
+            }
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+            }
+        }
+
+    }
+
+    private Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
-            port = url.getPort();
+            int portFromUrl = url.getPort();
+            if (portFromUrl > 0) {
+                port = portFromUrl;
+            }
         } catch (MalformedURLException e1) {
             hostname = urlAsString;
             if (urlAsString.contains("://")) {
@@ -3375,9 +3435,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (hostname.contains(":")) {
                 String[] split = hostname.split(":");
                 hostname = split[0];
-                port = Integer.parseInt(split[1]);
+                if (port > 0) {
+                    port = Integer.parseInt(split[1]);
+                }
             }
         }
+        return new Pair<String, Integer>(hostname, port);
+    }
+
+    @Override
+    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames,
+            boolean override, boolean compress) {
+        long startTime = System.currentTimeMillis();
+        Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
+        String hostname = hostnameAndPort.getA();
+        int port = hostnameAndPort.getB();
         String query;
         try {
             query = createLeaderboardQuery(groupNames, compress);
@@ -3390,7 +3462,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         InputStream inputStream = null;
         ObjectInputStream objectInputStream = null;
         try {
-            serverAddress = createUrl(hostname, port, query);
+            String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
+            serverAddress = createUrl(hostname, port, path, query);
             //set up out communications stuff
             connection = null;
             //Set up the initial connection
@@ -3434,8 +3507,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URL("http://" + host + ":" + port + "/sailingserver/spi/v1/masterdata/leaderboardgroups?" + query);
+    private URL createUrl(String host, Integer port, String path, String query) throws Exception {
+        URL url;
+        if (query != null) {
+            url = new URL("http://" + host + ":" + port + path + "?" + query);
+        } else {
+            url = new URL("http://" + host + ":" + port + path);
+        }
+        return url;
     }
     
     protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
