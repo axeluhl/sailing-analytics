@@ -86,8 +86,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException {
         setUp(raceNumber);
         testWholeRace();
-        testMiddleOfRace(2);
         testMiddleOfRace(0);
+        testMiddleOfRace(2);
     }
 
     private void testWholeRace() {

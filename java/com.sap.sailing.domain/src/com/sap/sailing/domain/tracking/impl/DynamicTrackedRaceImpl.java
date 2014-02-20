@@ -829,11 +829,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
-        for (Mark lineMark : w.getMarks()) {
-            final Position estimatedMarkPosition = getOrCreateTrack(lineMark).getEstimatedPosition(t, /* extrapolate */
-            false);
+        for (Mark mark : w.getMarks()) {
+            final Position estimatedMarkPosition = getOrCreateTrack(mark).getEstimatedPosition(t, /* extrapolate */false);
             if (estimatedMarkPosition == null) {
-                return new Pair<Mark, Mark>(null,null);
+                return new Pair<Mark, Mark>(null, null);
             }
             markPositions.add(estimatedMarkPosition);
         }

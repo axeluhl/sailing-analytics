@@ -43,7 +43,7 @@ public class Candidate implements Comparable<Candidate> {
     }
 
     public Double getProbability() {
-        double factor= (rightSide&&rightDirection)?1:(rightSide||rightDirection)?0.7:0.4;
+        double factor= (rightSide&&rightDirection)?1:(rightSide||rightDirection)?0.75:0.5;
         double cost = distanceProbability * factor;
         return cost;
     }
