@@ -158,12 +158,10 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     }
 
     private void updateLiveDelay(IRace tractracRace, DynamicTrackedRace trackedRace) {
-        final Number liveDelayInSeconds = (Number) tractracRace.getProperty("LiveDelaySecs");
-        if (liveDelayInSeconds != null) {
-            long delayInMillis = liveDelayInSeconds.longValue() * 1000;
-            if (trackedRace != null) {
-                trackedRace.setDelayToLiveInMillis(delayInMillis);
-            }
+        final int liveDelayInSeconds = tractracRace.getLiveDelay();
+        long delayInMillis = liveDelayInSeconds * 1000;
+        if (trackedRace != null) {
+            trackedRace.setDelayToLiveInMillis(delayInMillis);
         }
     }
 
