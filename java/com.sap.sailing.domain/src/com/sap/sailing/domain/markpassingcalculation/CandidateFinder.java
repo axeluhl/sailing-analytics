@@ -221,12 +221,17 @@ public class CandidateFinder implements AbstractCandidateFinder {
                     if (disBefore != null && disAfter != null && dis.getMeters() < disBefore.getMeters() && dis.getMeters() < disAfter.getMeters()) {
                         t = fix.getTimePoint();
                         p = fix.getPosition();
+                        if(cost != null){ // Candidate for both marks of a gate, the more likely one is chosen
+                            Double newCost = getDistanceLikelyhood(w, t, dis);
+                            if (newCost == null || newCost*0.8<cost){
+                                continue;
+                            }
+                        }
                         cost = getDistanceLikelyhood(w, t, dis);
                         if (cost == null) {
                             continue;
                         }
                         cost *= 0.8;
-                        // TODO Case: Candidate for both marks of gate
                         if (cost > penaltyForSkipping) {
                             isCan = true;
                             if (passingInstructions.get(w) == PassingInstruction.Gate) {
@@ -421,8 +426,22 @@ public class CandidateFinder implements AbstractCandidateFinder {
     private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t, boolean portMark) {
         boolean result = true;
         if (passingInstructions.get(w) == PassingInstruction.Line) {
-            // TODO passes in between the marks?
+            List<Position> pos = new ArrayList<>();
+            for (Mark m : w.getMarks()) {
+                Position po = race.getOrCreateTrack(m).getEstimatedPosition(t, false);
+                if (po == null) {
+                    return true;
+                }
+                pos.add(po);
+            }
+            Bearing diff1 = pos.get(0).getBearingGreatCircle(p).getDifferenceTo(pos.get(0).getBearingGreatCircle(pos.get(1)));
+            Bearing diff2 = pos.get(1).getBearingGreatCircle(p).getDifferenceTo(pos.get(1).getBearingGreatCircle(pos.get(0)));
+            if(Math.abs(diff1.getDegrees())>90||Math.abs(diff2.getDegrees())>90){
+                result = false;
+            }
+            
         } else {
+            
             Mark m = null;
             if (passingInstructions.get(w) == PassingInstruction.Port || passingInstructions.get(w) == PassingInstruction.Starboard
                     || passingInstructions.get(w) == PassingInstruction.FixedBearing) {
