@@ -177,7 +177,6 @@ public class FixesAndTails {
      * @param result
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
      *            the last one in the list
-     * @param timeForPositionTransitionMillis TODO
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
@@ -230,7 +229,6 @@ public class FixesAndTails {
      * @param mergeThis
      *            If this list contains an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix must be the last in
      *            the list
-     * @param timeForPositionTransitionMillis TODO
      */
     private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis, final long timeForPositionTransitionMillis) {
         List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
