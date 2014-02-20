@@ -9,7 +9,6 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
