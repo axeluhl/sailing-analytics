@@ -158,15 +158,15 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public void timeChanged(final Date date) {
+    public void timeChanged(final Date newTime, Date oldTime) {
         List<SimulatorWindDTO> windDTOToDraw = new ArrayList<SimulatorWindDTO>();
 
-        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime() + 1));
+        final SortedMap<Long, List<SimulatorWindDTO>> headMap = (timePointWindDTOMap.headMap(newTime.getTime() + 1));
 
         if (!headMap.isEmpty()) {
             windDTOToDraw = headMap.get(headMap.lastKey());
         }
-        logger.info("In WindGridCanvasOverlay.timeChanged drawing " + windDTOToDraw.size() + " points" + " @ " + date);
+        logger.info("In WindGridCanvasOverlay.timeChanged drawing " + windDTOToDraw.size() + " points" + " @ " + newTime);
 
         drawWindGrid(windDTOToDraw);
     }
@@ -200,7 +200,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     protected void drawWindGrid() {
 
         if (timer != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
 
         } else {
             drawWindGrid(windFieldDTO.getMatrix());

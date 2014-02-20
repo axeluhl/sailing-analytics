@@ -960,4 +960,5 @@ public interface StringMessages extends Messages {
     String hasSplitFleetContiguousScoring();
     String eventOverview();
     String start();
+    String overallProgress();
 }

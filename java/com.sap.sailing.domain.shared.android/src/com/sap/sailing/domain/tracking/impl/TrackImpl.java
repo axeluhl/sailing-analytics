@@ -309,7 +309,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public Duration getAverageIntervalBetweenFixes() {
         lockForRead();
         try {
-            return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
+            final Duration result;
+            final int size = getFixes().size();
+            if (size > 1) {
+                result = getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
+            }
+            return result;
         } finally {
             unlockAfterRead();
         }
@@ -319,7 +326,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public Duration getAverageIntervalBetweenRawFixes() {
         lockForRead();
         try {
-            return getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(getRawFixes().size()-1);
+            final Duration result;
+            final int size = getRawFixes().size();
+            if (size > 1) {
+                result = getRawFixes().first().getTimePoint().until(getRawFixes().last().getTimePoint()).divide(size-1);
+            } else {
+                result = null;
+            }
+            return result;
         } finally {
             unlockAfterRead();
         }

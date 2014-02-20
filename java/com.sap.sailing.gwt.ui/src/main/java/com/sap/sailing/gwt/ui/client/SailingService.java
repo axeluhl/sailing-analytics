@@ -12,9 +12,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.datamining.shared.DataMiningSerializationDummy;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.datamining.shared.QueryResult;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -345,8 +345,10 @@ public interface SailingService extends RemoteService {
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress);
     
+    DataImportProgress getImportOperationProgress(UUID id);
+
     <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception;
 
     Iterable<CompetitorDTO> getCompetitors();
