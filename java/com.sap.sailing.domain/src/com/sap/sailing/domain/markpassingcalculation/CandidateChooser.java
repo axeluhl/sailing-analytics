@@ -24,9 +24,9 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 /**
  * The standard implementation of {@link AbstractCandidateChooser}. A graph is created, with each {@link Candidate} as a
- * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an {@link Edge} is
- * equal to one minus the probability of the two Candidates times an estimation of the distance traveled between the them. The
- * shortest path between the proxy-Candidates is the most likely sequence of {@link MarkPassing}s.
+ * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an
+ * {@link Edge} is equal to one minus the probability of the two Candidates times an estimation of the distance traveled
+ * between the them. The shortest path between the proxy-Candidates is the most likely sequence of {@link MarkPassing}s.
  * 
  * @author Nicolas Klose
  * 
@@ -63,15 +63,18 @@ public class CandidateChooser implements AbstractCandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace() != null && !race.getStartOfRace().minus(2000).equals(raceStartTime)) {
-            raceStartTime = race.getStartOfRace().minus(2000);
-            for (Competitor com : allEdges.keySet()) {
-                removeCandidates(Arrays.asList(start), com);
-            }
-            start = new Candidate(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
-            /* right Direction */true, "Proxy");
-            for (Competitor com : allEdges.keySet()) {
-                addCandidates(Arrays.asList(start), com);
+        if (race.getStartOfRace() != null) {
+            if (raceStartTime == null || !race.getStartOfRace().minus(2000).equals(raceStartTime)) {
+                raceStartTime = race.getStartOfRace().minus(2000);
+                for (Competitor com : allEdges.keySet()) {
+                    removeCandidates(Arrays.asList(start), com);
+                }
+                start = new Candidate(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
+                /* right Direction */true, "Proxy");
+                for (Competitor com : allEdges.keySet()) {
+                    addCandidates(Arrays.asList(start), com);
+
+                }
             }
         }
         removeCandidates(candidateDeltas.getB(), c);
