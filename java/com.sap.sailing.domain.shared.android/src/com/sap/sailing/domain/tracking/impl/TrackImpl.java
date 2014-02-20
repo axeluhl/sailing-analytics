@@ -9,6 +9,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MillisecondsDurationImpl;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
@@ -309,10 +310,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     public Duration getAverageIntervalBetweenFixes() {
         lockForRead();
         try {
-            return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
+            NavigableSet<?> fixes = getFixes();
+            if (fixes.size() > 0) {
+                return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
+            }
         } finally {
             unlockAfterRead();
         }
+        return new MillisecondsDurationImpl(0);
     }
 
     @Override

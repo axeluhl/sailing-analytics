@@ -547,7 +547,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         clearChart();
         if (selectedRaceIdentifier != null) {
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 
@@ -592,21 +592,21 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if (!isVisible()) {
             return;
         }
 
         if (allowTimeAdjust) {
-            updateTimePlotLine(date);
+            updateTimePlotLine(newTime);
         }
         
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
-            if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
-            } else if (date.getTime() > timeOfLatestRequestInMillis) {
+            if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+            } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                 updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
@@ -618,9 +618,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
             } else {
                 // replay mode during live play
-                if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                    updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
-                } else if (date.getTime() > timeOfLatestRequestInMillis) {
+                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                     updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
             }
@@ -646,11 +646,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
     
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 }

@@ -5,12 +5,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -40,6 +44,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RegattaOverviewPanel extends SimplePanel {
+    private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
     
     private final long serverUpdateRateInMs = 10000;
     private final long uiUpdateRateInMs = 450;
@@ -55,6 +60,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
     private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
+    private boolean showLeaderboard = false;
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
@@ -65,6 +71,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final Button settingsButton;
     private final Button refreshNowButton;
     private final Button startStopUpdatingButton;
+    private final CheckBox leaderboardCheckBox;
     private final UserAgentDetails userAgent;
     
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
@@ -140,15 +147,15 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.startStopUpdatingButton.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
             @Override
-            public void timeChanged(Date date) {
+            public void timeChanged(Date newTime, Date oldTime) {
                 regattaRaceStatesComponent.onUpdateServer();
             }
         });
         this.serverUpdateTimer.play();
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
             @Override
-            public void timeChanged(Date date) {
-                onUpdateUI(date);
+            public void timeChanged(Date newTime, Date oldTime) {
+                onUpdateUI(newTime);
             }
         });
         this.uiUpdateTimer.play();
@@ -177,6 +184,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         flexTable.setWidget(0, 0, eventVenueGrid);
         flexTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
         
+        leaderboardCheckBox = addLeaderboardEnablerButton();
+        this.leaderboardCheckBox.getElement().getStyle().setMarginLeft(20.0, Unit.PX);
         HorizontalPanel refreshStartStopClockPanel = getRefreshStartStopClockPanel();
         
         flexTable.setWidget(0, 1, refreshStartStopClockPanel);
@@ -189,36 +198,62 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.add(leaderboardsTabPanel);
         
         onUpdateUI(uiUpdateTimer.getLiveTimePointAsDate());
+        addLeaderboardEnablerButton();
+    }
+    
+    private CheckBox addLeaderboardEnablerButton() {
+        final CheckBox checkBox = new CheckBox("Leaderboard");
         
+        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
+        
+        checkBox.setEnabled(true);
+        checkBox.setValue(false);
+        checkBox.setTitle(stringMessages.showHideComponent("Leaderboard"));
+        checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
+
+        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
+                boolean visible = checkBox.getValue();
+                showLeaderboard = visible;
+                loadLeaderboard();
+            }
+        });
+        
+        return checkBox;
     }
     
     private void loadLeaderboard() {
         /*
          * Load a tabbed widget with one tab per regatta. Each tab contains the leaderboard for the regatta.
          */
-        final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
-        sailingService.getLeaderboardsByEvent(eventDTO, new AsyncCallback<List<StrippedLeaderboardDTO>>() {
-            @Override
-            public void onSuccess(List<StrippedLeaderboardDTO> result) {
-                leaderboardsTabPanel.clear();
-                for (StrippedLeaderboardDTO leaderboard : result) {
-                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
-                            new AsyncActionsExecutor(), leaderboardSettings, 
-                            /*preSelectedRace*/null, 
-                            competitorSelectionProvider, 
-                            null, leaderboard.name, 
-                            errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
-                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+        if (showLeaderboard) {
+            final CompetitorSelectionModel competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+            final LeaderboardSettings leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+            sailingService.getLeaderboardsByEvent(eventDTO, new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+                @Override
+                public void onSuccess(List<StrippedLeaderboardDTO> result) {
+                    leaderboardsTabPanel.clear();
+                    for (StrippedLeaderboardDTO leaderboard : result) {
+                        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
+                                new AsyncActionsExecutor(), leaderboardSettings, 
+                                /*preSelectedRace*/null, 
+                                competitorSelectionProvider, 
+                                null, leaderboard.name, 
+                                errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
+                        leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+                    }
+                    leaderboardsTabPanel.setVisible(true);
+                    leaderboardsTabPanel.selectTab(0);
                 }
-                leaderboardsTabPanel.selectTab(0);
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+            });
+        } else {
+            leaderboardsTabPanel.clear();
+            leaderboardsTabPanel.setVisible(false);
+        }
     }
 
     private HorizontalPanel getRefreshStartStopClockPanel() {
@@ -227,6 +262,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         refreshStartStopClockPanel.setStyleName(STYLE_REFRESH_STOP_TIME);
         refreshStartStopClockPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
+        refreshStartStopClockPanel.add(leaderboardCheckBox);
         refreshStartStopClockPanel.add(settingsButton);
         refreshStartStopClockPanel.add(refreshNowButton);
         refreshStartStopClockPanel.add(startStopUpdatingButton);

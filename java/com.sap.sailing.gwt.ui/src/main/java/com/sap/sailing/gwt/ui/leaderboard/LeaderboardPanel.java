@@ -2352,12 +2352,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     /**
-     * @param date
+     * @param newTime
      *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
      *            {@link #getLeaderboardDisplayDate()}.
      */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
     }
 
@@ -2470,7 +2470,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override
