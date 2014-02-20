@@ -12,3 +12,6 @@ Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
 Import-Package: junit.framework;version="4.8.2",
  org.junit;version="4.8.2",
  org.junit.runner;version="4.8.2"
+Export-Package: com.sap.sse.datamining.impl.i18n,
+ com.sap.sse.datamining.test.function.test_classes,
+ com.sap.sse.datamining.test.util
