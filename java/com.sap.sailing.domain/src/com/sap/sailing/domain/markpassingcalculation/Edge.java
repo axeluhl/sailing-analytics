@@ -5,8 +5,8 @@ import com.sap.sailing.domain.base.Waypoint;
 /**
  * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>.
  * {@link #getProbability()} returns the probability of this passage being correct, consisting of the probability of
- * each Candidate, the probability of the passage (e.g. an estimate whether the time between the candidates matches the
- * distance between their {@link Waypoint}s), and a penalty for skipping waypoints, which is possible if a tracker fails
+ * each Candidate, the probability of the passage (e.g. an estimate whether the distance sailed between the candidates matches the
+ * distance between their {@link Waypoint}s), and a penalty for skipping waypoints, which might happen if a tracker fails
  * or a competitor aborts but should be avoided if possible.
  * 
  * @author Nicolas Klose

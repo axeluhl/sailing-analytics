@@ -96,9 +96,15 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
-        final MarkPassingCalculator markPassCreator = new MarkPassingCalculator(getTrackedRace(), true);
+        new MarkPassingCalculator(getTrackedRace(), false);
         time = System.currentTimeMillis() - time;
-        computedPasses = markPassCreator.getAllPasses();
+        
+        for (Competitor c : getRace().getCompetitors()){
+            computedPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
+            for (Waypoint w : waypoints){
+                computedPasses.get(c).put(w, getTrackedRace().getMarkPassing(c, w));
+            }
+        }
 
         // Compare computed and calculated MarkPassings
         final int tolerance = 10000;

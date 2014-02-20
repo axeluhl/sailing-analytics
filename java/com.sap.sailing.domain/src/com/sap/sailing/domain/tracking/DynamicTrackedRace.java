@@ -100,8 +100,14 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
-
+    /**
+     * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
+     */
     Bearing getCrossingBearing(Waypoint w, TimePoint t);
 
+    /**
+     * 
+     * @return The nautical side the marks of {@link Waypoint} w when approaching at {@link TimePoint} t.
+     */
     Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w);
 }

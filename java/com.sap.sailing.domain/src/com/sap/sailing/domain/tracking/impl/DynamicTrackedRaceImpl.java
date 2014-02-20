@@ -781,9 +781,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
         this.startTimeChangedListeners.add(listener);
     }
-    /**
-     * @return The Bearing of a line starting at <code>w</code> that needs to be crossed to pass a mark.
-     */
+
     @Override
     public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
         Bearing result = null;

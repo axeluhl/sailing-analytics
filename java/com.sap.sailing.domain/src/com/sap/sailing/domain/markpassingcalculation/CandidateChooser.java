@@ -24,9 +24,9 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 /**
  * The standard implementation of {@link AbstractCandidateChooser}. A graph is created, with each {@link Candidate} as a
- * vertices between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an {@link Edge} is
- * equal to the probability of the two Candidates plus and estimation of the distance traveled between the them. A
- * shortest path-algorithm is then used to find the most likely sequence of {@link MarkPassing}s.
+ * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an {@link Edge} is
+ * equal to one minus the probability of the two Candidates times an estimation of the distance traveled between the them. The
+ * shortest path between the proxy-Candidates is the most likely sequence of {@link MarkPassing}s.
  * 
  * @author Nicolas Klose
  * 
@@ -43,15 +43,15 @@ public class CandidateChooser implements AbstractCandidateChooser {
     private Candidate end;
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
-    private static double strictness = 900; // Lower = stricter; 900
+    private final double strictness = 900; // Lower = stricter; 900
 
     public CandidateChooser(DynamicTrackedRace race) {
-        logger.setLevel(Level.INFO);
         this.race = race;
-        raceStartTime = race.getStartOfRace()!=null?race.getStartOfRace().minus(2000):null;
-        start = new Candidate(/*Index*/0, raceStartTime, /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
-        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /*TimePoint*/null, 
-                /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
+        raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(2000) : null;
+        start = new Candidate(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
+        /* right Direction */true, "Proxy");
+        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
+        /* Probability */1, /* Waypoint */null, /* right Side */true, /* right Direction */true, "Proxy");
         candidates = new LinkedHashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new TreeSet<Candidate>());
@@ -62,18 +62,14 @@ public class CandidateChooser implements AbstractCandidateChooser {
     }
 
     @Override
-    public LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> getAllPasses() {
-        return currentMarkPasses;
-    }
-
-    @Override
     public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
-        if (race.getStartOfRace()!=null&&!race.getStartOfRace().minus(2000).equals(raceStartTime)) {
+        if (race.getStartOfRace() != null && !race.getStartOfRace().minus(2000).equals(raceStartTime)) {
             raceStartTime = race.getStartOfRace().minus(2000);
             for (Competitor com : allEdges.keySet()) {
                 removeCandidates(Arrays.asList(start), com);
             }
-            start = new Candidate(0, raceStartTime, /*Probability*/1, /*Waypoint*/null, /*right Side*/true, /*right Direction*/true, "Proxy");
+            start = new Candidate(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
+            /* right Direction */true, "Proxy");
             for (Competitor com : allEdges.keySet()) {
                 addCandidates(Arrays.asList(start), com);
             }
@@ -145,7 +141,7 @@ public class CandidateChooser implements AbstractCandidateChooser {
             marker = candidateWithParent.get(marker).getA();
         }
         if (changed) {
-            logger.info("New MarkPasses for " + co);
+            logger.fine("Updating MarkPasses for " + co);
             List<MarkPassing> markPassDeltas = new ArrayList<>();
             for (MarkPassing m : currentMarkPasses.get(co).values()) {
                 markPassDeltas.add(m);
@@ -218,11 +214,11 @@ public class CandidateChooser implements AbstractCandidateChooser {
 }
 
 /*
- * @SuppressWarnings("unused") private void reEvaluateStartingEdges() { for (Competitor c : candidates.keySet()) {
- * ArrayList<Edge> newEdges = new ArrayList<>(); ArrayList<Edge> edgesToRemove = new ArrayList<>(); for (Edge e :
- * allEdges.get(c)) { if (e.getStart().getID() == 0 && e.getEnd().getID() == 1) { newEdges.add(new Edge(e.getStart(),
- * e.getEnd(), numberOfCloseStarts(e.getEnd().getTimePoint()))); edgesToRemove.add(e); } } for (Edge e : edgesToRemove)
- * { allEdges.get(c).remove(e); } for (Edge e : newEdges) { allEdges.get(c).add(e); } } }
+ * private void reEvaluateStartingEdges() { for (Competitor c : candidates.keySet()) { ArrayList<Edge> newEdges = new
+ * ArrayList<>(); ArrayList<Edge> edgesToRemove = new ArrayList<>(); for (Edge e : allEdges.get(c)) { if
+ * (e.getStart().getID() == 0 && e.getEnd().getID() == 1) { newEdges.add(new Edge(e.getStart(), e.getEnd(),
+ * numberOfCloseStarts(e.getEnd().getTimePoint()))); edgesToRemove.add(e); } } for (Edge e : edgesToRemove) {
+ * allEdges.get(c).remove(e); } for (Edge e : newEdges) { allEdges.get(c).add(e); } } }
  * 
  * private double numberOfCloseStarts(TimePoint t) { double numberOfCompetitors = 0; double totalTimeDifference = 0; for
  * (Competitor c : candidates.keySet()) { double closestCandidate = -1; for (Candidate ca : candidates.get(c)) { if

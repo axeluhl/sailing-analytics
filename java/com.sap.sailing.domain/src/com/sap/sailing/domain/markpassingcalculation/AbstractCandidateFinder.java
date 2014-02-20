@@ -9,12 +9,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**
- * A CandidateFinder converts the incoming GPSFixes of competitors and marks into {@link Candidate}s for each
- * competitor. {@link #calculateFixesAffectedByNewMarkFixes(Mark, List)} determines the fixes that may have changed
- * their status as {@link Candidate} after new fixes for a mark arrive. This determines those fixes that may have
- * changed their status as a {@link Candidate}. {@link #getCandidateDeltas(Competitor, Iterable)} then returns the
- * actual changes to the list of Candidates as a Pair of Lists, one of the new Candidates and one of the Candidates that
- * should be removed.
+ * Converts the incoming GPSFixes of competitors and marks into {@link Candidate}s for each competitor.
  * 
  * @author Nicolas Klose
  * 
@@ -22,24 +17,23 @@ import com.sap.sailing.domain.tracking.GPSFix;
 
 public interface AbstractCandidateFinder {
 
+    /**
+     * @return The fixes of each Competitor that may have changed their status
+     */
     LinkedHashMap<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 
     /**
-     * Before calling this method, there have to be fixes that may have changed their status as a Candidate. This is
-     * done by the the method {@link #calculateFixesAffectedByNewMarkFixes(Mark, Iterable)}
-     * 
-     * @param c
-     * @return
+     * @param fixes
+     *            Either new fixes or fixes that may have changed their status, e.g. as a result of new {@link Mark}
+     *            fixes.
+     * @return new {@link Candidate}s and those that should be removed.
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
 
     /**
-     * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the Candidates
-     * are needed instead of just the deltas.
+     * When initializing the calculator, the whole race until now is evaluated. For that purpose all of the
+     * {@link Candidate}s are needed instead of just the deltas.
      * 
-     * @param c
-     *            the competitor whose {@link Candidate}s should be returned
-     * @return all of the Candidates for the specified competitor
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
 }
