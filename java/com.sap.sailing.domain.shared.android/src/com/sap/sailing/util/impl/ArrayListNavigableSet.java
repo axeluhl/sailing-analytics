@@ -62,7 +62,10 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
 
     @Override
     public E first() {
-        return list.get(0);
+        if (list.size()>0) {
+            return list.get(0);
+        }
+        return null;
     }
 
     @Override
