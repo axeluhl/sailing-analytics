@@ -27,8 +27,8 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
-import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.markpassingcalculation.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinderImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.test.measurements.Measurement;
@@ -201,8 +201,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     private void testMiddleOfRace(int waypoint) {
-        CandidateFinder finder = new CandidateFinder(getTrackedRace());
-        CandidateChooser chooser = new CandidateChooser(getTrackedRace());
+        CandidateFinderImpl finder = new CandidateFinderImpl(getTrackedRace());
+        CandidateChooserImpl chooser = new CandidateChooserImpl(getTrackedRace());
         int mistakes = 0;
         Waypoint start = waypoints.get(waypoint);
         Waypoint second = waypoints.get(waypoint + 1);

@@ -26,26 +26,24 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
- * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link AbstractCandidateFinder} and an
- * {@link AbstractCandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}
+ * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
+ * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}
  * s. The chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for
- * this sequence. If <code>listen</code> is true, a {@link MarkPassingUpdateListener} is initialized which puts new
- * fixes into a queue. Additionally a new Thread is started, which takes the fixes out of the queue and sorts them so
- * that each object (Competitor or Mark) has a list of Fixes in <code>combinedFixes</code>. If <code>suspended</code> is
- * false, the fixes will be evaluated (See {@link CandidateFinder} and {@link CandidateChooser}). Then the listening
- * process begins again with the queue being emptied. This continues until the <code>end</code> object is is recieved
- * from the {@link MarkPassingUpdateListener}, signalising that the race is over.
+ * this sequence. This happens upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)}
+ * for the current state of the race. This can be used for live or stored races. For live races, the <code>listen</code>
+ * parameter of the constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new
+ * fixes into a queue. Additionally a new thread is started, which evaluates the new fixes (See {@link CandidateFinderImpl}
+ * and {@link CandidateChooserImpl}). Then the listening process begins again with the queue being emptied. This continues
+ * until the {@link MarkPassingUpdateListener} signals that the race is over.
  * 
  * @author Nicolas Klose
  * 
  */
-
 public class MarkPassingCalculator {
-    private AbstractCandidateFinder finder;
-    private AbstractCandidateChooser chooser;
+    private final CandidateFinder finder;
+    private final CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
-    private MarkPassingUpdateListener listener;
-    private final static Pair<Object, GPSFix> end = new Pair<Object, GPSFix>(null, null);
+    private final MarkPassingUpdateListener listener;
     private boolean suspended = false;
     private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
@@ -54,10 +52,12 @@ public class MarkPassingCalculator {
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
         if (listen) {
-            listener = new MarkPassingUpdateListener(race, end);
+            listener = new MarkPassingUpdateListener(race);
+        } else {
+            listener = null;
         }
-        finder = new CandidateFinder(race);
-        chooser = new CandidateChooser(race);
+        finder = new CandidateFinderImpl(race);
+        chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
             chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
         }
@@ -82,14 +82,14 @@ public class MarkPassingCalculator {
                 }
                 listener.getQueue().drainTo(allNewFixes);
                 for (Pair<Object, GPSFix> fix : allNewFixes) {
-                    if (fix == end) {
+                    if (listener.isEndMarker(fix)) {
                         finished = true;
-                        continue;
+                    } else {
+                        if (!combinedFixes.containsKey(fix.getA())) {
+                            combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
+                        }
+                        combinedFixes.get(fix.getA()).add(fix.getB());
                     }
-                    if (!combinedFixes.containsKey(fix.getA())) {
-                        combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
-                    }
-                    combinedFixes.get(fix.getA()).add(fix.getB());
                 }
                 if (!suspended) {
                     computeMarkPasses(combinedFixes);

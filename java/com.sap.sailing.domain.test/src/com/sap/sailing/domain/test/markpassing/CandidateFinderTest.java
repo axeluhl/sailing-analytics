@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinderImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -35,7 +35,7 @@ public class CandidateFinderTest extends AbstractMockedRaceMarkPassingTest {
                         new DegreeBearingImpl(190)));
         trackedRace.recordFix(bob, fix1);
         trackedRace.recordFix(bob, fix2);
-        CandidateFinder finder = new CandidateFinder(trackedRace);
+        CandidateFinderImpl finder = new CandidateFinderImpl(trackedRace);
         List<GPSFix> fixes = new ArrayList<GPSFix>();
         fixes.add(fix1);
         fixes.add(fix2);

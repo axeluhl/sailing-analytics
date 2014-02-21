@@ -14,10 +14,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.markpassingcalculation.AbstractCandidateFinder;
-import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
+import com.sap.sailing.domain.markpassingcalculation.Candidate;
+import com.sap.sailing.domain.markpassingcalculation.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinderImpl;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
@@ -46,7 +46,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     @Test
     public void testFinder() {
-        AbstractCandidateFinder f = new CandidateFinder(trackedRace);
+        CandidateFinder f = new CandidateFinderImpl(trackedRace);
         List<GPSFix> fixesAdded = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             GPSFixMoving fix = rndFix();
@@ -73,7 +73,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
             newCans.add(randomCan());
         }
         time = System.currentTimeMillis();
-        CandidateChooser c = new CandidateChooser(trackedRace);
+        CandidateChooserImpl c = new CandidateChooserImpl(trackedRace);
         c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
         ArrayList<Long> times = new ArrayList<>();
