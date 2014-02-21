@@ -7,7 +7,7 @@ import java.util.List;
 import com.sap.sailing.datamining.data.GPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetrievalWorker;
+import com.sap.sailing.datamining.impl.components.AbstractLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.impl.data.GPSFixContextImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Pair;

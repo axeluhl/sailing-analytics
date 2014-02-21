@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
-import com.sap.sailing.datamining.impl.AbstractLeaderboardGroupDataRetrievalWorker;
+import com.sap.sailing.datamining.impl.components.AbstractLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 

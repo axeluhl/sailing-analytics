@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.builders;
+package com.sap.sailing.datamining.impl.workers.builders;
 
 import com.sap.sailing.datamining.impl.gps_fix.GPSFixLeaderboardGroupDataRetrievalWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.TrackedLegOfCompetitorLeaderboardGroupDataRetrievalWorker;
