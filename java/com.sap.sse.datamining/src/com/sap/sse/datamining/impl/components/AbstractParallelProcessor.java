@@ -4,14 +4,19 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RunnableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractParallelProcessor<InputType, ResultType> implements Processor<InputType> {
 	
+	private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
+	
 	private Set<Processor<ResultType>> resultReceivers;
 	private Executor executor;
+	
+	private int openInstructions;
 
 	public AbstractParallelProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers) {
 		this.executor = executor;
@@ -20,19 +25,64 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> implement
 
 	@Override
 	public void onElement(InputType element) {
-		executor.execute(createProcessingInstruction(element));
+		Runnable instruction = createInstruction(element);
+		if (instructionIsValid(instruction)) {
+			NotifyingInstruction notifyingInstruction = new NotifyingInstruction(instruction);
+			openInstructions++;
+			executor.execute(notifyingInstruction);
+		}
 	}
+
+	protected abstract Runnable createInstruction(InputType element);
 	
-	protected abstract RunnableFuture<ResultType> createProcessingInstruction(InputType element);
+	private boolean instructionIsValid(Runnable instruction) {
+		return instruction != null;
+	}
+
+	public void instructionCompleted() {
+		openInstructions--;
+	}
 
 	protected Set<Processor<ResultType>> getResultReceivers() {
 		return resultReceivers;
 	}
 	
-	/**
-	 * Tells this Processor, that there will be no incoming data.<br />
-	 * The called Processor will finish his work and call <code>finish()</code> on all subsequent processors.
-	 */
-	protected abstract void finish();
+	@Override
+	public void finish() throws InterruptedException {
+		while (!isDone()) {
+			Thread.sleep(100);
+		}
+		finishResultReceivers();
+	}
+	
+	private boolean isDone() {
+		return openInstructions == 0;
+	}
+
+	private void finishResultReceivers() {
+		for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+			try {
+				resultReceiver.finish();
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.SEVERE, resultReceiver.toString() + " was interrupted", e);
+			}
+		}
+	}
+
+	private class NotifyingInstruction implements Runnable {
+		
+		private final Runnable innerInstruction;
+
+		public NotifyingInstruction(Runnable instruction) {
+			this.innerInstruction = instruction;
+		}
+
+		@Override
+		public void run() {
+			innerInstruction.run();
+			AbstractParallelProcessor.this.instructionCompleted();
+		}
+		
+	}
 	
 }
