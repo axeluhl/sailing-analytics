@@ -9,31 +9,36 @@ import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.Processor;
 
-public abstract class AbstractParallelProcessor<InputType, ResultType> implements Processor<InputType> {
+public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType> implements Processor<InputType> {
 	
-	private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(AbstractPartitioningParallelProcessor.class.getName());
 	
 	private Set<Processor<ResultType>> resultReceivers;
 	private Executor executor;
 	
 	private int openInstructions;
 
-	public AbstractParallelProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers) {
+	public AbstractPartitioningParallelProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers) {
 		this.executor = executor;
 		this.resultReceivers = new HashSet<Processor<ResultType>>(resultReceivers);
 	}
 
 	@Override
 	public void onElement(InputType element) {
-		Runnable instruction = createInstruction(element);
-		if (instructionIsValid(instruction)) {
-			NotifyingInstruction notifyingInstruction = new NotifyingInstruction(instruction);
-			openInstructions++;
-			executor.execute(notifyingInstruction);
+		for (WorkingType partialElement : partitionElement(element)) {
+			Runnable instruction = createInstruction(partialElement);
+			if (instructionIsValid(instruction)) {
+				NotifyingInstruction notifyingInstruction = new NotifyingInstruction(
+						instruction);
+				openInstructions++;
+				executor.execute(notifyingInstruction);
+			}
 		}
 	}
 
-	protected abstract Runnable createInstruction(InputType element);
+	protected abstract Runnable createInstruction(WorkingType partialElement);
+
+	protected abstract Iterable<WorkingType> partitionElement(InputType element);
 	
 	private boolean instructionIsValid(Runnable instruction) {
 		return instruction != null;
@@ -80,7 +85,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> implement
 		@Override
 		public void run() {
 			innerInstruction.run();
-			AbstractParallelProcessor.this.instructionCompleted();
+			AbstractPartitioningParallelProcessor.this.instructionCompleted();
 		}
 		
 	}
