@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.components;
 
-public interface Processor<ElementType> {
+public interface Processor<InputType> {
 	
-	public void onElement(ElementType element);
+	public void onElement(InputType element);
 
 }

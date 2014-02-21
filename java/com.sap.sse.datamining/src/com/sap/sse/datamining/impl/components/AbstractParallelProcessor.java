@@ -8,7 +8,7 @@ import java.util.concurrent.RunnableFuture;
 
 import com.sap.sse.datamining.components.Processor;
 
-public abstract class AbstractParallelProcessor<ElementType, ResultType> implements Processor<ElementType> {
+public abstract class AbstractParallelProcessor<InputType, ResultType> implements Processor<InputType> {
 	
 	private Set<Processor<ResultType>> resultReceivers;
 	private Executor executor;
@@ -19,11 +19,11 @@ public abstract class AbstractParallelProcessor<ElementType, ResultType> impleme
 	}
 
 	@Override
-	public void onElement(ElementType element) {
-		executor.execute(createFuture(element));
+	public void onElement(InputType element) {
+		executor.execute(createProcessingInstruction(element));
 	}
 	
-	protected abstract RunnableFuture<ResultType> createFuture(ElementType element);
+	protected abstract RunnableFuture<ResultType> createProcessingInstruction(InputType element);
 
 	protected Set<Processor<ResultType>> getResultReceivers() {
 		return resultReceivers;
