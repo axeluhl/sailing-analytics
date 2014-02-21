@@ -48,6 +48,7 @@ public interface StringMessages extends Messages {
     String leaderboardName();
     String cancel();
     String pleaseEnterAName();
+    String pleaseEnterABoatClass();
     String discardRacesFromHowManyStartedRacesOn();
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
@@ -765,7 +766,7 @@ public interface StringMessages extends Messages {
     String importRemoteHost();
     String importFetchRemoteLgs();
     String importUrlInvalid(String url);
-    String importGetLeaderboardsFailed(int statusCode, String url);
+    String importGetLeaderboardsFailed(String host, String errorMessage);
     String importNoDataReturned();
     String importServerError();
     String importLeaderboardGroups();
@@ -956,4 +957,8 @@ public interface StringMessages extends Messages {
     String groupingProvider();
     String use();
     String releaseNotes();
+    String hasSplitFleetContiguousScoring();
+    String eventOverview();
+    String start();
+    String overallProgress();
 }

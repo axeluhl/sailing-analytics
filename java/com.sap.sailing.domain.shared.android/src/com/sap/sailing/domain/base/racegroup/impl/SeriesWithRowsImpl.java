@@ -40,4 +40,9 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
         return fleets;
     }
 
+    @Override
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
 }

@@ -368,7 +368,7 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
                             + courseElement.getRightMark().getName();
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(),
                             courseElement.getRightMark(), cpwtmName);
-                    Waypoint waypoint = new WaypointImpl(cpwtm);
+                    Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
                     
                     waypoints.add(waypoint);
                 } else {

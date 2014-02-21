@@ -7,6 +7,12 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
+/**
+ * Creates tails and their styles for the map.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface TailFactory {
     Polyline createTail(CompetitorDTO competitor, List<LatLng> points);
     

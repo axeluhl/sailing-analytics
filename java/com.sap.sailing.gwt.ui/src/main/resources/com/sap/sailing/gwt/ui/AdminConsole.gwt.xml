@@ -35,6 +35,10 @@
   <inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   <stylesheet src="../AdminConsoleDateTimePicker.css" />
   
+  <!-- Fancy Progressbar (without the rest of Bootstrap!) -->
+  <!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
+  <stylesheet src="../AdminConsoleProgressBar.css" />
+  
   <super-source path="jre" />
 
   <!-- Specify the app entry point class.                         -->

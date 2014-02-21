@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -129,7 +129,9 @@ public interface SailingService extends RemoteService {
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRegatta(RegattaDTO regatta);
+    
+    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
@@ -159,14 +161,17 @@ public interface SailingService extends RemoteService {
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
+    void removeSeries(RegattaIdentifier regattaIdentifier, String seriesName);
+
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, boolean isMedal,
-            int[] resultDiscardingThresholds, boolean startsWithZeroScore, boolean firstRaceIsNonDiscardableCarryForward);
+    void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
+            int[] resultDiscardingThresholds, boolean startsWithZeroScore,
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets);
 
     RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
@@ -217,7 +222,7 @@ public interface SailingService extends RemoteService {
     Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 
-    List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier);
     
     List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData);
     
@@ -335,7 +340,11 @@ public interface SailingService extends RemoteService {
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
-    MasterDataImportObjectCreationCount importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
+
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress);
+    
+    DataImportProgress getImportOperationProgress(UUID id);
 
     Iterable<CompetitorDTO> getCompetitors();
     

@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
@@ -90,6 +91,15 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         HorizontalPanel eventsPanel = new HorizontalPanel();
         eventsPanel.setSpacing(5);
         mainPanel.add(eventsPanel);
+        
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fillEvents();
+            }
+        });
+        eventsPanel.add(refreshButton);
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
         createEventBtn.addClickHandler(new ClickHandler() {
@@ -162,7 +172,25 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
                 return builder.toSafeHtml();
             }
         };
-
+        
+        final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                int regattaCount = event.regattas.size();
+                int i = 1;
+                for (RegattaDTO regatta : event.regattas) {
+                    builder.appendEscaped(regatta.getName());
+                    if (i < regattaCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        
         ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
                 new EventConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
@@ -190,6 +218,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         eventTable.addColumn(publicationUrlColumn, stringMessages.publicationUrl());
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
+        eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
         eventSelectionModel = new MultiSelectionModel<EventDTO>();

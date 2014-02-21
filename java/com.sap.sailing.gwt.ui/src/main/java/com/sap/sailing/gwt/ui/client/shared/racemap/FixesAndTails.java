@@ -179,7 +179,7 @@ public class FixesAndTails {
      *            the last one in the list
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
-            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory) {
+            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : result.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
@@ -200,7 +200,7 @@ public class FixesAndTails {
                     lastShownFix.remove(e.getKey());
                     fixesForCompetitor.addAll(e.getValue());
                 } else {
-                    mergeFixes(e.getKey(), e.getValue());
+                    mergeFixes(e.getKey(), e.getValue(), timeForPositionTransitionMillis);
                 }
             }
         }
@@ -220,17 +220,21 @@ public class FixesAndTails {
      * competitor's tail, the tail is adjusted by inserting the corresponding fix.
      * <p>
      * 
-     * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
+     * If the last fix so far was an {@link GPSFixDTO#extrapolated extrapolated} fix, and the merge leads to a different
+     * fix being the last one shown, the previously last fix that was extrapolated will be removed. This way, at most
+     * one extrapolated fix is shown, avoiding jitter on the map as actual fixes are received that obsolete the
+     * extrapolated ones.<p>
      * 
+     * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
      * @param mergeThis
      *            If this list contains an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix must be the last in
      *            the list
      */
-    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis) {
+    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis, final long timeForPositionTransitionMillis) {
         List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
         int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        Polyline tail = getTail(competitorDTO);
+        final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         for (GPSFixDTO mergeThisFix : mergeThis) {
             while (intoThisIndex < intoThis.size()
@@ -252,7 +256,15 @@ public class FixesAndTails {
                     // remove the fix at the respective index with the same time point and adjust indices:
                     intoThis.remove(intoThisIndex);
                     if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                        tail.getPath().removeAt(intoThisIndex - indexOfFirstShownFix);
+                        final int finalIntoThisIndex = intoThisIndex;
+                        final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
+                        Timer timer = new Timer() {
+                            @Override
+                            public void run() {
+                                tail.getPath().removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix);
+                            }
+                        };
+                        runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                     }
                     if (intoThisIndex < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
@@ -279,7 +291,15 @@ public class FixesAndTails {
                 if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
                     intoThis.remove(intoThisIndex-1);
                     if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
-                        tail.getPath().removeAt(intoThisIndex-1 - indexOfFirstShownFix);
+                        final int finalIntoThisIndex = intoThisIndex;
+                        final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
+                        Timer timer = new Timer() {
+                            @Override
+                            public void run() {
+                                tail.getPath().removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
+                            }
+                        };
+                        runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                     }
                     if (intoThisIndex-1 < indexOfFirstShownFix) {
                         indexOfFirstShownFix--;
@@ -333,6 +353,7 @@ public class FixesAndTails {
                 final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
                 int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix
                         .get(competitorDTO);
+                // remove fixes before what is now to be the beginning of the polyline:
                 while (indexOfFirstShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
                     tail.getPath().removeAt(0);
@@ -354,6 +375,9 @@ public class FixesAndTails {
                         .get(competitorDTO);
                 while (indexOfLastShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
+                    if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {
+                        // the loop will abort after this iteration
+                    }
                     tail.getPath().removeAt(--vertexCount);
                     indexOfLastShownFix--;
                 }
@@ -370,10 +394,14 @@ public class FixesAndTails {
                 lastShownFix.put(competitorDTO, indexOfLastShownFix);
             }
         };
+        runDelayedOrImmediately(delayedOrImmediateExecutor, delayForTailChangeInMillis);
+    }
+
+    private void runDelayedOrImmediately(Timer runThis, final int delayForTailChangeInMillis) {
         if (delayForTailChangeInMillis == -1) {
-            delayedOrImmediateExecutor.run();
+            runThis.run();
         } else {
-            delayedOrImmediateExecutor.schedule(delayForTailChangeInMillis);
+            runThis.schedule(delayForTailChangeInMillis);
         }
     }
 

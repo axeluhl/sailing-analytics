@@ -41,6 +41,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
         canvasHeight = 100;
 
         setCanvasSize(canvasWidth, canvasHeight);
+        canvas.addStyleName("competitorInfo-Canvas");
     }
 
     @Override
@@ -69,12 +70,8 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             }
 
             ctx.beginPath();
-            ctx.moveTo(1.72,0.787);
-            ctx.lineTo(0.543,0.787);
-            ctx.lineTo(0.936,101);
-            ctx.lineTo(0.936,101);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(0,0);
+            ctx.lineTo(0,101);
             ctx.stroke();
             
             ctx.beginPath();
@@ -115,9 +112,9 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     public void setPosition(PositionDTO position, long timeForPositionTransitionMillis) {
         if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionTransition();
+            removeCanvasPositionAndRotationTransition();
         } else {
-            setCanvasPositionTransition(timeForPositionTransitionMillis);
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
         }
         this.position = position;
     }

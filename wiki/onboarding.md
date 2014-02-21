@@ -14,7 +14,7 @@ This document describes the onboarding process for a new team member (developer)
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
 6. JDK 1.6 (Java SE 6), http://jdk6.java.net (for GWT)
 7. JDK 1.7 (Java SE 7), http://jdk7.java.net
-8. Maven 3, http://maven.apache.org
+8. Maven 3.1.1 (or higher), http://maven.apache.org
 
 #### Further optional but recommended installations
 

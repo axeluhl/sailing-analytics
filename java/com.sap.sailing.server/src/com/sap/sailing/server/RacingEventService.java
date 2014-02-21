@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -57,6 +58,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -201,6 +203,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Removes the regatta as well as all regatta leaderboards for that regatta
      */
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    
+    /**
+     * Removes the given series
+     */
+    void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -263,7 +270,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Regatta createRegatta(String regattaBaseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -381,8 +388,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     CourseArea getCourseArea(Serializable courseAreaId);
 
+    /**
+     * Adds the specified mediaTrack to the in-memory media library.
+     * Important note: Only if mediaTrack.dbId != null the mediaTrack will be persisted in the the database.
+     * @param mediaTrack
+     */
     void mediaTrackAdded(MediaTrack mediaTrack);
 
+    /**
+     * Calling mediaTrackAdded for every entry in the specified collection. 
+     * @param mediaTracks
+     */
     void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
@@ -395,6 +411,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
+    /**
+     * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
+     * Checks if the track already exists in the library and the database and adds/stores it
+     * accordingly. If a track already exists and override, its properties are checked for changes 
+     * @param mediaTrack
+     * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
+     * overwritten with the values from the track to be imported.
+     */
+    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
@@ -479,4 +505,23 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DomainObjectFactory getDomainObjectFactory();
     
     WindStore getWindStore();
+
+    /**
+     * This lock exists to allow only one master data import at a time to avoid situation where multiple Imports
+     * override each other in unpredictable fashion
+     */
+    DataImportLockWithProgress getDataImportLock();
+
+    DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
+            double overallProgressPct,
+            String subProgressName, double subProgressPct);
+
+    void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
+
+    void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage);
+
 }

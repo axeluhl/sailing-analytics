@@ -44,6 +44,7 @@
   <source path='client'/>
   <source path='controls'/>
   <source path='components'/>
+  <source path='leaderboard'/>
   <source path='regattaoverview'/>
   <source path='shared'/>
   <source path='test'/>

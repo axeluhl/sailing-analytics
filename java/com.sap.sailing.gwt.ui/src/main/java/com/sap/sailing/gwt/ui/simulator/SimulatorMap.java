@@ -805,7 +805,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if (shallStop()) {
             LOGGER.info("Stopping the timer");
             timer.stop();

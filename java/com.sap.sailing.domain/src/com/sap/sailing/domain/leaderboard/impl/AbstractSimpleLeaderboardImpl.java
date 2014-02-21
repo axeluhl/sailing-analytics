@@ -489,9 +489,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
-                        raceColumn);
+        final boolean result;
+        if (getResultDiscardingRule() == null) {
+            result = false;
+        } else {
+            result = !raceColumn.isMedalRace()
+                    && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
+                    && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider,
+                            timePoint).contains(raceColumn);
+        }
+        return result;
     }
 
     @Override
@@ -749,6 +756,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         getRaceColumnListeners().notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    }
+
+    @Override
+    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        getRaceColumnListeners().notifyListenersAboutHasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
     }
 
     @Override
@@ -1115,11 +1127,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
         result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
-            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
-                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
-            } else {
-                result.discardThresholds = null;
-            }
+        if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+            result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
+                    .getDiscardIndexResultsStartingWithHowManyRaces();
+        } else {
+            result.discardThresholds = null;
+        }
         // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
         // details
         // are requested only once and pass them into getLeaderboardEntryDTO
@@ -1254,9 +1267,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (trackedRace != null) {
-            entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
-            if(entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
-                long timeDifferenceInMs = timePoint.asMillis() - entryDTO.timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
+            Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
+            entryDTO.averageSamplingInterval = trackedRace.getTrack(competitor).getAverageIntervalBetweenFixes();
+            if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
+                long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
                 entryDTO.timeSinceLastPositionFixInSeconds = timeDifferenceInMs == 0 ? 0.0 : timeDifferenceInMs / 1000.0;  
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
@@ -1679,4 +1693,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getName() + " " + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " " + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 
+    @Override
+    public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
+        return new NumberOfCompetitorsFetcherImpl();
+    }
 }
