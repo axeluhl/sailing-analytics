@@ -53,10 +53,14 @@ public class DataMiningActivator implements BundleActivator {
 
     private ServiceReference<?>[] getAllClassesWithMarkedMethodsServices() {
         try {
-            return context.getServiceReferences(ClassesWithFunctionsService.class.getName(), null);
+            ServiceReference<?>[] serviceReferences = context.getServiceReferences(ClassesWithFunctionsService.class.getName(), null);
+            if (serviceReferences != null) {
+                return serviceReferences;
+            }
         } catch (InvalidSyntaxException e) {
             LOGGER.log(Level.SEVERE, "Error getting the service references. Data mining won't work.", e);
         }
+        LOGGER.log(Level.SEVERE, "There were no " + ClassesWithFunctionsService.class.getName() + "-Services registered. Data mining won't work.");
         return new ServiceReference<?>[0];
     }
 
