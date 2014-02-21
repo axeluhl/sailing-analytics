@@ -488,17 +488,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return isDiscarded(competitor, raceColumn, getRaceColumns(), timePoint);
     }
     
-    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        final boolean result;
-        if (getResultDiscardingRule() == null) {
-            result = false;
-        } else {
-            result = !raceColumn.isMedalRace()
-                    && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                    && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider,
-                            timePoint).contains(raceColumn);
-        }
-        return result;
+    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return !raceColumn.isMedalRace()
+                && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
+                && getResultDiscardingRule()
+                        .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
+                                raceColumn);
     }
 
     @Override
