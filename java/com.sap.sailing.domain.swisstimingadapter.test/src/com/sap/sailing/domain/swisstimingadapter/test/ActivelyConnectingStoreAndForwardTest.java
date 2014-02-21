@@ -139,7 +139,8 @@ public class ActivelyConnectingStoreAndForwardTest {
         }
         assertTrue(receivedSomething[0]);
         assertEquals(2, racesReceived.size());
-        Thread.sleep(500); // wait for DB to read our previous write
+        db.getLastError(); // synchronize on DB and wait for last write to have completed
+        Thread.sleep(2000); // the synchronization doesn't seem to help
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         Long lastMessageCount = (Long) lastMessageCountCollection.findOne().get(FieldNames.LAST_MESSAGE_COUNT.name());
         assertEquals((Long) 1l, lastMessageCount);

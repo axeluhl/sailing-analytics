@@ -489,12 +489,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        final boolean result;
         if (getResultDiscardingRule() == null) {
-            return false;
+            result = false;
+        } else {
+            result = !raceColumn.isMedalRace()
+                    && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
+                    && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider,
+                            timePoint).contains(raceColumn);
         }
-        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
-                        raceColumn);
+        return result;
     }
 
     @Override
@@ -1123,11 +1127,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
         result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
-            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
-                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
-            } else {
-                result.discardThresholds = null;
-            }
+        if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+            result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
+                    .getDiscardIndexResultsStartingWithHowManyRaces();
+        } else {
+            result.discardThresholds = null;
+        }
         // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
         // details
         // are requested only once and pass them into getLeaderboardEntryDTO

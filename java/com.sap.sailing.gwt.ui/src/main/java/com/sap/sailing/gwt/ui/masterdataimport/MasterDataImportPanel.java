@@ -182,7 +182,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                                     });
                         }
                     };
-                    timer.scheduleRepeating(200);
+                    timer.scheduleRepeating(5000);
                 }
             });
         } else {
