@@ -1,7 +1,7 @@
 package com.sap.sailing.datamining.impl;
 
 import com.sap.sailing.domain.base.Moving;
-import com.sap.sse.datamining.impl.workers.AbstractExtractionWorker;
+import com.sap.sse.datamining.impl.workers.extractors.AbstractExtractionWorker;
 
 public class SpeedInKnotsExtractionWorker extends AbstractExtractionWorker<Moving, Double> {
 

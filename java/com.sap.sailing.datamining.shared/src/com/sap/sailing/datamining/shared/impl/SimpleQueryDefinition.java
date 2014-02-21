@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
+import com.sap.sailing.datamining.shared.StatisticType;
+import com.sap.sse.datamining.components.AggregatorType;
+import com.sap.sse.datamining.components.GrouperType;
 
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;

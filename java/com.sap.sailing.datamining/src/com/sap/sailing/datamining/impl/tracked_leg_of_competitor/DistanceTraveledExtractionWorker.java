@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.tracked_leg_of_competitor;
 
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sse.datamining.impl.workers.AbstractExtractionWorker;
+import com.sap.sse.datamining.impl.workers.extractors.AbstractExtractionWorker;
 
 public class DistanceTraveledExtractionWorker extends AbstractExtractionWorker<TrackedLegOfCompetitorWithContext, Double> {
 

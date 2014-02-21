@@ -15,12 +15,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.GrouperType;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
 import com.sap.sailing.datamining.shared.impl.SimpleQueryDefinition;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.DataMiningService;
 import com.sap.sailing.gwt.ui.client.DataMiningServiceAsync;
@@ -33,6 +31,8 @@ import com.sap.sailing.gwt.ui.datamining.presentation.ResultsChart;
 import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.RefreshingSelectionTablesSettings;
+import com.sap.sse.datamining.components.AggregatorType;
+import com.sap.sse.datamining.components.GrouperType;
 
 public class DataMiningEntryPoint extends AbstractEntryPoint {
 

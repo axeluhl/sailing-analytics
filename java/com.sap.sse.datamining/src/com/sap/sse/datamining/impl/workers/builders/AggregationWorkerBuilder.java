@@ -1,14 +1,14 @@
-package com.sap.sailing.datamining.builders;
+package com.sap.sse.datamining.impl.workers.builders;
 
-import com.sap.sailing.datamining.shared.Components.AggregatorType;
-import com.sap.sailing.datamining.shared.Components.ValueType;
+import com.sap.sse.datamining.components.AggregatorType;
+import com.sap.sse.datamining.components.ValueType;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleMedianAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerMedianAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SumAggregationWorker;
-import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleDoubleSumAggregator;
-import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregator;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleDoubleSumAggregationHelper;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregationHelper;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 
@@ -40,7 +40,7 @@ public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements 
         case Average:
             return new SimpleIntegerArithmeticAverageAggregationWorker();
         case Sum:
-            return new SumAggregationWorker<Integer, Integer>(new SimpleIntegerSumAggregator());
+            return new SumAggregationWorker<Integer, Integer>(new SimpleIntegerSumAggregationHelper());
         case Median:
             return new SimpleIntegerMedianAggregationWorker();
         }
@@ -53,7 +53,7 @@ public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements 
         case Average:
             return new SimpleDoubleArithmeticAverageAggregationWorker();
         case Sum:
-            return new SumAggregationWorker<Double, Double>(new SimpleDoubleSumAggregator());
+            return new SumAggregationWorker<Double, Double>(new SimpleDoubleSumAggregationHelper());
         case Median:
             return new SimpleDoubleMedianAggregationWorker();
         }

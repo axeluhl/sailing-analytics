@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.test.util;
 
-import com.sap.sse.datamining.impl.workers.AbstractExtractionWorker;
+import com.sap.sse.datamining.impl.workers.extractors.AbstractExtractionWorker;
 
 public class StringLengthExtractor extends AbstractExtractionWorker<String, Integer> {
 

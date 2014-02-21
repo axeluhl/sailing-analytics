@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SumAggregationWorker;
-import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregator;
+import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregationHelper;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.OpenDataReceiver;
@@ -21,7 +21,7 @@ public class TestAggregators {
 
     @Test
     public void testSumAggregator() {
-        AggregationWorker<Integer, Integer> sumAggregator = new SumAggregationWorker<Integer, Integer>(new SimpleIntegerSumAggregator());
+        AggregationWorker<Integer, Integer> sumAggregator = new SumAggregationWorker<Integer, Integer>(new SimpleIntegerSumAggregationHelper());
         Map<GroupKey, Collection<Integer>> data = asDataToAggregate(1, 7, 6, 3);
         sumAggregator.setDataToAggregate(data);
         OpenDataReceiver<Map<GroupKey, Integer>> receiver = new OpenDataReceiver<>();

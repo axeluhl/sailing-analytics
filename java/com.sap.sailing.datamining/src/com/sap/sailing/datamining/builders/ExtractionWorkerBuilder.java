@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.builders;
 
 import com.sap.sailing.datamining.impl.SpeedInKnotsExtractionWorker;
 import com.sap.sailing.datamining.impl.tracked_leg_of_competitor.DistanceTraveledExtractionWorker;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.workers.ExtractionWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

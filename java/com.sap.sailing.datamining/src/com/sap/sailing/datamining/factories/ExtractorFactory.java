@@ -4,7 +4,7 @@ import java.util.Locale;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sailing.datamining.builders.ExtractionWorkerBuilder;
-import com.sap.sailing.datamining.shared.Components.StatisticType;
+import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.GroupDividingParallelExtractor;

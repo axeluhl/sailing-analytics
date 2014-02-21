@@ -1,8 +1,7 @@
 package com.sap.sse.datamining.impl.workers.aggregators.helpers;
 
-import com.sap.sse.datamining.impl.workers.aggregators.SimpleSumAggregator;
 
-public class SimpleIntegerSumAggregator extends SimpleSumAggregator<Integer> {
+public class SimpleIntegerSumAggregationHelper extends SimpleSumAggregationHelper<Integer> {
 
     @Override
     protected Integer add(Integer value1, Integer value2) {
