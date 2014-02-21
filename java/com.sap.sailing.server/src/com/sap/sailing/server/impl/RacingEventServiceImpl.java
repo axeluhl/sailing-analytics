@@ -2072,6 +2072,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override) {
+        for (MediaTrack trackToImport : mediaTracksToImport) {
+            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
+            if (existingTrack == null) {
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.durationInMillis, trackToImport.mimeType.name());
+                mediaTrackAdded(trackToImport);
+            } else if (override) {
+                    
+                // Using fine-grained update methods.
+                // Rationale: Changes on more than one track property are rare 
+                //            and don't justify the introduction of a new set 
+                //            of methods (including replication).
+                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+                    existingTrack.title = trackToImport.title;
+                    mediaTrackTitleChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+                    existingTrack.url = trackToImport.url;
+                    mediaTrackUrlChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+                    existingTrack.startTime = trackToImport.startTime;
+                    mediaTrackStartTimeChanged(existingTrack);
+                }
+                if (existingTrack.durationInMillis != trackToImport.durationInMillis) {
+                    existingTrack.durationInMillis = trackToImport.durationInMillis;
+                    mediaTrackDurationChanged(existingTrack);
+                }
+            }
+        }
+    }
+    
+    @Override
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
