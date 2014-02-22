@@ -22,8 +22,8 @@ public class BearingChangeAnalyzerImpl implements BearingChangeAnalyzer {
             // The answer has to be TRUE because the course changed to port and was almost a full circle, passing 000deg.
             // Still, the diffToCourseInQuestion is 005deg and positive.
             // Approach: revert the course change required; revert 005deg to 355deg and check again with this reverted course change.
-            Bearing revertedDiffToCourseInQuestion = new DegreeBearingImpl(360 * Math.signum(diffToCourseInQuestion
-                    .getDegrees())).add(diffToCourseInQuestion);
+            Bearing revertedDiffToCourseInQuestion = new DegreeBearingImpl(-360 * Math.signum(diffToCourseInQuestion
+                    .getDegrees())+diffToCourseInQuestion.getDegrees());
             result = Math.abs(revertedDiffToCourseInQuestion.getDegrees()) <= Math.abs(totalCourseChangeInDegrees);
         }
         return result;
