@@ -229,7 +229,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         ongoingMasterDataExport.set(flagValue);
     }
-
+    
     private void writeObject(ObjectOutputStream stream) throws IOException {
         if (ongoingMasterDataExport.get()) {
             stream.writeBoolean(true);
