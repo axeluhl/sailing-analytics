@@ -42,16 +42,21 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
      * we don't want the TrackedRaces to be serialized during a master data export. Thus, we need this thread flag which
      * is true only during master data export
      */
-    private transient ThreadLocal<Boolean> ongoingMasterDataExport = new ThreadLocal<Boolean>() {
-        protected Boolean initialValue() {
-            return false;
-        };
-    };
+    private transient ThreadLocal<Boolean> ongoingMasterDataExport;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
         this.raceLogs = new HashMap<Fleet, RaceLog>();
+        this.ongoingMasterDataExport = createOngoingMasterDataExportThreadLocal();
+    }
+    
+    private ThreadLocal<Boolean> createOngoingMasterDataExportThreadLocal() {
+        return new ThreadLocal<Boolean>() {
+            protected Boolean initialValue() {
+                return false;
+            };
+        };
     }
 
     @Override
@@ -202,7 +207,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
      */
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-
+        this.ongoingMasterDataExport = createOngoingMasterDataExportThreadLocal();
         // Check if master data export is ongoing
         boolean masterDataImportOngoing = ois.readBoolean();
         if (masterDataImportOngoing) {
