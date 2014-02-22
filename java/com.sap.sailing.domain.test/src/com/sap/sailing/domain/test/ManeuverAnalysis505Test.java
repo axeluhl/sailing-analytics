@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +30,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
-    private static final Logger logger = Logger.getLogger(ManeuverAnalysis505Test.class.getName());
-
     public ManeuverAnalysis505Test() throws MalformedURLException, URISyntaxException {
         super();
     }
@@ -126,13 +122,8 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
          * The maneuver changed the course by -111.66359920328841deg. Lost approximately 0.4702134204862639m was
          * detected but not expected
          */
-        try {
-            assertManeuver(maneuvers, ManeuverType.TACK,
-                    new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")), TACK_TOLERANCE);
-        } catch (AssertionError e) {
-            logger.log(Level.INFO, "The Findel maneuver test would have passed this time; TODO: improve mark passing algorithm to fix this test for good", e);
-        }
-        
+        assertManeuver(maneuvers, ManeuverType.JIBE,
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:45")), PENALTYCIRCLE_TOLERANCE);
 
