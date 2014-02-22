@@ -46,6 +46,7 @@ import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -2100,8 +2101,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final Wind wind = getWind(competitorTrack.getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false), maneuverTimePoint);
         final Bearing courseBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver).getBearing();
         final Bearing courseAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver).getBearing();
-        boolean jibed = didPass(courseBeforeManeuver, courseChangedTo, courseAfterManeuver, wind.getBearing());
-        boolean tacked = didPass(courseBeforeManeuver, courseChangedTo, courseAfterManeuver, wind.getFrom());
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        boolean jibed = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getBearing());
+        boolean tacked = bearingChangeAnalyzer.didPass(courseBeforeManeuver, totalCourseChangeInDegrees, courseAfterManeuver, wind.getFrom());
         if (tacked && jibed) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
             if (legBeforeManeuver != null) {
@@ -2135,24 +2137,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 totalCourseChangeInDegrees, maneuverLoss);
         result.add(maneuver);
         return result;
-    }
-
-    /**
-     * Determines whether during a maneuver a certain course was reached and crossed during a maneuver. When used with
-     * the wind direction, this can tell whether a boat tacked or jibed.
-     * 
-     * @param courseChangedTo
-     *            tells the direction to which the course was changed; this is required to understand over which side
-     *            the competitor reached the new course from the old course; if could have been either way. Example:
-     *            if the <code>courseBeforeManeuver</code> was 355deg and the <code>courseAfterManeuver</code> was
-     *            005deg then if the <code>courseChangedTo</code> was {@link NauticalSide#STARBOARD} then the competitor
-     *            passed the 000deg course, whereas had the <code>courseChangedTo</code> been {@link NauticalSide#PORT} then
-     *            the competitor would have passed the 180deg course but not the 000deg course.
-     */
-    private boolean didPass(Bearing courseBeforeManeuver, NauticalSide courseChangedTo,
-            Bearing courseAfterManeuver, Bearing wasThisCourseReachedAndCrossedDuringManeuver) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     /**
