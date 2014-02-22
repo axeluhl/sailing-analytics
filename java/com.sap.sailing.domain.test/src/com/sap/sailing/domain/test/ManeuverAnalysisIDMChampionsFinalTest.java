@@ -69,11 +69,11 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("G2 Start-Finish (1)", new DegreePosition(53.96003300000019, 10.878697000000084));
-        markPositions.put("G2 Start-Finish (2)", new DegreePosition(53.9674420000693, 10.894410000058738));
-        markPositions.put("G2 Mark4 (2)", new DegreePosition(53.96002200000019, 10.878875000000063));
-        markPositions.put("G2 Mark4 (1)", new DegreePosition(53.9599880000002, 10.878665000000069));
-        markPositions.put("G2 Mark1", new DegreePosition(53.96355800000006, 10.885751999999806));
+        markPositions.put("G2 Start-Finish (1)", new DegreePosition(53.96744, 10.89441));
+        markPositions.put("G2 Start-Finish (2)", new DegreePosition(53.96798, 10.89401));
+        markPositions.put("G2 Mark4 (2)", new DegreePosition(53.96689, 10.89375));
+        markPositions.put("G2 Mark4 (1)", new DegreePosition(53.96718, 10.89339));
+        markPositions.put("G2 Mark1", new DegreePosition(53.96506, 10.88896));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Mark mark : w.getMarks()) {
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));
