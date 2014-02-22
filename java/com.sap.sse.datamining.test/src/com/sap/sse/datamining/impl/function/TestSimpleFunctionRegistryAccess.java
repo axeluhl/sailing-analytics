@@ -19,7 +19,7 @@ import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProcessor;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistryAccess {
     
@@ -33,19 +33,19 @@ public class TestSimpleFunctionRegistryAccess {
         classesToScan.add(SimpleClassWithMarkedMethods.class);
         classesToScan.add(DataTypeWithContext.class);
         classesToScan.add(DataTypeWithContextProcessor.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, TestsUtil.getExecutor());
+        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
         Collection<Class<?>> externalClasses = new HashSet<>();
         externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, TestsUtil.getExecutor());
+        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(externalFunctionRetriever);
     }
 
     @Test
     public void testGetAllDimensions() {
-        Collection<Function<?>> modifiableExpectedDimensions = TestsUtil.getDimensionsFor(DataTypeWithContext.class);
-        modifiableExpectedDimensions.addAll(TestsUtil.getDimensionsFor(SimpleClassWithMarkedMethods.class));
+        Collection<Function<?>> modifiableExpectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
+        modifiableExpectedDimensions.addAll(FunctionTestsUtil.getDimensionsFor(SimpleClassWithMarkedMethods.class));
         Iterable<Function<?>> expectedDimensions = modifiableExpectedDimensions;
         assertThat(functionRegistry.getAllDimensions(), is(expectedDimensions));
     }

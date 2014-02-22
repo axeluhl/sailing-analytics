@@ -1,7 +1,8 @@
 package com.sap.sse.datamining.test.components;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
-import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
 public class TestAbstractParallelProcessorFinishing {
     
@@ -37,20 +38,12 @@ public class TestAbstractParallelProcessorFinishing {
     public void testProcessFinishing() {
         processor.onElement(1);
         tryFinishingInOtherThread();
-        sleep(100); //Wait till the processor tries to finish
+        ConcurrencyTestsUtil.sleepFor(100); //Wait till the processor tries to finish
         assertThat(receiverWasToldToFinish, is(false));
         instructionIsWorking = false; //The processer should be able to finish after the instruction is done
-        sleep(500); //Giving the processor a chance to finish
+        ConcurrencyTestsUtil.sleepFor(500); //Giving the processor a chance to finish
         assertThat(receiverWasToldToFinish, is(true));
         
-    }
-
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            fail("Test was interrupted: " + e.getMessage());
-        }
     }
 
     private void tryFinishingInOtherThread() {
@@ -64,7 +57,7 @@ public class TestAbstractParallelProcessorFinishing {
                 }
             }
         };
-        TestsUtil.getExecutor().execute(finishingRunnable);
+        ConcurrencyTestsUtil.getExecutor().execute(finishingRunnable);
     }
 
     private Processor<Integer> createReceiver() {
@@ -79,7 +72,7 @@ public class TestAbstractParallelProcessorFinishing {
     }
 
     private AbstractSimpleParallelProcessor<Integer, Integer> createProcessor(Collection<Processor<Integer>> receivers) {
-        return new AbstractSimpleParallelProcessor<Integer, Integer>(TestsUtil.getExecutor(), receivers) {
+        return new AbstractSimpleParallelProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected Runnable createInstruction(Integer partialElement) {
                 return new Runnable() {

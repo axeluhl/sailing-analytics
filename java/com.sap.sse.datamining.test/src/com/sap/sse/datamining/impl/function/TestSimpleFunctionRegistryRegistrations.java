@@ -19,13 +19,13 @@ import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionR
 import com.sap.sse.datamining.impl.functions.SimpleFunctionRegistry;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestSimpleFunctionRegistryRegistrations {
 
     @Test
     public void testSimpleRegistration() {
-        Method dimension = TestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
+        Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registry.register(dimension);
@@ -43,8 +43,8 @@ public class TestSimpleFunctionRegistryRegistrations {
         registerMethodsOfTestClassesViaFunctionRetrieversTo(registry);
 
         Set<Function<?>> expectedRegisteredFunctionsAsSet = new HashSet<>();
-        expectedRegisteredFunctionsAsSet.addAll(TestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod());
-        expectedRegisteredFunctionsAsSet.addAll(TestsUtil.getMethodsOfExternalLibraryClass());
+        expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod());
+        expectedRegisteredFunctionsAsSet.addAll(FunctionTestsUtil.getMethodsOfExternalLibraryClass());
         Iterable<Function<?>> expectedRegisteredFunctions = expectedRegisteredFunctionsAsSet;
         assertThat(registry.getAllRegisteredFunctions(), is(expectedRegisteredFunctions));
     }
@@ -52,18 +52,18 @@ public class TestSimpleFunctionRegistryRegistrations {
     private void registerMethodsOfTestClassesViaFunctionRetrieversTo(FunctionRegistry registry) {
         Collection<Class<?>> classesToScan = new HashSet<>();
         classesToScan.add(SimpleClassWithMarkedMethods.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, TestsUtil.getExecutor());
+        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
         registry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
         Collection<Class<?>> externalClasses = new HashSet<>();
         externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, TestsUtil.getExecutor());
+        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
         registry.registerFunctionsRetrievedBy(externalFunctionRetriever);
     }
     
     @Test
     public void testTheMultipleRegistrationOfTheSameFunction() {
-        Method dimension = TestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
+        Method dimension = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("dimension");
         
         FunctionRegistry registry = new SimpleFunctionRegistry();
         registry.register(dimension);

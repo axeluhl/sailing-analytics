@@ -15,7 +15,7 @@ import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
-import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestDeclaringTypeOrParameterTypeCriteria {
 
@@ -27,11 +27,11 @@ public class TestDeclaringTypeOrParameterTypeCriteria {
     
     @Before
     public void setUpFunctions() {
-        getSpeedInKnotsValue = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
-        getRaceNameLengthValue = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
-        getRegattaNameDimension = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        getSpeedInKnotsValue = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeInterface.class, "getSpeedInKnots"));
+        getRaceNameLengthValue = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExtendingInterface.class, "getRaceNameLength"));
+        getRegattaNameDimension = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         
-        libraryFunction = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo"));
+        libraryFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo"));
     }
 
     @Test

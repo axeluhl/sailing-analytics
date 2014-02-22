@@ -6,9 +6,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -20,14 +17,7 @@ import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 
-public class TestsUtil {
-    
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    
-    public static ThreadPoolExecutor getExecutor() {
-        return executor;
-    }
+public class FunctionTestsUtil extends ConcurrencyTestsUtil {
     
     public static Collection<Function<?>> getMarkedMethodsOfSimpleClassWithMarkedMethod() {
         Set<Function<?>> markedMethods = new HashSet<>();
@@ -102,6 +92,9 @@ public class TestsUtil {
         dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContext.class, "getLegNumber")));
         dimensions.add(FunctionFactory.createMethodWrappingFunction(getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class)));
         return dimensions;
+    }
+    
+    private FunctionTestsUtil() {
     }
 
 }
