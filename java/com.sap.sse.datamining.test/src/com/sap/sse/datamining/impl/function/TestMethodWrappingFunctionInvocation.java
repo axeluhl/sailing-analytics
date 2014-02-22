@@ -12,7 +12,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestMethodWrappingFunctionInvocation {
     
@@ -21,8 +21,8 @@ public class TestMethodWrappingFunctionInvocation {
 
     @Before
     public void setUpFunctions() {
-        getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
-        increment = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class));
+        getRegattaName = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        increment = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class));
     }
 
     @Test

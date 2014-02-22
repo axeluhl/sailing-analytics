@@ -14,7 +14,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.StringMessagesForTests;
 
 public class TestMethodWrappingFunction {
@@ -25,9 +25,9 @@ public class TestMethodWrappingFunction {
 
     @Before
     public void initializeMethods() {
-        dimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
-        sideEffectFreeValueMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "sideEffectFreeValue");
-        externalLibraryMethod = FunctionTestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo");
+        dimensionMethod = TestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
+        sideEffectFreeValueMethod = TestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "sideEffectFreeValue");
+        externalLibraryMethod = TestsUtil.getMethodFromClass(ExternalLibraryClass.class, "foo");
     }
     
     @Test(expected=IllegalArgumentException.class)

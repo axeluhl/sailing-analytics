@@ -22,7 +22,7 @@ import com.sap.sse.datamining.impl.criterias.SimpleRangeFilterCriteria;
 import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContext;
 import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextImpl;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.StringRegexFilterCriteria;
 
 public class TestFilterCriterias {
@@ -84,7 +84,7 @@ public class TestFilterCriterias {
     
     @Test
     public void testNullaryFunctionValuesFilterCriteria() {
-        Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
+        Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(TestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
         FilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionFilterCriteria<>(getRegattaName, valuesToMatch);
         

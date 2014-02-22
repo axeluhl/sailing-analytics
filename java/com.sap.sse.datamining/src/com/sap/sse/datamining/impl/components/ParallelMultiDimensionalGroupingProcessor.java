@@ -4,12 +4,13 @@ import java.util.Collection;
 import java.util.concurrent.Executor;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.functions.Function;
 
-public class MultiDimensionalGroupingProcessor<DataType>
-             extends AbstractSimpleParallelProcessor<DataType, GroupedDataEntry<DataType>> {
+public class ParallelMultiDimensionalGroupingProcessor<DataType>
+             extends AbstractPartitioningParallelProcessor<Iterable<DataType>, DataType, GroupedDataEntry<DataType>> {
 
-    public MultiDimensionalGroupingProcessor(Executor executor,
-            Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers) {
+    public ParallelMultiDimensionalGroupingProcessor(Executor executor,
+            Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers, Iterable<Function<?>> dimensions) {
         super(executor, resultReceivers);
     }
 
@@ -18,10 +19,14 @@ public class MultiDimensionalGroupingProcessor<DataType>
         return new AbstractDirectForwardProcessingInstruction<DataType, GroupedDataEntry<DataType>>(element, getResultReceivers()) {
             @Override
             protected GroupedDataEntry<DataType> processInput(DataType input) {
-                // TODO Auto-generated method stub
                 return null;
             }
         };
+    }
+
+    @Override
+    protected Iterable<DataType> partitionElement(Iterable<DataType> element) {
+        return element;
     }
 
 }

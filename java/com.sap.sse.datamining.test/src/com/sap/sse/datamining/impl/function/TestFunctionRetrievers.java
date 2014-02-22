@@ -17,7 +17,7 @@ import com.sap.sse.datamining.impl.functions.FunctionRetrievalWorker;
 import com.sap.sse.datamining.impl.functions.PartitioningParallelMarkedFunctionRetriever;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.OpenDataReceiver;
 
 public class TestFunctionRetrievers {
@@ -30,7 +30,7 @@ public class TestFunctionRetrievers {
         
         FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createMarkedFunctionRetrievalWorker(classesToScan, receiver);
         
-        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        Collection<Function<?>> expectedFunctions = TestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
         worker.run();
         assertThat(receiver.result, is(expectedFunctions));
     }
@@ -43,7 +43,7 @@ public class TestFunctionRetrievers {
         
         FunctionRetrievalWorker worker = FunctionRetrievalWorker.Util.createExternalFunctionRetrievalWorker(classesToScan, receiver);
         
-        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMethodsOfExternalLibraryClass();
+        Collection<Function<?>> expectedFunctions = TestsUtil.getMethodsOfExternalLibraryClass();
         worker.run();
         assertThat(receiver.result, is(expectedFunctions));
     }
@@ -54,9 +54,9 @@ public class TestFunctionRetrievers {
         classesToScan.add(SimpleClassWithMarkedMethods.class);
         assertThat("Not enough classes to scan for this test.", classesToScan.size() >= getMaximumWorkerAmount(), is(true));
         
-        ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , FunctionTestsUtil.getExecutor());
+        ParallelFunctionRetriever functionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan , TestsUtil.getExecutor());
 
-        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
+        Collection<Function<?>> expectedFunctions = TestsUtil.getMarkedMethodsOfSimpleClassWithMarkedMethod();
         try {
             Collection<Function<?>> retrievedFunctions = new HashSet<>(functionRetriever.start(null).get());
             assertThat(retrievedFunctions, is(expectedFunctions));
@@ -66,7 +66,7 @@ public class TestFunctionRetrievers {
     }
 
     private int getMaximumWorkerAmount() {
-        return (int) (FunctionTestsUtil.getExecutor().getCorePoolSize() * 0.5);
+        return (int) (TestsUtil.getExecutor().getCorePoolSize() * 0.5);
     }
 
     private Collection<Class<?>> getManyClassesToScan() {

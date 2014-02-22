@@ -29,7 +29,7 @@ import com.sap.sse.datamining.test.function.test_classes.DataTypeWithContextProc
 import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.StringMessagesForTests;
 
 public class TestFunctionProvider {
@@ -47,20 +47,20 @@ public class TestFunctionProvider {
         classesToScan.add(DataTypeWithContext.class);
         classesToScan.add(DataTypeWithContextProcessor.class);
         classesToScan.add(ExtendingInterface.class);
-        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, FunctionTestsUtil.getExecutor());
+        ParallelFunctionRetriever markedFunctionRetriever = new PartitioningParallelMarkedFunctionRetriever(classesToScan, TestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(markedFunctionRetriever);
         
         Collection<Class<?>> externalClasses = new HashSet<>();
         externalClasses.add(ExternalLibraryClass.class);
-        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, FunctionTestsUtil.getExecutor());
+        ParallelFunctionRetriever externalFunctionRetriever = new PartitionParallelExternalFunctionRetriever(externalClasses, TestsUtil.getExecutor());
         functionRegistry.registerFunctionsRetrievedBy(externalFunctionRetriever);
     }
 
     @Test
     public void testGetDimensionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, TestsUtil.getExecutor());
         
-        Collection<Function<?>> expectedDimensions = FunctionTestsUtil.getDimensionsFor(DataTypeWithContext.class);
+        Collection<Function<?>> expectedDimensions = TestsUtil.getDimensionsFor(DataTypeWithContext.class);
         
         Collection<Function<?>> providedDimensions = new HashSet<>(functionProvider.getDimensionsFor(DataTypeWithContext.class));
         assertThat(providedDimensions, is(expectedDimensions));
@@ -71,16 +71,16 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionsForType() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
-        Method getRegattaAndRaceName = FunctionTestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, TestsUtil.getExecutor());
+        Method getRegattaAndRaceName = TestsUtil.getMethodFromClass(DataTypeWithContextProcessor.class, "getRegattaAndRaceName", DataTypeWithContext.class);
         
-        Collection<Function<?>> expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
+        Collection<Function<?>> expectedFunctions = TestsUtil.getMarkedMethodsOfDataTypeWithContextAndItsSupertypes();
         expectedFunctions.add(FunctionFactory.createMethodWrappingFunction(getRegattaAndRaceName));
         
         Collection<Function<?>> providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContext.class));
         assertThat(providedFunctions, is(expectedFunctions));
         
-        expectedFunctions = FunctionTestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
+        expectedFunctions = TestsUtil.getMarkedMethodsOfDataTypeWithContextImplAndItsSupertypes();
         expectedFunctions.add(FunctionFactory.createMethodWrappingFunction(getRegattaAndRaceName));
         
         providedFunctions = new HashSet<>(functionProvider.getFunctionsFor(DataTypeWithContextImpl.class));
@@ -89,11 +89,11 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionForDTO() {
-        Method getRegattaNameMethod = FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName");
+        Method getRegattaNameMethod = TestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName");
         Function<Object> getRegattaName = FunctionFactory.createMethodWrappingFunction(getRegattaNameMethod);
         FunctionDTO getRegattaNameDTO = getRegattaName.asDTO(Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, TestsUtil.getExecutor());
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
         Function<Object> providedFunction = (Function<Object>) functionProvider.getFunctionFor(getRegattaNameDTO);
         assertThat(providedFunction, is(getRegattaName));
@@ -101,17 +101,17 @@ public class TestFunctionProvider {
     
     @Test
     public void testGetFunctionForUnregisteredDTO() {
-        Method incrementMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
+        Method incrementMethod = TestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "increment", int.class);
         Function<Object> increment = FunctionFactory.createMethodWrappingFunction(incrementMethod);
         FunctionDTO incrementDTO = increment.asDTO(Locale.ENGLISH, stringMessages);
         
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, TestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(incrementDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
-        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, FunctionTestsUtil.getExecutor());
+        FunctionProvider functionProvider = new RegistryFunctionsProvider(functionRegistry, TestsUtil.getExecutor());
         assertThat(functionProvider.getFunctionFor(null), is(nullValue()));
     }
 
