@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
@@ -31,11 +32,14 @@ public abstract class HighPointFirstGetsFixedScore extends HighPoint {
         int competitorFleetOrdering;
         if (rank == 0) {
             effectiveRank = 0;
-        } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
-            int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn, competitorFleetOrdering);
-            effectiveRank = rank + numberOfCompetitorsInBetterFleets;
         } else {
-            effectiveRank = rank;
+            final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+            if (fleetOfCompetitor != null && raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=fleetOfCompetitor.getOrdering()) != 0) {
+                int numberOfCompetitorsInBetterFleets = getNumberOfCompetitorsInBetterFleets(raceColumn, competitorFleetOrdering);
+                effectiveRank = rank + numberOfCompetitorsInBetterFleets;
+            } else {
+                effectiveRank = rank;
+            }
         }
         if (effectiveRank == 0) {
             result = null;
