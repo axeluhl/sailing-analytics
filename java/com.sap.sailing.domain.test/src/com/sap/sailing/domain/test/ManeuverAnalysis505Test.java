@@ -35,7 +35,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20110609_KielerWoch-505_Race_2.txt").getCanonicalPath()),
@@ -44,8 +44,9 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
                 new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+                new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")),
+                        new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(55))),
+                new WindSourceImpl(WindSourceType.WEB));
     }
     
     /**
@@ -103,27 +104,11 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:45")), JIBE_TOLERANCE);
 
         /*
-         * Findel's track has an interesting challenge. When Findel passes the leeward gate they do so by bearing
-         * away into the gate and then luffing up. Based on the somewhat indeterministic Douglas-Peucker algorithm,
-         * the bear-away can come in so late that it---instead of the luffing-up---the bearing-away maneuver is called
-         * the mark passing maneuver. This leaves the luffing-up as a "TACK" maneuver which is entirely wrong but is called
-         * because the tacks before and after the maneuver are different and the boat is thought to be already on the
-         * upwind leg...
-         * 
-         * Nick Klose is working on an improved mark passing algorithm which will call the mark passing in a better way.
-         * This will hopefully fix this test for good. For the time being, we need to work around the problem by trying
-         * to check for the presence of the "TACK" maneuver, and ignoring the failure if it's not found.
-         * 
-         * TODO based on an improve mark passing detection algorithm, remove this workaround again
-         * 
-         * The maneuver com.sap.sailing.domain.tracking.impl.ManeuverImpl@3cc74bd4 TACK on new tack PORT on position
-         * (54.499522999999996,10.200467) at time point Thu Jun 23 13:53:30 UTC 2011. Speed before maneuver
-         * 5.3325230629005045kn to 39.215442566414524° speed after maneuver 3.8682658770744913kn to 287.5518433631261°.
-         * The maneuver changed the course by -111.66359920328841deg. Lost approximately 0.4702134204862639m was
-         * detected but not expected
+         * Findel's track has an interesting challenge. When Findel, at 15:53:30, rounds the leeward gate, this has to
+         * be recognized as a HEAD_UP by the algorithm, and the wind has to be set to point to 55deg exactly during the
+         * maneuver (to protect against a somewhat off estimation that reads 43deg which would cause this to be
+         * recognized as a jibe) whereas Findel's course *before* the maneuver was 48deg, then heading up by 111deg.
          */
-        assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")), TACK_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:45")), PENALTYCIRCLE_TOLERANCE);
 

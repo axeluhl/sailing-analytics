@@ -2098,7 +2098,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     speedWithBearingOnApproximationAtEnd, totalCourseChangeInDegrees, maneuverLoss, waypointPassed,
                     sideToWhichWaypointWasPassed));
         }
-        final Wind wind = getWind(competitorTrack.getEstimatedPosition(maneuverTimePoint, /* extrapolate */ false), maneuverTimePoint);
+        final Wind wind = getWind(maneuverPosition, maneuverTimePoint);
         final Bearing courseBeforeManeuver = competitorTrack.getEstimatedSpeed(timePointBeforeManeuver).getBearing();
         final Bearing courseAfterManeuver = competitorTrack.getEstimatedSpeed(timePointAfterManeuver).getBearing();
         BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;

@@ -47,7 +47,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException {
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20110929_Internatio-Champions_Cup_Final.txt").getCanonicalPath()),
