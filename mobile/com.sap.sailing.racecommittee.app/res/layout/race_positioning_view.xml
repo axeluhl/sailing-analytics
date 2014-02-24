@@ -45,7 +45,7 @@
         <com.mobeta.android.dslv.DragSortListView
             android:id="@+id/dragSortListPositioning"
             android:layout_width="350dp"
-            android:layout_height="fill_parent"
+            android:layout_height="584dp"
             android:layout_gravity="left"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="30dp"

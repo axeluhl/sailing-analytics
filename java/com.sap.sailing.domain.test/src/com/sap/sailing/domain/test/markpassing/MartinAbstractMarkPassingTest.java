@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
         super();
     }
 
-    public void setUp() throws IOException, InterruptedException, URISyntaxException {
+    public void setUp() throws IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
         String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
         if (!loadData(raceID) && !forceReload) {

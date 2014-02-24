@@ -430,6 +430,15 @@ public interface SailingServiceAsync {
 
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, UUID defaultCourseAreaUuid, RegattaConfigurationDTO regattaConfiguration, AsyncCallback<Void> callback);
+
+    /**
+     * @param detailType
+     *            supports {@link DetailType#REGATTA_RANK}, {@link DetailType#REGATTA_TOTAL_POINTS} and
+     *            {@link DetailType#OVERALL_RANK}.
+     * 
+     * @return the first triple element is the race column name; then follows the list of competitors, and finally the
+     *         list of values whose indices correspond with the elements in the {@link CompetitorDTO} list.
+     */
     void getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, Date date, DetailType detailType,
             AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>> callback);
 

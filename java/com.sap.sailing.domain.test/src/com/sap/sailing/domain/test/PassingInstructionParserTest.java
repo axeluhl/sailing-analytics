@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class PassingInstructionParserTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///"+new File("resources/event_20131112_ESSFlorian-Race_1.txt").getCanonicalPath()),

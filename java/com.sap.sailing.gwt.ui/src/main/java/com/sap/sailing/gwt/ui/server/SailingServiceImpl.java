@@ -2428,33 +2428,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private Triple<String, List<CompetitorDTO>, List<Double>> getLeaderboardDataEntriesForRaceColumn(DetailType detailType,
-            LeaderboardDTO leaderboard, RaceColumnDTO raceColumn) throws NoWindException {
+    private Triple<String, List<CompetitorDTO>, List<Double>> getTotalPointsForRaceColumn(LeaderboardDTO leaderboard,
+            RaceColumnDTO raceColumn) throws NoWindException {
         List<Double> values = new ArrayList<Double>();
         List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
-        if(detailType != null) {
-            switch (detailType) {
-            case REGATTA_TOTAL_POINTS:
-                for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
-                    LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
-                    values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
-                    competitorDTOs.add(entry.getKey());
-                }
-                
-                break;
-            case REGATTA_RANK:
-            case OVERALL_RANK:
-                List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumn);
-                int rank = 1;
-                for(CompetitorDTO competitor: competitorsFromBestToWorst) {
-                    values.add(new Double(rank));
-                    competitorDTOs.add(competitor);
-                    rank++;
-                }
-                break;
-            default:
-                break;
-            }
+        for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
+            LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
+            values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
+            competitorDTOs.add(entry.getKey());
         }
         return new Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.getName(), competitorDTOs, values);
     }
@@ -2463,9 +2444,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
             Date date, DetailType detailType) throws Exception {
         List<Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<Util.Triple<String,List<CompetitorDTO>,List<Double>>>();
-
         // Attention: The reason why we read the data from the LeaderboardDTO and not from the leaderboard directly is to ensure
-        // the use of the leaderboard cache and the reuse of all the logic in the getLeaderboardByName method
+        // the use of the leaderboard cache.
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             TimePoint timePoint;
@@ -2474,11 +2454,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 timePoint = new MillisecondsTimePoint(date);
             }
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
-                    getService(), baseDomainFactory);
-            for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
-                result.add(getLeaderboardDataEntriesForRaceColumn(detailType, leaderboardDTO, raceColumnDTO));
+            if (detailType != null) {
+                switch (detailType) {
+                case REGATTA_TOTAL_POINTS:
+                    LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
+                            getService(), baseDomainFactory);
+                    for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
+                        result.add(getTotalPointsForRaceColumn(leaderboardDTO, raceColumnDTO));
+                    }
+                    break;
+                case REGATTA_RANK:
+                case OVERALL_RANK:
+                    TimePoint effectiveTimePoint = timePoint == null ?
+                            leaderboard.getNowMinusDelay() : timePoint;
+                    Map<RaceColumn, List<Competitor>> competitorsFromBestToWorst = leaderboard
+                            .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(effectiveTimePoint);
+                    for (Entry<RaceColumn, List<Competitor>> e : competitorsFromBestToWorst.entrySet()) {
+                        int rank = 1;
+                        List<Double> values = new ArrayList<Double>();
+                        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
+                        for (Competitor competitor : e.getValue()) {
+                            values.add(new Double(rank));
+                            competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
+                            rank++;
+                        }
+                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
+                    }
+                    break;
+                default:
+                    break;
+                }
             }
+
         }
         return result;
     }
@@ -3508,6 +3515,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     throw new RuntimeException(e);
                 } finally {
                     // close the connection, set all objects to null
+                    getService().setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
                     connection.disconnect();
                     connection = null;
                     long timeToImport = System.currentTimeMillis() - startTime;

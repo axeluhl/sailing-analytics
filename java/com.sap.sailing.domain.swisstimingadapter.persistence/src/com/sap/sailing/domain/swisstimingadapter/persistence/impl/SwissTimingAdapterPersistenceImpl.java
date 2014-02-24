@@ -333,5 +333,6 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         racesMessageCollection.drop();
         DBCollection cmdMessageCollection = database.getCollection(CollectionNames.COMMAND_MESSAGES.name());
         cmdMessageCollection.drop();
+        database.getLastError(); // wait for the drop() to complete
     }
 }
