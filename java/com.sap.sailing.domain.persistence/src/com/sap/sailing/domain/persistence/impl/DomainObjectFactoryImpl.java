@@ -29,12 +29,12 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -204,6 +204,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
         // for legacy access to not yet migrated fixes
         windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1).add(FieldNames.RACE_NAME.name(), 1).get());
+        // Unique index
+        windTracks.ensureIndex(
+                new BasicDBObjectBuilder().add(FieldNames.RACE_ID.name(), 1).add(FieldNames.WIND_SOURCE_NAME.name(), 1)
+                        .add(FieldNames.WIND_SOURCE_ID.name(), 1)
+                        .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),
+                new BasicDBObjectBuilder().add("unique", true).get());
     }
 
     @Override
