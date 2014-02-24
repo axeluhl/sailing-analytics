@@ -20,4 +20,9 @@ public class GroupedDataEntry<DataType> {
         return dataEntry;
     }
 
+    @Override
+    public String toString() {
+        return "[" + key + ", " + dataEntry + "]";
+    }
+
 }

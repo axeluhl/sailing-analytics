@@ -6,34 +6,32 @@ import com.sap.sse.datamining.components.ProcessingInstruction;
 import com.sap.sse.datamining.components.Processor;
 
 /**
- * A processing construction, that processes the input and directly forwards
- * it to the result receivers.
+ * A processing construction, that processes the input and directly forwards it to the result receivers.
  */
-public abstract class AbstractDirectForwardProcessingInstruction<InputType, ResultType>
-			 implements ProcessingInstruction<InputType, ResultType> {
-	
-	private final InputType input;
-	private ResultType result;
-	private final Collection<Processor<ResultType>> resultReceivers;
+public abstract class AbstractDirectForwardProcessingInstruction<InputType, ResultType> implements
+        ProcessingInstruction<InputType, ResultType> {
 
-	public AbstractDirectForwardProcessingInstruction(InputType input, Collection<Processor<ResultType>> resultReceivers) {
-		this.input = input;
-		this.resultReceivers = resultReceivers;
-	}
+    private final InputType input;
+    private ResultType result;
+    private final Collection<Processor<ResultType>> resultReceivers;
 
-	@Override
-	public void run() {
-		result = processInput(input);
-		forwardResult();
-	}
+    public AbstractDirectForwardProcessingInstruction(InputType input, Collection<Processor<ResultType>> resultReceivers) {
+        this.input = input;
+        this.resultReceivers = resultReceivers;
+    }
 
-	private void forwardResult() {
-		for (Processor<ResultType> resultReceiver : resultReceivers) {
-			resultReceiver.onElement(result);
-		}
-	}
+    @Override
+    public void run() {
+        result = processInput(input);
+        forwardResult();
+    }
 
-	protected abstract ResultType processInput(InputType input);
+    private void forwardResult() {
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            resultReceiver.onElement(result);
+        }
+    }
 
-	
+    protected abstract ResultType processInput(InputType input);
+
 }

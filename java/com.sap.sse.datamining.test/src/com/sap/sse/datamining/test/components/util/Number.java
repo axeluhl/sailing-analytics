@@ -23,11 +23,17 @@ public class Number {
     @Dimension("crossSum")
     public int getCrossSum() {
         int crossSum = 0;
+        int value = this.value;
         while (value != 0) {
               crossSum += value % 10;
               value /= 10;
         }
         return crossSum;
+    }
+
+    @Override
+    public String toString() {
+        return "Number " + value;
     }
 
 }

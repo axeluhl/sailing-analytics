@@ -30,7 +30,6 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
             Runnable instruction = createInstruction(partialElement);
             if (instructionIsValid(instruction)) {
                 NotifyingInstruction notifyingInstruction = new NotifyingInstruction(instruction);
-                openInstructions++;
                 executor.execute(notifyingInstruction);
             }
         }
@@ -42,10 +41,6 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     private boolean instructionIsValid(Runnable instruction) {
         return instruction != null;
-    }
-
-    public void instructionCompleted() {
-        openInstructions--;
     }
 
     protected Set<Processor<ResultType>> getResultReceivers() {
@@ -80,12 +75,13 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
         public NotifyingInstruction(Runnable instruction) {
             this.innerInstruction = instruction;
+            AbstractPartitioningParallelProcessor.this.openInstructions++;
         }
 
         @Override
         public void run() {
             innerInstruction.run();
-            AbstractPartitioningParallelProcessor.this.instructionCompleted();
+            AbstractPartitioningParallelProcessor.this.openInstructions--;
         }
 
     }
