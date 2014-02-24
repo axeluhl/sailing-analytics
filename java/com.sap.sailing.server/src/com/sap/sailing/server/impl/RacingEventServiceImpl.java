@@ -134,6 +134,7 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -142,6 +143,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
+import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
@@ -2290,6 +2292,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage) {
         setDataImportFailedWithoutReplication(importOperationId, errorMessage);
         replicate(new DataImportFailed(importOperationId, errorMessage));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId) {
+        setDataImportDeleteProgressFromMapTimerWithoutReplication(importOperationId);
+        replicate(new SetDataImportDeleteProgressFromMapTimer(importOperationId));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
+        dataImportLock.setDeleteFromMapTimer(importOperationId);
+    }
+
+    @Override
+    public void replicateDataImportOperation(ImportMasterDataOperation op) {
+        replicate(op);
     }
 
 }

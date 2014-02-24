@@ -3520,6 +3520,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     throw new RuntimeException(e);
                 } finally {
                     // close the connection, set all objects to null
+                    getService().setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
                     connection.disconnect();
                     connection = null;
                     long timeToImport = System.currentTimeMillis() - startTime;

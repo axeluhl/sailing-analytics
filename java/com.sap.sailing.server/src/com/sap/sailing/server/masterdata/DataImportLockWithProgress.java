@@ -18,8 +18,6 @@ public class DataImportLockWithProgress extends ReentrantLock {
 
     private static final long serialVersionUID = -3527221613483691340L;
 
-    private DataImportProgress currentProgress;
-
     private final Map<UUID, DataImportProgress> progressPerId;
 
     private final ReentrantReadWriteLock mapLock;
@@ -30,30 +28,18 @@ public class DataImportLockWithProgress extends ReentrantLock {
         mapLock = new ReentrantReadWriteLock();
     }
 
-    public void lock(UUID operationId) {
-        super.lock();
-        currentProgress = progressPerId.get(operationId);
-    }
-
-    @Override
-    public void unlock() {
-        setDeleteFromMapTimer(currentProgress);
-        currentProgress = null;
-        super.unlock();
-    }
-
     /**
      * This timer ensures that operation results are deleted from memory after some time. Just deleting the entry when
      * the operation is done does not ensure that the entry is deleted from every replica, since the last progress
      * request will only reach one server.
      */
-    private void setDeleteFromMapTimer(final DataImportProgress progressToDelete) {
+    public void setDeleteFromMapTimer(final UUID progressIDToDelete) {
         TimerTask deleteTask = new TimerTask() {
             @Override
             public void run() {
                 mapLock.writeLock().lock();
                 try {
-                    progressPerId.remove(progressToDelete.getOperationId());
+                    progressPerId.remove(progressIDToDelete);
                 } finally {
                     mapLock.writeLock().unlock();
                 }
