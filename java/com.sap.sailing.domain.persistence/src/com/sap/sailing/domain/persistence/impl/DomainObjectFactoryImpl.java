@@ -173,7 +173,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private TimePoint loadTimePoint(DBObject object, FieldNames field) {
-        return new MillisecondsTimePoint(((Number) object.get(field.name())).longValue());
+        TimePoint result = null;
+        Number timePointAsNumber = (Number) object.get(field.name());
+        if(timePointAsNumber != null) {
+            result = new MillisecondsTimePoint(timePointAsNumber.longValue());
+        }
+        return result;
     }
 
     /**
@@ -836,10 +841,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Event loadEvent(DBObject eventDBObject) {
         String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
         UUID id = (UUID) eventDBObject.get(FieldNames.EVENT_ID.name());
-        String publicationUrl = (String) eventDBObject.get(FieldNames.EVENT_PUBLICATION_URL.name());
+        TimePoint startDate = loadTimePoint(eventDBObject, FieldNames.EVENT_START_DATE);
+        TimePoint endDate = loadTimePoint(eventDBObject, FieldNames.EVENT_END_DATE);
         boolean isPublic = eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) != null ? (Boolean) eventDBObject.get(FieldNames.EVENT_IS_PUBLIC.name()) : false;
         Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
-        Event result = new EventImpl(name, venue, publicationUrl, isPublic, id);
+        Event result = new EventImpl(name, startDate, endDate, venue, isPublic, id);
         return result;
     }
 

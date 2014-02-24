@@ -215,16 +215,9 @@ public class EventOverviewPanel extends FormPanel {
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(eventNameAnchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
-                    String link = URLEncoder.encode(event.publicationUrl
-                            + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
-                    return ANCHORTEMPLATE.anchor(link, event.getName());
-                } else {
-                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                    builder.appendHtmlConstant(event.getName());
-                    return builder.toSafeHtml();
-                }
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendHtmlConstant(event.getName());
+                return builder.toSafeHtml();
             }
         };
         eventNameColumn.setSortable(true);

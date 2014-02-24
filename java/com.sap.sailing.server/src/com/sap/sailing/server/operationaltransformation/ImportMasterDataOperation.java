@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -365,10 +366,11 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 String name = event.getName();
-                String pubString = event.getPublicationUrl();
+                TimePoint startDate = event.getStartDate();
+                TimePoint endDate = event.getEndDate();
                 String venueName = event.getVenue().getName();
                 boolean isPublic = event.isPublic();
-                Event newEvent = toState.createEventWithoutReplication(name, venueName, pubString, isPublic, id);
+                Event newEvent = toState.createEventWithoutReplication(name, startDate, endDate, venueName, isPublic, id);
                 creationCount.addOneEvent(newEvent.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",

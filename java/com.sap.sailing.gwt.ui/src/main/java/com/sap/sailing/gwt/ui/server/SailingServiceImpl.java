@@ -2779,14 +2779,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventId, eventName, venue.getName(), publicationUrl, isPublic, regattaNames));
+    public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(eventId, eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue.getName(), isPublic, regattaNames));
     }
 
     @Override
-    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
+    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
+        getService().apply(new CreateEvent(eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -2842,7 +2842,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
-        eventDTO.publicationUrl = event.getPublicationUrl();
+        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
+        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = event.getId();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
