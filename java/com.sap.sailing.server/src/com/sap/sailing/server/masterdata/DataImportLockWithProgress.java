@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 
@@ -21,9 +22,12 @@ public class DataImportLockWithProgress extends ReentrantLock {
 
     private final Map<UUID, DataImportProgress> progressPerId;
 
+    private final ReentrantReadWriteLock mapLock;
+
     public DataImportLockWithProgress() {
         super(true);
         progressPerId = new HashMap<UUID, DataImportProgress>();
+        mapLock = new ReentrantReadWriteLock();
     }
 
     public void lock(UUID operationId) {
@@ -47,8 +51,11 @@ public class DataImportLockWithProgress extends ReentrantLock {
         TimerTask deleteTask = new TimerTask() {
             @Override
             public void run() {
-                synchronized (progressPerId) {
+                mapLock.writeLock().lock();
+                try {
                     progressPerId.remove(progressToDelete.getOperationId());
+                } finally {
+                    mapLock.writeLock().unlock();
                 }
             }
         };
@@ -62,15 +69,21 @@ public class DataImportLockWithProgress extends ReentrantLock {
      */
     public DataImportProgress getProgress(UUID operationId) {
         DataImportProgress progress;
-        synchronized (progressPerId) {
+        mapLock.readLock().lock();
+        try {
             progress = progressPerId.get(operationId);
+        } finally {
+            mapLock.readLock().unlock();
         }
         return progress;
     }
 
     public void addProgress(UUID operationId, DataImportProgress progress) {
-        synchronized (progressPerId) {
+        mapLock.writeLock().lock();
+        try {
             progressPerId.put(operationId, progress);
+        } finally {
+            mapLock.writeLock().unlock();
         }
     }
 
