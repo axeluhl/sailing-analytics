@@ -814,13 +814,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
-        for (Event event : getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
         return regatta;
     }
 
@@ -846,6 +839,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         if (persistent) {
             updateStoredRegatta(regatta);
+        }
+        for (Event event : getAllEvents()) {
+            for (CourseArea eventCourseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && eventCourseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
         }
         return new Pair<Regatta, Boolean>(regatta, wasCreated);
     }
