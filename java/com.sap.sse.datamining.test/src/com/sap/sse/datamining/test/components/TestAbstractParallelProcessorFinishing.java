@@ -37,27 +37,13 @@ public class TestAbstractParallelProcessorFinishing {
     @Test
     public void testProcessFinishing() {
         processor.onElement(1);
-        tryFinishingInOtherThread();
+        ConcurrencyTestsUtil.tryToFinishTheProcessorInAnotherThread(processor);
         ConcurrencyTestsUtil.sleepFor(100); //Wait till the processor tries to finish
         assertThat(receiverWasToldToFinish, is(false));
         instructionIsWorking = false; //The processer should be able to finish after the instruction is done
         ConcurrencyTestsUtil.sleepFor(500); //Giving the processor a chance to finish
         assertThat(receiverWasToldToFinish, is(true));
         
-    }
-
-    private void tryFinishingInOtherThread() {
-        Runnable finishingRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    processor.finish();
-                } catch (InterruptedException e) {
-                    fail("Test was interrupted: " + e.getMessage());
-                }
-            }
-        };
-        ConcurrencyTestsUtil.getExecutor().execute(finishingRunnable);
     }
 
     private Processor<Integer> createReceiver() {
