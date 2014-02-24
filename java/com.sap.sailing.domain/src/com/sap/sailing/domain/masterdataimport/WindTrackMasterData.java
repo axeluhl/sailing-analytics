@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 
 public class WindTrackMasterData implements Serializable {
 
@@ -14,15 +14,15 @@ public class WindTrackMasterData implements Serializable {
 
     private final WindSourceType windSourceType;
     private final Object windSourceId;
-    private final Iterable<Wind> fixes;
+    private final WindTrack windTrack;
     private final String regattaName;
     private final String raceName;
     private final Serializable raceId;
 
-    public WindTrackMasterData(WindSourceType windSourceType, Object windSourceId, Iterable<Wind> fixes,
+    public WindTrackMasterData(WindSourceType windSourceType, Object windSourceId, WindTrack windTrack,
             String regattaName, String raceName, Serializable raceId) {
         this.windSourceId = windSourceId;
-        this.fixes = fixes;
+        this.windTrack = windTrack;
         this.regattaName = regattaName;
         this.raceName = raceName;
         this.raceId = raceId;
@@ -37,8 +37,8 @@ public class WindTrackMasterData implements Serializable {
         return windSourceId;
     }
 
-    public Iterable<Wind> getFixes() {
-        return fixes;
+    public WindTrack getWindTrack() {
+        return windTrack;
     }
     
     public String getRegattaName() {

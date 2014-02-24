@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     }
 
-    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException {
+    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
         super.setUp();
         URI storedUri = new URI("file:///" + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
@@ -83,7 +84,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
         setUp(raceNumber);
         testWholeRace();
         testMiddleOfRace(0);

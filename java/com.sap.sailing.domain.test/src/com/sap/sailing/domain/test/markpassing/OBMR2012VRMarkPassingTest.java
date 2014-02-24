@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.markpassing;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 
 import org.junit.Test;
 
@@ -13,57 +14,57 @@ public class OBMR2012VRMarkPassingTest extends AbstractMarkPassingTest {
     }
 
     @Test
-    public void testRaceFr11() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr11() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_1_1");
     }
     
     @Test
-    public void testRaceFr12() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr12() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_1_2");
     }
     
     @Test
-    public void testRaceFr13() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr13() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_1_3");
     }
     
     @Test
-    public void testRaceFr21() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr21() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_2_1");
     }
     
     @Test
-    public void testRaceFr22() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr22() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_2_2");
     }
     
     @Test
-    public void testRaceFr23() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceFr23() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Fr_Fleet_2_3");
     }
     
     @Test
-    public void testRaceSaVm11() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceSaVm11() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Sa-Vm_Fleet_1_1");
     }
     
     @Test
-    public void testRaceSaVm12() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceSaVm12() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Sa-Vm_Fleet_1_2");
     }
     
     @Test
-    public void testRaceSaVm13() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceSaVm13() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Sa-Vm_Fleet_1_3");
     }
     
     @Test
-    public void testRaceSaVm21() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceSaVm21() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Sa-Vm_Fleet_2_1");
     }
     
     @Test
-    public void testRaceSaVm22() throws IOException, InterruptedException, URISyntaxException {
+    public void testRaceSaVm22() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("Sa-Vm_Fleet_2_2");
     }
     

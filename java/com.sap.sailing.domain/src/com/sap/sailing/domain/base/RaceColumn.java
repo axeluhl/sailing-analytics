@@ -227,4 +227,6 @@ public interface RaceColumn extends Named {
      * in the column as many times as there are fleets in the column. For the latter case, this method returns <code>true</code>.
      */
     boolean hasSplitFleetContiguousScoring();
+
+    boolean hasSplitFleets();
 }

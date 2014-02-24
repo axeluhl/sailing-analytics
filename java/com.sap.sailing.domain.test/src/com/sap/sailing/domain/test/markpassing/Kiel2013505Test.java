@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.markpassing;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 
 import org.junit.Ignore;
 
@@ -15,7 +16,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
     //Takes longer than 2 minutes, so the rule in AbstractTracTracLiveTest needs to be deactivated first.
     
     @Ignore
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException {
+    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("5");
     }
 
