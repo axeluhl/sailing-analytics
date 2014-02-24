@@ -20,7 +20,6 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -927,18 +926,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Bearing getCrossingBearing(Waypoint w, TimePoint t) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         // TODO Auto-generated method stub
         return null;
     }
