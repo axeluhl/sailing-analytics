@@ -268,10 +268,16 @@ public class ImportMasterDataOperation extends
         int i = 0;
         for (WindTrackMasterData windMasterData : masterData.getWindTrackMasterData()) {
             DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
-            WindTrack windTrack = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
-            for (Wind fix : windMasterData.getFixes()) {
-                windTrack.add(fix);
-            }         
+            WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
+            final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
+            windTrackToReadFrom.lockForRead();
+            try {
+                for (Wind fix : windTrackToReadFrom.getRawFixes()) {
+                    windTrackToWriteTo.add(fix);
+                }
+            } finally {
+                windTrackToReadFrom.unlockAfterRead();
+            }
             i++;
             progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
             progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
