@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -18,9 +18,9 @@ import com.sap.sailing.domain.tracking.GPSFix;
 public interface CandidateFinder {
 
     /**
-     * @return The fixes of each Competitor that may have changed their status
+     * @return The fixes of each Competitor that may have changed their status as a {@link Candidate}.
      */
-    LinkedHashMap<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
+    Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> gps);
 
     /**
      * @param fixes

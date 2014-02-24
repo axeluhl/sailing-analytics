@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +21,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -72,67 +73,66 @@ public class MarkPassingCalculator {
         public void run() {
             logger.fine("MarkPassingCalculator is listening for new Fixes.");
             boolean finished = false;
-            LinkedHashMap<Object, List<GPSFix>> combinedFixes = new LinkedHashMap<>();
+            Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
+            Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
             while (!finished) {
-                List<Pair<Object, GPSFix>> allNewFixes = new ArrayList<Pair<Object, GPSFix>>();
+                List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                 try {
-                    allNewFixes.add(listener.getQueue().take());
+                    allNewFixInsertions.add(listener.getQueue().take());
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage() + " while waiting for new GPSFixes");
                 }
-                listener.getQueue().drainTo(allNewFixes);
-                for (Pair<Object, GPSFix> fix : allNewFixes) {
-                    if (listener.isEndMarker(fix)) {
+                listener.getQueue().drainTo(allNewFixInsertions);
+                for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
+                    if (listener.isEndMarker(fixInsertion)) {
                         finished = true;
                     } else {
-                        if (!combinedFixes.containsKey(fix.getA())) {
-                            combinedFixes.put(fix.getA(), new ArrayList<GPSFix>());
-                        }
-                        combinedFixes.get(fix.getA()).add(fix.getB());
+                        fixInsertion.storePositionUpdate(competitorFixes, markFixes);
                     }
                 }
                 if (!suspended) {
-                    computeMarkPasses(combinedFixes);
-                    combinedFixes.clear();
+                    computeMarkPasses(competitorFixes, markFixes);
+                    competitorFixes.clear();
+                    markFixes.clear();
                 }
             }
         }
 
-        private void computeMarkPasses(LinkedHashMap<Object, List<GPSFix>> combinedFixes) {
-
+        /**
+         *  TODO Clears combined fixes
+         * @param combinedFixes
+         */
+        private void computeMarkPasses(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
             LinkedHashMap<Competitor, Set<GPSFix>> comFixes = new LinkedHashMap<>();
-            Comparator<GPSFix> com = new Comparator<GPSFix>() {
-                @Override
-                public int compare(GPSFix arg0, GPSFix arg1) {
-                    return arg0.getTimePoint().compareTo(arg1.getTimePoint());
-                }
-            };
-            List<FutureTask<LinkedHashMap<Competitor, List<GPSFix>>>> markTasks = new ArrayList<>();
-            for (Object o : combinedFixes.keySet()) {
-                if (o instanceof Mark) {
-                    FutureTask<LinkedHashMap<Competitor, List<GPSFix>>> task = new FutureTask<>(new FixesAffectedByNewMarkFixes((Mark) o, combinedFixes.get(o)));
-                    markTasks.add(task);
-                    executor.submit(task);
-                }
-                if (o instanceof Competitor) {
-                    if (!comFixes.keySet().contains(o)) {
-                        comFixes.put((Competitor) o, new TreeSet<GPSFix>(com));
-                    }
-                    comFixes.get(o).addAll(combinedFixes.get(o));
-                }
+            List<FutureTask<Map<Competitor, List<GPSFix>>>> markTasks = new ArrayList<>();
+            for (Entry<Mark, List<GPSFix>> markEntry : markFixes.entrySet()) {
+                FutureTask<Map<Competitor, List<GPSFix>>> task = new FutureTask<>(new FixesAffectedByNewMarkFixes(
+                        markEntry.getKey(), markEntry.getValue()));
+                markTasks.add(task);
+                executor.submit(task);
             }
-            for (FutureTask<LinkedHashMap<Competitor, List<GPSFix>>> task : markTasks) {
-                LinkedHashMap<Competitor, List<GPSFix>> fixes = new LinkedHashMap<>();
+            for (Entry<Competitor, List<GPSFix>> competitorEntry : competitorFixes.entrySet()) {
+                Set<GPSFix> fixesForCompetitor = comFixes.get(competitorEntry.getKey());
+                if (competitorFixes == null) {
+                    fixesForCompetitor = new HashSet<>();
+                    comFixes.put(competitorEntry.getKey(), fixesForCompetitor);
+                }
+                fixesForCompetitor.addAll(competitorEntry.getValue());
+            }
+            for (FutureTask<Map<Competitor, List<GPSFix>>> task : markTasks) {
+                Map<Competitor, List<GPSFix>> fixes = new HashMap<>();
                 try {
                     fixes = task.get();
                 } catch (InterruptedException | ExecutionException e) {
                     logger.severe("Threw Exception " + e.getMessage() + " while calculating fixes affected by new Mark Fixes.");
                 }
-                for (Competitor c : fixes.keySet()) {
-                    if (!comFixes.keySet().contains(c)) {
-                        comFixes.put((Competitor) c, new TreeSet<GPSFix>(com));
+                for (Entry<Competitor, List<GPSFix>> competitorEntry : fixes.entrySet()) {
+                    Set<GPSFix> fixesForCompetitor = comFixes.get(competitorEntry.getKey());
+                    if (competitorFixes == null) {
+                        fixesForCompetitor = new HashSet<>();
+                        comFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                     }
-                    comFixes.get(c).addAll(fixes.get(c));
+                    fixesForCompetitor.addAll(competitorEntry.getValue());
                 }
             }
             List<Callable<Object>> tasks = new ArrayList<>();
@@ -162,7 +162,7 @@ public class MarkPassingCalculator {
             }
         }
 
-        private class FixesAffectedByNewMarkFixes implements Callable<LinkedHashMap<Competitor, List<GPSFix>>> {
+        private class FixesAffectedByNewMarkFixes implements Callable<Map<Competitor, List<GPSFix>>> {
             Mark m;
             Iterable<GPSFix> fixes;
 
@@ -172,17 +172,21 @@ public class MarkPassingCalculator {
             }
 
             @Override
-            public LinkedHashMap<Competitor, List<GPSFix>> call() {
+            public Map<Competitor, List<GPSFix>> call() {
                 return finder.calculateFixesAffectedByNewMarkFixes(m, fixes);
             }
         }
     }
 
+    /**
+     * Does not stop from listening, only calculation
+     */
     public void suspend() {
         suspended = true;
     }
 
     public void resume() {
+        // Puts an event in the queue to ensure calculation
         suspended = false;
     }
 }

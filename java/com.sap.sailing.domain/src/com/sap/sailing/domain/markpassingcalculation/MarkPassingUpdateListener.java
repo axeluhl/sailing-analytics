@@ -1,15 +1,16 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
 /**
@@ -21,8 +22,12 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * 
  */
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
-    private LinkedBlockingQueue<Pair<Object, GPSFix>> queue;
-    private final Pair<Object, GPSFix> end = new Pair<>(null, null);
+    private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
+    private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
+        @Override
+        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+        }
+    };
 
     /**
      * Adds itself automatically as a Listener on the <code>race</code>.
@@ -32,28 +37,42 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
         race.addListener(this);
     }
 
-    public LinkedBlockingQueue<Pair<Object, GPSFix>> getQueue() {
+    public BlockingQueue<StorePositionUpdateStrategy> getQueue() {
         return queue;
     }
 
     @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-        queue.add(new Pair<Object, GPSFix>(competitor, fix));
+    public void competitorPositionChanged(final GPSFixMoving fix, final Competitor competitor) {
+        queue.add(new StorePositionUpdateStrategy() {
+            @Override
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+                List<GPSFix> list = competitorFixes.get(competitor);
+                if (list == null) {
+                    list = new ArrayList<>();
+                    competitorFixes.put(competitor, list);
+                }
+                list.add(fix);
+            }
+        });
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark) {
-        queue.add(new Pair<Object, GPSFix>(mark, fix));
+    public void markPositionChanged(final GPSFix fix, final Mark mark) {
+        queue.add(new StorePositionUpdateStrategy() {
+            @Override
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+                List<GPSFix> list = markFixes.get(mark);
+                if (list == null) {
+                    list = new ArrayList<>();
+                    markFixes.put(mark, list);
+                }
+                list.add(fix);
+            }
+        });
     }
 
-    public boolean isEndMarker(Pair<Object, GPSFix> pair) {
-        return pair == end;
+    public boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
+        return endMarkerCandidate == endMarker;
     }
 
-    @Override
-    public void statusChanged(TrackedRaceStatus newStatus) {
-        if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
-            queue.add(end);
-        }
-    }
 }

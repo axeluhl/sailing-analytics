@@ -695,6 +695,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     private void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+        // TODO end MarkPassingCalculator
         synchronized (this) {
             while (controlPointPositionPoller == null) {
                 wait(); // constructor will notify all waiters once the controlPointPositionPoller is set
