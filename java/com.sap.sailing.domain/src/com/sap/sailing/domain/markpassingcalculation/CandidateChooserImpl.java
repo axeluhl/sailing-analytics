@@ -2,8 +2,9 @@ package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -35,9 +36,9 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
 
-    private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> currentMarkPasses = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, Set<Edge>> allEdges = new LinkedHashMap<>();
-    private LinkedHashMap<Competitor, Set<Candidate>> candidates = new LinkedHashMap<>();
+    private Map<Competitor, Map<Waypoint, MarkPassing>> currentMarkPasses = new HashMap<>();
+    private Map<Competitor, Set<Edge>> allEdges = new HashMap<>();
+    private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private TimePoint raceStartTime;
     private Candidate start;
     private Candidate end;
@@ -52,10 +53,10 @@ public class CandidateChooserImpl implements CandidateChooser {
         /* right Direction */true, "Proxy");
         end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
         /* Probability */1, /* Waypoint */null, /* right Side */true, /* right Direction */true, "Proxy");
-        candidates = new LinkedHashMap<>();
+        candidates = new HashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, new TreeSet<Candidate>());
-            currentMarkPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
+            currentMarkPasses.put(c, new HashMap<Waypoint, MarkPassing>());
             allEdges.put(c, new TreeSet<Edge>());
             addCandidates(Arrays.asList(start, end), c);
         }
@@ -114,7 +115,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         for (Edge e : allEdges.get(co)) {
             all.add(e);
         }
-        LinkedHashMap<Candidate, Pair<Candidate, Double>> candidateWithParent = new LinkedHashMap<>();
+        Map<Candidate, Pair<Candidate, Double>> candidateWithParent = new HashMap<>();
         candidateWithParent.put(start, new Pair<Candidate, Double>(null, 0.0));
         Pair<Edge, Double> currentMostLikelyEdge = null;
         while (!candidateWithParent.containsKey(end)) {
