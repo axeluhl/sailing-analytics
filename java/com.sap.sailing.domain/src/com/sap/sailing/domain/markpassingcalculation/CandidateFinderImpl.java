@@ -142,7 +142,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         for (GPSFix fix : gps) {
             Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-            // TODO JavaDoc for track: fixAfter/before
             for (Entry<Competitor, List<GPSFix>> c : affectedFixes.entrySet()) {
                 GPSFix comFix = race.getTrack(c.getKey()).getFirstFixAtOrAfter(timePoints.getA());
                 if (timePoints.getB() != null) {
@@ -509,7 +508,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         } else {
             Waypoint w = null;
             for (Entry<Waypoint, Mark> way : lineMarks.entrySet()) {
-                if (lineMarks.get(way.getValue()) == m) {
+                if (way.getValue() == m) {
                     w = way.getKey();
                     break;
                 }

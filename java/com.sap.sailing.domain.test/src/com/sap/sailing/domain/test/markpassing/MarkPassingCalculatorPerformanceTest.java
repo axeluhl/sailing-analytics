@@ -68,7 +68,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     }
 
     private long timeToAddCandidatesToChooser(int numberOfCandidates, int numberToAdd) {
-        ArrayList<Candidate> newCans = new ArrayList<>();
+        List<Candidate> newCans = new ArrayList<>();
         for (int i = 0; i < numberOfCandidates; i++) {
             newCans.add(randomCan());
         }
@@ -76,10 +76,10 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         CandidateChooserImpl c = new CandidateChooserImpl(trackedRace);
         c.calculateMarkPassDeltas(bob, new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, new ArrayList<Candidate>()));
         time = System.currentTimeMillis() - time;
-        ArrayList<Long> times = new ArrayList<>();
+        List<Long> times = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            ArrayList<Candidate> old = new ArrayList<>();
-            ArrayList<Candidate> ne = new ArrayList<>();
+            List<Candidate> old = new ArrayList<>();
+            List<Candidate> ne = new ArrayList<>();
             for (int j = 0; j < numberToAdd; j++) {
                 ne.add(randomCan());
             }

@@ -11,8 +11,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -43,8 +44,8 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
-    private LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> givenPasses = new LinkedHashMap<>();
-    private ArrayList<Waypoint> waypoints = new ArrayList<>();
+    private Map<Competitor, Map<Waypoint, MarkPassing>> givenPasses = new HashMap<>();
+    private List<Waypoint> waypoints = new ArrayList<>();
     private static String className;
     private static String simpleName;
     private static double totalPasses = 0;
@@ -73,7 +74,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             waypoints.add(w);
         }
         for (Competitor c : getRace().getCompetitors()) {
-            LinkedHashMap<Waypoint, MarkPassing> givenMarkPasses = new LinkedHashMap<Waypoint, MarkPassing>();
+            Map<Waypoint, MarkPassing> givenMarkPasses = new HashMap<Waypoint, MarkPassing>();
             for (Waypoint wp : waypoints) {
                 MarkPassing markPassing = getTrackedRace().getMarkPassing(c, wp);
                 givenMarkPasses.put(wp, markPassing);
@@ -93,7 +94,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     private void testWholeRace() {
 
-        LinkedHashMap<Competitor, LinkedHashMap<Waypoint, MarkPassing>> computedPasses = new LinkedHashMap<>();
+        Map<Competitor, Map<Waypoint, MarkPassing>> computedPasses = new HashMap<>();
 
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
@@ -101,7 +102,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         time = System.currentTimeMillis() - time;
         
         for (Competitor c : getRace().getCompetitors()){
-            computedPasses.put(c, new LinkedHashMap<Waypoint, MarkPassing>());
+            computedPasses.put(c, new HashMap<Waypoint, MarkPassing>());
             for (Waypoint w : waypoints){
                 computedPasses.get(c).put(w, getTrackedRace().getMarkPassing(c, w));
             }

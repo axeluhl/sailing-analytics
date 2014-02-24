@@ -86,7 +86,6 @@ public class AbstractMockedRaceMarkPassingTest {
         DegreePosition position = new DegreePosition(37.8878 + rnd.nextDouble() * 0.0019, -122.268 - rnd.nextDouble() * 0.012);
         TimePoint p = new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000))));
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
-
         return new GPSFixMovingImpl(position, p, speed);
     }
 }
