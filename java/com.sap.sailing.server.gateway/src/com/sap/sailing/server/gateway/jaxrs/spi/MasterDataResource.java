@@ -4,7 +4,9 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -54,6 +58,16 @@ public class MasterDataResource extends AbstractSailingServerResource {
         } else {
             groupsToExport = new HashSet<LeaderboardGroup>();
             groupsToExport.addAll(allLeaderboardGroups.values());
+        }
+
+        final List<Serializable> competitorIds = new ArrayList<Serializable>();
+
+        for (LeaderboardGroup lg : groupsToExport) {
+            for (Leaderboard leaderboard : lg.getLeaderboards()) {
+                for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                    competitorIds.add(competitor.getId());
+                }
+            }
         }
 
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,

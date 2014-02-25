@@ -1189,8 +1189,7 @@ public class MasterDataImportTest {
             DynamicBoat boatToOverride = new BoatImpl("Wingy", boatClassToOverride, "GER70133");
             String competitorOldName = "oldName";
             Competitor competitorToOverride = domainFactory.getOrCreateCompetitor(competitorUUID, competitorOldName,
-                    Color.BLUE,
-                    teamToOverride, boatToOverride);
+                    Color.BLUE, teamToOverride, boatToOverride);
             competitorsToOverride.add(competitorToOverride);
 
             Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(
@@ -1465,7 +1464,8 @@ public class MasterDataImportTest {
         List<String> raceColumnNames = new ArrayList<String>();
         String raceColumnName = "T1";
         raceColumnNames.add(raceColumnName);
-        raceColumnNames.add("T2");
+        String raceColumnName2 = "T2";
+        raceColumnNames.add(raceColumnName2);
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
 
         List<Series> series = new ArrayList<Series>();
