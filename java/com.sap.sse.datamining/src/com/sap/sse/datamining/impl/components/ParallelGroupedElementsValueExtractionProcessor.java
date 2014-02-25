@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sse.datamining.components.Processor;
@@ -19,12 +20,13 @@ public class ParallelGroupedElementsValueExtractionProcessor<ElementType, Functi
     }
 
     @Override
-    protected Runnable createInstruction(GroupedDataEntry<ElementType> element) {
-        return new AbstractDirectForwardProcessingInstruction<GroupedDataEntry<ElementType>, GroupedDataEntry<FunctionReturnType>>(element, getResultReceivers()) {
+    protected Callable<GroupedDataEntry<FunctionReturnType>> createInstruction(final GroupedDataEntry<ElementType> element) {
+        return new Callable<GroupedDataEntry<FunctionReturnType>>() {
             @Override
-            protected GroupedDataEntry<FunctionReturnType> doWork() {
-                FunctionReturnType value = extractionFunction.tryToInvoke(super.getInput().getDataEntry());
-                return value != null ? new GroupedDataEntry<FunctionReturnType>(super.getInput().getKey(), value) : super.getInvalidResult();
+            public GroupedDataEntry<FunctionReturnType> call() throws Exception {
+                FunctionReturnType value = extractionFunction.tryToInvoke(element.getDataEntry());
+                return value != null ? new GroupedDataEntry<FunctionReturnType>(element.getKey(), value) :
+                                       ParallelGroupedElementsValueExtractionProcessor.super.createInvalidResult();
             }
         };
     }

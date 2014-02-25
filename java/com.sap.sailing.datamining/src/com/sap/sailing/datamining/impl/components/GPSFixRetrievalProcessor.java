@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import com.sap.sailing.datamining.data.GPSFixWithContext;
@@ -17,7 +18,7 @@ public class GPSFixRetrievalProcessor extends
     }
 
     @Override
-    protected Runnable createInstruction(LeaderboardGroup partialElement) {
+    protected Callable<GPSFixWithContext> createInstruction(LeaderboardGroup partialElement) {
         // TODO Auto-generated method stub
         return null;
     }

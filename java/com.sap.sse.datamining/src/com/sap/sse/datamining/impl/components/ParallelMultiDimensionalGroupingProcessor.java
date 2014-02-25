@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import com.sap.sse.datamining.components.Processor;
@@ -37,12 +38,11 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
     }
 
     @Override
-    protected Runnable createInstruction(DataType element) {
-        return new AbstractDirectForwardProcessingInstruction<DataType, GroupedDataEntry<DataType>>(element, getResultReceivers()) {
+    protected Callable<GroupedDataEntry<DataType>> createInstruction(final DataType element) {
+        return new Callable<GroupedDataEntry<DataType>>() {
             @Override
-            protected GroupedDataEntry<DataType> doWork() {
-                DataType input = super.getInput();
-                return new GroupedDataEntry<DataType>(createCompoundKeyFor(input, dimensions.iterator()), input);
+            public GroupedDataEntry<DataType> call() throws Exception {
+                return new GroupedDataEntry<DataType>(createCompoundKeyFor(element, dimensions.iterator()), element);
             }
         };
     }

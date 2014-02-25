@@ -3,7 +3,11 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,13 +32,22 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void onElement(InputType element) {
         for (WorkingType partialElement : partitionElement(element)) {
-            final Runnable instruction = createInstruction(partialElement);
-            if (instructionIsValid(instruction)) {
+            final RunnableFuture<ResultType> instruction = new FutureTask<>(createInstruction(partialElement));
+            if (isInstructionValid(instruction)) {
                 Runnable instructionWrapper = new Runnable() {
                     @Override
                     public void run() {
                         instruction.run();
-                        AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
+                        try {
+                            ResultType result = instruction.get();
+                            if (isResultValid(result)) {
+                                forwardResultToReceivers(result);
+                            }
+                        } catch (InterruptedException | ExecutionException e) {
+                            LOGGER.log(Level.FINEST, "Error getting the result from the instruction: ", e);
+                        } finally {
+                            AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
+                        }
                     }
                 };
                 unfinishedInstructionsCounter.increment();
@@ -43,17 +56,34 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    protected abstract Runnable createInstruction(WorkingType partialElement);
-
-    protected abstract Iterable<WorkingType> partitionElement(InputType element);
-
-    private boolean instructionIsValid(Runnable instruction) {
+    protected boolean isInstructionValid(Runnable instruction) {
         return instruction != null;
+    }
+
+    protected boolean isResultValid(ResultType result) {
+        return result != null;
+    }
+    
+    /**
+     * @return An invalid result, that won't be forwarded to the result receivers.
+     */
+    protected ResultType createInvalidResult() {
+        return null;
+    }
+    
+    private void forwardResultToReceivers(ResultType result) {
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            resultReceiver.onElement(result);
+        }
     }
 
     protected Set<Processor<ResultType>> getResultReceivers() {
         return resultReceivers;
     }
+
+    protected abstract Callable<ResultType> createInstruction(final WorkingType partialElement);
+
+    protected abstract Iterable<WorkingType> partitionElement(InputType element);
 
     @Override
     public void finish() throws InterruptedException {
