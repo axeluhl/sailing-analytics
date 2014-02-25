@@ -1573,6 +1573,7 @@ public class MasterDataImportTest {
         // Check if dummy race id has been imported to destination service
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
+        Assert.assertEquals(regattaOnTarget, map.get("dummy2"));
 
         // Check if persistent regatta for race id has been persisted
         RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
