@@ -20,7 +20,7 @@ public class TestFilteringProcessors {
     /**
      * Contains the last received elements as key and the amount of the received times as value;
      */
-    private Map<Integer, Integer> lastReceivedElements;
+    private Map<Integer, Integer> receivedElements;
 
     @Test
     public void testFilteringProcessor() {
@@ -47,7 +47,7 @@ public class TestFilteringProcessors {
 
     private void verifyThatUnexpectedElementsHasNotBeenReceived(Collection<Integer> unexpectedElements) {
         for (Integer unexpectedElement : unexpectedElements) {
-            assertThat("The unexpected element '" + unexpectedElement + "' was received", lastReceivedElements.containsKey(unexpectedElement), is(false));
+            assertThat("The unexpected element '" + unexpectedElement + "' was received", receivedElements.containsKey(unexpectedElement), is(false));
         }
     }
 
@@ -75,22 +75,22 @@ public class TestFilteringProcessors {
     
     private void verifyThatExpectedElementsHasBeenReceived(Iterable<Integer> expectedElements) {
         for (Integer expectedElement : expectedElements) {
-            assertThat("The expected element '" + expectedElement + "' wasn't received", lastReceivedElements.containsKey(expectedElement), is(true));
+            assertThat("The expected element '" + expectedElement + "' wasn't received", receivedElements.containsKey(expectedElement), is(true));
         }
     }
     
     @Before
     public void initializeReceivers() {
-        lastReceivedElements = new HashMap<>();
+        receivedElements = new HashMap<>();
         
         Processor<Integer> receiver = new Processor<Integer>() {
             @Override
             public void onElement(Integer element) {
-                if (!lastReceivedElements.containsKey(element)) {
-                    lastReceivedElements.put(element, 0);
+                if (!receivedElements.containsKey(element)) {
+                    receivedElements.put(element, 0);
                 }
-                Integer elementAmount = lastReceivedElements.get(element) + 1;
-                lastReceivedElements.put(element, elementAmount);
+                Integer elementAmount = receivedElements.get(element) + 1;
+                receivedElements.put(element, elementAmount);
             }
             @Override
             public void finish() throws InterruptedException {
