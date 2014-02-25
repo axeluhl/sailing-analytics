@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -40,6 +41,7 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
  * 
  */
 public class MarkPassingCalculator {
+    // TODO Course changes (listener on course)
     private final CandidateFinder finder;
     private final CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
@@ -59,7 +61,8 @@ public class MarkPassingCalculator {
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
-            chooser.calculateMarkPassDeltas(c, finder.getAllCandidates(c));
+            Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+            chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
             new Thread(new Listen(), "MarkPassingCalculator listener for race " + race.getRace().getName()).start();
@@ -154,7 +157,8 @@ public class MarkPassingCalculator {
             @Override
             public void run() {
                 logger.finest("Calculating MarkPassings for " + c);
-                chooser.calculateMarkPassDeltas(c, finder.getCandidateDeltas(c, fixes));
+                Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
             }
         }
 

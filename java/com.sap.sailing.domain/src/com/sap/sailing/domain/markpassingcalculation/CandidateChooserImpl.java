@@ -3,6 +3,7 @@ package com.sap.sailing.domain.markpassingcalculation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     @Override
-    public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas) {
+    public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
         if (race.getStartOfRace() != null) {
             if (raceStartTime == null || !race.getStartOfRace().minus(2000).equals(raceStartTime)) {
                 raceStartTime = race.getStartOfRace().minus(2000);
@@ -77,8 +78,8 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
         }
-        removeCandidates(candidateDeltas.getB(), c);
-        addCandidates(candidateDeltas.getA(), c);
+        removeCandidates(oldCans, c);
+        addCandidates(newCans, c);
         findShortestPath(c);
     }
 
@@ -87,22 +88,22 @@ public class CandidateChooserImpl implements CandidateChooser {
             for (Candidate oldCan : candidates.get(co)) {
                 Candidate early = newCan;
                 Candidate late = oldCan;
-                if (oldCan.getID() < newCan.getID()) {
+                if (oldCan.getOneBasedIndexOfWaypoint() < newCan.getOneBasedIndexOfWaypoint()) {
                     early = oldCan;
                     late = newCan;
                 }
                 if (raceStartTime != null) {
                     if (late == end && early != end) {
-                        allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
-                        Edge e = new Edge(early, late, estimatedDistance(co, early, late));
+                        allEdges.get(co).add(new Edge(early, late, 1, race.getRace().getCourse()));
+                    } else if (!(early.getOneBasedIndexOfWaypoint() == late.getOneBasedIndexOfWaypoint()) && !late.getTimePoint().before(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
+                        Edge e = new Edge(early, late, estimatedDistance(co, early, late), race.getRace().getCourse());
                         allEdges.get(co).add(e);
                     }
                 } else {
                     if ((late == end || early == start) && early != late) {
-                        allEdges.get(co).add(new Edge(early, late, 1));
-                    } else if (!(early.getID() == late.getID()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
-                        allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late)));
+                        allEdges.get(co).add(new Edge(early, late, 1, race.getRace().getCourse()));
+                    } else if (!(early.getOneBasedIndexOfWaypoint() == late.getOneBasedIndexOfWaypoint()) && late.getTimePoint().after(early.getTimePoint()) && estimatedDistance(co, early, late) > penaltyForSkipping) {
+                        allEdges.get(co).add(new Edge(early, late, estimatedDistance(co, early, late), race.getRace().getCourse()));
                     }
                 }
             }
@@ -156,7 +157,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private double estimatedDistance(Competitor c, Candidate c1, Candidate c2) {
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint current;
-        if (c1.getID() == 0) {
+        if (c1.getOneBasedIndexOfWaypoint() == 0) {
             current = race.getRace().getCourse().getFirstWaypoint();
         } else {
             current = c1.getWaypoint();
@@ -193,9 +194,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private void addCandidates(Iterable<Candidate> newCandidates, Competitor co) {
         for (Candidate c : newCandidates) {
-            if (!candidates.get(co).contains(c)) {
-                candidates.get(co).add(c);
-            }
+            candidates.get(co).add(c);
         }
         createNewEdges(co, newCandidates);
     }
@@ -203,14 +202,11 @@ public class CandidateChooserImpl implements CandidateChooser {
     private void removeCandidates(Iterable<Candidate> wrongCandidates, Competitor co) {
         for (Candidate c : wrongCandidates) {
             candidates.get(co).remove(c);
-            List<Edge> toRemove = new ArrayList<>();
-            for (Edge e : allEdges.get(co)) {
+            for (Iterator<Edge> i=allEdges.get(co).iterator(); i.hasNext(); ) {
+                final Edge e = i.next();
                 if (e.getStart().equals(c) || e.getEnd().equals(c)) {
-                    toRemove.add(e);
+                    i.remove();
                 }
-            }
-            for (Edge e : toRemove) {
-                allEdges.get(co).remove(e);
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public interface CandidateChooser {
@@ -13,5 +13,5 @@ public interface CandidateChooser {
      *            A pair of new {@link Candidate}s and those that should be removed.
      */
 
-    public void calculateMarkPassDeltas(Competitor c, Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas);
+    public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans);
 }

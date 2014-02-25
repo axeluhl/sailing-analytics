@@ -111,7 +111,6 @@ public class CandidateFinderImpl implements CandidateFinder {
             } else
                 Util.addAll(w.getMarks(), marks);
         }
-        Edge.setNumberOfWayoints(Util.size(race.getRace().getCourse().getWaypoints()));
     }
 
     @Override

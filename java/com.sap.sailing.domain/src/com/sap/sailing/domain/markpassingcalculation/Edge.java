@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 
 /**
@@ -14,30 +15,28 @@ import com.sap.sailing.domain.base.Waypoint;
  */
 
 public class Edge implements Comparable<Edge> {
-    private Candidate start;
-    private Candidate end;
-    private static int numberOfWaypoints;
-    private static double penaltyForSkipped = 0.7;
-    private static double penaltyForSkippedToEnd = 0.6;
-    private double timeEstimationOrCloseStartsProbability;
+    private final Candidate start;
+    private final Candidate end;
+    private final static double penaltyForSkipped = 0.7;
+    private final static double penaltyForSkippedToEnd = 0.6;
+    private final double estimatedDistanceProbability;
+    //TODO JavaDoc distance
+    private final Course course;
 
-    public Edge(Candidate start, Candidate end, double timeEstimationOrStartAnalysis) {
+    public Edge(Candidate start, Candidate end, double estimatedDistanceProbability, Course course) {
+        this.course = course;
         this.start = start;
         this.end = end;
-        this.timeEstimationOrCloseStartsProbability = timeEstimationOrStartAnalysis;
+        this.estimatedDistanceProbability = estimatedDistanceProbability;
     }
 
     public static double getPenaltyForSkipping() {
         return penaltyForSkipped;
     }
 
-    public static void setNumberOfWayoints(int number) {
-        numberOfWaypoints = number;
-    }
-
     public Double getProbability() {
-        double penalty = end.getID() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
-        return 1-(start.getProbability() * end.getProbability() * timeEstimationOrCloseStartsProbability) + 2 * penalty * (end.getID() - start.getID() - 1);
+        double penalty = end.getOneBasedIndexOfWaypoint() == course.getNumberOfWaypoints() + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
+        return 1-(start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
     }
 
     public Candidate getStart() {
@@ -49,9 +48,10 @@ public class Edge implements Comparable<Edge> {
     }
 
     public String toString() {
-        return "From ID " + start.getID() + " to " + end.getID() + ": " + getProbability();
+        return "From ID " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getProbability();
     }
 
+    // TODO Only for Debugging!
     @Override
     public int compareTo(Edge o) {
         return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getProbability().compareTo(o.getProbability());

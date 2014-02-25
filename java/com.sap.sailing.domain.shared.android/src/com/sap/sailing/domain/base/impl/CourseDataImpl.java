@@ -49,6 +49,11 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
     public int getIndexOfWaypoint(Waypoint waypoint) {
         return this.waypoints.indexOf(waypoint);
     }
+    
+    @Override
+    public int getNumberOfWaypoints() {
+        return waypoints.size();
+    }
 
     @Override
     public Waypoint getFirstWaypoint() {

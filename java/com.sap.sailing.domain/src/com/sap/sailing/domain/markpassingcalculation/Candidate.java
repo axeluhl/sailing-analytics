@@ -16,26 +16,28 @@ import com.sap.sailing.domain.common.TimePoint;
  */
 
 public class Candidate implements Comparable<Candidate> {
-    private Waypoint w;
-    private TimePoint p;
-    private double distanceProbability;
-    private Integer id;
-    private boolean rightSide;
-    private boolean rightDirection;
-    private String type;
+    private final Waypoint w;
+    private final TimePoint p;
+    private final double distanceBasedProbability;
+    private final Integer oneBasedIndexOfWaypoint;
+    // TODO Document what side and direction mean
+    // TODO Interface + no side and direction
+    private final boolean correctSide;
+    private final boolean correctDirection;
+    private final String type;
 
-    public Candidate(int id, TimePoint p, double distanceProbability, Waypoint w, boolean rightSide, boolean rightDirection, String type) {
+    public Candidate(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w, boolean rightSide, boolean rightDirection, String type) {
         this.w = w;
         this.p = p;
-        this.distanceProbability = distanceProbability;
-        this.id = id;
-        this.rightSide = rightSide;
-        this.rightDirection=rightDirection;
+        this.distanceBasedProbability = distanceProbability;
+        this.oneBasedIndexOfWaypoint = oneBasedIndexOfWaypoint;
+        this.correctSide = rightSide;
+        this.correctDirection = rightDirection;
         this.type = type;
     }
 
-    public int getID() {
-        return id;
+    public int getOneBasedIndexOfWaypoint() {
+        return oneBasedIndexOfWaypoint;
     }
 
     public TimePoint getTimePoint() {
@@ -43,8 +45,8 @@ public class Candidate implements Comparable<Candidate> {
     }
 
     public Double getProbability() {
-        double factor= (rightSide&&rightDirection)?1:(rightSide||rightDirection)?0.8:0.6;
-        double cost = distanceProbability * factor;
+        double factor= (correctSide&&correctDirection)?1:(correctSide||correctDirection)?0.8:0.6;
+        double cost = distanceBasedProbability * factor;
         return cost;
     }
 
@@ -53,11 +55,11 @@ public class Candidate implements Comparable<Candidate> {
     }
 
     public String toString() {
-        return type + "-Candidate for " + id + " with cost " + getProbability() + "and Timepoint " + p;
+        return type + "-Candidate for " + oneBasedIndexOfWaypoint + " with cost " + getProbability() + "and Timepoint " + p;
     }
 
     @Override
     public int compareTo(Candidate arg0) {
-        return id != arg0.getID() ? id.compareTo(arg0.getID()) : p != arg0.getTimePoint() ? p.compareTo(arg0.getTimePoint()) : getProbability().compareTo(arg0.getProbability());
+        return oneBasedIndexOfWaypoint != arg0.getOneBasedIndexOfWaypoint() ? oneBasedIndexOfWaypoint.compareTo(arg0.getOneBasedIndexOfWaypoint()) : p != arg0.getTimePoint() ? p.compareTo(arg0.getTimePoint()) : getProbability().compareTo(arg0.getProbability());
     }
 }

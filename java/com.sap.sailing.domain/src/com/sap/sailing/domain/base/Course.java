@@ -41,4 +41,9 @@ public interface Course extends CourseBase {
      * had been used.
      */
     void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    
+    /**
+     * To make sure that after the method returns there are as many waypoints callers have to {@link #lockForRead() lock this course for read}.
+     */
+    int getNumberOfWaypoints();
 }

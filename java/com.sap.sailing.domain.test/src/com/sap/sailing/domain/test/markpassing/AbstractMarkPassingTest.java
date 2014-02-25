@@ -230,7 +230,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 getTrackedRace().getTrack(c).unlockAfterRead();
             }
             Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
-            chooser.calculateMarkPassDeltas(c, f);
+            chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
             boolean gotPassed = true;
             boolean gotOther = false;
          //   System.out.println(c);
