@@ -1177,9 +1177,25 @@ public class MasterDataImportTest {
                 seriesToOverride.get(0).addRaceColumn(name, destService);
             }
 
+            // Create competitor with same ID and other details
+            Set<Competitor> competitorsToOverride = new HashSet<Competitor>();
+            Set<DynamicPerson> sailorsToOverride = new HashSet<DynamicPerson>();
+            sailorsToOverride.add(new PersonImpl("Froderik Poterson", new NationalityImpl("GER"), new Date(
+                    645487200000L), "Oberhoschy"));
+            Person coachToOverride = new PersonImpl("Lennart Hensler", new NationalityImpl("GER"), new Date(
+                    645487200000L), "Der Lennart halt");
+            DynamicTeam teamToOverride = new TeamImpl("Pros", sailorsToOverride, coachToOverride);
+            BoatClass boatClassToOverride = new BoatClassImpl("H16", true);
+            DynamicBoat boatToOverride = new BoatImpl("Wingy", boatClassToOverride, "GER70133");
+            String competitorOldName = "oldName";
+            Competitor competitorToOverride = domainFactory.getOrCreateCompetitor(competitorUUID, competitorOldName,
+                    Color.BLUE,
+                    teamToOverride, boatToOverride);
+            competitorsToOverride.add(competitorToOverride);
+
             Leaderboard leaderboardToOverride = destService.addRegattaLeaderboard(
                     regattaToOverride.getRegattaIdentifier(), "testDisplayNameNotToOverride", discardRule);
-            TrackedRace trackedRace2 = new DummyTrackedRace(new HashSet<Competitor>(), regattaToOverride, null);
+            TrackedRace trackedRace2 = new DummyTrackedRace(competitorsToOverride, regattaToOverride, null);
             RaceColumn columnToOverride = leaderboardToOverride.getRaceColumns().iterator().next();
             columnToOverride.setTrackedRace(testFleet1ToOverride, trackedRace2);
             identifierOfRegattaTrackedRace = regattaToOverride
@@ -1237,6 +1253,11 @@ public class MasterDataImportTest {
 
         // Check that tracked race of regatta leaderboard has been removed
         Assert.assertNull(destService.getTrackedRace(identifierOfRegattaTrackedRace));
+
+        // Assert that competitor details were overridden
+        Competitor competitorOnTarget = destService.getBaseDomainFactory().getExistingCompetitorById(competitorUUID);
+        Assert.assertEquals(competitor.getName(), competitorOnTarget.getName());
+        Assert.assertEquals(competitor.getColor(), competitorOnTarget.getColor());
 
     }
 
