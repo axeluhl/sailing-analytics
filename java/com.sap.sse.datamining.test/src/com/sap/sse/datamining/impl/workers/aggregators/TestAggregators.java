@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
-import com.sap.sse.datamining.impl.workers.aggregators.SumAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.helpers.SimpleIntegerSumAggregationHelper;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;

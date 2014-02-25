@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.test.components;
+package com.sap.sse.datamining.components;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,8 +8,6 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.components.ProcessingInstruction;
-import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractDirectForwardProcessingInstruction;
 
 public class TestAbstractDirectForwardingProcessingInstruction {
