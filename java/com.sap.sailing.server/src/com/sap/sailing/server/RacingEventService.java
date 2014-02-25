@@ -443,13 +443,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
-
-    /**
-     * 
-     * @param override If set to true, the mthod will override any existing connection
-     */
-    void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
     
+    void setRegattaForRace(Regatta regatta, String raceIdAsString);
+
     Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic,
             UUID id);
 

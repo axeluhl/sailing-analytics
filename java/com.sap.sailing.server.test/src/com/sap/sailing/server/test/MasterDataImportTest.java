@@ -1497,10 +1497,8 @@ public class MasterDataImportTest {
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-        Set<String> raceIds = new HashSet<String>();
-        raceIds.add("dummy");
-
-        sourceService.setPersistentRegattaForRaceIDs(regatta, raceIds, false);
+        sourceService.setRegattaForRace(regatta, "dummy");
+        sourceService.setRegattaForRace(regatta, "dummy2");
 
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
