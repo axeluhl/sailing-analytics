@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.components;
+package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -12,7 +12,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
+import com.sap.sse.datamining.components.FilterCriteria;
+import com.sap.sse.datamining.components.NonFilteringProcessor;
+import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
 public class TestFilteringProcessors {

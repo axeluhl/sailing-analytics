@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.components;
+package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -13,10 +13,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.components.util.Number;

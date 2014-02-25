@@ -1,7 +1,7 @@
-package com.sap.sse.datamining.components;
+package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.impl.components.AbstractProcessor;
+import com.sap.sse.datamining.components.Processor;
 
 public class TestAbstractProcessor {
     
