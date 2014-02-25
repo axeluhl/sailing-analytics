@@ -88,7 +88,7 @@ public class TopLevelMasterData implements Serializable {
         Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta = new HashMap<RegattaIdentifier, Set<String>>();
         for (Entry<String, Regatta> entry : regattaForRaceIdString.entrySet()) {
             Regatta regatta = entry.getValue();
-            Set<String> raceIds = raceIdStringsForRegatta.get(regatta);
+            Set<String> raceIds = raceIdStringsForRegatta.get(regatta.getRegattaIdentifier());
             if (raceIds == null) {
                 raceIds = new HashSet<String>();
                 raceIdStringsForRegatta.put(regatta.getRegattaIdentifier(), raceIds);
