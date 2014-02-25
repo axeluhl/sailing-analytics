@@ -59,6 +59,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -392,8 +393,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     CourseArea getCourseArea(Serializable courseAreaId);
 
+    /**
+     * Adds the specified mediaTrack to the in-memory media library.
+     * Important note: Only if mediaTrack.dbId != null the mediaTrack will be persisted in the the database.
+     * @param mediaTrack
+     */
     void mediaTrackAdded(MediaTrack mediaTrack);
 
+    /**
+     * Calling mediaTrackAdded for every entry in the specified collection. 
+     * @param mediaTracks
+     */
     void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
@@ -406,6 +416,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void mediaTrackDeleted(MediaTrack mediaTrack);
 
+    /**
+     * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
+     * Checks if the track already exists in the library and the database and adds/stores it
+     * accordingly. If a track already exists and override, its properties are checked for changes 
+     * @param mediaTrack
+     * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
+     * overwritten with the values from the track to be imported.
+     */
+    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
     Collection<MediaTrack> getAllMediaTracks();
@@ -427,15 +447,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}. It helps remember the connection between races and regattas.
      */
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
-
-    /**
-     * 
-     * @param override If set to true, the mthod will override any existing connection
-     */
-    void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override);
     
     Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic,
             UUID id);
+
+    void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
     CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
 
@@ -508,4 +524,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
 
     void setDataImportFailedWithoutReplication(UUID importOperationId, String errorMessage);
+
+    void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
+
+    void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
+
+    void replicateDataImportOperation(ImportMasterDataOperation op);
+
 }

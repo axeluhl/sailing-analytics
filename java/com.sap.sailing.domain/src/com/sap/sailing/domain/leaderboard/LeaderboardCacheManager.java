@@ -153,7 +153,6 @@ public class LeaderboardCacheManager {
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
-        leaderboardCache.invalidate(leaderboard);
         synchronized (invalidationListenersPerLeaderboard) {
             Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
                     .remove(leaderboard);
@@ -176,6 +175,11 @@ public class LeaderboardCacheManager {
             LockUtil.unlockAfterWrite(scoreCorrectionListenersLock);
         }
         leaderboard.getScoreCorrection().removeScoreCorrectionListener(removedScoreCorrectionListener);
+        // invalidate after the listeners have been removed; this is important because invalidation may trigger a
+        // re-calculation which then in turn may call add(leaderboard) asynchronously again which may be executed
+        // before the listener removal happens here. This could lead to a race condition where listeners are
+        // removed again after the invalidation has just added them again. See also bug 1807.
+        leaderboardCache.invalidate(leaderboard);
     }
     
     public void add(Leaderboard leaderboard) {
@@ -186,7 +190,7 @@ public class LeaderboardCacheManager {
     /**
      * Listens at the leaderboard for {@link TrackedRace}s being connected to / disconnected from race columns. Whenever this
      * happens, the listener structure that uses {@link CacheInvalidationListener}s to observe the individual tracked races
-     * is updated accordingly.
+     * is updated accordingly. Calling this method for a <code>leaderboard</code> that is already observed has no effect.
      */
     private void registerAsListener(final Leaderboard leaderboard) {
         // only add as listener again if not yet added

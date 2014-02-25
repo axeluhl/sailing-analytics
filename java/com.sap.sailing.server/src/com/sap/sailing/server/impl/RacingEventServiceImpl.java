@@ -134,6 +134,7 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -142,6 +143,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
+import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
@@ -814,13 +816,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         if (regattaWithCreatedFlag.getB()) {
             replicateSpecificRegattaWithoutRaceColumns(regatta);
         }
-        for (Event event : getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (defaultCourseAreaId != null && courseArea.getId().equals(defaultCourseAreaId)) {
-                    event.addRegatta(regatta);
-                }
-            }
-        }
         return regatta;
     }
 
@@ -846,6 +841,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         if (persistent) {
             updateStoredRegatta(regatta);
+        }
+        for (Event event : getAllEvents()) {
+            for (CourseArea eventCourseArea : event.getVenue().getCourseAreas()) {
+                if (defaultCourseAreaId != null && eventCourseArea.getId().equals(defaultCourseAreaId)) {
+                    event.addRegatta(regatta);
+                }
+            }
         }
         return new Pair<Regatta, Boolean>(regatta, wasCreated);
     }
@@ -1993,8 +1995,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * <code>regatta</code> will be returned.
      */
     private void setRegattaForRace(Regatta regatta, RaceDefinition race) {
-        persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
-        mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
+        setRegattaForRace(regatta, race.getId().toString());
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, String raceIdAsString) {
+        persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
+        mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
     }
 
     @Override
@@ -2073,6 +2080,39 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
+    public void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override) {
+        for (MediaTrack trackToImport : mediaTracksToImport) {
+            MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
+            if (existingTrack == null) {
+                mediaDB.insertMediaTrackWithId(trackToImport.dbId, trackToImport.title, trackToImport.url, trackToImport.startTime, trackToImport.durationInMillis, trackToImport.mimeType.name());
+                mediaTrackAdded(trackToImport);
+            } else if (override) {
+                    
+                // Using fine-grained update methods.
+                // Rationale: Changes on more than one track property are rare 
+                //            and don't justify the introduction of a new set 
+                //            of methods (including replication).
+                if (!Util.equalsWithNull(existingTrack.title, trackToImport.title)) {
+                    existingTrack.title = trackToImport.title;
+                    mediaTrackTitleChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.url, trackToImport.url)) {
+                    existingTrack.url = trackToImport.url;
+                    mediaTrackUrlChanged(existingTrack);
+                }
+                if (!Util.equalsWithNull(existingTrack.startTime, trackToImport.startTime)) {
+                    existingTrack.startTime = trackToImport.startTime;
+                    mediaTrackStartTimeChanged(existingTrack);
+                }
+                if (existingTrack.durationInMillis != trackToImport.durationInMillis) {
+                    existingTrack.durationInMillis = trackToImport.durationInMillis;
+                    mediaTrackDurationChanged(existingTrack);
+                }
+            }
+        }
+    }
+    
+    @Override
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
@@ -2115,18 +2155,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         return persistentRegattasForRaceIDs;
     }
 
-    @Override
-    public void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override) {
-        for (String raceIdAsString : raceIdStrings) {
-            if (!override && persistentRegattasForRaceIDs.contains(raceIdAsString)) {
-                logger.info(String.format(
-                        "Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
-                        raceIdAsString));
-            } else {
-                persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
-            }
-        }
-    }
 
     @Override
     public WindStore getWindStore() {
@@ -2258,6 +2286,22 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage) {
         setDataImportFailedWithoutReplication(importOperationId, errorMessage);
         replicate(new DataImportFailed(importOperationId, errorMessage));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId) {
+        setDataImportDeleteProgressFromMapTimerWithoutReplication(importOperationId);
+        replicate(new SetDataImportDeleteProgressFromMapTimer(importOperationId));
+    }
+
+    @Override
+    public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
+        dataImportLock.setDeleteFromMapTimer(importOperationId);
+    }
+
+    @Override
+    public void replicateDataImportOperation(ImportMasterDataOperation op) {
+        replicate(op);
     }
 
 }

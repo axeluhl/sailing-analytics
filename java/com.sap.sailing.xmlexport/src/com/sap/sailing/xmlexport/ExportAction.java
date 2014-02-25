@@ -23,8 +23,10 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -167,6 +169,22 @@ public abstract class ExportAction {
             }
         }
         return result;
+    }
+    
+    public Speed getMaximumSpeedOverGround(Competitor competitor, TrackedRace trackedRace) {
+        Speed maxSpeed = null;
+        if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            if (!markPassings.isEmpty()) {
+                TimePoint from = markPassings.first().getTimePoint();
+                TimePoint to = trackedRace.getEndOfRace();
+                Pair<GPSFixMoving, Speed> maxSpeedWithGPSFix = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                if (maxSpeedWithGPSFix != null) {
+                    maxSpeed = maxSpeedWithGPSFix.getB();
+                }
+            }
+        }
+        return maxSpeed;
     }
 
     public Speed getAverageSpeedOverGround(Leaderboard leaderboard, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {

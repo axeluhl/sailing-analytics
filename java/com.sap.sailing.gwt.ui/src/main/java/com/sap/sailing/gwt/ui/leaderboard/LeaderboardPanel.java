@@ -322,6 +322,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
+    
+    protected ImageResource getSettingsIcon() {
+        return resources.settingsIcon();
+    }
 
     public void updateSettings(LeaderboardSettings newSettings) {
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
@@ -1514,7 +1518,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public Double get(LeaderboardRowDTO row) {
             final Double result;
-            if (row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
+            if (row.totalDistanceTraveledInMeters != null && row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
                 result = row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
             } else {
                 result = null;

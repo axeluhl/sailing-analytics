@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -27,6 +29,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -46,7 +49,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
-    private Iterable<? extends Series> series;
+    private List<? extends Series> series;
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
     private final Serializable id;
@@ -94,7 +97,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+    public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
         super(getDefaultName(baseName, boatClass==null?null:boatClass.getName()));
         this.id = id;
         this.raceLogStore = raceLogStore;
@@ -102,11 +105,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         regattaListeners = new HashSet<RegattaListener>();
         raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
-        this.series = series;
+        List<S> seriesList = new ArrayList<S>();
+        for (S s : series) {
+            seriesList.add(s);
+        }
+        this.series = seriesList;
         for (Series s : series) {
-            s.setRegatta(this);
-            s.addRaceColumnListener(this);
-            registerRaceLogsOnRaceColumns(s);
+            linkToRegattaAndAddListeners(s);
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -164,7 +169,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<? extends Series> getSeries() {
-        return series;
+        return Collections.unmodifiableCollection(series);
     }
     
     @Override
@@ -398,10 +403,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void addSeries(Series seriesToAdd) {
         Series existingSeries = getSeriesByName(seriesToAdd.getName());
         if (existingSeries == null) {
-            seriesToAdd.setRegatta(this);
-            seriesToAdd.addRaceColumnListener(this);
-            registerRaceLogsOnRaceColumns(seriesToAdd);
-            synchronized(this.series) {
+            linkToRegattaAndAddListeners(seriesToAdd);
+            synchronized (this.series) {
                 ArrayList<Series> newSeriesList = new ArrayList<Series>();
                 for (Series seriesObject : this.series) {
                     newSeriesList.add(seriesObject);
@@ -410,6 +413,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 this.series = newSeriesList;
             }
         }
+    }
+
+    private void linkToRegattaAndAddListeners(Series seriesToAdd) {
+        seriesToAdd.setRegatta(this);
+        seriesToAdd.addRaceColumnListener(this);
+        registerRaceLogsOnRaceColumns(seriesToAdd);
     }
 
     @Override
@@ -422,13 +431,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void removeSeries(Series series) {
         Series existingSeries = getSeriesByName(series.getName());
         if (existingSeries != null) {
-            series.removeRaceColumnListener(this);
-            for (RaceColumn column : series.getRaceColumns()) {
+            final List<RaceColumnInSeries> raceColumns = new ArrayList<RaceColumnInSeries>();
+            Util.addAll(series.getRaceColumns(), raceColumns);
+            for (RaceColumn column : raceColumns) {
                 for (Fleet fleet : column.getFleets()) {
                     column.removeRaceIdentifier(fleet);
                 }
+                series.removeRaceColumn(column.getName());
             }
-            synchronized(this.series) {
+            series.removeRaceColumnListener(this);
+            synchronized (this.series) {
                 ArrayList<Series> newSeriesList = new ArrayList<Series>();
                 for (Series seriesObject : this.series) {
                     if (!seriesObject.getName().equals(series.getName())) {

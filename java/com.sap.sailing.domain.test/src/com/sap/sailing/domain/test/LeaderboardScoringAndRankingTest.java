@@ -907,6 +907,41 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(2. + 0., leaderboard1.getTotalPoints(c[0], withinR1), 0.00000001); // correction expected NOT to apply before end of last tracked race before the corrected column
         assertEquals(0., leaderboard1.getTotalPoints(c[0], beforeStartOfR1), 0.00000001); // not even the R1 scores apply before the start time of R1
     }
+    
+    /**
+     * A test case for bug 1802. Competitors that didn't have a fleet (null fleet) were sorted to the end of the column even
+     * if they had a score correction assigned.
+     */
+    @Test
+    public void testSortingOfNullFleetCompetitorsWithScoreCorrection() throws NoWindException {
+        Competitor[] c1 = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] c2 = new Competitor[] { c1[1], c1[2], c1[3] }; // bug c1[0] will then get a good score correction
+        final TimePoint endOfR1 = MillisecondsTimePoint.now();
+        final TimePoint withinR1 = endOfR1.minus(1000);
+        final TimePoint startOfR1 = withinR1.minus(10000);
+        final TimePoint afterEndOfR1 = endOfR1.plus(1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new LowPoint(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(c1)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return endOfR1;
+            }
+        }, "R1", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        RaceColumn r2 = leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(afterEndOfR1, Arrays.asList(c2)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return afterEndOfR1;
+            }
+        }, "R2", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        leaderboard1.getScoreCorrection().correctScore(c1[0], r2, .9);
+        assertEquals(1. + .9, leaderboard1.getTotalPoints(c1[0], afterEndOfR1), 0.00000001);
+        assertEquals(1, leaderboard1.getTotalRankOfCompetitor(c1[0], afterEndOfR1));
+        // now assert that the competitor c1[0] is best in r2 because of the score correction, although c1[0] doesn't have a fleet
+        assertEquals(0, leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1).indexOf(c1[0]));
+    }
 
     @Test
     public void testApplicationOfScoreCorrectionsInRacesWithNoTrackedRaceAfterLastTrackedRaceWithMarkPassings() throws NoWindException {

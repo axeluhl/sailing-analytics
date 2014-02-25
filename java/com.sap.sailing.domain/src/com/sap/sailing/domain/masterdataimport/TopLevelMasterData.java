@@ -20,7 +20,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindTrack;
 
 /**
  * Holds all information needed for a master data import.
@@ -89,7 +88,7 @@ public class TopLevelMasterData implements Serializable {
         Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta = new HashMap<RegattaIdentifier, Set<String>>();
         for (Entry<String, Regatta> entry : regattaForRaceIdString.entrySet()) {
             Regatta regatta = entry.getValue();
-            Set<String> raceIds = raceIdStringsForRegatta.get(regatta);
+            Set<String> raceIds = raceIdStringsForRegatta.get(regatta.getRegattaIdentifier());
             if (raceIds == null) {
                 raceIds = new HashSet<String>();
                 raceIdStringsForRegatta.put(regatta.getRegattaIdentifier(), raceIds);
@@ -124,14 +123,8 @@ public class TopLevelMasterData implements Serializable {
             if (windSources != null) {
                 for (WindSource source : windSources) {
                     if (source.canBeStored()) {
-                        WindTrack track = trackedRace.getOrCreateWindTrack(source);
-                        track.lockForRead();
-                        try {
-                            windTrackMasterDataSet.add(new WindTrackMasterData(source.getType(), source.getId(), track
-                                .getFixes(), regattaName, raceName, raceId));
-                        } finally {
-                            track.unlockAfterRead();
-                        }
+                        windTrackMasterDataSet.add(new WindTrackMasterData(source.getType(), source.getId(),
+                                trackedRace.getOrCreateWindTrack(source), regattaName, raceName, raceId));
                     }
                 }
             }
