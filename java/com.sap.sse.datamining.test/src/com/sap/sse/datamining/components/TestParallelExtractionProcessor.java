@@ -30,6 +30,11 @@ public class TestParallelExtractionProcessor {
     
     private Function<Integer> getCrossSumFunction;
     
+    /**
+     * A function that is invalid with the type {@link Number} and will return <code>null</code> with every invocation.
+     */
+    private Function<Integer> invalidFunction;
+    
     @Before
     public void initializeReceivers() {
         receivedValues = new HashMap<>();
@@ -49,9 +54,12 @@ public class TestParallelExtractionProcessor {
     }
     
     @Before
-    public void initializeExtractionFunction() {
-        Method extractionMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(extractionMethod);
+    public void initializeExtractionFunctions() {
+        Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
+        getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
+        
+        Method invalidMethod = FunctionTestsUtil.getMethodFromSimpleClassWithMarkedMethod("sideEffectFreeValue");
+        invalidFunction = FunctionFactory.createMethodWrappingFunction(invalidMethod);
     }
 
     @Test
@@ -59,8 +67,25 @@ public class TestParallelExtractionProcessor {
         Processor<GroupedDataEntry<Number>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, getCrossSumFunction);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         processElements(processor, elements);
+        ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
+        
         Collection<GroupedDataEntry<Integer>> expectedReceivedValues = buildExpectedReceivedValues(elements);
         verifyThatExpectedElementsHaveBeenReceived(expectedReceivedValues);
+    }
+
+    private void verifyThatExpectedElementsHaveBeenReceived(Collection<GroupedDataEntry<Integer>> expectedReceivedValues) {
+        for (GroupedDataEntry<Integer> expectedReceivedValue : expectedReceivedValues) {
+            assertThat("The expected value '" + expectedReceivedValue + "' wasn't received.", receivedValues.containsKey(expectedReceivedValue.getKey()), is(true));
+            assertThat(receivedValues.get(expectedReceivedValue.getKey()), is(expectedReceivedValue.getDataEntry()));
+        }
+    }
+    
+    @Test
+    public void testValueExtractionWithInvalidFunction() {
+        Processor<GroupedDataEntry<Number>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, invalidFunction);
+        processElements(processor, createElements());
+        ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
+        assertThat("Values have been received, but the processor function is invalid.", receivedValues.isEmpty(), is(true));
     }
 
     private Collection<GroupedDataEntry<Number>> createElements() {
@@ -86,13 +111,6 @@ public class TestParallelExtractionProcessor {
             expectedReceivedValues.add(new GroupedDataEntry<Integer>(element.getKey(), value));
         }
         return expectedReceivedValues;
-    }
-
-    private void verifyThatExpectedElementsHaveBeenReceived(Collection<GroupedDataEntry<Integer>> expectedReceivedValues) {
-        for (GroupedDataEntry<Integer> expectedReceivedValue : expectedReceivedValues) {
-            assertThat("The expected value '" + expectedReceivedValue + "' wasn't received.", receivedValues.containsKey(expectedReceivedValue.getKey()), is(true));
-            assertThat(receivedValues.get(expectedReceivedValue.getKey()), is(expectedReceivedValue.getDataEntry()));
-        }
     }
 
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
@@ -26,10 +27,11 @@ public class TestPartitioningOfAbstractSimpleParallelProcessor {
             }
 
             @Override
-            protected Runnable createInstruction(Integer partialElement) {
-                return new Runnable() {
+            protected Callable<Integer> createInstruction(Integer partialElement) {
+                return new Callable<Integer>() {
                     @Override
-                    public void run() {
+                    public Integer call() throws Exception {
+                        return 0;
                     }
                 };
             }

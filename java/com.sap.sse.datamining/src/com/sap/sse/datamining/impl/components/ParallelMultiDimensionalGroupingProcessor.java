@@ -24,6 +24,10 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
     }
 
     private void verifyThatDimensionsAreDimensions(Iterable<Function<?>> dimensions) {
+        if (dimensions == null) {
+            throw new IllegalArgumentException("The given dimensions mustn't be null.");
+        }
+        
         int size = 0;
         for (Function<?> possibleDimension : dimensions) {
             size++;
