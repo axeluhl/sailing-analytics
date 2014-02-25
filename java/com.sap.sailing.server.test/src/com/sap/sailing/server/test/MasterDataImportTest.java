@@ -1518,10 +1518,8 @@ public class MasterDataImportTest {
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-        Set<String> raceIds = new HashSet<String>();
-        raceIds.add("dummy");
-
-        sourceService.setPersistentRegattaForRaceIDs(regatta, raceIds, false);
+        sourceService.setRegattaForRace(regatta, "dummy");
+        sourceService.setRegattaForRace(regatta, "dummy2");
 
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
@@ -1596,6 +1594,7 @@ public class MasterDataImportTest {
         // Check if dummy race id has been imported to destination service
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
+        Assert.assertEquals(regattaOnTarget, map.get("dummy2"));
 
         // Check if persistent regatta for race id has been persisted
         RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
