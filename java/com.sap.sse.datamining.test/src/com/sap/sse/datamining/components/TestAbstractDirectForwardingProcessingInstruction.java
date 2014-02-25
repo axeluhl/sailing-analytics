@@ -35,10 +35,9 @@ public class TestAbstractDirectForwardingProcessingInstruction {
         Integer input = 10;
         Collection<Processor<Integer>> resultReceivers = new ArrayList<>();
         resultReceivers.add(resultReceiver);
-        ProcessingInstruction<Integer, Integer> instruction = new AbstractDirectForwardProcessingInstruction<Integer, Integer>(
-                input, resultReceivers) {
+        ProcessingInstruction<Integer, Integer> instruction = new AbstractDirectForwardProcessingInstruction<Integer, Integer>(input, resultReceivers) {
             @Override
-            protected Integer processInput(Integer input) {
+            protected Integer doWork() {
                 return 0;
             }
         };

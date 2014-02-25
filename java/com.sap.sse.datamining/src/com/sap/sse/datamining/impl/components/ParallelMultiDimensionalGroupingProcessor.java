@@ -40,7 +40,8 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
     protected Runnable createInstruction(DataType element) {
         return new AbstractDirectForwardProcessingInstruction<DataType, GroupedDataEntry<DataType>>(element, getResultReceivers()) {
             @Override
-            protected GroupedDataEntry<DataType> processInput(DataType input) {
+            protected GroupedDataEntry<DataType> doWork() {
+                DataType input = super.getInput();
                 return new GroupedDataEntry<DataType>(createCompoundKeyFor(input, dimensions.iterator()), input);
             }
         };

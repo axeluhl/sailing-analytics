@@ -8,8 +8,8 @@ import com.sap.sse.datamining.components.Processor;
 /**
  * A processing construction, that processes the input and directly forwards it to the result receivers.
  */
-public abstract class AbstractDirectForwardProcessingInstruction<InputType, ResultType> implements
-        ProcessingInstruction<InputType, ResultType> {
+public abstract class AbstractDirectForwardProcessingInstruction<InputType, ResultType>
+                      implements ProcessingInstruction<InputType, ResultType> {
 
     private final InputType input;
     private ResultType result;
@@ -22,8 +22,21 @@ public abstract class AbstractDirectForwardProcessingInstruction<InputType, Resu
 
     @Override
     public void run() {
-        result = processInput(input);
-        forwardResult();
+        result = doWork();
+        if (resultIsValid()) {
+            forwardResult();
+        }
+    }
+
+    private boolean resultIsValid() {
+        return result != null;
+    }
+    
+    /**
+     * @return A result, that won't be forwarded to the result receivers.
+     */
+    protected ResultType getInvalidResult() {
+        return null;
     }
 
     private void forwardResult() {
@@ -32,6 +45,10 @@ public abstract class AbstractDirectForwardProcessingInstruction<InputType, Resu
         }
     }
 
-    protected abstract ResultType processInput(InputType input);
+    protected abstract ResultType doWork();
+    
+    protected InputType getInput() {
+        return input;
+    }
 
 }

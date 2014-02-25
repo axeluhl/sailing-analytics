@@ -12,8 +12,8 @@ public class InputForwardingInstruction<T> extends AbstractDirectForwardProcessi
     }
 
     @Override
-    protected T processInput(T input) {
-        return input;
+    protected T doWork() {
+        return super.getInput();
     }
 
 }

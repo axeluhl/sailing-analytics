@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.components;
 
-public interface FilterCriteria<DataType> {
+public interface FilterCriteria<T> {
     
-    public boolean matches(DataType dataEntry);
+    public boolean matches(T element);
 
 }
