@@ -60,9 +60,11 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
@@ -82,6 +84,19 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
+    
+    private class SettingsClickHandler implements ClickHandler {
+        private final StringMessages stringMessages;
+
+        private SettingsClickHandler(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            new SettingsDialog<LeaderboardSettings>(EditableLeaderboardPanel.this, stringMessages).show();
+        }
+    }
 
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
@@ -613,6 +628,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 });
             }
         });
+        
+        
 
         Grid scoreCorrectionInfoGrid = new Grid(3,3);
         scoreCorrectionInfoGrid.setCellPadding(3);
@@ -661,6 +678,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
         getContentPanel().add(new Label(getStringMessages().suppressedCompetitors()+":"));
         getContentPanel().add(suppressedCompetitorsTable);
+
+        // add a dedicated settings button that allows users to remove columns if needed; the settings
+        // button has disappeared as the LeaderboardPanel switched to the use of the more general Component
+        // framework with its own handling of component and settings visibility
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(getSettingsIcon()).getSafeHtml());
+        settingsAnchor.setTitle(stringMessages.settings());
+        settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
+        getRefreshAndSettingsPanel().add(settingsAnchor);
+
     }
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {

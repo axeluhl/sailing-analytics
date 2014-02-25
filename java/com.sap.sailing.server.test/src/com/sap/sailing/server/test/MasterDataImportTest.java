@@ -1576,6 +1576,12 @@ public class MasterDataImportTest {
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
 
+        // Check if persistent regatta for race id has been persisted
+        RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+        ConcurrentHashMap<String, Regatta> map2 = destService2.getPersistentRegattasForRaceIDs();
+        Regatta regattaOnTarget2 = destService2.getRegattaByName(TEST_LEADERBOARD_NAME);
+        Assert.assertEquals(regattaOnTarget2, map2.get("dummy"));
+
     }
 
     @Test
