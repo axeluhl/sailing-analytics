@@ -322,6 +322,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
+    
+    protected ImageResource getSettingsIcon() {
+        return resources.settingsIcon();
+    }
 
     public void updateSettings(LeaderboardSettings newSettings) {
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
