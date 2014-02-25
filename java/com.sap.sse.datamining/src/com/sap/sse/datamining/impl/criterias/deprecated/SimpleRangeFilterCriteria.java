@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.criterias;
+package com.sap.sse.datamining.impl.criterias.deprecated;
 
 import com.sap.sse.datamining.data.ClusterOfComparable;
 

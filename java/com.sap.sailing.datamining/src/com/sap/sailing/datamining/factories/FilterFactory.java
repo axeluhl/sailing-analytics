@@ -16,7 +16,7 @@ import com.sap.sse.datamining.impl.components.deprecated.NonFilteringFilter;
 import com.sap.sse.datamining.impl.components.deprecated.PartitioningParallelFilter;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriteria;
-import com.sap.sse.datamining.impl.criterias.DimensionValuesFilterCriteria;
+import com.sap.sse.datamining.impl.criterias.deprecated.DimensionValuesFilterCriteria;
 import com.sap.sse.datamining.impl.workers.builders.FilterByCriteriaBuilder;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;

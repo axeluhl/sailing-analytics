@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.criterias;
+package com.sap.sse.datamining.impl.criterias.deprecated;
 
 import java.util.Collection;
 import java.util.HashSet;
