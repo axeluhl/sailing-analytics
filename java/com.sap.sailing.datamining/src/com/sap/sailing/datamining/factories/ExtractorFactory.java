@@ -7,7 +7,7 @@ import com.sap.sailing.datamining.impl.workers.builders.ExtractionWorkerBuilder;
 import com.sap.sailing.datamining.shared.StatisticType;
 import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.components.GroupDividingParallelExtractor;
+import com.sap.sse.datamining.impl.components.deprecated.GroupDividingParallelExtractor;
 import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.workers.ExtractionWorker;

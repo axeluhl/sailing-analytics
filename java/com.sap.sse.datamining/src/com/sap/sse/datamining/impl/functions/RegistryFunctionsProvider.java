@@ -12,7 +12,7 @@ import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.components.PartitioningParallelFilter;
+import com.sap.sse.datamining.impl.components.deprecated.PartitioningParallelFilter;
 import com.sap.sse.datamining.impl.workers.builders.FilterByCriteriaBuilder;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.workers.FiltrationWorker;

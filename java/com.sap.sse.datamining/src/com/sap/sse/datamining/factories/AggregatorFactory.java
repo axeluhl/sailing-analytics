@@ -7,7 +7,7 @@ import com.sap.sse.datamining.components.AggregatorType;
 import com.sap.sse.datamining.components.ParallelAggregator;
 import com.sap.sse.datamining.components.ValueType;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.components.GroupDividingParallelAggregator;
+import com.sap.sse.datamining.impl.components.deprecated.GroupDividingParallelAggregator;
 import com.sap.sse.datamining.impl.workers.builders.AggregationWorkerBuilder;
 import com.sap.sse.datamining.workers.AggregationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;

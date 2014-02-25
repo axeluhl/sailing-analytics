@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParallelFunctionRetriever;
-import com.sap.sse.datamining.impl.components.AbstractParallelComponent;
+import com.sap.sse.datamining.impl.components.deprecated.AbstractParallelComponent;
 import com.sap.sse.datamining.workers.ComponentWorker;
 
 public abstract class AbstractPartitioningParallelFunctionRetriever

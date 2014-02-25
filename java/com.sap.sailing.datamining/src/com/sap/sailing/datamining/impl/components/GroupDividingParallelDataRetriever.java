@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.ParallelDataRetriever;
-import com.sap.sse.datamining.impl.components.AbstractParallelComponent;
+import com.sap.sse.datamining.impl.components.deprecated.AbstractParallelComponent;
 import com.sap.sse.datamining.workers.DataRetrievalWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 
