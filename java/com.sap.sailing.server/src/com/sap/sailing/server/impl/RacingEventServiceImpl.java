@@ -2158,6 +2158,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
                         raceIdAsString));
             } else {
                 persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
+                mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
             }
         }
     }
