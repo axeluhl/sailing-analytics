@@ -32,14 +32,15 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void onElement(InputType element) {
         for (WorkingType partialElement : partitionElement(element)) {
-            final RunnableFuture<ResultType> instruction = new FutureTask<>(createInstruction(partialElement));
+            Callable<ResultType> instruction = createInstruction(partialElement);
             if (isInstructionValid(instruction)) {
+                final RunnableFuture<ResultType> runnableInstruction = new FutureTask<>(instruction);
                 Runnable instructionWrapper = new Runnable() {
                     @Override
                     public void run() {
-                        instruction.run();
+                        runnableInstruction.run();
                         try {
-                            ResultType result = instruction.get();
+                            ResultType result = runnableInstruction.get();
                             if (isResultValid(result)) {
                                 forwardResultToReceivers(result);
                             }
@@ -56,7 +57,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
 
-    protected boolean isInstructionValid(Runnable instruction) {
+    protected boolean isInstructionValid(Callable<ResultType> instruction) {
         return instruction != null;
     }
 
@@ -71,7 +72,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         return null;
     }
     
-    private void forwardResultToReceivers(ResultType result) {
+    protected void forwardResultToReceivers(ResultType result) {
         for (Processor<ResultType> resultReceiver : resultReceivers) {
             resultReceiver.onElement(result);
         }
