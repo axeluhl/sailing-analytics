@@ -7,12 +7,12 @@ import java.util.Objects;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.functions.Function;
 
-public class NullaryFunctionFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
+public class NullaryFunctionValuesFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
 
     private Function<ValueType> function;
     private Collection<ValueType> valuesToMatch;
 
-    public NullaryFunctionFilterCriteria(Function<ValueType> function, Collection<ValueType> valuesToMatch) {
+    public NullaryFunctionValuesFilterCriteria(Function<ValueType> function, Collection<ValueType> valuesToMatch) {
         this.function = function;
         this.valuesToMatch = new HashSet<>(valuesToMatch);
     }

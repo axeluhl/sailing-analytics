@@ -82,7 +82,7 @@ public class TestFilterCriterias {
     public void testNullaryFunctionValuesFilterCriteria() {
         Function<String> getRegattaName = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(DataTypeWithContext.class, "getRegattaName"));
         Collection<String> valuesToMatch = Arrays.asList("Regatta", "Other Regatta");
-        FilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionFilterCriteria<>(getRegattaName, valuesToMatch);
+        FilterCriteria<DataTypeWithContext> nullaryFunctionFilterCriteria = new NullaryFunctionValuesFilterCriteria<>(getRegattaName, valuesToMatch);
         
         DataTypeWithContext regatta = new DataTypeWithContextImpl("Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriteria.matches(regatta), is(true));
@@ -93,5 +93,5 @@ public class TestFilterCriterias {
         DataTypeWithContext unmatchingRegatta = new DataTypeWithContextImpl("Unmatching Regatta", "Race Name", 7);
         assertThat(nullaryFunctionFilterCriteria.matches(unmatchingRegatta), is(false));
     }
-
+    
 }
