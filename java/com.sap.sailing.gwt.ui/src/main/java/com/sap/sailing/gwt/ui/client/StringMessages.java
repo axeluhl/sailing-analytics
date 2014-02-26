@@ -963,5 +963,4 @@ public interface StringMessages extends Messages {
     String denoteForRaceLogTracking();
     String raceLogTrackerExists();
     String raceLogTrackingState();
-    String addTemplate(String template);
 }
