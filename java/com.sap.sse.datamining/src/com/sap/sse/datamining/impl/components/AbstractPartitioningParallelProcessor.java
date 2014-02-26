@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,16 +118,30 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
      */
     private class UnfinishedInstructionsCounter {
         
+        private final ReentrantReadWriteLock instructionsAmountLock;
         private int unfinishedInstructionsAmount;
         
-        //TODO replace synchronized with ReentrantReadWriteLock
-        public synchronized void increment() {
-            unfinishedInstructionsAmount++;
+        public UnfinishedInstructionsCounter() {
+            instructionsAmountLock = new ReentrantReadWriteLock();
         }
         
-        public synchronized void decrement() {
-            unfinishedInstructionsAmount--;
-            unfinishedInstructionsAmount = Math.max(0, unfinishedInstructionsAmount);
+        public void increment() {
+            instructionsAmountLock.writeLock().lock();
+            try {
+                unfinishedInstructionsAmount++;
+            } finally {
+                instructionsAmountLock.writeLock().unlock();
+            }
+        }
+        
+        public void decrement() {
+            instructionsAmountLock.writeLock().lock();
+            try {
+                unfinishedInstructionsAmount--;
+                unfinishedInstructionsAmount = Math.max(0, unfinishedInstructionsAmount);
+            } finally {
+                instructionsAmountLock.writeLock().unlock();
+            }
         }
         
         public int getUnfinishedInstructionsAmount() {
