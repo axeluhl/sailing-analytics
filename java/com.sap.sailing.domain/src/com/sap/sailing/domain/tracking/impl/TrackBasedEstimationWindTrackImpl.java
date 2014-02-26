@@ -466,7 +466,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     @Override
     public void windDataReceived(Wind wind, WindSource windSource) {
-        invalidateForNewWind(wind);
+        invalidateForNewWind(wind, windSource);
     }
     
     @Override
@@ -477,17 +477,40 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
 
-    private void invalidateForNewWind(Wind wind) {
+    private void invalidateForNewWind(Wind wind, WindSource windSource) {
+        WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
+        // check what the next fixes before and after the one affected are; if they are further than the averagingInterval
+        // away, extend the invalidation interval accordingly because the entire span up to the next fix may be influenced
+        // by adding/removing a fix in a sparsely occupied track. See WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
-        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(wind
-                .getTimePoint().asMillis() - averagingInterval));
-        TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis() + averagingInterval);
+        final TimePoint timePoint = wind.getTimePoint();
+        // See WindComparator; if time is equal, position is compared; for dummy fixes this will create arbitrary order, so ensure time point cannot
+        // accidentally be equal
+        Wind lastFixBefore = windTrack.getLastFixBefore(timePoint.minus(1)); // subtract one millisecond to be sure to be before a fix just inserted
+        Wind firstFixAfter = windTrack.getFirstFixAfter(timePoint.plus(1)); // add one millisecond to be sure to be after a fix just inserted
+        final WindWithConfidence<TimePoint> startOfInvalidation;
+        if (lastFixBefore == null) {
+            startOfInvalidation = getTrackedRace().getStartOfTracking() == null ? getDummyFixWithConfidence(new MillisecondsTimePoint(0l))
+                    : getDummyFixWithConfidence(getTrackedRace().getStartOfTracking());
+        } else if (lastFixBefore.getTimePoint().before(timePoint.minus(averagingInterval))) {
+            startOfInvalidation = new WindWithConfidenceImpl<TimePoint>(lastFixBefore, 1.0, timePoint, windSource.getType().useSpeed());
+        } else {
+            startOfInvalidation = getDummyFixWithConfidence(timePoint.minus(averagingInterval));
+        }
+        final TimePoint endOfInvalidation;
+        if (firstFixAfter == null) {
+            endOfInvalidation = getTrackedRace().getEndOfTracking() == null ? new MillisecondsTimePoint(Long.MAX_VALUE) : getTrackedRace().getEndOfTracking();
+        } else if (firstFixAfter.getTimePoint().after(timePoint.plus(averagingInterval))) {
+            endOfInvalidation = firstFixAfter.getTimePoint();
+        } else {
+            endOfInvalidation = timePoint.plus(averagingInterval);
+        }
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
     public void windDataRemoved(Wind wind, WindSource windSource) {
-        invalidateForNewWind(wind);
+        invalidateForNewWind(wind, windSource);
     }
 
     @Override

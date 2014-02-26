@@ -26,4 +26,8 @@ public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl
         return positionedCompetitors;
     }
 
+    @Override
+    public String getShortInfo() {
+        return "positionedCompetitors=" + positionedCompetitors;
+    }
 }

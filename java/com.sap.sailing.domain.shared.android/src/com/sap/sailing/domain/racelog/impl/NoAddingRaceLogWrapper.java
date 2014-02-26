@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -188,5 +189,25 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public Iterator<RaceLogEvent> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive) {
         return innerRaceLog.getRawFixesDescendingIterator(startingAt, inclusive);
+    }
+
+    @Override
+    public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
+        return innerRaceLog.getEventsToDeliver(clientId);
+    }
+    
+    @Override
+    public Iterable<RaceLogEvent> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
+        return innerRaceLog.getFixes(from, fromInclusive, to, toInclusive);
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenFixes() {
+        return innerRaceLog.getAverageIntervalBetweenFixes();
+    }
+
+    @Override
+    public Duration getAverageIntervalBetweenRawFixes() {
+        return innerRaceLog.getAverageIntervalBetweenRawFixes();
     }
 }

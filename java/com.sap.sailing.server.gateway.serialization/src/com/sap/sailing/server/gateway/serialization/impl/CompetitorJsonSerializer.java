@@ -47,7 +47,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         this.boatJsonSerializer = teamBoatSerializer;
     }
     
-    public JSONObject getCompetitorIdQuery(Competitor competitor) {
+    public static JSONObject getCompetitorIdQuery(Competitor competitor) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ID, getPersistentCompetitorId(competitor));
         return result;
@@ -81,7 +81,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         return result;
     }
 
-    private Serializable getPersistentCompetitorId(Competitor competitor) {
+    private static Serializable getPersistentCompetitorId(Competitor competitor) {
         Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
         return competitorId;
     }

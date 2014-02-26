@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,13 +13,10 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.igtimiadapter.Account;
-import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
-import com.sap.sailing.domain.igtimiadapter.Permission;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.tracking.AbstractWindTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -30,7 +25,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private static final Logger logger = Logger.getLogger(IgtimiWindTracker.class.getName());
     private static final int TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS = 10*60*1000; // 10 minutes
     private static final long TIME_INTERVAL_TO_TRACK_AFTER_END_OF_RACE_MILLIS = 60*60*1000; // 60 minutes
-    private final Map<LiveDataConnection, Pair<Set<String>, Account>> liveConnectionsAndDeviceSerialNumber;
+    private final Map<LiveDataConnection, Pair<Iterable<String>, Account>> liveConnectionsAndDeviceSerialNumber;
     private final IgtimiWindTrackerFactory windTrackerFactory;
     private boolean stopping;
 
@@ -49,37 +44,13 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         try {
                             if (!stopping) {
                                 IgtimiConnection connection = connectionFactory.connect(account);
-                                // find all the devices from which we may read
-                                Iterable<DataAccessWindow> dataAccessWindows = connection.getDataAccessWindows(
-                                        Permission.read, /* start time */ null, /* end time */ null,
-                                        /* get data for all available deviceSerialNumbers */null);
-                                Set<String> deviceSerialNumbersWeCanRead = new HashSet<>();
-                                for (DataAccessWindow daw : dataAccessWindows) {
-                                    deviceSerialNumbersWeCanRead.add(daw.getDeviceSerialNumber());
-                                }
-                                // find all that haven't even sent GPS; those may never have sent ever, so we need to listen to them for new stuff; they could be wind sensors
-                                Iterable<Fix> gpsFixes = connection.getLatestFixes(deviceSerialNumbersWeCanRead, Type.gps_latlong);
-                                Set<String> devicesWithGps = getDeviceSerialNumbers(gpsFixes);
-                                Iterable<Fix> awsFixes = connection.getLatestFixes(deviceSerialNumbersWeCanRead, Type.AWS); // look for latest fixes with apparent wind speed in the fix
-                                Set<String> devicesWithWind = getDeviceSerialNumbers(awsFixes);
-                                Set<String> devicesThatHaveNeverSentGpsNorWind = new HashSet<>(deviceSerialNumbersWeCanRead);
-                                devicesThatHaveNeverSentGpsNorWind.removeAll(devicesWithGps);
-                                devicesThatHaveNeverSentGpsNorWind.removeAll(devicesWithWind);
-                                Set<String> devicesWeShouldListenTo = new HashSet<>();
-                                devicesWeShouldListenTo.addAll(devicesWithWind);
-                                devicesWeShouldListenTo.addAll(devicesThatHaveNeverSentGpsNorWind);
-                                logger.info("Will listen to devices "
-                                        + devicesWeShouldListenTo
-                                        + " because from all devices "+deviceSerialNumbersWeCanRead+" for "
-                                        + devicesThatHaveNeverSentGpsNorWind
-                                        + " we don't know what they are as they never sent anything we can access, and for "
-                                        + devicesWithWind + " we know they sent wind");
+                                Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                 if (!stopping) {
-                                    LiveDataConnection liveConnection = connection.createLiveConnection(devicesWeShouldListenTo);
+                                    LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
                                     IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(devicesWeShouldListenTo);
                                     liveConnection.addListener(windReceiver);
                                     windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Pair<Set<String>, Account>(devicesWeShouldListenTo, account));
+                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Pair<Iterable<String>, Account>(devicesWeShouldListenTo, account));
                                 }
                             }
                         } catch (Exception e) {
@@ -90,14 +61,6 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 }
             }
         }.start();
-    }
-
-    private Set<String> getDeviceSerialNumbers(Iterable<Fix> fixes) {
-        Set<String> deviceSerialNumbers = new HashSet<>();
-        for (Fix fix : fixes) {
-            deviceSerialNumbers.add(fix.getSensor().getDeviceSerialNumber());
-        }
-        return deviceSerialNumbers;
     }
 
     public static TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {
@@ -151,7 +114,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                     logger.info("Stopping Igtimi live connection "+ldc);
                     ldc.stop();
                 } catch (Exception e) {
-                    final Pair<Set<String>, Account> deviceSerialNumberAndAccount = liveConnectionsAndDeviceSerialNumber.get(ldc);
+                    final Pair<Iterable<String>, Account> deviceSerialNumberAndAccount = liveConnectionsAndDeviceSerialNumber.get(ldc);
                     logger.log(Level.INFO,
                             "Exception trying to stop Igtimi live connection for wind receiver for race "
                                     + getTrackedRace().getRace() + " and device " + deviceSerialNumberAndAccount.getA()

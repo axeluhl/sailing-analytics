@@ -9,17 +9,13 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -39,6 +35,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
@@ -68,11 +65,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     private Iterable<RaceDTO> allRaces;
 
     private final VerticalPanel panel;
-
-    private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
-    private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
-            DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
 
     private final Label noTrackedRacesLabel;
 
@@ -126,7 +118,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRaces");
+        raceTable.ensureDebugId("TrackedRacesCellTable");
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -152,7 +144,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -163,13 +154,14 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
         filterPanel.add(filterablePanelRaces);
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
 
         btnRefresh = new Button(stringMessages.refresh());
-        btnRefresh.ensureDebugId("Refresh");
+        btnRefresh.ensureDebugId("RefreshButton");
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -233,7 +225,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.startOfRace != null) {
-                    return dateFormatter.render(raceDTO.startOfRace) + " " + timeFormatter.render(raceDTO.startOfRace);
+                    return DateAndTimeFormatterUtil.defaultDateFormatter.render(raceDTO.startOfRace) + " " + 
+                            DateAndTimeFormatterUtil.defaultTimeFormatter.render(raceDTO.startOfRace);
                 }
 
                 return "";
@@ -389,16 +382,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
             sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
-                    new AsyncCallback<Void>() {
+                    new MarkedAsyncCallback<Void>() {
                         @Override
-                        public void onFailure(Throwable caught) {
+                        public void handleFailure(Throwable caught) {
                             errorReporter
                                     .reportError("Exception trying to set the delay to live for the selected tracked races: "
                                             + caught.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
+                        public void handleSuccess(Void result) {
                             regattaRefresher.fillRegattas();
                         }
                     });

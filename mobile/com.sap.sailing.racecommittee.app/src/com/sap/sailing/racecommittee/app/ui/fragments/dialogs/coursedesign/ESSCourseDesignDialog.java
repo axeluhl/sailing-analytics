@@ -25,14 +25,14 @@ import android.widget.Toast;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
@@ -40,7 +40,6 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.DraggableCourseElementListAdapter;
@@ -50,260 +49,304 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 
 public class ESSCourseDesignDialog extends RaceDialogFragment {
-    // private final static String TAG = ESSCourseDesignDialogFragment.class.getName();
-    
-    private static int MarksLoaderId = 0;
+	// private final static String TAG =
+	// ESSCourseDesignDialogFragment.class.getName();
 
-    private List<Mark> aMarkList;
-    private MarkGridAdapter gridAdapter;
-    private List<CourseListDataElement> courseElements;
-    private List<CourseListDataElement> previousCourseElements;
-    private DraggableCourseElementListAdapter courseElementAdapter;
-    private CourseElementListAdapter previousCourseElementAdapter;
-    private DragSortListView newCourseListView;
-    private ListView previousCourseListView;
+	private static int MarksLoaderId = 0;
 
-    private DragSortController dragSortController;
+	private List<Mark> aMarkList;
+	private MarkGridAdapter gridAdapter;
+	private List<CourseListDataElement> courseElements;
+	private List<CourseListDataElement> previousCourseElements;
+	private DraggableCourseElementListAdapter courseElementAdapter;
+	private CourseElementListAdapter previousCourseElementAdapter;
+	private DragSortListView newCourseListView;
+	private ListView previousCourseListView;
 
-    private Button publishButton;
-    private Button unpublishButton;
-    private Button takePreviousButton;
+	private DragSortController dragSortController;
 
-    private ReadonlyDataManager dataManager;
+	private Button publishButton;
+	private Button unpublishButton;
+	private Button takePreviousButton;
 
-    private int dragStartMode = DragSortController.ON_DRAG;
-    private boolean removeEnabled = true;
-    private int removeMode = DragSortController.FLING_REMOVE;
-    private boolean sortEnabled = true;
-    private boolean dragEnabled = true;
+	private ReadonlyDataManager dataManager;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.race_choose_ess_course_design_view, container);
-    }
+	private int dragStartMode = DragSortController.ON_DRAG;
+	private boolean removeEnabled = true;
+	private int removeMode = DragSortController.FLING_REMOVE;
+	private boolean sortEnabled = true;
+	private boolean dragEnabled = true;
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getDialog().setTitle(getActivity().getText(R.string.course_design_dialog_title));
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.race_choose_ess_course_design_view,
+				container);
+	}
 
-        dataManager = DataManager.create(getActivity());
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		getDialog().setTitle(
+				getActivity().getText(R.string.course_design_dialog_title));
 
-        aMarkList = new ArrayList<Mark>();
-        courseElements = new ArrayList<CourseListDataElement>();
-        previousCourseElements = new ArrayList<CourseListDataElement>();
+		dataManager = DataManager.create(getActivity());
 
-        gridAdapter = new MarkGridAdapter(getActivity(), aMarkList, ESSMarkImageHelper.getInstance());
-        courseElementAdapter = new DraggableCourseElementListAdapter(getActivity(), courseElements,
-                ESSMarkImageHelper.getInstance());
-        previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), previousCourseElements,
-                ESSMarkImageHelper.getInstance());
+		aMarkList = new ArrayList<Mark>();
+		courseElements = new ArrayList<CourseListDataElement>();
+		previousCourseElements = new ArrayList<CourseListDataElement>();
 
-        loadMarks();
-        fillPreviousCourseElementsWithLastPublishedCourseDesign();
+		gridAdapter = new MarkGridAdapter(getActivity(), aMarkList,
+				ESSMarkImageHelper.getInstance());
+		courseElementAdapter = new DraggableCourseElementListAdapter(
+				getActivity(), courseElements, ESSMarkImageHelper.getInstance());
+		previousCourseElementAdapter = new CourseElementListAdapter(
+				getActivity(), previousCourseElements,
+				ESSMarkImageHelper.getInstance());
 
-        GridView gridView = (GridView) getView().findViewById(R.id.gridViewAssets);
-        gridView.setAdapter(gridAdapter);
+		loadMarks();
+		fillPreviousCourseElementsWithLastPublishedCourseDesign();
 
-        gridView.setOnItemClickListener(new OnItemClickListener() {
+		GridView gridView = (GridView) getView().findViewById(
+				R.id.gridViewAssets);
+		gridView.setAdapter(gridAdapter);
 
-            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
-                Mark mark = (Mark) gridAdapter.getItem(position);
-                Log.i("CourseDesign", "Grid is clicked at position " + position + " for buoy " + mark.getName());
-                onMarkClickedOnGrid(mark);
-            }
+		gridView.setOnItemClickListener(new OnItemClickListener() {
 
-        });
+			public void onItemClick(AdapterView<?> arg0, View view,
+					int position, long arg3) {
+				Mark mark = (Mark) gridAdapter.getItem(position);
+				Log.i("CourseDesign", "Grid is clicked at position " + position
+						+ " for buoy " + mark.getName());
+				onMarkClickedOnGrid(mark);
+			}
 
-        newCourseListView = (DragSortListView) getView().findViewById(R.id.listViewNewCourse);
-        newCourseListView.setAdapter(courseElementAdapter);
-        newCourseListView.setDropListener(new DragSortListView.DropListener() {
+		});
 
-            @Override
-            public void drop(int from, int to) {
-                if (from != to) {
-                    CourseListDataElement item = courseElementAdapter.getItem(from);
-                    courseElementAdapter.remove(item);
-                    courseElementAdapter.insert(item, to);
-                }
-            }
-        });
+		newCourseListView = (DragSortListView) getView().findViewById(
+				R.id.listViewNewCourse);
+		newCourseListView.setAdapter(courseElementAdapter);
+		newCourseListView.setDropListener(new DragSortListView.DropListener() {
 
-        newCourseListView.setRemoveListener(new DragSortListView.RemoveListener() {
+			@Override
+			public void drop(int from, int to) {
+				if (from != to) {
+					CourseListDataElement item = courseElementAdapter
+							.getItem(from);
+					courseElementAdapter.remove(item);
+					courseElementAdapter.insert(item, to);
+				}
+			}
+		});
 
-            @Override
-            public void remove(int toBeRemoved) {
-                CourseListDataElement item = courseElementAdapter.getItem(toBeRemoved);
-                courseElementAdapter.remove(item);
-            }
-        });
+		newCourseListView
+				.setRemoveListener(new DragSortListView.RemoveListener() {
 
-        newCourseListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+					@Override
+					public void remove(int toBeRemoved) {
+						CourseListDataElement item = courseElementAdapter
+								.getItem(toBeRemoved);
+						courseElementAdapter.remove(item);
+					}
+				});
 
-            @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-                CourseListDataElement courseElement = courseElementAdapter.getItem(position);
-                createRoundingDirectionDialog(courseElement);
-                return true;
-            }
-        });
+		newCourseListView
+				.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-        dragSortController = buildDragSortController(newCourseListView);
-        newCourseListView.setFloatViewManager(dragSortController);
-        newCourseListView.setOnTouchListener(dragSortController);
-        newCourseListView.setDragEnabled(dragEnabled);
+					@Override
+					public boolean onItemLongClick(AdapterView<?> arg0,
+							View arg1, int position, long arg3) {
+						CourseListDataElement courseElement = courseElementAdapter
+								.getItem(position);
+						createPassingInstructionDialog(courseElement);
+						return true;
+					}
+				});
 
-        if (getRace().getCourseDesign() != null) {
-            fillCourseElementsInList();
-        }
+		dragSortController = buildDragSortController(newCourseListView);
+		newCourseListView.setFloatViewManager(dragSortController);
+		newCourseListView.setOnTouchListener(dragSortController);
+		newCourseListView.setDragEnabled(dragEnabled);
 
-        previousCourseListView = (ListView) getView().findViewById(R.id.listViewPreviousCourse);
-        previousCourseListView.setAdapter(previousCourseElementAdapter);
+		if (getRace().getCourseDesign() != null) {
+			fillCourseElementsInList();
+		}
 
-        takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
-        takePreviousButton.setOnClickListener(new OnClickListener() {
+		previousCourseListView = (ListView) getView().findViewById(
+				R.id.listViewPreviousCourse);
+		previousCourseListView.setAdapter(previousCourseElementAdapter);
 
-            public void onClick(View arg0) {
-                if (!previousCourseElements.isEmpty()) {
-                    if (!courseElements.isEmpty()) {
-                        createUsePreviousCourseDialog();
-                    } else {
-                        copyPreviousToNewCourseDesign();
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "No course available to copy", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+		takePreviousButton = (Button) getView().findViewById(
+				R.id.takePreviousCourseDesignButton);
+		takePreviousButton.setOnClickListener(new OnClickListener() {
 
-        publishButton = (Button) getView().findViewById(R.id.publishCourseDesignButton);
-        publishButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View arg0) {
+				if (!previousCourseElements.isEmpty()) {
+					if (!courseElements.isEmpty()) {
+						createUsePreviousCourseDialog();
+					} else {
+						copyPreviousToNewCourseDesign();
+					}
+				} else {
+					Toast.makeText(getActivity(),
+							"No course available to copy", Toast.LENGTH_LONG)
+							.show();
+				}
+			}
+		});
 
-            public void onClick(View arg0) {
-                try {
-                    CourseBase courseData = convertCourseElementsToACourseData();
-                    sendCourseDataAndDismiss(courseData);
-                } catch (IllegalStateException ex) {
-                    if (ex.getMessage().equals("Gate has no right buoy")) {
-                        Toast.makeText(getActivity(),
-                                "A right buoy is missing for a gate. Please select the right buoy.", Toast.LENGTH_LONG)
-                                .show();
-                    } else if (ex.getMessage().equals("Each waypoints needs a passing side")) {
-                        Toast.makeText(
-                                getActivity(),
-                                "A waypoint has no passing side. Please select the passing side by clicking long on the waypoint.",
-                                Toast.LENGTH_LONG).show();
-                    }
+		publishButton = (Button) getView().findViewById(
+				R.id.publishCourseDesignButton);
+		publishButton.setOnClickListener(new OnClickListener() {
 
-                } catch (IllegalArgumentException ex) {
-                    Toast.makeText(getActivity(), "The course design has to have at least one waypoint.",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
+			public void onClick(View arg0) {
+				try {
+					CourseBase courseData = convertCourseElementsToACourseData();
+					sendCourseDataAndDismiss(courseData);
+				} catch (IllegalStateException ex) {
+					if (ex.getMessage().equals("Missing second mark")) {
+						Toast.makeText(
+								getActivity(),
+								"The selected passing instructions require two buoys. Please select the second buoy.",
+								Toast.LENGTH_LONG).show();
+					} else if (ex.getMessage().equals(
+							"Each waypoints needs passing instructions")) {
+						Toast.makeText(
+								getActivity(),
+								"A waypoint has no passing instructions. Please select the passing instruction by clicking long on the waypoint.",
+								Toast.LENGTH_LONG).show();
+					}
 
-        });
+				} catch (IllegalArgumentException ex) {
+					Toast.makeText(
+							getActivity(),
+							"The course design has to have at least one waypoint.",
+							Toast.LENGTH_LONG).show();
+				}
+			}
 
-        unpublishButton = (Button) getView().findViewById(R.id.unpublishCourseDesignButton);
-        unpublishButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                CourseBase emptyCourse = new CourseDataImpl("Unpublished course design");
-                sendCourseDataAndDismiss(emptyCourse);
-            }
-        });
-    }
+		});
 
-    /**
-     * Creates a DragSortController and thereby defines the behavior of the drag sort list
-     */
-    public DragSortController buildDragSortController(DragSortListView dragSortListView) {
-        DragSortController controller = new DragSortController(dragSortListView);
-        controller.setDragHandleId(R.id.drag_handle);
-        controller.setFlingHandleId(R.id.drag_handle);
-        controller.setRemoveEnabled(removeEnabled);
-        controller.setSortEnabled(sortEnabled);
-        controller.setDragInitMode(dragStartMode);
-        controller.setRemoveMode(removeMode);
-        controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
-        return controller;
-    }
+		unpublishButton = (Button) getView().findViewById(
+				R.id.unpublishCourseDesignButton);
+		unpublishButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				CourseBase emptyCourse = new CourseDataImpl(
+						"Unpublished course design");
+				sendCourseDataAndDismiss(emptyCourse);
+			}
+		});
+	}
 
-    private void fillPreviousCourseElementsWithLastPublishedCourseDesign() {
-        CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
-        if (lastPublishedCourseDesign != null) {
-            fillPreviousCourseElementsInList(lastPublishedCourseDesign);
-        }
-    }
+	/**
+	 * Creates a DragSortController and thereby defines the behavior of the drag
+	 * sort list
+	 */
+	public DragSortController buildDragSortController(
+			DragSortListView dragSortListView) {
+		DragSortController controller = new DragSortController(dragSortListView);
+		controller.setDragHandleId(R.id.drag_handle);
+		controller.setFlingHandleId(R.id.drag_handle);
+		controller.setRemoveEnabled(removeEnabled);
+		controller.setSortEnabled(sortEnabled);
+		controller.setDragInitMode(dragStartMode);
+		controller.setRemoveMode(removeMode);
+		controller.setBackgroundColor(getActivity().getResources().getColor(
+				R.color.welter_medium_blue));
+		return controller;
+	}
 
-    private void loadMarks() {
-        Loader<?> marksLoader = getLoaderManager().restartLoader(MarksLoaderId, null,
-                dataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
-                    @Override
-                    public void onLoadFailed(Exception reason) {
-                        Toast.makeText(getActivity(), String.format("Marks: %s",reason.toString()), Toast.LENGTH_LONG).show();
-                    }
+	private void fillPreviousCourseElementsWithLastPublishedCourseDesign() {
+		CourseBase lastPublishedCourseDesign = InMemoryDataStore.INSTANCE
+				.getLastPublishedCourseDesign();
+		if (lastPublishedCourseDesign != null) {
+			fillPreviousCourseElementsInList(lastPublishedCourseDesign);
+		}
+	}
 
-                    @Override
-                    public void onLoadSucceded(Collection<Mark> data, boolean isCached) {
-                        onLoadMarksSucceeded(data);
-                    }
-                }));
-        // ignore any cached results and force a remote load of the marks,
-        // because we always need the most current.
-        marksLoader.forceLoad();
-    }
+	private void loadMarks() {
+		Loader<?> marksLoader = getLoaderManager().restartLoader(
+				MarksLoaderId,
+				null,
+				dataManager.createMarksLoader(getRace(),
+						new LoadClient<Collection<Mark>>() {
+							@Override
+							public void onLoadFailed(Exception reason) {
+								Toast.makeText(
+										getActivity(),
+										String.format("Marks: %s",
+												reason.toString()),
+										Toast.LENGTH_LONG).show();
+							}
 
-    protected void onLoadMarksSucceeded(Collection<Mark> data) {
-        aMarkList.clear();
-        aMarkList.addAll(data);
-        Collections.sort(aMarkList, new NaturalNamedComparator());
-        gridAdapter.notifyDataSetChanged();
-    }
+							@Override
+							public void onLoadSucceded(Collection<Mark> data,
+									boolean isCached) {
+								onLoadMarksSucceeded(data);
+							}
+						}));
+		// ignore any cached results and force a remote load of the marks,
+		// because we always need the most current.
+		marksLoader.forceLoad();
+	}
 
-    private void fillPreviousCourseElementsInList(CourseBase previousCourseData) {
-        if (previousCourseData != null) {
-            previousCourseElements.clear();
-            previousCourseElements.addAll(convertCourseDesignToCourseElements(previousCourseData));
-            previousCourseElementAdapter.notifyDataSetChanged();
-        }
-    }
+	protected void onLoadMarksSucceeded(Collection<Mark> data) {
+		aMarkList.clear();
+		aMarkList.addAll(data);
+		Collections.sort(aMarkList, new NaturalNamedComparator());
+		gridAdapter.notifyDataSetChanged();
+	}
 
-    private void fillCourseElementsInList() {
-        courseElements.clear();
-        courseElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
-        courseElementAdapter.notifyDataSetChanged();
-    }
+	private void fillPreviousCourseElementsInList(CourseBase previousCourseData) {
+		if (previousCourseData != null) {
+			previousCourseElements.clear();
+			previousCourseElements
+					.addAll(convertCourseDesignToCourseElements(previousCourseData));
+			previousCourseElementAdapter.notifyDataSetChanged();
+		}
+	}
 
-    protected List<CourseListDataElement> convertCourseDesignToCourseElements(CourseBase courseData) {
-        List<CourseListDataElement> elementList = new ArrayList<CourseListDataElement>();
+	private void fillCourseElementsInList() {
+		courseElements.clear();
+		courseElements.addAll(convertCourseDesignToCourseElements(getRace()
+				.getCourseDesign()));
+		courseElementAdapter.notifyDataSetChanged();
+	}
 
-        for (Waypoint waypoint : courseData.getWaypoints()) {
-            ControlPoint controlPoint = waypoint.getControlPoint();
+	protected List<CourseListDataElement> convertCourseDesignToCourseElements(
+			CourseBase courseData) {
+		List<CourseListDataElement> elementList = new ArrayList<CourseListDataElement>();
 
-            if (controlPoint instanceof Mark) {
-                CourseListDataElement element = new CourseListDataElement();
-                element.setLeftMark((Mark) controlPoint);
-                element.setRoundingDirection(getRoundingDirection(waypoint.getPassingSide()));
-                elementList.add(element);
-            } else if (controlPoint instanceof Gate) {
-                Gate gate = (Gate) controlPoint;
-                CourseListDataElement element = new CourseListDataElement();
-                element.setLeftMark(gate.getLeft());
-                element.setRightMark(gate.getRight());
-                element.setRoundingDirection(RoundingDirection.Gate);
-                elementList.add(element);
-            }
-        }
+		for (Waypoint waypoint : courseData.getWaypoints()) {
+			ControlPoint controlPoint = waypoint.getControlPoint();
 
-        return elementList;
-    }
+			if (controlPoint instanceof Mark) {
+				CourseListDataElement element = new CourseListDataElement();
+				element.setLeftMark((Mark) controlPoint);
+				element.setPassingInstructions(waypoint
+						.getPassingInstructions());
+				elementList.add(element);
+			} else if (controlPoint instanceof ControlPointWithTwoMarks) {
+				ControlPointWithTwoMarks controlPointTwoMarks = (ControlPointWithTwoMarks) controlPoint;
+				CourseListDataElement element = new CourseListDataElement();
+				element.setLeftMark(controlPointTwoMarks.getLeft());
+				element.setRightMark(controlPointTwoMarks.getRight());
+				element.setPassingInstructions(waypoint
+						.getPassingInstructions());
+				elementList.add(element);
+			}
+		}
 
-    protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
+		return elementList;
+	}
+
+	protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
-        saveChangedCourseDesignInCache(courseDesign);
-        dismiss();
-    }
+		saveChangedCourseDesignInCache(courseDesign);
+		dismiss();
+	}
 
     private void saveChangedCourseDesignInCache(CourseBase courseDesign) {
         if (!Util.isEmpty(courseDesign.getWaypoints())) {
@@ -315,25 +358,28 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         // TODO find a proper name for the highly flexible ESS courses to be shown on the regatta overview page
         CourseBase design = new CourseDataImpl("Course");
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
-
+        
         for (CourseListDataElement courseElement : courseElements) {
-            if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
-                    && courseElement.getRightMark() != null) {
-                String gateName = "Gate " + courseElement.getLeftMark().getName() + " / "
-                        + courseElement.getRightMark().getName();
-                Gate gate = new GateImpl(courseElement.getLeftMark(), courseElement.getRightMark(), gateName);
-                Waypoint waypoint = new WaypointImpl(gate);
-
-                waypoints.add(waypoint);
-            } else if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
-                    && courseElement.getRightMark() == null) {
-                throw new IllegalStateException("Gate has no right buoy");
-            } else if (courseElement.getRoundingDirection().equals(RoundingDirection.None)) {
-                throw new IllegalStateException("Each waypoints needs a passing side");
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line) || courseElement
+                    .getPassingInstructions().equals(PassingInstruction.Offset))) {
+                if (courseElement.getRightMark() != null) {
+                    String cpwtmName = "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / "
+                            + courseElement.getRightMark().getName();
+                    ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(),
+                            courseElement.getRightMark(), cpwtmName);
+                    Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
+                    
+                    waypoints.add(waypoint);
+                } else {
+                    throw new IllegalStateException("Missing second mark");
+                }
+            } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
+                throw new IllegalStateException("Each waypoints needs passing instructions");
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(),
-                        getNauticalSide(courseElement.getRoundingDirection()));
-
+                        courseElement.getPassingInstructions());
+                
                 waypoints.add(waypoint);
             }
 
@@ -348,30 +394,6 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         }
 
         return design;
-    }
-
-    private NauticalSide getNauticalSide(RoundingDirection roundingDirection) {
-        NauticalSide side = null;
-        if (roundingDirection.name().equalsIgnoreCase(NauticalSide.PORT.name())) {
-            side = NauticalSide.PORT;
-        } else if (roundingDirection.name().equalsIgnoreCase(NauticalSide.STARBOARD.name())) {
-            side = NauticalSide.STARBOARD;
-        }
-        return side;
-    }
-
-    private RoundingDirection getRoundingDirection(NauticalSide passingSide) {
-        RoundingDirection direction = null;
-        if (passingSide == null) {
-            direction = RoundingDirection.None;
-        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
-            direction = RoundingDirection.Port;
-        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Starboard.name())) {
-            direction = RoundingDirection.Starboard;
-        } else {
-            direction = RoundingDirection.Gate;
-        }
-        return direction;
     }
 
     private void createUsePreviousCourseDialog() {
@@ -406,9 +428,9 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         if (courseElements.isEmpty()) {
             addNewCourseElementToList(mark);
         } else {
-            CourseListDataElement gateCourseElement = getFirstGateCourseElementWithoutRightMark();
-            if (gateCourseElement != null) {
-                gateCourseElement.setRightMark(mark);
+            CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
+            if (twoMarksCourseElement != null) {
+                twoMarksCourseElement.setRightMark(mark);
                 courseElementAdapter.notifyDataSetChanged();
             } else {
                 addNewCourseElementToList(mark);
@@ -416,9 +438,11 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
         }
     }
 
-    private CourseListDataElement getFirstGateCourseElementWithoutRightMark() {
+    private CourseListDataElement getFirstTwoMarksCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : courseElements) {
-            if (courseElement.getRoundingDirection().equals(RoundingDirection.Gate)
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line) || courseElement
+                    .getPassingInstructions().equals(PassingInstruction.Offset))
                     && courseElement.getRightMark() == null) {
                 return courseElement;
             }
@@ -429,28 +453,29 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
     private void addNewCourseElementToList(Mark mark) {
         CourseListDataElement courseElement = new CourseListDataElement();
         courseElement.setLeftMark(mark);
-        createRoundingDirectionDialog(courseElement);
+        createPassingInstructionDialog(courseElement);
     }
 
-    private void createRoundingDirectionDialog(final CourseListDataElement courseElement) {
-        List<String> directions = new ArrayList<String>();
-        for (RoundingDirection direction : RoundingDirection.relevantValues()) {
-            directions.add(direction.name());
+    private void createPassingInstructionDialog(final CourseListDataElement courseElement) {
+        List<String> instructions = new ArrayList<String>();
+        for (PassingInstruction instruction : PassingInstruction.relevantValues()) {
+            instructions.add(instruction.name());
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int position) {
-                        RoundingDirection pickedDirection = RoundingDirection.relevantValues()[position];
-                        onRoundingDirectionPicked(courseElement, pickedDirection);
+                        PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
+                        onPassingInstructionPicked(courseElement, pickedDirection);
                     }
                 });
         builder.create();
         builder.show();
     }
 
-    protected void onRoundingDirectionPicked(CourseListDataElement courseElement, RoundingDirection pickedDirection) {
-        courseElement.setRoundingDirection(pickedDirection);
+
+    protected void onPassingInstructionPicked(CourseListDataElement courseElement, PassingInstruction pickedDirection) {
+        courseElement.setPassingInstructions(pickedDirection);
         if (!courseElements.contains(courseElement)) {
             courseElements.add(courseElement);
         }

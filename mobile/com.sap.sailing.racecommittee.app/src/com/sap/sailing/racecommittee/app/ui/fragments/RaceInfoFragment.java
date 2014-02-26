@@ -78,12 +78,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
             @Override
             public void onClick(View v) {
-/*                getRace().getRaceLog().add(
-                        RaceLogEventFactory.INSTANCE.createStartTimeEvent(
-                                MillisecondsTimePoint.now(), 
-                                AppPreferences.getAuthor(getActivity()), 
-                                getRace().getRaceLog().getCurrentPassId(),
-                                MillisecondsTimePoint.now().plus(3000000)));*/
                 showCourseDesignDialog();
             }
         });

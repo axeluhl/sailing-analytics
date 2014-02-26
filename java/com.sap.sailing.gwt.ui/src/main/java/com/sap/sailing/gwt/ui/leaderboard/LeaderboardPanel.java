@@ -322,6 +322,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
+    
+    protected ImageResource getSettingsIcon() {
+        return resources.settingsIcon();
+    }
 
     public void updateSettings(LeaderboardSettings newSettings) {
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
@@ -880,13 +884,22 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return result;
         }
 
+        /**
+         * Reports the ratio of the time that passed since the last position fix and the average sampling interval of the
+         * competitor's track. On a perfect track, this value will never exceed 1.0. Immediately when a fix is received, this
+         * value goes to 0.0. For a competitor whose tracker is lagging, this value can grow considerably greater than 1.
+         * The value goes to <code>null</code> if there are no fixes in the track.
+         * 
+         * @author Axel Uhl (D043530)
+         *
+         */
         private class RaceTrackingQuality implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null) {
-                    result = fieldsForRace.timeSinceLastPositionFixInSeconds;
+                if (fieldsForRace != null && fieldsForRace.timeSinceLastPositionFixInSeconds != null && fieldsForRace.averageSamplingInterval != null) {
+                    result = fieldsForRace.timeSinceLastPositionFixInSeconds / fieldsForRace.averageSamplingInterval.asSeconds();
                 }
                 return result;
             }
@@ -1304,7 +1317,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         public SafeHtmlHeader getHeader() {
-            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.totalRank()), stringMessages.rankColumnTooltip());
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.totalRegattaRank()), stringMessages.rankColumnTooltip());
         }
     }
 
@@ -1403,6 +1416,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
+        leaderboardTable.ensureDebugId("LeaderboardTable");
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -1504,7 +1518,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         @Override
         public Double get(LeaderboardRowDTO row) {
             final Double result;
-            if (row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
+            if (row.totalDistanceTraveledInMeters != null && row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
                 result = row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
             } else {
                 result = null;
@@ -2343,12 +2357,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     }
 
     /**
-     * @param date
+     * @param newTime
      *            ignored; may be <code>null</code>. The time for loading the leaderboard is determined using
      *            {@link #getLeaderboardDisplayDate()}.
      */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
     }
 
@@ -2461,7 +2475,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime());
+        timeChanged(timer.getTime(), null);
     }
 
     @Override

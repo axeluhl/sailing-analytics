@@ -16,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.base.Size;
 import com.google.gwt.maps.client.events.click.ClickEventFormatter;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
@@ -85,6 +86,9 @@ public abstract class CanvasOverlayV3 {
      */
     private long transitionTimeInMilliseconds;
 
+    private final int minZoomLevel = 1;
+    private final int maxZoomLevel = 21;
+    
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
@@ -108,6 +112,18 @@ public abstract class CanvasOverlayV3 {
         return canvas;
     }
 
+    /** 
+     * This method can be used to calculate a value in a min-max range according to the zoom level.
+     * Sample 1: minZoom = 1, maxZoom = 21, currentZoom = 21 will return maxValue
+     * Sample 2: minZoom = 1, maxZoom = 21, currentZoom = 1 will return minValue
+     * Sample 3: minZoom = 1, maxZoom = 21, currentZoom = 11, minValue = 1, maxValue = 2 will return 1.5
+     */
+    public double fitValueToMapZoom(double minValue, double maxValue) {
+        double dZoom = maxZoomLevel - minZoomLevel;
+        double zoomInPercentage = (map.getZoom() - minZoomLevel) / dZoom; 
+        return  minValue + (maxValue - minValue) * zoomInPercentage; 
+    }
+    
     public boolean isVisible() {
         return getCanvas() != null && getCanvas().isVisible();
     }
@@ -259,23 +275,35 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
-    protected void setCanvasPositionTransition(long durationInMilliseconds) {
+    public void setCanvasPositionAndRotationTransition(long durationInMilliseconds) {
         if (durationInMilliseconds != transitionTimeInMilliseconds) {
-            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+            for (String browserTypePrefix : getBrowserTypePrefixes()) {
+                StringBuilder transformPropertyList = new StringBuilder();
+                transformPropertyList.append("left ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, top ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, ");
+                transformPropertyList.append(getBrowserSpecificDashedPropertyName(browserTypePrefix, "transform"));
+                transformPropertyList.append(' ');
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear");
+                canvas.getElement().getStyle().setProperty(getBrowserSpecificPropertyName(browserTypePrefix, "transition"), transformPropertyList.toString());
+            }
             transitionTimeInMilliseconds = durationInMilliseconds;
         }
     }
     
-    protected void removeCanvasPositionTransition() {
+    public void removeCanvasPositionAndRotationTransition() {
         if (transitionTimeInMilliseconds != -1) {
             setProperty(canvas.getElement().getStyle(), "transition", "none");
             transitionTimeInMilliseconds = -1;
         }
     }
-
+    
     private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
         for (String browserTypePrefix : getBrowserTypePrefixes()) {
-                style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
+            style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
         }
     }
     
@@ -285,6 +313,32 @@ public abstract class CanvasOverlayV3 {
      */
     private String[] getBrowserTypePrefixes() {
         return new String[] { "", /* Firefox */ "moz", /* IE */ "ms", /* Opera */ "o", /* Chrome and Mobile */ "webkit" };
+    }
+    
+    /**
+     * Converts something like "transformOrigin" to "-<code>browserType</code>-transform-origin"
+     * 
+     * @param browserType
+     *            a browser type string as received from {@link #getBrowserTypePrefixes()}. If empty or null, the
+     *            original property name is returned unchanged
+     * @param camelCaseString
+     *            the original camel-cased property name, such as "transformOrigin"
+     */
+    private String getBrowserSpecificDashedPropertyName(String browserType, String camelCaseString) {
+        StringBuilder result = new StringBuilder();
+        if (browserType != null && !browserType.isEmpty()) {
+            result.append('-');
+            result.append(browserType);
+            result.append('-');
+        }
+        for (int i=0; i<camelCaseString.length(); i++) {
+            final char c = camelCaseString.charAt(i);
+            if (Character.isUpperCase(c)) {
+                result.append('-');
+            }
+            result.append(Character.toLowerCase(c));
+        }
+        return result.toString();
     }
 
     private String getBrowserSpecificPropertyName(String browserType, String basePropertyName) {
@@ -302,6 +356,11 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
     
+    protected void setCanvasRotation(double rotationInDegrees) {
+        setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
+        setProperty(canvas.getElement().getStyle(), "transform", "rotate("+Math.round(rotationInDegrees)+"deg)");
+    }
+
     protected double calculateRadiusOfBoundingBox(MapCanvasProjection projection, LatLng centerPosition, double lengthInMeter) {
         Position centerPos = new DegreePosition(centerPosition.getLatitude(), centerPosition.getLongitude());
         Position translateRhumbX = centerPos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
@@ -318,6 +377,33 @@ public abstract class CanvasOverlayV3 {
         double diffY = Math.abs(pointY.getY() - pointCenter.getY());
         
         return Math.min(diffX, diffY);  
+    }
+
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, LatLng position, double distanceXInMeter) {
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+
+        Point point = projection.fromLatLngToDivPixel(position);
+        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
+
+        return Math.abs(pointX.getX() - point.getX());
+    }
+    
+    protected Size calculateBoundingBox(MapCanvasProjection projection, LatLng position, double distanceXInMeter, double distanceYInMeter) {
+        Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
+
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+        LatLng posWithDistanceY = LatLng.newInstance(translateRhumbY.getLatDeg(), translateRhumbY.getLngDeg());
+
+        Point pointCenter = projection.fromLatLngToDivPixel(position);
+        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
+
+        return Size.newInstance(Math.abs(pointX.getX() - pointCenter.getX()), Math.abs(pointY.getY() - pointCenter.getY()));
     }
     
     protected void setCanvasSize(int newWidthInPx, int newHeightInPx) {

@@ -13,6 +13,10 @@ public class HttpJsonPostRequest extends HttpRequest {
 
     private String requestBody;
 
+    public HttpJsonPostRequest(URL requestUrl) {
+        this(requestUrl, null);
+    }
+    
     public HttpJsonPostRequest(URL requestUrl, String body) {
         super(requestUrl);
         this.requestBody = body;
@@ -34,6 +38,8 @@ public class HttpJsonPostRequest extends HttpRequest {
     }
 
     private void sendBody(OutputStream outputStream) throws IOException {
-        outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
+        if (requestBody != null) {
+            outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
+        }
     }
 }

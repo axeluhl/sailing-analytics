@@ -68,7 +68,7 @@ public class FlagPoleStateRenderer {
                 Toast.makeText(v.getContext(), upperFlag.toString() + "|" + lowerFlag.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        if (upperFlag == Flags.CLASS) {
+        if (upperFlag == Flags.CLASS && race.getFleet().getColor() != null) {
             flagView.setPadding(6, 6, 6, 6);
             flagView.setBackgroundColor(getFleetColorId());
         }
@@ -76,7 +76,8 @@ public class FlagPoleStateRenderer {
     }
     
     private int getFleetColorId() {
-        Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor().getAsRGB();
+        Triple<Integer, Integer, Integer> rgb = race.getFleet().getColor() == null ? 
+                new Triple<Integer, Integer, Integer>(0, 0, 0) : race.getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
     }
     

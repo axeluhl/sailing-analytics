@@ -170,4 +170,16 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         }
         return result;
     }
+
+    protected int getNumberOfCompetitorsInBetterFleets(RaceColumn raceColumn, int competitorFleetOrdering) {
+        int numberOfCompetitorsInBetterFleets = 0;
+        for (Fleet fleet : raceColumn.getFleets()) {
+            TrackedRace trackedRaceOfBetterFleet;
+            if (fleet.getOrdering() != 0 && fleet.getOrdering() < competitorFleetOrdering &&
+                    (trackedRaceOfBetterFleet=raceColumn.getTrackedRace(fleet)) != null) {
+                numberOfCompetitorsInBetterFleets += Util.size(trackedRaceOfBetterFleet.getRace().getCompetitors());
+            }
+        }
+        return numberOfCompetitorsInBetterFleets;
+    }
 }

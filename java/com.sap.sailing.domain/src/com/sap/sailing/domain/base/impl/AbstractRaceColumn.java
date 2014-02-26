@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,10 +25,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
 
-    private final Map<Fleet, TrackedRace> trackedRaces;
-    private final Map<Fleet, RaceIdentifier> raceIdentifiers;
+    private Map<Fleet, TrackedRace> trackedRaces;
+    private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
-    private final Map<Fleet, RaceLog> raceLogs;
+    private Map<Fleet, RaceLog> raceLogs;
     
     /**
      * holds the race log identifier template needed to create the appropriate RaceLogIdentifer that is constructed from the 
@@ -37,10 +38,25 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private transient RaceLogInformation raceLogInformation;
     private RaceLogIdentifierTemplate raceLogIdentifierTemplate;
 
+    /**
+     * we don't want the TrackedRaces to be serialized during a master data export. Thus, we need this thread flag which
+     * is true only during master data export
+     */
+    private transient ThreadLocal<Boolean> ongoingMasterDataExport;
+
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
         this.raceLogs = new HashMap<Fleet, RaceLog>();
+        this.ongoingMasterDataExport = createOngoingMasterDataExportThreadLocal();
+    }
+    
+    private ThreadLocal<Boolean> createOngoingMasterDataExportThreadLocal() {
+        return new ThreadLocal<Boolean>() {
+            protected Boolean initialValue() {
+                return false;
+            };
+        };
     }
 
     @Override
@@ -189,12 +205,40 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     /**
      * When deserializing, replication listeners are registered on all race logs.
      */
+    @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
+        this.ongoingMasterDataExport = createOngoingMasterDataExportThreadLocal();
+        // Check if master data export is ongoing
+        boolean masterDataImportOngoing = ois.readBoolean();
+        if (masterDataImportOngoing) {
+            this.trackedRaces = new HashMap<Fleet, TrackedRace>();
+            this.raceIdentifiers = (Map<Fleet, RaceIdentifier>) ois.readObject();
+            this.raceLogs = (Map<Fleet, RaceLog>) ois.readObject();
+            this.raceLogIdentifierTemplate = (RaceLogIdentifierTemplate) ois.readObject();
+        } else {
+            ois.defaultReadObject();
+        }
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
             raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+        }
+    }
+
+    @Override
+    public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
+        ongoingMasterDataExport.set(flagValue);
+    }
+    
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        if (ongoingMasterDataExport.get()) {
+            stream.writeBoolean(true);
+            stream.writeObject(raceIdentifiers);
+            stream.writeObject(raceLogs);
+            stream.writeObject(raceLogIdentifierTemplate);
+        } else {
+            stream.writeBoolean(false);
+            stream.defaultWriteObject();
         }
     }
 }

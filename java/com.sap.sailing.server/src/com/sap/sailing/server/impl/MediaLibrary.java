@@ -302,4 +302,8 @@ class MediaLibrary {
         }
     }
 
+    public MediaTrack lookupMediaTrack(MediaTrack mediaTrack) {
+        return mediaTracksByDbId.get(mediaTrack);
+    }
+
 }

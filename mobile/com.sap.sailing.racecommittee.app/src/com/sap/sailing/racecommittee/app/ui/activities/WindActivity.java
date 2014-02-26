@@ -150,7 +150,7 @@ public class WindActivity extends SessionActivity implements CompassDirectionLis
 
     private void buildAlertMessageNoGps() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+        builder.setMessage(R.string.wind_gps_is_disabled)
         .setCancelable(false)
         .setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(final DialogInterface dialog, final int id) {

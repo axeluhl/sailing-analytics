@@ -12,7 +12,7 @@ You have to ensure that your Firefox browser has a profile called "Selenium" and
 
 ### Running the tests with GWT hosted mode
 
-Launch the server by choosing the "Sailing Server (Proxy)" or "Sailing Server (No Proxy)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
+Launch the server by choosing the "Sailing Server (Proxy, winddbTest)" or "Sailing Server (No Proxy, winddbTest)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
 
 When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy, GWT Codesvr)" or "com.sap.sailing.senelium.test (No Proxy, GWT Codesvr)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
 
@@ -66,7 +66,7 @@ In the next step you should set a debug identifier for all relevant widgets the 
 
 After preparing the UI for testing, you have to implement new page objects or to extend existing ones, if needed. Therefore we provide the two classes _HostPage_ and _PageArea_ which also share common functionality. The class _HostPage_ represents a whole page and in the context of GWT it is used for page objects representing an _EntryPoint_. The second class _PageArea_ in contrast should be used to represent complex widgets (e.g. tables and tab panels) or logical parts like field sets. While implementing your page objects, you should always think in services instead of single widgets. So, for example you should provide a method _login(String name, String password)_ for a simple login form, which sets the username, the password and clicks the login button instead of the 3 methods _setName(String name)_, _setPassword(String password)_ and _login()_.
 
-To get access to the HTML-elements representing the widgets the user interacts with, you should use the provided factory by creating instance fields of the type _WebElement_ or _List<WebElement>_ and annotating them with _FindBy_ or _FindBys_ as well as _CacheLookup_, if the element is static and never changes. Usually you use the annotation _FindBy_ which needs you to provide the mechanism as well as the value to use for locating the element. Since we use the debug identifiers of GWT we also provide the corresponding mechanism with the class _BySeleniumId_ and a typical example would look like following:
+To get access to the HTML-elements representing the widgets the user interacts with, you should use the provided factory by creating instance fields of the type _WebElement_ or _List\<WebElement\>_ and annotating them with _FindBy_ or _FindBys_ as well as _CacheLookup_, if the element is static and never changes. Usually you use the annotation _FindBy_ which needs you to provide the mechanism as well as the value to use for locating the element. Since we use the debug identifiers of GWT we also provide the corresponding mechanism with the class _BySeleniumId_ and a typical example would look like following:
 
         public MyPageObject extends PageArea {
             @FindBy(how = BySeleniumId.class, using = ”NameTextField”)
@@ -101,6 +101,17 @@ The easiest way to execute the tests is to perform a full Maven build. Here you 
 
 After the build, Tycho will start a server instance and runs all tests against the deployed application.
 
-Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, Jetty on 8889)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expects the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
+Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, winddbTest)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expects the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
 
 For a more practical example of how to write page objects and test you should take a look at the [[tutorial|wiki/ui-tests-tutorial]].
+
+## Updating Selenium
+
+While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps to be able to run the tests local.
+
+* Download the latest _Client & WebDriver Bindings_ for Java from the official [Selenium](http://docs.seleniumhq.org/download/) website
+* Delete the _selenium-java-<version>.jar_ in the root directory of the project _org.openqa.selenium.osgi_ as well as all libraries in the _lib_ directory and copy the new versions from the downloaded file in  the appropriate folders
+* Open the _MANIFEST.MF_ with the Plug-in Manifest Editor and switch to the _Runtime_ tab
+    * Remove all the old libraries from the _Classpath_ section and add all new versions
+    * Add all new packages that start with _org.openqa.selenium_ to the _Exported Packages_ section in the case there were packages added
+* Updated the version number in the _MANIFEST.MF_ and in the _pom.xml_

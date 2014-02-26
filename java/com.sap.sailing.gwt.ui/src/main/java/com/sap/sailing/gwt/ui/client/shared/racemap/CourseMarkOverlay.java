@@ -1,16 +1,20 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
-import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing course marks (images) and the buoy zone if the mark is a buoy.
@@ -28,35 +32,45 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     
     private boolean showBuoyZone;
 
-    private final MarkImageDescriptor markImageDescriptor;
-    
-    private final ImageCanvas markImageCanvas;
-    
     private final int MIN_BUOYZONE_RADIUS_IN_PX = 25;
-    
-    public CourseMarkOverlay(MapWidget map, int zIndex, final RaceMapImageManager raceMapImageManager, MarkDTO markDTO) {
+
+    private final MarkVectorGraphics markVectorGraphics;
+
+    private Map<Integer, Pair<Double, Size>> markScaleAndSizePerZoomCache; 
+
+    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO) {
         super(map, zIndex);
         this.mark = markDTO;
         this.position = markDTO.position;
         this.buoyZoneRadiusInMeter = 0.0;
         this.showBuoyZone = false;
     
-        markImageDescriptor = raceMapImageManager.resolveMarkImage(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        markImageCanvas = new ImageCanvas(markImageDescriptor.getImgageResource());
+        markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+        markScaleAndSizePerZoomCache = new HashMap<Integer, Pair<Double,Size>>();
+        
+        setCanvasSize(50, 50);
     }
 
 
     @Override
     protected void draw() {
-        if (mapProjection != null && mark != null && position != null && markImageCanvas.isImageLoaded()) {
+        if (mapProjection != null && mark != null && position != null) {
+            int zoom = map.getZoom();
+
+            Pair<Double, Size> markScaleAndSize = markScaleAndSizePerZoomCache.get(zoom);
+            if(markScaleAndSize == null) {
+                markScaleAndSize = getMarkScaleAndSize(position);
+                markScaleAndSizePerZoomCache.put(zoom, markScaleAndSize);
+            }
+            double markSizeScaleFactor = markScaleAndSize.getA();
+            
             getCanvas().setTitle(getTitle());
             
             LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
 
             // calculate canvas size
-            Size imageSize = markImageCanvas.getImageSize();
-            double canvasWidth = imageSize.getWidth();
-            double canvasHeight = imageSize.getHeight();
+            double canvasWidth = markScaleAndSize.getB().getWidth();
+            double canvasHeight = markScaleAndSize.getB().getHeight();
             double buoyZoneRadiusInPixel = -1;
             if(showBuoyZone && mark.type == MarkType.BUOY) {
                 buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(mapProjection, latLngPosition, buoyZoneRadiusInMeter);
@@ -68,20 +82,14 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             setCanvasSize((int) canvasWidth, (int) canvasHeight);
             
             Context2d context2d = getCanvas().getContext2d();
-            context2d.clearRect(0, 0, canvasWidth, canvasHeight);
 
             // draw the course mark
-            markImageCanvas.drawImage();
-            ImageData imageData = markImageCanvas.getImageData();
-
+            markVectorGraphics.drawMarkToCanvas(context2d, showBuoyZone, canvasWidth, canvasHeight, markSizeScaleFactor);
+            
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
-            Point markAnchorPoint = markImageDescriptor.getAnchorPoint();
 
             // draw the buoy zone 
             if(showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
-                context2d.putImageData(imageData, buoyZoneRadiusInPixel  - markAnchorPoint.getX(),
-                        buoyZoneRadiusInPixel - markAnchorPoint.getY());
-
                 CssColor grayTransparentColor = CssColor.make("rgba(50,90,135,0.75)");
 
                 // this translation is important for drawing lines with a real line width of 1 pixel
@@ -94,11 +102,31 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
-                context2d.putImageData(imageData, 0, 0);
-
-                setCanvasPosition(buoyPositionInPx.getX() - markAnchorPoint.getX(), buoyPositionInPx.getY() - markAnchorPoint.getY());
+                setCanvasPosition(buoyPositionInPx.getX() - canvasWidth / 2.0, buoyPositionInPx.getY() - canvasHeight / 2.0);
             }
         }
+    }
+
+    public Pair<Double, Size> getMarkScaleAndSize(PositionDTO markPosition) {
+        double minMarkHeight = 20;
+        
+        // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
+        // therefore we scale the buoys with factor 2 by default
+        double buoyScaleFactor = 2.0;
+
+        Size markSizeInPixel = calculateBoundingBox(mapProjection,
+                LatLng.newInstance(markPosition.latDeg, markPosition.lngDeg),
+                markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
+        
+        double markHeightInPixel = markSizeInPixel.getHeight();
+        if(markHeightInPixel < minMarkHeight)
+            markHeightInPixel = minMarkHeight;
+
+        // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
+        // To calculate the display real mark size the scale factor from canvas units to the real   
+        double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
+
+        return new Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 
     private String getTitle() {

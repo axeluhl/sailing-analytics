@@ -29,6 +29,21 @@
     
     </PreferenceCategory>
     
+    <PreferenceCategory android:title="@string/settings_category_polling">
+        
+        <CheckBoxPreference
+            android:key="@string/preference_polling_active_key"
+            android:defaultValue="@bool/preference_polling_active_default"
+            android:title="@string/settings_polling_active_header"
+            android:summary="@string/settings_polling_active_description" />
+        
+        <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
+            android:key="@string/preference_polling_interval_key"
+            android:defaultValue="@integer/preference_polling_interval_default"
+            android:title="@string/settings_polling_interval_header" />
+        
+    </PreferenceCategory>
+    
     <PreferenceCategory android:title="@string/settings_category_general" >
     
 	    <Preference

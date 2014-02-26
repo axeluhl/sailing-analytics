@@ -55,7 +55,7 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
         
         if (regattaConfigurationLoader != null) {
             regattaConfigurationLoader.store();
-            logApply("regatta configuration", configuration.getRegattaConfiguration());
+            logApply("regatta configuration", "[object]");
         }
         
         if (configuration.getAllowedCourseAreaNames() != null) {
@@ -73,7 +73,7 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
     }
     
     private static void logApply(String configurationName, Object value) {
-        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value.toString()));
+        ExLog.i(TAG, String.format("Applied '%s' configuration: %s.", configurationName, value==null?"null":value.toString()));
     }
 
 }

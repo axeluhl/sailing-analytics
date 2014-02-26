@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.common.Duration;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
@@ -49,6 +50,14 @@ public interface Track<FixType extends Timed> extends Serializable {
      * @return the smoothened fixes
      */
     Iterable<FixType> getFixes();
+
+    /**
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
+     * will be thrown in case the caller has failed to do so.
+     * 
+     * @return The smoothened fixes between from and to.
+     */
+    Iterable<FixType> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive);
 
     /**
      * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
@@ -123,5 +132,16 @@ public interface Track<FixType extends Timed> extends Serializable {
      * will be thrown in case the caller has failed to do so.
      */
     Iterator<FixType> getRawFixesDescendingIterator(TimePoint startingAt, boolean inclusive);
-
+    
+    /**
+     * @return the average duration between two fixes (outliers removed) in this track or <code>null</code> if there is not
+     * more than one fix in the track
+     */
+    Duration getAverageIntervalBetweenFixes();
+    
+    /**
+     * @return the average duration between two fixes (outliers <em>not</em> removed) in this track or <code>null</code> if there is not
+     * more than one raw fix in the track
+     */
+    Duration getAverageIntervalBetweenRawFixes();
 }

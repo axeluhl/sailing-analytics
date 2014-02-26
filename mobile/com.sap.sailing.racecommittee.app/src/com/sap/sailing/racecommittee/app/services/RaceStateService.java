@@ -33,6 +33,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -65,6 +66,8 @@ public class RaceStateService extends Service {
     
     private ReadonlyDataManager dataManager;
     
+    private RaceLogPoller poller;
+    
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
     private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
     
@@ -78,6 +81,8 @@ public class RaceStateService extends Service {
         this.serviceId = UUID.randomUUID();
         this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         this.dataManager = DataManager.create(this);
+        
+        this.poller = new RaceLogPoller(this);
         
         this.registeredLogListeners = new HashMap<ManagedRace, RaceLogEventVisitor>();
         this.registeredStateEventSchedulers = new HashMap<ManagedRace, RaceStateEventScheduler>();
@@ -132,6 +137,8 @@ public class RaceStateService extends Service {
     }
 
     private void unregisterAllRaces() {
+        poller.unregisterAllAndStop();
+        
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
@@ -235,9 +242,12 @@ public class RaceStateService extends Service {
             RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
             state.getRaceLog().addListener(logListener);
 
-            // ... register on state changes!
+            // ... register on state changes...
             RaceStateEventScheduler stateEventScheduler = new RaceStateEventSchedulerOnService(this, race);
             state.setStateEventScheduler(stateEventScheduler);
+            
+            // ... and register for polling!
+            poller.register(race);
 
             this.registeredLogListeners.put(race, logListener);
             this.registeredStateEventSchedulers.put(race, stateEventScheduler);

@@ -338,7 +338,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 this.setComment(previousVersion.getComment());
             }
             if (this.defaultCourseAreaIdAsStringUnchanged) {
-                this.defaultCourseAreaIdAsString = previousVersion.defaultCourseAreaIdAsString;
+                this.defaultCourseAreaId = previousVersion.defaultCourseAreaId;
             }
             if (this.defaultCourseAreaNameUnchanged) {
                 this.defaultCourseAreaName = previousVersion.defaultCourseAreaName;
@@ -497,8 +497,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             this.displayName = null;
             this.displayNameUnchanged = true;
         }
-        if (Util.equalsWithNull(this.defaultCourseAreaIdAsString, previousVersion.defaultCourseAreaIdAsString)) {
-            this.defaultCourseAreaIdAsString = null;
+        if (Util.equalsWithNull(this.defaultCourseAreaId, previousVersion.defaultCourseAreaId)) {
+            this.defaultCourseAreaId = null;
             this.defaultCourseAreaIdAsStringUnchanged = true;
         }
         if (Util.equalsWithNull(this.defaultCourseAreaName, previousVersion.defaultCourseAreaName)) {

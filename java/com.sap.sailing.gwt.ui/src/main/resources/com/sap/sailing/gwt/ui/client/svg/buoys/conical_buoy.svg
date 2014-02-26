@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="150"
+   height="300"
+   id="svg3305"
+   version="1.1"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="conical_buoy.svg">
+  <defs
+     id="defs3307" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.98"
+     inkscape:cx="-43.4"
+     inkscape:cy="216"
+     inkscape:document-units="px"
+     inkscape:current-layer="svg3305"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1005"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4104"
+       units="mm"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3310">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <circle
+     transform="matrix(12.5,0,0,12.5,-578,22.2)"
+     style="fill:#f9ac00"
+     sodipodi:ry="2.66"
+     sodipodi:rx="2.66"
+     sodipodi:cy="12.8"
+     sodipodi:cx="49.7"
+     cx="49.7"
+     cy="12.8"
+     r="2.66"
+     id="circle29"
+     d="m 52.4,12.8 c 0,1.5 -1.2,2.7 -2.7,2.7 -1.5,0 -2.7,-1.2 -2.7,-2.7 0,-1.5 1.2,-2.7 2.7,-2.7 1.5,0 2.7,1.2 2.7,2.7 z" />
+  <circle
+     transform="matrix(12.5,0,0,12.5,-578,22.2)"
+     style="fill:#f0f0f0;fill-opacity:1"
+     sodipodi:ry="3.37"
+     sodipodi:rx="3.37"
+     sodipodi:cy="11.3"
+     sodipodi:cx="49.7"
+     cx="49.7"
+     cy="11.3"
+     r="3.37"
+     id="circle31"
+     d="m 53.1,11.3 c 0,1.9 -1.5,3.4 -3.4,3.4 -1.9,0 -3.4,-1.5 -3.4,-3.4 0,-1.86 1.5,-3.37 3.4,-3.37 1.9,0 3.4,1.51 3.4,3.37 z" />
+  <circle
+     transform="matrix(12.5,0,0,12.5,-578,22.2)"
+     style="fill:#f9ac00"
+     sodipodi:ry="2.66"
+     sodipodi:rx="2.66"
+     sodipodi:cy="10.6"
+     sodipodi:cx="49.6"
+     cx="49.6"
+     cy="10.6"
+     r="2.66"
+     id="circle33"
+     d="m 52.3,10.6 c 0,1.5 -1.2,2.7 -2.7,2.7 -1.5,0 -2.7,-1.2 -2.7,-2.7 0,-1.47 1.2,-2.66 2.7,-2.66 1.5,0 2.7,1.19 2.7,2.66 z" />
+  <rect
+     style="fill:#f0f0f0;fill-opacity:1;stroke:none"
+     id="rect3757"
+     width="10.6"
+     height="56.5"
+     x="36.9"
+     y="98" />
+  <path
+     style="fill:#f0f0f0;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+     d="M 43.6,0.372 87.3,102 -0.714,102 z"
+     id="path3759"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cccc" />
+  <path
+     style="fill:#f9ac00;fill-opacity:1;stroke:none"
+     d="m 43.6,14.7 34.9,81.9 -70.43,0 z"
+     id="path3759-1"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cccc" />
+</svg>

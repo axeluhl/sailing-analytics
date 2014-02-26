@@ -21,7 +21,7 @@ import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.util.CourseAsWaypointList;
@@ -324,7 +324,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(Iterable<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
@@ -344,7 +344,7 @@ public class CourseImpl extends NamedImpl implements Course {
                     }
                     wpl.add(waypoint);
                 }
-                for (Pair<ControlPoint, NauticalSide> newDomainControlPoint : newControlPoints) {
+                for (Pair<ControlPoint, PassingInstruction> newDomainControlPoint : newControlPoints) {
                     List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
                     Waypoint waypoint;
                     if (waypoints == null || waypoints.isEmpty()) {

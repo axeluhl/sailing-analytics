@@ -87,7 +87,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
 
                 if (visible && component instanceof TimeListener) {
                     // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime());
+                    ((TimeListener) component).timeChanged(timer.getTime(), null);
                 }
                 if(component.hasSettings() && !hasSettingsWhenComponentIsInvisible) {
                     settingsButton.setEnabled(visible);

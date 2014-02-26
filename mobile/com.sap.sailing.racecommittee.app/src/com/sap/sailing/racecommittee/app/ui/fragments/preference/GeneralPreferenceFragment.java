@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -26,7 +27,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private static int requestCodeQRCode = 45392;
     
-    private AppPreferences appPreferences;
     private Preference identifierPreference;
     private Preference serverUrlPreference;
     
@@ -35,21 +35,37 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_general);
         
-        appPreferences = AppPreferences.on(getActivity());
-        
+        setupConnection();
+        setupPolling();
+        setupGeneral();
+    }
+    protected void setupGeneral() {
         setupLanguageButton();
-        setupIdentifierBox();
-        setupSyncQRCodeButton();
-        setupForceUpdateButton();
-        setupServerUrlBox();
         setupCourseAreasList();
         
-        bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
     }
 
+    private void setupPolling() {
+        Preference intervalPreference = findPreference(R.string.preference_polling_interval_key);
+        CheckBoxPreference activePreference = findPreference(R.string.preference_polling_active_key);
+        bindPreferenceToCheckbox(activePreference, intervalPreference);
+        bindPreferenceSummaryToInteger(intervalPreference);
+    }
+
+
+    protected void setupConnection() {
+        setupIdentifierBox();
+        setupServerUrlBox();
+        setupSyncQRCodeButton();
+        setupForceUpdateButton();
+        
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_server_url_key));
+    }
+
     private void setupIdentifierBox() {
+        final AppPreferences appPreferences = AppPreferences.on(getActivity());
         identifierPreference = findPreference(R.string.preference_identifier_key);
         identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
         addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
@@ -102,8 +118,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private void setupCourseAreasList() {
         EditSetPreference preference = findPreference(R.string.preference_course_areas_key);
-        //ReadonlyDataManager dataManager = DataManager.create(getActivity());
-        
+        // TODO: example values from DataStore
         preference.setExampleValues(getResources().getStringArray(R.array.preference_course_areas_example));
     }
 

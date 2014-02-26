@@ -104,13 +104,13 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             unlockAfterWrite();
         }
         if (isAdded) {
-            logger.finer(String.format("%s (%s) was added to log.", event, event.getClass().getName()));
+            logger.finer(String.format("%s (%s) was added to log %s.", event, event.getClass().getName(), getId()));
             // FIXME with out-of-order delivery would destroy currentPassId; need to check at least the createdAt time
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             notifyListenersAboutReceive(event);
         } else {
-            logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
+            logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
         }
         return isAdded;
     }
@@ -152,9 +152,23 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         } else {
             logger.warning(String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
         }
-        // FIXME lock for read getInternalRawFixes?
-        LinkedHashSet<RaceLogEvent> stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
-        stillToDeliverToClient.remove(event);
+        return getEventsToDeliver(clientId, event);
+    }
+    
+    @Override
+    public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
+        return getEventsToDeliver(clientId, null);
+    }
+
+    protected Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId, RaceLogEvent suppressedEvent) {
+        final LinkedHashSet<RaceLogEvent> stillToDeliverToClient;
+        lockForRead();
+        try {
+            stillToDeliverToClient = new LinkedHashSet<RaceLogEvent>(getInternalRawFixes());
+        } finally {
+            unlockAfterRead();
+        }
+        stillToDeliverToClient.remove(suppressedEvent);
         Set<RaceLogEvent> deliveredToClient = eventsDeliveredToClient.get(clientId);
         if (deliveredToClient != null) {
             stillToDeliverToClient.removeAll(deliveredToClient);
@@ -163,7 +177,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             eventsDeliveredToClient.put(clientId, deliveredToClient);
         }
         deliveredToClient.addAll(stillToDeliverToClient);
-        deliveredToClient.add(event);
+        deliveredToClient.add(suppressedEvent);
         return stillToDeliverToClient;
     }
 

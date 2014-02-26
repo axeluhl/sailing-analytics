@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,9 @@ public class RaceLogOperationalTransformationTest {
     private Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> server;
     private OperationalTransformer<RaceLog, RaceLogEventWithTransformationSupport<?>> transformer;
     private RaceLogEventAuthor author = new RaceLogEventAuthorImpl("Test Author", 1);
+    private CountDownLatch client1Latch;
+    private CountDownLatch client2Latch;
+    private CountDownLatch serverLatch;
     
     @Before
     public void setUp() {
@@ -42,9 +46,45 @@ public class RaceLogOperationalTransformationTest {
         raceLogClient2 = new RaceLogImpl("Test Race Log Client2");
         raceLogServer = new RaceLogImpl("Test Race Log Server");
         transformer = new OperationalTransformer<>();
-        client1 = new PeerImpl<>(transformer, raceLogClient1, Role.CLIENT);
-        client2 = new PeerImpl<>(transformer, raceLogClient2, Role.CLIENT);
-        server = new PeerImpl<>(transformer, raceLogServer, Role.SERVER);
+        client1Latch = new CountDownLatch(1);
+        client1 = new PeerImpl<RaceLogEventWithTransformationSupport<?>, RaceLog>(transformer, raceLogClient1, Role.CLIENT) {
+            @Override
+            public void apply(Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> source,
+                    RaceLogEventWithTransformationSupport<?> operation, int numberOfOperationsSourceHasMergedFromThis) {
+                try {
+                    client1Latch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                super.apply(source, operation, numberOfOperationsSourceHasMergedFromThis);
+            }
+        };
+        client2Latch = new CountDownLatch(1);
+        client2 = new PeerImpl<RaceLogEventWithTransformationSupport<?>, RaceLog>(transformer, raceLogClient2, Role.CLIENT) {
+            @Override
+            public void apply(Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> source,
+                    RaceLogEventWithTransformationSupport<?> operation, int numberOfOperationsSourceHasMergedFromThis) {
+                try {
+                    client2Latch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                super.apply(source, operation, numberOfOperationsSourceHasMergedFromThis);
+            }
+        };
+        serverLatch = new CountDownLatch(1);
+        server = new PeerImpl<RaceLogEventWithTransformationSupport<?>, RaceLog>(transformer, raceLogServer, Role.SERVER) {
+            @Override
+            public void apply(Peer<RaceLogEventWithTransformationSupport<?>, RaceLog> source,
+                    RaceLogEventWithTransformationSupport<?> operation, int numberOfOperationsSourceHasMergedFromThis) {
+                try {
+                    serverLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                super.apply(source, operation, numberOfOperationsSourceHasMergedFromThis);
+            }
+        };
         server.addPeer(client1);
         client1.addPeer(server);
         server.addPeer(client2);
@@ -58,6 +98,9 @@ public class RaceLogOperationalTransformationTest {
         RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTime, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTime);
         RaceLogStartTimeEventWithTransformationSupport e = new RaceLogStartTimeEventWithTransformationSupport(startTimeEvent);
         server.apply(e);
+        serverLatch.countDown();
+        client1Latch.countDown();
+        client2Latch.countDown();
         waitForEventualConsistency();
         raceLogClient1.lockForRead();
         try {
@@ -93,14 +136,28 @@ public class RaceLogOperationalTransformationTest {
     public void testConflictingApplyServerWins() {
         Calendar cServer = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTimeServer = new MillisecondsTimePoint(cServer.getTime());
-        RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeServer);
-        RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventServer);
-        server.apply(eServer);
-        Calendar cClient1 = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
-        final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
-        RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTimeClient1);
-        RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(startTimeEventClient1);
-        client1.apply(eClient1);
+        final MillisecondsTimePoint createdAt = MillisecondsTimePoint.now();
+        {
+            RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
+                    author, startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */1,
+                    startTimeServer);
+            RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(
+                    startTimeEventServer);
+            server.apply(eServer);
+        }
+        {
+            Calendar cClient1 = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
+            final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
+            RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(createdAt,
+                    author, startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */1,
+                    startTimeClient1);
+            final RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(
+                    startTimeEventClient1);
+            client1.apply(eClient1); // this call won't block because server calls apply(Peer, O, int) which first waits for the latch before synchronizing
+        }
+        serverLatch.countDown();
+        client1Latch.countDown();
+        client2Latch.countDown();
         waitForEventualConsistency();
         // now assert that the start time is equal on both clients and the server and equal to that set on the server
         raceLogClient1.lockForRead();

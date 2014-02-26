@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.TimePoint;
@@ -400,9 +401,7 @@ public class LockUtil {
                 logger.info(message.toString());
             }
         } catch (InterruptedException ex) {
-            // re-assert interrupt state that occurred while we
-            // were acquiring the lock
-            Thread.currentThread().interrupt();
+            logger.log(Level.WARNING, "Interrupted while waiting for lock "+lockDescriptionForTimeoutLogMessage, ex);
         }
         return locked;
     }

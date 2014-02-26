@@ -42,7 +42,7 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
         
         if(redraw) {
             clearChart();
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 

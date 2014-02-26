@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.coursedata.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -23,7 +23,7 @@ public class ControlPointJsonSerializer implements JsonSerializer<ControlPoint> 
             ControlPoint controlPoint) {
         if (controlPoint instanceof Mark) {
             return markSerializer;
-        } else if (controlPoint instanceof Gate) {
+        } else if (controlPoint instanceof ControlPointWithTwoMarks) {
             return gateSerializer;
         }
 

@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -52,6 +53,7 @@ public interface Leaderboard extends Named {
     public interface Entry {
         int getTrackedRank();
         Double getNetPoints() throws NoWindException;
+        Double getNetPointsUncorrected() throws NoWindException;
         Double getTotalPoints() throws NoWindException;
         MaxPointsReason getMaxPointsReason();
         boolean isDiscarded() throws NoWindException;
@@ -123,6 +125,9 @@ public interface Leaderboard extends Named {
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
     
@@ -132,6 +137,13 @@ public interface Leaderboard extends Named {
      * <code>competitor</code>.
      */
     double getCarriedPoints(Competitor competitor);
+
+    /**
+     * 
+     * @return an unmodifiable map of competitors and their carried points. The key set can be a true super set of what
+     *         {@link #getAllCompetitors()} returns.
+     */
+    Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints();
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
@@ -448,4 +460,6 @@ public interface Leaderboard extends Named {
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory) throws NoWindException,
             InterruptedException, ExecutionException;
+
+    NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 }

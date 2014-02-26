@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.components;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
+import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.ui.DataEntryDialog.Validator;
 
 public class CompositeSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     

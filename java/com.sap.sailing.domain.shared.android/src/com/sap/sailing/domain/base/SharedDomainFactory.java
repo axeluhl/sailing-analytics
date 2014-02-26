@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 public interface SharedDomainFactory extends CompetitorFactory {
@@ -49,15 +49,15 @@ public interface SharedDomainFactory extends CompetitorFactory {
     /**
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
      */
-    Gate createGate(Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 
-    Gate createGate(Serializable id, Mark left, Mark right, String name);
+    ControlPointWithTwoMarks createControlPointWithTwoMarks(Serializable id, Mark left, Mark right, String name);
 
     /**
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
-    Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide);
+    Waypoint createWaypoint(ControlPoint controlPoint, PassingInstruction passingInstruction);
 
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 

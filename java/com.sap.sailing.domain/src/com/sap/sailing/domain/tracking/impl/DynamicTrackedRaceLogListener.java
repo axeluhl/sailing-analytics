@@ -7,10 +7,10 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -20,6 +20,10 @@ import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
+/**
+ * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.
+ * This includes for example the {@link RaceLogRaceStatus} indicating the current race's start.
+ */
 public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
@@ -83,14 +87,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyze() {
-        analyzeStatus();
         analyzeCourseDesign(null);
-    }
-
-    private void analyzeStatus() {
-        /* RaceLogRaceStatus newStatus = statusAnalyzer.analyze();*/
-
-        // TODO: What can we do with the status? Should we use DynamicTrackedRace.setStatus?
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
@@ -129,18 +126,13 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogPassChangeEvent event) {
         trackedRace.invalidateStartTime();
-        /* this will send tractrac the original start time */
-        trackedRace.onStartTimeChangedByRaceCommittee(trackedRace.getStartTimeReceived());
+        /* reset start time */
+        trackedRace.onStartTimeChangedByRaceCommittee(null);
     }
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
         analyzeStartTime(event.getStartTime());
-    }
-
-    @Override
-    public void visit(RaceLogRaceStatusEvent event) {
-        analyzeStatus();
     }
 
     @Override

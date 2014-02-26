@@ -12,15 +12,15 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -84,30 +84,30 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     protected CourseBase createCourseData() {
         CourseBase course = new CourseDataImpl("Test Course");
 
-        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
+        course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
                 MarkType.BUOY, "black", "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
                 "green", "round", "circle"), "Upper gate")));
         course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white",
-                "conical", "bold"), NauticalSide.PORT));
+                "conical", "bold"), PassingInstruction.Port));
 
         return course;
     }
 
     protected void compareCourseData(CourseBase serializedCourse, CourseBase deserializedCourse) {
-        assertEquals(serializedCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(deserializedCourse.getFirstWaypoint().getPassingSide(), null);
-        Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
-        Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        assertEquals(serializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(deserializedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        Assert.assertTrue(serializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
+        Assert.assertTrue(deserializedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
 
-        Gate serializedGate = (Gate) serializedCourse.getFirstWaypoint().getControlPoint();
-        Gate deserializedGate = (Gate) deserializedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks serializedGate = (ControlPointWithTwoMarks) serializedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks deserializedGate = (ControlPointWithTwoMarks) deserializedCourse.getFirstWaypoint().getControlPoint();
 
         assertEquals(serializedGate.getName(), deserializedGate.getName());
         compareMarks(serializedGate.getLeft(), deserializedGate.getLeft());
         compareMarks(serializedGate.getRight(), deserializedGate.getRight());
 
-        assertEquals(serializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(deserializedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(serializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(deserializedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(serializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(deserializedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
 

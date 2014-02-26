@@ -10,13 +10,13 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 
 public class NationalityJsonDeserializer implements JsonDeserializer<Nationality> {
-	private final SharedDomainFactory domainFactory;
+    private final SharedDomainFactory domainFactory;
 
     public NationalityJsonDeserializer(SharedDomainFactory domainFactory) {
-		this.domainFactory = domainFactory;
-	}
+        this.domainFactory = domainFactory;
+    }
 
-	@Override
+    @Override
     public Nationality deserialize(JSONObject object) throws JsonDeserializationException {
         final Nationality result;
         if (object == null) {

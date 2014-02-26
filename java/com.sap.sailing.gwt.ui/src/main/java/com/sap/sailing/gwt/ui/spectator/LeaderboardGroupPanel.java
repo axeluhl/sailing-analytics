@@ -16,7 +16,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -238,7 +240,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                     racesCell) {
                 @Override
                 public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                    return leaderboardRacesToHtml(leaderboard);
+                    return leaderboardStrutureToHtml(leaderboard);
                 }
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
@@ -309,65 +311,75 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         return legendPanel;
     }
 
-    private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
+    private SafeHtml leaderboardStrutureToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         if (leaderboard.type.isRegattaLeaderboard()) {
             RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
             if (regatta != null) {
-                boolean renderSeriesName = Util.size(regatta.series) > 1;
+                int numberOfSeries = Util.size(regatta.series);
+                Grid seriesGrid = new Grid(numberOfSeries, 2);
+                CellFormatter seriesGridFormatter = seriesGrid.getCellFormatter();
+                int seriesRow = 0;
                 for (SeriesDTO series : regatta.series) {
-                    b.appendHtmlConstant("<div>");
-                    renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
-                    b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
-                    b.appendHtmlConstant("</div>");
+                    // render the series name
+                    if (! "Default".equals(series.getName())) {
+                        seriesGrid.setHTML(seriesRow, 0, TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
+                    }
+                    seriesGridFormatter.setVerticalAlignment(seriesRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+                    int numberOfFleets = series.getFleets().size();
+                    if(numberOfFleets > 1) {
+                        // multiple fleets 
+                        Grid fleetsGrid = new Grid(numberOfFleets, 3);
+                        CellFormatter fleetGridsFormatter = fleetsGrid.getCellFormatter();
+                        int fleetRow = 0;
+                        for(FleetDTO fleet: series.getFleets()) {
+                            Color color = fleet.getColor();
+                            if(color != null) {
+                                fleetsGrid.setHTML(fleetRow, 0, COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_COLORBOX));
+                                fleetGridsFormatter.setVerticalAlignment(fleetRow, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+                            }
+                            fleetsGrid.setHTML(fleetRow, 1, TEXTTEMPLATE.textWithClass(fleet.getName(), 50, STYLE_TABLE_TEXT));
+                            fleetGridsFormatter.setVerticalAlignment(fleetRow, 1, HasVerticalAlignment.ALIGN_MIDDLE);
+                            List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
+                            fleetsGrid.setHTML(fleetRow, 2, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                            fleetRow++;
+                        }                        
+                        seriesGrid.setWidget(seriesRow, 1, fleetsGrid);
+                    } else {
+                        // single fleet
+                        FleetDTO fleet = series.getFleets().get(0);
+                        List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
+                        String displayName = fleet.getName();
+                        if (! "Default".equals(fleet.getName())) {
+                            Grid fleetsGrid = new Grid(1, 2);
+                            CellFormatter fleetGridsFormatter = fleetsGrid.getCellFormatter();
+                            fleetsGrid.setHTML(0, 0, TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
+                            fleetGridsFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+                            fleetsGrid.setHTML(0, 1, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                            seriesGrid.setWidget(seriesRow, 1, fleetsGrid);
+                        } else {
+                            seriesGrid.setHTML(seriesRow, 1, renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet));
+                        }
+                    }
+                    seriesRow++;
                 }
+                b.appendHtmlConstant(seriesGrid.getElement().getString());
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null), b); 
+            b.append(renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
         }
         return b.toSafeHtml();
     }
-
-    private void renderSeriesToHtml(StrippedLeaderboardDTO leaderboard, SeriesDTO series, boolean renderSeriesName, SafeHtmlBuilder b) {
-        boolean hasMultipleFleets = series.getFleets().size() > 1;
-        b.appendHtmlConstant("<div style=\"float:left;\">");
-        if(renderSeriesName) {
-            b.append(TEXTTEMPLATE.textWithClass(series.getName(), 50, STYLE_TABLE_TEXT));
-        }
-        b.appendHtmlConstant("</div>");
-        b.appendHtmlConstant("<div style=\"float:left;\">");
-        for(FleetDTO fleet: series.getFleets()) {
-            Color color = fleet.getColor();
-            // show the "fleet" and the color only if there are more than one fleet in this fleet group and a color has been set
-            b.appendHtmlConstant("<div style=\"\">");
-
-            if (hasMultipleFleets) {
-                if(color != null) {
-                    b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_COLORBOX));
-                }
-                b.append(TEXTTEMPLATE.textWithClass(fleet.getName(), 50, STYLE_TABLE_TEXT));
-            } else {
-                String displayName = fleet.getName();
-                if (! "Default".equals(fleet.getName())) {
-                    b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
-                } 
-            }
-            
-            List<RaceColumnDTO> raceColumnsOfSeries = getRacesOfFleet(leaderboard, series, fleet);
-            renderRacesToHTml(leaderboard.name, raceColumnsOfSeries, fleet, b);
-            
-            b.appendHtmlConstant("</div>");
-        }
-        b.appendHtmlConstant("</div>");
-    }
     
-    private void renderRacesToHTml(String leaderboardName, List<RaceColumnDTO> raceColumns, FleetDTO fleet, SafeHtmlBuilder b) {
+    private SafeHtml renderRacesToHTml(String leaderboardName, List<RaceColumnDTO> raceColumns, FleetDTO fleet) {
+        SafeHtmlBuilder b = new SafeHtmlBuilder();
         for (RaceColumnDTO raceColumn : raceColumns) {
             String raceColumnName = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
             renderRaceLink(leaderboardName, race, raceColumn.isLive(fleet, timerForClientServerOffset.getLiveTimePointInMillis()), raceColumnName, b);
         }
+        return b.toSafeHtml();
     }
 
     private List<RaceColumnDTO> getRacesOfFleet(StrippedLeaderboardDTO leaderboard, SeriesDTO series, FleetDTO fleet) {

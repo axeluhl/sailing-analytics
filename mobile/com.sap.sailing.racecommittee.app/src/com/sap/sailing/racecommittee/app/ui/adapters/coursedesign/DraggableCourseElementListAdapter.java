@@ -10,8 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 
 public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDataElement> {
@@ -53,8 +53,8 @@ public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDa
             leftMarkImage.setVisibility(View.VISIBLE);
         }
 
-        if (courseElement.getRoundingDirection() != null)
-            roundingDirectionText.setText(getDisplayValueForRounding(courseElement.getRoundingDirection()));
+        if (courseElement.getPassingInstructions() != null)
+            roundingDirectionText.setText(getDisplayValueForRounding(courseElement.getPassingInstructions()));
         else
             roundingDirectionText.setText(R.string.empty);
 
@@ -72,13 +72,18 @@ public class DraggableCourseElementListAdapter extends ArrayAdapter<CourseListDa
         return view;
     }
 
-    protected String getDisplayValueForRounding(RoundingDirection direction) {
-        if (direction.equals(RoundingDirection.Gate))
+    protected String getDisplayValueForRounding(PassingInstruction direction) {
+        if (direction.equals(PassingInstruction.Gate))
             return "Gate";
-        else if (direction.equals(RoundingDirection.Port))
+        else if (direction.equals(PassingInstruction.Port))
             return "P";
-        else if (direction.equals(RoundingDirection.Starboard))
+        else if (direction.equals(PassingInstruction.Starboard))
             return "S";
+        else if (direction.equals(PassingInstruction.Line))
+            return "Line";
+        else if (direction.equals(PassingInstruction.Offset))
+            return "Offset";
+
 
         return"";
     }

@@ -91,6 +91,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutHasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+        }
+    }
+
     public void notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
@@ -151,4 +157,5 @@ public class RaceColumnListeners implements Serializable {
             listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);
         }
     }
+
 }

@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.LineLengthAndAdvantage;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 
 public class LineAnalysisTest extends TrackBasedTest {
@@ -35,9 +35,9 @@ public class LineAnalysisTest extends TrackBasedTest {
     
     @Test
     public void testLinesAnalysisWithNoAdvantage() {
-        final LineLengthAndAdvantage startLine = trackedRace.getStartLine(now);
+        final LineDetails startLine = trackedRace.getStartLine(now);
         assertEquals(0, startLine.getAdvantage().getMeters(), 0.001);
-        final LineLengthAndAdvantage finishLine = trackedRace.getFinishLine(now);
+        final LineDetails finishLine = trackedRace.getFinishLine(now);
         assertEquals(0, finishLine.getAdvantage().getMeters(), 0.001);
     }
 
@@ -49,10 +49,10 @@ public class LineAnalysisTest extends TrackBasedTest {
         TimePoint aBitAfterNow = now.plus(1000);
         final MeterDistance advantage = new MeterDistance(10);
         rightMarkTrack.addGPSFix(new GPSFixImpl(rightMarkAtNow.translateGreatCircle(new DegreeBearingImpl(0), advantage), aBitAfterNow));
-        final LineLengthAndAdvantage startLine = trackedRace.getStartLine(aBitAfterNow);
+        final LineDetails startLine = trackedRace.getStartLine(aBitAfterNow);
         assertEquals(advantage.getMeters(), startLine.getAdvantage().getMeters(), 0.1);
         assertEquals(NauticalSide.STARBOARD, startLine.getAdvantageousSideWhileApproachingLine());
-        final LineLengthAndAdvantage finishLine = trackedRace.getFinishLine(aBitAfterNow);
+        final LineDetails finishLine = trackedRace.getFinishLine(aBitAfterNow);
         assertEquals(advantage.getMeters(), finishLine.getAdvantage().getMeters(), 0.1);
         assertEquals(NauticalSide.PORT, finishLine.getAdvantageousSideWhileApproachingLine());
     }

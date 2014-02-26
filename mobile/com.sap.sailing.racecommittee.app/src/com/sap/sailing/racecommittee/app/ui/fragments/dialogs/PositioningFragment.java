@@ -26,6 +26,7 @@ import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
@@ -171,7 +172,14 @@ public class PositioningFragment extends RaceDialogFragment {
 
     private void loadCompetitors() {
         getActivity().setProgressBarIndeterminateVisibility(true);
+        
+        // invalidate all competitors of this race
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
+        SharedDomainFactory domainFactory = dataManager.getDataStore().getDomainFactory();
+        for (Competitor competitor : getRace().getCompetitors()) {
+            domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
+        }
+        
         Loader<?> competitorLoaders = getLoaderManager().initLoader(0, null,
                 dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 

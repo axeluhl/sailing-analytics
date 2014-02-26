@@ -9,16 +9,16 @@ import java.util.UUID;
 import junit.framework.Assert;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
@@ -43,13 +43,13 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     }
     
     protected void compareCourseData(CourseBase storedCourse, CourseBase loadedCourse) {
-        assertEquals(storedCourse.getFirstWaypoint().getPassingSide(), null);
-        assertEquals(loadedCourse.getFirstWaypoint().getPassingSide(), null);
-        Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
-        Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
+        assertEquals(storedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        assertEquals(loadedCourse.getFirstWaypoint().getPassingInstructions(), PassingInstruction.None);
+        Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
+        Assert.assertTrue(loadedCourse.getFirstWaypoint().getControlPoint() instanceof ControlPointWithTwoMarks);
         
-        Gate storedGate = (Gate) storedCourse.getFirstWaypoint().getControlPoint();
-        Gate loadedGate = (Gate) loadedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks storedGate = (ControlPointWithTwoMarks) storedCourse.getFirstWaypoint().getControlPoint();
+        ControlPointWithTwoMarks loadedGate = (ControlPointWithTwoMarks) loadedCourse.getFirstWaypoint().getControlPoint();
         
         assertEquals(storedGate.getId(), loadedGate.getId());
         assertEquals(storedGate.getName(), loadedGate.getName());
@@ -57,8 +57,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         compareMarks(storedGate.getLeft(), loadedGate.getLeft());
         compareMarks(storedGate.getRight(), loadedGate.getRight());
         
-        assertEquals(storedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
-        assertEquals(loadedCourse.getLastWaypoint().getPassingSide(), NauticalSide.PORT);
+        assertEquals(storedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
+        assertEquals(loadedCourse.getLastWaypoint().getPassingInstructions(), PassingInstruction.Port);
         Assert.assertTrue(storedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         Assert.assertTrue(loadedCourse.getLastWaypoint().getControlPoint() instanceof Mark);
         
@@ -79,11 +79,11 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
     protected CourseBase createCourseBase() {
         CourseBase course = new CourseDataImpl("Test Course");
         
-        course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
+        course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
                 new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
                 "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), NauticalSide.PORT));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), PassingInstruction.Port));
         
         return course;
     }

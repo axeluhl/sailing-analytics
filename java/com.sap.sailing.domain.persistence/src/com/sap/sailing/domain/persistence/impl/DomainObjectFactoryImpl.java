@@ -25,16 +25,17 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -58,7 +59,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -91,6 +92,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.DelayedLeaderboardCorrectionsImpl;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
@@ -202,7 +204,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
         windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
         // for legacy access to not yet migrated fixes
-        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1).add(FieldNames.RACE_NAME.name(), 1).get());
+        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1)
+                .add(FieldNames.RACE_NAME.name(), 1).get());
+        // Unique index
+        try {
+            windTracks.ensureIndex(
+                    new BasicDBObjectBuilder().add(FieldNames.RACE_ID.name(), 1)
+                            .add(FieldNames.WIND_SOURCE_NAME.name(), 1).add(FieldNames.WIND_SOURCE_ID.name(), 1)
+                            .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),
+                    new BasicDBObjectBuilder().add("unique", true).add("dropDups", true).get());
+        } catch (MongoException exception) {
+
+            if (exception.getCode() == 10092) {
+                logger.warning(String.format(
+                        "Setting the unique index on the %s collection failed because you have too many duplicates. "
+                                + "This leads to the mongo error code %s and the following message: %s \nTo fix this follow "
+                                + "the steps provided on the wiki page: http://wiki.sapsailing.com/wiki/cook-book#Remove-"
+                                + "duplicates-from-WIND_TRACK-collection", CollectionNames.WIND_TRACKS.name(),
+                        exception.getCode(), exception.getMessage()));
+            } else {
+                logger.severe(String.format(
+                        "Setting the unique index on the %s collection failed with error code %s and message: %s",
+                        CollectionNames.WIND_TRACKS.name(), exception.getCode(), exception.getMessage()));
+            }
+        }
     }
 
     @Override
@@ -282,7 +307,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final Leaderboard finalResult = result;
                 finalResult.setDisplayName((String) dbLeaderboard.get(FieldNames.LEADERBOARD_DISPLAY_NAME.name()));
 
-                DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
+                DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
                 final boolean[] needsMigration = new boolean[1];
                 loadedLeaderboardCorrections.addLeaderboardCorrectionsResolvedListener(new LeaderboardCorrectionsResolvedListener() {
                     @Override
@@ -947,6 +972,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
         boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
         Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
+        Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries.get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
@@ -959,6 +985,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         if (startsWithZeroScore != null) {
             series.setStartsWithZeroScore(startsWithZeroScore);
+        }
+        if (hasSplitFleetContiguousScoring != null) {
+            series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
         }
         if (firstColumnIsNonDiscardableCarryForward != null) {
             series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
@@ -1265,6 +1294,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createRaceStatusEvent(createdAt, author, logicalTimePoint, id, competitors, passId, nextStatus);
     }
     
+    /**
+     * The old field name WAYPOINT_PASSINGSIDE has been replaced by WAYPOINT_PASSINGINSTRUCTIONS. If a race with the old
+     * field is loaded, the value of PASSINGSIDE is used and then migrated to PASSINGINSTRUCTION. If the first or last
+     * Waypoint has the PassingInstructions Gate, it is transfered to Line.
+     * 
+     */
+    @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
     private CourseBase loadCourseData(BasicDBList dbCourseList, String courseName) {
         if (courseName == null) {
             courseName = "Course";
@@ -1274,16 +1310,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
-            NauticalSide passingSide = null;
-            String waypointPassingSide = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
-            if (waypointPassingSide != null) {
-                passingSide = NauticalSide.valueOf(waypointPassingSide);
+            PassingInstruction passingInstructions = null;
+            String waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name());
+            if (waypointPassingInstruction == null) {
+                waypointPassingInstruction = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+                if(waypointPassingInstruction != null) {
+                    logger.info("Migrating PassingInstruction "+waypointPassingInstruction+" to field name WAYPOINT_PASSINGINSTRUCTIONS");
+                    if((i==0||i==dbCourseList.size()-1)&&waypointPassingInstruction.toLowerCase().equals("gate")){
+                        logger.warning("Changing PassingInstructions of first or last Waypoint from Gate to Line.");
+                        waypointPassingInstruction = "Line";
+                    }
+                    dbObject.put(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name(), waypointPassingInstruction);
+                    dbObject.removeField(FieldNames.WAYPOINT_PASSINGSIDE.name());
+                }
+            }
+            if (waypointPassingInstruction != null) {
+                passingInstructions = PassingInstruction.valueOfIgnoringCase(waypointPassingInstruction);
             }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
-            if (passingSide == null) {
+            if (passingInstructions == null) {
                 waypoint = new WaypointImpl(controlPoint);
             } else {
-                waypoint = new WaypointImpl(controlPoint, passingSide);
+                waypoint = new WaypointImpl(controlPoint, passingInstructions);
             }
             courseData.addWaypoint(i++, waypoint);
         }
@@ -1297,21 +1345,56 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (controlPointClass.equals(Mark.class.getSimpleName())) {
                 Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
                 controlPoint = mark;
-            } else if (controlPointClass.equals(Gate.class.getSimpleName())) {
-                Gate gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
-                controlPoint = gate;
+            } else if(controlPointClass.equals("Gate")) {
+                ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                dbObject.put(FieldNames.CONTROLPOINT_CLASS.name(), ControlPointWithTwoMarks.class.getSimpleName());
+                controlPoint = cpwtm;
+            } else if (controlPointClass.equals(ControlPointWithTwoMarks.class.getSimpleName())) {
+                ControlPointWithTwoMarks cpwtm = loadControlPointWithTwoMarks((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                controlPoint = cpwtm;
             }
         }
         return controlPoint;
     }
 
-    private Gate loadGate(DBObject dbObject) {
-        Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
-        String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
-        Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
-        Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
-        
-        Gate gate = baseDomainFactory.createGate(gateId, leftMark, rightMark, gateName);
+    /**
+     * Checks for the old GATE fields and migrates them to the new CONTROLPOINTWITHTWOMARKS fields.
+     */
+    @SuppressWarnings("deprecation") // Used for migrating old races
+    private ControlPointWithTwoMarks loadControlPointWithTwoMarks(DBObject dbObject) {
+        String controlPointName = (String) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name());
+        if (controlPointName == null) {
+            controlPointName = (String) dbObject.get(FieldNames.GATE_NAME.name());
+            logger.info("Migrating name of ControlPointWithTwoMarks " + controlPointName
+                    + " from GATE_NAME to new field CONTROLPOINTWITHTWOMARKS_NAME.");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name(), controlPointName);
+            dbObject.removeField(FieldNames.GATE_NAME.name());
+        }
+        Serializable controlPointId = (Serializable) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name());
+        if (controlPointId == null) {
+            controlPointId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
+            logger.info("Migrating id of ControlPointWithTwoMarks " + controlPointName
+                    + " from old field GATE_ID to CONTROLPOINTWITHTWOMARKS_ID.");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name(), controlPointId);
+            dbObject.removeField(FieldNames.GATE_ID.name());
+        }
+        DBObject dbLeft = (DBObject) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name());
+        if (dbLeft == null) {
+            dbLeft = (DBObject) dbObject.get(FieldNames.GATE_LEFT.name());
+            logger.info("Migrating left Mark of ControlPointWithTwoMarks " + controlPointName + " from old field GATE_LEFT to CONTROLPOINTWITHTWOMARKS_LEFT");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name(), dbLeft);
+            dbObject.removeField(FieldNames.GATE_LEFT.name());
+        }
+        Mark leftMark = loadMark(dbLeft);
+        DBObject dbRight = (DBObject) dbObject.get(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name());
+        if (dbRight == null) {
+            dbRight = (DBObject) dbObject.get(FieldNames.GATE_RIGHT.name());
+            logger.info("Migrating right Mark of ControlPointWithTwoMarks " + controlPointName + " from old field GATE_RIGHT to CONTROLPOINTWITHTWOMARKS_RIGHT");
+            dbObject.put(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name(), dbRight);
+            dbObject.removeField(FieldNames.GATE_RIGHT.name());
+        }
+        Mark rightMark = loadMark(dbRight);
+        ControlPointWithTwoMarks gate = baseDomainFactory.createControlPointWithTwoMarks(controlPointId, leftMark, rightMark, controlPointName);
         return gate;
     }
 

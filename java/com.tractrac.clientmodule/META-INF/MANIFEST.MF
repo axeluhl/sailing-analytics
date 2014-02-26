@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TracTrac Client module
 Bundle-SymbolicName: com.tractrac.clientmodule
-Bundle-Version: 2.0.6.qualifier
+Bundle-Version: 2.0.12.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/TracTracClientModule.jar,
  .
@@ -39,7 +39,6 @@ Export-Package: com.maptrack.asio,
  com.maptrack.utils.seqtimedatatable.simple,
  com.maptrack.utils.sortedset,
  com.maptrack.utils.sortedset.btree,
- com.sap.tractrac.clientmodule.util,
  com.tractrac.clientmodule,
  com.tractrac.clientmodule.data,
  com.tractrac.clientmodule.data.containers,

@@ -136,7 +136,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             flagName.append("|");
             flagName.append(changePole.getLowerFlag().toString());
         }
-        targetView.setText(getString(formatTextResourceId, TimeUtils.formatDuration(millisecondsTillChange), flagName));
+        targetView.setText(getString(formatTextResourceId, TimeUtils.formatDurationUntil(millisecondsTillChange), flagName));
     }
     
     private class ProcedureChangedListener extends BaseRacingProcedureChangedListener {

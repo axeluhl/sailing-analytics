@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -26,7 +27,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public int[] discardThresholds;
     public String regattaName;
     public String displayName;
-    public String defaultCourseAreaIdAsString;
+    public UUID defaultCourseAreaId;
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
     public LeaderboardType type; 

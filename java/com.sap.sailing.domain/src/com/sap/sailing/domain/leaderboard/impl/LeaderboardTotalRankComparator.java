@@ -140,7 +140,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     // (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                 }
-                if (preemptiveColumnResult == 0) {
+                if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
                     preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
                 }
                 if (preemptiveColumnResult != 0) {

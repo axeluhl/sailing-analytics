@@ -20,7 +20,7 @@ public class MarkPassingByTimeComparator implements Comparator<MarkPassing>, Ser
     
     @Override
     public int compare(MarkPassing o1, MarkPassing o2) {
-        int result = o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.getTimePoint().compareTo(o2.getTimePoint());
+        int result = o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.getTimePoint() == null ? (o2.getTimePoint() == null ? 0 : -1) : o2.getTimePoint() == null ? 1 : o1.getTimePoint().compareTo(o2.getTimePoint());
         if (result == 0 && o1 != null) {
             assert o2 != null;
             Object c1ID = o1.getCompetitor().getId();

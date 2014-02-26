@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -32,7 +33,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -41,6 +41,8 @@ import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePanel;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
@@ -89,6 +91,15 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         HorizontalPanel eventsPanel = new HorizontalPanel();
         eventsPanel.setSpacing(5);
         mainPanel.add(eventsPanel);
+        
+        Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fillEvents();
+            }
+        });
+        eventsPanel.add(refreshButton);
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
         createEventBtn.addClickHandler(new ClickHandler() {
@@ -161,7 +172,25 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
                 return builder.toSafeHtml();
             }
         };
-
+        
+        final SafeHtmlCell associatedRegattasCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> associatedRegattasColumn = new Column<EventDTO, SafeHtml>(associatedRegattasCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                int regattaCount = event.regattas.size();
+                int i = 1;
+                for (RegattaDTO regatta : event.regattas) {
+                    builder.appendEscaped(regatta.getName());
+                    if (i < regattaCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        
         ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
                 new EventConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
@@ -189,6 +218,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
         eventTable.addColumn(publicationUrlColumn, stringMessages.publicationUrl());
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
+        eventTable.addColumn(associatedRegattasColumn, stringMessages.regattas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
 
         eventSelectionModel = new MultiSelectionModel<EventDTO>();
@@ -267,7 +297,7 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
 
     private void removeEvents(Collection<EventDTO> events) {
         if (!events.isEmpty()) {
-            Collection<String> eventIds = new HashSet<String>();
+            Collection<UUID> eventIds = new HashSet<UUID>();
             for (EventDTO event : events) {
                 eventIds.add(event.id);
             }
@@ -421,7 +451,6 @@ public class SailingEventManagementPanel extends SimplePanel implements EventRef
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.getName() + ": " + t.getMessage());
-                                
             }
 
             @Override

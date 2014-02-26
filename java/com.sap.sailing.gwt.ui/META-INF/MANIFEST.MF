@@ -26,7 +26,10 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.simulator;bundle-version="1.0.0",
  de.csenk.gwt.ws,
  com.google.gwt.osgi;bundle-version="2.5.1",
- com.sap.sailing.domain.igtimiadapter
+ com.sap.sailing.domain.igtimiadapter,
+ com.sap.sailing.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.datamining;bundle-version="1.0.0",
+ com.sap.sse.gwt;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.polars,

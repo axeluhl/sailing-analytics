@@ -1,16 +1,21 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
-import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
-import com.google.gwt.maps.client.geometrylib.SphericalUtils;
+import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 
 /**
@@ -34,101 +39,135 @@ public class BoatOverlay extends CanvasOverlayV3 {
      */
     private static double ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE = 90.0;
 
-    private final BoatClassImageData boatClassImageData;
+    private int canvasWidth;
+    private int canvasHeight;
+
+    private Color color; 
+
+    private Map<Integer, Pair<Double, Size>> boatScaleAndSizePerZoomCache; 
+
+    private final BoatClassVectorGraphics boatVectorGraphics;
+
+    private LegType lastLegType;
+    private Tack lastTack;
+    private Boolean lastSelected;
+    private Integer lastWidth;
+    private Integer lastHeight;
+    private Double lastScale;
+    private Color lastColor;
 
     /**
-     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
+     * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
+     * the next update. The rotation property will always be animated according to the magnitude of the values. A
+     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
+     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
+     * goes through 0.<p>
      */
-    private LatLngBounds currentMapBounds;
+    private Double boatDrawingAngle;
 
-    public BoatOverlay(final RaceMap map, int zIndex, final CompetitorDTO competitorDTO) {
-        super(map.getMap(), zIndex);
+    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color) {
+        super(map, zIndex);
         this.boatClass = competitorDTO.getBoatClass();
-        this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.getName());
-        map.getMap().addBoundsChangeHandler(new BoundsChangeMapHandler() {
-            @Override
-            public void onEvent(BoundsChangeMapEvent event) {
-                if (!map.isAutoZoomInProgress() && !map.getMap().getBounds().equals(currentMapBounds)) {
-                    for (BoatOverlay boatOverlay : map.getBoatOverlays().values()) {
-                        boatOverlay.removeCanvasPositionTransition();
-                    }
-                }
-                currentMapBounds = map.getMap().getBounds();
-            }
-        });
+        this.color = color;
+
+        boatScaleAndSizePerZoomCache = new HashMap<Integer, Pair<Double,Size>>();
+        boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }
-  
+    
     @Override
     protected void draw() {
         if (mapProjection != null && boatFix != null) {
-            ImageTransformer boatImageTransformer;
-            if (boatFix.legType != null) {
-                boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType,
-                        boatFix.tack, isSelected());
-            } else {
-                boatImageTransformer = boatClassImageData.getBoatImageTransformerByTack(boatFix.tack, isSelected());
+            // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
+            int zoom = map.getZoom();
+            Pair<Double, Size> boatScaleAndSize = boatScaleAndSizePerZoomCache.get(zoom);
+            if (boatScaleAndSize == null) {
+                boatScaleAndSize = getBoatScaleAndSize(boatClass);
+                boatScaleAndSizePerZoomCache.put(zoom, boatScaleAndSize);
             }
-            double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
-            if (speedWithBearing == null) {
-                speedWithBearing = new SpeedWithBearingDTO(0, 0);
+            double boatSizeScaleFactor = boatScaleAndSize.getA();
+            canvasWidth = (int) (boatScaleAndSize.getB().getWidth());
+            canvasHeight = (int) (boatScaleAndSize.getB().getHeight());
+            if (lastWidth == null || canvasWidth != lastWidth || lastHeight == null || canvasHeight != lastHeight) {
+                setCanvasSize(canvasWidth, canvasHeight);
             }
-            double boatDrawingAngle = speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
-            if (boatDrawingAngle < 0) {
-                boatDrawingAngle += 360;
+            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor, color)) {
+                boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, isSelected(), 
+                        canvasWidth, canvasHeight, boatSizeScaleFactor, color);
+                lastLegType = boatFix.legType;
+                lastTack = boatFix.tack;
+                lastSelected = isSelected();
+                lastWidth = canvasWidth;
+                lastHeight = canvasHeight;
+                lastScale = boatSizeScaleFactor;
+                lastColor = color;
             }
-            boatImageTransformer.drawToCanvas(getCanvas(), boatDrawingAngle, realBoatSizeScaleFactor);
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
+            // now rotate the canvas accordingly
+            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
+            if (speedWithBearing == null) {
+                speedWithBearing = new SpeedWithBearingDTO(0, 0);
+            }
+            updateBoatDrawingAngle(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
+            setCanvasRotation(boatDrawingAngle);
         }
     }
     
+    /**
+     * Compares the drawing parameters to {@link #lastLegType} and the other <code>last...</code>. If anything has
+     * changed, the result is <code>true</code>.
+     */
+    private boolean needToDraw(LegType legType, Tack tack, boolean isSelected, double width, double height,
+            double scaleFactor, Color color) {
+        return lastLegType == null || lastLegType != legType || lastTack == null || lastTack != tack
+                || lastSelected == null || lastSelected != isSelected || lastWidth == null || lastWidth != width
+                || lastHeight == null || lastHeight != height || lastScale == null || lastScale != scaleFactor
+                || lastColor == null || !lastColor.equals(color);
+    }
+
+    /**
+     * Updates {@link #boatDrawingAngle} to that the CSS transition from the old {@link #boatDrawingAngle} to
+     * <code>newBoatDrawingAngle</code> is minimal.
+     */
+    private void updateBoatDrawingAngle(double newBoatDrawingAngle) {
+        if (boatDrawingAngle == null) {
+            boatDrawingAngle = newBoatDrawingAngle;
+        } else {
+            double newMinusOld;
+            while (Math.abs(newMinusOld = newBoatDrawingAngle - boatDrawingAngle) > 180) {
+                newBoatDrawingAngle -= Math.signum(newMinusOld)*360;
+            }
+            boatDrawingAngle = boatDrawingAngle+newMinusOld;
+        }
+    }
+
     public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
         if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionTransition();
+            removeCanvasPositionAndRotationTransition();
         } else {
-            setCanvasPositionTransition(timeForPositionTransitionMillis);
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
         }
         this.boatFix = boatFix;
     }
-    
-    public double getRealBoatSizeScaleFactor(Size imageSize) {
-        // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
-        int zoomLevel = map == null ? 1 : map.getZoom();
-        int boatLengthInPixel = boatClassImageData.getBoatClassImageLengthInPx();
-        double minScaleFactor = 0.45;
-        double maxScaleFactor = 2.0;
-        if (boatLengthInPixel > 50 && boatLengthInPixel <= 100) {
-            minScaleFactor = 0.40;
-        } else if (boatLengthInPixel > 100) {
-            minScaleFactor = 0.33;
+
+    public Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
+        // the minimum boat length is related to the hull of the boat, not the overall length 
+        double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
+
+        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
+                LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
+        
+        if(boatHullLengthInPixel < minBoatHullLengthInPx) {
+            boatHullLengthInPixel = minBoatHullLengthInPx;
         }
 
-        double realBoatSizeScaleFactor = minScaleFactor;
-        double hullLengthInMeters = boatClass.getHullLengthInMeters();
-        // to scale the boats to a realistic size we need the length of the boat in pixel, 
-        // but it does not work to just take the image size, because the images for the different boat states can be different
-        if (zoomLevel > 5) {
-            LatLngBounds bounds = map.getBounds();
-            if (bounds != null) {
-                LatLng upperRight = bounds.getNorthEast();
-                LatLng bottomLeft = bounds.getSouthWest();
-                LatLng upperLeft = LatLng.newInstance(upperRight.getLatitude(), bottomLeft.getLongitude());
-                double distXInMeters = SphericalUtils.computeDistanceBetween(upperLeft, upperRight);
-                int widthInPixel = map.getElement().getClientWidth(); // check... 
-                double realBoatSizeInPixel  = (widthInPixel * hullLengthInMeters) / distXInMeters;
-                realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatLengthInPixel;
-                if (realBoatSizeScaleFactor < minScaleFactor) {
-                    realBoatSizeScaleFactor = minScaleFactor;
-                }
-                if (realBoatSizeScaleFactor > maxScaleFactor) {
-                    realBoatSizeScaleFactor = maxScaleFactor;
-                }
-            }
-        }
-        
-        return realBoatSizeScaleFactor;
+        double boatSizeScaleFactor = boatHullLengthInPixel / (boatVectorGraphics.getHullLengthInPx());
+
+        // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length 
+        double scaledCanvasSize = (boatVectorGraphics.getOverallLengthInPx()) * boatSizeScaleFactor; 
+
+        return new Pair<Double, Size>(boatSizeScaleFactor, Size.newInstance(scaledCanvasSize + scaledCanvasSize / 2.0, scaledCanvasSize + scaledCanvasSize / 2.0));
     }
 }

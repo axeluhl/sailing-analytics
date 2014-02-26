@@ -141,8 +141,8 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     }
 
     @Override
-    public void timeChanged(Date date) {
-        this.date = date;
+    public void timeChanged(Date newTime, Date oldTime) {
+        this.date = newTime;
         updateWindDisplay();
     }
 

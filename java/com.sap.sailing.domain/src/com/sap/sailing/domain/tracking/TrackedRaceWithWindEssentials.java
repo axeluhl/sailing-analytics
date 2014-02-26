@@ -91,12 +91,6 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                     result = createWindTrack(windSource,
                             delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
                                     : delayForWindEstimationCacheInvalidation);
-                    LockUtil.lockForRead(getSerializationLock());
-                    try {
-                        windTracks.put(windSource, result);
-                    } finally {
-                        LockUtil.unlockAfterRead(getSerializationLock());
-                    }
                 }
             }
         }
@@ -116,6 +110,14 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result = windStore.getWindTrack(trackedRegatta.getRegatta().getName(), this, windSource, millisecondsOverWhichToAverageWind,
                 delayForWindEstimationCacheInvalidation);
+        synchronized (windTracks) {
+            LockUtil.lockForRead(getSerializationLock());
+            try {
+                windTracks.put(windSource, result);
+            } finally {
+                LockUtil.unlockAfterRead(getSerializationLock());
+            }
+        }
         return result;
     }
     

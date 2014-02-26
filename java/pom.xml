@@ -14,11 +14,15 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>com.sap.sse.gwt</module>
 		<module>com.sap.sailing.domain.common</module>
 		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.geocoding</module>
+		<module>com.sap.sailing.datamining</module>
+		<module>com.sap.sailing.datamining.shared</module>
+		<module>com.sap.sailing.datamining.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
@@ -60,7 +64,7 @@
 		<module>com.sap.sailing.simulator</module>
 		<module>com.sap.sailing.server.trackfiles</module>
 		<module>com.sap.sailing.feature.runtime</module>
-	        <module>com.sap.sailing.gwt.ui</module>
+		<module>com.sap.sailing.gwt.ui</module>
 		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.shared.android.test</module>
@@ -72,9 +76,10 @@
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.server.gateway.test</module>
+		<module>com.sap.sailing.server.gateway.test.support</module>
 		<module>com.sap.sailing.server.gateway.serialization.test</module>
 		<module>com.sap.sailing.server.replication.test</module>
-       	        <module>com.sap.sailing.gwt.ui.test</module>
+		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.sap.sailing.mongodb.test</module>
 		<module>com.googlecode.java-diff-utils.test</module>
 		<module>com.sap.sailing.kiworesultimport.test</module>
@@ -120,8 +125,7 @@
           -Dmongo.host=localhost
 		</parameters.mongodb>
         <parameters.debug>
-          -Xdebug
-          -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+          -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
         </parameters.debug>
         <!--
           "Forward declaration" for better readability. The actual value should be defined in the local settings.xml,

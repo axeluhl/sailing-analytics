@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.racecommittee.app.ui.utils.MultiplePreferenceChangeListener;
-import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
-
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -16,6 +13,9 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import com.sap.sailing.racecommittee.app.ui.utils.MultiplePreferenceChangeListener;
+import com.sap.sailing.racecommittee.app.ui.views.EditSetPreference;
 
 /**
  * Created by I074137 on 18.09.13.

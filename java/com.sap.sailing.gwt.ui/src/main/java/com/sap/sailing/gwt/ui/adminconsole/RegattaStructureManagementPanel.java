@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -32,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage the structure of a regatta. Each regatta consists of several substructures like
@@ -65,7 +65,9 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
         HorizontalPanel regattaManagementControlsPanel = new HorizontalPanel();
         regattaManagementControlsPanel.setSpacing(5);
+        
         Button addRegattaBtn = new Button(stringMessages.addRegatta());
+        addRegattaBtn.ensureDebugId("AddRegattaButton");
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -75,6 +77,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaManagementControlsPanel.add(addRegattaBtn);
         
         removeRegattaButton = new Button(stringMessages.remove());
+        removeRegattaButton.ensureDebugId("RemoveRegattaButton");
         removeRegattaButton.setEnabled(false);
         removeRegattaButton.addClickHandler(new ClickHandler() {
             @Override
@@ -100,10 +103,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaSelectionProvider.addRegattaSelectionChangeListener(this);
         
         regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        regattaListComposite.ensureDebugId("RegattaListComposite");
         grid.setWidget(0, 0, regattaListComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
+        regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
@@ -152,6 +157,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 createNewRegatta(newRegatta);
             }
         });
+        dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
     
@@ -160,12 +166,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         for (SeriesDTO seriesDTO : newRegatta.series) {
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
                     seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore(),
-                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds());
+                    seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
+                    seriesDTO.hasSplitFleetContiguousScoring());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
                 new RegattaCreationParametersDTO(seriesStructure), true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuidAsString, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());

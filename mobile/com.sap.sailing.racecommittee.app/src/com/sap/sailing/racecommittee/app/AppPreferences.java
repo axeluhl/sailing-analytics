@@ -7,6 +7,7 @@ import java.util.Set;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
@@ -32,6 +33,10 @@ public class AppPreferences {
     
     public static AppPreferences on(Context context, String preferenceName) {
         return new AppPreferences(context, preferenceName);
+    }
+    
+    public interface PollingActiveChangedListener {
+        void onPollingActiveChanged(boolean isActive);
     }
 
     private final static String HIDDEN_PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
@@ -71,7 +76,7 @@ public class AppPreferences {
     public boolean isSendingActive() {
         return preferences.getBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, false);
     }
-
+    
     public void setSendingActive(boolean activate) {
         preferences.edit().putBoolean(HIDDEN_PREFERENCE_SENDING_ACTIVE, activate).commit();
     }
@@ -178,6 +183,18 @@ public class AppPreferences {
 
     public void setMailRecipient(String mail) {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
+    }
+    
+    public boolean isPollingActive() {
+        return preferences.getBoolean(key(R.string.preference_polling_active_key), false);
+    }
+
+    
+    /**
+     * Gets polling interval in minutes
+     */
+    public int getPollingInterval() {
+        return preferences.getInt(key(R.string.preference_polling_interval_key), 0);
     }
 
     public RacingProcedureType getDefaultRacingProcedureType() {
@@ -293,6 +310,33 @@ public class AppPreferences {
             return key(R.string.preference_racing_procedure_basic_hasxray_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
+        }
+    }
+    
+    private Set<PollingActiveChangedListener> pollingActiveChangedListeners = new HashSet<AppPreferences.PollingActiveChangedListener>();
+    
+    private OnSharedPreferenceChangeListener pollingActiveChangedListener = new OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key(R.string.preference_polling_active_key).equals(key)) {
+                for (PollingActiveChangedListener listener : pollingActiveChangedListeners) {
+                    listener.onPollingActiveChanged(isPollingActive());
+                }
+            }
+        }
+    };
+    
+    public void registerPollingActiveChangedListener(final PollingActiveChangedListener listener) {
+        if (pollingActiveChangedListeners.isEmpty()) {
+            preferences.registerOnSharedPreferenceChangeListener(pollingActiveChangedListener);
+        }
+        pollingActiveChangedListeners.add(listener);
+    }
+    
+    public void unregisterPollingActiveChangedListener(PollingActiveChangedListener listener) {
+        pollingActiveChangedListeners.remove(listener);
+        if (pollingActiveChangedListeners.isEmpty()) {
+            preferences.unregisterOnSharedPreferenceChangeListener(pollingActiveChangedListener);
         }
     }
 }

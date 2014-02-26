@@ -80,7 +80,10 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
         generalRecallButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                getRaceState().setGeneralRecall(MillisecondsTimePoint.now());
+                TimePoint now = MillisecondsTimePoint.now();
+                getRaceState().setGeneralRecall(now);
+                // TODO see bug 1649: Explicit passing of pass identifier in RaceState interface
+                getRaceState().setAdvancePass(now);
             }
         });
         
@@ -114,7 +117,7 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
             
             startCountUpTextView.setText(String.format(
                     getString(R.string.race_running_since_template),
-                    getRace().getName(), TimeUtils.formatDuration(millisecondsSinceStart)));
+                    getRace().getName(), TimeUtils.formatDurationSince(millisecondsSinceStart)));
             
             if (!updateFlagChangesCountdown(nextCountdownTextView)) {
                 nextCountdownTextView.setText("");

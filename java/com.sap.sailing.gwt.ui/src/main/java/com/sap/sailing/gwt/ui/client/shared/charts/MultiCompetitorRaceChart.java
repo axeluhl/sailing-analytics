@@ -66,7 +66,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
-            timeChanged(timer.getTime());
+            timeChanged(timer.getTime(), null);
         }
     }
 

@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.TextOperator;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sse.gwt.ui.DataEntryDialog;
 
 public class CompetitorSailNumbersFilterUIFactory extends AbstractCompetitorTextFilterUIFactory {
     private TextBox valueTextBox;

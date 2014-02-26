@@ -5,12 +5,14 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -23,9 +25,11 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public class StarbordSideOfStartLineRecognitionTest {
     private MillisecondsTimePoint now;
@@ -43,9 +47,10 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(race.getCourse()).thenReturn(course);
         MockedTrackedRaceImpl trackedRace = mock(MockedTrackedRaceImpl.class);
         when(trackedRace.getRace()).thenReturn(race);
-        when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
-        Position p = trackedRace.getStarboardMarkOfStartlinePosition(now);
-        assertNull(p);
+        when(trackedRace.getStartLine(now)).thenCallRealMethod();
+        when(trackedRace.getStarboardMarkOfStartlineOrSingleStartMark(now)).thenCallRealMethod();
+        Mark m = trackedRace.getStarboardMarkOfStartlineOrSingleStartMark(now);
+        assertNull(m);
     }
     
     @Test
@@ -68,13 +73,13 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getRace()).thenReturn(race);
         when(trackedRace.getOrCreateTrack(startPort)).thenReturn(startPortTrack);
         when(trackedRace.getOrCreateTrack(startStarboard)).thenReturn(startStarboardTrack);
-        when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
-        Position p = trackedRace.getStarboardMarkOfStartlinePosition(now);
-        assertNull(p);
+        when(trackedRace.getStartLine(now)).thenCallRealMethod();
+        LineDetails startLine = trackedRace.getStartLine(now);
+        assertNull(startLine);
     }
     
-    public static abstract class MockedTrackedRaceImpl extends TrackedRaceImpl {
+    public static abstract class MockedTrackedRaceImpl extends DynamicTrackedRaceImpl {
         /**
          * 
          */
@@ -85,8 +90,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         }
         
         @Override
-        protected Position getStarboardMarkOfStartlinePosition(TimePoint at) {
-            return super.getStarboardMarkOfStartlinePosition(at);
+        protected Mark getStarboardMarkOfStartlineOrSingleStartMark(TimePoint at) {
+            return super.getStarboardMarkOfStartlineOrSingleStartMark(at);
         }
     }
 
@@ -104,7 +109,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         Mark windward = mock(Mark.class);
         DynamicGPSFixTrack<Mark, GPSFix> windwardTrack = new DynamicGPSFixTrackImpl<Mark>(windward, /* millisecondsOverWhichToAverage */ 10000);
         windwardTrack.addGPSFix(new GPSFixImpl(windwardPosition, now));
-        when(windwardWaypoint.getMarks()).thenReturn(Arrays.asList(new Mark[] { windward}));
+        when(windwardWaypoint.getMarks()).thenReturn(Arrays.asList(new Mark[] { windward }));
         Course course = new CourseImpl("testforSimpleFirstLeg", Arrays.asList(new Waypoint[] { startWaypoint, windwardWaypoint }));
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getCourse()).thenReturn(course);
@@ -112,11 +117,13 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getRace()).thenReturn(race);
         when(trackedRace.getOrCreateTrack(startPort)).thenReturn(startPortTrack);
         when(trackedRace.getOrCreateTrack(windward)).thenReturn(windwardTrack);
-        when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
+        when(trackedRace.getStartLine(now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(windwardWaypoint, now)).thenCallRealMethod();
-        
-        Position p = trackedRace.getStarboardMarkOfStartlinePosition(now);
+        when(trackedRace.getStarboardMarkOfStartlineOrSingleStartMark(now)).thenCallRealMethod();
+
+        Position p = trackedRace.getOrCreateTrack(trackedRace.getStarboardMarkOfStartlineOrSingleStartMark(now)).
+                getEstimatedPosition(now, /* extrapolate */ false);
         assertEquals(startPortPosition, p);
     }
 
@@ -128,7 +135,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         Position windwardPosition = new DegreePosition(10, 0.5);
         MockedTrackedRaceImpl trackedRace = createTrackedRaceWithMarkPositions(startPortPosition, startStarboardPosition, windwardPosition);
         
-        Position p = trackedRace.getStarboardMarkOfStartlinePosition(now);
+        Position p = trackedRace.getOrCreateTrack(trackedRace.getStartLine(now).getStarboardMarkWhileApproachingLine()).
+                getEstimatedPosition(now, /* extrapolate */ false);
         assertEquals(startStarboardPosition, p);
     }
 
@@ -140,7 +148,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         Position windwardPosition = new DegreePosition(-10, 0.5);
         MockedTrackedRaceImpl trackedRace = createTrackedRaceWithMarkPositions(startPortPosition, startStarboardPosition, windwardPosition);
         
-        Position p = trackedRace.getStarboardMarkOfStartlinePosition(now);
+        Position p = trackedRace.getOrCreateTrack(trackedRace.getStartLine(now).getStarboardMarkWhileApproachingLine()).
+                getEstimatedPosition(now, /* extrapolate */ false);
         assertEquals(startPortPosition, p);
     }
 
@@ -167,7 +176,9 @@ public class StarbordSideOfStartLineRecognitionTest {
         when(trackedRace.getOrCreateTrack(startPort)).thenReturn(startPortTrack);
         when(trackedRace.getOrCreateTrack(startStarboard)).thenReturn(startStarboardTrack);
         when(trackedRace.getOrCreateTrack(windward)).thenReturn(windwardTrack);
-        when(trackedRace.getStarboardMarkOfStartlinePosition(now)).thenCallRealMethod();
+        when(trackedRace.getStartLine(now)).thenCallRealMethod();
+        TrackedLegImpl trackedLeg = new TrackedLegImpl(trackedRace, course.getFirstLeg(), /* competitors */ new ArrayList<Competitor>());
+        when(trackedRace.getTrackedLeg(course.getFirstLeg())).thenReturn(trackedLeg);
         when(trackedRace.getApproximatePosition(startWaypoint, now)).thenCallRealMethod();
         when(trackedRace.getApproximatePosition(windwardWaypoint, now)).thenCallRealMethod();
         return trackedRace;
