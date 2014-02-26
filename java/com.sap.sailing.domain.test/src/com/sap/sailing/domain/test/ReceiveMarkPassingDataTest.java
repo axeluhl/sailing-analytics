@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -25,10 +24,6 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
-import com.tractrac.clientmodule.Race;
-import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ICallbackData;
-import com.tractrac.clientmodule.data.MarkPassingsData;
 
 public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
