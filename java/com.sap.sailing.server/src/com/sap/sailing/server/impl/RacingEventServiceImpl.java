@@ -1994,8 +1994,13 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * <code>regatta</code> will be returned.
      */
     private void setRegattaForRace(Regatta regatta, RaceDefinition race) {
-        persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
-        mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
+        setRegattaForRace(regatta, race.getId().toString());
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, String raceIdAsString) {
+        persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
+        mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
     }
 
     @Override
@@ -2149,19 +2154,6 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
         return persistentRegattasForRaceIDs;
     }
 
-    @Override
-    public void setPersistentRegattaForRaceIDs(Regatta regatta, Iterable<String> raceIdStrings, boolean override) {
-        for (String raceIdAsString : raceIdStrings) {
-            if (!override && persistentRegattasForRaceIDs.contains(raceIdAsString)) {
-                logger.info(String.format(
-                        "Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
-                        raceIdAsString));
-            } else {
-                persistentRegattasForRaceIDs.put(raceIdAsString, regatta);
-                mongoObjectFactory.storeRegattaForRaceID(raceIdAsString, regatta);
-            }
-        }
-    }
 
     @Override
     public WindStore getWindStore() {

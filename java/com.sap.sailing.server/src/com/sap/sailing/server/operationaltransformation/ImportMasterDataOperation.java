@@ -350,7 +350,15 @@ public class ImportMasterDataOperation extends
                 createdRegatta.setRegattaConfiguration(regatta.getRegattaConfiguration());
                 Set<String> raceIdStrings = masterData.getRaceIdStringsForRegatta().get(regatta.getRegattaIdentifier());
                 if (raceIdStrings != null) {
-                    toState.setPersistentRegattaForRaceIDs(createdRegatta, raceIdStrings, override);
+                    for (String raceIdAsString : raceIdStrings) {
+                        if (!override && toState.getRememberedRegattaForRace(raceIdAsString) != null) {
+                            logger.info(String
+                                    .format("Persistent regatta wasn't set for race id %1$s, because override was not turned on.",
+                                            raceIdAsString));
+                        } else {
+                            toState.setRegattaForRace(createdRegatta, raceIdAsString);
+                        }
+                    }
                 }
                 creationCount.addOneRegatta(createdRegatta.getId().toString());
             }
