@@ -5,7 +5,7 @@ import com.sap.sailing.domain.base.Waypoint;
 
 /**
  * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>.
- * {@link #getProbability()} returns the probability of this passage being correct, consisting of the probability of
+ * {@link #getCost()} returns the probability of this passage being correct, consisting of the probability of
  * each Candidate, the probability of the passage (e.g. an estimate whether the distance sailed between the candidates matches the
  * distance between their {@link Waypoint}s), and a penalty for skipping waypoints, which might happen if a tracker fails
  * or a competitor aborts but should be avoided if possible.
@@ -34,7 +34,7 @@ public class Edge implements Comparable<Edge> {
         return penaltyForSkipped;
     }
 
-    public Double getProbability() {
+    public Double getCost() {
         double penalty = end.getOneBasedIndexOfWaypoint() == course.getNumberOfWaypoints() + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
         return 1-(start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
     }
@@ -48,12 +48,12 @@ public class Edge implements Comparable<Edge> {
     }
 
     public String toString() {
-        return "From ID " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getProbability();
+        return "From ID " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getCost();
     }
 
     // TODO Only for Debugging!
     @Override
     public int compareTo(Edge o) {
-        return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getProbability().compareTo(o.getProbability());
+        return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getCost().compareTo(o.getCost());
     }
 }
