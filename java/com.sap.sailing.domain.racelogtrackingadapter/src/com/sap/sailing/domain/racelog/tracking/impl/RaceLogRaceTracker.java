@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -30,7 +31,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -308,11 +308,8 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         BoatClass boatClass = raceInfo.getB();
         CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (courseBase == null) {
-            if (event != null) {
-                raceLog.add(RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), params
-                        .getService().getServerAuthor(), raceLog.getCurrentPassId(), event.getId()));
-            }
-            throw new RaceNotCreatedException(String.format("Course definition for racelog (%s) missing", raceLog));
+            courseBase = new CourseDataImpl("Default course for " + raceInfo.getA());
+            logger.log(Level.FINE, "Using empty course in creation of race " + raceInfo.getA());
         }
 
         Course course = new CourseImpl(raceInfo.getA() + " course", courseBase.getWaypoints());
