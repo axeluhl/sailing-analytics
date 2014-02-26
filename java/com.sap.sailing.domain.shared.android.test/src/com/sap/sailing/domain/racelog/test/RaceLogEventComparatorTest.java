@@ -79,8 +79,6 @@ public class RaceLogEventComparatorTest {
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result < 0);
@@ -94,8 +92,6 @@ public class RaceLogEventComparatorTest {
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(author);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);
@@ -112,8 +108,6 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getAuthor()).thenReturn(minorAuthor);
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(majorAuthor);
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result < 0);
@@ -130,8 +124,6 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getAuthor()).thenReturn(majorAuthor);
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getAuthor()).thenReturn(minorAuthor);
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);
@@ -143,8 +135,6 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
         when(eventTwo.getPassId()).thenReturn(1);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result < 0);
@@ -156,8 +146,6 @@ public class RaceLogEventComparatorTest {
         when(eventOne.getCreatedAt()).thenReturn(new MillisecondsTimePoint(1));
         when(eventTwo.getPassId()).thenReturn(0);
         when(eventTwo.getCreatedAt()).thenReturn(new MillisecondsTimePoint(2));
-        when(eventOne.getId()).thenReturn("a");
-        when(eventTwo.getId()).thenReturn("b");
         
         int result = comparator.compare(eventOne, eventTwo);
         assertTrue(result > 0);

@@ -38,7 +38,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinderFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -487,6 +486,4 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceTracker getRaceTrackerById(Object id);
     
     RaceLogEventAuthor getServerAuthor();
-    
-    TypeBasedServiceFinderFactory getServiceFinderFactory();
 }

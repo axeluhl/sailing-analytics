@@ -19,6 +19,7 @@ public class RaceLogTrackingStateAnalyzer extends RaceLogAnalyzer<RaceLogTrackin
             if (event instanceof StartTrackingEvent) {
                 return RaceLogTrackingState.TRACKING;
             } else if (event instanceof DenoteForTrackingEvent) {
+            	System.out.println(RaceLogTrackingState.AWAITING_RACE_DEFINITION);
                 return RaceLogTrackingState.AWAITING_RACE_DEFINITION;
             }
         }

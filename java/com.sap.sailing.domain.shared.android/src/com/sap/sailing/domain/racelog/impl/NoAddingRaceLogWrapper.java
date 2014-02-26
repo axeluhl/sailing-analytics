@@ -228,18 +228,8 @@ public class NoAddingRaceLogWrapper implements RaceLog {
         return innerRaceLog.getAverageIntervalBetweenRawFixes();
     }
 
-	@Override
-	public void update(RaceLogEvent event) {
-		innerRaceLog.update(event);
-	}
-
-	@Override
-	public void delete(RaceLogEvent event) {
-		innerRaceLog.delete(event);
-	}
-
-	@Override
-	public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
-		return innerRaceLog.getUnrevokedEventsDescending();
-	}
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
+        return innerRaceLog.getUnrevokedEventsDescending();
+    }
 }

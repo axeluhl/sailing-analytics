@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -9,7 +8,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * DTO for a race log entry.
  */
 public class RaceLogEventDTO implements IsSerializable {
-	private Serializable eventId;
     private Integer passId;
     private String authorName;
     private Integer authorPriority;
@@ -24,9 +22,8 @@ public class RaceLogEventDTO implements IsSerializable {
     
     RaceLogEventDTO() {}
 
-    public RaceLogEventDTO(Serializable eventId, int passId, String authorName, Integer authorPriority, Date createdAt, Date logicalTimePoint,
+    public RaceLogEventDTO(int passId, String authorName, Integer authorPriority, Date createdAt, Date logicalTimePoint,
             String type, String info) {
-    	this.eventId = eventId;
         this.passId = passId;
         this.authorName = authorName;
         this.authorPriority = authorPriority;
@@ -69,9 +66,5 @@ public class RaceLogEventDTO implements IsSerializable {
 
     public Date getCreatedAt() {
         return createdAt;
-    }
-    
-    public Serializable getEventId() {
-    	return eventId;
     }
 }

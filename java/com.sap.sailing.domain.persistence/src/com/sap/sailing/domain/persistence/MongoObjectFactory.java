@@ -14,8 +14,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -109,9 +107,4 @@ public interface MongoObjectFactory {
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
-    
-    /**
-     * Rewrite entire racelog to DB after changes. This deletes old events, and updates changes ones.
-     */
-    void rewriteRaceLog(RaceLogIdentifier identifier, RaceLog raceLog);
 }

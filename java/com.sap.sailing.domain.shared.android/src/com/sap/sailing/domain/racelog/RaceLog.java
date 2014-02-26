@@ -129,15 +129,4 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
      * @return
      */
     NavigableSet<RaceLogEvent> getUnrevokedEventsDescending();
-    
-    /**
-     * Updates the event, based on the assumption that the id has remained the same.
-     * Listeners are not informed about this, so use with care.
-     */
-    void update(RaceLogEvent event);
-    
-    /**
-     * Deletes the event. Listeners are not informed about this, so use with care.
-     */
-    void delete(RaceLogEvent event);
 }

@@ -48,8 +48,6 @@ import java.util.zip.GZIPInputStream;
 import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -161,7 +159,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -180,7 +177,6 @@ import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
@@ -284,10 +280,6 @@ import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
-import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -3370,64 +3362,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
         getService().reloadRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
     }
-    
-    private RaceLogEventDTO convertToRaceLogEventDTO(RaceLogEvent raceLogEvent) {
-        return new RaceLogEventDTO(raceLogEvent.getId(), raceLogEvent.getPassId(), 
-                raceLogEvent.getAuthor().getName(), raceLogEvent.getAuthor().getPriority(), 
-                raceLogEvent.getCreatedAt() != null ? raceLogEvent.getCreatedAt().asDate() : null,
-                raceLogEvent.getLogicalTimePoint() != null ? raceLogEvent.getLogicalTimePoint().asDate() : null,
-                raceLogEvent.getClass().getSimpleName(), raceLogEvent.getShortInfo());
-    }
-    
-    private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceJsonHandler;
-    private TypeBasedServiceFinder<DeviceIdentifierJsonHandler> getDeviceJsonHandler() {
-    	if (deviceJsonHandler == null) {
-    		deviceJsonHandler = getService().getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class);
-    	}
-    	return deviceJsonHandler;
-    }
-    
-    @Override
-    public String getRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, Serializable eventId) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if(raceLog != null) {
-        	return RaceLogEventSerializer.create(CompetitorJsonSerializer.create(), getDeviceJsonHandler()).
-        			serialize(raceLog.getEventById(eventId)).toString();
-        }
-        return null;
-    }
-    
-    @Override
-    public void addOrUpdateRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, String jsonEvent)
-    	throws Exception {
-    	 RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-    	 if (raceLog != null) {
-    		 RaceLogEvent event = RaceLogEventDeserializer.create(getBaseDomainFactory(), getDeviceJsonHandler()).
-    		 	deserialize((JSONObject) JSONValue.parseWithException(jsonEvent));
-    		 if (raceLog.getEventById(event.getId()) != null) {
-        		 raceLog.update(event);
-    		 }  else {
-    			 raceLog.add(event);
-    		 }
-    	 }
-    	 RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
-    	 RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(raceColumn.getFleetByName(fleetName));
-    	 mongoObjectFactory.rewriteRaceLog(identifier, raceLog);
-    	 getService().reloadRaceLog(leaderboardName, raceColumnName, fleetName);
-    }
-    
-    @Override
-    public void deleteRaceLogEvent(String leaderboardName,
-    		String raceColumnName, String fleetName, Serializable eventId) {
-    	RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-    	if (raceLog != null) {
-    		raceLog.delete(raceLog.getEventById(eventId));
-    	}
-   	 RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
-   	 RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(raceColumn.getFleetByName(fleetName));
-   	 mongoObjectFactory.rewriteRaceLog(identifier, raceLog);
-   	 getService().reloadRaceLog(leaderboardName, raceColumnName, fleetName);
-    }
 
     @Override
     public RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
@@ -3439,7 +3373,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceLog.lockForRead();
             try {
                 for(RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
-                    RaceLogEventDTO entry = convertToRaceLogEventDTO(raceLogEvent);
+                    RaceLogEventDTO entry = new RaceLogEventDTO(raceLogEvent.getPassId(), 
+                            raceLogEvent.getAuthor().getName(), raceLogEvent.getAuthor().getPriority(), 
+                            raceLogEvent.getCreatedAt() != null ? raceLogEvent.getCreatedAt().asDate() : null,
+                            raceLogEvent.getLogicalTimePoint() != null ? raceLogEvent.getLogicalTimePoint().asDate() : null,
+                            raceLogEvent.getClass().getSimpleName(), raceLogEvent.getShortInfo());
                     entries.add(entry);
                 }
             } finally {

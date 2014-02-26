@@ -796,7 +796,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     }
     
     private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
-        RaceLogDialog dialog = new RaceLogDialog(sailingService, errorReporter, raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
+        RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
             @Override
             public void cancel() {
             }

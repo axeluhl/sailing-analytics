@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -524,15 +523,5 @@ public interface SailingServiceAsync {
 	void denoteForRaceLogTracking(String leaderboardName,
 			String raceColumnName, String fleetName,
 			AsyncCallback<Void> callback);
-
-	void getRaceLogEvent(String leaderboardName, String raceColumnName,
-			String fleetName, Serializable eventId,
-			AsyncCallback<String> callback);
-
-	void addOrUpdateRaceLogEvent(String leaderboardName, String raceColumnName,
-			String fleetName, String jsonEvent, AsyncCallback<Void> callback);
-
-	void deleteRaceLogEvent(String leaderboardName, String raceColumnName,
-			String fleetName, Serializable eventId, AsyncCallback<Void> callback);
 }
 

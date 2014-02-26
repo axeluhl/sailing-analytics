@@ -62,7 +62,6 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -1132,21 +1131,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
     			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();
     }
-
-	@Override
-	public void rewriteRaceLog(RaceLogIdentifier identifier, RaceLog raceLog) {
-		DBObject query = new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(),
-				TripleSerializer.serialize(identifier.getIdentifier()));
-		getRaceLogCollection().remove(query);
-		
-		MongoRaceLogStoreVisitor visitor = new MongoRaceLogStoreVisitor(identifier, this);
-		raceLog.lockForRead();
-		try {
-			for (RaceLogEvent event : raceLog.getRawFixes()) {
-				event.accept(visitor);
-			}
-		} finally {
-			raceLog.unlockAfterRead();
-		}
-	}
 }
