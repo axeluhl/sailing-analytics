@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 
 /**
  * Extracts typical measures from polar sheets.
@@ -15,7 +15,7 @@ import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
  * @author Frederik Petersen (D054528)
  * 
  */
-public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzerInterface {
+public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
 
     private PolarDataService polarDataService;
 
