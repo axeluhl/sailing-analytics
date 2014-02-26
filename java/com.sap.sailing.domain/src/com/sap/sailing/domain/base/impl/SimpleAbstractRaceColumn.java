@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
@@ -108,6 +109,11 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return false;
+    }
+
+    @Override
+    public boolean hasSplitFleets() {
+        return Util.size(getFleets()) > 1;
     }
 
 }

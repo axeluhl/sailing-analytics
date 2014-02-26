@@ -1497,10 +1497,8 @@ public class MasterDataImportTest {
         TrackedRace trackedRace = new DummyTrackedRace(competitors, regatta, null);
 
         raceColumn.setTrackedRace(testFleet1, trackedRace);
-        Set<String> raceIds = new HashSet<String>();
-        raceIds.add("dummy");
-
-        sourceService.setPersistentRegattaForRaceIDs(regatta, raceIds, false);
+        sourceService.setRegattaForRace(regatta, "dummy");
+        sourceService.setRegattaForRace(regatta, "dummy2");
 
         // Set log event
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
@@ -1575,6 +1573,13 @@ public class MasterDataImportTest {
         // Check if dummy race id has been imported to destination service
         ConcurrentHashMap<String, Regatta> map = destService.getPersistentRegattasForRaceIDs();
         Assert.assertEquals(regattaOnTarget, map.get("dummy"));
+        Assert.assertEquals(regattaOnTarget, map.get("dummy2"));
+
+        // Check if persistent regatta for race id has been persisted
+        RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+        ConcurrentHashMap<String, Regatta> map2 = destService2.getPersistentRegattasForRaceIDs();
+        Regatta regattaOnTarget2 = destService2.getRegattaByName(TEST_LEADERBOARD_NAME);
+        Assert.assertEquals(regattaOnTarget2, map2.get("dummy"));
 
     }
 
@@ -1583,7 +1588,7 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         RacingEventService sourceService = new RacingEventServiceImpl();
-        MediaTrack trackOnSource = new MediaTrack("test", "testTitle", "http://test/test.mp4", new Date(0), 2000,
+        MediaTrack trackOnSource = new MediaTrack("testTitle", "http://test/test.mp4", new Date(0), 2000,
                 MediaTrack.MimeType.mp4);
         sourceService.mediaTrackAdded(trackOnSource);
 

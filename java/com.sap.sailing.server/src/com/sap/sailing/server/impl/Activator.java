@@ -23,7 +23,7 @@ public class Activator implements BundleActivator {
     private final RacingEventServiceImpl racingEventService;
 
     public Activator() {
-        boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+true));
+        boolean clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
         logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors);

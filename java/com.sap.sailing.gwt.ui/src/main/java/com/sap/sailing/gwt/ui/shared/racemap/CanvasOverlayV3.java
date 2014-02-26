@@ -358,7 +358,7 @@ public abstract class CanvasOverlayV3 {
     
     protected void setCanvasRotation(double rotationInDegrees) {
         setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
-        setProperty(canvas.getElement().getStyle(), "transform", "rotate("+rotationInDegrees+"deg");
+        setProperty(canvas.getElement().getStyle(), "transform", "rotate("+Math.round(rotationInDegrees)+"deg)");
     }
 
     protected double calculateRadiusOfBoundingBox(MapCanvasProjection projection, LatLng centerPosition, double lengthInMeter) {

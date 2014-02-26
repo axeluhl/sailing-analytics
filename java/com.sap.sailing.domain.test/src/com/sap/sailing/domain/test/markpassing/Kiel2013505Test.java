@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test.markpassing;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 
 import org.junit.Ignore;
 
@@ -13,7 +14,7 @@ public class Kiel2013505Test extends AbstractMarkPassingTest {
     }
 
     @Ignore
-    public void testRace5() throws IOException, InterruptedException, URISyntaxException {
+    public void testRace5() throws IOException, InterruptedException, URISyntaxException, ParseException {
         testRace("5");
     }
 

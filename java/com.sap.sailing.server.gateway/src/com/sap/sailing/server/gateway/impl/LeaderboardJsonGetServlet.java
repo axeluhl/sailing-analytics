@@ -163,10 +163,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 if (oldCacheValue != null) {
                     result.putAll(oldCacheValue);
                     totalNumberOfCacheEntries -= oldCacheValue.size();
-                } else {
-                    // first time we cache something for that leaderboard; ensure we get update triggers:
-                    cacheManager.add(leaderboard);
                 }
+                // ensure we get update triggers; note that oldCacheValue!=null doesn't mean that there are currently listeners active;
+                // the listeners could have been removed, and the SmartFutureCache will keep old values around as there is no explicit
+                // cache eviction for a SmartFutureCache.
+                cacheManager.add(leaderboard);
                 result.putAll(computedCacheUpdate);
                 totalNumberOfCacheEntries += result.size();
             }

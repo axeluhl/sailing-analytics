@@ -125,6 +125,9 @@ public interface Leaderboard extends Named {
      * When computing the ranks after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
+     * 
+     * @return The resulting map is guaranteed to have the same iteration order regarding the race columns
+     * as {@link #getRaceColumns()}.
      */
     Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException;
     

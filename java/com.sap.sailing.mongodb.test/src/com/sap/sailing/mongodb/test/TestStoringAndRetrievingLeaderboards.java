@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -43,6 +44,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     public TestStoringAndRetrievingLeaderboards() throws UnknownHostException, MongoException {
         super();
+    }
+    
+    @Before
+    public void clearCompetitorStore() {
+        DomainFactory.INSTANCE.getCompetitorStore().clear();
     }
 
     @Test

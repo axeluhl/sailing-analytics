@@ -6,9 +6,33 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImportProgress;
+import com.sap.sailing.server.operationaltransformation.DataImportFailed;
+import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
+import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 
+/**
+ * This lock is used to allow only one master data import operation be performed at once. It also keeps information
+ * about the progress of the operation. It's important to keep in mind that there the {@link ImportMasterDataOperation}
+ * is run on every replica and that any http request from the client to obtain the progress can be directed to any of
+ * the servers by the load balancer. Thus, the progress needs to be maintained on every server. The first part of the
+ * import (the data transfer) only happens on the server that the initial request went to. The progress is created and
+ * updated on the other servers using a {@link CreateOrUpdateDataImportProgress} operation. If an error occurs it will
+ * be logged to the progress object using the {@link DataImportFailed} operation.
+ * 
+ * The {@link #progressPerId} entries are deleted
+ * {@value #TIME_TO_DELETE_PROGRESS_ENTRY_AFTER_OPERATION_FINISHED_IN_MILLIS} ms, after the operation finished on the
+ * server reached with the initial import request. The {@link SetDataImportDeleteProgressFromMapTimer} operation is
+ * replicated so that the map entry is also deleted on the other servers.
+ * 
+ * 
+ * 
+ * @author Frederik Petersen (D054528)
+ * 
+ */
 public class DataImportLockWithProgress extends ReentrantLock {
     /**
      * Defaults to 60s (60000ms).
@@ -17,25 +41,14 @@ public class DataImportLockWithProgress extends ReentrantLock {
 
     private static final long serialVersionUID = -3527221613483691340L;
 
-    private DataImportProgress currentProgress;
-
     private final Map<UUID, DataImportProgress> progressPerId;
+
+    private final ReentrantReadWriteLock mapLock;
 
     public DataImportLockWithProgress() {
         super(true);
         progressPerId = new HashMap<UUID, DataImportProgress>();
-    }
-
-    public void lock(UUID operationId) {
-        super.lock();
-        currentProgress = progressPerId.get(operationId);
-    }
-
-    @Override
-    public void unlock() {
-        setDeleteFromMapTimer(currentProgress);
-        currentProgress = null;
-        super.unlock();
+        mapLock = new ReentrantReadWriteLock();
     }
 
     /**
@@ -43,12 +56,15 @@ public class DataImportLockWithProgress extends ReentrantLock {
      * the operation is done does not ensure that the entry is deleted from every replica, since the last progress
      * request will only reach one server.
      */
-    private void setDeleteFromMapTimer(final DataImportProgress progressToDelete) {
+    public void setDeleteFromMapTimer(final UUID progressIDToDelete) {
         TimerTask deleteTask = new TimerTask() {
             @Override
             public void run() {
-                synchronized (progressPerId) {
-                    progressPerId.remove(progressToDelete.getOperationId());
+                mapLock.writeLock().lock();
+                try {
+                    progressPerId.remove(progressIDToDelete);
+                } finally {
+                    mapLock.writeLock().unlock();
                 }
             }
         };
@@ -62,15 +78,21 @@ public class DataImportLockWithProgress extends ReentrantLock {
      */
     public DataImportProgress getProgress(UUID operationId) {
         DataImportProgress progress;
-        synchronized (progressPerId) {
+        mapLock.readLock().lock();
+        try {
             progress = progressPerId.get(operationId);
+        } finally {
+            mapLock.readLock().unlock();
         }
         return progress;
     }
 
     public void addProgress(UUID operationId, DataImportProgress progress) {
-        synchronized (progressPerId) {
+        mapLock.writeLock().lock();
+        try {
             progressPerId.put(operationId, progress);
+        } finally {
+            mapLock.writeLock().unlock();
         }
     }
 
