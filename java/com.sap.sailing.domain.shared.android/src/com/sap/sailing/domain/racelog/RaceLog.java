@@ -103,18 +103,12 @@ public interface RaceLog extends Track<RaceLogEvent>, WithID {
     boolean load(RaceLogEvent event);
     
     /**
-     * Search for the event by its {@code id}, which will perform poorly for a large number
-     * of events, as they are ordered by {@link TimePoint}.
-     * @param id
-     * @return
+     * Search for the event by its {@link RaceLogEvent#getId() id}.
      */
     RaceLogEvent getEventById(Serializable id);
     
     /**
-     * Check, whether the {@code revokeEvent} actually revokes the event it specifies by its
-     * {@link RevokeEvent#getRevokedEventId()}.
-     * @param revokeEvent
-     * @return
+     * Search for the event by its {@link RaceLogEvent#getId() id}.
      */
     boolean isEventRevokedBy(RevokeEvent revokeEvent);
     

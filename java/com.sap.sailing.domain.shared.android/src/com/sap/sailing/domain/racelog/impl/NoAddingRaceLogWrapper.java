@@ -197,26 +197,21 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     public Iterable<RaceLogEvent> getEventsToDeliver(UUID clientId) {
         return innerRaceLog.getEventsToDeliver(clientId);
     }
-    
+
     @Override
     public Iterable<RaceLogEvent> getFixes(TimePoint from, boolean fromInclusive, TimePoint to, boolean toInclusive) {
         return innerRaceLog.getFixes(from, fromInclusive, to, toInclusive);
     }
 
-	@Override
-	public RaceLogEvent getEventById(Serializable id) {
-		return innerRaceLog.getEventById(id);
-	}
+    @Override
+    public boolean isEventRevokedBy(RevokeEvent revokeEvent) {
+        return innerRaceLog.isEventRevokedBy(revokeEvent);
+    }
 
-	@Override
-	public boolean isEventRevokedBy(RevokeEvent revokeEvent) {
-		return innerRaceLog.isEventRevokedBy(revokeEvent);
-	}
-
-	@Override
-	public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
-		return innerRaceLog.getUnrevokedEvents();
-	}
+    @Override
+    public NavigableSet<RaceLogEvent> getUnrevokedEvents() {
+        return innerRaceLog.getUnrevokedEvents();
+    }
 
     @Override
     public Duration getAverageIntervalBetweenFixes() {
@@ -231,5 +226,9 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public NavigableSet<RaceLogEvent> getUnrevokedEventsDescending() {
         return innerRaceLog.getUnrevokedEventsDescending();
+    }
+    
+    public RaceLogEvent getEventById(Serializable id) {
+        return innerRaceLog.getEventById(id);
     }
 }

@@ -47,6 +47,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
      * Clients can use the {@link #add(RaceLogEvent, UUID)} method
      */
     private transient Map<UUID, Set<RaceLogEvent>> eventsDeliveredToClient = new HashMap<UUID, Set<RaceLogEvent>>();
+    
+    private Map<Serializable, RaceLogEvent> eventsById = new HashMap<Serializable, RaceLogEvent>();
 
     private final Serializable id;
     private transient Set<RaceLogEventVisitor> listeners;
@@ -111,6 +113,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             // point
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             revokeIfNecessary(event);
+            eventsById.put(event.getId(), event);
             notifyListenersAboutReceive(event);
         } else {
             logger.warning(String.format("%s (%s) was not added to race log %s. Ignoring", event, event.getClass().getName(), getId()));
@@ -303,10 +306,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public RaceLogEvent getEventById(Serializable id) {
-        for (RaceLogEvent e : getRawFixes()) {
-            if (e.getId().equals(id)) return e;
-        }
-        return null;
+        assertReadLock();
+        return eventsById.get(id);
     }
     
     @Override
