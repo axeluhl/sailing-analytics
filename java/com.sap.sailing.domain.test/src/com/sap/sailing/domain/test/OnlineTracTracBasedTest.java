@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 /**
  * Connects to TracTrac data. Subclasses should implement a @Before method which calls
@@ -74,14 +75,14 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException {
+    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
 
     protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
-            IOException, InterruptedException, URISyntaxException {
+            IOException, InterruptedException, URISyntaxException, SubscriberInitializationException {
         setUpWithoutLaunchingController(regattaName, raceId);
         finishSetUp(receiverTypes);
     }
@@ -93,7 +94,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
-            throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException {
         setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
         finishSetUp(receiverTypes);
     }
@@ -145,7 +146,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
-            URISyntaxException {
+            URISyntaxException, SubscriberInitializationException {
         final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
         final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
         final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
@@ -154,7 +155,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
 
     protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri)
-            throws FileNotFoundException, MalformedURLException {
+            throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());

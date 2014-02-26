@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
@@ -60,7 +61,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     }
 
-    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
+    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException {
         super.setUp();
         URI storedUri = new URI("file:///" + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(new URL("file:///" + new File("resources/" + getFileName() + raceNumber + ".txt").getCanonicalPath()),
@@ -84,7 +85,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected abstract String getFileName();
 
-    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
+    protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException {
         setUp(raceNumber);
         testWholeRace();
         testMiddleOfRace(2);

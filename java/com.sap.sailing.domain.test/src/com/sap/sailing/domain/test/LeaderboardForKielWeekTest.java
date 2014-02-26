@@ -28,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
@@ -39,7 +40,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     @Test
-    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException {
+    public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException, SubscriberInitializationException {
         leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }),
                 new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
@@ -68,7 +69,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     }
 
     private void loadRace(String paramsFile, String storedDataFile) throws MalformedURLException, IOException, InterruptedException,
-            URISyntaxException {
+            URISyntaxException, SubscriberInitializationException {
         final String raceName = "505 Race 2 from Kieler Woche 2011";
         logger.info("Loading race "+raceName);
         URI storedUri = new URI("file:///"+new File("resources/"+storedDataFile).getCanonicalPath().replace('\\', '/'));
