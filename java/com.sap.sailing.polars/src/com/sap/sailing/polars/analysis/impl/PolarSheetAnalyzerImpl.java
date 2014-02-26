@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.analysis;
+package com.sap.sailing.polars.analysis.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.PolarSheetsData;
@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.polars.PolarDataService;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
 
 /**
  * Extracts typical measures from polar sheets.
@@ -14,15 +15,16 @@ import com.sap.sailing.polars.PolarDataService;
  * @author Frederik Petersen (D054528)
  * 
  */
-public class PolarSheetAnalyzer {
+public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzerInterface {
 
     private PolarDataService polarDataService;
 
-    public PolarSheetAnalyzer(PolarDataService polarDataService) {
+    public PolarSheetAnalyzerImpl(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
     }
 
-    public SpeedWithBearing getOptimalUpwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
+    @Override
+	public SpeedWithBearing getOptimalUpwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
         PolarSheetsData data = polarDataService.getPolarSheetForBoatClass(boatClass);
         Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
         int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());
@@ -43,7 +45,8 @@ public class PolarSheetAnalyzer {
         return new KnotSpeedWithBearingImpl(optUpwindSpeed, new DegreeBearingImpl(optUpwindDeg));
     }
 
-    public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
+    @Override
+	public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
         PolarSheetsData data = polarDataService.getPolarSheetForBoatClass(boatClass);
         Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
         int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());

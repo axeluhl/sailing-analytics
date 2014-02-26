@@ -12,7 +12,8 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
-import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
+import com.sap.sailing.polars.analysis.impl.PolarSheetAnalyzerImpl;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 
 public class PolarSheetAnalyzerTest {
@@ -28,7 +29,7 @@ public class PolarSheetAnalyzerTest {
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, {} };
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, 0, null,
                 settings.getWindStepping(), null);
-        PolarSheetAnalyzer analyzer = new PolarSheetAnalyzer(new MockedPolarDataService(null, data));
+        PolarSheetAnalyzerInterface analyzer = new PolarSheetAnalyzerImpl(new MockedPolarDataService(null, data));
         SpeedWithBearing result = analyzer.getOptimalUpwindSpeedWithBearingFor(null, new KnotSpeedImpl(6));
         Assert.assertEquals(0.5 * Math.cos(Math.toRadians(45)), result.getKnots(), 0.01);
         Assert.assertEquals(45, result.getBearing().getDegrees(), 0.01);
@@ -48,7 +49,7 @@ public class PolarSheetAnalyzerTest {
                         0, 0, 0, 0, 0, 0, 0 }, {} };
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, 0, null,
                 settings.getWindStepping(), null);
-        PolarSheetAnalyzer analyzer = new PolarSheetAnalyzer(new MockedPolarDataService(null, data));
+        PolarSheetAnalyzerInterface analyzer = new PolarSheetAnalyzerImpl(new MockedPolarDataService(null, data));
         SpeedWithBearing result = analyzer.getOptimalDownwindSpeedWithBearingFor(null, new KnotSpeedImpl(6));
         Assert.assertEquals(4.5 * Math.sin(Math.toRadians(85)), result.getKnots(), 0.01);
         Assert.assertEquals(175, result.getBearing().getDegrees(), 0.01);

@@ -23,6 +23,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
+import com.sap.sailing.polars.analysis.impl.PolarSheetAnalyzerImpl;
 import com.sap.sailing.polars.caching.NoCacheEntryException;
 import com.sap.sailing.polars.caching.PolarFixCache;
 import com.sap.sailing.polars.caching.PolarFixCacheRaceInterval;
@@ -45,11 +47,14 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     private final PolarFixCache polarFixCache;
     private final PolarSheetPerBoatClassCache polarSheetPerBoatClassCache;
+    
+    private final PolarSheetAnalyzerInterface polarSheetAnalyzer;
 
     public PolarDataServiceImpl(Executor executor) {
         this.polarFixCache = new PolarFixCache(executor);
         this.polarSheetPerBoatClassCache = new PolarSheetPerBoatClassCache(this);
         polarFixCache.addListener(polarSheetPerBoatClassCache);
+        this.polarSheetAnalyzer = new PolarSheetAnalyzerImpl(this);
     }
 
     @Override
@@ -198,5 +203,10 @@ public class PolarDataServiceImpl implements PolarDataService {
     public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
         return polarSheetPerBoatClassCache.keySet();
     }
+
+	@Override
+	public PolarSheetAnalyzerInterface getAnalyzer() {
+		return polarSheetAnalyzer;
+	}
 
 }

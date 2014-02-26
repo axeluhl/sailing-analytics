@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.analysis.PolarSheetAnalyzerInterface;
 import com.sap.sailing.polars.data.PolarFix;
 
 /**
@@ -64,13 +65,15 @@ public interface PolarDataService {
      *            The {@link BoatClass} to obtain the polar sheet for.
      * @return The polar sheet for all existing races of the {@link BoatClass}.
      */
-    public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
+    PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
 
     /**
      * 
      * @return The {@link BoatClass}es for which there are polar sheets available via
      *         {@link PolarDataService#getPolarSheetForBoatClass(BoatClass)}
      */
-    public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
+    Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable();
+    
+    PolarSheetAnalyzerInterface getAnalyzer();
 
 }
