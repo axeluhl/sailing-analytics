@@ -1973,7 +1973,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.discardThresholds = null;
         }
-        leaderboardDTO.raceLogTrackedRacesCouldBeAdded = false;
+        leaderboardDTO.isDenotedForRaceLogTracking = false;
+        leaderboardDTO.raceLogTrackersCanBeAdded = false;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceDTO raceDTO = null;
@@ -1992,11 +1993,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 fleetDTO.raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-                fleetDTO.raceLogTrackerForRaceExists = getService().getRaceTrackerById(raceLog.getId()) != null;
+                fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
                 
-                if (getRaceLogTrackingAdapter().canRaceBeAdded(getService(), raceColumn, fleet)) {
-                	leaderboardDTO.raceLogTrackedRacesCouldBeAdded = true;
-                	fleetDTO.raceLogTrackedRaceCouldBeAdded = true;
+                if (getRaceLogTrackingAdapter().isDenotedForRaceLogTracking(getService(), raceColumn, fleet)) {
+                    leaderboardDTO.isDenotedForRaceLogTracking = true;
+                }
+                
+                if (getRaceLogTrackingAdapter().canRaceLogTrackerBeAdded(getService(), raceColumn, fleet)) {
+                    leaderboardDTO.raceLogTrackersCanBeAdded = true;
+                    fleetDTO.raceLogTrackerCanBeAdded = true;
                 }
             }
         }
@@ -3840,7 +3845,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
     	RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
     	
-    	Map<RaceColumn, Collection<Fleet>> canBeLoaded = adapter.listRacesThatCanBeAdded(getService(), leaderboard);
+    	Map<RaceColumn, Collection<Fleet>> canBeLoaded = adapter.listRaceLogTrackersThatCanBeAdded(getService(), leaderboard);
     	for (RaceColumn raceColumn : canBeLoaded.keySet()) {
     		if (canBeLoaded.get(raceColumn) != null) {
     			for (Fleet fleet : canBeLoaded.get(raceColumn)) {
@@ -3858,5 +3863,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	Fleet fleet = raceColumn.getFleetByName(fleetName);
     	
     	getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+    }
+    
+    @Override
+    public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
+        getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard);
     }
 }

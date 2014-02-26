@@ -97,6 +97,12 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         createSwissTimingRacePanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, createSwissTimingRacePanel, stringMessages.createSwissTimingRace());
 
+        final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
+                sailingService, this, this, stringMessages);
+        raceLogTrackingEventManagementPanel.setSize("90%", "90%");
+        addScrollableTab(tabPanel, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking());
+        regattaDisplayers.add(raceLogTrackingEventManagementPanel);
+
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, this, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         igtimiAccountsPanel.setSize("90%", "90%");
@@ -177,6 +183,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
                 }
                 if (competitorPanel.isVisible()) {
                     competitorPanel.refreshCompetitorList();
+                }
+                if (raceLogTrackingEventManagementPanel.isVisible()) {
+                    raceLogTrackingEventManagementPanel.loadLeaderboards();
                 }
             }
         });

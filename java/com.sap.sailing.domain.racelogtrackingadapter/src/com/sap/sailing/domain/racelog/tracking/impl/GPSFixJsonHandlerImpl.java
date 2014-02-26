@@ -9,23 +9,22 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 
 public class GPSFixJsonHandlerImpl<T extends GPSFix> implements GPSFixJsonHandler {
-	private final JsonDeserializer<T> deserializer;
-	private final JsonSerializer<T> serializer;
+    private final JsonDeserializer<T> deserializer;
+    private final JsonSerializer<T> serializer;
 
-	public GPSFixJsonHandlerImpl(JsonDeserializer<T> deserializer,
-			JsonSerializer<T> serializer) {
-		this.deserializer = deserializer;
-		this.serializer = serializer;
-	}
+    public GPSFixJsonHandlerImpl(JsonDeserializer<T> deserializer, JsonSerializer<T> serializer) {
+        this.deserializer = deserializer;
+        this.serializer = serializer;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public JSONObject transformForth(GPSFix fix) throws IllegalArgumentException {
-		return serializer.serialize((T) fix);
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public JSONObject transformForth(GPSFix fix) throws IllegalArgumentException {
+        return serializer.serialize((T) fix);
+    }
 
-	@Override
-	public GPSFix transformBack(JSONObject json) throws JsonDeserializationException {
-		return deserializer.deserialize(json);
-	}
+    @Override
+    public GPSFix transformBack(JSONObject json) throws JsonDeserializationException {
+        return deserializer.deserialize(json);
+    }
 }

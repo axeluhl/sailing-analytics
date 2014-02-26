@@ -960,7 +960,7 @@ public interface StringMessages extends Messages {
     String hasSplitFleetContiguousScoring();
     String eventOverview();
     String addRaceLogTracker();
+    String addRaceLogTrackers();
     String denoteForRaceLogTracking();
-    String raceLogTrackerExists();
-    String raceLogTrackingState();
+    String raceLogTracking();
 }

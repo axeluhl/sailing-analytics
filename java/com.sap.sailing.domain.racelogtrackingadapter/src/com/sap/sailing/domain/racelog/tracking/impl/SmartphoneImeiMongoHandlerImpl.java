@@ -7,8 +7,8 @@ import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 
 public class SmartphoneImeiMongoHandlerImpl implements DeviceIdentifierMongoHandler {
     private SmartphoneImeiIdentifier castIdentifier(DeviceIdentifier identifier) throws TransformationException {
-        if (! (identifier instanceof SmartphoneImeiIdentifier))
-        	throw new TransformationException("Expected a SmartphoneImeiIdentifier, got instead: " + identifier);
+        if (!(identifier instanceof SmartphoneImeiIdentifier))
+            throw new TransformationException("Expected a SmartphoneImeiIdentifier, got instead: " + identifier);
         return (SmartphoneImeiIdentifier) identifier;
     }
 

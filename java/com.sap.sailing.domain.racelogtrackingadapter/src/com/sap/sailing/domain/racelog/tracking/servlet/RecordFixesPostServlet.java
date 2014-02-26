@@ -19,17 +19,18 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 
-public class RecordFixesPostServlet extends AbstractJsonPostServlet<Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {    
+public class RecordFixesPostServlet extends
+        AbstractJsonPostServlet<Triple<DeviceIdentifier, Serializable, List<GPSFix>>, Void> {
     private static final long serialVersionUID = 2778739335260621119L;
     private DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {  
-    	super.init(config);
-        TypeBasedServiceFinder<GPSFixJsonHandler> fixServiceFinder =
-        		getServiceFinderFactory().createServiceFinder(GPSFixJsonHandler.class);
-        TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder =
-        		getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class);
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        TypeBasedServiceFinder<GPSFixJsonHandler> fixServiceFinder = getServiceFinderFactory().createServiceFinder(
+                GPSFixJsonHandler.class);
+        TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder = getServiceFinderFactory()
+                .createServiceFinder(DeviceIdentifierJsonHandler.class);
         deserializer = new DeviceAndSessionIdentifierWithGPSFixesDeserializer(fixServiceFinder, deviceServiceFinder);
     }
 
@@ -47,14 +48,14 @@ public class RecordFixesPostServlet extends AbstractJsonPostServlet<Triple<Devic
     public Void process(Map<String, String> parameterValues,
             Triple<DeviceIdentifier, Serializable, List<GPSFix>> domainObject) throws HttpExceptionWithMessage {
         DeviceIdentifier device = domainObject.getA();
-        //might use the session id in the future
-//        Serializable sessionId = domainObject.getB();
+        // might use the session id in the future
+        // Serializable sessionId = domainObject.getB();
         List<GPSFix> fixes = domainObject.getC();
-        
+
         for (GPSFix fix : fixes) {
-        	getService().getGPSFixStore().storeFix(device, fix);
+            getService().getGPSFixStore().storeFix(device, fix);
         }
-               
-        return null;        
+
+        return null;
     }
 }

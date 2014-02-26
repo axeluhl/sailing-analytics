@@ -31,6 +31,8 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
      */
     private final static ImagesBarTemplates imageTemplate = GWT.create(ImagesBarTemplates.class);
     
+    private Context context;
+    
     protected class ImageSpec {
         private final AbstractImagePrototype imagePrototype;
         private final String actionName;
@@ -138,9 +140,15 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
     }
     
     protected abstract Iterable<ImageSpec> getImageSpecs();
+    
+    protected Context getContext() {
+        return context;
+    }
 
     @Override
     protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
+        this.context = context;
+        
         /*
          * Always do a null check on the value. Cell widgets can pass null to
          * cells if the underlying data contains a null, or if the data arrives

@@ -5,15 +5,15 @@ import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
 
 public enum RaceLogTrackingAdapterFactoryImpl implements RaceLogTrackingAdapterFactory {
-	INSTANCE;
-	private RaceLogTrackingAdapter adapter;
+    INSTANCE;
+    private RaceLogTrackingAdapter adapter;
 
-	@Override
-	public RaceLogTrackingAdapter getAdapter(DomainFactory baseDomainFactory) {
-		if (adapter == null) {
-			adapter = new RaceLogTrackingAdapterImpl(baseDomainFactory);
-		}
-		return adapter;
-	}
+    @Override
+    public RaceLogTrackingAdapter getAdapter(DomainFactory baseDomainFactory) {
+        if (adapter == null) {
+            adapter = new RaceLogTrackingAdapterImpl(baseDomainFactory);
+        }
+        return adapter;
+    }
 
 }

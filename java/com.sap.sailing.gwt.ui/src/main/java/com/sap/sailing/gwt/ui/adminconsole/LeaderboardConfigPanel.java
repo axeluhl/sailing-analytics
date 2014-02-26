@@ -50,7 +50,6 @@ import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -76,7 +75,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
-    TrackedRaceChangedListener {
+TrackedRaceChangedListener {
 
     private final TrackedRacesListComposite trackedRacesListComposite;
 
@@ -132,7 +131,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
-    private static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Pair<RaceColumnDTO, FleetDTO> {
+    public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Pair<RaceColumnDTO, FleetDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
         public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b) {
@@ -250,7 +249,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 int val = -1;
                 val = (o1 != null && o2 != null && ascending) ? (o1.name.compareTo(o2.name)) : -(o2.name
                         .compareTo(o1.name));
-                        
+
                 return val;
             }
 
@@ -362,13 +361,11 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                         }
                     });
                     editCompetitorsDialog.show();
-                    
+
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name, "", null);
-                } else if (LeaderboardConfigImagesBarCell.ACTION_ADD_RACELOG_TRACKER.equals(value)) {
-                	addRaceLogTracker(leaderboardDTO);
                 }
             }
         });
@@ -497,7 +494,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     @Override
                     public boolean isEnabled() {
                         return getSelectedLeaderboard() != null && !getSelectedLeaderboard().type.isRegattaLeaderboard();
-                                
+
                     }
                 })) {
             @Override
@@ -521,22 +518,6 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             }
         };
 
-        TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogTrackerExistsColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
-            @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
-                boolean trackerExists = raceColumnAndFleetName.getB().raceLogTrackerForRaceExists;
-                return trackerExists ? "X" : "";
-            }
-        };
-
-        TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogTrackingStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
-            @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
-                RaceLogTrackingState state = raceColumnAndFleetName.getB().raceLogTrackingState;
-                return state.isForTracking() ? state.name() : "";
-            }
-        };
-        
         ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell> raceActionColumn =
                 new ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell>(
                         new LeaderboardRaceConfigImagesBarCell(this, stringMessages));
@@ -557,10 +538,6 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     setStartTime(object.getA(), object.getB());
                 } else if(LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
-                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_ADD_RACELOG_TRACKER.equals(value)) {
-                	addRaceLogTracker(object.getA(), object.getB());
-                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
-                	denoteForRaceLogTracking(object.getA(), object.getB());
                 }
             }
         });
@@ -573,8 +550,6 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         raceColumnTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         raceColumnTable.addColumn(explicitFactorColumn, stringMessages.factor());
-        raceColumnTable.addColumn(raceLogTrackerExistsColumn, stringMessages.raceLogTrackerExists());
-        raceColumnTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceLogTrackingState());
         raceColumnTable.addColumn(raceActionColumn, stringMessages.actions());
         raceColumnAndFleetList.addDataDisplay(raceColumnTable);
         raceColumnTable.setWidth("500px");
@@ -794,7 +769,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             }
         });
     }
-    
+
     private void openRaceLogDialog(RaceLogDTO raceLogDTO) {
         RaceLogDialog dialog = new RaceLogDialog(raceLogDTO, stringMessages, new DialogCallback<RaceLogDTO>() { 
             @Override
@@ -927,12 +902,12 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             + selectedRaceColumnName + " in leaderboard " + selectedLeaderboardName + ": "
                             + t.getMessage());
                 }
-                
+
                 @Override
                 public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
                     if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
-                                    RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
-                                            .get(selectedFleetName);
+                        RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet
+                                .get(selectedFleetName);
                         if (raceIdentifier != null) {
                             selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
                         } else {
@@ -1028,7 +1003,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorUpdatingIsMedalRace(caught.getMessage()));
             }
-            
+
             @Override
             public void onSuccess(Void result) {
                 getSelectedLeaderboard().setIsMedalRace(raceInLeaderboard.getRaceColumnName(), isMedalRace);
@@ -1047,7 +1022,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void cancel() {
             }
-            
+
             @Override
             public void ok(final List<RaceColumnDTO> result) {
                 updateRaceColumnsOfLeaderboard(leaderboardName, existingRaceColumns, result);
@@ -1163,7 +1138,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             @Override
             public void cancel() {
             }
-            
+
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
@@ -1174,7 +1149,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                         errorReporter.reportError("Error trying to create the new flexible leaderboard " + newLeaderboard.getName()
                                 + ": " + t.getMessage());
                     }
-                    
+
                     @Override
                     public void handleSuccess(StrippedLeaderboardDTO result) {
                         addLeaderboard(result);
@@ -1203,7 +1178,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                         errorReporter.reportError("Error trying to create the new regatta leaderboard " + newLeaderboard.getName()
                                 + ": " + t.getMessage());
                     }
-                    
+
                     @Override
                     public void onSuccess(StrippedLeaderboardDTO result) {
                         addLeaderboard(result);
@@ -1229,7 +1204,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "
                         + t.getMessage());
             }
-            
+
             @Override
             public void onSuccess(StrippedLeaderboardDTO updatedLeaderboard) {
                 int indexOfLeaderboard = 0;
@@ -1257,7 +1232,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove the leaderboards:" + caught.getMessage());
-                           
+
 
                 }
 
@@ -1334,59 +1309,5 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     @Override
     public StrippedLeaderboardDTO getSelectedLeaderboard() {
         return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null : leaderboardSelectionModel.getSelectedSet().iterator().next();
-    }
-    
-    private void addRaceLogTracker(final StrippedLeaderboardDTO leaderboard) {
-    	final RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRCFleet = getSelectedRaceColumnWithFleet();
-    	if (leaderboard.raceLogTrackedRacesCouldBeAdded) {
-    		sailingService.addRaceLogTrackers(leaderboard.name, new AsyncCallback<Void>() {
-				@Override
-				public void onSuccess(Void result) {
-					loadAndRefreshLeaderboard(leaderboard.name, selectedRCFleet.getA().getName());
-				}
-				
-				@Override
-				public void onFailure(Throwable caught) {
-					errorReporter.reportError("Failed to add RaceLog tracker: " + caught.getMessage());
-				}
-			});
-    	} else {
-    		errorReporter.reportError("No RaceLogTracker can be added for any of the RaceLogs in this leaderboard");
-    	}
-    }
-    
-    private void addRaceLogTracker(final RaceColumnDTO raceColumn, FleetDTO fleet) {
-    	if (fleet.raceLogTrackedRaceCouldBeAdded) {
-    		final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
-    		sailingService.addRaceLogTracker(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Void>() {
-				@Override
-				public void onSuccess(Void result) {
-					loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
-				}
-				
-				@Override
-				public void onFailure(Throwable caught) {
-					errorReporter.reportError("Failed to add RaceLog trackers: " + caught.getMessage());
-				}
-			});
-    	} else {
-    		errorReporter.reportError("No RaceLogTracker can be added for the RaceLog of this fleet");
-    	}    	
-    }
-    
-    private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
-    	final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
-    	sailingService.denoteForRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Void>() {
-    		@Override
-    		public void onSuccess(Void result) {
-    			loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
-    			refreshRaceLog(raceColumn, fleet, true);
-    		}
-
-    		@Override
-    		public void onFailure(Throwable caught) {
-    			errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
-    		}
-    	});
     }
 }

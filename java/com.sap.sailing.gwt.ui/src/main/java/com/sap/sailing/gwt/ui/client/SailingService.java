@@ -383,4 +383,6 @@ public interface SailingService extends RemoteService {
     void addRaceLogTracker(String leaderboardName, String raceColumnName, String fleetName) throws Exception, RaceNotCreatedException;
     
     void denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws Exception;
+
+    void denoteForRaceLogTracking(String leaderboardName) throws Exception;
 }
