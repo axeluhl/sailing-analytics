@@ -24,7 +24,7 @@ public final class DataMiningFactory {
     
     private DataMiningFactory() { }
 
-    public static <DataType, AggregatedType extends Number> Query<DataType, AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
+    public static <DataType, AggregatedType extends Number> Query<AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
         Locale locale = stringMessages.getLocaleFrom(queryDefinition.getLocaleName());
         
         ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), racingService, getExecutor());

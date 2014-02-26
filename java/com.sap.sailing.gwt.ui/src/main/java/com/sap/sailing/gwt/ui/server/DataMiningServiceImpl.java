@@ -85,7 +85,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public <ResultType extends Number> QueryResult<ResultType> runQuery(QueryDefinition queryDefinition) throws Exception {
-        Query<?, ResultType> query = DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
+        Query<ResultType> query = DataMiningFactory.createQuery(queryDefinition, getRacingEventService());
         return query.run();
     }
     

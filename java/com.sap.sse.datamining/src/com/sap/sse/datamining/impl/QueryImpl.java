@@ -18,7 +18,7 @@ import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
-public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<DataType, AggregatedType> {
+public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<AggregatedType> {
 
     private DataMiningStringMessages stringMessages;
     private Locale locale;
