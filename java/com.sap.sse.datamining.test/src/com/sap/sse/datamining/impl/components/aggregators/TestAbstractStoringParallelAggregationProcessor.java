@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.components;
+package com.sap.sse.datamining.impl.components.aggregators;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -59,8 +59,6 @@ public class TestAbstractStoringParallelAggregationProcessor {
         processElementAndVerifyThatItWasStored(processor, 7);
         
         processor.finish();
-        ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish
-        
         assertThat("The receiver wasn't told to finish", receiverWasToldToFinish, is(true));
         Integer expectedReceivedElement = 42 + 7;
         assertThat(receivedElement, is(expectedReceivedElement));
@@ -70,6 +68,36 @@ public class TestAbstractStoringParallelAggregationProcessor {
         processor.onElement(element);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to process the instructions
         assertThat("The element store doesn't contain the previously processed element '" + element + "'", elementStore.contains(element), is(true));
+    }
+    
+    @Test(timeout=5000)
+    public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
+        Processor<Integer> processor = new AbstractStoringParallelAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+            @Override
+            protected void storeElement(Integer element) {
+                if (element < 0) {
+                    throw new IllegalArgumentException("The element mustn't be negative");
+                }
+                elementStore.add(element);
+            }
+            @Override
+            protected Integer aggregateResult() {
+                Integer sum = 0;
+                for (Integer element : elementStore) {
+                    sum += element;
+                }
+                return sum;
+            }
+        };
+
+        processor.onElement(-1);
+        processor.onElement(42);
+        processor.onElement(7);
+        
+        processor.finish();
+        assertThat("The receiver wasn't told to finish", receiverWasToldToFinish, is(true));
+        Integer expectedReceivedElement = 42 + 7;
+        assertThat(receivedElement, is(expectedReceivedElement));
     }
 
 }

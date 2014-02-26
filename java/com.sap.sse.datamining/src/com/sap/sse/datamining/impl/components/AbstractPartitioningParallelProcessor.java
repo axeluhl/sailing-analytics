@@ -88,17 +88,21 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
 
     @Override
     public void finish() throws InterruptedException {
+        sleepUntilAllInstructionsFinished();
+        notifyResultReceiversToFinish();
+    }
+
+    protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
         while (areUnfinishedInstructionsLeft()) {
             Thread.sleep(SLEEP_TIME_DURING_FINISHING);
         }
-        notifyResultReceiversToFinish();
     }
 
     private boolean areUnfinishedInstructionsLeft() {
         return unfinishedInstructionsCounter.getUnfinishedInstructionsAmount() > 0;
     }
 
-    private void notifyResultReceiversToFinish() {
+    protected void notifyResultReceiversToFinish() {
         for (Processor<ResultType> resultReceiver : getResultReceivers()) {
             try {
                 resultReceiver.finish();
@@ -115,6 +119,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         
         private int unfinishedInstructionsAmount;
         
+        //TODO replace synchronized with ReentrantReadWriteLock
         public synchronized void increment() {
             unfinishedInstructionsAmount++;
         }
