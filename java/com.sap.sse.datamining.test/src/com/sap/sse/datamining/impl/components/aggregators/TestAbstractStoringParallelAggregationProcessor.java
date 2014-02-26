@@ -40,7 +40,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer> processor = new AbstractStoringParallelAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -72,7 +72,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Processor<Integer> processor = new AbstractStoringParallelAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

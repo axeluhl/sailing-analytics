@@ -8,12 +8,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 
-public abstract class AbstractStoringParallelAggregationProcessor<InputType, AggregatedType> 
+public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
                       extends AbstractSimpleParallelProcessor<InputType, AggregatedType> {
 
     private final ReentrantReadWriteLock storeLock;
 
-    public AbstractStoringParallelAggregationProcessor(Executor executor, Collection<Processor<AggregatedType>> resultReceivers) {
+    public AbstractParallelStoringAggregationProcessor(Executor executor, Collection<Processor<AggregatedType>> resultReceivers) {
         super(executor, resultReceivers);
         storeLock = new ReentrantReadWriteLock();
     }
@@ -29,7 +29,7 @@ public abstract class AbstractStoringParallelAggregationProcessor<InputType, Agg
                 } finally {
                     storeLock.writeLock().unlock();
                 }
-                return AbstractStoringParallelAggregationProcessor.super.createInvalidResult();
+                return AbstractParallelStoringAggregationProcessor.super.createInvalidResult();
             }
         };
     }

@@ -11,9 +11,9 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
-        AbstractStoringParallelAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
 
-    private final AbstractStoringParallelAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
+    private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
     private final Map<GroupKey, Integer> elementAmountPerKey;
 
     public ParallelGroupedDoubleDataAverageAggregationProcessor(Executor executor,

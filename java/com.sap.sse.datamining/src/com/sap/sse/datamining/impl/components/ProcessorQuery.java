@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -8,6 +9,8 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
 public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
     
@@ -71,8 +74,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         }
 
         private QueryResult<AggregatedType> constructResult(Map<GroupKey, AggregatedType> groupedAggregations) {
-            // TODO Auto-generated method stub
-            return null;
+            QueryResultImpl<AggregatedType> result = new QueryResultImpl<>(0, 0, "", Unit.None, 0);
+            for (Entry<GroupKey, AggregatedType> groupedAggregationsEntry : groupedAggregations.entrySet()) {
+                result.addResult(groupedAggregationsEntry.getKey(), groupedAggregationsEntry.getValue());
+            }
+            return result;
         }
 
         @Override

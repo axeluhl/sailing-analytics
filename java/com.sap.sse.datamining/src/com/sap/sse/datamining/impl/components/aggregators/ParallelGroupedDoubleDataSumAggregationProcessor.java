@@ -11,7 +11,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelGroupedDoubleDataSumAggregationProcessor
-             extends AbstractStoringParallelAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+             extends AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
 
     private Map<GroupedDataEntry<Double>, Integer> elementAmountMap;
 
@@ -34,9 +34,9 @@ public class ParallelGroupedDoubleDataSumAggregationProcessor
     protected Map<GroupKey, Double> aggregateResult() {
         Map<GroupKey, Double> result = new HashMap<>();
         for (Entry<GroupedDataEntry<Double>, Integer> elementAmountEntry : elementAmountMap.entrySet()) {
-            Double element = elementAmountEntry.getKey().getDataEntry();
+            Number element = elementAmountEntry.getKey().getDataEntry();
             Integer times = elementAmountEntry.getValue();
-            Double multipliedElementValue = multiply(element, times);
+            Double multipliedElementValue = multiply(element.doubleValue(), times);
             
             GroupKey groupKey = elementAmountEntry.getKey().getKey();
             Double groupResult = result.get(groupKey);
