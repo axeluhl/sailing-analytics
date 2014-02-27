@@ -41,11 +41,11 @@ import com.sap.sailing.server.RacingEventService;
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private static final Logger logger = Logger.getLogger(RaceLogTrackingAdapterImpl.class.getName());
 
-//    private final DomainFactory domainFactory;
+    private final DomainFactory domainFactory;
     private final long delayToLiveInMillis;
 
     public RaceLogTrackingAdapterImpl(DomainFactory domainFactory) {
-//        this.domainFactory = domainFactory;
+        this.domainFactory = domainFactory;
         this.delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
     }
 
@@ -55,7 +55,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             FileNotFoundException, URISyntaxException, RaceNotCreatedException, Exception, RaceNotCreatedException {
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
         RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
-                leaderboard, delayToLiveInMillis);
+                leaderboard, delayToLiveInMillis, domainFactory);
         return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
     }
 

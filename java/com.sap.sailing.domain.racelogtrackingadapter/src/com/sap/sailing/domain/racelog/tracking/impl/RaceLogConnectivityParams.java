@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.tracking.impl;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
@@ -26,15 +27,17 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
     private final Leaderboard leaderboard;
     private final long delayToLiveInMillis;
     private final Regatta regatta;
+    private final DomainFactory domainFactory;
 
     public RaceLogConnectivityParams(RacingEventService service, Regatta regatta, RaceColumn raceColumn, Fleet fleet,
-            Leaderboard leaderboard, long delayToLiveInMillis) throws RaceNotCreatedException {
+            Leaderboard leaderboard, long delayToLiveInMillis, DomainFactory domainFactory) throws RaceNotCreatedException {
         this.service = service;
         this.regatta = regatta;
         this.raceColumn = raceColumn;
         this.fleet = fleet;
         this.leaderboard = leaderboard;
         this.delayToLiveInMillis = delayToLiveInMillis;
+        this.domainFactory = domainFactory;
 
         if (!new RaceLogTrackingStateAnalyzer(getRaceLog()).analyze().isForTracking()) {
             throw new RaceNotCreatedException(String.format("Racelog (%s) is not denoted for tracking", getRaceLog()));
@@ -90,5 +93,9 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
     public RacingEventService getService() {
         return service;
+    }
+    
+    public DomainFactory getDomainFactory() {
+        return domainFactory;
     }
 }

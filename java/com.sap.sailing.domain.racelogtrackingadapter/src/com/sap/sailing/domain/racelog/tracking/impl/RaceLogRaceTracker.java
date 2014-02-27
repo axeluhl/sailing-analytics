@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -19,9 +20,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -31,6 +34,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
@@ -55,6 +59,8 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+
+import difflib.PatchFailedException;
 
 /**
  * Track a race using the data defined in the {@link RaceLog}. If the events suggest that the race is already in the
@@ -297,6 +303,25 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     public void visit(StartTrackingEvent event) {
         if (trackedRace == null)
             startTracking(event);
+    }
+    
+    @Override
+    public void visit(RaceLogCourseDesignChangedEvent event) {
+        if (trackedRace == null) return;
+        
+        CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+        List<Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+        
+        for (Waypoint waypoint : base.getWaypoints()) {
+            update.add(new Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+        }
+        
+        try {
+            trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+        } catch (PatchFailedException e) {
+            logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+            e.printStackTrace();
+        }
     }
 
     private void startTracking(StartTrackingEvent event) {
