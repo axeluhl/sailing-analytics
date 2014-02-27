@@ -133,14 +133,13 @@ public class ActivelyConnectingStoreAndForwardTest {
         String rawMessage = "RAC|2|4711;A wonderful test race|4712;Not such a wonderful race";
         transceiver.sendMessage(rawMessage, sendingStream);
         synchronized (this) {
-            if (!receivedSomething[0]) {
-                wait(2000l); // wait for two seconds to receive the message
+            for (int i=0; i<1000 && !receivedSomething[0]; i++) {
+                wait(100l); // wait for 1/10 of a second (up to 1000 times = 100s) to receive the message
             }
         }
         assertTrue(receivedSomething[0]);
         assertEquals(2, racesReceived.size());
         db.getLastError(); // synchronize on DB and wait for last write to have completed
-        Thread.sleep(2000); // the synchronization doesn't seem to help
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         Long lastMessageCount = (Long) lastMessageCountCollection.findOne().get(FieldNames.LAST_MESSAGE_COUNT.name());
         assertEquals((Long) 1l, lastMessageCount);
