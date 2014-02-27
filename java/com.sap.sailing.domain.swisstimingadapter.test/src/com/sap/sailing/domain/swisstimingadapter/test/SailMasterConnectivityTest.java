@@ -16,7 +16,9 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
@@ -44,6 +46,8 @@ public class SailMasterConnectivityTest {
     private SailMasterConnector connector;
     private Thread dummyServerThread;
     private SailMasterDummy sailMaster;
+    
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
     
     @Before
     public void setUp() throws InterruptedException, ParseException {
