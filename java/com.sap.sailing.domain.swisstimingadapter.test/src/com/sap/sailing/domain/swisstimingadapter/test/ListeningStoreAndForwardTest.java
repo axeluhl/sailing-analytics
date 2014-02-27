@@ -13,7 +13,9 @@ import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -44,6 +46,8 @@ public class ListeningStoreAndForwardTest {
     private SailMasterConnector connector;
     private SwissTimingAdapterPersistence swissTimingAdapterPersistence;
     private SwissTimingFactory swissTimingFactory;
+
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
 
     @Before
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
