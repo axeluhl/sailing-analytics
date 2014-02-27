@@ -25,8 +25,8 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
 
         result.put(FIELD_ID, event.getId().toString());
         result.put(FIELD_NAME, event.getName());
-        result.put(FIELD_START_DATE, event.getStartDate().asMillis());
-        result.put(FIELD_END_DATE, event.getEndDate().asMillis());
+        result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
+        result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
 
         return result;
