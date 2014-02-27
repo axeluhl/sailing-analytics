@@ -11,18 +11,18 @@ import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 
 public class StartTrackingEventImpl extends RaceLogEventImpl implements
-		StartTrackingEvent {
-	private static final long serialVersionUID = 6017954368580125221L;
+StartTrackingEvent {
+    private static final long serialVersionUID = 6017954368580125221L;
 
-	public StartTrackingEventImpl(TimePoint createdAt, RaceLogEventAuthor author,
-			TimePoint logicalTimePoint, Serializable pId, int pPassId) {
-		super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
-	}
+    public StartTrackingEventImpl(TimePoint createdAt, RaceLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable pId, int pPassId) {
+        super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
+    }
 
 
-	@Override
-	public void accept(RaceLogEventVisitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(RaceLogEventVisitor visitor) {
+        visitor.visit(this);
+    }
 
 }

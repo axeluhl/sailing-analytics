@@ -10,16 +10,16 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 
 public class DeviceMarkMappingEventImpl extends AbstractDeviceMappingEventImpl<Mark>
-	implements DeviceMarkMappingEvent {
-	public DeviceMarkMappingEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-			Serializable pId, int pPassId, Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
-		super(createdAt, author, logicalTimePoint, pId, pPassId, mappedTo, device, from, to);
-	}
+implements DeviceMarkMappingEvent {
+    public DeviceMarkMappingEventImpl(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable pId, int pPassId, Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
+        super(createdAt, author, logicalTimePoint, pId, pPassId, mappedTo, device, from, to);
+    }
 
-	private static final long serialVersionUID = -1494030544804758753L;
+    private static final long serialVersionUID = -1494030544804758753L;
 
-	@Override
-	public void accept(RaceLogEventVisitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(RaceLogEventVisitor visitor) {
+        visitor.visit(this);
+    }
 }

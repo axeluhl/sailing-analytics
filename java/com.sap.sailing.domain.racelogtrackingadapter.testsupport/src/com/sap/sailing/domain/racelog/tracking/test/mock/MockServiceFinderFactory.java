@@ -20,18 +20,18 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
  *
  */
 public class MockServiceFinderFactory implements TypeBasedServiceFinderFactory {
-	Map<Class<?>, TypeBasedServiceFinder<?>> serviceFinders = new HashMap<>();
-	
-	public MockServiceFinderFactory() {
-		serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockSmartphoneImeiMongoServiceFinder());
-		serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockSmartphoneImeiJsonServiceFinder());
-		serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
-		serviceFinders.put(GPSFixJsonHandler.class, new MockGPSFixJsonServiceFinder());
-	}
-    
+    Map<Class<?>, TypeBasedServiceFinder<?>> serviceFinders = new HashMap<>();
+
+    public MockServiceFinderFactory() {
+        serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockSmartphoneImeiMongoServiceFinder());
+        serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockSmartphoneImeiJsonServiceFinder());
+        serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
+        serviceFinders.put(GPSFixJsonHandler.class, new MockGPSFixJsonServiceFinder());
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <ServiceT> TypeBasedServiceFinder<ServiceT> createServiceFinder(Class<ServiceT> clazz) {
-    	return (TypeBasedServiceFinder<ServiceT>) serviceFinders.get(clazz);
+        return (TypeBasedServiceFinder<ServiceT>) serviceFinders.get(clazz);
     }
 }

@@ -7,9 +7,9 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMapping;
 
 public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping<ItemType> {
-	private static final long serialVersionUID = -4602948402371623654L;
-	
-	private final ItemType mappedTo;
+    private static final long serialVersionUID = -4602948402371623654L;
+
+    private final ItemType mappedTo;
     private final DeviceIdentifier device;
     private final TimeRange timeRange;
 
@@ -29,13 +29,13 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
         return timeRange;
     }
 
-	@Override
-	public ItemType getMappedTo() {
-		return mappedTo;
-	}
+    @Override
+    public ItemType getMappedTo() {
+        return mappedTo;
+    }
 
-	@Override
-	public TimePoint getTimePoint() {
-		return timeRange.from();
-	}
+    @Override
+    public TimePoint getTimePoint() {
+        return timeRange.from();
+    }
 }

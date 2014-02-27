@@ -115,7 +115,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         } else {
-        	this.deviceIdentifierServiceFinder = null;
+            this.deviceIdentifierServiceFinder = null;
         }
     }
     
@@ -794,12 +794,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceCompetitorMappingEvent.class.getSimpleName());
         DBObject deviceId = null;
-		try {
-			deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
-			e.printStackTrace();
-		}
+        try {
+            deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);
@@ -813,12 +813,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DeviceMarkMappingEvent.class.getSimpleName());
         DBObject deviceId = null;
-		try {
-			deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
-			e.printStackTrace();
-		}
+        try {
+            deviceId = storeDeviceId(deviceIdentifierServiceFinder, event.getDevice());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not store deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
         result.put(FieldNames.DEVICE_ID.name(), deviceId);
         result.put(FieldNames.MARK_ID.name(), event.getMappedTo().getId());
         storeTimePoint(event.getFrom(), result, FieldNames.RACE_LOG_FROM);

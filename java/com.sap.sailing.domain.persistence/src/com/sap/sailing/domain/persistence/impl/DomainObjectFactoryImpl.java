@@ -169,7 +169,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         } else {
-        	this.deviceIdentifierServiceFinder = null;
+            this.deviceIdentifierServiceFinder = null;
         }
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
@@ -1186,35 +1186,35 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogDeviceCompetitorMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	DeviceIdentifier device = null;
-		try {
-			device = loadDeviceId(deviceIdentifierServiceFinder,
-					(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
-			e.printStackTrace();
-		}
-    	Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
-    			(Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
-    	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
-    	TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
+        DeviceIdentifier device = null;
+        try {
+            device = loadDeviceId(deviceIdentifierServiceFinder,
+                    (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
+        Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
+                (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
+        TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
+        TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
         return raceLogEventFactory.createDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, device, mappedTo, passId, from, to);
     }
 
     private RaceLogEvent loadRaceLogDeviceMarkMappingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	DeviceIdentifier device = null;
-		try {
-			device = loadDeviceId(deviceIdentifierServiceFinder,
-					(DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
-			e.printStackTrace();
-		}
-    	Mark mappedTo = baseDomainFactory.getOrCreateMark(
-    			(Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
-    	TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
-    	TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
+        DeviceIdentifier device = null;
+        try {
+            device = loadDeviceId(deviceIdentifierServiceFinder,
+                    (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
+        Mark mappedTo = baseDomainFactory.getOrCreateMark(
+                (Serializable) dbObject.get(FieldNames.MARK_ID.name()), null);
+        TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
+        TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
         return raceLogEventFactory.createDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, device, mappedTo, passId, from, to);
     }
 
@@ -1553,10 +1553,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     public static DeviceIdentifier loadDeviceId(
-    		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DBObject deviceId)
-    				throws TransformationException, NoCorrespondingServiceRegisteredException {
-    	String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
-    	Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
-    	return deviceIdentifierServiceFinder.findService(deviceType).transformBack(deviceTypeId);
+            TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DBObject deviceId)
+                    throws TransformationException, NoCorrespondingServiceRegisteredException {
+        String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
+        Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
+        return deviceIdentifierServiceFinder.findService(deviceType).transformBack(deviceTypeId);
     }
 }

@@ -11,14 +11,14 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 
 public class MockGPSFixJsonHandler implements GPSFixJsonHandler {
 
-	@Override
-	public JSONObject transformForth(GPSFix object) {
-		return new GPSFixMovingJsonSerializer().serialize((GPSFixMoving) object);
-	}
+    @Override
+    public JSONObject transformForth(GPSFix object) {
+        return new GPSFixMovingJsonSerializer().serialize((GPSFixMoving) object);
+    }
 
-	@Override
-	public GPSFix transformBack(JSONObject json) throws JsonDeserializationException {
-		return new GPSFixMovingJsonDeserializer().deserialize(json);
-	}
+    @Override
+    public GPSFix transformBack(JSONObject json) throws JsonDeserializationException {
+        return new GPSFixMovingJsonDeserializer().deserialize(json);
+    }
 
 }

@@ -21,7 +21,7 @@ public abstract class AbstractJsonOverHttpTest {
     protected String getUrl(String endOfUrl) {
         return "http://" + URL_BASE + ":" + PORT + endOfUrl;
     }
-    
+
     protected String executeRequest(String method, String targetURL, String body) throws IOException {
         // Create connection
         URL url = new URL(targetURL);

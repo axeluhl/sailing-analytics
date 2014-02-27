@@ -2215,18 +2215,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return result;
     }
 
-	@Override
-	public GPSFixStore getGPSFixStore() {
-		return gpsFixStore;
-	}
-	
-	@Override
-	public RaceTracker getRaceTrackerById(Object id) {
-		return raceTrackersByID.get(id);
-	}
-	
-	@Override
-	public RaceLogEventAuthor getServerAuthor() {
-		return raceLogEventAuthorForServer;
-	}
+    @Override
+    public GPSFixStore getGPSFixStore() {
+        return gpsFixStore;
+    }
+
+    @Override
+    public RaceTracker getRaceTrackerById(Object id) {
+        return raceTrackersByID.get(id);
+    }
+
+    @Override
+    public RaceLogEventAuthor getServerAuthor() {
+        return raceLogEventAuthorForServer;
+    }
 }

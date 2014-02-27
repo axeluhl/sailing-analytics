@@ -33,50 +33,50 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdent
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class AbstractGPSFixStoreTest {
-	protected RacingEventService service;
-	protected final  MockServiceFinderFactory serviceFinderFactory = new MockServiceFinderFactory();
-	DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
-			new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
-	protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-	protected RaceLog raceLog;
-	protected GPSFixStore store;
-	protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
-	protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
-	
-	private final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
+    protected RacingEventService service;
+    protected final  MockServiceFinderFactory serviceFinderFactory = new MockServiceFinderFactory();
+    DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
+            new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
+    protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
+    protected RaceLog raceLog;
+    protected GPSFixStore store;
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
+    protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
-	protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
-		return new GPSFixMovingImpl(new DegreePosition(lat, lng),
-				new MillisecondsTimePoint(millis), new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
-	}
+    private final RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
 
-	@Before
-	public void setServiceAndRaceLog() {
-		service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
-		raceLog = new RaceLogImpl("racelog");
-		store = new MongoGPSFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
-				serviceFinderFactory);
-	}
-	
-	@After
-	public void after() {
-		MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
-		mongoOF.getGPSFixCollection().drop();
-	}
-	
-	protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
-		raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(MillisecondsTimePoint.now(), author, device,
-        		comp, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
-	}
-	
-	protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
-		raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(MillisecondsTimePoint.now(), author, device,
-        		mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
-	}
-	
-	protected void testLength(Track<?> track, long expected) {
-		track.lockForRead();
-		assertEquals(expected, size(track.getRawFixes()));
-		track.unlockAfterRead();
-	}
+    protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
+        return new GPSFixMovingImpl(new DegreePosition(lat, lng),
+                new MillisecondsTimePoint(millis), new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
+    }
+
+    @Before
+    public void setServiceAndRaceLog() {
+        service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
+        raceLog = new RaceLogImpl("racelog");
+        store = new MongoGPSFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
+                serviceFinderFactory);
+    }
+
+    @After
+    public void after() {
+        MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
+        mongoOF.getGPSFixCollection().drop();
+    }
+
+    protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
+        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(MillisecondsTimePoint.now(), author, device,
+                comp, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+    }
+
+    protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
+        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(MillisecondsTimePoint.now(), author, device,
+                mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+    }
+
+    protected void testLength(Track<?> track, long expected) {
+        track.lockForRead();
+        assertEquals(expected, size(track.getRawFixes()));
+        track.unlockAfterRead();
+    }
 }

@@ -18,23 +18,23 @@ import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
  */
 public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Iterable<Competitor>> {
 
-	public RegisteredCompetitorsAnalyzer(RaceLog raceLog) {
-		super(raceLog);
-	}
+    public RegisteredCompetitorsAnalyzer(RaceLog raceLog) {
+        super(raceLog);
+    }
 
-	@Override
-	protected Iterable<Competitor> performAnalysis() {
-		Set<Competitor> result = new HashSet<Competitor>();
-		
-		for (RaceLogEvent event : getRaceLog().getUnrevokedEvents()) {
-			if (event instanceof DeviceCompetitorMappingEvent) {
-				result.add(((DeviceCompetitorMappingEvent) event).getMappedTo());
-			} else if (event instanceof RegisterCompetitorEvent) {
-				result.add(((RegisterCompetitorEvent) event).getCompetitor());
-			}
-		}
-		
-		return result;
-	}
+    @Override
+    protected Iterable<Competitor> performAnalysis() {
+        Set<Competitor> result = new HashSet<Competitor>();
+
+        for (RaceLogEvent event : getRaceLog().getUnrevokedEvents()) {
+            if (event instanceof DeviceCompetitorMappingEvent) {
+                result.add(((DeviceCompetitorMappingEvent) event).getMappedTo());
+            } else if (event instanceof RegisterCompetitorEvent) {
+                result.add(((RegisterCompetitorEvent) event).getCompetitor());
+            }
+        }
+
+        return result;
+    }
 
 }

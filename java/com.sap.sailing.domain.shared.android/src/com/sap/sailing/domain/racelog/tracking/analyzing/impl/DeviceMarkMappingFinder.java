@@ -7,12 +7,12 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 
 public class DeviceMarkMappingFinder extends DeviceMappingFinder<Mark> {
 
-	public DeviceMarkMappingFinder(RaceLog raceLog) {
-		super(raceLog);
-	}
+    public DeviceMarkMappingFinder(RaceLog raceLog) {
+        super(raceLog);
+    }
 
-	@Override
-	protected boolean isValidMapping(DeviceMappingEvent<?> mapping) {
-		return mapping instanceof DeviceMarkMappingEvent;
-	}
+    @Override
+    protected boolean isValidMapping(DeviceMappingEvent<?> mapping) {
+        return mapping instanceof DeviceMarkMappingEvent;
+    }
 }

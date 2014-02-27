@@ -11,28 +11,28 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 
 public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
-	MongoObjectFactoryImpl mof;
-	DomainObjectFactoryImpl dof;
+    MongoObjectFactoryImpl mof;
+    DomainObjectFactoryImpl dof;
 
-	public GPSFixMongoHandlerImpl(MongoObjectFactoryImpl mof, DomainObjectFactoryImpl dof) {
-		this.mof = mof;
-		this.dof = dof;
-	}
+    public GPSFixMongoHandlerImpl(MongoObjectFactoryImpl mof, DomainObjectFactoryImpl dof) {
+        this.mof = mof;
+        this.dof = dof;
+    }
 
-	@Override
-	public Object transformForth(GPSFix fix) throws IllegalArgumentException {
-		DBObject result = new BasicDBObject();
-		mof.storeTimed(fix, result);
-		mof.storePositioned(fix, result);        
+    @Override
+    public Object transformForth(GPSFix fix) throws IllegalArgumentException {
+        DBObject result = new BasicDBObject();
+        mof.storeTimed(fix, result);
+        mof.storePositioned(fix, result);        
         return result;
-	}
+    }
 
-	@Override
-	public GPSFix transformBack(Object object) {
-		DBObject dbObject = (DBObject) object;
+    @Override
+    public GPSFix transformBack(Object object) {
+        DBObject dbObject = (DBObject) object;
         TimePoint timePoint = dof.loadTimePoint(dbObject);
         Position position = dof.loadPosition(dbObject);
         return new GPSFixImpl(position, timePoint);
-	}
+    }
 
 }

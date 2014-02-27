@@ -10,38 +10,38 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 public enum EmptyGPSFixStore implements GPSFixStore {
     INSTANCE;
 
-	@Override
-	public void storeFix(DeviceIdentifier device, GPSFix fix) {
-	}
+    @Override
+    public void storeFix(DeviceIdentifier device, GPSFix fix) {
+    }
 
-	@Override
-	public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-			RaceLog raceLog, Competitor competitor) {
-	}
+    @Override
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            RaceLog raceLog, Competitor competitor) {
+    }
 
-	@Override
-	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-			RaceLog raceLog, Mark mark) {
-	}
+    @Override
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
+            RaceLog raceLog, Mark mark) {
+    }
 
-	@Override
-	public void addListener(GPSFixReceivedListener listener) {
-	}
+    @Override
+    public void addListener(GPSFixReceivedListener listener) {
+    }
 
-	@Override
-	public void removeListener(GPSFixReceivedListener listener) {
-	}
+    @Override
+    public void removeListener(GPSFixReceivedListener listener) {
+    }
 
-	@Override
-	public void loadCompetitorTrack(
-			DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-			DeviceMapping<Competitor> mapping) {
-		
-	}
+    @Override
+    public void loadCompetitorTrack(
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            DeviceMapping<Competitor> mapping) {
 
-	@Override
-	public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-			DeviceMapping<Mark> mapping) {
-		
-	}
+    }
+
+    @Override
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
+            DeviceMapping<Mark> mapping) {
+
+    }
 }

@@ -8,19 +8,19 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 
 public class RaceInformationFinder extends RaceLogAnalyzer<Pair<String, BoatClass>> {
-	public RaceInformationFinder(RaceLog raceLog) {
-		super(raceLog);
-	}
+    public RaceInformationFinder(RaceLog raceLog) {
+        super(raceLog);
+    }
 
-	@Override
-	protected Pair<String, BoatClass> performAnalysis() {
+    @Override
+    protected Pair<String, BoatClass> performAnalysis() {
         for (RaceLogEvent event : getAllEvents()) {
             if (event instanceof DenoteForTrackingEvent) {
-            	DenoteForTrackingEvent e = (DenoteForTrackingEvent) event;
+                DenoteForTrackingEvent e = (DenoteForTrackingEvent) event;
                 return new Pair<String, BoatClass>(e.getRaceName(), e.getBoatClass());
             }
         }
-        
+
         return null;
-	}
+    }
 }

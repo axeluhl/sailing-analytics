@@ -25,5 +25,5 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
  * 
  */
 public interface DeviceIdentifierMongoHandler extends
-		TransformationHandler<DeviceIdentifier, Object> {
+TransformationHandler<DeviceIdentifier, Object> {
 }

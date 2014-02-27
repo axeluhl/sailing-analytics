@@ -16,5 +16,5 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
  *
  */
 public interface RegisterCompetitorEvent extends RaceLogEvent {
-	Competitor getCompetitor();
+    Competitor getCompetitor();
 }

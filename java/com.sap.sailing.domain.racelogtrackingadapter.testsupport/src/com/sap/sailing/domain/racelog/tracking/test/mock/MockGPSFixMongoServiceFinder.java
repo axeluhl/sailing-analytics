@@ -10,9 +10,9 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSFixMongoHandler> {
-	private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
-	private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
-    
+    private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
+    private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
+
     @Override
     public GPSFixMongoHandler findService(String fixType) {
         if (fixType.equals(GPSFixMovingImpl.class.getName())) return new GPSFixMovingMongoHandlerImpl(mof, dof);

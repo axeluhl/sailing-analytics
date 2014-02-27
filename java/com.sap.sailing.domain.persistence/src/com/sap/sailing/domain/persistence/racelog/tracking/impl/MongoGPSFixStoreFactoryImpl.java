@@ -10,10 +10,10 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
 
 public class MongoGPSFixStoreFactoryImpl implements MongoGPSFixStoreFactory {	
-	@Override
-	public MongoGPSFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory,
-			DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory)
-					throws UnknownHostException, MongoException {
-		return new MongoGPSFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory);
-	}
+    @Override
+    public MongoGPSFixStore getMongoGPSFixStore(MongoObjectFactory mongoObjectFactory,
+            DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory)
+                    throws UnknownHostException, MongoException {
+        return new MongoGPSFixStoreImpl(mongoObjectFactory, domainObjectFactory, serviceFinderFactory);
+    }
 }

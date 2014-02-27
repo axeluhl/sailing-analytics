@@ -9,8 +9,8 @@ import com.sap.sailing.domain.common.WithID;
  * @author Fredrik Teschke
  */
 public interface DeviceMapping<ItemType extends WithID> extends Timed {
-	ItemType getMappedTo();
-	DeviceIdentifier getDevice();
-	
-	TimeRange getTimeRange();
+    ItemType getMappedTo();
+    DeviceIdentifier getDevice();
+
+    TimeRange getTimeRange();
 }

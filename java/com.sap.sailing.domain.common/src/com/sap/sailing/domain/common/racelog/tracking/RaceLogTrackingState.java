@@ -9,9 +9,9 @@ package com.sap.sailing.domain.common.racelog.tracking;
  */
 public enum RaceLogTrackingState {
     //can't determine whether tracking has ended from race log, therefore omitting TRACKING_ENDED state for now
-	/**
-	 * no {@link DenoteForTrackingEvent} is present
-	 */
+    /**
+     * no {@link DenoteForTrackingEvent} is present
+     */
     NOT_A_RACELOG_TRACKED_RACE,
     
     /**

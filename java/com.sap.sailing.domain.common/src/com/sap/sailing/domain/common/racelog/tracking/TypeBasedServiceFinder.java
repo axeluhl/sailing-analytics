@@ -7,7 +7,7 @@ package com.sap.sailing.domain.common.racelog.tracking;
  */
 public interface TypeBasedServiceFinder<ServiceType> {
     public static final String TYPE = "type";
-    
+
     /**
      * Find a service that implements the <ServiceType> interface for the specified {@code type}
      * of object (e.g. type of a {@link GPSFix}).

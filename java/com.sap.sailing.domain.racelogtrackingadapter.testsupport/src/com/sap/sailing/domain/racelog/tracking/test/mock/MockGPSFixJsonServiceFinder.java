@@ -6,7 +6,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 
 public class MockGPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJsonHandler> {
     private final MockGPSFixJsonHandler handler = new MockGPSFixJsonHandler();
-    
+
     @Override
     public GPSFixJsonHandler findService(String fixType) {
         if (fixType.equals(GPSFixMovingJsonDeserializer.TYPE)) {

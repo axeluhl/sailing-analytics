@@ -29,36 +29,36 @@ import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
 
 public class RecordFixesTest extends AbstractGPSFixStoreTest {
-	private RecordFixesPostServlet servlet;
-	private final DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
-			new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
-	private final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
+    private RecordFixesPostServlet servlet;
+    private final DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
+            new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
+    private final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
 
-	@Before
-	public void setupServlet() {
-		servlet = new RecordFixesPostServlet();
-		servlet = spy(servlet);
-		when(servlet.getRequestDeserializer()).thenReturn(deserializer);
-		doReturn(service).when(servlet).getService();
-	}
+    @Before
+    public void setupServlet() {
+        servlet = new RecordFixesPostServlet();
+        servlet = spy(servlet);
+        when(servlet.getRequestDeserializer()).thenReturn(deserializer);
+        doReturn(service).when(servlet).getService();
+    }
 
-	@Test
-	public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException {
-		map(comp, device, 0, 600);
+    @Test
+    public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException {
+        map(comp, device, 0, 600);
 
-		int timepoint = 343;
-		List<GPSFix> fixes = new ArrayList<>();
-		fixes.add(createFix(timepoint, 0, 0, 0, 0));
-		fixes.add(createFix(timepoint+1, 0, 0, 0, 0));
-		Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new Triple<>(device, null, fixes);
-		servlet.process(null, data);
-		
+        int timepoint = 343;
+        List<GPSFix> fixes = new ArrayList<>();
+        fixes.add(createFix(timepoint, 0, 0, 0, 0));
+        fixes.add(createFix(timepoint+1, 0, 0, 0, 0));
+        Triple<DeviceIdentifier, Serializable, List<GPSFix>> data = new Triple<>(device, null, fixes);
+        servlet.process(null, data);
+
         DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
         store.loadCompetitorTrack(track, raceLog, comp);
-		track.lockForRead();
-		assertEquals(2, size(track.getRawFixes()));
-		assertEquals(timepoint, track.getFirstRawFix().getTimePoint().asMillis());
-		assertTrue(track.getFirstRawFix() instanceof GPSFixMoving);
-		track.unlockAfterRead();
-	}
+        track.lockForRead();
+        assertEquals(2, size(track.getRawFixes()));
+        assertEquals(timepoint, track.getFirstRawFix().getTimePoint().asMillis());
+        assertTrue(track.getFirstRawFix() instanceof GPSFixMoving);
+        track.unlockAfterRead();
+    }
 }

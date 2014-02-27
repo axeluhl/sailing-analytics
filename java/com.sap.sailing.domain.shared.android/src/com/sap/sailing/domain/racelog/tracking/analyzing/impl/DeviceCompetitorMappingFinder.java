@@ -7,12 +7,12 @@ import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 
 public class DeviceCompetitorMappingFinder extends DeviceMappingFinder<Competitor> {
 
-	public DeviceCompetitorMappingFinder(RaceLog raceLog) {
-		super(raceLog);
-	}
+    public DeviceCompetitorMappingFinder(RaceLog raceLog) {
+        super(raceLog);
+    }
 
-	@Override
-	protected boolean isValidMapping(DeviceMappingEvent<?> mapping) {
-		return mapping instanceof DeviceCompetitorMappingEvent;
-	}
+    @Override
+    protected boolean isValidMapping(DeviceMappingEvent<?> mapping) {
+        return mapping instanceof DeviceCompetitorMappingEvent;
+    }
 }

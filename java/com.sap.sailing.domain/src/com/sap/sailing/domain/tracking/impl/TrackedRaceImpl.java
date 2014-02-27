@@ -371,17 +371,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * and {@link #timePointOfOldestEvent}.
      */
     private void updateEventTimePoints(Iterable<? extends Track<? extends Timed>> tracks) {
-    	for (Track<? extends Timed> track : tracks) {
-    		track.lockForRead();
+        for (Track<? extends Timed> track : tracks) {
+            track.lockForRead();
 
-    		try {
-    			for (Timed fix : track.getRawFixes()) {
-    				updated(fix.getTimePoint());
-    			}
-    		} finally {
-    			track.unlockAfterRead();
-    		}
-    	}
+            try {
+                for (Timed fix : track.getRawFixes()) {
+                    updated(fix.getTimePoint());
+                }
+            } finally {
+                track.unlockAfterRead();
+            }
+        }
     }
 
     /**
