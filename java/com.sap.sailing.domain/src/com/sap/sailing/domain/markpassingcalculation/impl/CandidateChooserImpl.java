@@ -113,8 +113,11 @@ public class CandidateChooserImpl implements CandidateChooser {
                 Boolean oneCandidateIsProxyWithoutTime = raceStartTime == null ? (late == end || early == start) : late == end;
                 if (oneCandidateIsProxyWithoutTime) {
                     addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
-                } else if (late.getTimePoint().after(early.getTimePoint()) && getDistanceEstimationBasedProbability(co, early, late) > MINIMUM_PROBABILITY) {
-                    addEdge(edges, new Edge(early, late, getDistanceEstimationBasedProbability(co, early, late), race.getRace().getCourse()));
+                } else if (late.getTimePoint().after(early.getTimePoint())) {
+                    final double probability = getDistanceEstimationBasedProbability(co, early, late);
+                    if (probability > MINIMUM_PROBABILITY) {
+                        addEdge(edges, new Edge(early, late, probability, race.getRace().getCourse()));
+                    }
                 }
             }
         }
