@@ -149,11 +149,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
         trackedRacesCaptionPanel.setWidth("50%");
         splitPanel.add(trackedRacesCaptionPanel);
-
-        VerticalPanel trackedRacesPanel = new VerticalPanel();
-        trackedRacesPanel.setWidth("100%");
-        trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
-        trackedRacesCaptionPanel.setStyleName("bold");
+        trackedRacesCaptionPanel.setContentWidget(trackedRacesListComposite);
 
 
         // ------------ races of the selected leaderboard ----------------
