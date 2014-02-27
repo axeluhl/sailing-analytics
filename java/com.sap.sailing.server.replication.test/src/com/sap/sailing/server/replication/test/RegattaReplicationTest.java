@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +28,9 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
@@ -59,8 +62,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         
         final UUID alphaCourseAreaId = UUID.randomUUID();
         final UUID tvCourseAreaId = UUID.randomUUID();
-        
-        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID());
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+
+        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         
@@ -104,7 +109,9 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
     public void testRegattaToEventAssociationBeingReplicated() throws InterruptedException {
         final UUID tvCourseAreaId = UUID.randomUUID();
         final UUID golfCourseAreaId = UUID.randomUUID();
-        Event event = master.addEvent("Event", "Venue", ".", /*isPublic*/true, UUID.randomUUID());
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
         master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
         Regatta masterRegatta = master.createRegatta("Kiel Week 2012", "49er", UUID.randomUUID(), Collections.<Series>emptyList(),
@@ -125,8 +132,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Regatta replicatedRegatta;
         
         final UUID alphaCourseAreaId = UUID.randomUUID();
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         
-        Event event = master.addEvent("Event", "Venue", ".", true, UUID.randomUUID());
+        Event event = master.addEvent("Event", eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
         master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
         
         UUID currentCourseAreaId = null;
@@ -278,12 +287,13 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
     public void testSpecificRegattaReplicationWithCourseArea() throws InterruptedException {
         final String eventName = "ESS Singapur";
         final String venueName = "Singapur, Singapur";
-        final String publicationUrl = "http://ess40.sapsailing.com";
         final boolean isPublic = false;
         final String boatClassName = "X40";
         final Iterable<Series> series = Collections.emptyList();
         final String courseArea = "Alpha";
-        Event masterEvent = master.addEvent(eventName, venueName, publicationUrl, isPublic, UUID.randomUUID());
+        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
+        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
+        Event masterEvent = master.addEvent(eventName, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
         CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
         
         Regatta masterRegatta = master.createRegatta(eventName, boatClassName, UUID.randomUUID(), series,

@@ -12,7 +12,8 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -7100030301376959817L;
     public List<RegattaDTO> regattas;
     public VenueDTO venue;
-    public String publicationUrl;
+    public Date startDate;
+    public Date endDate;
     public boolean isPublic;
     public UUID id;
 
