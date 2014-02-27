@@ -1,6 +1,6 @@
 # Create boat graphics for the 2D race viewer
 
-This page describes how to create the SVG graphics for different boat classes which can be used by the 2D race viewer to draw boat graphics directly to a HTML Canvas.
+This page describes how to create the SVG graphics for different boat classes which can be used by the 2D race viewer to draw boat graphics directly to an HTML Canvas.
 
 ## Inkscape
 
@@ -18,7 +18,7 @@ To draw the boats later on the map with the right scale/size we also have to be 
 
 ## Conversion of SVG graphics into a Canvas drawing commands
 
-You can use the online tool 'SVG to HTML5 Canvas Converter' http://www.professorcloud.com/svg-to-canvas/) to convert the SVG graphics to a list of drawing commands. So for example a SVG line<br/>
+You can use the online tool 'SVG to HTML5 Canvas Converter' http://www.professorcloud.com/svg-to-canvas/ to convert the SVG graphics to a list of drawing commands. So for example a SVG line<br/>
 &lt;line x1="1050" y1="651" x2="1050" y2="49" id="line75" /><br/>
 will be converted to something like<br/>
 ctx.beginPath();<br/>
