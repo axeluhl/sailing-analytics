@@ -510,11 +510,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setLeaderboardVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
     }
 
     /**
@@ -526,11 +522,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
     public void setWindChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, windChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, windChart, visible);
     }
 
     /**
@@ -542,11 +534,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */
     public void setCompetitorChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
     public Panel getToolbarPanel() {
