@@ -1,7 +1,8 @@
-package com.sap.sailing.domain.markpassingcalculation;
+package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.markpassingcalculation.Candidate;
 
 /**
  * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>.
@@ -20,7 +21,6 @@ public class Edge implements Comparable<Edge> {
     private final static double penaltyForSkipped = 0.7;
     private final static double penaltyForSkippedToEnd = 0.6;
     private final double estimatedDistanceProbability;
-    //TODO JavaDoc distance
     private final Course course;
 
     public Edge(Candidate start, Candidate end, double estimatedDistanceProbability, Course course) {

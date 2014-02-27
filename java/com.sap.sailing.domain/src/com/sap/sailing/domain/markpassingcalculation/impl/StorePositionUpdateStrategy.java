@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.markpassingcalculation;
+package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.List;
 import java.util.Map;

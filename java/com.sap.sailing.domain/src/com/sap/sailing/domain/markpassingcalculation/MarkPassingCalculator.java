@@ -21,6 +21,10 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.StorePositionUpdateStrategy;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -28,8 +32,8 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
- * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate} s. The
- * chooser than finds the most likely sequence of {@link Candidate}s and creates the {@link MarkPassing}s for this
+ * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link CandidateImpl} s. The
+ * chooser than finds the most likely sequence of {@link CandidateImpl}s and creates the {@link MarkPassing}s for this
  * sequence. This happens upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} for
  * the current state of the race. This can be used for live or stored races. For live races, the <code>listen</code>
  * parameter of the constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new

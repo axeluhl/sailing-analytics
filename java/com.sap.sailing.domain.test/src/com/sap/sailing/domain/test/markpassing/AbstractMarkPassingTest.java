@@ -29,9 +29,11 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooserImpl;
-import com.sap.sailing.domain.markpassingcalculation.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
@@ -203,8 +205,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     private void testMiddleOfRace(int waypoint) {
-        CandidateFinderImpl finder = new CandidateFinderImpl(getTrackedRace());
-        CandidateChooserImpl chooser = new CandidateChooserImpl(getTrackedRace());
+        CandidateFinder finder = new CandidateFinderImpl(getTrackedRace());
+        CandidateChooser chooser = new CandidateChooserImpl(getTrackedRace());
         int mistakes = 0;
         Waypoint start = waypoints.get(waypoint);
         Waypoint second = waypoints.get(waypoint + 1);
@@ -233,11 +235,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
             boolean gotPassed = true;
             boolean gotOther = false;
-         //   System.out.println(c);
+            System.out.println(c);
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
                 MarkPassing old = givenPasses.get(c).get(w);
                 MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
-             //   System.out.println(newm);
+                System.out.println(newm);
                 if (waypoints.indexOf(w) <= waypoint) {
                     if ((old == null) != (newm == null)) {
                         gotPassed = false;

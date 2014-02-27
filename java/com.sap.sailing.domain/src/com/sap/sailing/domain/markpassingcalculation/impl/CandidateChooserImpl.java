@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.markpassingcalculation;
+package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -22,6 +22,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.markpassingcalculation.Candidate;
+import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -57,9 +59,9 @@ public class CandidateChooserImpl implements CandidateChooser {
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
-        start = new Candidate(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
+        start = new CandidateImpl(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
         /* right Direction */true, "Proxy");
-        end = new Candidate(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
+        end = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(race.getRace().getCourse().getLastWaypoint()) + 2, /* TimePoint */null,
         /* Probability */1, /* Waypoint */null, /* right Side */true, /* right Direction */true, "Proxy");
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
@@ -79,7 +81,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 for (Competitor com : allEdges.keySet()) {
                     removeCandidates(Arrays.asList(start), com);
                 }
-                start = new Candidate(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
+                start = new CandidateImpl(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
                 /* right Direction */true, "Proxy");
                 for (Competitor com : allEdges.keySet()) {
                     addCandidates(com, Arrays.asList(start));
@@ -195,7 +197,6 @@ public class CandidateChooserImpl implements CandidateChooser {
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
         final TimePoint middleOfc1Andc2 = c1.getTimePoint().plus((long) (c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis() * 0.5));
-        // TODO iterate over legs
         if (c1.getOneBasedIndexOfWaypoint() == 0) {
             first = race.getRace().getCourse().getFirstWaypoint();
         } else {

@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.markpassingcalculation.impl.StorePositionUpdateStrategy;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;

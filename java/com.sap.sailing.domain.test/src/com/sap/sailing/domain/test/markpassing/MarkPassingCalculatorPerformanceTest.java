@@ -14,9 +14,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
-import com.sap.sailing.domain.markpassingcalculation.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
@@ -94,9 +95,9 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         return total / times.size();
     }
 
-    private Candidate randomCan() {
+    private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
-        return new Candidate(id + 1, new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
+        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
                 waypoints.get(id), true, true, "Test");
     }
 }
