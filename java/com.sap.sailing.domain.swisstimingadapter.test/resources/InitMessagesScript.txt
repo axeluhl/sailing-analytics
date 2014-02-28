@@ -1,5 +1,5 @@
-RAC|2|4711;A wonderful test race|4712;Not such a wonderful race
-STL|4711|2|GER 8414;GER;Polgar/Koy|GER 8140;GER;Schlonski/Bohn
-STL|4712|3|GER 8340;GER;Stanjek/Kleen|GER 8433;GER;Babendererde/Jacobs|GER 8299;GER;Elsner/Schulz
-CCG|4711|2|0;Mark1 Description;SailNumber1;SailNumber2|1;Mark2 Description;SailNumber3
-CCG|4712|2|0;Mark2 Description;SailNumber1;SailNumber2|1;Mark7 Description;SailNumber4
+0|RAC|2|4711;A wonderful test race|4712;Not such a wonderful race
+1|STL|4711|2|GER 8414;GER;Polgar/Koy|GER 8140;GER;Schlonski/Bohn
+2|STL|4712|3|GER 8340;GER;Stanjek/Kleen|GER 8433;GER;Babendererde/Jacobs|GER 8299;GER;Elsner/Schulz
+3|CCG|4711|2|0;Mark1 Description;SailNumber1;SailNumber2|1;Mark2 Description;SailNumber3
+4|CCG|4712|2|0;Mark2 Description;SailNumber1;SailNumber2|1;Mark7 Description;SailNumber4
