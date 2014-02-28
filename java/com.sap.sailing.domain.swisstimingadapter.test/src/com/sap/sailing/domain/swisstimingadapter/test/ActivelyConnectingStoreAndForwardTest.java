@@ -134,7 +134,7 @@ public class ActivelyConnectingStoreAndForwardTest {
                 }
             }
         });
-        String rawMessage = "RAC|2|4711;A wonderful test race|4712;Not such a wonderful race";
+        String rawMessage = "0|RAC|2|c34c423c-0295-4fe5-91ca-336681624711;A wonderful test race|c34c423c-0295-4fe5-91ca-336681624712;Not such a wonderful race";
         transceiver.sendMessage(rawMessage, sendingStream);
         synchronized (this) {
             for (int i=0; i<1000 && !receivedSomething[0]; i++) {

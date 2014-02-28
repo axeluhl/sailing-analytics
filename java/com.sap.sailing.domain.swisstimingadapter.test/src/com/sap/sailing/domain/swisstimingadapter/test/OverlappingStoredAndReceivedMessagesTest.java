@@ -109,7 +109,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         assert STORED < COUNT-UNBUFFERED && STORED-OVERLAP >= 0;
         final String[] rawMessage = new String[COUNT];
         for (int i=0; i<COUNT; i++) {
-            rawMessage[i] = "CCG|4711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
+            rawMessage[i] = ""+i+"|CCG|c34c423c-0295-4fe5-91ca-336681624711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
             if (i<STORED) {
                 messagesToLoad.add(swissTimingFactory.createMessage(rawMessage[i], (long) i));
             }
@@ -143,7 +143,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
             }
         };
         bufferingMessageSenderThread.start();
-        connector.trackRace("4711"); // this should transitively invoke loadMessages which blocks until the first STORED messages have been sent
+        connector.trackRace("c34c423c-0295-4fe5-91ca-336681624711"); // this should transitively invoke loadMessages which blocks until the first STORED messages have been sent
         assertTrue(loadMessagesCalled);
         // send more messages after buffering
         for (int i=COUNT-UNBUFFERED; i<COUNT; i++) {

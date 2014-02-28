@@ -142,7 +142,7 @@ public class EndToEndListeningStoreAndFowardTest {
 
      @Test
     public void testEndToEndScenarioWithInitMessages() throws Exception {
-        String[] racesToTrack = new String[] { "4711", "4712" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624711", "c34c423c-0295-4fe5-91ca-336681624712" };
         String scriptName = "/InitMessagesScript.txt";
         setUpUsingScript(racesToTrack, scriptName);
 
@@ -154,7 +154,7 @@ public class EndToEndListeningStoreAndFowardTest {
             raceIDs.add(race.getName());
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "4711", "4712" }) {
+        for (String raceIDToTrack : new String[] { "c34c423c-0295-4fe5-91ca-336681624711", "c34c423c-0295-4fe5-91ca-336681624712" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
@@ -162,7 +162,7 @@ public class EndToEndListeningStoreAndFowardTest {
 
     @Test
     public void testLongRaceLog() throws Exception {
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
@@ -171,7 +171,7 @@ public class EndToEndListeningStoreAndFowardTest {
 
     @Test
     public void testLongRaceLogNewVersion() throws Exception {
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         String scriptName1 = "/W4702RACandSTLandCCG.txt";
         String scriptName2 = "/W4702AsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
@@ -230,7 +230,7 @@ public class EndToEndListeningStoreAndFowardTest {
     
     @Test
     public void testLongLogRaceNewConfig() throws Exception {
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
@@ -277,7 +277,7 @@ public class EndToEndListeningStoreAndFowardTest {
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
-        for (String raceIDToTrack : new String[] { "W4702" }) {
+        for (String raceIDToTrack : new String[] { "c34c423c-0295-4fe5-91ca-336681624702" }) {
             expectedRaceIDs.add(raceIDToTrack);
         }
         assertEquals(expectedRaceIDs, raceIDs);
@@ -285,7 +285,7 @@ public class EndToEndListeningStoreAndFowardTest {
 
     @Test
     public void testDuplicateCCGMessageAndWaypointUniqueness() throws Exception {
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
 
         Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
@@ -301,12 +301,12 @@ public class EndToEndListeningStoreAndFowardTest {
     @Test
     public void testTMDMessageBeforeReceivingStartTime() throws Exception {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        String[] racesToTrack = new String[] { "SAM005923" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681625923" };
         setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample.txt");
         Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, allTrackedRaces.size());
         TrackedRace trackedRace = allTrackedRaces.iterator().next();
-        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals("c34c423c-0295-4fe5-91ca-336681625923", trackedRace.getRace().getName());
         assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             if (competitor.getBoat().getSailID().equals("GBR-828")) {
@@ -333,12 +333,12 @@ public class EndToEndListeningStoreAndFowardTest {
     @Test
     public void testTMDMessageBeforeReceivingStartTimeWithManyTMDs() throws Exception {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        String[] racesToTrack = new String[] { "SAM005923" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681625923" };
         setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample_ManyTMDs.txt");
         Set<TrackedRace> allTrackedRaces = getAllTrackedRaces();
         assertEquals(1, allTrackedRaces.size());
         TrackedRace trackedRace = allTrackedRaces.iterator().next();
-        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals("c34c423c-0295-4fe5-91ca-336681625923", trackedRace.getRace().getName());
         assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
@@ -352,7 +352,7 @@ public class EndToEndListeningStoreAndFowardTest {
     
     @Test
     public void testRongRaceLogRACZero() throws Exception{
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
         setUpUsingScript(racesToTrack, scriptName2);
         Set<TrackedRace> allNewTrackedRaces = getAllTrackedRaces();
@@ -361,7 +361,7 @@ public class EndToEndListeningStoreAndFowardTest {
 
     @Test
     public void testEndToEndWithSwissTimingData() throws Exception {
-        String[] racesToTrack = new String[] { "W4702" };
+        String[] racesToTrack = new String[] { "c34c423c-0295-4fe5-91ca-336681624702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
