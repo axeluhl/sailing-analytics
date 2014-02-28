@@ -27,5 +27,11 @@ public interface SailMasterMessage {
      */
     String getRaceID();
 
+    /**
+     * The sequence number as added to each message as a prefix by
+     * the SwissTiming SAP Gateway. This sequence number can be used
+     * in a <code>LSN</code> message to query race messages starting
+     * from a specific message onwards.
+     */
     Long getSequenceNumber();
 }

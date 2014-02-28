@@ -236,8 +236,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         socket = null;
                     } else {
                         SailMasterMessage message = new SailMasterMessageImpl(
-                                receivedMessageAndOptionalSequenceNumber.getA(),
-                                receivedMessageAndOptionalSequenceNumber.getB());
+                                receivedMessageAndOptionalSequenceNumber.getA());
                         // drop race-specific messages for non-tracked races
                         if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
                             boolean messageProcessed = false;

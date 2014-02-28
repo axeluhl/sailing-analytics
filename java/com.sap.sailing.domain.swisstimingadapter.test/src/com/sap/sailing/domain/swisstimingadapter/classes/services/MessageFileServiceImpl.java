@@ -258,7 +258,7 @@ public class MessageFileServiceImpl implements MessageFileService {
         // Add Strings of stringmessageList into a ArrayList of type SailMasterMessage
         List<SailMasterMessage> sailMasterMessageList = new ArrayList<SailMasterMessage>();
         for (String s : strList) {
-            sailMasterMessageList.add(new SailMasterMessageImpl(s, new Long(0)));
+            sailMasterMessageList.add(new SailMasterMessageImpl(s));
         }
         return sailMasterMessageList;
     }

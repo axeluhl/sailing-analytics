@@ -1,18 +1,35 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 
 public class SailMasterMessageImpl implements SailMasterMessage {
+    private static Pattern leadingSequenceNumber = Pattern.compile("^([0-9][0-9]*)\\|(.*)$");
     private final String message;
     private final Long sequenceNumber;
     
     private String[] sections;
 
-    public SailMasterMessageImpl(String message, Long sequenceNumber) {
+    /**
+     * @param message
+     *            If the message starts with the pattern "[0-9][0-9]*|" then the number preceding the pipe symbol is
+     *            taken to be the {@link #sequenceNumber} and everything after the pipe symbol is assigned to
+     *            {@link #message}. Otherwise, the {@link #sequenceNumber} field is initialized to <code>null</code>,
+     *            and the <code>message</code> parameter's value is assigned to the {@link #message} field unchanged.
+     */
+    public SailMasterMessageImpl(String message) {
         super();
-        this.message = message;
-        this.sequenceNumber = sequenceNumber;
+        Matcher m = leadingSequenceNumber.matcher(message);
+        if (m.matches()) {
+            this.sequenceNumber = Long.valueOf(m.group(1));
+            this.message = m.group(2);
+        } else {
+            this.sequenceNumber = null;
+            this.message = message;
+        }
     }
 
     @Override
