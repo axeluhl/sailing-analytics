@@ -12,13 +12,11 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -42,9 +40,6 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private static final int MILLISECONDS_BEFORE_STARTTIME = 2000;
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
-    private final static double STRICTNESS = 900; // Lower = stricter; 900
-    private final static double SIGMA_SQUARED = 1 / (2 * Math.PI);
-    private final static double FACTOR = 1 / (Math.sqrt(SIGMA_SQUARED * 2 * Math.PI));
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
 
@@ -110,8 +105,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
                 // If a start time is given the probability of an Edge from start to an other candidate can be
                 // evaluated.
-                Boolean oneCandidateIsProxyWithoutTime = raceStartTime == null ? (late == end || early == start) : late == end;
-                if (oneCandidateIsProxyWithoutTime) {
+                if (late == end){
+                    addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
+                } else if (early == start&&(raceStartTime==null||!early.getTimePoint().after(late.getTimePoint()))){
                     addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
                     final double probability = getDistanceEstimationBasedProbability(co, early, late);
@@ -195,8 +191,13 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private double getDistanceEstimationBasedProbability(Competitor c, Candidate c1, Candidate c2) {
+        final double result;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
+        assert c1 != start;
         assert c2 != end;
+        if (c.getName().equals("Jochen Schümann")/*&&c1.getOneBasedIndexOfWaypoint()==1&&c2.getOneBasedIndexOfWaypoint()==3*/){
+            System.currentTimeMillis();
+        }
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
         final TimePoint middleOfc1Andc2 = c1.getTimePoint().plus((long) (c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis() * 0.5));
@@ -216,37 +217,18 @@ public class CandidateChooserImpl implements CandidateChooser {
                 legsAreBetweenCandidates = true;
             }
             if (legsAreBetweenCandidates) {
-                totalEstimatedDistance = totalEstimatedDistance.add(estimatedDistanceOnLeg(leg, middleOfc1Andc2));
+                totalEstimatedDistance = totalEstimatedDistance.add(leg.getGreatCircleDistance(middleOfc1Andc2));
             }
         }
         Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
-        double differenceInMeters = totalEstimatedDistance.getMeters() - actualDistance.getMeters();
-        double exponent = -(Math.pow(differenceInMeters / STRICTNESS, 2) / (2 * SIGMA_SQUARED));
-        double result = FACTOR * Math.pow(Math.E, exponent);
-        return result;
-    }
-
-    private Distance estimatedDistanceOnLeg(TrackedLeg leg, TimePoint t) {
-        Distance result;
-        final Distance distance = leg.getGreatCircleDistance(t);
-        try {
-            switch (leg.getLegType(t)) {
-            case DOWNWIND:
-                result = distance.scale(1.2);
-                break;
-            case UPWIND:
-                result = distance.scale(Math.sqrt(2));
-                break;
-            /*case REACHING:
-                result = distance;
-                break;*/
-            default:
-                result = distance.scale(1.3);
-            }
-        } catch (NoWindException e) {
-            Logger.getLogger(CandidateChooserImpl.class.getName()).log(Level.SEVERE,
-                    "CandidateChooser threw exception " + e.getMessage() + " while estimating the Time between two Candidates.");
-            result = distance.scale(1.3);
+        double differenceInMeters = actualDistance.getMeters() - totalEstimatedDistance.getMeters();
+        double differenceInPercent = differenceInMeters/totalEstimatedDistance.getMeters();
+        if (differenceInPercent < 0) {
+            result = 3.5*differenceInPercent+1;
+        } else if (differenceInPercent > 1) {
+            result = Math.sqrt((-differenceInPercent+3)/2);
+        } else {
+            result = 1;
         }
         return result;
     }
