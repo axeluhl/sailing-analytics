@@ -15,7 +15,6 @@ public interface SwissTimingAdapter {
             boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     /**
-     * @param trackerManager TODO
      * @param regattaToAddTo
      *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
      *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
@@ -28,8 +27,6 @@ public interface SwissTimingAdapter {
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
-
-    void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
 

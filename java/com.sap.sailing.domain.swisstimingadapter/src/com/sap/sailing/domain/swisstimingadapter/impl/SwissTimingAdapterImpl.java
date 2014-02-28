@@ -13,7 +13,6 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
-import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -70,20 +69,6 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
                 raceID, canSendRequests, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory,
                 swissTimingDomainFactory, logStore, raceSpecificMessageLoader),
                 timeoutInMilliseconds);
-    }
-
-    @Override
-    public void storeSwissTimingDummyRace(String racMessage, String stlMessage, String ccgMessage) {
-        SailMasterMessage racSMMessage = swissTimingFactory.createMessage(racMessage, null);
-        SailMasterMessage stlSMMessage = swissTimingFactory.createMessage(stlMessage, null);
-        SailMasterMessage ccgSMMessage = swissTimingFactory.createMessage(ccgMessage, null);
-        if (raceSpecificMessageLoader.getRace(stlSMMessage.getRaceID()) != null) {
-            throw new IllegalArgumentException("Race with raceID \"" + stlSMMessage.getRaceID() + "\" already exists.");
-        } else {
-            raceSpecificMessageLoader.storeSailMasterMessage(racSMMessage);
-            raceSpecificMessageLoader.storeSailMasterMessage(stlSMMessage);
-            raceSpecificMessageLoader.storeSailMasterMessage(ccgSMMessage);
-        }
     }
 
 }

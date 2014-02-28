@@ -227,16 +227,15 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             while (!stopped) {
                 try {
                     ensureSocketIsOpen();
-                    Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
-                    if (receivedMessageAndOptionalSequenceNumber == null) {
+                    String receivedMessage = receiveMessage(socket.getInputStream());
+                    if (receivedMessage == null) {
                         // reached EOF; this means the socket is or can be closed
                         if (socket != null && !socket.isClosed()) {
                             socket.close();
                         }
                         socket = null;
                     } else {
-                        SailMasterMessage message = new SailMasterMessageImpl(
-                                receivedMessageAndOptionalSequenceNumber.getA());
+                        SailMasterMessage message = new SailMasterMessageImpl(receivedMessage);
                         // drop race-specific messages for non-tracked races
                         if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
                             boolean messageProcessed = false;

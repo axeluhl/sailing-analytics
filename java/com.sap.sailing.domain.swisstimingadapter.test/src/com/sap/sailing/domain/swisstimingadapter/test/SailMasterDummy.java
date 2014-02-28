@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterMessageImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SailMasterTransceiverImpl;
@@ -53,13 +52,13 @@ public class SailMasterDummy implements Runnable {
 
     private void processRequests() throws IOException {
         InputStream is = socket.getInputStream();
-        Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
-        while (messageAndOptionalSequenceNumber != null) {
-            respondToMessage(messageAndOptionalSequenceNumber.getA(), socket.getOutputStream());
+        String message = transceiver.receiveMessage(is);
+        while (message != null) {
+            respondToMessage(message, socket.getOutputStream());
             if (stopped) {
-                messageAndOptionalSequenceNumber = null;
+                message = null;
             } else {
-                messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                message = transceiver.receiveMessage(is);
             }
         }
     }

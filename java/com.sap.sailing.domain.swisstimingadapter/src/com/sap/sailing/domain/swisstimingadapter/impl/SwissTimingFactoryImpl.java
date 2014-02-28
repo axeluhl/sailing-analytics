@@ -102,7 +102,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterMessage createMessage(String message, Long sequenceNumber) {
+    public SailMasterMessage createMessage(String message) {
         return new SailMasterMessageImpl(message);
     }
 

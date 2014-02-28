@@ -61,7 +61,7 @@ public interface SwissTimingFactory {
 
     Race createRace(String raceId, String description, TimePoint startTime);
 
-    SailMasterMessage createMessage(String message, Long sequenceNumber);
+    SailMasterMessage createMessage(String message);
 
     SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String string);
 

@@ -123,13 +123,6 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                     }
 
                     @Override
-                    public void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage)
-                            throws IllegalArgumentException {
-                        // TODO Auto-generated method stub
-                        
-                    }
-
-                    @Override
                     public com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory() {
                         return com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE;
                     }

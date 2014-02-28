@@ -53,7 +53,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         messagesToLoad = new ArrayList<SailMasterMessage>();
         new Thread("OverlappingStoredAndReceivedMessages-Connector") {
-
+            @Override
             public void run() {
                 try {
                     serverSocket = new ServerSocket(PORT);
@@ -111,7 +111,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         for (int i=0; i<COUNT; i++) {
             rawMessage[i] = ""+i+"|CCG|c34c423c-0295-4fe5-91ca-336681624711|2|1;Lee Gate;LG1;LG2|"+i+";Windward;WW1";
             if (i<STORED) {
-                messagesToLoad.add(swissTimingFactory.createMessage(rawMessage[i], (long) i));
+                messagesToLoad.add(swissTimingFactory.createMessage(rawMessage[i]));
             }
         }
         logger.info("starting StoreAndForwardTest-testBufferingMessageSender thread");
@@ -130,7 +130,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
                     // unblocked by us sending the STORED-OVERLAPth message
                     for (int i = 0; i < COUNT-UNBUFFERED; i++) {
                         if (i >= STORED-OVERLAP) {
-                            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i], (long) i), sendingStream);
+                            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i]), sendingStream);
                         }
                         synchronized (OverlappingStoredAndReceivedMessagesTest.this) {
                             messagesSent++;
@@ -147,7 +147,7 @@ public class OverlappingStoredAndReceivedMessagesTest implements RaceSpecificMes
         assertTrue(loadMessagesCalled);
         // send more messages after buffering
         for (int i=COUNT-UNBUFFERED; i<COUNT; i++) {
-            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i], (long) i), sendingStream);
+            transceiver.sendMessage(swissTimingFactory.createMessage(rawMessage[i]), sendingStream);
         }
         synchronized (this) {
             int attempts = 0;

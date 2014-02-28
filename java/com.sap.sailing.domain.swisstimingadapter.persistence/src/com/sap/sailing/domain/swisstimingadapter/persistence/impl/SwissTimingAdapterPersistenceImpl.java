@@ -132,8 +132,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         DBCursor results = commandMessages.find(query);
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
-            result.add(swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())));
+            result.add(swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name())));
         }
         return result;
     }
@@ -148,8 +147,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
-            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    ((Number) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())).longValue());
+            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()));
             result.add(msg);
         }
         return result;
@@ -162,8 +160,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 new BasicDBObject().append(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1));
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
-            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+            SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()));
             result.add(msg);
         }
         return result;
