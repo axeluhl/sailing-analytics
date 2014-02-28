@@ -42,44 +42,44 @@ public class RaceMapImageManager {
      */
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
-            Marker tackToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000", 10, 33);
+            Marker tackToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.STARBOARD), tackToStarboardIcon);
 
-            Marker tackToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|FF0000|000000", 10, 33);
+            Marker tackToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.TACK, Tack.PORT), tackToPortIcon);
 
-            Marker jibeToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|00FF00|000000", 10, 33);
+            Marker jibeToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.STARBOARD), jibeToStarboardIcon);
 
-            Marker jibeToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|FF0000|000000", 10, 33);
+            Marker jibeToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=J|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.JIBE, Tack.PORT), jibeToPortIcon);
 
-            Marker headUpOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|00FF00|000000", 10, 33);
+            Marker headUpOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.STARBOARD), headUpOnStarboardIcon);
 
-            Marker headUpOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|FF0000|000000", 10, 33);
+            Marker headUpOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=H|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.HEAD_UP, Tack.PORT), headUpOnPortIcon);
 
-            Marker bearAwayOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|00FF00|000000", 10, 33);
+            Marker bearAwayOnStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.STARBOARD), bearAwayOnStarboardIcon);
           
-            Marker bearAwayOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|FF0000|000000", 10, 33);
+            Marker bearAwayOnPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=B|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.BEAR_AWAY, Tack.PORT), bearAwayOnPortIcon);
 
-            Marker markPassingToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|00FF00|000000", 10, 33);
+            Marker markPassingToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.STARBOARD), markPassingToStarboardIcon);
             
-            Marker markPassingToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|FF0000|000000", 10, 33);
+            Marker markPassingToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=M|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.MARK_PASSING, Tack.PORT), markPassingToPortIcon);
 
             Marker unknownManeuverIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=?|FFFFFF|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.STARBOARD), unknownManeuverIcon);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.UNKNOWN, Tack.PORT), unknownManeuverIcon);
 
-            Marker penaltyCircleToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|00FF00|000000", 10, 33);
+            Marker penaltyCircleToStarboardIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|71bf44|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.STARBOARD), penaltyCircleToStarboardIcon);
             
-            Marker penaltyCircleToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|FF0000|000000", 10, 33);
+            Marker penaltyCircleToPortIcon = createMarker("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=P|d95252|000000", 10, 33);
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.PORT), penaltyCircleToPortIcon);
         }
     }
