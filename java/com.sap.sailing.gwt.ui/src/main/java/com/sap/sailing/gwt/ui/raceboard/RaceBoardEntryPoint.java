@@ -67,25 +67,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         
         // read optional parameters 
-        RaceBoardViewConfiguration.ViewModes viewMode;
-        String viewModeParamValue = Window.Location.getParameter(RaceBoardViewConfiguration.PARAM_VIEW_MODE);
-        if (viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
-            try {
-                viewMode = RaceBoardViewConfiguration.ViewModes.valueOf(viewModeParamValue);
-            } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
-            }
-        } else {
-            viewMode = RaceBoardViewConfiguration.ViewModes.ONESCREEN;
-        }
         boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
         boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
         boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, false);
-        raceboardViewConfig = new RaceBoardViewConfiguration(viewMode, activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
+        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
+                showCompetitorsChart, canReplayWhileLiveIsPossible, autoSelectMedia);
         
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
@@ -157,12 +146,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName,
                 leaderboardGroupName, raceboardViewConfig, RaceBoardEntryPoint.this, stringMessages, userAgent, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
-
-        switch (raceBoardPanel.getConfiguration().getViewMode()) {
-            case ONESCREEN:
-                createRaceBoardInOneScreenMode(raceBoardPanel);
-                break;
-        }
+        createRaceBoardInOneScreenMode(raceBoardPanel);
     }  
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
