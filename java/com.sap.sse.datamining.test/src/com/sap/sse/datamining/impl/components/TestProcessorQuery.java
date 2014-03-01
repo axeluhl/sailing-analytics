@@ -2,14 +2,16 @@ package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -126,8 +128,24 @@ public class TestProcessorQuery {
 
     @Ignore
     @Test
-    public void testQueryTimeouting() {
-        fail("Not yet implemented");
+    public void testQueryTimeouting() throws TimeoutException {
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(createDataSource());
+        query.setFirstProcessor(createBlockingProcessor());
+        query.run(5000, TimeUnit.MILLISECONDS);
+    }
+
+    private Processor<Iterable<Number>> createBlockingProcessor() {
+        return new AbstractSimpleParallelProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), new ArrayList<Processor<Double>>()) {
+            @Override
+            protected Callable<Double> createInstruction(Iterable<Number> element) {
+                return new Callable<Double>() {
+                    @Override
+                    public Double call() throws Exception {
+                        while (true) { }
+                    }
+                };
+            }
+        };
     }
 
 }

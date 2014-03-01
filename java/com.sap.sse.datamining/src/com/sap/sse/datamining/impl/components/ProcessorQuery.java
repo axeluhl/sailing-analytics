@@ -2,6 +2,8 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +24,8 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     private final ProcessResultReceiver resultReceiver;
 
     private final Object monitorObject = new Object();
-    private boolean workIsDone;
+    private boolean workIsDone = false;
+    private boolean processorTimedOut = true;
 
     public ProcessorQuery(DataSourceType dataSource) {
         this.dataSource = dataSource;
@@ -36,7 +39,19 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     @Override
     public QueryResult<AggregatedType> run() {
         try {
-            return processQuery();
+            return run(0, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            // This code shouldn't be reached, because the timeout is deactivated (by the value 0 as timeout)
+            LOGGER.log(Level.WARNING, "Got a TimeoutException that should never happen: ", e);
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException {
+        try {
+            return processQuery(unit.toMillis(timeout));
         } catch (InterruptedException e) {
             LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
         }
@@ -44,19 +59,36 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         return null;
     }
 
-    private QueryResult<AggregatedType> processQuery() throws InterruptedException {
+    private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
         firstProcessor.onElement(dataSource);
         firstProcessor.finish();
+        setUpTimeout(timeoutInMillis);
         waitTillWorkIsDone();
         return resultReceiver.getResult();
     }
     
-    private void waitTillWorkIsDone() throws InterruptedException {
+    private void setUpTimeout(long timeoutInMillis) {
+        Thread timeoutThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (monitorObject) {
+                    monitorObject.notify();
+                }
+            }
+        });
+        timeoutThread.start();
+    }
+
+    private void waitTillWorkIsDone() throws InterruptedException, TimeoutException {
         synchronized (monitorObject) {
             while (!workIsDone) {
                 monitorObject.wait();
+                if (processorTimedOut) {
+                    throw new TimeoutException("The query processing timed out");
+                }
             }
             workIsDone = false;
+            processorTimedOut = true;
         }
     }
 
@@ -85,6 +117,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         public void finish() throws InterruptedException {
             synchronized (monitorObject) {
                 workIsDone = true;
+                processorTimedOut = false;
                 monitorObject.notify();
             }
         }

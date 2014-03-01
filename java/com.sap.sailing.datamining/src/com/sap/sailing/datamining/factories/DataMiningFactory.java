@@ -14,7 +14,7 @@ import com.sap.sse.datamining.components.ParallelGrouper;
 import com.sap.sse.datamining.factories.AggregatorFactory;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.DataMiningActivator;
-import com.sap.sse.datamining.impl.QueryImpl;
+import com.sap.sse.datamining.impl.deprecated.QueryImpl;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;
 

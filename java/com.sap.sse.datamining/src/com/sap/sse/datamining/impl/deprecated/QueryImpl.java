@@ -1,10 +1,12 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.deprecated;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.ParallelAggregator;
@@ -59,6 +61,11 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
         final long endTime = System.nanoTime();
         result.setCalculationTimeInNanos(endTime - startTime);
         return result;
+    }
+    
+    @Override
+    public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException {
+        throw new UnsupportedOperationException("This query implementation is deprecated.");
     }
 
     private String createResultSignifier() {
