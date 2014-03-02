@@ -15,6 +15,10 @@ public class Number {
         this.value = value;
     }
     
+    public int getValue() {
+        return value;
+    }
+    
     @Dimension("length")
     public int getLength() {
         return String.valueOf(value).length();

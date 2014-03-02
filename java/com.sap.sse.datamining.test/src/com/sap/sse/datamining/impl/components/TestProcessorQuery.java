@@ -2,10 +2,13 @@ package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -13,7 +16,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sse.datamining.Query;
@@ -32,12 +34,15 @@ import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestProcessorQuery {
 
+    @SuppressWarnings("unused")
+    private boolean receivedElementOrFinished;
+
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
         Collection<Number> dataSource = createDataSource();
         Query<Double> queryWithStandardWorkflow = createQueryWithStandardWorkflow(dataSource);
         QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
-        verifyResultWith(queryWithStandardWorkflow.run(), expectedResult);
+        verifyResult(queryWithStandardWorkflow.run(), expectedResult);
     }
     
     private Collection<Number> createDataSource() {
@@ -80,7 +85,7 @@ public class TestProcessorQuery {
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
         ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource);
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor, dataSource);
         
         Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = asCollection(query.getResultReceiver());
         Processor<GroupedDataEntry<Double>> sumAggregator =
@@ -117,7 +122,7 @@ public class TestProcessorQuery {
         return result;
     }
 
-    private void verifyResultWith(QueryResult<Double> result, QueryResult<Double> expectedResult) {
+    private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
 //        assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
 //        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
@@ -126,22 +131,74 @@ public class TestProcessorQuery {
 //        assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 
-    @Ignore
-    @Test
+    @Test(timeout=2000)
     public void testQueryTimeouting() throws TimeoutException {
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(createDataSource());
-        query.setFirstProcessor(createBlockingProcessor());
-        query.run(5000, TimeUnit.MILLISECONDS);
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), createDataSource());
+        Processor<Double> resultReceiver = new Processor<Double>() {
+            @Override
+            public void onElement(Double element) {
+                receivedElementOrFinished = true;
+            }
+            @Override
+            public void finish() throws InterruptedException {
+                receivedElementOrFinished = true;
+            }
+        };
+        query.setFirstProcessor(createBlockingProcessor(1000, resultReceiver));
+        
+        try {
+            query.run(500, TimeUnit.MILLISECONDS);
+            fail("The previous line should throw a timeout exception");
+        } catch (TimeoutException e) {
+            // A timeout exception is expected
+        }
+        
+//        ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
+//        assertThat("The processing should be aborted", receivedElementOrFinished, is(false));
     }
 
-    private Processor<Iterable<Number>> createBlockingProcessor() {
-        return new AbstractSimpleParallelProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), new ArrayList<Processor<Double>>()) {
+    private Processor<Iterable<Number>> createBlockingProcessor(final long timeToBlockInMillis, Processor<Double> resultReceiver) {
+        return new AbstractSimpleParallelProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver)) {
             @Override
             protected Callable<Double> createInstruction(Iterable<Number> element) {
                 return new Callable<Double>() {
                     @Override
                     public Double call() throws Exception {
-                        while (true) { }
+                        Thread.sleep(timeToBlockInMillis);
+                        return 0.0;
+                    }
+                };
+            }
+        };
+    }
+    
+    @Test
+    public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), createDataSource());
+        String keyValue = "Sum";
+        query.setFirstProcessor(createSumBuildingProcessor(query, keyValue));
+        
+        Map<GroupKey, Double> expectedResult = new HashMap<>();
+        expectedResult.put(new GenericGroupKey<String>(keyValue), 10358.0);
+        assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
+    }
+
+    private AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>> createSumBuildingProcessor(
+            ProcessorQuery<Double, Iterable<Number>> query, final String keyValue) {
+        return new AbstractSimpleParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>(ConcurrencyTestsUtil.getExecutor(),
+                                                                                            Arrays.asList(query.getResultReceiver())) {
+            @Override
+            protected Callable<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
+                return new Callable<Map<GroupKey,Double>>() {
+                    @Override
+                    public Map<GroupKey, Double> call() throws Exception {
+                        Map<GroupKey, Double> result = new HashMap<>();
+                        double sum = 0;
+                        for (Number number : element) {
+                            sum += number.getValue();
+                        }
+                        result.put(new GenericGroupKey<String>(keyValue), sum);
+                        return result;
                     }
                 };
             }

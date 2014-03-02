@@ -1,7 +1,10 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Map.Entry;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -20,14 +23,16 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     
     private final DataSourceType dataSource;
     private Processor<DataSourceType> firstProcessor;
-    
+
+    private Executor executor;
     private final ProcessResultReceiver resultReceiver;
 
     private final Object monitorObject = new Object();
     private boolean workIsDone = false;
     private boolean processorTimedOut = true;
 
-    public ProcessorQuery(DataSourceType dataSource) {
+    public ProcessorQuery(Executor executor, DataSourceType dataSource) {
+        this.executor = executor;
         this.dataSource = dataSource;
         resultReceiver = new ProcessResultReceiver();
     }
@@ -60,35 +65,47 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
-        firstProcessor.onElement(dataSource);
-        firstProcessor.finish();
-        setUpTimeout(timeoutInMillis);
-        waitTillWorkIsDone();
-        return resultReceiver.getResult();
-    }
-    
-    private void setUpTimeout(long timeoutInMillis) {
-        Thread timeoutThread = new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
-                synchronized (monitorObject) {
-                    monitorObject.notify();
+                try {
+                    firstProcessor.onElement(dataSource);
+                    firstProcessor.finish();
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.WARNING, "The query processing got interrupted.", e);
                 }
             }
         });
-        timeoutThread.start();
+        waitTillWorkIsDone(timeoutInMillis);
+        return resultReceiver.getResult();
     }
 
-    private void waitTillWorkIsDone() throws InterruptedException, TimeoutException {
+    private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
+        setUpTimeoutTimer(timeoutInMillis);
         synchronized (monitorObject) {
             while (!workIsDone) {
                 monitorObject.wait();
                 if (processorTimedOut) {
+                    // TODO Abort the processing
                     throw new TimeoutException("The query processing timed out");
                 }
             }
             workIsDone = false;
             processorTimedOut = true;
+        }
+    }
+    
+    private void setUpTimeoutTimer(long timeoutInMillis) {
+        if (timeoutInMillis > 0) {
+            Timer timeoutTimer = new Timer();
+            timeoutTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (monitorObject) {
+                        monitorObject.notify();
+                    }
+                }
+            }, timeoutInMillis);
         }
     }
 
