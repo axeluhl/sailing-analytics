@@ -28,6 +28,7 @@ import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
+import com.sap.sse.datamining.test.components.util.BlockingProcessor;
 import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -144,7 +145,7 @@ public class TestProcessorQuery {
                 receivedElementOrFinished = true;
             }
         };
-        query.setFirstProcessor(createBlockingProcessor(1000, resultReceiver));
+        query.setFirstProcessor(new BlockingProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000));
         
         try {
             query.run(500, TimeUnit.MILLISECONDS);
@@ -157,21 +158,6 @@ public class TestProcessorQuery {
 //        assertThat("The processing should be aborted", receivedElementOrFinished, is(false));
     }
 
-    private Processor<Iterable<Number>> createBlockingProcessor(final long timeToBlockInMillis, Processor<Double> resultReceiver) {
-        return new AbstractSimpleParallelProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver)) {
-            @Override
-            protected Callable<Double> createInstruction(Iterable<Number> element) {
-                return new Callable<Double>() {
-                    @Override
-                    public Double call() throws Exception {
-                        Thread.sleep(timeToBlockInMillis);
-                        return 0.0;
-                    }
-                };
-            }
-        };
-    }
-    
     @Test
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), createDataSource());

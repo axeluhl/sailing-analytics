@@ -4,10 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,20 +30,18 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void onElement(InputType element) {
         for (WorkingType partialElement : partitionElement(element)) {
-            Callable<ResultType> instruction = createInstruction(partialElement);
+            final Callable<ResultType> instruction = createInstruction(partialElement);
             if (isInstructionValid(instruction)) {
-                final RunnableFuture<ResultType> runnableInstruction = new FutureTask<>(instruction);
                 Runnable instructionWrapper = new Runnable() {
                     @Override
                     public void run() {
-                        runnableInstruction.run();
                         try {
-                            ResultType result = runnableInstruction.get();
+                            ResultType result = instruction.call();
                             if (isResultValid(result)) {
                                 forwardResultToReceivers(result);
                             }
-                        } catch (InterruptedException | ExecutionException e) {
-                            LOGGER.log(Level.FINEST, "Error getting the result from the instruction: ", e);
+                        } catch (Exception e) {
+                            LOGGER.log(Level.FINEST, "An error occured during the processing of an instruction: ", e);
                         } finally {
                             AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
                         }
