@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeTicksCalculator.TickPosition;
 
