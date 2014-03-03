@@ -58,6 +58,10 @@ public class ActivelyConnectingStoreAndForwardTest {
     public void setUp() throws UnknownHostException, IOException, InterruptedException {
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         db = mongoDBService.getDB();
+        // Now ensure that for the duration of this test, until in tearDown() db.requestDone() is called, the DB connection
+        // keeps using the same socket / connection to the DB, so we read our own writes.
+        db.requestStart();
+        db.requestEnsureConnection();
         sailMasterDummyListenerThread = new Thread("ActivelyConnectingStoreAndForwardTest-Listener") {
             public void run() {
                 try {
@@ -107,11 +111,13 @@ public class ActivelyConnectingStoreAndForwardTest {
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(), new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */ true, /* multi */ false);
+        db.getLastError(); // wait for this update to succeed
     }
     
     @After
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
+        db.requestDone();
         storeAndForward.stop();
         sailMasterDummyListenerThread.join();
         connector.stop();
