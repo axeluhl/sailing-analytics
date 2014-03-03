@@ -133,7 +133,7 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
             super(DOM.createAnchor());
             this.panel = panel;
             Element elem = getElement();
-            DOM.setElementProperty(elem, "href", "javascript:void(0);");
+            elem.setPropertyString("href", "javascript:void(0);");
             // Avoids layout problems from having blocks in inlines.
             //DOM.setStyleAttribute(elem, "display", "block");
             sinkEvents(Event.ONCLICK);
@@ -149,7 +149,7 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
             switch (DOM.eventGetType(event)) {
             case Event.ONCLICK:
                 // Prevent link default action.
-                DOM.eventPreventDefault(event);
+                event.preventDefault();
                 if(isClickable) {
                     panel.setOpen(!panel.isOpen());
                 }
