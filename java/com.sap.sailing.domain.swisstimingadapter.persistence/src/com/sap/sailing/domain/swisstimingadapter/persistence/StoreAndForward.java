@@ -19,6 +19,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -162,7 +163,7 @@ public class StoreAndForward implements Runnable {
     private long getLastMessageCount() {
         DBObject lastMessageCountRecord = lastMessageCountCollection.findOne();
         if (lastMessageCountRecord == null) {
-            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l));
+            lastMessageCountCollection.insert(new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l), WriteConcern.SAFE);
         }
         return lastMessageCountRecord == null ? 0 : ((Number) lastMessageCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue();
     }
