@@ -3,20 +3,6 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
-import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
-import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
-
-/**
- * A possible passing of a {@link Waypoint}. It contains the {@link Waypoint} that it might be passing, a
- * {@link TimePoint}, the probability that this candidate is a passing (e.g. based on the distance to the
- * {@link Waypoint}) and the one-based(!) ID of this Waypoint. The ID is one based because the standard implemantation
- * of {@link CandidateChooser} (see {@link CandidateChooserImpl}) uses a proxy Candidates at the end and the
- * beginning of the race, the one at the beginning recieves the ID 0. Candidates are created in an
- * {@link CandidateFinder}, which determines where a passing could be and assigns them
- * 
- * @author Nicolas Klose
- * 
- */
 
 public class CandidateImpl implements Candidate {
     private final Waypoint w;

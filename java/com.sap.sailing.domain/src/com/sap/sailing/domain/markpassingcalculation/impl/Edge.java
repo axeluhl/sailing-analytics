@@ -5,11 +5,11 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 
 /**
- * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>.
- * {@link #getCost()} returns the probability of this passage being correct, consisting of the probability of
- * each Candidate, the probability of the passage (e.g. an estimate whether the distance sailed between the candidates matches the
- * distance between their {@link Waypoint}s), and a penalty for skipping waypoints, which might happen if a tracker fails
- * or a competitor aborts but should be avoided if possible.
+ * Represent the passage between two {@link Candidate}s, <code>start</code> and <code>end</code>. {@link #getCost()}
+ * returns the probability of this passage being correct, consisting of the probability of each Candidate, the
+ * probability of the passage between them (an estimate whether the distance sailed between the candidates matches the
+ * distance between their {@link Waypoint}s), and a penalty for skipping waypoints, which might happen if a tracker
+ * fails or a competitor aborts but should be avoided if possible and is therefore unlikely.
  * 
  * @author Nicolas Klose
  * 
@@ -36,7 +36,8 @@ public class Edge implements Comparable<Edge> {
 
     public Double getCost() {
         double penalty = end.getOneBasedIndexOfWaypoint() == course.getNumberOfWaypoints() + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
-        return 1-(start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
+        return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceProbability) + 2 * penalty
+                * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
     }
 
     public Candidate getStart() {

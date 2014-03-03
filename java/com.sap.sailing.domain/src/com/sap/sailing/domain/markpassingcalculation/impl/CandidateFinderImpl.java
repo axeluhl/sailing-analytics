@@ -35,11 +35,11 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 
 /**
- * The standard implemantation of {@link CandidateFinder}. There are two ways {@link CandidateImpl}s can be created. First
- * of all, all local distance minima to a waypoint are candidates. Secondly, every time a competitor passes the crossing
- * Bearing of a Waypoint, a candidate is created using linear interpolation to estimate the exact time the bearing was
- * crossed. The probability of a candidate depends on its distance to the waypoint, whether it is on the right side and
- * if it passes in the right direction.
+ * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
+ * every time a competitor passes the crossing-bearing of a waypoint, a candidate is created using linear interpolation
+ * to estimate the exact time the bearing was crossed. Secondly, all local distance minima to a waypoint are candidates.
+ * The probability of a candidate depends on its distance , whether it is on the right side and if it passes in the
+ * right direction of its waypoint.
  * 
  * @author Nicolas Klose
  * 
@@ -77,7 +77,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             crossTrackErrors.put(c, new TreeMap<GPSFix, Map<Waypoint, Pair<Double, Double>>>(comp));
             distances.put(c, new TreeMap<GPSFix, Map<Mark, Distance>>(comp));
             cteCandidates.put(c, new HashMap<Waypoint, Map<List<GPSFix>, CandidateImpl>>());
-            distanceCandidates.put(c, new HashMap<Waypoint,Map<GPSFix, CandidateImpl>>());
+            distanceCandidates.put(c, new HashMap<Waypoint, Map<GPSFix, CandidateImpl>>());
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
                 cteCandidates.get(c).put(w, new HashMap<List<GPSFix>, CandidateImpl>());
                 distanceCandidates.get(c).put(w, new HashMap<GPSFix, CandidateImpl>());
@@ -372,7 +372,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
                 Pair<Double, Double> ctes;
                 Position fixPos = fix.getPosition();
-                // TODO extract Iterable<Pair<Position, Bearing>> for Waypoint and check XTE for all of them... + direction!
+                // TODO extract Iterable<Pair<Position, Bearing>> for Waypoint and check XTE for all of them... +
+                // direction!
                 Position markPos = race.getOrCreateTrack(marks.get(0)).getEstimatedPosition(t, false);
                 Bearing crossingBearing = getCrossingBearing(w, t);
                 Double cte1 = null;
@@ -521,7 +522,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         return distance;
     }
-    
+
     private Bearing getCrossingBearing(Waypoint w, TimePoint t) {
         Bearing result = null;
         PassingInstruction instruction = w.getPassingInstructions();
@@ -562,7 +563,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         return result;
     }
-    
+
     private Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark mark : w.getMarks()) {

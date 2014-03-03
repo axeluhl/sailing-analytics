@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
-import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.StorePositionUpdateStrategy;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -32,14 +31,14 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
- * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link CandidateImpl} s. The
- * chooser than finds the most likely sequence of {@link CandidateImpl}s and creates the {@link MarkPassing}s for this
- * sequence. This happens upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} for
- * the current state of the race. This can be used for live or stored races. For live races, the <code>listen</code>
- * parameter of the constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new
- * fixes into a queue. Additionally a new thread is started, which evaluates the new fixes (See
- * {@link CandidateFinderImpl} and {@link CandidateChooserImpl}). Then the listening process begins again with the queue
- * being emptied. This continues until the {@link MarkPassingUpdateListener} signals that the race is over.
+ * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s . The
+ * chooser than finds the most likely sequence of {@link Candidate}s and updates the race with new {@link MarkPassing}s
+ * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} this
+ * happens for the current state of the race. In addition, for live races, the <code>listen</code> parameter of the
+ * constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new fixes into a queue
+ * as {@link StorePositionUpdateStrategy}. A new thread will also be started to evaluate the new fixes (See
+ * {@link CandidateFinder} and {@link CandidateChooser}). This continues until the {@link MarkPassingUpdateListener}
+ * signals that the race is over.
  * 
  * @author Nicolas Klose
  * 
@@ -73,6 +72,14 @@ public class MarkPassingCalculator {
         }
     }
 
+    /**
+     * Waits until an object is in the queue, then drains it entirely. After that, the fixes are sorted by the object
+     * they are tracking in <code>competitorFixes</code> and <code>markFixes</code>. Finally, if <code>suspended</code>
+     * is false, new passing are computed.
+     * 
+     * @author Nicolas Klose
+     * 
+     */
     private class Listen implements Runnable {
         @Override
         public void run() {
@@ -103,21 +110,28 @@ public class MarkPassingCalculator {
             }
         }
 
-        private void computeMarkPasses(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
-            Map<Competitor, Set<GPSFix>> comFixes = new HashMap<>();
+        /**
+         * The calculation has two steps. For every mark with new fixes those competitor fixes are calculated that may
+         * have changed their status as {@link Candidate} (see {@link FixesAffectedByNewMarkFixes}. Then, the
+         * {@link CandidateFinder} uses those fixes along with any new competitor fixes to calculate any new or wrong
+         * Candidates. These are passed to the {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see
+         * {@link ComputeMarkPassings}).
+         * 
+         */
+        private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes, Map<Mark, List<GPSFix>> newMarkFixes) {
+            Map<Competitor, Set<GPSFix>> combinedCompetitorFixesFixes = new HashMap<>();
             List<FutureTask<Map<Competitor, List<GPSFix>>>> markTasks = new ArrayList<>();
-            for (Entry<Mark, List<GPSFix>> markEntry : markFixes.entrySet()) {
+            for (Entry<Mark, List<GPSFix>> markEntry : newMarkFixes.entrySet()) {
                 FutureTask<Map<Competitor, List<GPSFix>>> task = new FutureTask<>(new FixesAffectedByNewMarkFixes(markEntry.getKey(), markEntry.getValue()));
-
                 markTasks.add(task);
                 executor.submit(task);
             }
-            markFixes.clear();
-            for (Entry<Competitor, List<GPSFix>> competitorEntry : competitorFixes.entrySet()) {
-                Set<GPSFix> fixesForCompetitor = comFixes.get(competitorEntry.getKey());
-                if (competitorFixes == null) {
+            newMarkFixes.clear();
+            for (Entry<Competitor, List<GPSFix>> competitorEntry : newCompetitorFixes.entrySet()) {
+                Set<GPSFix> fixesForCompetitor = combinedCompetitorFixesFixes.get(competitorEntry.getKey());
+                if (newCompetitorFixes == null) {
                     fixesForCompetitor = new HashSet<>();
-                    comFixes.put(competitorEntry.getKey(), fixesForCompetitor);
+                    combinedCompetitorFixesFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                 }
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
@@ -129,17 +143,17 @@ public class MarkPassingCalculator {
                     logger.severe("Threw Exception " + e.getMessage() + " while calculating fixes affected by new Mark Fixes.");
                 }
                 for (Entry<Competitor, List<GPSFix>> competitorEntry : fixes.entrySet()) {
-                    Set<GPSFix> fixesForCompetitor = comFixes.get(competitorEntry.getKey());
-                    if (competitorFixes == null) {
+                    Set<GPSFix> fixesForCompetitor = combinedCompetitorFixesFixes.get(competitorEntry.getKey());
+                    if (newCompetitorFixes == null) {
                         fixesForCompetitor = new HashSet<>();
-                        comFixes.put(competitorEntry.getKey(), fixesForCompetitor);
+                        combinedCompetitorFixesFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                     }
                     fixesForCompetitor.addAll(competitorEntry.getValue());
                 }
             }
-            competitorFixes.clear();
+            newCompetitorFixes.clear();
             List<Callable<Object>> tasks = new ArrayList<>();
-            for (Entry<Competitor, Set<GPSFix>> c : comFixes.entrySet()) {
+            for (Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixesFixes.entrySet()) {
                 tasks.add(Executors.callable(new ComputeMarkPassings(c.getKey(), c.getValue())));
             }
             try {
@@ -183,12 +197,16 @@ public class MarkPassingCalculator {
     }
 
     /**
-     * Only suspends the actual calcualtion. Even when suspended all incoming fixes are added to the queue and sorted.
+     * Only suspends the actual calculation. Even when suspended all incoming fixes are added to the queue and sorted.
      */
     public void suspend() {
         suspended = true;
     }
 
+    /**
+     * An empty object is written to the queue to ensure that any fixes that have been removed from the queue are
+     * evaluated even if nothing else arrives after this is called.
+     */
     public void resume() {
         suspended = false;
         listener.getQueue().add(new StorePositionUpdateStrategy() {

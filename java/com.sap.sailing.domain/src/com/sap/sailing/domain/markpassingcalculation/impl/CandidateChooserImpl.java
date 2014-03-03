@@ -29,9 +29,11 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
- * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code>. The probability of an
- * {@link Edge} is equal to one minus the probability of the two Candidates times an estimation of the distance traveled
- * between the them. The shortest path between the proxy-Candidates is the most likely sequence of {@link MarkPassing}s.
+ * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code> using {@link Edge}s. These are
+ * only created if the both the waypoints and the the timepoints are in chronological order and the distance-based
+ * estimation is good enough. They are saved in a map in which every candidate is the key to a list of all the edges
+ * that start at this candidate. The shortest path between the proxy-Candidates is the most likely sequence of
+ * {@link MarkPassing}s.
  * 
  * @author Nicolas Klose
  * 
@@ -105,9 +107,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
                 // If a start time is given the probability of an Edge from start to an other candidate can be
                 // evaluated.
-                if (late == end){
+                if (late == end) {
                     addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
-                } else if (early == start&&(raceStartTime==null||!early.getTimePoint().after(late.getTimePoint()))){
+                } else if (early == start && (raceStartTime == null || !early.getTimePoint().after(late.getTimePoint()))) {
                     addEdge(edges, new Edge(early, late, 1, race.getRace().getCourse()));
                 } else if (late.getTimePoint().after(early.getTimePoint())) {
                     final double probability = getDistanceEstimationBasedProbability(co, early, late);
@@ -119,7 +121,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
 
-    public void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
+    private void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
         Set<Edge> edgeSet = edges.get(e.getStart());
         if (edgeSet == null) {
             edgeSet = new HashSet<>();
@@ -219,11 +221,11 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
         Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         double differenceInMeters = actualDistance.getMeters() - totalEstimatedDistance.getMeters();
-        double differenceInPercent = differenceInMeters/totalEstimatedDistance.getMeters();
+        double differenceInPercent = differenceInMeters / totalEstimatedDistance.getMeters();
         if (differenceInPercent < 0) {
-            result = 3.5*differenceInPercent+1;
+            result = 3.5 * differenceInPercent + 1;
         } else if (differenceInPercent > 1) {
-            result = Math.sqrt((-differenceInPercent+3)/2);
+            result = Math.sqrt((-differenceInPercent + 3) / 2);
         } else {
             result = 1;
         }
