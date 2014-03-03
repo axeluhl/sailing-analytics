@@ -69,7 +69,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     };
 
-    private final double strictness = 9; // Higher = stricter; 9
+    private final double strictness = 10; // Higher = stricter; 9
 
     public CandidateFinderImpl(DynamicTrackedRace race) {
         this.race = race;

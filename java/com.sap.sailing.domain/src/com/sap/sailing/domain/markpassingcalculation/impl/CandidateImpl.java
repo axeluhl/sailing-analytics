@@ -51,7 +51,7 @@ public class CandidateImpl implements Candidate {
 
     @Override
     public Double getProbability() {
-        double factor= (correctSide&&correctDirection)?1:(correctSide||correctDirection)?0.8:0.6;
+        double factor= (correctSide&&correctDirection)?1:(correctSide||correctDirection)?0.7:0.4;
         double cost = distanceBasedProbability * factor;
         return cost;
     }

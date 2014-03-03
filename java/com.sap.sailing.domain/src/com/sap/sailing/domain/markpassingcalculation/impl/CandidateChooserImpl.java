@@ -195,9 +195,6 @@ public class CandidateChooserImpl implements CandidateChooser {
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
         assert c1 != start;
         assert c2 != end;
-        if (c.getName().equals("Jochen Schümann")/*&&c1.getOneBasedIndexOfWaypoint()==1&&c2.getOneBasedIndexOfWaypoint()==3*/){
-            System.currentTimeMillis();
-        }
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
         final TimePoint middleOfc1Andc2 = c1.getTimePoint().plus((long) (c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis() * 0.5));
