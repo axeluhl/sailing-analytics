@@ -31,9 +31,10 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
  * vertices, all between two proxy Candidates, <code>start</code> and <code>end</code> using {@link Edge}s. These are
  * only created if the both the waypoints and the the timepoints are in chronological order and the distance-based
- * estimation is good enough. They are saved in a map in which every candidate is the key to a list of all the edges
- * that start at this candidate. The shortest path between the proxy-Candidates is the most likely sequence of
- * {@link MarkPassing}s.
+ * estimation is good enough. They are saved in <code>allEdges</code>, a map in which every candidate is the key to a
+ * list of all the edges that start at this candidate. The shortest path between the proxy-Candidates is the most likely
+ * sequence of {@link MarkPassing}s. Every time new candidates arrive, the start time of the race is checked. If it has
+ * changed, the proxy start and all edges containing it are updated.
  * 
  * @author Nicolas Klose
  * 
@@ -192,6 +193,11 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
 
+    /**
+     * The distance between waypoints is used to estimate the distance that should be covered between these two
+     * candidates. This estimation is then compared to the distance actually sailed. A distance smaller than the
+     * estimation is (aside from a small tolerance) impossible, a distance larger get increasingly unlikely.
+     */
     private double getDistanceEstimationBasedProbability(Competitor c, Candidate c1, Candidate c2) {
         final double result;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();

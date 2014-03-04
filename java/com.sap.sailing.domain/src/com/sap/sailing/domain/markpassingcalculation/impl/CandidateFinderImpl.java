@@ -176,6 +176,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
+    /**
+     * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate.
+     */
     private Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> checkForDistanceCandidateChanges(Competitor c, Iterable<GPSFix> fixes) {
         Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
         calculatesDistances(c, fixes);
@@ -283,6 +286,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
+    /**
+     * For each fix the cross-track error(s) to each waypoint are calculated. Then all pairs of fixes are checked for
+     * being a candidate.
+     */
     private Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> checkForXTECandidatesChanges(Competitor c, Iterable<GPSFix> fixes) {
         calculateCrossTrackErrors(c, fixes);
         Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
@@ -295,16 +302,16 @@ public class CandidateFinderImpl implements CandidateFinder {
             // TODO Datenstrukturen beschreiben
             GPSFix fixBefore = crossTrackErrors.get(c).lowerKey(fix);
             GPSFix fixAfter = crossTrackErrors.get(c).higherKey(fix);
-            Map<Waypoint, List<Double>> xteBefore = null;
-            Map<Waypoint, List<Double>> xteAfter = null;
+            Map<Waypoint, List<Double>> xtesBefore = null;
+            Map<Waypoint, List<Double>> xtesAfter = null;
             TimePoint tBefore = null;
             TimePoint tAfter = null;
             if (fixBefore != null) {
-                xteBefore = crossTrackErrors.get(c).get(fixBefore);
+                xtesBefore = crossTrackErrors.get(c).get(fixBefore);
                 tBefore = fixBefore.getTimePoint();
             }
             if (fixAfter != null) {
-                xteAfter = crossTrackErrors.get(c).get(fixAfter);
+                xtesAfter = crossTrackErrors.get(c).get(fixAfter);
                 tAfter = fixAfter.getTimePoint();
             }
             for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
@@ -322,11 +329,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                     } else {
-                        if (fixAfter != null && crossTrackErrorSignChanges(fix, fixAfter, w, c, true)) {
-                            newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter.get(w).get(0), t, tAfter, w, true));
+                        if (fixAfter != null) {
+                            Double xteAfter = xtesAfter.get(w).get(0);
+                            if (xte < 0 != xteAfter <= 0) {
+                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                            }
                         }
-                        if (fixBefore != null && crossTrackErrorSignChanges(fix, fixBefore, w, c, true)) {
-                            newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore.get(w).get(0), xte, t, tBefore, w, true));
+                        if (fixBefore != null) {
+                            Double xteBefore = xtesBefore.get(w).get(0);
+                            if (xte < 0 != xteBefore <= 0) {
+                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                            }
                         }
                     }
                 }
@@ -335,11 +348,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
                     } else {
-                        if (fixAfter != null && crossTrackErrorSignChanges(fix, fixAfter, w, c, false)) {
-                            newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter.get(w).get(1), t, tAfter, w, true));
+                        if (fixAfter != null) {
+                            Double xteAfter = xtesAfter.get(w).get(1);
+                            if (xte < 0 != xteAfter <= 0) {
+                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                            }
                         }
-                        if (fixBefore != null && crossTrackErrorSignChanges(fix, fixBefore, w, c, false)) {
-                            newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore.get(w).get(1), xte, t, tBefore, w, true));
+                        if (fixBefore != null) {
+                            Double xteBefore = xtesBefore.get(w).get(1);
+                            if (xte < 0 != xteBefore <= 0) {
+                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                            }
                         }
                     }
                 }
@@ -387,15 +406,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
-    }
-
-    private boolean crossTrackErrorSignChanges(GPSFix fix, GPSFix fix2, Waypoint w, Competitor c, boolean portMark) {
-        Double cte = portMark ? crossTrackErrors.get(c).get(fix).get(w).get(0) : crossTrackErrors.get(c).get(fix).get(w).get(1);
-        Double cte2 = portMark ? crossTrackErrors.get(c).get(fix2).get(w).get(0) : crossTrackErrors.get(c).get(fix2).get(w).get(1);
-        if (cte != null && cte2 != null && (cte < 0) != (cte2 <= 0)) {
-            return true;
-        }
-        return false;
     }
 
     private Candidate createCandidate(Competitor c, double cte1, double cte2, TimePoint t1, TimePoint t2, Waypoint w, Boolean portMark) {
