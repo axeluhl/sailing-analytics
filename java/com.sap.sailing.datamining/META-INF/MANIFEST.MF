@@ -6,10 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.gwt.i18n.client,
- com.sap.sailing.server
+Import-Package: com.sap.sailing.server
 Export-Package: com.sap.sailing.datamining
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common,
- com.sap.sailing.datamining.shared;bundle-version="1.0.0"
+ com.sap.sailing.datamining.shared;bundle-version="1.0.0",
+ com.google.gwt.osgi;bundle-version="2.6.0"
 Bundle-ClassPath: .
