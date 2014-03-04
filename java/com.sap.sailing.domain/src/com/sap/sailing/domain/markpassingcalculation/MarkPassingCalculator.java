@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
+import com.sap.sailing.domain.markpassingcalculation.impl.MarkPassingUpdateListener;
 import com.sap.sailing.domain.markpassingcalculation.impl.StorePositionUpdateStrategy;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
