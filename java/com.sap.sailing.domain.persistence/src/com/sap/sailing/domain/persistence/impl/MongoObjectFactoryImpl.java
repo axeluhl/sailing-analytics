@@ -106,11 +106,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     private void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
-        result.put(field.name(), timePoint.asMillis());
+        if(timePoint != null) {
+            result.put(field.name(), timePoint.asMillis());
+        }
     }
 
     private void storeTimed(Timed timed, DBObject result) {
-        storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
+        if(timed.getTimePoint() != null) {
+            storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
+        }
     }
 
     private void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
@@ -422,7 +426,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
-        eventDBObject.put(FieldNames.EVENT_PUBLICATION_URL.name(), event.getPublicationUrl());
+        storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
+        storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);

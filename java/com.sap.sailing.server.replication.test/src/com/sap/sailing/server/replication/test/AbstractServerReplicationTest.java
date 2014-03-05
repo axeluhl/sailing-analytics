@@ -20,6 +20,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -50,6 +52,8 @@ public abstract class AbstractServerReplicationTest {
     private ReplicationServiceImpl masterReplicator;
     private ReplicationMasterDescriptor  masterDescriptor;
     
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+
     /**
      * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */

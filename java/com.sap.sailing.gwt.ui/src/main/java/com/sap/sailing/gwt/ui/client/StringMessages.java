@@ -209,6 +209,7 @@ public interface StringMessages extends Messages {
     String locationNotAvailable();
     String startDateNotAvailable();
     String startDate();
+    String endDate();
     String unknownManeuver();
     String tailLengthMustBePositive();
     String failedToLoadRaceInformation(String message);
@@ -306,6 +307,8 @@ public interface StringMessages extends Messages {
     String boatClass();
     String setDelayToLive();
     String pleaseEnterNonEmptyVenue();
+    String pleaseEnterStartAndEndDate();
+    String startDateMustBeforeEndDate();
     String eventWithThisNameAlreadyExists();
     String venue();
     String pleaseSelectABoatClass();
