@@ -244,12 +244,12 @@ public class CandidateFinderImpl implements CandidateFinder {
                         t = fix.getTimePoint();
                         p = fix.getPosition();
                         if (cost != null) { // Candidate for both marks of a gate, the more likely one is chosen
-                            Double newCost = getDistanceLikelyhood(w, t, dis);
+                            Double newCost = getDistanceBasedProbability(w, t, dis);
                             if (newCost == null || newCost * 0.8 < cost) {
                                 continue;
                             }
                         }
-                        cost = getDistanceLikelyhood(w, t, dis);
+                        cost = getDistanceBasedProbability(w, t, dis);
                         if (cost == null) {
                             continue;
                         }
@@ -295,6 +295,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * Calculates the distance from each fix to each mark or line.
+     */
     private void calculatesDistances(Competitor c, Iterable<GPSFix> fixes) {
         for (GPSFix fix : fixes) {
             HashMap<Mark, Distance> fixDistances = new HashMap<Mark, Distance>();
@@ -311,7 +314,6 @@ public class CandidateFinderImpl implements CandidateFinder {
      * being a candidate.
      */
     private Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> checkForXTECandidatesChanges(Competitor c, Iterable<GPSFix> fixes) {
-        // TODO Candidate from fix before gets removed and added!!
         calculateCrossTrackErrors(c, fixes);
         Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> totalResult = new HashMap<>();
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
@@ -414,6 +416,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         return totalResult;
     }
 
+    /**
+     * Calculates the cross-track error of each fix to the position and crossing bearing of each waypoint. Gates have
+     * two of these and lines always go from the port mark to the starboard mark.
+     */
     private void calculateCrossTrackErrors(Competitor c, Iterable<GPSFix> fixes) {
         for (GPSFix fix : fixes) {
             Position fixPos = fix.getPosition();
@@ -446,11 +452,16 @@ public class CandidateFinderImpl implements CandidateFinder {
             m = w.getMarks().iterator().next();
         }
         Distance d = calculateDistance(p, m, t);
-        double cost = getDistanceLikelyhood(w, t, d);
+        double cost = getDistanceBasedProbability(w, t, d);
         return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark), passesInTheRightDirection(w, cte1,
                 cte2, portMark), "CTE");
     }
 
+    /**
+     * Determines whether a candidate is on the correct side of a waypoint. This is defined by the crossing information.
+     * The cross-track error of <code>p</code> to the crossing Position and the crossing Bearing rotated by 90° need to
+     * be negative. If the passing Instructions are line, it checks whether the boat passed between the two marks.
+     */
     private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t, boolean portMark) {
         boolean result = true;
         PassingInstruction instruction = passingInstructions.get(w);
@@ -471,8 +482,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
         } else {
             Mark m = null;
-            if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
-                    || instruction == PassingInstruction.FixedBearing) {
+            if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard || instruction == PassingInstruction.FixedBearing) {
                 m = w.getMarks().iterator().next();
             }
             if (instruction == PassingInstruction.Gate) {
@@ -487,29 +497,39 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * Determines whether a candidate passes a waypoint in the right direction. Can only be applied to XTE-Candidates.
+     * For marks passed on port, the cross-track error should switch from positive to negative and vice versa. Lines are
+     * also from positive to negative as the cross-track error to a line is always positive when approaching it from the
+     * correct side.
+     */
     private boolean passesInTheRightDirection(Waypoint w, double cte1, double cte2, boolean portMark) {
         boolean result = true;
         PassingInstruction instruction = passingInstructions.get(w);
-        if (instruction == PassingInstruction.Port || (instruction == PassingInstruction.Gate && portMark)) {
+        if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Line || (instruction == PassingInstruction.Gate && portMark)) {
             result = cte1 > cte2 ? true : false;
         } else if (instruction == PassingInstruction.Starboard || (instruction == PassingInstruction.Gate && !portMark)) {
             result = cte1 < cte2 ? true : false;
-        } else if (instruction == PassingInstruction.Line) {
-            result = cte1 > cte2 ? true : false;
         }
         return result;
     }
 
-    private Double getDistanceLikelyhood(Waypoint w, TimePoint t, Distance distance) {
+    /**
+     * @return a probability based on the distance to <code>w</code> and the average leg lengths before and after.
+     */
+    private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance) {
         Distance legLength = getLegLength(t, w);
         if (legLength != null) {
-            double result = 1 / (10/*Raising this will make is stricter*/ * Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
+            double result = 1 / (10/*Raising this will make is stricter*/* Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
             // Auch NormalVerteilung?
             return result;
         }
         return null;
     }
 
+    /**
+     * @return an average of the estimated legs before and after <code>w</code>.
+     */
     private Distance getLegLength(TimePoint t, Waypoint w) {
         Course course = race.getRace().getCourse();
         if (w == course.getFirstWaypoint()) {
@@ -526,6 +546,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
+    /**
+     * If <code>m</code> is contained in <code>lineMarks</code>, the distance to that line is calculated, else simply
+     * the distance to the m.
+     */
     private Distance calculateDistance(Position p, Mark m, TimePoint t) {
         Distance distance = null;
         if (!lineMarks.containsValue(m)) {
@@ -547,6 +571,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         return distance;
     }
 
+    /**
+     * @return all possible ways to pass a waypoint, described as a position and a bearing. The line out of those two
+     *         muss be crossed.
+     */
     private Iterable<Pair<Position, Bearing>> getCrossingBearing(Waypoint w, TimePoint t) {
         List<Pair<Position, Bearing>> result = new ArrayList<>();
         PassingInstruction instruction = w.getPassingInstructions();
@@ -616,6 +644,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * @return the marks of a waypoint with two marks in the order port, starboard (when approching the waypoint from
+     *         the direction of the waypoint beforehand.
+     */
     private Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w) {
         List<Position> markPositions = new ArrayList<Position>();
         for (Mark mark : w.getMarks()) {
