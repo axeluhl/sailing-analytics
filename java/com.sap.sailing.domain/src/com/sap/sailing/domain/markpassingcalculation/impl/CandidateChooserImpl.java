@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
@@ -73,10 +74,11 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-        if (race.getStartOfRace() != null) {
-            if (raceStartTime == null || !race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME).equals(raceStartTime)) {
-                raceStartTime = race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME);
-                for (Competitor com : allEdges.keySet()) {
+        TimePoint startOfRace = race.getStartOfRace();
+        if (startOfRace != null) {
+            if (raceStartTime == null || !startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME).equals(raceStartTime)) {
+                raceStartTime = startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME);
+                for (Competitor com : candidates.keySet()) {
                     removeCandidates(Arrays.asList(start), com);
                 }
                 start = new CandidateImpl(0, raceStartTime, /* Probability */1, /* Waypoint */null, /* right Side */true,
@@ -172,10 +174,12 @@ public class CandidateChooserImpl implements CandidateChooser {
         Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(co);
         List<MarkPassing> newMarkPassings = new LinkedList<>();
         while (marker != start) {
-            MarkPassing markPassingForWaypoint = currentPasses.get(marker.getWaypoint());
-            if (markPassingForWaypoint == null || !markPassingForWaypoint.getTimePoint().equals(marker.getTimePoint())) {
-                markPassingForWaypoint = new MarkPassingImpl(marker.getTimePoint(), marker.getWaypoint(), co);
-                currentPasses.put(marker.getWaypoint(), markPassingForWaypoint);
+            Waypoint markerWaypoint = marker.getWaypoint();
+            MarkPassing markPassingForWaypoint = currentPasses.get(markerWaypoint);
+            TimePoint markerTimePoint = marker.getTimePoint();
+            if (markPassingForWaypoint == null || !markPassingForWaypoint.getTimePoint().equals(markerTimePoint)) {
+                markPassingForWaypoint = new MarkPassingImpl(markerTimePoint, markerWaypoint, co);
+                currentPasses.put(markerWaypoint, markPassingForWaypoint);
                 changed = true;
             }
             newMarkPassings.add(0, markPassingForWaypoint);
@@ -205,7 +209,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         assert c2 != end;
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
-        final TimePoint middleOfc1Andc2 = c1.getTimePoint().plus((long) (c2.getTimePoint().minus(c1.getTimePoint().asMillis()).asMillis() * 0.5));
+        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis()/2);
         if (c1.getOneBasedIndexOfWaypoint() == 0) {
             first = race.getRace().getCourse().getFirstWaypoint();
         } else {
