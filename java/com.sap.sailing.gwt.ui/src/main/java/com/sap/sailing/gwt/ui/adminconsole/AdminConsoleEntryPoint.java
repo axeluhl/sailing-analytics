@@ -98,7 +98,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         addScrollableTab(tabPanel, createSwissTimingRacePanel, stringMessages.createSwissTimingRace());
 
         final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
-                sailingService, this, this, stringMessages);
+                sailingService, this, this, this, stringMessages);
         raceLogTrackingEventManagementPanel.setSize("90%", "90%");
         addScrollableTab(tabPanel, raceLogTrackingEventManagementPanel, stringMessages.raceLogTracking());
         regattaDisplayers.add(raceLogTrackingEventManagementPanel);

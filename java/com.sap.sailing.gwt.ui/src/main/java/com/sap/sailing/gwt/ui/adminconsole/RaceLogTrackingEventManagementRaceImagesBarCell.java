@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
-import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
+import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
 
