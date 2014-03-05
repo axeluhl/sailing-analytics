@@ -176,6 +176,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
@@ -3870,5 +3871,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
         getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard);
+    }
+    
+    @Override
+    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
+                getService().getServerAuthor(), raceLog.getCurrentPassId());
+        
+        raceLog.add(event);
     }
 }

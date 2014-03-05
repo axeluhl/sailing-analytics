@@ -67,4 +67,7 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/denote_for_racelog_tracking.png")
     ImageResource denoteForRaceLogTracking();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/start_racelog_tracking.png")
+    ImageResource startRaceLogTracking();
 }

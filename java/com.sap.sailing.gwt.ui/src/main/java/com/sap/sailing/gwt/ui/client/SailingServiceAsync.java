@@ -525,5 +525,8 @@ public interface SailingServiceAsync {
 			AsyncCallback<Void> callback);
 
     void denoteForRaceLogTracking(String leaderboardName, AsyncCallback<Void> callback);
+
+    void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Void> callback);
 }
 

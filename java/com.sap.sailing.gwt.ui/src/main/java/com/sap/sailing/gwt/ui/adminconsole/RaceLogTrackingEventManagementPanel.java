@@ -194,6 +194,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
                     addRaceLogTracker(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(object.getA(), object.getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_START_RACELOG_TRACKING.equals(value)) {
+                    startRaceLogTracking(object.getA(), object.getB());
                 }
             }
         });
@@ -210,6 +212,11 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
         raceColumnTable.setWidth("500px");
         raceColumnTableSelectionModel = new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
         raceColumnTable.setSelectionModel(raceColumnTableSelectionModel);
+        raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            public void onSelectionChange(SelectionChangeEvent event) {
+                leaderboardRaceColumnSelectionChanged();
+            }
+        });
         vPanel.add(raceColumnTable);
 
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
@@ -217,6 +224,15 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
         vPanel.add(selectedLeaderboardRaceButtonPanel);
 
         loadLeaderboards();
+    }
+
+    private void leaderboardRaceColumnSelectionChanged() {
+        RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard = getSelectedRaceColumnWithFleet();
+        if (selectedRaceInLeaderboard != null) {
+            selectTrackedRaceInRaceList();
+        } else {
+            trackedRacesListComposite.clearSelection();
+        }
     }
 
     public void loadLeaderboards() {
@@ -364,6 +380,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
                 @Override
                 public void onSuccess(Void result) {
                     loadAndRefreshLeaderboard(leaderboard.name, selectedRCFleet.getA().getName());
+                    trackedRacesListComposite.regattaRefresher.fillRegattas();
                 }
 
                 @Override
@@ -383,6 +400,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
                 @Override
                 public void onSuccess(Void result) {
                     loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
+                    trackedRacesListComposite.regattaRefresher.fillRegattas();
                 }
 
                 @Override
@@ -393,5 +411,22 @@ public class RaceLogTrackingEventManagementPanel extends AbstractEventManagement
         } else {
             errorReporter.reportError("No RaceLogTracker can be added for the RaceLog of this fleet");
         }       
+    }
+
+    private void startRaceLogTracking(final RaceColumnDTO raceColumn, FleetDTO fleet) {
+        final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
+        sailingService.startRaceLogTracking(leaderboard.name, raceColumn.getName(), fleet.getName(), new AsyncCallback<Void>() {
+            
+            @Override
+            public void onSuccess(Void result) {
+                loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
+                trackedRacesListComposite.regattaRefresher.fillRegattas();
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Failed to start tracking: " + caught.getMessage());
+            }
+        });
     }
 }
