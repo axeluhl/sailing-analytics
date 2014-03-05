@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -66,7 +67,7 @@ import difflib.PatchFailedException;
  * Track a race using the data defined in the {@link RaceLog}. If the events suggest that the race is already in the
  * {@link RaceLogTrackingState#TRACKING} state, tracking commences immediately and existing fixes are loaded immediately
  * from the database.
- * 
+ * <p>
  * Otherwise, the tracker waits until a {@link StartTrackingEvent} is received to perform these tasks.
  * 
  * @author Fredrik Teschke
@@ -109,6 +110,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
     @Override
     public void stop() {
+        // mark passing calculator is automatically stopped, when the race status is set to {@link TrackedRaceStatusEnum#FINISHED}
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 100));
 
         // remove listener on racelog
@@ -116,7 +118,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
         // remove listener for fixes
         gpsFixStore.removeListener(this);
-
+        
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
     }
@@ -365,6 +367,9 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
 
         // add a listener, so new fixes will also be forwarded to the race
         gpsFixStore.addListener(this);
+        
+        // add mark passing detection
+        new MarkPassingCalculator(trackedRace, true);
 
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
