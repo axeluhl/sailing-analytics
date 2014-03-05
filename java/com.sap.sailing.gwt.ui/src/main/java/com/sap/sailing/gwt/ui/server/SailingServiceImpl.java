@@ -3507,15 +3507,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorDTO updateCompetitor(CompetitorDTO competitor) {
+    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
+    	
+    	BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	
     	//new competitor
     	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty()) {
     		DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     		DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
-    		BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     		DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
     		return getBaseDomainFactory().convertToCompetitorDTO(getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getColor(),
     				team, boat));
@@ -3523,7 +3524,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	
         return getBaseDomainFactory().convertToCompetitorDTO(
                 getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
-                competitor.getColor(), competitor.getSailID(), nationality)));
+                competitor.getColor(), competitor.getSailID(), nationality, boatClass)));
     }
 
     @Override

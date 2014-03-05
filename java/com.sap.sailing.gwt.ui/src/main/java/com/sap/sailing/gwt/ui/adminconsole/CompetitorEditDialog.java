@@ -34,7 +34,7 @@ import com.sap.sse.gwt.ui.DataEntryDialog;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
-    private final TextBox boatClassName;
+    private final ListBox boatClassName;
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
@@ -64,12 +64,28 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 }, /* animationEnabled */true, callback);
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
-        this.boatClassName = createTextBox(competitorToEdit.getBoatClass() == null ? "" : competitorToEdit.getBoatClass().getName());
+        
+        this.boatClassName = createListBox(/* isMultipleSelect */ false);
+        
+        int i=0;
+        List<String> boatClassNamesList = new ArrayList<String>();
+        for (BoatTypes t : BoatTypes.values()) {
+            boatClassNamesList.add(t.getName());
+        }
+        Collections.sort(boatClassNamesList);
+        for (String name : boatClassNamesList) {
+            boatClassName.addItem(name);
+            if (competitorToEdit.getBoatClass() != null && name.equals(competitorToEdit.getBoatClass().getName())) {
+                boatClassName.setSelectedIndex(i);
+            }
+            i++;
+        }
+        
         this.name = createTextBox(competitorToEdit.getName());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
         CountryCodeFactory ccf = CountryCodeFactory.INSTANCE;
-        int i=0;
+        i=0;
         List<CountryCode> ccs = new ArrayList<CountryCode>();
         Util.addAll(ccf.getAll(), ccs);
         ccs.add(null); // representing no nationality (NONE / white flag)
@@ -142,7 +158,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         } catch (IllegalArgumentException iae) {
             color = new InvalidColor(iae);
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getText(), 0);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(boatClassName.getSelectedIndex()), 0);
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color,
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),

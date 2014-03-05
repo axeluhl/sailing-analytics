@@ -269,7 +269,7 @@ public class CompetitorPanel extends SimplePanel {
         new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
-                sailingService.updateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: "+caught.getMessage());

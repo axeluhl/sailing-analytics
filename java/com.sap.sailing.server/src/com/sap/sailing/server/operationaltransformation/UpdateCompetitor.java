@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.Color;
@@ -13,23 +14,25 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private final Color newDisplayColor;
     private final String newSailId;
     private final Nationality newNationality;
+    private final BoatClass boatClass;
     
     /**
      * @param idAsString Identified the competitor to update
      * @param newNationality if <code>null</code>, the competitor obtains the "NONE" nationality, usually represented by a white flag
      */
-    public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality) {
+    public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newSailId, Nationality newNationality, BoatClass boatClass) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
         this.newDisplayColor = newDisplayColor;
         this.newSailId = newSailId;
         this.newNationality = newNationality;
+        this.boatClass = boatClass;
     }
 
     @Override
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality);
+        return toState.getBaseDomainFactory().getCompetitorStore().updateCompetitor(idAsString, newName, newDisplayColor, newSailId, newNationality, boatClass);
     }
 
     @Override
