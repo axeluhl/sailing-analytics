@@ -10,6 +10,5 @@ Import-Package: com.sap.sailing.server
 Export-Package: com.sap.sailing.datamining
 Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sailing.domain.common,
- com.sap.sailing.datamining.shared;bundle-version="1.0.0",
- com.google.gwt.osgi;bundle-version="2.6.0"
+ com.sap.sailing.datamining.shared;bundle-version="1.0.0"
 Bundle-ClassPath: .
