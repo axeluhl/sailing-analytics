@@ -66,19 +66,23 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.competitorToEdit = competitorToEdit;
         
         this.boatClassName = createListBox(/* isMultipleSelect */ false);
-        
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
         for (BoatTypes t : BoatTypes.values()) {
             boatClassNamesList.add(t.getName());
         }
+        String competitorsBoatClassName = competitorToEdit.getBoatClass() != null ? competitorToEdit.getBoatClass().getName() : null;
         Collections.sort(boatClassNamesList);
         for (String name : boatClassNamesList) {
             boatClassName.addItem(name);
-            if (competitorToEdit.getBoatClass() != null && name.equals(competitorToEdit.getBoatClass().getName())) {
+            if (name.equals(competitorsBoatClassName)) {
                 boatClassName.setSelectedIndex(i);
             }
             i++;
+        }
+        if (boatClassName.getSelectedIndex() == -1 && competitorsBoatClassName != null) {
+            boatClassName.addItem(competitorsBoatClassName);
+            boatClassName.setSelectedIndex(i);
         }
         
         this.name = createTextBox(competitorToEdit.getName());
