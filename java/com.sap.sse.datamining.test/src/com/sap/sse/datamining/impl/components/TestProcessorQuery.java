@@ -34,8 +34,8 @@ import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 
 public class TestProcessorQuery {
 
-    @SuppressWarnings("unused")
     private boolean receivedElementOrFinished;
+    private boolean receivedAbort;
 
     @Test
     public void testStandardWorkflow() throws InterruptedException, ExecutionException {
@@ -143,6 +143,10 @@ public class TestProcessorQuery {
             public void finish() throws InterruptedException {
                 receivedElementOrFinished = true;
             }
+            @Override
+            public void abort() {
+                receivedAbort = true;
+            }
         };
         query.setFirstProcessor(createBlockingProcessor(1000, resultReceiver));
         
@@ -153,8 +157,9 @@ public class TestProcessorQuery {
             // A timeout exception is expected
         }
         
-//        ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
-//        assertThat("The processing should be aborted", receivedElementOrFinished, is(false));
+        ConcurrencyTestsUtil.sleepFor(1000); // Wait if a result is received
+        assertThat("The processing should be aborted", receivedElementOrFinished, is(false));
+        assertThat("The processing should be aborted", receivedAbort, is(true));
     }
 
     private Processor<Iterable<Number>> createBlockingProcessor(final long timeToBlockInMillis, Processor<Double> resultReceiver) {

@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -13,7 +13,7 @@ import com.sap.sse.datamining.impl.components.AbstractPartitioningParallelProces
 public class GPSFixRetrievalProcessor extends
         AbstractPartitioningParallelProcessor<RacingEventService, LeaderboardGroup, GPSFixWithContext> {
 
-    public GPSFixRetrievalProcessor(Executor executor, Collection<Processor<GPSFixWithContext>> resultReceivers) {
+    public GPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<GPSFixWithContext>> resultReceivers) {
         super(executor, resultReceivers);
     }
 

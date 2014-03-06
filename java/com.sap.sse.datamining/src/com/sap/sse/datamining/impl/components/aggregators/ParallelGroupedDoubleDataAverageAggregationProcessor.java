@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -16,7 +16,7 @@ public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
     private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
     private final Map<GroupKey, Integer> elementAmountPerKey;
 
-    public ParallelGroupedDoubleDataAverageAggregationProcessor(Executor executor,
+    public ParallelGroupedDoubleDataAverageAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>>> resultReceivers) {
         super(executor, resultReceivers);
         elementAmountPerKey = new HashMap<>();

@@ -54,6 +54,8 @@ public class TestAbstractParallelProcessorFinishing {
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
+            @Override
+            public void abort() { }
         };
     }
 

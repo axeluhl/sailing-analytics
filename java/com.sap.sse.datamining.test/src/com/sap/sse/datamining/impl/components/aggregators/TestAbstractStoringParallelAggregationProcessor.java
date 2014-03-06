@@ -32,6 +32,9 @@ public class TestAbstractStoringParallelAggregationProcessor {
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
+            @Override
+            public void abort() {
+            }
         };
         
         receivers = new HashSet<>();

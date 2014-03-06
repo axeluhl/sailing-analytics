@@ -14,5 +14,9 @@ public class NonFilteringProcessor<InputType> extends AbstractProcessor<InputTyp
     protected InputType processElement(InputType element) {
         return element;
     }
+    
+    @Override
+    public void abort() {
+    }
 
 }

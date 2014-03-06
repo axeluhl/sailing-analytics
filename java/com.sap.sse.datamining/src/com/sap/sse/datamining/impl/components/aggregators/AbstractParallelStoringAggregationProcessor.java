@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.components.aggregators;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sse.datamining.components.Processor;
@@ -13,7 +13,7 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
 
     private final ReentrantReadWriteLock storeLock;
 
-    public AbstractParallelStoringAggregationProcessor(Executor executor, Collection<Processor<AggregatedType>> resultReceivers) {
+    public AbstractParallelStoringAggregationProcessor(ExecutorService executor, Collection<Processor<AggregatedType>> resultReceivers) {
         super(executor, resultReceivers);
         storeLock = new ReentrantReadWriteLock();
     }
@@ -44,7 +44,7 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
     public void finish() throws InterruptedException {
         super.sleepUntilAllInstructionsFinished();
         super.forwardResultToReceivers(aggregateResult());
-        super.notifyResultReceiversToFinish();
+        super.tellResultReceiversToFinish();
     }
 
     protected abstract AggregatedType aggregateResult();

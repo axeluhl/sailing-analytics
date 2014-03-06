@@ -46,6 +46,9 @@ public class TestParallelExtractionProcessor {
             @Override
             public void finish() throws InterruptedException {
             }
+            @Override
+            public void abort() {
+            }
         };
         
         receivers = new HashSet<>();

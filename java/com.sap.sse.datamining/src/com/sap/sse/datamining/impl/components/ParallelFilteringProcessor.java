@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
@@ -11,7 +11,7 @@ public class ParallelFilteringProcessor<InputType> extends AbstractSimpleParalle
 
     private final FilterCriteria<InputType> filterCriteria;
 
-    public ParallelFilteringProcessor(Executor executor, Collection<Processor<InputType>> resultReceivers, FilterCriteria<InputType> filterCriteria) {
+    public ParallelFilteringProcessor(ExecutorService executor, Collection<Processor<InputType>> resultReceivers, FilterCriteria<InputType> filterCriteria) {
         super(executor, resultReceivers);
         this.filterCriteria = filterCriteria;
     }

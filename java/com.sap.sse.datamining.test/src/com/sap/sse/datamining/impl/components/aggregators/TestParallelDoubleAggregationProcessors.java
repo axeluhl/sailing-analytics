@@ -185,6 +185,9 @@ public class TestParallelDoubleAggregationProcessors {
             @Override
             public void finish() throws InterruptedException {
             }
+            @Override
+            public void abort() {
+            }
         };
         
         receivers = new ArrayList<>();

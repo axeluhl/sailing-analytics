@@ -3,7 +3,7 @@ package com.sap.sse.datamining.impl.components;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
@@ -13,7 +13,7 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
 
     private final FilterCriteria<WorkingType> criteria;
 
-    public AbstractFilteringRetrievalProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers, FilterCriteria<WorkingType> criteria) {
+    public AbstractFilteringRetrievalProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, FilterCriteria<WorkingType> criteria) {
         super(executor, resultReceivers);
         this.criteria = criteria;
     }

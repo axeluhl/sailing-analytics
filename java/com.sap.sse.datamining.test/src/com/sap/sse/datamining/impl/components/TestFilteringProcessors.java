@@ -98,6 +98,9 @@ public class TestFilteringProcessors {
             @Override
             public void finish() throws InterruptedException {
             }
+            @Override
+            public void abort() {
+            }
         };
         
         receivers = new HashSet<>();
