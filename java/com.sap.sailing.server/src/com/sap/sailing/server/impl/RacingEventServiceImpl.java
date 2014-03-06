@@ -2229,4 +2229,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public RaceLogEventAuthor getServerAuthor() {
         return raceLogEventAuthorForServer;
     }
+    
+    @Override
+    public CompetitorStore getCompetitorStore() {
+        return competitorStore;
+    }
 }

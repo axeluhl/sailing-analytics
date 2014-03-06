@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -486,4 +487,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceTracker getRaceTrackerById(Object id);
     
     RaceLogEventAuthor getServerAuthor();
+    
+    CompetitorStore getCompetitorStore();
 }
