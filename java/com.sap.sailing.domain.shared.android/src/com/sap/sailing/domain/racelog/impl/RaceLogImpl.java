@@ -134,6 +134,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             logger.finer(String.format("%s (%s) was loaded into log.", event, event.getClass().getName()));
             setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
             revokeIfNecessary(event);
+            eventsById.put(event.getId(), event);
         } else {
             logger.warning(String
                     .format("%s (%s) was not loaded into log. Ignoring", event, event.getClass().getName()));
@@ -148,7 +149,11 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
             RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
             unlockAfterRead();
 
-            if (! (revokedEvent instanceof RevokeEvent) && isEventRevokedBy(revokeEvent)) {
+            if (revokedEvent == null) {
+                logger.log(Level.FINE, "RevokeEvent added, that refers to non-existent event to be revoked");
+            }
+            
+            if (revokedEvent != null && ! (revokedEvent instanceof RevokeEvent) && isEventRevokedBy(revokeEvent)) {
                 lockForWrite();
                 revokedEventIds.add(revokeEvent.getRevokedEventId());
                 unlockAfterWrite();
