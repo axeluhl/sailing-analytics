@@ -88,11 +88,18 @@
                     android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
                 <Button
+                    android:id="@+id/raceStartIn4Minutes"
+                    android:layout_width="197dp"
+                    android:layout_height="match_parent"
+                    android:text="Race Start in exactly 4 Minutes" />
+
+                <Button
                     android:id="@+id/race_startphase_base_reset_time_button"
                     android:layout_width="200dp"
                     android:layout_height="50dp"
                     android:text="@string/reset_time" />
             </LinearLayout>
+
         </ScrollView>
     </LinearLayout>
 

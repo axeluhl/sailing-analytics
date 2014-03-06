@@ -28,6 +28,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     private TextView startCountdownTextView;
     private ImageButton abortButton;
     private Button resetTimeButton;
+    protected Button raceStartIn4Minutes;
     private TextView nextCountdownTextView;
     
     private FlagPoleStateRenderer flagRenderer;
@@ -70,6 +71,8 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             }
         });
         
+        raceStartIn4Minutes = (Button) getView().findViewById(R.id.raceStartIn4Minutes);
+
         flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
                 (LinearLayout) getView().findViewById(R.id.race_flag_space_up_flags), 
                 (LinearLayout) getView().findViewById(R.id.race_flag_space_down_flags));
