@@ -13,6 +13,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_ADD_RACELOG_TRACKER = "ACTION_ADD_RACELOG_TRACKER";
     public final static String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
     public final static String ACTION_START_RACELOG_TRACKING = "ACTION_START_RACELOG_TRACKING";
+    public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
     
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
@@ -33,9 +34,12 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(), makeImagePrototype(resources.denoteForRaceLogTracking())));
         }
         
-        if (object.getB().raceLogTrackingState.isForTracking() &&
-                object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING) {
+        if (object.getB().raceLogTrackerExists && object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING) {
             result.add(new ImageSpec(ACTION_START_RACELOG_TRACKING, stringMessages.startRaceLogTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+        }
+        
+        if (object.getB().raceLogTrackingState.isForTracking()) {
+            result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(), makeImagePrototype(resources.competitorRegistrations())));
         }
         
         return result;

@@ -964,4 +964,9 @@ public interface StringMessages extends Messages {
     String denoteForRaceLogTracking();
     String raceLogTracking();
     String startRaceLogTracking();
+    String filterByLeaderboard();
+    String removeLeaderboardFilter();
+    String competitorRegistrations();
+    String trackerStatus();
+    String canOnlyBeEditedBeforeStartingTracking();
 }

@@ -84,17 +84,14 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
                 RaceLogTrackingState state = raceColumnAndFleetName.getB().raceLogTrackingState;
-                if (raceColumnAndFleetName.getB().raceLogTrackerExists) {
-                    if (state == RaceLogTrackingState.TRACKING) {
-                        return "Tracking";
-                    } else {
-                        return "Tracker is listening";
-                    }
-                } else if (raceColumnAndFleetName.getB().raceLogTrackingState.isForTracking()) {
-                    return "Denoted";
-                } else {
-                    return "Not denoted";
-                }
+                return state.name();
+            }
+        };
+
+        TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> trackerStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
+                return raceColumnAndFleetName.getB().raceLogTrackerExists ? "Active" : "None";
             }
         };
 
@@ -110,13 +107,18 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     denoteForRaceLogTracking(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_START_RACELOG_TRACKING.equals(value)) {
                     startRaceLogTracking(object.getA(), object.getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
+                    boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
+                    new CompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
+                            getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
                 }
             }
         });
         
         racesTable.addColumn(raceNameColumn, stringMessages.race());
         racesTable.addColumn(fleetNameColumn, stringMessages.fleet());
-        racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.status());
+        racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
+        racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
     }
 

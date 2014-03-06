@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -183,20 +184,31 @@ public class CompetitorTableWrapper implements IsWidget {
         return filterField;
     }
     
+    public void refreshCompetitorList(String leaderboardName) {
+        refreshCompetitorList(leaderboardName, false, null);
+    }
+    
+    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs) {
+        refreshCompetitorList(leaderboardName, lookInRaceLogs, null);
+    }
+    
     /**
      * @param leaderboardName If null, all existing competitors are loaded
      */
-    public void refreshCompetitorList(String leaderboardName) {
+    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs, final Callback<Iterable<CompetitorDTO>,
+            Throwable> callback) {
         if(leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, lookInRaceLogs, new AsyncCallback<Iterable<CompetitorDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                    if (callback != null) callback.onFailure(caught);
                 }
 
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
+                    if (callback != null) callback.onSuccess(result);
                 }
             });
         } else {
@@ -204,11 +216,13 @@ public class CompetitorTableWrapper implements IsWidget {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
+                    if (callback != null) callback.onFailure(caught);
                 }
 
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
+                    if (callback != null) callback.onSuccess(result);
                 }
             });
         }

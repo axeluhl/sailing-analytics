@@ -474,7 +474,8 @@ public interface SailingServiceAsync {
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void getCompetitorsOfLeaderboard(String leaderboardName, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
+    void getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs,
+            AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
@@ -528,5 +529,11 @@ public interface SailingServiceAsync {
 
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
+
+    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+            Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
+
+    void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Iterable<CompetitorDTO>> callback);
 }
 

@@ -187,7 +187,9 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateSta
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -3502,11 +3504,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
+    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs) {
+        if (lookInRaceLogs) {
+            Set<Competitor> result = new HashSet<Competitor>();
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    result.addAll(new RegisteredCompetitorsAnalyzer(raceLog).analyze());
+                }
+            }
+            return convertToCompetitorDTOs(result);
+        } else {
+            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
+        }
     }
-
+    
     @Override
     public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) {
     	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
@@ -3873,15 +3887,60 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getRaceLogTrackingAdapter().denoteForRaceLogTracking(getService(), leaderboard);
     }
     
-    @Override
-    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
+    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        return raceColumn.getRaceLog(fleet);
+    }
+    
+    @Override
+    public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId());
         
         raceLog.add(event);
+    }
+    
+    @Override
+    public Iterable<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
+        return convertToCompetitorDTOs(
+                new RegisteredCompetitorsAnalyzer(
+                        getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
+    }
+    
+    private void unregisterCompetitor(RaceLog raceLog, Competitor competitor) {
+        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+            if (event instanceof RegisterCompetitorEvent && ((RegisterCompetitorEvent) event).getCompetitor().equals(competitor)) {
+                raceLog.add(RaceLogEventFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(),
+                        getService().getServerAuthor(), raceLog.getCurrentPassId(), event.getId()));
+            }
+        }
+    }
+    
+    @Override
+    public void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+            Set<CompetitorDTO> competitors) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Set<Competitor> alreadyRegistered = new HashSet<Competitor>(new RegisteredCompetitorsAnalyzer(raceLog).analyze());
+        Set<Competitor> toBeRegistered = new HashSet<Competitor>();
+        
+        for (CompetitorDTO dto : competitors) {
+            toBeRegistered.add(getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString()));
+        }
+        
+        Set<Competitor> toBeRemoved = new HashSet<Competitor>(alreadyRegistered);
+        toBeRemoved.removeAll(toBeRegistered);
+        toBeRegistered.removeAll(alreadyRegistered);
+        
+        for (Competitor c : toBeRegistered) {
+            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(),
+                    getService().getServerAuthor(), raceLog.getCurrentPassId(), c));
+        }
+        
+        for (Competitor c : toBeRemoved) {
+            unregisterCompetitor(raceLog, c);
+        }
     }
 }

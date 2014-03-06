@@ -350,7 +350,14 @@ public interface SailingService extends RemoteService {
     
     DataMiningSerializationDummy pseudoMethodSoThatSomeDataMiningClassesAreAddedToTheGWTSerializationPolicy();
     
-    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
+    /**
+     * 
+     * @param leaderboardName
+     * @param lookInRaceLogs If set to {@code true}, the {@link RaceLog}s are checked for the competitor registrations.
+     * If set to {@code false}, the {@link RaceDefinition}s are checked instead.
+     * @return
+     */
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor);
 
@@ -387,4 +394,8 @@ public interface SailingService extends RemoteService {
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName);
+    
+    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
+    
+    Iterable<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
 }
