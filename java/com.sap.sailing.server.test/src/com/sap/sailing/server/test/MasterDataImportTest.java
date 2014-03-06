@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -80,7 +79,6 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
-import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.CompetitorResults;
@@ -293,8 +291,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -302,6 +298,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        InputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -310,21 +307,20 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
 
 
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -483,8 +479,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -492,6 +486,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -500,18 +495,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -619,8 +613,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -628,6 +620,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -636,18 +629,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -771,8 +763,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -780,6 +770,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -788,18 +779,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         Assert.assertNotNull(creationCount);
         Event eventOnTarget = destService.getEvent(eventUUID);
@@ -934,8 +924,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -948,6 +936,7 @@ public class MasterDataImportTest {
         String raceColumnNameNotToOveride;
         RegattaLeaderboard leaderboardNotToOverride;
         LeaderboardGroup groupNotToOverride;
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -987,18 +976,17 @@ public class MasterDataImportTest {
             leaderboardNamesNotToOverride.add(leaderboardNotToOverride.getName());
             groupNotToOverride = destService.addLeaderboardGroup(TEST_GROUP_NAME,
                     "testGroupDescNotToOverride", false, leaderboardNamesNotToOverride, null, null);
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
 
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // ---Asserts---
         // Test correct number of creations
@@ -1132,8 +1120,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1142,6 +1128,7 @@ public class MasterDataImportTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
         RegattaAndRaceIdentifier identifierOfRegattaTrackedRace;
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1201,17 +1188,17 @@ public class MasterDataImportTest {
                     null, null);
             destService.getLeaderboardGroupByName(TEST_GROUP_NAME).addLeaderboard(leaderboardToOverride);
             destService.addLeaderboard(leaderboardToOverride);
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, true);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, true);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // ---Asserts---
         // Test correct number of creations
@@ -1279,8 +1266,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1288,6 +1273,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1296,17 +1282,16 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        importer.importMasterData(deserializedMasterData, randomUUID, false);
 
+        destService.getDataImportLock().getProgress(randomUUID).getResult();
         Regatta importedRegatta = destService.getRegattaByName(regatta.getName());
 
         assertNotNull(importedRegatta.getRegattaConfiguration());
@@ -1404,8 +1389,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1413,6 +1396,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1421,17 +1405,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // ---Asserts---
         Assert.assertNotNull(creationCount);
@@ -1540,8 +1524,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1549,6 +1531,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1557,17 +1540,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // ---Asserts---
 
@@ -1604,8 +1587,6 @@ public class MasterDataImportTest {
         List<String> groupNamesToExport = new ArrayList<String>();
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1613,6 +1594,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1621,17 +1603,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // ---Asserts---
 
@@ -1725,8 +1707,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(group2.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1734,6 +1714,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1742,17 +1723,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // Test correct number of creations
         Assert.assertNotNull(creationCount);
@@ -1797,8 +1778,6 @@ public class MasterDataImportTest {
         groupNamesToExport.add(sourceGroup.getName());
 
         RacingEventService destService;
-        ObjectInputStream ois = null;
-        TopLevelMasterData deserializedMasterData;
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
@@ -1806,6 +1785,7 @@ public class MasterDataImportTest {
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
+        ByteArrayInputStream inputStream = null;
         try {
             streamingOutput.write(os);
             os.flush();
@@ -1814,17 +1794,17 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
-            InputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-            deserializedMasterData = (TopLevelMasterData) ois.readObject();
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            ois.close();
+            inputStream.close();
         }
-        MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
-        MasterDataImportObjectCreationCount creationCount = importer.importMasterData(deserializedMasterData,
-                randomUUID, false);
+
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
+                .getResult();
 
         // Test correct number of creations
         Assert.assertEquals(1, creationCount.getLeaderboardGroupCount());
