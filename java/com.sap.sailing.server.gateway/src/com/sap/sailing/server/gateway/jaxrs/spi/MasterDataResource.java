@@ -107,11 +107,13 @@ public class MasterDataResource extends AbstractSailingServerResource {
                     try {
                         OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(output);
                         objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+                        masterData.setMasterDataExportFlagOnRaceColumns(true);
 
                         // Actual start of streaming
                         objectOutputStream.writeObject(masterData);
                     } finally {
                         objectOutputStream.close();
+                        masterData.setMasterDataExportFlagOnRaceColumns(false);
                         long timeToExport = System.currentTimeMillis() - startTime;
                         logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
                     }
