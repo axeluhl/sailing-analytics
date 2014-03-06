@@ -111,6 +111,10 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
                     new CompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
                             getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
+                    //TODO
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
+                    //TODO
                 }
             }
         });
@@ -120,6 +124,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         racesTable.addColumn(raceLogTrackingStateColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(trackerStateColumn, stringMessages.trackerStatus());
         racesTable.addColumn(raceActionColumn, stringMessages.actions());
+        racesTable.setWidth("600px");
     }
 
     @Override

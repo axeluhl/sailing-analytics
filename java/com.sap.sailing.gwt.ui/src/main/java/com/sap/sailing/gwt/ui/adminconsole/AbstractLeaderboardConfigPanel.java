@@ -230,11 +230,11 @@ TrackedRaceChangedListener {
         
         raceColumnTable = new CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality>(/* pageSize */200, tableRes);
         raceColumnTable.ensureDebugId("RaceColumnTable");
+        raceColumnAndFleetList.addDataDisplay(raceColumnTable);
+        raceColumnTable.setWidth("500px");
 
         addColumnsToRacesTable(raceColumnTable);
         
-        raceColumnAndFleetList.addDataDisplay(raceColumnTable);
-        raceColumnTable.setWidth("500px");
         raceColumnTableSelectionModel = new SingleSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
         raceColumnTable.setSelectionModel(raceColumnTableSelectionModel);
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

@@ -969,4 +969,6 @@ public interface StringMessages extends Messages {
     String competitorRegistrations();
     String trackerStatus();
     String canOnlyBeEditedBeforeStartingTracking();
+    String defineCourse();
+    String mapDevices();
 }
