@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
 TrackedRaceChangedListener {
+    protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
 
@@ -123,7 +124,7 @@ TrackedRaceChangedListener {
         raceColumnAndFleetList = new ListDataProvider<RaceColumnDTOAndFleetDTOWithNameBasedEquality>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
-        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
 
