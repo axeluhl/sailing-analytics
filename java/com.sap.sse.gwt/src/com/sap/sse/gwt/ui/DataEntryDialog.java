@@ -286,6 +286,10 @@ public abstract class DataEntryDialog<T> {
         return doubleBox;
     }
 
+    public DateBox createDateBox(Date initialDate, int visibleLength) {
+        return createDateBoxInternal(initialDate, visibleLength);
+    }
+
     public DateBox createDateBox(long initialTimeInMs, int visibleLength) {
         return createDateBoxInternal(new Date(initialTimeInMs), visibleLength);
     }

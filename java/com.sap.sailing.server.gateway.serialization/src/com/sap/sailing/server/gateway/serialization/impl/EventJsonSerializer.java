@@ -9,7 +9,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class EventJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
-    public static final String FIELD_PUBLICATION_URL = "publicationUrl";
+    public static final String FIELD_START_DATE = "startDate";
+    public static final String FIELD_END_DATE = "endDate";
     public static final String FIELD_VENUE = "venue";
 
     private final JsonSerializer<Venue> venueSerializer;
@@ -24,7 +25,8 @@ public class EventJsonSerializer implements JsonSerializer<EventBase> {
 
         result.put(FIELD_ID, event.getId().toString());
         result.put(FIELD_NAME, event.getName());
-        result.put(FIELD_PUBLICATION_URL, event.getPublicationUrl());
+        result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
+        result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
 
         return result;
