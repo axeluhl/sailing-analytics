@@ -7,7 +7,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
-import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 
 /**
