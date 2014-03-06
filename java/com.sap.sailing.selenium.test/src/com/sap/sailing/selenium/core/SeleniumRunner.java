@@ -147,7 +147,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
         }
 
         private String describeCapabilities() {
-            Map<String, String> capabilities = this.definition.getCapabilities();
+            Map<String, Object> capabilities = this.definition.getCapabilities();
 
             if (capabilities.isEmpty())
                 return ""; //$NON-NLS-1$
@@ -156,7 +156,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
 
             builder.append('[');
 
-            for (Entry<String, String> capability : capabilities.entrySet()) {
+            for (Entry<String, Object> capability : capabilities.entrySet()) {
                 builder.append(capability.getKey());
                 builder.append('=');
                 builder.append(capability.getValue());
@@ -171,8 +171,7 @@ public class SeleniumRunner extends ParentRunner<SeleniumJUnit4ClassRunner> {
         private TestEnvironmentImpl createTestEnvironment() throws Exception {
             try {
                 String driverClassname = this.definition.getDriver();
-                Map<String, String> capabilityDefinitions = this.definition.getCapabilities();
-
+                Map<String, Object> capabilityDefinitions = this.definition.getCapabilities();
                 @SuppressWarnings("unchecked")
                 Class<WebDriver> clazz = (Class<WebDriver>) Class.forName(driverClassname);
                 DesiredCapabilities capabilities = new DesiredCapabilities(capabilityDefinitions);
