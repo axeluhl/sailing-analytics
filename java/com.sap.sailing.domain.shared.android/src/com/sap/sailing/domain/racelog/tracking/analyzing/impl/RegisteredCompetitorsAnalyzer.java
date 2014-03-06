@@ -11,25 +11,23 @@ import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 
 /**
- * Uses the {@link DeviceCompetitorMappingEvent}s and the {@link RegisterCompetitorEvent}s in the {@link RaceLog}
+ * Uses the {@link RegisterCompetitorEvent}s in the {@link RaceLog}
  * to determine the competitors registered for this event.
  * @author Fredrik Teschke
  *
  */
-public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Iterable<Competitor>> {
+public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competitor>> {
 
     public RegisteredCompetitorsAnalyzer(RaceLog raceLog) {
         super(raceLog);
     }
 
     @Override
-    protected Iterable<Competitor> performAnalysis() {
+    protected Set<Competitor> performAnalysis() {
         Set<Competitor> result = new HashSet<Competitor>();
 
         for (RaceLogEvent event : getRaceLog().getUnrevokedEvents()) {
-            if (event instanceof DeviceCompetitorMappingEvent) {
-                result.add(((DeviceCompetitorMappingEvent) event).getMappedTo());
-            } else if (event instanceof RegisterCompetitorEvent) {
+            if (event instanceof RegisterCompetitorEvent) {
                 result.add(((RegisterCompetitorEvent) event).getCompetitor());
             }
         }

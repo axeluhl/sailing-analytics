@@ -6,7 +6,6 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 /**
  * Register a competitor for that race using the {@link RaceLog} in racelog-tracked races.
- * This can also be done by adding a {@link DeviceCompetitorMappingEvent}.
  * 
  * A dummy {@link Competitor} implementation with only an {@link Competitor#getId() id} may be used,
  * if the competitor is known to already exist on the server, as it is
