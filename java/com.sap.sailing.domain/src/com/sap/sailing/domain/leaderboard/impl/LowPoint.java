@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -63,5 +64,11 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     @Override
     public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
         return true;
+    }
+
+    @Override
+    public int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered,
+            List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered) {
+        return 0;
     }
 }
