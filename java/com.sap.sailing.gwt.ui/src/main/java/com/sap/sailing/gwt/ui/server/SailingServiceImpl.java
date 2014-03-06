@@ -3507,7 +3507,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Exception e) {
-                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage());
+                    getService()
+                            .setDataImportFailedWithReplication(
+                                    importOperationId,
+                                    e.getMessage()
+                                            + "\n\nHave you checked if the"
+                                            + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
+                                            + "If the error still occurs, when both servers are running the same version, please report the problem.");
                     throw new RuntimeException(e);
                 } finally {
                     // close the connection, set all objects to null

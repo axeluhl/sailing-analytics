@@ -88,6 +88,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
+                        objectOutputStream.writeObject(competitorIds);
                         objectOutputStream.writeObject(masterData);
                     } finally {
                         objectOutputStream.close();
@@ -110,6 +111,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
 
                         // Actual start of streaming
+                        objectOutputStream.writeObject(competitorIds);
                         objectOutputStream.writeObject(masterData);
                     } finally {
                         objectOutputStream.close();
