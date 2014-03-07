@@ -22,22 +22,29 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
 
 /**
  * Extracts the {@link DeviceMapping}s with the appropriate {@link TimeRange}s from the {@link RaceLog}.
- * If there are overlapping mappings for an {@code item} (overlap in time), then the resulting mappings are constructed as follows:
- * 
- * Depending on the overlap between two mappings for the same item, one of the following cases is true
- * (--- is timeRange of higher priority mapping, xxx is timeRange of lower priority mapping):
- *      xxxxxxxxxxxx            starting situation
- *     --------------           case 1: higher prio range completely includes other: overwrite other completely
- *      xxx----xxxxx            case 2: higher prio range lies within other: keep two parts of other (combination of 3 & 4)
- *     --------xxxxx            case 3: higher prio range ends within other: keep only right part of other
- *      xxx----------           case 4: higher prio range starts within other: keep only left part of other
- *      
- * If both mappings are for the same {@code item} and {@code device}, they can however simply be merged.
- *      
- * As stated in {@link DeviceMappingEvent}, an open-ended mapping can be closed by another open-ended mapping for the same
- * {@code item} and {@link competitor}.
- * If there are several possible {@link DeviceMappingEvent}s that could close an open range, the closest one is chosen.
- * An open-ended {@link DeviceMappingEvent} can close several others.
+ * Based on the {@link DeviceMappingEvent}s found in the {@code RaceLog} for the tracked {@code items}
+ * ({@code Competitor}s and {@code Marks}), the the actual mappings are created by removing conflicting
+ * overlaps of these mappings by the rules defined below.
+ * <p>
+ * Mappings can be defined with an open-ended time range (e.g. track this from now on), which should then be
+ * closed by another mapping for the same {@code item} and {@code device} which is open-ended towards the other
+ * end (e.g. open-ended start instead of end).
+ * If there are several candidates that could close an open range, the closest one is chosen.
+ * One open-ended mapping can also close several others.
+ * <p>
+ * The events in the {@code RaceLog} are ordered by their priority through the {@link RaceLogEventComparator}.
+ * Therefore, the rules for resolving conflicts are applied by inspecting the events in order of increasing
+ * priority one by one. Each inspected {@code DeviceMappingEvent} is resolved against the set of mappings
+ * deducted so far from the events with lower priority. The resulting set of mappings from this conflict
+ * resolution is then used as the new mapping basis against which the next higher-priority event is resolved.
+ * <ol>
+ * <li>Mappings that have no overlap in time are never in conflict.</li>
+ * <li>Mappings for different items are never in conflict.</li>
+ * <li>Mappings for both the same device and item with overlapping {@code TimeRanges} can be merged.</li>
+ * <li>Mappings for the same item, but different devices, are in conflict if they have overlapping {@code TimeRanges}.
+ * The higher-priority mapping of the two takes precedence, and overwrites the lower-priority mapping for the
+ * duration of the overlap.</li>
+ * </ol>
  */
 public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> {
     public DeviceMappingFinder(RaceLog raceLog) {
@@ -71,8 +78,7 @@ public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogA
     }
 
     /**
-     * If an overlap in time is found between this mapping, and one already found for the same {@code item}, the new
-     * mapping overrides the one in the initialSet for the time of the overlap.
+     * Resolves conflicts between an existing set of mappings for one {@code item}, and a new, higher-priority mapping for the same {@code item}.
      */
     private List<DeviceMapping<ItemT>> getOverlapFreeMappings(List<DeviceMapping<ItemT>> initial,
             DeviceMapping<ItemT> toBeAdded) {
@@ -102,17 +108,17 @@ public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogA
                         timeRange = timeRange.union(otherTimeRange);
                     }
 
-                    //different device -> transform according to four cases
+                    //different device: higher prio overwrites other
                 } else {
                     if (otherTimeRange.liesWithin(timeRange)) {
-                        //case 1: just ignore the other mapping, as it is completely overwritten by the new one
+                        //just ignore the other mapping, as it is completely overwritten by the new one
                     } else {
                         if (otherTimeRange.startsBefore(timeRange)) {
-                            //case 4
+                            //add the part of the lower-prio mapping, that lies before the higher-prio mapping
                             result.add(getMapping(device, item, otherTimeRange.from(), timeRange.from().minus(1)));
                         }
                         if (otherTimeRange.endsAfter(timeRange)) {
-                            //case 3
+                            //add the part of the lower-prio mapping, that lies after the higher-prio mapping
                             result.add(getMapping(device, item, timeRange.to().plus(1), otherTimeRange.to()));
                         }
                     }
@@ -138,6 +144,8 @@ public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogA
         /* iterate over events in order
          * -> events with higher importance (later, higher author prio) are located towards the end, and should
          * therefore override those before
+         * 
+         * group the events by item, as conflicts have to be resolved within these per-item groups
          */
         for (RaceLogEvent e : raceLog.getUnrevokedEvents()) {
             if (e instanceof DeviceMappingEvent && isValidMapping(((DeviceMappingEvent<?>) e))) {
@@ -155,11 +163,11 @@ public abstract class DeviceMappingFinder<ItemT extends WithID> extends RaceLogA
 
         //resolve overlaps
         for (ItemT item : preliminary.keySet()) {
+            List<DeviceMapping<ItemT>> temp = new ArrayList<DeviceMapping<ItemT>>();
             for (DeviceMapping<ItemT> mapping : preliminary.get(item)) {
-                List<DeviceMapping<ItemT>> mappings = getOverlapFreeMappings(getItemSet(result, item), mapping);
-                Collections.sort(mappings, new TimedComparator());
-                result.put(item, mappings);
+                temp = getOverlapFreeMappings(temp, mapping);
             }
+            result.put(item, temp);
         }
 
         return result;

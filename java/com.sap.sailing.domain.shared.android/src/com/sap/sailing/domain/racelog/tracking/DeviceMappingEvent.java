@@ -5,15 +5,17 @@ import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 /**
+ * Event type for mapping {@link DeviceIdentifier devices} to {@code items} ({@link Competitor competitors} or {@link Mark marks}).
+ * <p>
  * Not both {@link #getFrom()} and {@link #getTo()} may be {@code null} at the same time (which would be a mapping for "all times",
  * as the semantics of somehow later limiting this range would become unclear, whereas for a time range only open to one end the
  * semantics are explained below.
- * 
+ * <p>
  * If one end of the time range enclosed by {@link #getFrom()} and {@link #getTo()} is open, this can be closed
  * by another {@link DeviceMappingEvent} in the same {@link RaceLog} with equal {@code item} and {@code device},
  * that is open to the other side and lies in the open direction of this event.
- * E.g. the following two {@link DeviceMappingEvent}s, that are both open to one side, together form one closed range (|---- shall denote
- * a time range, that is open in the direction of increasing time values):
+ * E.g. the following two {@link DeviceMappingEvent}s, that are both open to one side, together form one closed range
+ * (|---- shall denote a time range that is open in the direction of increasing time values):
  * <ul>
  * <li>1:   |------ </li>
  * <li>2:        ------| </li>
