@@ -3,18 +3,14 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.SmartphoneImeiIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class SmartphoneImeiIdentifierJsonSerializer implements JsonSerializer<SmartphoneImeiIdentifier> {
-
+public class SmartphoneImeiIdentifierJsonSerializer extends DeviceIdentifierBaseJsonSerializer<SmartphoneImeiIdentifier>
+implements JsonSerializer<SmartphoneImeiIdentifier> {
     @Override
-    public JSONObject serialize(SmartphoneImeiIdentifier identifier) {
-        JSONObject result = new JSONObject();
-
-        result.put(TypeBasedJsonDeserializer.FIELD_TYPE, SmartphoneImeiIdentifier.TYPE);
-        result.put(SmartphoneImeiIdentifierJsonDeserializer.FIELD_IMEI, identifier.getImei());
+    protected JSONObject furtherSerialize(SmartphoneImeiIdentifier object, JSONObject result) {
+        result.put(SmartphoneImeiIdentifierJsonDeserializer.FIELD_IMEI, object.getImei());
         return result;
     }
 }

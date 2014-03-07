@@ -4,10 +4,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.racelog.tracking.SingleTypeBasedServiceFinderImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
@@ -40,14 +38,13 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTim
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerImpl;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 	
 	public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
 		return create(domainFactory,
-				new SingleTypeBasedServiceFinderImpl<DeviceIdentifierJsonHandler>(
-						new SmartphoneImeiJsonHandlerImpl(), SmartphoneImeiIdentifier.TYPE));
+				new SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder());
 	}
 	
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory,

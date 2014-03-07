@@ -19,5 +19,12 @@ public interface DeviceIdentifier extends IsManagedBySharedDomainFactory, Serial
      * have to register new OSGi service, and not touch the SAP Sailing Analytics code.
      */
     String getIdentifierType();
+    
+    /**
+     * Create a string representation, that can identify this device.
+     * The returned values should be unique for this identifier within its {@link #getIdentifierType() type},
+     * but need not include the {@link #getIdentifierType() type} itself in the representation.
+     */
+    String getStringRepresentation();
 
 }

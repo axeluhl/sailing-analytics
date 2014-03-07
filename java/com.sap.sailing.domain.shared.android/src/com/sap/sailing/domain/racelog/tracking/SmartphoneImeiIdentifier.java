@@ -51,4 +51,9 @@ public class SmartphoneImeiIdentifier implements DeviceIdentifier {
         }
         return false;
     }
+    
+    @Override
+    public String getStringRepresentation() {
+        return imei;
+    }
 }

@@ -52,6 +52,8 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneImeiMongoHandlerImpl(), getDict(SmartphoneImeiIdentifier.TYPE)));
         registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneImeiJsonHandlerImpl(), getDict(SmartphoneImeiIdentifier.TYPE)));
         
+        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new PingDeviceMongoHandlerImpl(), getDict(PingDeviceIdentifierImpl.TYPE)));
+        
         registerGPSFixJsonService(context, new GPSFixJsonDeserializer(), new GPSFixJsonSerializer(), GPSFixJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixMovingJsonDeserializer(), new GPSFixMovingJsonSerializer(), GPSFixMovingJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixNmeaDTOJsonDeserializer(), new GPSFixNmeaDTOJsonSerializer(), GPSFixNmeaDTOJsonDeserializer.TYPE);
