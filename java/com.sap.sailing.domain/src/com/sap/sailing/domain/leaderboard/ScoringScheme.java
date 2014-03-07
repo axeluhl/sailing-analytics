@@ -98,10 +98,10 @@ public interface ScoringScheme extends Serializable {
     boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
 
     /**
-     * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These
-     * instances of a leaderboard are based on other leaderboards grouped in a {@link LeaderboardGroup}.
-     * It can happen that the {@link ScoringScheme} needs to have look at the total points of the other leaderboards 
-     * in that group. The ordering of the list containing the total points matches the order in the group.
+     * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These instances of a
+     * leaderboard are based on other leaderboards grouped in a {@link LeaderboardGroup}. It can happen that the
+     * {@link ScoringScheme} needs to have a look at the total points of the other leaderboards in that group. The
+     * ordering of the list containing the total points matches the order in the group.
      */
     int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered, List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered);
 }

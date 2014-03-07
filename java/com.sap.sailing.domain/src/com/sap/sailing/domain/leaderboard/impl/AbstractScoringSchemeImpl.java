@@ -182,4 +182,9 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         }
         return numberOfCompetitorsInBetterFleets;
     }
+
+    @Override
+    public int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered, List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered) {
+        return 0;
+    }
 }
