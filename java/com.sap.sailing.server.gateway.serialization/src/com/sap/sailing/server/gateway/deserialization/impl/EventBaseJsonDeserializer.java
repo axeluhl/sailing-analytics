@@ -26,7 +26,8 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         Number endDate = (Number) object.get(EventJsonSerializer.FIELD_END_DATE);
         JSONObject venueObject = Helpers.getNestedObjectSafe(object, EventJsonSerializer.FIELD_VENUE);
         Venue venue = venueDeserializer.deserialize(venueObject);
-        return new EventBaseImpl(name, new MillisecondsTimePoint(startDate.longValue()), new MillisecondsTimePoint(endDate.longValue()), 
+
+        return new EventBaseImpl(name, new MillisecondsTimePoint(startDate != null ? startDate.longValue() : 0), new MillisecondsTimePoint(endDate != null ? endDate.longValue() : 1), 
                 venue, true, id);
     }
 
