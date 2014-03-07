@@ -54,6 +54,12 @@
     pages mentioned above.
   -->
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
+		<capabilities>
+			<capability>
+				<name>nativeEvents</name>
+				<value>false</value>
+			</capability>
+		</capabilities>
   </driver-definition>
   <!--
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
