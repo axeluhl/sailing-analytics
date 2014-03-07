@@ -78,6 +78,18 @@
                 android:text="@string/abort_starting_phase"
                 android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
+                <Button
+                    android:id="@+id/raceStartIn4Minutes"
+                    android:layout_width="197dp"
+                    android:layout_height="200dp"
+                    android:text="@string/race_start_in_4_minutes" />
+
+                <Button
+                    android:id="@+id/raceResetCourse"
+                    android:layout_width="197dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/race_reset_course" />
+
             <Button
                 android:id="@+id/race_startphase_base_reset_time_button"
                 android:layout_width="200dp"
