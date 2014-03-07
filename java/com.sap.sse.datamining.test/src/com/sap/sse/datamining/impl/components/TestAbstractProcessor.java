@@ -9,6 +9,7 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public class TestAbstractProcessor {
@@ -29,6 +30,10 @@ public class TestAbstractProcessor {
             @Override
             public void abort() {
             }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
+            }
         };
         
         receivers = new HashSet<>();
@@ -44,6 +49,9 @@ public class TestAbstractProcessor {
             }
             @Override
             public void abort() {
+            }
+            @Override
+            protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
             }
         };
         processor.finish();

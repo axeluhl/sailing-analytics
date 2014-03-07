@@ -31,6 +31,11 @@ public class DataMiningResourceBundleManager implements DataMiningStringMessages
     }
     
     @Override
+    public String get(Locale locale, Message message, String... parameters) {
+        return get(locale, message.toString(), parameters);
+    }
+    
+    @Override
     public String get(Locale locale, String messageKey, String... parameters) {
         String result = getResourceBundle(locale).getString(messageKey);
         
@@ -39,11 +44,6 @@ public class DataMiningResourceBundleManager implements DataMiningStringMessages
             result = result.replaceAll(replacementRegex, parameters[i]);
         }
         return result;
-    }
-    
-    @Override
-    public String get(Locale locale, Message message, String... parameters) {
-        return get(locale, message.toString(), parameters);
     }
     
     @Override

@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType>
@@ -126,6 +127,17 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         }
     }
     
+    @Override
+    public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+        setAdditionalData(additionalDataBuilder);
+        for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+            additionalDataBuilder = resultReceiver.getAdditionalResultData(additionalDataBuilder);
+        }
+        return additionalDataBuilder;
+    }
+    
+    protected abstract void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder);
+
     /**
      * Thread safe class to manage, if there are unfinished instructions. 
      */

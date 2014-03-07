@@ -1,20 +1,22 @@
 package com.sap.sse.datamining.impl.components;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.impl.SumBuildingAndOverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
 public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
@@ -26,14 +28,19 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
 
     private Executor executor;
     private final ProcessResultReceiver resultReceiver;
+    
+    private final DataMiningStringMessages stringMessages;
+    private final Locale locale;
 
     private final Object monitorObject = new Object();
     private boolean workIsDone = false;
     private boolean processorTimedOut = false;
 
-    public ProcessorQuery(Executor executor, DataSourceType dataSource) {
+    public ProcessorQuery(Executor executor, DataSourceType dataSource, DataMiningStringMessages stringMessages, Locale locale) {
         this.executor = executor;
         this.dataSource = dataSource;
+        this.stringMessages = stringMessages;
+        this.locale = locale;
         resultReceiver = new ProcessResultReceiver();
     }
     
@@ -65,6 +72,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     }
 
     private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
+        final long startTime = System.nanoTime();
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +85,13 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
             }
         });
         waitTillWorkIsDone(timeoutInMillis);
-        return resultReceiver.getResult();
+        final long endTime = System.nanoTime();
+
+        long calculationTimeInNanos = endTime - startTime;
+        AdditionalResultDataBuilder additionalDataBuilder = new SumBuildingAndOverwritingResultDataBuilder();
+        additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
+        Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
+        return new QueryResultImpl<>(results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
     }
 
     private void waitTillWorkIsDone(long timeoutInMillis) throws InterruptedException, TimeoutException {
@@ -116,19 +130,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
     
     private class ProcessResultReceiver implements Processor<Map<GroupKey, AggregatedType>> {
         
-        private QueryResult<AggregatedType> result;
+        private Map<GroupKey, AggregatedType> results;
 
         @Override
         public void onElement(Map<GroupKey, AggregatedType> groupedAggregations) {
-            result = constructResult(groupedAggregations);
-        }
-
-        private QueryResult<AggregatedType> constructResult(Map<GroupKey, AggregatedType> groupedAggregations) {
-            QueryResultImpl<AggregatedType> result = new QueryResultImpl<>(0, 0, "", Unit.None, 0);
-            for (Entry<GroupKey, AggregatedType> groupedAggregationsEntry : groupedAggregations.entrySet()) {
-                result.addResult(groupedAggregationsEntry.getKey(), groupedAggregationsEntry.getValue());
-            }
-            return result;
+            results = groupedAggregations;
         }
 
         @Override
@@ -141,11 +147,16 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         
         @Override
         public void abort() {
-            result = null;
+            results = null;
         }
         
-        public QueryResult<AggregatedType> getResult() {
-            return result;
+        public Map<GroupKey, AggregatedType> getResult() {
+            return results;
+        }
+
+        @Override
+        public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+            return additionalDataBuilder;
         }
         
     }

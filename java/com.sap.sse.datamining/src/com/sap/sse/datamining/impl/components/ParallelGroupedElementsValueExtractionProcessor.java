@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 
@@ -29,6 +30,11 @@ public class ParallelGroupedElementsValueExtractionProcessor<ElementType, Functi
                                        ParallelGroupedElementsValueExtractionProcessor.super.createInvalidResult();
             }
         };
+    }
+
+    @Override
+    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+        additionalDataBuilder.setExtractedStatisticNameMessageKey(extractionFunction.getMessageKey());
     }
 
 }

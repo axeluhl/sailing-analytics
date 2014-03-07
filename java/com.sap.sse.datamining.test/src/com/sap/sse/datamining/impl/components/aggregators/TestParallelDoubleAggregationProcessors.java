@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -187,6 +188,10 @@ public class TestParallelDoubleAggregationProcessors {
             }
             @Override
             public void abort() {
+            }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
             }
         };
         

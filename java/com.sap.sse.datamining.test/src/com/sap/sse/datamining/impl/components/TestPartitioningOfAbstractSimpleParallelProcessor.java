@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -34,6 +35,9 @@ public class TestPartitioningOfAbstractSimpleParallelProcessor {
                         return 0;
                     }
                 };
+            }
+            @Override
+            protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
             }
         };
 

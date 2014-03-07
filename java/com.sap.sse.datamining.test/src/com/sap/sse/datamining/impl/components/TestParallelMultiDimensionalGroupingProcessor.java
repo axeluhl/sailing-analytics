@@ -11,6 +11,7 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -40,6 +41,10 @@ public class TestParallelMultiDimensionalGroupingProcessor {
             public void finish() throws InterruptedException { }
             @Override
             public void abort() { }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
+            }
         };
         
         receivers = new ArrayList<>();

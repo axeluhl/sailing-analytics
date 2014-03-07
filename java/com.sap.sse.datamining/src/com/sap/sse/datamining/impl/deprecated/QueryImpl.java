@@ -3,7 +3,6 @@ package com.sap.sse.datamining.impl.deprecated;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -15,9 +14,11 @@ import com.sap.sse.datamining.components.ParallelExtractor;
 import com.sap.sse.datamining.components.ParallelFilter;
 import com.sap.sse.datamining.components.ParallelGrouper;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 
 public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query<AggregatedType> {
@@ -46,20 +47,18 @@ public class QueryImpl<DataType, ExtractedType, AggregatedType> implements Query
     @Override
     public QueryResult<AggregatedType> run() throws InterruptedException, ExecutionException {
         final long startTime = System.nanoTime();
-        
         Collection<DataType> retrievedData = retriever.start(null).get();
         Collection<DataType> filteredData = filter.start(retrievedData).get();
         Map<GroupKey, Collection<DataType>> groupedData = grouper.start(filteredData).get();
         Map<GroupKey, Collection<ExtractedType>> extractedData = extractor.start(groupedData).get();
         Map<GroupKey, AggregatedType> aggregatedData = aggregator.start(extractedData).get();
-
-        QueryResultImpl<AggregatedType> result = new QueryResultImpl<AggregatedType>(retrievedData.size(), filteredData.size(), createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals());
-        for (Entry<GroupKey, AggregatedType> resultEntry : aggregatedData.entrySet()) {
-            result.addResult(resultEntry.getKey(), resultEntry.getValue());
-        }
-        
         final long endTime = System.nanoTime();
-        result.setCalculationTimeInNanos(endTime - startTime);
+
+        long calculationTimeInNanos = endTime - startTime;
+        AdditionalResultData additionalData = new AdditionalResultDataImpl(retrievedData.size(), filteredData.size(),
+                createResultSignifier(), extractor.getUnit(), extractor.getValueDecimals(), calculationTimeInNanos);
+        QueryResult<AggregatedType> result = new QueryResultImpl<AggregatedType>(aggregatedData, additionalData);
+        
         return result;
     }
     

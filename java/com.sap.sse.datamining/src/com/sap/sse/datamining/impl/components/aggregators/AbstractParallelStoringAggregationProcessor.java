@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 
@@ -12,10 +13,13 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
                       extends AbstractSimpleParallelProcessor<InputType, AggregatedType> {
 
     private final ReentrantReadWriteLock storeLock;
+    private final String aggregationNameMessageKey;
 
-    public AbstractParallelStoringAggregationProcessor(ExecutorService executor, Collection<Processor<AggregatedType>> resultReceivers) {
+    public AbstractParallelStoringAggregationProcessor(ExecutorService executor, Collection<Processor<AggregatedType>> resultReceivers,
+                                                       String aggregationNameMessageKey) {
         super(executor, resultReceivers);
         storeLock = new ReentrantReadWriteLock();
+        this.aggregationNameMessageKey = aggregationNameMessageKey;
     }
 
     @Override
@@ -48,5 +52,10 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
     }
 
     protected abstract AggregatedType aggregateResult();
+    
+    @Override
+    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+        additionalDataBuilder.setAggregationNameMessageKey(aggregationNameMessageKey);
+    }
 
 }

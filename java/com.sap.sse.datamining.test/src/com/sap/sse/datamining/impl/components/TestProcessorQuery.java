@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -18,22 +19,28 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
+import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.datamining.test.components.util.BlockingProcessor;
 import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
+import com.sap.sse.datamining.test.util.StringMessagesForTests;
 
 public class TestProcessorQuery {
+    
+    private final static DataMiningStringMessages stringMessages = new StringMessagesForTests();
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
@@ -86,7 +93,8 @@ public class TestProcessorQuery {
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
         ThreadPoolExecutor executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor, dataSource);
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor,
+                dataSource, stringMessages, Locale.ENGLISH);
         
         Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = asCollection(query.getResultReceiver());
         Processor<GroupedDataEntry<Double>> sumAggregator =
@@ -115,26 +123,29 @@ public class TestProcessorQuery {
     }
 
     private QueryResult<Double> buildExpectedResult(Collection<Number> dataSource) {
-        QueryResultImpl<Double> result = new QueryResultImpl<>(dataSource.size(), 2, "Cross sum (Sum)", Unit.None, 0);
-        result.addResult(new GenericGroupKey<Integer>(1), 8.0);
-        result.addResult(new GenericGroupKey<Integer>(2), 5.0);
-        result.addResult(new GenericGroupKey<Integer>(3), 3.0);
-        result.addResult(new GenericGroupKey<Integer>(4), 10.0);
+        Map<GroupKey, Double> results = new HashMap<>();
+        results.put(new GenericGroupKey<Integer>(1), 8.0);
+        results.put(new GenericGroupKey<Integer>(2), 5.0);
+        results.put(new GenericGroupKey<Integer>(3), 3.0);
+        results.put(new GenericGroupKey<Integer>(4), 10.0);
+        
+        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 2, "Cross sum (Sum)", Unit.None, 0, 0));
         return result;
     }
 
     private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
 //        assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
-//        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
-//        assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
-//        assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
-//        assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
+        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
+        assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
+        assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
+        assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 
     @Test(timeout=2000)
     public void testQueryTimeouting() throws TimeoutException {
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), createDataSource());
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
+                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
         Processor<Double> resultReceiver = new Processor<Double>() {
             @Override
             public void onElement(Double element) {
@@ -147,6 +158,10 @@ public class TestProcessorQuery {
             @Override
             public void abort() {
                 receivedAbort = true;
+            }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
             }
         };
         query.setFirstProcessor(new BlockingProcessor<Iterable<Number>, Double>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(resultReceiver), (long) 1000));
@@ -165,7 +180,8 @@ public class TestProcessorQuery {
 
     @Test
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), createDataSource());
+        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
+                ConcurrencyTestsUtil.getExecutor(), createDataSource(), stringMessages, Locale.ENGLISH);
         String keyValue = "Sum";
         query.setFirstProcessor(createSumBuildingProcessor(query, keyValue));
         
@@ -192,6 +208,10 @@ public class TestProcessorQuery {
                         return result;
                     }
                 };
+            }
+
+            @Override
+            protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
             }
         };
     }

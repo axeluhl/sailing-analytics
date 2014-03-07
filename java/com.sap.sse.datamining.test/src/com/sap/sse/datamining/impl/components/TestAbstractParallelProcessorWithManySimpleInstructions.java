@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
@@ -34,6 +35,10 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
             @Override
             public void abort() {
             }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
+            }
         };
         
         Collection<Processor<Integer>> receivers = new ArrayList<>();
@@ -47,6 +52,9 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
                         return element;
                     }
                 };
+            }
+            @Override
+            protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
             }
         };
     }

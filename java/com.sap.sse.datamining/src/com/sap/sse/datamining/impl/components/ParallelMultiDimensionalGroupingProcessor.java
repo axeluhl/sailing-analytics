@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -68,6 +69,10 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
     @Override
     protected Iterable<DataType> partitionElement(Iterable<DataType> element) {
         return element;
+    }
+
+    @Override
+    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 
 public abstract class AbstractProcessor<InputType, ResultType> implements Processor<InputType> {
@@ -34,5 +35,16 @@ public abstract class AbstractProcessor<InputType, ResultType> implements Proces
             resultReceiver.finish();
         }
     }
+    
+    @Override
+    public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+        setAdditionalData(additionalDataBuilder);
+        for (Processor<ResultType> resultReceiver : resultReceivers) {
+            additionalDataBuilder = resultReceiver.getAdditionalResultData(additionalDataBuilder);
+        }
+        return additionalDataBuilder;
+    }
+
+    protected abstract void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder);
 
 }

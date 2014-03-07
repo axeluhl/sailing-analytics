@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 
@@ -25,4 +26,9 @@ public class BlockingProcessor<InputType, ResultType> extends AbstractSimplePara
             }
         };
     }
+
+    @Override
+    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+    }
+    
 }

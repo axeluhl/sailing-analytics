@@ -45,5 +45,7 @@ public interface Function<ReturnType> {
      * If the function has no message key, the function name is used as display name.
      */
     public FunctionDTO asDTO(Locale locale, DataMiningStringMessages stringMessages);
+    
+    public String getMessageKey();
 
 }

@@ -10,7 +10,9 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 
 public class TestAbstractStoringParallelAggregationProcessor {
@@ -35,6 +37,10 @@ public class TestAbstractStoringParallelAggregationProcessor {
             @Override
             public void abort() {
             }
+            @Override
+            public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
+                return additionalDataBuilder;
+            }
         };
         
         receivers = new HashSet<>();
@@ -43,7 +49,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
             @Override
             protected void storeElement(Integer element) {
                 elementStore.add(element);
@@ -75,7 +81,7 @@ public class TestAbstractStoringParallelAggregationProcessor {
     
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers) {
+        Processor<Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, Message.Sum.toString()) {
             @Override
             protected void storeElement(Integer element) {
                 if (element < 0) {

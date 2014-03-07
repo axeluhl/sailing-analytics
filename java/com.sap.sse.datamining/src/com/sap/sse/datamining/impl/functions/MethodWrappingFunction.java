@@ -94,7 +94,8 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         return method.getName();
     }
 
-    private String getMessageKey() {
+    @Override
+    public String getMessageKey() {
         return messageKey;
     }
     

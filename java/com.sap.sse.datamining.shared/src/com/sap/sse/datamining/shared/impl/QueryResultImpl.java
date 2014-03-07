@@ -3,6 +3,7 @@ package com.sap.sse.datamining.shared.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
@@ -10,15 +11,8 @@ import com.sap.sse.datamining.shared.Unit;
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
     private static final long serialVersionUID = -8347731622150585715L;
     
-    private int retrievedDataAmount;
-    private int filteredDataAmount;
-    private long calculationTimeInNanos;
-
-    private String resultSignifier;
-    private Unit unit;
-    private int valueDecimals;
-	
     private Map<GroupKey, AggregatedType> results;
+    private AdditionalResultData additionalData;
     
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -26,32 +20,24 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Deprecated
     QueryResultImpl() { }
     
-    public QueryResultImpl(int retrievedDataAmount, int filteredDataAmount, String resultSiginifier, Unit unit, int valueDecimals) {
-        this.retrievedDataAmount = retrievedDataAmount;
-        this.filteredDataAmount = filteredDataAmount;
-        results = new HashMap<GroupKey, AggregatedType>();
-        this.resultSignifier = resultSiginifier;
-        this.unit = unit;
-        this.valueDecimals = valueDecimals;
+    public QueryResultImpl(Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
+        this.results = new HashMap<GroupKey, AggregatedType>(results);
+        this.additionalData = additionalData;
     }
 
     @Override
     public int getRetrievedDataAmount() {
-        return retrievedDataAmount;
+        return additionalData.getRetrievedDataAmount();
     }
 
     @Override
     public int getFilteredDataAmount() {
-        return filteredDataAmount;
+        return additionalData.getFilteredDataAmount();
     }
 
     @Override
     public double getCalculationTimeInSeconds() {
-        return calculationTimeInNanos / 1000000000.0;
-    }
-    
-    public void setCalculationTimeInNanos(long calculationTimeInNanos) {
-        this.calculationTimeInNanos = calculationTimeInNanos;
+        return additionalData.getCalculationTimeInSeconds();
     }
 
     @Override
@@ -61,17 +47,17 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
 
     @Override
     public String getResultSignifier() {
-        return resultSignifier;
+        return additionalData.getResultSignifier();
     }
     
     @Override
     public Unit getUnit() {
-    	return unit;
+    	return additionalData.getUnit();
     }
 
     @Override
     public int getValueDecimals() {
-        return valueDecimals;
+        return additionalData.getValueDecimals();
     }
 
     @Override
