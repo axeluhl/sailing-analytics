@@ -17,7 +17,8 @@ import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
-import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+import com.sap.sailing.domain.racelog.Revokable;
+import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
@@ -151,15 +152,22 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
             if (revokedEvent == null) {
                 logger.log(Level.FINE, "RevokeEvent added, that refers to non-existent event to be revoked");
+                return;
             }
             
-            if (revokedEvent != null && ! (revokedEvent instanceof RevokeEvent) && isEventRevokedBy(revokeEvent)) {
-                lockForWrite();
-                revokedEventIds.add(revokeEvent.getRevokedEventId());
-                unlockAfterWrite();
-            } else {
-                logger.log(Level.FINE, "Not revoking event " + revokedEvent);
+            if (! (revokedEvent instanceof Revokable)) {
+                logger.log(Level.FINE, "RevokeEvent trying to revoke non-revokable event");
+                return;
             }
+            
+            if (getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) <= 0) {
+                logger.log(Level.FINE, "RevokeEvent does not have sufficient priority");
+                return;
+            }
+            
+            lockForWrite();
+            revokedEventIds.add(revokeEvent.getRevokedEventId());
+            unlockAfterWrite();
         }
     }
 
@@ -313,14 +321,6 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     public RaceLogEvent getEventById(Serializable id) {
         assertReadLock();
         return eventsById.get(id);
-    }
-    
-    @Override
-    public boolean isEventRevokedBy(RevokeEvent revokeEvent) {
-        lockForRead();
-        RaceLogEvent revokedEvent = getEventById(revokeEvent.getRevokedEventId());
-        unlockAfterRead();
-        return getInternalRawFixes().comparator().compare(revokeEvent, revokedEvent) > 0;
     }
     
     @Override

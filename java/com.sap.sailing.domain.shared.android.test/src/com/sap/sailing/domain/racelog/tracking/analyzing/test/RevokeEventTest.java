@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.tracking.RevokeEvent;
+import com.sap.sailing.domain.racelog.RevokeEvent;
 
 public class RevokeEventTest extends AbstractRaceLogTrackingTest {
     @Test

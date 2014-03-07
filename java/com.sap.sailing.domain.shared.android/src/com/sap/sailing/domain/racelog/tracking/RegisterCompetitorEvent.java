@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.tracking;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.Revokable;
 
 /**
  * Register a competitor for that race using the {@link RaceLog} in racelog-tracked races.
@@ -14,6 +15,6 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
  * @author Fredrik Teschke
  *
  */
-public interface RegisterCompetitorEvent extends RaceLogEvent {
+public interface RegisterCompetitorEvent extends RaceLogEvent, Revokable {
     Competitor getCompetitor();
 }

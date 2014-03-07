@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.tracking;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.Revokable;
 
 /**
  * Event type for mapping {@link DeviceIdentifier devices} to {@code items} ({@link Competitor competitors} or {@link Mark marks}).
@@ -33,7 +34,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
  * </ul>
  * @author Fredrik Teschke
  */
-public interface DeviceMappingEvent<ItemType extends WithID> extends RaceLogEvent {
+public interface DeviceMappingEvent<ItemType extends WithID> extends RaceLogEvent, Revokable {
     ItemType getMappedTo();
     DeviceIdentifier getDevice();
     

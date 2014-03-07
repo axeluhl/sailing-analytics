@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.Revokable;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
 
 /**
@@ -11,5 +12,5 @@ import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEve
  * @author Fredrik Teschke
  *
  */
-public interface StartTrackingEvent extends RaceLogEvent {
+public interface StartTrackingEvent extends RaceLogEvent, Revokable {
 }
