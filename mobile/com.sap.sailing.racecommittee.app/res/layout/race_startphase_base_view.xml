@@ -41,7 +41,7 @@
         android:orientation="horizontal" >
 
         <include
-            android:layout_width="match_parent"
+            android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="0.618"
             layout="@layout/race_flag_space"
@@ -91,7 +91,7 @@
                     android:id="@+id/raceStartIn4Minutes"
                     android:layout_width="197dp"
                     android:layout_height="match_parent"
-                    android:text="Race Start in exactly 4 Minutes" />
+                    android:text="@string/race_start_in_4_minutes" />
 
                 <Button
                     android:id="@+id/race_startphase_base_reset_time_button"
