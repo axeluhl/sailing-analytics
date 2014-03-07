@@ -19,7 +19,7 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
  * the winner of a regatta, and one less for each subsequent position. This scheme is used particularly by the Extreme
- * Sailing Series' overall leaderboard.
+ * Sailing Series' overall leaderboard and can only be applied to {@link MetaLeaderboard}s.
  * <p>
  * 
  * From the Notices of Race: "13.5: If there is a tie in the Series score between two or more boats at any time, the tie
