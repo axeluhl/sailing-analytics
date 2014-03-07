@@ -184,7 +184,8 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered, List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered) {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2,
+            TimePoint timePoint) throws NoWindException {
         return 0;
     }
 }

@@ -10,12 +10,12 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -162,19 +162,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     if (result == 0) {
                         // compare by last race:
                         result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
-                        if (result == 0 && (getLeaderboard() instanceof LeaderboardGroupMetaLeaderboard)) {
-                            // compare by last regatta if this leaderboard is a meta leaderboard
-                            LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) getLeaderboard();
-                            List<Double> o1PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
-                            List<Double> o2PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
+                        if (result == 0) {
                             try {
-                                for (Leaderboard leaderboardInOverall : overallLeaderboard.getLeaderboards()) {
-                                        o1PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o1, timePoint));
-                                        o2PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o2, timePoint));
-                                }
-                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(o1PointsInLeaderboardsOfTheGroup, o2PointsInLeaderboardsOfTheGroup);
+                                result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
                             } catch (NoWindException e) {
-                                e.printStackTrace();
+                                throw new NoWindError(e);
                             }
                         }
                     }

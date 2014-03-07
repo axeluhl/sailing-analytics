@@ -1,13 +1,19 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
@@ -96,17 +102,27 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
     }
 
     /**
-     * If a tie still remains, it shall be broken in
-     * favour of the boat that had the better place at the last Regatta sailed.
+     * Notice of Race (NOR) section 13.5 specifies for the series score: "If a tie still remains, it shall be broken in
+     * favor of the boat that had the better place at the last Regatta sailed."
+     * @throws NoWindException 
      */
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered,
-            List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered) {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard,
+            Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException {
+        assert leaderboard instanceof MetaLeaderboard;
+        // compare by last regatta if this leaderboard is a meta leaderboard
+        LeaderboardGroupMetaLeaderboard overallLeaderboard = (LeaderboardGroupMetaLeaderboard) leaderboard;
+        List<Double> o1PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
+        List<Double> o2PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
+            for (Leaderboard leaderboardInOverall : overallLeaderboard.getLeaderboards()) {
+                    o1PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o1, timePoint));
+                    o2PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o2, timePoint));
+            }
         int result = 0;
-        if (o1TotalPointsForAllOtherLeaderboardsOrdered.size() == o2TotalPointsForAllOtherLeaderboardsOrdered.size()) {
-            for (int i=o1TotalPointsForAllOtherLeaderboardsOrdered.size()-1;i==0;i--) {
-                Double o1PointsForLeaderboard = o1TotalPointsForAllOtherLeaderboardsOrdered.get(i);
-                Double o2PointsForLeaderboard = o2TotalPointsForAllOtherLeaderboardsOrdered.get(i);
+        if (o1PointsInLeaderboardsOfTheGroup.size() == o2PointsInLeaderboardsOfTheGroup.size()) {
+            for (int i=o1PointsInLeaderboardsOfTheGroup.size()-1;i==0;i--) {
+                Double o1PointsForLeaderboard = o1PointsInLeaderboardsOfTheGroup.get(i);
+                Double o2PointsForLeaderboard = o2PointsInLeaderboardsOfTheGroup.get(i);
                 if (o1PointsForLeaderboard != null && o2PointsForLeaderboard != null) {
                     // we're in a scheme where points never get 0 so we can safely assume
                     // that the last total points that are no 0 are the ones that we want to
