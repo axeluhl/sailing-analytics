@@ -971,4 +971,11 @@ public interface StringMessages extends Messages {
     String canOnlyBeEditedBeforeStartingTracking();
     String defineCourse();
     String mapDevices();
+    @Key("edit_what")
+    String edit(String what);
+    @Key("add_what")
+    String add(String what);
+    @Key("remove_what")
+    String remove(String what);
+    String pleaseEnterA(String what);
 }

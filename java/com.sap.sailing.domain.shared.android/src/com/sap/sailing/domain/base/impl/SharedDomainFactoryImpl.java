@@ -312,5 +312,15 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         }
         return matcher;
     }
+    
+    @Override
+    public Mark getExistingMarkById(Serializable id) {
+        return markCache.get(id);
+    }
+    
+    @Override
+    public Mark getExistingMarkByIdAsString(String toStringRepresentationOfID) {
+        return markCache.get(markIdCache.get(toStringRepresentationOfID));
+    }
 
 }

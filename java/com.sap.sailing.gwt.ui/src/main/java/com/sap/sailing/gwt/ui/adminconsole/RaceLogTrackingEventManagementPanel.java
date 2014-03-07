@@ -101,6 +101,9 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         raceActionColumn.setFieldUpdater(new FieldUpdater<RaceColumnDTOAndFleetDTOWithNameBasedEquality, String>() {
             @Override
             public void update(int index, RaceColumnDTOAndFleetDTOWithNameBasedEquality object, String value) {
+                String leaderboardName = getSelectedLeaderboardName();
+                String raceColumnName = object.getA().getName();
+                String fleetName = object.getB().getName();
                 if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_ADD_RACELOG_TRACKER.equals(value)) {
                     addRaceLogTracker(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
@@ -109,10 +112,10 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     startRaceLogTracking(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
                     boolean editable = object.getB().raceLogTrackingState != RaceLogTrackingState.TRACKING;
-                    new CompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
+                    new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
                             getSelectedLeaderboardName(), object.getA().getName(), object.getB().getName(), editable).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
-                    //TODO
+                    new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     //TODO
                 }

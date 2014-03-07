@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -535,5 +536,17 @@ public interface SailingServiceAsync {
 
     void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Iterable<CompetitorDTO>> callback);
+
+    void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
+            AsyncCallback<Void> callback);
+
+    void getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Collection<MarkDTO>> callback);
+
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            List<Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
+
+    void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<RaceCourseDTO> callback);
 }
 

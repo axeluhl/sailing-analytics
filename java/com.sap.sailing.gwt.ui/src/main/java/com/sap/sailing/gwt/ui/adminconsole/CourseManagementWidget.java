@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -32,6 +36,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -178,7 +183,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final Handler markSelectionChangeHandler;
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
-    protected final Button removeWaypointBtn;
+    protected final Button saveButton;
     protected boolean ignoreWaypointAndOldAndNewMarkSelectionChange;
     
     @Override
@@ -249,6 +254,19 @@ public abstract class CourseManagementWidget implements IsWidget {
             
         }; 
         controlPointsTable.addColumn(newMarkColumn, stringMessages.newMark());
+
+        ImagesBarColumn<ControlPointAndOldAndNewMark, CourseManagementWidgetWaypointsImagesBarCell> actionColumn =
+                new ImagesBarColumn<ControlPointAndOldAndNewMark, CourseManagementWidgetWaypointsImagesBarCell>(
+                new CourseManagementWidgetWaypointsImagesBarCell(stringMessages));
+        actionColumn.setFieldUpdater(new FieldUpdater<ControlPointAndOldAndNewMark, String>() {
+            @Override
+            public void update(int index, ControlPointAndOldAndNewMark controlPoint, String value) {
+                if (CourseManagementWidgetWaypointsImagesBarCell.ACTION_DELETE.equals(value)) {
+                    removeSelectedWaypoints(sailingService);
+                }
+            }
+        });
+        controlPointsTable.addColumn(actionColumn, stringMessages.actions());
         controlPointDataProvider = new ListDataProvider<ControlPointAndOldAndNewMark>();
         controlPointDataProvider.addDataDisplay(controlPointsTable);
 
@@ -290,15 +308,6 @@ public abstract class CourseManagementWidget implements IsWidget {
         });
         insertWaypointAfter.setEnabled(false);
         courseActionsPanel.add(insertWaypointAfter);
-        removeWaypointBtn = new Button(stringMessages.remove());
-        removeWaypointBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-              removeSelectedWaypoints(sailingService);
-            }
-        });
-        removeWaypointBtn.setEnabled(false);
-        courseActionsPanel.add(removeWaypointBtn);
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -307,14 +316,32 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         });
         courseActionsPanel.add(refreshBtn);
-        Button saveBtn = new Button(stringMessages.save());
-        saveBtn.addClickHandler(new ClickHandler() {
+        saveButton = new Button(stringMessages.save());
+        saveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                saveCourse(sailingService, stringMessages);
+                Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
+                List<Pair<ControlPointDTO, PassingInstruction>> controlPoints = new ArrayList<Pair<ControlPointDTO, PassingInstruction>>();
+                for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
+                    if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
+                        oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
+                        ControlPointDTO controlPointToAdd;
+                        if (controlPointsNeedingReplacement.contains(cpaoanb.getControlPoint())) {
+                            if (cpaoanb.getControlPoint() instanceof GateDTO) {
+                                controlPointToAdd = createGate((GateDTO) cpaoanb.getControlPoint());
+                            } else {
+                                controlPointToAdd = cpaoanb.getNewMark();
+                            }
+                        } else {
+                            controlPointToAdd = cpaoanb.getControlPoint();
+                        }
+                        controlPoints.add(new Pair<ControlPointDTO, PassingInstruction>(controlPointToAdd, cpaoanb.passingInstructions));
+                    }
+                }
+                saveCourse(controlPoints);
             }
-        });        courseActionsPanel.add(saveBtn);
-        courseActionsPanel.setVisible(false);
+        });        courseActionsPanel.add(saveButton);
+//        courseActionsPanel.setVisible(false);
 
         mainPanel.add(courseActionsPanel);
     }
@@ -325,8 +352,7 @@ public abstract class CourseManagementWidget implements IsWidget {
             markSelectionModel.setSelected(markSelectionModel.getSelectedObject(), false);
           final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
             insertWaypointAfter.setEnabled(selectionSize==1);
-            insertWaypointBefore.setEnabled(selectionSize==1);
-            removeWaypointBtn.setEnabled(selectionSize>=1);
+            insertWaypointBefore.setEnabled(selectionSize==1 || controlPointDataProvider.getList().isEmpty());
             if (selectionSize == 1) {
                 MarkDTO newMark = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewMark();
                 if (newMark != null) {
@@ -342,7 +368,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }
     }
 
-    protected abstract void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages);
+    protected abstract void saveCourse(List<Pair<ControlPointDTO, PassingInstruction>> controlPoints);
 
     /**
      * When a gate needs replacement, its entries in {@link #controlPointDataProvider} are looked up, and a new
@@ -474,13 +500,19 @@ public abstract class CourseManagementWidget implements IsWidget {
             @Override
             public void ok(ControlPointDTO result) {
                 Set<ControlPointAndOldAndNewMark> selectedElements = controlPointsSelectionModel.getSelectedSet();
-                if (!selectedElements.isEmpty()) {
+                int index = -1;
+                if (controlPointDataProvider.getList().isEmpty()) {
+                    index = 0;
+                } else if (!selectedElements.isEmpty()) {
                     ControlPointAndOldAndNewMark selectedElement = selectedElements.iterator().next();
-                    int insertPos = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
+                    index = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
+                }
+                if (index != -1) {
                     for (MarkDTO markDTO : result.getMarks()) {
-                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewMark(result, null, markDTO));
+                        controlPointDataProvider.getList().add(index++, new ControlPointAndOldAndNewMark(result, null, markDTO));
                     }
                 }
+                handleControlPointSelectionChange();
             }
         }).show();
     }
@@ -513,8 +545,20 @@ public abstract class CourseManagementWidget implements IsWidget {
             ControlPointAndOldAndNewMark next = i.next();
             if (selectedControlPoints.contains(next.getControlPoint())) {
                 i.remove();
+                controlPointsSelectionModel.setSelected(next, false);
             }
         }
         handleControlPointSelectionChange();
+    }
+    
+    protected void updateMarksTable(Collection<MarkDTO> marks) {
+        markDataProvider.getList().clear();
+        markDataProvider.getList().addAll(marks);
+        Collections.sort(markDataProvider.getList(), new Comparator<MarkDTO>() {
+            @Override
+            public int compare(MarkDTO o1, MarkDTO o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
     }
 }

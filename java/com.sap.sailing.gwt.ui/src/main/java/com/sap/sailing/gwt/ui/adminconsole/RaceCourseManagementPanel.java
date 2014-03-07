@@ -1,12 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,8 +12,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.GateDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 
 /**
@@ -39,25 +32,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
             
             @Override
-            protected void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
-                Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
-                List<Pair<ControlPointDTO, PassingInstruction>> controlPoints = new ArrayList<Pair<ControlPointDTO, PassingInstruction>>();
-                for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
-                    if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
-                        oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
-                        ControlPointDTO controlPointToAdd;
-                        if (controlPointsNeedingReplacement.contains(cpaoanb.getControlPoint())) {
-                            if (cpaoanb.getControlPoint() instanceof GateDTO) {
-                                controlPointToAdd = createGate((GateDTO) cpaoanb.getControlPoint());
-                            } else {
-                                controlPointToAdd = cpaoanb.getNewMark();
-                            }
-                        } else {
-                            controlPointToAdd = cpaoanb.getControlPoint();
-                        }
-                        controlPoints.add(new Pair<ControlPointDTO, PassingInstruction>(controlPointToAdd, cpaoanb.passingInstructions));
-                    }
-                }
+            protected void saveCourse(List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
                 sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -75,13 +50,13 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public void refresh() {
                 if (singleSelectedRace != null && selectedRaceDTO != null) {
-                    courseActionsPanel.setVisible(true);
+//                    courseActionsPanel.setVisible(true);
                     // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
                     sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
                             updateWaypointTable(raceCourseDTO);
-                            updateMarksTable(raceCourseDTO);
+                            updateMarksTable(raceCourseDTO.getMarks());
                         }
             
                         @Override
@@ -94,17 +69,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     courseActionsPanel.setVisible(false);
                 }
-            }
-            
-            private void updateMarksTable(RaceCourseDTO raceCourseDTO) {
-                markDataProvider.getList().clear();
-                markDataProvider.getList().addAll(raceCourseDTO.getMarks());
-                Collections.sort(markDataProvider.getList(), new Comparator<MarkDTO>() {
-                    @Override
-                    public int compare(MarkDTO o1, MarkDTO o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
             }
         };
         this.selectedRaceContentPanel.add(courseManagementWidget);

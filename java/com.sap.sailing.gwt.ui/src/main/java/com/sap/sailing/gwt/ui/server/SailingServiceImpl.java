@@ -86,6 +86,8 @@ import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -180,6 +182,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
 import com.sap.sailing.domain.racelog.analyzing.impl.AbortingFlagFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.state.ReadonlyRaceState;
 import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
@@ -188,6 +191,7 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26R
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -1620,7 +1624,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getMarks().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+            result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName(), posOfFirst == null ? -1 : posOfFirst.getLatDeg(), posOfFirst == null ? -1 : posOfFirst.getLngDeg());
         }
         return result;
     }
@@ -1639,6 +1643,55 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     /**
      * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
+     * from the {@code old} {@code CourseBase}.
+     * If such a waypoint is found, its control point is added to the control point list for the new course.
+     * Otherwise, a new control point is created using the default {@link com.sap.sailing.domain.base.DomainFactory}
+     * instance.
+     */
+    private List<Pair<ControlPoint, PassingInstruction>> resolveControlPoints(
+            CourseBase old, List<Pair<ControlPointDTO, PassingInstruction>> controlPoints) {
+        Iterable<Waypoint> waypoints = old.getWaypoints();
+        List<Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
+        int lastMatchPosition = -1;
+        for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
+            ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
+            ControlPoint matchFromOldCourse = null;
+            for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
+                Waypoint waypointAtI = Util.get(waypoints, i);
+                ControlPoint controlPointAtI = waypointAtI.getControlPoint();
+                if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
+                    matchFromOldCourse = controlPointAtI;
+                    newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(matchFromOldCourse, null));
+                    lastMatchPosition = i;
+                }
+            }
+            if (matchFromOldCourse == null) {
+                // no match found; create new control point:
+                ControlPoint newControlPoint;
+                if (controlPointDTO instanceof GateDTO) {
+                    GateDTO gateDTO = (GateDTO) controlPointDTO;
+                    final Serializable id;
+                    if (gateDTO.getIdAsString() == null) {
+                        id = UUID.randomUUID();
+                    } else {
+                        id = gateDTO.getIdAsString();
+                    }
+                    Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
+                    Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
+                    newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
+                    newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
+                } else {
+                    newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
+                    PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
+                    newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
+                }
+            }
+        }
+        return newControlPoints;
+    }
+
+    /**
+     * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
      * from the course that belongs to the race identified by <code>raceIdentifier</code>. If such a waypoint is
      * found, its control point is added to the control point list for the new course. Otherwise, a new control
      * point is created using the default {@link com.sap.sailing.domain.base.DomainFactory} instance. The resulting
@@ -1650,43 +1703,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
-            Iterable<Waypoint> waypoints = course.getWaypoints();
-            List<Pair<ControlPoint, PassingInstruction>> newControlPoints = new ArrayList<Pair<ControlPoint, PassingInstruction>>();
-            int lastMatchPosition = -1;
-            for (Pair<ControlPointDTO, PassingInstruction> controlPointAndPassingInstruction : controlPoints) {
-                ControlPointDTO controlPointDTO = controlPointAndPassingInstruction.getA();
-                ControlPoint matchFromOldCourse = null;
-                for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
-                    Waypoint waypointAtI = Util.get(waypoints, i);
-                    ControlPoint controlPointAtI = waypointAtI.getControlPoint();
-                    if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
-                        matchFromOldCourse = controlPointAtI;
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(matchFromOldCourse, null));
-                        lastMatchPosition = i;
-                    }
-                }
-                if (matchFromOldCourse == null) {
-                    // no match found; create new control point:
-                    ControlPoint newControlPoint;
-                    if (controlPointDTO instanceof GateDTO) {
-                        GateDTO gateDTO = (GateDTO) controlPointDTO;
-                        final Serializable id;
-                        if (gateDTO.getIdAsString() == null) {
-                            id = UUID.randomUUID();
-                        } else {
-                            id = gateDTO.getIdAsString();
-                        }
-                        Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().getName());
-                        Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().getName());
-                        newControlPoint = baseDomainFactory.createControlPointWithTwoMarks(id, left, right, gateDTO.getName());
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, null));
-                    } else {
-                        newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.getName());
-                        PassingInstruction passingInstructions = controlPointAndPassingInstruction.getB();
-                        newControlPoints.add(new Pair<ControlPoint, PassingInstruction>(newControlPoint, passingInstructions));
-                    }
-                }
-            }
+            List<Pair<ControlPoint, PassingInstruction>> newControlPoints = resolveControlPoints(course, controlPoints);
             try {
                 course.update(newControlPoints, baseDomainFactory);
             } catch (Exception e) {
@@ -3942,5 +3959,100 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Competitor c : toBeRemoved) {
             unregisterCompetitor(raceLog, c);
         }
+    }
+    
+    /**
+     * Generates new id, does not resolve against domain factory.
+     */
+    private Mark convertToMark(MarkDTO dto) {
+//        Mark existing = baseDomainFactory.getExistingMarkByIdAsString(dto.getIdAsString());
+//        if (existing != null) {
+//            return existing;
+//        }
+        
+//        Serializable id = dto.getIdAsString();
+//        if (id == null) {
+        Serializable id = UUID.randomUUID();
+//        }
+        
+        return baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
+    }
+    
+    private Collection<MarkDTO> convertToMarkDTOs(Iterable<Mark> marks) {
+        List<MarkDTO> dtos = new ArrayList<MarkDTO>();
+        for (Mark mark : marks) {
+            dtos.add(convertToMarkDTO(mark, null));
+        }
+        return dtos;
+    }
+    
+    @Override
+    public void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
+        Mark mark = convertToMark(markDTO);
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
+                getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
+        raceLog.add(event);
+    }
+    
+    @Override
+    public Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        Collection<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
+        return convertToMarkDTOs(marks);
+    }
+    
+    @Override
+    public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            List<Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        String name = String.format("Course for %s - %s - %s", leaderboardName, raceColumnName, fleetName);
+        
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        if (lastPublishedCourse == null) {
+            lastPublishedCourse = new CourseDataImpl(name);
+        }
+        
+        List<Pair<ControlPoint, PassingInstruction>> waypoints = resolveControlPoints(lastPublishedCourse, courseDTO);
+        Course course = new CourseImpl(name, lastPublishedCourse.getWaypoints());
+        
+        try {
+            course.update(waypoints, baseDomainFactory);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(),
+                getService().getServerAuthor(), raceLog.getCurrentPassId(), course);
+        raceLog.add(event);
+    }
+    
+    private WaypointDTO convertToWaypointDTO(Waypoint waypoint) {
+        ControlPointDTO cp = convertToControlPointDTO(waypoint.getControlPoint());
+        List<MarkDTO> marks = new ArrayList<MarkDTO>();
+        Util.addAll(cp.getMarks(), marks);
+        return new WaypointDTO(waypoint.getName(), cp, marks, waypoint.getPassingInstructions());
+    }
+    
+    private RaceCourseDTO convertToRaceCourseDTO(CourseBase course) {
+        List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
+        RaceCourseDTO result = new RaceCourseDTO(waypointDTOs);
+        for (Waypoint waypoint : course.getWaypoints()) {
+            waypointDTOs.add(convertToWaypointDTO(waypoint));
+        }
+        return result;
+    }
+    
+    @Override
+    public RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        if (lastPublishedCourse == null) {
+            lastPublishedCourse = new CourseDataImpl("");
+        }
+        
+        return convertToRaceCourseDTO(lastPublishedCourse);
     }
 }

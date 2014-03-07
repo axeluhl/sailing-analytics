@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelog.tracking.analyzing.impl;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -10,21 +10,21 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 
-public class DefinedMarkFinder extends RaceLogAnalyzer<Iterable<Mark>> {
+public class DefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
     public DefinedMarkFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
     @Override
-    protected Iterable<Mark> performAnalysis() {
-        Map<Serializable, Mark> result = new HashMap<Serializable, Mark>();
+    protected Collection<Mark> performAnalysis() {
+        List< Mark> result = new ArrayList<Mark>();
         for (RaceLogEvent event : getAllEvents()) {
             if (event instanceof DefineMarkEvent) {
                 DefineMarkEvent dME = (DefineMarkEvent) event;
-                result.put(dME.getMark().getId(), dME.getMark());
+                result.add(dME.getMark());
             }
         }
-        return result.values();
+        return result;
     }
 
 }
