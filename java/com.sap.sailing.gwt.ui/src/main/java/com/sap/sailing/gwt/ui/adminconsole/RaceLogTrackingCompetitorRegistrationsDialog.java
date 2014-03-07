@@ -62,7 +62,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
             @Override
             public void onClick(ClickEvent event) {
                 boolean filterByLeaderboard = toggleOnlyLeaderboard.getText().equals(stringMessages.filterByLeaderboard());
-                competitorTable.refreshCompetitorList(filterByLeaderboard ? leaderboardName : null);
+                competitorTable.refreshCompetitorList(filterByLeaderboard ? leaderboardName : null, true);
                 toggleOnlyLeaderboard.setText(filterByLeaderboard ? stringMessages.removeLeaderboardFilter() :
                     stringMessages.filterByLeaderboard());
             }
