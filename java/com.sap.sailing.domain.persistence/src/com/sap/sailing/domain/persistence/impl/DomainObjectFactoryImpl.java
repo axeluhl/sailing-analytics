@@ -128,6 +128,7 @@ import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -1173,6 +1174,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogRevokeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RegisterCompetitorEvent.class.getSimpleName())) {
             return loadRaceLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(DefineMarkEvent.class.getSimpleName())) {
+            return loadRaceLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
@@ -1241,6 +1244,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
     	assert competitors.size() == 1 : "Should have exactly one competitor for RegisterCompetitorEvent";
         return raceLogEventFactory.createRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, passId, competitors.get(0));
+    }
+
+    private RaceLogEvent loadRaceLogDefineMarkEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Mark mark = loadMark((DBObject) dbObject.get(FieldNames.RACE_LOG_MARK.name()));
+        return raceLogEventFactory.createDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, mark);
     }
 
     private RaceLogEvent loadRaceLogRaceLogProtestStartTimeEvent(TimePoint createdAt, RaceLogEventAuthor author,

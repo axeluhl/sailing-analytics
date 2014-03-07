@@ -79,6 +79,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
@@ -750,6 +751,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRegisterCompetitorEvent(event));
         return result;
     }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, DefineMarkEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceLogIdentifier.getIdentifier()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDefineMarkEvent(event));
+        return result;
+    }
     
     private Object storeRaceLogWindFix(RaceLogWindFixEvent event) {
         DBObject result = new BasicDBObject();
@@ -858,6 +867,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RegisterCompetitorEvent.class.getSimpleName());
+        return result;
+    }
+
+    private Object storeRaceLogDefineMarkEvent(DefineMarkEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), DefineMarkEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_MARK.name(), storeMark(event.getMark()));
         return result;
     }
 

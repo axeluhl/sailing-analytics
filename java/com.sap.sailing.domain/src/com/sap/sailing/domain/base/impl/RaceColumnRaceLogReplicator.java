@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -109,33 +110,38 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
         notifyOnAdd(event);
     }
 
-	@Override
-	public void visit(DeviceCompetitorMappingEvent event) {
+    @Override
+    public void visit(DeviceCompetitorMappingEvent event) {
         notifyOnAdd(event);
-	}
+    }
 
-	@Override
-	public void visit(DeviceMarkMappingEvent event) {
+    @Override
+    public void visit(DeviceMarkMappingEvent event) {
         notifyOnAdd(event);
-	}
+    }
 
-	@Override
-	public void visit(DenoteForTrackingEvent event) {
+    @Override
+    public void visit(DenoteForTrackingEvent event) {
         notifyOnAdd(event);
-	}
+    }
 
-	@Override
-	public void visit(StartTrackingEvent event) {
+    @Override
+    public void visit(StartTrackingEvent event) {
         notifyOnAdd(event);
-	}
+    }
 
-	@Override
-	public void visit(RevokeEvent event) {
+    @Override
+    public void visit(RevokeEvent event) {
         notifyOnAdd(event);
-	}
+    }
 
-	@Override
-	public void visit(RegisterCompetitorEvent event) {
+    @Override
+    public void visit(RegisterCompetitorEvent event) {
         notifyOnAdd(event);
-	}
+    }
+    
+    @Override
+    public void visit(DefineMarkEvent event) {
+        notifyOnAdd(event);
+    }
 }

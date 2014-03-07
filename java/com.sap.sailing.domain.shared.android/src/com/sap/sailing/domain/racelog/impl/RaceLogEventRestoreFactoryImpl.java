@@ -28,12 +28,14 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.events.DefineMarkEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DenoteForTrackingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.racelog.tracking.events.DeviceMarkMappingEventImpl;
@@ -126,39 +128,45 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public DeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint createdAt, RaceLogEventAuthor author,
-    		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to) {
-    	return new DeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, pId, passId, mappedTo, device, from, to);
+            TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to) {
+        return new DeviceCompetitorMappingEventImpl(createdAt, author, logicalTimePoint, pId, passId, mappedTo, device, from, to);
     }
-    
+
     @Override
     public DeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint createdAt, RaceLogEventAuthor author,
-    		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from,
-    		TimePoint to) {
-    	return new DeviceMarkMappingEventImpl(createdAt, author, logicalTimePoint, pId, passId, mappedTo, device, from, to);
+            TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from,
+            TimePoint to) {
+        return new DeviceMarkMappingEventImpl(createdAt, author, logicalTimePoint, pId, passId, mappedTo, device, from, to);
     }
-    
+
     @Override
     public DenoteForTrackingEvent createDenoteForTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author,
-    		TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass) {
-    	return new DenoteForTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId, raceName, boatClass);
+            TimePoint logicalTimePoint, Serializable pId, int passId, String raceName, BoatClass boatClass) {
+        return new DenoteForTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId, raceName, boatClass);
     }
-    
+
     @Override
     public StartTrackingEvent createStartTrackingEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-    		Serializable pId, int passId) {
-    	return new StartTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId);
+            Serializable pId, int passId) {
+        return new StartTrackingEventImpl(createdAt, author, logicalTimePoint, pId, passId);
     }
-    
+
     @Override
     public RevokeEvent createRevokeEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-    		Serializable pId, int passId, Serializable revokedEventId) {
-    	return new RevokeEventImpl(createdAt, author, logicalTimePoint, pId, passId, revokedEventId);
+            Serializable pId, int passId, Serializable revokedEventId) {
+        return new RevokeEventImpl(createdAt, author, logicalTimePoint, pId, passId, revokedEventId);
     }
-    
+
     @Override
     public RegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
-    		Serializable pId, int passId, Competitor competitor) {
-    	return new RegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, pId, passId, competitor);
+            Serializable pId, int passId, Competitor competitor) {
+        return new RegisterCompetitorEventImpl(createdAt, author, logicalTimePoint, pId, passId, competitor);
+    }
+
+    @Override
+    public DefineMarkEvent createDefineMarkEvent(TimePoint createdAt, RaceLogEventAuthor author, TimePoint logicalTimePoint,
+            Serializable pId, int passId, Mark mark) {
+        return new DefineMarkEventImpl(createdAt, author, logicalTimePoint, pId, passId, mark);
     }
 
 }

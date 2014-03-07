@@ -15,6 +15,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -119,6 +120,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     @Override
     public void visit(RegisterCompetitorEvent event) {
 
+    }
+    
+    @Override
+    public void visit(DefineMarkEvent event) {
+         
     }
 
 }

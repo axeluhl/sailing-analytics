@@ -21,6 +21,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -72,7 +73,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
                 new RaceLogStartTrackingEventSerializer(competitorSerializer),
                 new RaceLogRevokeEventSerializer(competitorSerializer),
-                new RaceLogRegisterCompetitorEventSerializer(competitorSerializer));
+                new RaceLogRegisterCompetitorEventSerializer(competitorSerializer),
+                new RaceLogDefineMarkEventSerializer(competitorSerializer, new MarkJsonSerializer()));
     }
 
     private final JsonSerializer<RaceLogEvent> flagEventSerializer;
@@ -94,6 +96,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> startTrackingSerializer;
     private final JsonSerializer<RaceLogEvent> revokeSerializer;
     private final JsonSerializer<RaceLogEvent> registerCompetitorSerializer;
+    private final JsonSerializer<RaceLogEvent> defineMarkSerializer;
     
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -116,7 +119,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> denoteForTrackingSerializer,
             JsonSerializer<RaceLogEvent> createRaceSerializer,
             JsonSerializer<RaceLogEvent> revokeSerializer,
-            JsonSerializer<RaceLogEvent> registerCompetitorSerializer) {
+            JsonSerializer<RaceLogEvent> registerCompetitorSerializer,
+            JsonSerializer<RaceLogEvent> defineMarkSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
@@ -136,6 +140,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.startTrackingSerializer = createRaceSerializer;
         this.revokeSerializer = revokeSerializer;
         this.registerCompetitorSerializer = registerCompetitorSerializer;
+        this.defineMarkSerializer = defineMarkSerializer;
         
         this.chosenSerializer = null;
     }
@@ -220,32 +225,36 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     public void visit(RaceLogWindFixEvent event) {
         chosenSerializer = windFixEventSerializer;
     }
-    
-	@Override
-	public void visit(DeviceCompetitorMappingEvent event) {
-		chosenSerializer = deviceCompetitorMappingSerializer;
-	}
-	
-	@Override
-	public void visit(DeviceMarkMappingEvent event) {
-		chosenSerializer = deviceMarkMappingSerializer;
-	}
-	
-	@Override
-	public void visit(DenoteForTrackingEvent event) {
-		chosenSerializer = denoteForTrackingSerializer;
-	}
-	@Override
-	public void visit(StartTrackingEvent event) {
-		chosenSerializer = startTrackingSerializer;
-	}
-	@Override
-	public void visit(RevokeEvent event) {
-		chosenSerializer = revokeSerializer;
-	}
-	@Override
-	public void visit(RegisterCompetitorEvent event) {
-		chosenSerializer = registerCompetitorSerializer;
-	}
 
+    @Override
+    public void visit(DeviceCompetitorMappingEvent event) {
+        chosenSerializer = deviceCompetitorMappingSerializer;
+    }
+
+    @Override
+    public void visit(DeviceMarkMappingEvent event) {
+        chosenSerializer = deviceMarkMappingSerializer;
+    }
+
+    @Override
+    public void visit(DenoteForTrackingEvent event) {
+        chosenSerializer = denoteForTrackingSerializer;
+    }
+    @Override
+    public void visit(StartTrackingEvent event) {
+        chosenSerializer = startTrackingSerializer;
+    }
+    @Override
+    public void visit(RevokeEvent event) {
+        chosenSerializer = revokeSerializer;
+    }
+    @Override
+    public void visit(RegisterCompetitorEvent event) {
+        chosenSerializer = registerCompetitorSerializer;
+    }
+
+    @Override
+    public void visit(DefineMarkEvent event) {
+        chosenSerializer = defineMarkSerializer;
+    }
 }

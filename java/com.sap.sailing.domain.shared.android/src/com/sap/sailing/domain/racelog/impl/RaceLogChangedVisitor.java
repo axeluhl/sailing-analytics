@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogWindFixEvent;
 import com.sap.sailing.domain.racelog.RevokeEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
@@ -89,34 +90,38 @@ public class RaceLogChangedVisitor implements RaceLogEventVisitor {
         listener.eventAdded(event);
     }
 
-	@Override
-	public void visit(DeviceCompetitorMappingEvent event) {
+    @Override
+    public void visit(DeviceCompetitorMappingEvent event) {
         listener.eventAdded(event);
-	}
+    }
 
-	@Override
-	public void visit(DeviceMarkMappingEvent event) {
+    @Override
+    public void visit(DeviceMarkMappingEvent event) {
         listener.eventAdded(event);
-	}
+    }
 
-	@Override
-	public void visit(DenoteForTrackingEvent event) {
+    @Override
+    public void visit(DenoteForTrackingEvent event) {
         listener.eventAdded(event);
-	}
+    }
 
-	@Override
-	public void visit(StartTrackingEvent event) {
+    @Override
+    public void visit(StartTrackingEvent event) {
         listener.eventAdded(event);
-	}
+    }
 
-	@Override
-	public void visit(RevokeEvent event) {
+    @Override
+    public void visit(RevokeEvent event) {
         listener.eventAdded(event);
-	}
+    }
 
-	@Override
-	public void visit(RegisterCompetitorEvent event) {
-		listener.eventAdded(event);
-	}
+    @Override
+    public void visit(RegisterCompetitorEvent event) {
+        listener.eventAdded(event);
+    }
 
+    @Override
+    public void visit(DefineMarkEvent event) {
+        listener.eventAdded(event);
+    }
 }
