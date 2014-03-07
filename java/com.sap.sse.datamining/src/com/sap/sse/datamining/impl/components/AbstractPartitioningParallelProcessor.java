@@ -20,6 +20,8 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     private final Set<Processor<ResultType>> resultReceivers;
     private final ExecutorService executor;
     private final UnfinishedInstructionsCounter unfinishedInstructionsCounter;
+    
+    private boolean gotAborted = false;
 
     public AbstractPartitioningParallelProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
         this.executor = executor;
@@ -41,7 +43,9 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
                                 forwardResultToReceivers(result);
                             }
                         } catch (Exception e) {
-                            LOGGER.log(Level.FINEST, "An error occured during the processing of an instruction: ", e);
+                            if (!gotAborted || !(e instanceof InterruptedException)) {
+                                LOGGER.log(Level.FINEST, "An error occured during the processing of an instruction: ", e);
+                            }
                         } finally {
                             AbstractPartitioningParallelProcessor.this.unfinishedInstructionsCounter.decrement();
                         }
@@ -110,8 +114,10 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     
     @Override
     public void abort() {
+        gotAborted = true;
         executor.shutdownNow();
         tellResultReceiversToAbort();
+        LOGGER.log(Level.INFO, "The processing got aborted.");
     }
 
     private void tellResultReceiversToAbort() {

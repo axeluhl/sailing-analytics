@@ -29,7 +29,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
 
     private final Object monitorObject = new Object();
     private boolean workIsDone = false;
-    private boolean processorTimedOut = true;
+    private boolean processorTimedOut = false;
 
     public ProcessorQuery(Executor executor, DataSourceType dataSource) {
         this.executor = executor;
@@ -91,7 +91,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                 }
             }
             workIsDone = false;
-            processorTimedOut = true;
+            processorTimedOut = false;
         }
     }
     
@@ -102,6 +102,7 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                 @Override
                 public void run() {
                     synchronized (monitorObject) {
+                        processorTimedOut = true;
                         monitorObject.notify();
                     }
                 }
@@ -134,7 +135,6 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         public void finish() throws InterruptedException {
             synchronized (monitorObject) {
                 workIsDone = true;
-                processorTimedOut = false;
                 monitorObject.notify();
             }
         }
