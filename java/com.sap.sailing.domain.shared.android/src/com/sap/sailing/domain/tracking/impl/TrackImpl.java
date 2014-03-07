@@ -308,6 +308,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     @Override
     public Duration getAverageIntervalBetweenFixes() {
         lockForRead();
+        if (getFixes().isEmpty()) {
+            return null;
+        }
         try {
             return getFixes().first().getTimePoint().until(getFixes().last().getTimePoint()).divide(getFixes().size()-1);
         } finally {
