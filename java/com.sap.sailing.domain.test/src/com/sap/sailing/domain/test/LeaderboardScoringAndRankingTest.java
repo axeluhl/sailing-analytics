@@ -809,10 +809,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 leaderboardHighPoint.getFleet(null));
         assertEquals(16, leaderboardHighPoint.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(16), leaderboardHighPoint.getTotalPoints(competitors[0], later));
-        FlexibleLeaderboard leaderboardHighPointESSOverall = new FlexibleLeaderboardImpl("Test ESS Highpoint Overall", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
-                new HighPointExtremeSailingSeriesOverall(), null);
-        leaderboardHighPointESSOverall.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */ false,
-                leaderboardHighPointESSOverall.getFleet(null));
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("ESS", "ESS", /* displayGroupsInReverseOrder */ false,
+                Arrays.asList(new Leaderboard[] { leaderboardHighPoint10LastBreaksTie }));
+        LeaderboardGroupMetaLeaderboard leaderboardHighPointESSOverall = new LeaderboardGroupMetaLeaderboard(
+                leaderboardGroup, new HighPointExtremeSailingSeriesOverall(), new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]));
         assertEquals(16, leaderboardHighPointESSOverall.getCompetitorsFromBestToWorst(later).size());
         assertEquals(new Double(10), leaderboardHighPointESSOverall.getTotalPoints(competitors[0], later));
         assertEquals(new Double(9), leaderboardHighPointESSOverall.getTotalPoints(competitors[1], later));
