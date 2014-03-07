@@ -85,8 +85,8 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
         synchronized (monitorObject) {
             while (!workIsDone) {
                 monitorObject.wait();
-                if (processorTimedOut) {
-                    // TODO Abort the processing
+                if (processorTimedOut && !workIsDone) {
+                    firstProcessor.abort();
                     throw new TimeoutException("The query processing timed out");
                 }
             }
@@ -137,6 +137,11 @@ public class ProcessorQuery<AggregatedType, DataSourceType> implements Query<Agg
                 processorTimedOut = false;
                 monitorObject.notify();
             }
+        }
+        
+        @Override
+        public void abort() {
+            result = null;
         }
         
         public QueryResult<AggregatedType> getResult() {

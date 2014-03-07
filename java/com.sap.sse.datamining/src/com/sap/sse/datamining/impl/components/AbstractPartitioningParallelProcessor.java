@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,10 +18,10 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
 
     private final Set<Processor<ResultType>> resultReceivers;
-    private final Executor executor;
+    private final ExecutorService executor;
     private final UnfinishedInstructionsCounter unfinishedInstructionsCounter;
 
-    public AbstractPartitioningParallelProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers) {
+    public AbstractPartitioningParallelProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers) {
         this.executor = executor;
         this.resultReceivers = new HashSet<Processor<ResultType>>(resultReceivers);
         unfinishedInstructionsCounter = new UnfinishedInstructionsCounter();
@@ -85,7 +85,7 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
     @Override
     public void finish() throws InterruptedException {
         sleepUntilAllInstructionsFinished();
-        notifyResultReceiversToFinish();
+        tellResultReceiversToFinish();
     }
 
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
@@ -98,13 +98,25 @@ public abstract class AbstractPartitioningParallelProcessor<InputType, WorkingTy
         return unfinishedInstructionsCounter.getUnfinishedInstructionsAmount() > 0;
     }
 
-    protected void notifyResultReceiversToFinish() {
+    protected void tellResultReceiversToFinish() {
         for (Processor<ResultType> resultReceiver : getResultReceivers()) {
             try {
                 resultReceiver.finish();
             } catch (InterruptedException e) {
                 LOGGER.log(Level.SEVERE, resultReceiver.toString() + " was interrupted", e);
             }
+        }
+    }
+    
+    @Override
+    public void abort() {
+        executor.shutdownNow();
+        tellResultReceiversToAbort();
+    }
+
+    private void tellResultReceiversToAbort() {
+        for (Processor<ResultType> resultReceiver : getResultReceivers()) {
+            resultReceiver.abort();
         }
     }
     

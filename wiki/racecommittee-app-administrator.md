@@ -101,7 +101,7 @@ Selecting the "Expert information" option you'll have access to the expert infor
 
 When trying to logon onto a course area the RaceCommittee App opens an error dialog showing an error similar to "Failure to load data: 'null'" or something more expressive. Most of the times this happens when the current version of the app is not compatible with the server. Redo the synchronization step or even force an update via the app's preference screen.
 
-If this doesn't help have a log in the runtime-log (see below).
+If this doesn't help have a look in the runtime-log (see below).
 
 ### Runtime- and Crash-Logs
 

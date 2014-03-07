@@ -26,6 +26,9 @@ public class TestAbstractProcessor {
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
+            @Override
+            public void abort() {
+            }
         };
         
         receivers = new HashSet<>();
@@ -38,6 +41,9 @@ public class TestAbstractProcessor {
             @Override
             protected Integer processElement(Integer element) {
                 return null;
+            }
+            @Override
+            public void abort() {
             }
         };
         processor.finish();

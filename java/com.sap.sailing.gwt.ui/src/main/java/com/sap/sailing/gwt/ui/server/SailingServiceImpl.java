@@ -4,7 +4,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -158,7 +157,6 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
-import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -3477,7 +3475,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 URL serverAddress = null;
                 InputStream inputStream = null;
-                ObjectInputStream objectInputStream = null;
                 try {
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(hostname, port, path, query);
@@ -3502,17 +3499,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
 
-                    objectInputStream = getService().getBaseDomainFactory()
-                            .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
-                            "Reading Data", 0.5);
-                    TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
-
-                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
-                            "Data-Transfer Complete, Initializing Import Operation", 0.5);
-                    importFromHttpResponse(topLevelMasterData, importOperationId, override);
+                    final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
+                    importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Exception e) {
-                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage());
+                    getService()
+                            .setDataImportFailedWithReplication(
+                                    importOperationId,
+                                    e.getMessage()
+                                            + "\n\nHave you checked if the"
+                                            + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
+                                            + "If the error still occurs, when both servers are running the same version, please report the problem.");
                     throw new RuntimeException(e);
                 } finally {
                     // close the connection, set all objects to null
@@ -3524,9 +3520,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     try {
                         if (inputStream != null) {
                             inputStream.close();
-                        }
-                        if (objectInputStream != null) {
-                            objectInputStream.close();
                         }
                     } catch (IOException e) {
                     }
@@ -3546,12 +3539,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             url = new URL("http://" + host + ":" + port + path);
         }
         return url;
-    }
-    
-    protected void importFromHttpResponse(final TopLevelMasterData topLevelMasterData, final UUID importOperationId,
-            final boolean override) {
-        final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
-        importer.importMasterData(topLevelMasterData, importOperationId, override);
     }
 
     public DataImportProgress getImportOperationProgress(UUID id) {

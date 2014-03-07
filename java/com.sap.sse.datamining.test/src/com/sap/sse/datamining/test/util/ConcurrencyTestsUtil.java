@@ -11,10 +11,17 @@ import com.sap.sse.datamining.components.Processor;
 public class ConcurrencyTestsUtil {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    private static ThreadPoolExecutor executor = createExecutor();
 
     public static ThreadPoolExecutor getExecutor() {
+        if (executor.isShutdown()) {
+            executor = createExecutor();
+        }
         return executor;
+    }
+
+    private static ThreadPoolExecutor createExecutor() {
+        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
     
     public static void sleepFor(long milliseconds) {

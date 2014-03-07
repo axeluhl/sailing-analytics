@@ -2,7 +2,7 @@ package com.sap.sse.datamining.test.components.util;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
@@ -10,7 +10,7 @@ import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 public class BlockingProcessor<InputType, ResultType> extends AbstractSimpleParallelProcessor<InputType, ResultType> {
     private final long timeToBlockInMillis;
 
-    public BlockingProcessor(Executor executor, Collection<Processor<ResultType>> resultReceivers, long timeToBlockInMillis) {
+    public BlockingProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, long timeToBlockInMillis) {
         super(executor, resultReceivers);
         this.timeToBlockInMillis = timeToBlockInMillis;
     }

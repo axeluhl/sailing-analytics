@@ -3,7 +3,7 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
@@ -16,7 +16,7 @@ public class ParallelMultiDimensionalGroupingProcessor<DataType>
 
     private Iterable<Function<?>> dimensions;
 
-    public ParallelMultiDimensionalGroupingProcessor(Executor executor, Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
+    public ParallelMultiDimensionalGroupingProcessor(ExecutorService executor, Collection<Processor<GroupedDataEntry<DataType>>> resultReceivers,
                                                      Iterable<Function<?>> dimensions) {
         super(executor, resultReceivers);
         verifyThatDimensionsAreDimensions(dimensions);

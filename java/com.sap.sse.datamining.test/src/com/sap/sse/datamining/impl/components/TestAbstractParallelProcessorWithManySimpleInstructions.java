@@ -31,6 +31,9 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
             public void finish() throws InterruptedException {
                 receiverWasToldToFinish = true;
             }
+            @Override
+            public void abort() {
+            }
         };
         
         Collection<Processor<Integer>> receivers = new ArrayList<>();

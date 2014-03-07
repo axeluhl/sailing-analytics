@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -95,4 +96,12 @@ public interface ScoringScheme extends Serializable {
      * for the total scores.
      */
     boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
+
+    /**
+     * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These
+     * instances of a leaderboard are based on other leaderboards grouped in a {@link LeaderboardGroup}.
+     * It can happen that the {@link ScoringScheme} needs to have look at the total points of the other leaderboards 
+     * in that group. The ordering of the list containing the total points matches the order in the group.
+     */
+    int compareByLatestRegattaInMetaLeaderboard(List<Double> o1TotalPointsForAllOtherLeaderboardsOrdered, List<Double> o2TotalPointsForAllOtherLeaderboardsOrdered);
 }

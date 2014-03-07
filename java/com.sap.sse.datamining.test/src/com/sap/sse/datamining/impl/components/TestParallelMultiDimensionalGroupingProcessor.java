@@ -38,6 +38,8 @@ public class TestParallelMultiDimensionalGroupingProcessor {
             }
             @Override
             public void finish() throws InterruptedException { }
+            @Override
+            public void abort() { }
         };
         
         receivers = new ArrayList<>();
