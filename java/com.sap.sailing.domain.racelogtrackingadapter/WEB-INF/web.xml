@@ -7,7 +7,7 @@
 
 	<servlet>
     	<servlet-name>RecordFixesPostServlet</servlet-name>
-		<servlet-class>com.sap.sailing.domain.racelog.tracking.servlet.RecordFixesPostServlet</servlet-class>
+		<servlet-class>com.sap.sailing.domain.racelogtracking.servlet.RecordFixesPostServlet</servlet-class>
   	</servlet>
   	<servlet-mapping>
     	<servlet-name>RecordFixesPostServlet</servlet-name>

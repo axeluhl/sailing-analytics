@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -242,9 +242,11 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                     DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                     List<DeviceMapping<Mark>> oldMappings = markMappings.get(mark);
 
-                    for (DeviceMapping<Mark> newMapping : newMappings.get(mark)) {
-                        if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                            gpsFixStore.loadMarkTrack(track, newMapping);
+                    if (oldMappings != null) {
+                        for (DeviceMapping<Mark> newMapping : newMappings.get(mark)) {
+                            if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
+                                gpsFixStore.loadMarkTrack(track, newMapping);
+                            }
                         }
                     }
                 }

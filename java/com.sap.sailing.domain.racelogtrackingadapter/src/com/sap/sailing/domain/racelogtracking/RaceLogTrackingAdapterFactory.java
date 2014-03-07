@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.racelogtracking;
 
 import com.sap.sailing.domain.base.DomainFactory;
 

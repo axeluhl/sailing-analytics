@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking;
+package com.sap.sailing.domain.racelogtracking;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -14,7 +14,8 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.tracking.impl.RaceLogRaceTracker;
+import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;

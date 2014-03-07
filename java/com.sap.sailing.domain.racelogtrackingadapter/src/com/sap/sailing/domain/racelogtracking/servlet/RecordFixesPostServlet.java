@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.servlet;
+package com.sap.sailing.domain.racelogtracking.servlet;
 
 import java.io.Serializable;
 import java.util.List;

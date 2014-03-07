@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.util.Collections;
 import java.util.Set;

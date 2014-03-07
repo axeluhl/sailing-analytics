@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherTyp
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -548,5 +549,8 @@ public interface SailingServiceAsync {
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
+
+    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+            PositionDTO position, AsyncCallback<Void> callback);
 }
 

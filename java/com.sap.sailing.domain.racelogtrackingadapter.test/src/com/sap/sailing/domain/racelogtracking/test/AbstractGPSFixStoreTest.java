@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test;
+package com.sap.sailing.domain.racelogtracking.test;
 
 import static com.sap.sailing.domain.common.impl.Util.size;
 import static junit.framework.Assert.assertEquals;

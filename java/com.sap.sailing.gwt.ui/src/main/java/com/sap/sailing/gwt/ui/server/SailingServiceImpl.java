@@ -188,12 +188,17 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.racelog.tracking.analyzing.impl.LastPingMappingEventFinder;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -220,6 +225,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -3961,34 +3968,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    /**
-     * Generates new id, does not resolve against domain factory.
-     */
-    private Mark convertToMark(MarkDTO dto) {
-//        Mark existing = baseDomainFactory.getExistingMarkByIdAsString(dto.getIdAsString());
-//        if (existing != null) {
-//            return existing;
-//        }
+    private Mark convertToMark(MarkDTO dto, boolean resolve) {
+        if (resolve) {
+            Mark existing = baseDomainFactory.getExistingMarkByIdAsString(dto.getIdAsString());
+            if (existing != null) {
+                return existing;
+            }
+        }
         
-//        Serializable id = dto.getIdAsString();
-//        if (id == null) {
         Serializable id = UUID.randomUUID();
-//        }
         
         return baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
     }
     
-    private Collection<MarkDTO> convertToMarkDTOs(Iterable<Mark> marks) {
+    /**
+     * Also finds the last position of the marks, if set by pinging them
+     */
+    private Collection<MarkDTO> convertToMarkDTOs(RaceLog raceLog, Iterable<Mark> marks) {
         List<MarkDTO> dtos = new ArrayList<MarkDTO>();
         for (Mark mark : marks) {
-            dtos.add(convertToMarkDTO(mark, null));
+            DynamicGPSFixTrackImpl<Mark> track = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
+            DeviceMappingEvent<Mark> lastPingMappingEvent = new LastPingMappingEventFinder<Mark>(raceLog, mark).analyze();
+            if (lastPingMappingEvent != null) {
+                getService().getGPSFixStore().loadMarkTrack(track, DeviceMappingImpl.convertToDeviceMapping(lastPingMappingEvent));
+            }
+            Position lastPos = track.getLastRawFix() == null ? null : track.getLastRawFix().getPosition();
+            dtos.add(convertToMarkDTO(mark, lastPos));
         }
         return dtos;
     }
     
     @Override
     public void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
-        Mark mark = convertToMark(markDTO);
+        Mark mark = convertToMark(markDTO, false);
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
@@ -3999,7 +4011,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Collection<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Collection<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
-        return convertToMarkDTOs(marks);
+        return convertToMarkDTOs(raceLog, marks);
     }
     
     @Override
@@ -4054,5 +4066,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         return convertToRaceCourseDTO(lastPublishedCourse);
+    }
+    
+    private Position convertToPosition(PositionDTO dto) {
+        return new DegreePosition(dto.latDeg, dto.lngDeg);
+    }
+    
+    @Override
+    public void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
+            MarkDTO markDTO, PositionDTO positionDTO) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        
+        Mark mark = convertToMark(markDTO, true);
+        
+        TimePoint time = MillisecondsTimePoint.now();
+        
+        Position position = convertToPosition(positionDTO);
+        GPSFix fix = new GPSFixImpl(position, time);
+        
+        DeviceIdentifier device = new PingDeviceIdentifierImpl();
+        
+        RaceLogEvent mapping = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time,
+                getService().getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
+        
+        raceLog.add(mapping);
+        
+        getService().getGPSFixStore().storeFix(device, fix);
     }
 }

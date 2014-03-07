@@ -156,6 +156,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEventRestoreFactory raceLogEventFactory;
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -167,6 +168,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     public DomainObjectFactoryImpl(DB db, DomainFactory baseDomainFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         super();
+        this.serviceFinderFactory = serviceFinderFactory;
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         } else {
@@ -924,7 +926,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                    new MongoObjectFactoryImpl(database), 
+                    new MongoObjectFactoryImpl(database, serviceFinderFactory), 
                     this);
             
             Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
@@ -1087,7 +1089,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             List<RaceLogEvent> eventsToMigrate = loadRaceLogEvents(result, query);
             if (!eventsToMigrate.isEmpty()) {
                 // ... migrate them...
-                MongoRaceLogStoreVisitor storeVisitor = new MongoRaceLogStoreVisitor(identifier, new MongoObjectFactoryImpl(database));
+                MongoRaceLogStoreVisitor storeVisitor = new MongoRaceLogStoreVisitor(identifier, new MongoObjectFactoryImpl(database, serviceFinderFactory));
                 for (RaceLogEvent event : eventsToMigrate) {
                     event.accept(storeVisitor);
                 }

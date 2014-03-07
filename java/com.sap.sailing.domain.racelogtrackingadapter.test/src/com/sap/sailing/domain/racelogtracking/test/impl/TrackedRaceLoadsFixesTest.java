@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test.impl;
+package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.test.AbstractGPSFixStoreTest;
+import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;

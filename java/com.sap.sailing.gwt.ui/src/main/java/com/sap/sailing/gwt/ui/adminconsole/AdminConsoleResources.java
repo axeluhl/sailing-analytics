@@ -79,4 +79,7 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/map_devices.png")
     ImageResource mapDevices();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/ping.png")
+    ImageResource ping();
 }

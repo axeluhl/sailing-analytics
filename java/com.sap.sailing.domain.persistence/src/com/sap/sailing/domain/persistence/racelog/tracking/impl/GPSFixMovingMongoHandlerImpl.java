@@ -5,6 +5,8 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
@@ -16,9 +18,9 @@ public class GPSFixMovingMongoHandlerImpl implements GPSFixMongoHandler {
     MongoObjectFactoryImpl mof;
     DomainObjectFactoryImpl dof;
 
-    public GPSFixMovingMongoHandlerImpl(MongoObjectFactoryImpl mof, DomainObjectFactoryImpl dof) {
-        this.mof = mof;
-        this.dof = dof;
+    public GPSFixMovingMongoHandlerImpl(MongoObjectFactory mof, DomainObjectFactory dof) {
+        this.mof = (MongoObjectFactoryImpl) mof;
+        this.dof = (DomainObjectFactoryImpl) dof;
     }
 
     @Override

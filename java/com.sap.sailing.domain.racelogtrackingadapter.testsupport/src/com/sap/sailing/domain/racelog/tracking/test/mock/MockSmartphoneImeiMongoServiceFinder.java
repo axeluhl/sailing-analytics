@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.tracking.test.mock;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.SmartphoneImeiMongoHandlerImpl;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiMongoHandlerImpl;
 
 /**
  * A simplified implementation of the {@link TypeBasedServiceFinder} interface that, when the device type

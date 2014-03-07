@@ -1,8 +1,8 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 
 public enum RaceLogTrackingAdapterFactoryImpl implements RaceLogTrackingAdapterFactory {
     INSTANCE;

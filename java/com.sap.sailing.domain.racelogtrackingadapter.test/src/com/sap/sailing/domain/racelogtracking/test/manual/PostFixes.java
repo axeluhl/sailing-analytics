@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test.manual;
+package com.sap.sailing.domain.racelogtracking.test.manual;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.test.AbstractJsonOverHttpTest;
+import com.sap.sailing.domain.racelogtracking.test.AbstractJsonOverHttpTest;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;

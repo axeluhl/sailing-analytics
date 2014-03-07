@@ -19,15 +19,22 @@ public abstract class RaceLogTrackingDialog extends DialogBox {
     protected final String raceColumnName;
     protected final String fleetName;
     protected Button saveButton;
-        
+    protected final boolean editable;
+      
     public RaceLogTrackingDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, String leaderboardName, String raceColumnName, String fleetName) {
+        this(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, true);
+    }
+    
+    public RaceLogTrackingDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
+            ErrorReporter errorReporter, String leaderboardName, String raceColumnName, String fleetName, boolean editable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
+        this.editable = editable;
         
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -13,8 +13,9 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;

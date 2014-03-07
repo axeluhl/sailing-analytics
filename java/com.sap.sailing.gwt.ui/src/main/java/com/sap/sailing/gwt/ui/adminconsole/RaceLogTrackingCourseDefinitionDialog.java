@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -59,6 +61,41 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
                 }
             });
             courseActionsPanel.insert(cancel, courseActionsPanel.getWidgetIndex(RaceLogCourseManagementWidget.this.saveButton));
+            
+            ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn =
+                    new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
+                    new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
+            actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
+                @Override
+                public void update(int index, final MarkDTO markDTO, String value) {
+                    if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
+                        new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()),
+                                stringMessages, new DialogCallback<PositionDTO>() {
+
+                            @Override
+                            public void ok(PositionDTO position) {
+                                sailingService.pingMarkViaRaceLogTracking(leaderboardName, raceColumnName, fleetName,
+                                        markDTO, position, new AsyncCallback<Void>() {
+                                            
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                refresh();
+                                            }
+                                            
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError("Could not ping mark: " + caught.getMessage());
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void cancel() {}
+                        }).show();
+                    }
+                }
+            });
+            marksTable.addColumn(actionColumn);
         }
 
         @Override

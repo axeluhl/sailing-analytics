@@ -1,10 +1,9 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking;
 
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.racelog.tracking.PingDeviceIdentifier;
 
 public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     private static final long serialVersionUID = -4049961972156611640L;
@@ -40,5 +39,13 @@ public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     @Override
     public String getStringRepresentation() {
         return id.toString();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PingDeviceIdentifier) {
+            return id.equals(((PingDeviceIdentifier) obj).getId());
+        }
+        return false;
     }
 }

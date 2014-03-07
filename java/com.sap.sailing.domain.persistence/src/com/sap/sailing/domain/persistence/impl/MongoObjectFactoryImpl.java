@@ -1143,8 +1143,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public static DBObject storeDeviceId(
     		TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder, DeviceIdentifier device)
-    				throws TransformationException, NoCorrespondingServiceRegisteredException{
-    	Object deviceTypeId = deviceIdentifierServiceFinder.findService(device.getIdentifierType()).transformForth(device);
+    				throws TransformationException, NoCorrespondingServiceRegisteredException {
+        String type = device.getIdentifierType();
+        DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
+    	Object deviceTypeId = handler.transformForth(device);
     	return new BasicDBObjectBuilder()
     			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
     			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();

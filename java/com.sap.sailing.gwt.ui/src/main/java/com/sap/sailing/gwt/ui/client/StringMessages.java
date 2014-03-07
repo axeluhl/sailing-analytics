@@ -978,4 +978,6 @@ public interface StringMessages extends Messages {
     @Key("remove_what")
     String remove(String what);
     String pleaseEnterA(String what);
+    String pingPosition(String whose);
+    String pleaseEnterAValidValueFor(String what, String validTemplate);
 }

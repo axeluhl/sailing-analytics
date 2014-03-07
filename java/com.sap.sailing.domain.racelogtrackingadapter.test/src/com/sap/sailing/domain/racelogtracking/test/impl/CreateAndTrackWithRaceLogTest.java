@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test.impl;
+package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sailing.domain.common.impl.Util.size;
 import static junit.framework.Assert.assertNotNull;
@@ -45,10 +45,10 @@ import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;

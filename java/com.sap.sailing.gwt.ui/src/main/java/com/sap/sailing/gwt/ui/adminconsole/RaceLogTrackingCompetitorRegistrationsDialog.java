@@ -17,13 +17,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackingDialog {
     private CompetitorTableWrapper competitorTable;
     private final boolean filterByLeaderBoardInitially = false;
-    private final boolean editable;
 
     public RaceLogTrackingCompetitorRegistrationsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName,
             final String raceColumnName, final String fleetName, boolean editable) {
-        super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName);
-        this.editable = editable;
+        super(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, editable);
 
         competitorTable.refreshCompetitorList(filterByLeaderBoardInitially ? leaderboardName : null,
                 true, new Callback<Iterable<CompetitorDTO>, Throwable>() {

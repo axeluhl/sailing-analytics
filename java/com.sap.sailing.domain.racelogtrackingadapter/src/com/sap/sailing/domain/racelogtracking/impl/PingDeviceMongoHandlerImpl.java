@@ -1,11 +1,12 @@
-package com.sap.sailing.domain.racelog.tracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.PingDeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 
 public class PingDeviceMongoHandlerImpl implements DeviceIdentifierMongoHandler {
     private PingDeviceIdentifier castIdentifier(DeviceIdentifier identifier) throws TransformationException {

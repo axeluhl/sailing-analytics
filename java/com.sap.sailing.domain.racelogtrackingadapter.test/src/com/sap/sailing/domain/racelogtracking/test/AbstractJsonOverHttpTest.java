@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test;
+package com.sap.sailing.domain.racelogtracking.test;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
