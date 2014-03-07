@@ -57,9 +57,9 @@ public class MarkVectorGraphics {
         switch(type) {
             case BUOY:
                 if(shape != null) {
-                    if("Cylinder".equalsIgnoreCase(shape) && pattern != null && "Checkered".equalsIgnoreCase(pattern)) {
+                    if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
                         drawBuoyWithFinishFlag(ctx, isSelected, color);
-                    } else if ("Conical".equalsIgnoreCase(shape)) {
+                    } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
                         drawConicalBuoy(ctx, isSelected, color);
                     } else {
                         drawSimpleBuoy(ctx, isSelected, color);
