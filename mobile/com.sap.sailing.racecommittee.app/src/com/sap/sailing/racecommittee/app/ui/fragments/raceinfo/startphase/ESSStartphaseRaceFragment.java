@@ -27,7 +27,6 @@ public class ESSStartphaseRaceFragment extends BaseStartphaseRaceFragment<ESSRac
                 getRaceState().forceNewStartTime(now, now.plus(4*60*1000));
             }
         });
-
     }
         
 }
