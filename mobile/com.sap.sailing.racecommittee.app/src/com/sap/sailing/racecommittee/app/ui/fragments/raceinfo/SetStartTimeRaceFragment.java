@@ -41,6 +41,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.Prere
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseGateLaunchTimesDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChoosePathFinderDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.prerequisite.RaceChooseStartModeDialog;
+import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 
@@ -61,6 +62,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
     protected Button btSetDate;
     protected Button btSetTime;
     protected Button btPostpone;
+    protected Button btSetCourse;
     protected TextView textInfoText;
 
     protected DatePickerFragment datePicker;
@@ -89,6 +91,7 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         btSetDate = (Button) getView().findViewById(R.id.race_reset_time_btn_date);
         btSetTime = (Button) getView().findViewById(R.id.race_reset_time_btn_time);
         btPostpone = (Button) getView().findViewById(R.id.race_reset_time_btn_postpone);
+        btSetCourse = (Button) getView().findViewById(R.id.race_set_course);
 
         btSetDate.setOnClickListener(new OnClickListener() {
             @Override
@@ -102,6 +105,13 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             @Override
             public void onClick(View view) {
                 setStartTime();
+            }
+        });
+        
+        btSetCourse.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View paramView) {
+                showCourseDesignDialog();
             }
         });
 
@@ -143,6 +153,12 @@ public class SetStartTimeRaceFragment extends RaceFragment {
         datePicker.setCurrentYear(today.get(Calendar.YEAR));
         datePicker.setCurrentMonth(today.get(Calendar.MONTH));
         datePicker.setCurrentDay(today.get(Calendar.DAY_OF_MONTH));
+    }
+
+    private void showCourseDesignDialog() {
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "courseDesignDialogFragment");
     }
 
     private void setupTimePicker() {

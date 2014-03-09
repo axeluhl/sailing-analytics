@@ -176,7 +176,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private TimePoint loadTimePoint(DBObject object, FieldNames field) {
         TimePoint result = null;
         Number timePointAsNumber = (Number) object.get(field.name());
-        if(timePointAsNumber != null) {
+        if (timePointAsNumber != null) {
             result = new MillisecondsTimePoint(timePointAsNumber.longValue());
         }
         return result;

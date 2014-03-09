@@ -16,6 +16,8 @@ import com.sap.sailing.domain.racelog.state.racingprocedure.impl.BaseRacingProce
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
@@ -82,6 +84,12 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         return getRaceState().getTypedRacingProcedure();
     }
     
+    protected void showCourseDesignDialog() {
+        RaceDialogFragment fragment = CourseDesignerChooser.choose(preferences, getRace());
+        fragment.setArguments(getRecentArguments());
+        fragment.show(getFragmentManager(), "courseDesignDialogFragment");
+    }
+
     protected abstract void setupUi();
 
     
