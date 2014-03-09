@@ -30,11 +30,11 @@ import com.sap.sse.datamining.test.function.test_classes.ExtendingInterface;
 import com.sap.sse.datamining.test.function.test_classes.ExternalLibraryClass;
 import com.sap.sse.datamining.test.function.test_classes.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
-import com.sap.sse.datamining.test.util.StringMessagesForTests;
+import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestFunctionProvider {
     
-    private static final DataMiningStringMessages stringMessages = new StringMessagesForTests();
+    private static final DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
     private FunctionRegistry functionRegistry;
     

@@ -17,7 +17,7 @@ import com.sap.sse.datamining.components.GrouperType;
 public class SimpleQueryDefinition implements QueryDefinition {
     private static final long serialVersionUID = 3476324726640558091L;
 
-    private String localeName;
+    private LocaleInfo localeInfo;
     
     private GrouperType grouperType;
     private StatisticType statisticType;
@@ -34,7 +34,7 @@ public class SimpleQueryDefinition implements QueryDefinition {
     SimpleQueryDefinition() { }
 
     public SimpleQueryDefinition(LocaleInfo localeInfo, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
-        this.localeName = localeInfo.getLocaleName();
+        this.localeInfo = localeInfo;
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
@@ -45,8 +45,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     }
     
     @Override
-    public String getLocaleName() {
-        return localeName;
+    public LocaleInfo getLocaleInfo() {
+        return localeInfo;
     }
 
     @Override

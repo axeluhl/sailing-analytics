@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.sap.sse.datamining.shared.Unit;
+
 /**
  * Methods marked with this annotation will be used as dimensions for the data mining framework. The method will be called,
  * if the dimension value of a data element is requested.<br />
@@ -22,16 +24,16 @@ import java.lang.annotation.Target;
  *      <li>classes that implement <code>equals()</code>, <code>hashCode()</code> and <code>toString()</code>.
  * </ul>
  * Otherwise the grouping could become incorrect and the result presentation will be unreadable.
- * 
- * 
- * @author Lennart Hensler (D054527)
- *
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Dimension {
     
-    public String value();
+    public String messageKey();
+
+    public Unit resultUnit() default Unit.None;
+    
+    public int resultDecimals() default 0;
 
 }

@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sse.datamining.components.AggregatorType;
 import com.sap.sse.datamining.components.GrouperType;
 
 public interface QueryDefinition extends Serializable {
 
-    public String getLocaleName();
+    public LocaleInfo getLocaleInfo();
 
     public GrouperType getGrouperType();
 

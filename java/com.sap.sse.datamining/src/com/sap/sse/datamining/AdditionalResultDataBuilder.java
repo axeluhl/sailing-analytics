@@ -2,9 +2,9 @@ package com.sap.sse.datamining;
 
 import java.util.Locale;
 
+import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Unit;
 
 /**
  * These builders are used to collect the additional result data from different sources (e.g. the Processors)
@@ -18,13 +18,8 @@ public interface AdditionalResultDataBuilder {
 
     public void setFilteredDataAmount(int filteredDataAmount);
 
-    public void setExtractedStatisticNameMessageKey(String extractedStatisticNameMessageKey);
+    public void setExtractionFunction(Function<?> extractionFunction);
 
     public void setAggregationNameMessageKey(String aggregationNameMessageKey);
-
-    public void setUnit(Unit unit);
-
-    public void setValueDecimals(int valueDecimals);
-
 
 }

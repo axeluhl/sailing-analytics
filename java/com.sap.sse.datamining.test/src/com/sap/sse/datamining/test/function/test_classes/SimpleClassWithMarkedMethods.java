@@ -10,18 +10,18 @@ import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 
 public class SimpleClassWithMarkedMethods {
     
-    @Dimension("dimension")
+    @Dimension(messageKey="dimension")
     public String dimension() {
         return "Method marked as dimension";
     }
     
     //Methods without a return value can't be dimensions
-    @Dimension("illegalDimension")
+    @Dimension(messageKey="illegalDimension")
     public void illegalDimension() {
         
     }
     
-    @SideEffectFreeValue("value")
+    @SideEffectFreeValue(messageKey="value")
     public int sideEffectFreeValue() {
         return 1;
     }

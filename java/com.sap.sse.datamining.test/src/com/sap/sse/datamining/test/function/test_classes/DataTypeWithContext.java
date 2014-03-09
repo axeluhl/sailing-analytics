@@ -9,13 +9,13 @@ import com.sap.sse.datamining.annotations.Dimension;
 
 public interface DataTypeWithContext extends DataTypeInterface {
     
-    @Dimension("regattaName")
+    @Dimension(messageKey="regattaName")
     public String getRegattaName();
     
-    @Dimension("raceName")
+    @Dimension(messageKey="raceName")
     public String getRaceName();
     
-    @Dimension("legNumber")
+    @Dimension(messageKey="legNumber")
     public int getLegNumber();
 
 }

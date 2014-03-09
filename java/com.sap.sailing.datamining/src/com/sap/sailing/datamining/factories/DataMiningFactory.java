@@ -1,8 +1,11 @@
 package com.sap.sailing.datamining.factories;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.Query;
@@ -20,12 +23,19 @@ import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public final class DataMiningFactory {
     
-    private static final DataMiningStringMessages stringMessages = DataMiningStringMessages.Util.getInstanceFor(Locale.ENGLISH);
+    private static final DataMiningStringMessages stringMessages = DataMiningStringMessages.Util.getDefaultStringMessages();
+    
+    private static final String DEFAULT_LOCALE_NAME = "default";
+    private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>(); {
+        supportedLocalesMappedByLocaleInfo.put(DEFAULT_LOCALE_NAME, Locale.ENGLISH);
+        supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
+        supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
+    }
     
     private DataMiningFactory() { }
 
     public static <DataType, AggregatedType extends Number> Query<AggregatedType> createQuery(QueryDefinition queryDefinition, RacingEventService racingService) {
-        Locale locale = stringMessages.getLocaleFrom(queryDefinition.getLocaleName());
+        Locale locale = getLocaleFrom(queryDefinition.getLocaleInfo());
         
         ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(queryDefinition.getDataType(), racingService, getExecutor());
         
@@ -37,6 +47,11 @@ public final class DataMiningFactory {
                                                                                                            queryDefinition.getAggregatorType(), getExecutor());
         
         return new QueryImpl<DataType, AggregatedType, AggregatedType>(stringMessages, locale, retriever, filter, grouper, extractor, aggregator);
+    }
+
+    private static Locale getLocaleFrom(LocaleInfo localeInfo) {
+        Locale locale = supportedLocalesMappedByLocaleInfo.get(localeInfo.getLocaleName());
+        return locale != null ? locale : supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
     }
 
     private static <DataType> ParallelFilter<DataType> createFilter(QueryDefinition queryDefinition) {

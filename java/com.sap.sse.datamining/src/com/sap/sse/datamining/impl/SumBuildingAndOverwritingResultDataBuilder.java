@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl;
 import java.util.Locale;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.Message;
@@ -21,10 +22,10 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
 
     private int retrievedDataAmount;
     private int filteredDataAmount;
-    private String extractedStatisticNameMessageKey;
+    private Function<?> extractionFunction;
     private String aggregationNameMessageKey;
     private Unit unit;
-    private int valueDecimals;
+    private int resultDecimals;
     
     /**
      * Creates a new builder with standard values for the additional data.
@@ -33,16 +34,20 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
         retrievedDataAmount = 0;
         filteredDataAmount = 0;
         unit = Unit.None;
-        valueDecimals = 0;
+        resultDecimals = 0;
     }
 
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, DataMiningStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, filteredDataAmount, buildResultSignifier(stringMessages, locale), unit, valueDecimals, calculationTimeInNanos);
+        return new AdditionalResultDataImpl(retrievedDataAmount, filteredDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
     }
 
     private String buildResultSignifier(DataMiningStringMessages stringMessages, Locale locale) {
-        String extractedStatisticName = stringMessages.get(locale, extractedStatisticNameMessageKey);
+        if (extractionFunction == null || aggregationNameMessageKey == null) {
+            return "";
+        }
+        
+        String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
         return stringMessages.get(locale, Message.ResultSignifier, extractedStatisticName, aggregationName);
     }
@@ -58,23 +63,15 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
     }
 
     @Override
-    public void setExtractedStatisticNameMessageKey(String extractedStatisticNameMessageKey) {
-        this.extractedStatisticNameMessageKey = extractedStatisticNameMessageKey;
+    public void setExtractionFunction(Function<?> extractionFunction) {
+        this.extractionFunction = extractionFunction;
+        unit = extractionFunction.getResultUnit();
+        resultDecimals = extractionFunction.getResultDecimals();
     }
 
     @Override
     public void setAggregationNameMessageKey(String aggregationNameMessageKey) {
         this.aggregationNameMessageKey = aggregationNameMessageKey;
-    }
-
-    @Override
-    public void setUnit(Unit unit) {
-        this.unit = unit;
-    }
-
-    @Override
-    public void setValueDecimals(int valueDecimals) {
-        this.valueDecimals = valueDecimals;
     }
 
 }

@@ -4,7 +4,7 @@ import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 
 public interface ExtendingInterface {
 
-    @SideEffectFreeValue("raceNameLength")
+    @SideEffectFreeValue(messageKey="raceNameLength")
     public int getRaceNameLength();
     
 }

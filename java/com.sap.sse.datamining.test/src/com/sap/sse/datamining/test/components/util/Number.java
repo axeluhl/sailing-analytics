@@ -19,12 +19,12 @@ public class Number {
         return value;
     }
     
-    @Dimension("length")
+    @Dimension(messageKey="length")
     public int getLength() {
         return String.valueOf(value).length();
     }
     
-    @Dimension("crossSum")
+    @Dimension(messageKey="crossSum")
     public int getCrossSum() {
         int crossSum = 0;
         int value = this.value;

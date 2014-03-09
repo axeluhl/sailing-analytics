@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.SideEffectFreeValue;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
+import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTOImpl;
 
@@ -19,6 +20,8 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     private Method method;
     
     private String messageKey;
+    private int resultDecimals;
+    private Unit resultUnit;
     
     /**
      * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
@@ -29,7 +32,7 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         checkThatReturnTypesMatch(method, returnType);
         
         this.method = method;
-        initializeMessageKey();
+        initializeAdditionalData();
     }
 
     private static boolean isMethodADimension(Method method) {
@@ -43,17 +46,17 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         }
     }
 
-    private void initializeMessageKey() {
+    private void initializeAdditionalData() {
         if (method.getAnnotation(Dimension.class) != null) {
-            setMessageKey(method.getAnnotation(Dimension.class).value());
+            messageKey = method.getAnnotation(Dimension.class).messageKey();
+            resultUnit = method.getAnnotation(Dimension.class).resultUnit();
+            resultDecimals = method.getAnnotation(Dimension.class).resultDecimals();
         }
         if (method.getAnnotation(SideEffectFreeValue.class) != null) {
-            setMessageKey(method.getAnnotation(SideEffectFreeValue.class).value());
+            messageKey = method.getAnnotation(SideEffectFreeValue.class).messageKey();
+            resultUnit = method.getAnnotation(SideEffectFreeValue.class).resultUnit();
+            resultDecimals = method.getAnnotation(SideEffectFreeValue.class).resultDecimals();
         }
-    }
-
-    private void setMessageKey(String messageKey) {
-        this.messageKey = messageKey;
     }
 
     @Override
@@ -83,20 +86,25 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
+    public Unit getResultUnit() {
+        return resultUnit;
+    }
+
+    @Override
+    public int getResultDecimals() {
+        return resultDecimals;
+    }
+
+    @Override
     public String getLocalizedName(Locale locale, DataMiningStringMessages stringMessages) {
-        if (getMessageKey() == null || getMessageKey().isEmpty()) {
+        if (messageKey == null || messageKey.isEmpty()) {
             return getMethodName();
         }
-        return stringMessages.get(locale, getMessageKey());
+        return stringMessages.get(locale, messageKey);
     }
     
     private String getMethodName() {
         return method.getName();
-    }
-
-    @Override
-    public String getMessageKey() {
-        return messageKey;
     }
     
     @Override

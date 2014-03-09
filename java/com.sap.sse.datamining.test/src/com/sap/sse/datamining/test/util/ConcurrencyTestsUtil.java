@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.sap.sse.datamining.components.Processor;
 
-public class ConcurrencyTestsUtil {
+public class ConcurrencyTestsUtil extends TestsUtil {
 
     private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
     private static ThreadPoolExecutor executor = createExecutor();

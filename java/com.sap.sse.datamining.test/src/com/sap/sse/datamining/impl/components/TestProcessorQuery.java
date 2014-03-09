@@ -36,11 +36,11 @@ import com.sap.sse.datamining.test.components.util.BlockingProcessor;
 import com.sap.sse.datamining.test.components.util.Number;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
-import com.sap.sse.datamining.test.util.StringMessagesForTests;
+import com.sap.sse.datamining.test.util.TestsUtil;
 
 public class TestProcessorQuery {
     
-    private final static DataMiningStringMessages stringMessages = new StringMessagesForTests();
+    private final static DataMiningStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
@@ -129,14 +129,12 @@ public class TestProcessorQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 2, "Cross sum (Sum)", Unit.None, 0, 0));
+        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 2, "Cross Sum (Sum)", Unit.None, 0, 0));
         return result;
     }
 
     private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
-//        assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
-        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
         assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));

@@ -34,7 +34,7 @@ public class ParallelGroupedElementsValueExtractionProcessor<ElementType, Functi
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
-        additionalDataBuilder.setExtractedStatisticNameMessageKey(extractionFunction.getMessageKey());
+        additionalDataBuilder.setExtractionFunction(extractionFunction);
     }
 
 }
