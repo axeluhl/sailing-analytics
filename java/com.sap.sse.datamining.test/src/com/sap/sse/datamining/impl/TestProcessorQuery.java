@@ -21,11 +21,12 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.ProcessorQuery;
+import com.sap.sse.datamining.impl.components.AbstractFilteringRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.AbstractSimpleParallelProcessor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
@@ -93,7 +94,7 @@ public class TestProcessorQuery {
     }
 
     /**
-     * Creates a query, that takes a Collection of Numbers, groups them by
+     * Creates a query, that takes a Collection of Numbers, filters all numbers < 10, groups them by
      * their length, extracts the cross sum and aggregates these as sum.
      */
     private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
@@ -101,45 +102,60 @@ public class TestProcessorQuery {
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(executor,
                 dataSource, stringMessages, Locale.ENGLISH);
         
-        Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = asCollection(query.getResultReceiver());
+        Collection<Processor<Map<GroupKey, Double>>> aggregationResultReceivers = Arrays.asList(query.getResultReceiver());
         Processor<GroupedDataEntry<Double>> sumAggregator =
                 new ParallelGroupedDoubleDataSumAggregationProcessor(executor, aggregationResultReceivers);
         
-        Collection<Processor<GroupedDataEntry<Double>>> extractionResultReceivers = asCollection(sumAggregator);
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
         Function<Double> getCrossSumFunction = FunctionFactory.createMethodWrappingFunction(getCrossSumMethod);
         Processor<GroupedDataEntry<Number>> crossSumExtractor = new ParallelGroupedElementsValueExtractionProcessor<Number, Double>(
-                executor, extractionResultReceivers, getCrossSumFunction);
-        
-        Collection<Processor<GroupedDataEntry<Number>>> groupingResultReceivers = asCollection(crossSumExtractor);
+                executor, Arrays.asList(sumAggregator), getCrossSumFunction);
+
         Collection<Function<?>> dimensions = new ArrayList<>();
         Function<Integer> getLengthFunction = FunctionFactory.createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
         dimensions.add(getLengthFunction);
-        Processor<Iterable<Number>> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, groupingResultReceivers, dimensions);
+        Processor<Iterable<Number>> lengthGrouper = new ParallelMultiDimensionalGroupingProcessor<>(executor, Arrays.asList(crossSumExtractor), dimensions);
         
-        query.setFirstProcessor(lengthGrouper);
+        FilterCriteria<Number> retrievalFilterCriteria = new FilterCriteria<Number>() {
+            @Override
+            public boolean matches(Number element) {
+                return element.getValue() >= 10;
+            }
+        };
+        Processor<Iterable<Number>> filteringRetrievalProcessor = new AbstractFilteringRetrievalProcessor<Iterable<Number>, Number, Iterable<Number>>(ConcurrencyTestsUtil.getExecutor(), Arrays.asList(lengthGrouper), retrievalFilterCriteria) {
+            @Override
+            protected Iterable<Number> retrieveData(Iterable<Number> element) {
+                return element;
+            }
+            @Override
+            protected Callable<Iterable<Number>> createInstruction(final Number filteredPartialElement) {
+                return new Callable<Iterable<Number>>() {
+                    @Override
+                    public Iterable<Number> call() throws Exception {
+                        return Arrays.asList(filteredPartialElement);
+                    }
+                };
+            }
+        };
+        
+        query.setFirstProcessor(filteringRetrievalProcessor);
         return query;
-    }
-
-    private <T> Collection<T> asCollection(T value) {
-        Collection<T> collection = new ArrayList<>();
-        collection.add(value);
-        return collection;
     }
 
     private QueryResult<Double> buildExpectedResult(Collection<Number> dataSource) {
         Map<GroupKey, Double> results = new HashMap<>();
-        results.put(new GenericGroupKey<Integer>(1), 8.0);
         results.put(new GenericGroupKey<Integer>(2), 5.0);
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 2, "Cross Sum (Sum)", Unit.None, 0, 0));
+        QueryResultImpl<Double> result = new QueryResultImpl<>(results, new AdditionalResultDataImpl(dataSource.size(), 18, "Cross Sum (Sum)", Unit.None, 0, 0));
         return result;
     }
 
     private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
+        assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
+        assertThat("Filtered data amount isn't correct.", result.getFilteredDataAmount(), is(expectedResult.getFilteredDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
         assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
