@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.Processor;
 
@@ -12,6 +13,9 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
              extends AbstractPartitioningParallelProcessor<InputType, WorkingType, ResultType> {
 
     private final FilterCriteria<WorkingType> criteria;
+    
+    private int retrievedDataAmount;
+    private int filteredDataAmount;
 
     public AbstractFilteringRetrievalProcessor(ExecutorService executor, Collection<Processor<ResultType>> resultReceivers, FilterCriteria<WorkingType> criteria) {
         super(executor, resultReceivers);
@@ -24,10 +28,12 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
         
         Iterable<WorkingType> retrievedData = retrieveData(element);
         for (WorkingType retrievedDataEntry : retrievedData) {
+            retrievedDataAmount++;
             if (criteria.matches(retrievedDataEntry)) {
                 filteredData.add(retrievedDataEntry);
             }
         }
+        filteredDataAmount = filteredData.size();
         return filteredData;
     }
 
@@ -37,5 +43,11 @@ public abstract class AbstractFilteringRetrievalProcessor<InputType, WorkingType
     //This makes the implementation of sub classes more fluent.
     @Override
     protected abstract Callable<ResultType> createInstruction(WorkingType filteredPartialElement);
+    
+    @Override
+    protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+        additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount);
+        additionalDataBuilder.setFilteredDataAmount(filteredDataAmount);
+    }
 
 }

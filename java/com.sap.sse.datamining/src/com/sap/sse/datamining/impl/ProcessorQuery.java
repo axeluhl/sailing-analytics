@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.components;
+package com.sap.sse.datamining.impl;
 
 import java.util.Locale;
 import java.util.Map;
@@ -14,7 +14,7 @@ import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
-import com.sap.sse.datamining.impl.SumBuildingAndOverwritingResultDataBuilder;
+import com.sap.sse.datamining.impl.components.SumBuildingAndOverwritingResultDataBuilder;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.QueryResultImpl;

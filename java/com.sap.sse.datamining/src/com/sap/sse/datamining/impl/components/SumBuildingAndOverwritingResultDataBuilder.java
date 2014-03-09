@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl;
+package com.sap.sse.datamining.impl.components;
 
 import java.util.Locale;
 
@@ -72,6 +72,30 @@ public class SumBuildingAndOverwritingResultDataBuilder implements AdditionalRes
     @Override
     public void setAggregationNameMessageKey(String aggregationNameMessageKey) {
         this.aggregationNameMessageKey = aggregationNameMessageKey;
+    }
+
+    protected int getRetrievedDataAmount() {
+        return retrievedDataAmount;
+    }
+
+    protected int getFilteredDataAmount() {
+        return filteredDataAmount;
+    }
+
+    protected Function<?> getExtractionFunction() {
+        return extractionFunction;
+    }
+
+    protected String getAggregationNameMessageKey() {
+        return aggregationNameMessageKey;
+    }
+
+    protected Unit getUnit() {
+        return unit;
+    }
+
+    protected int getResultDecimals() {
+        return resultDecimals;
     }
 
 }
