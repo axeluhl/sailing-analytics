@@ -5,40 +5,32 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class RecordRaceLogEventOnRegatta extends AbstractRecordRaceLogEvent {
+public class RecordRaceLogEventOnRegatta extends AbstractRaceLogOnRegattaOperation {
     private static final long serialVersionUID = 8092146834280389864L;
-
-    private final String regattaName;
     
     public RecordRaceLogEventOnRegatta(String regattaName, String raceColumnName, 
             String fleetName, RaceLogEvent event) {
-        super(raceColumnName, fleetName, event);
-        this.regattaName = regattaName;
+        super(regattaName, raceColumnName, fleetName, event);
     }
 
     @Override
-    public RaceLogEvent internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.getRegattaByName(regattaName);
+    protected RaceColumn getRaceColumn(RacingEventService toState) {
+        Regatta regatta = toState.getRegattaByName(getRegattaName());
         RaceColumn raceColumn = null;
         for (Series series : regatta.getSeries()) {
-            raceColumn = series.getRaceColumnByName(raceColumnName);
+            raceColumn = series.getRaceColumnByName(getRaceColumnName());
             if (raceColumn != null) {
                 break;
             }
         }
-        return addEventTo(raceColumn);
+        return raceColumn;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
-        return null;
-    }
-
-    @Override
-    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
-        return null;
+    public RaceLogEvent internalApplyTo(RacingEventService toState) throws Exception {
+        RaceColumn raceColumn = getRaceColumn(toState);
+        return new RaceLogEventRecorder(getFleetName(), getEvent()).addEventTo(raceColumn);
     }
 
 }
