@@ -375,13 +375,13 @@ public class CandidateFinderImpl implements CandidateFinder {
                         if (fixAfter != null) {
                             Double xteAfter = xtesAfter.get(w).get(1);
                             if (xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                                newCandidates.put(Arrays.asList(fix, fixAfter), createCandidate(c, xte, xteAfter, t, tAfter, w, false));
                             }
                         }
                         if (fixBefore != null) {
                             Double xteBefore = xtesBefore.get(w).get(1);
                             if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                                newCandidates.put(Arrays.asList(fixBefore, fix), createCandidate(c, xteBefore, xte, tBefore, t, w, false));
                             }
                         }
                     }
@@ -520,7 +520,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance) {
         Distance legLength = getLegLength(t, w);
         if (legLength != null) {
-            double result = 1 / (10/*Raising this will make is stricter*/* Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
+            double result = 1 / (8/*Raising this will make is stricter*/* Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
             // Auch NormalVerteilung?
             return result;
         }
@@ -638,7 +638,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     b = before.middle(after.reverse());
                 }
             }
-            p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, true);
+            p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
             result.add(new Pair<Position, Bearing>(p, b));
         }
         return result;

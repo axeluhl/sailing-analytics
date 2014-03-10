@@ -60,7 +60,6 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         super();
         className = getClass().getName();
         simpleName = getClass().getSimpleName();
-
     }
 
     private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException {
@@ -252,7 +251,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
         Assert.assertTrue(mistakes == 0);
     }
-
+    
     @AfterClass
     public static void createXML() throws IOException {
         double accuracy = correct / totalPasses;

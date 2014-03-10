@@ -9,7 +9,6 @@ public class CandidateImpl implements Candidate {
     private final TimePoint p;
     private final double distanceBasedProbability;
     private final Integer oneBasedIndexOfWaypoint;
-    // TODO Document what side and direction mean
     // TODO Interface + no side and direction
     private final boolean correctSide;
     private final boolean correctDirection;
