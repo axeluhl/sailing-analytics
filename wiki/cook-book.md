@@ -76,7 +76,7 @@ db.WIND_TRACKS.ensureIndex( { "RACE_ID": 1 , "WIND_SOURCE_NAME" : 1, "WIND_SOURC
 
 #4
 #Restore the documents dumped in step 1
-mongorestore --db winddb --collection WIND_TRACKS mongodump_wind_tracks
+mongorestore mongodump_wind_tracks
 </pre>
 
 
