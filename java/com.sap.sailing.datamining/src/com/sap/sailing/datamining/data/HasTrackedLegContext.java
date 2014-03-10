@@ -8,7 +8,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public interface TrackedLegContext {
+public interface HasTrackedLegContext {
 
     public LeaderboardGroup getLeaderboardGroup();
     public Leaderboard getLeaderboard();

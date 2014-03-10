@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.gps_fix;
 
 import com.sap.sailing.datamining.Clusters.WindStrength;
 import com.sap.sailing.datamining.WindStrengthCluster;
-import com.sap.sailing.datamining.data.GPSFixContext;
+import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.GPSFixWithContext;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
@@ -18,12 +18,12 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 public class GPSFixWithContextImpl extends GPSFixMovingImpl implements GPSFixWithContext {
     private static final long serialVersionUID = -5551381302809417831L;
 
-    private GPSFixContext context;
+    private HasGPSFixContext context;
     private Wind wind;
 
     private boolean windHasBeenInitialized;
 
-    public GPSFixWithContextImpl(GPSFixMoving gpsFix, GPSFixContext context) {
+    public GPSFixWithContextImpl(GPSFixMoving gpsFix, HasGPSFixContext context) {
         super(copyPosition(gpsFix), copyTimePoint(gpsFix), copySpeed(gpsFix));
         this.context = context;
         

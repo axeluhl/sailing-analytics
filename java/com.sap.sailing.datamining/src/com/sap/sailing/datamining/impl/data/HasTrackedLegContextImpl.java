@@ -2,7 +2,7 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
 
-import com.sap.sailing.datamining.data.TrackedLegContext;
+import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.LegType;
@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class TrackedLegContextImpl implements TrackedLegContext {
+public class HasTrackedLegContextImpl implements HasTrackedLegContext {
     
     private LeaderboardGroup leaderboardGroup;
     private Leaderboard leaderboard;
@@ -30,7 +30,7 @@ public class TrackedLegContextImpl implements TrackedLegContext {
     private boolean legTypeHasBeenInitialized;
     private boolean yearHasBeenInitialized;
 
-    public TrackedLegContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet,
+    public HasTrackedLegContextImpl(LeaderboardGroup leaderboardGroup, Leaderboard leaderboard, CourseArea courseArea, Fleet fleet,
                                  TrackedRace trackedRace, TrackedLeg trackedLeg, int legNumber) {
         this.leaderboardGroup = leaderboardGroup;
         this.leaderboard = leaderboard;

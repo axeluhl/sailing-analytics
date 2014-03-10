@@ -3,10 +3,10 @@ package com.sap.sailing.datamining.impl.components;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.data.TrackedLegContext;
-import com.sap.sailing.datamining.data.TrackedLegOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.TrackedLegContextImpl;
-import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorContextImpl;
+import com.sap.sailing.datamining.data.HasTrackedLegContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.datamining.impl.data.HasTrackedLegContextImpl;
+import com.sap.sailing.datamining.impl.data.HasTrackedLegOfCompetitorContextImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -36,8 +36,8 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
         return group;
     }
 
-    private static Collection<Pair<TrackedLeg, TrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
-        Collection<Pair<TrackedLeg, TrackedLegContext>> data = new ArrayList<Pair<TrackedLeg, TrackedLegContext>>();
+    private static Collection<Pair<TrackedLeg, HasTrackedLegContext>> retrieveDataTillTrackedLeg(LeaderboardGroup group) {
+        Collection<Pair<TrackedLeg, HasTrackedLegContext>> data = new ArrayList<Pair<TrackedLeg, HasTrackedLegContext>>();
         for (Leaderboard leaderboard : group.getLeaderboards()) {
             CourseArea courseArea = leaderboard.getDefaultCourseArea();
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -48,9 +48,9 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
                         for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
                             TrackedLeg trackedLeg = trackedRace.getTrackedLeg(leg);
                             if (trackedLeg != null) {
-                                TrackedLegContext dataContext = new TrackedLegContextImpl(group, leaderboard,
+                                HasTrackedLegContext dataContext = new HasTrackedLegContextImpl(group, leaderboard,
                                         courseArea, fleet, trackedRace, trackedLeg, legNumber);
-                                data.add(new Pair<TrackedLeg, TrackedLegContext>(trackedLeg, dataContext));
+                                data.add(new Pair<TrackedLeg, HasTrackedLegContext>(trackedLeg, dataContext));
                                 legNumber++;
                             }
                         }
@@ -61,18 +61,18 @@ public abstract class AbstractLeaderboardGroupDataRetrievalWorker<DataType>
         return data;
     }
 
-    protected static Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> retrieveDataTillTrackedLegOfCompetitor(
+    protected static Collection<Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> retrieveDataTillTrackedLegOfCompetitor(
             LeaderboardGroup group) {
-        Collection<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>> data = new ArrayList<Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>>();
-        Collection<Pair<TrackedLeg, TrackedLegContext>> baseData = retrieveDataTillTrackedLeg(group);
-        for (Pair<TrackedLeg, TrackedLegContext> baseDataEntry : baseData) {
+        Collection<Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>> data = new ArrayList<Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>>();
+        Collection<Pair<TrackedLeg, HasTrackedLegContext>> baseData = retrieveDataTillTrackedLeg(group);
+        for (Pair<TrackedLeg, HasTrackedLegContext> baseDataEntry : baseData) {
             TrackedLeg trackedLeg = baseDataEntry.getA();
-            TrackedLegContext trackedLegContext = baseDataEntry.getB();
+            HasTrackedLegContext trackedLegContext = baseDataEntry.getB();
             for (Competitor competitor : trackedLegContext.getTrackedRace().getRace().getCompetitors()) {
                 TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor);
-                TrackedLegOfCompetitorContext dataContext = new TrackedLegOfCompetitorContextImpl(trackedLegContext,
+                HasTrackedLegOfCompetitorContext dataContext = new HasTrackedLegOfCompetitorContextImpl(trackedLegContext,
                         competitor);
-                data.add(new Pair<TrackedLegOfCompetitor, TrackedLegOfCompetitorContext>(trackedLegOfCompetitor,
+                data.add(new Pair<TrackedLegOfCompetitor, HasTrackedLegOfCompetitorContext>(trackedLegOfCompetitor,
                         dataContext));
             }
         }
