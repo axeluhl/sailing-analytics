@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -2218,10 +2219,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     
     @Override
     public TimePoint setStartTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
-            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime) {
+            int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             RaceState state = RaceStateImpl.create(raceLog, new RaceLogEventAuthorImpl(authorName, authorPriority));
+            state.setRacingProcedure(logicalTimePoint, racingProcedure);
             state.forceNewStartTime(logicalTimePoint, startTime);
             return state.getStartTime();
         }
@@ -2241,11 +2243,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Pair<TimePoint, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+    public Triple<TimePoint, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null) {
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
-            return new Pair<TimePoint, Integer>(state.getStartTime(), raceLog.getCurrentPassId());
+            return new Triple<TimePoint, Integer, RacingProcedureType>(state.getStartTime(), raceLog.getCurrentPassId(), state.getRacingProcedure().getType());
         }
         return null;
     }

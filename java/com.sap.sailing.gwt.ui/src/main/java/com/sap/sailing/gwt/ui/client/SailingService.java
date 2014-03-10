@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -329,8 +330,13 @@ public interface SailingService extends RemoteService {
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
     
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
-            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay);
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
+            throws Exception;
     
+    List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
+            boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, List<String> visibleRegattas)
+            throws Exception;
+
     String getBuildVersion();
 
     void stopReplicatingFromMaster();
@@ -369,9 +375,9 @@ public interface SailingService extends RemoteService {
 
     boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
 
-    boolean setStartTime(RaceLogSetStartTimeDTO dto);
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeDTO dto);
     
-    Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
+    Triple<Date, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName);
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 

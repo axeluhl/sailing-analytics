@@ -152,6 +152,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -712,6 +713,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null) {
             
+            raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
             
             TimePoint startTime = state.getStartTime();
@@ -728,6 +730,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
+            } else {
+                raceInfoDTO.finishedTime = null;
+                if (raceInfoDTO.isTracked) {
+                    TimePoint endOfRace = raceColumn.getTrackedRace(fleet).getEndOfRace();
+                    raceInfoDTO.finishedTime = endOfRace != null ? endOfRace.asDate() : null;
+                }
             }
 
             if (startTime != null) {
@@ -3188,8 +3196,52 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreaIds, 
-            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay) {
+    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
+            boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, final List<String> visibleRegattas)
+            throws NoWindException, InterruptedException, ExecutionException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        return getRaceStateEntriesForLeaderboard(leaderboard, showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, visibleRegattas);
+    }
+
+    private List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(Leaderboard leaderboard,
+            boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, final List<String> visibleRegattas)
+            throws NoWindException, InterruptedException, ExecutionException {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        Calendar dayToCheck = Calendar.getInstance();
+        dayToCheck.setTime(new Date());
+        CourseArea usedCourseArea = leaderboard.getDefaultCourseArea();
+        if (leaderboard != null) {
+            if (visibleRegattas != null && !visibleRegattas.contains(leaderboard.getName())) {
+                return result;
+            }
+            String regattaName = getRegattaNameFromLeaderboard(leaderboard);
+            if (leaderboard instanceof RegattaLeaderboard) {
+                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                    Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                    for (RaceColumn raceColumn : series.getRaceColumns()) {
+                        getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck,
+                                usedCourseArea, leaderboard, regattaName, series.getName(), raceColumn, entriesPerFleet);
+                    }
+                    result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
+                }
+
+            } else {
+                Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, usedCourseArea,
+                            leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, raceColumn, entriesPerFleet);
+                }
+                result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreaIds,
+            List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
+            throws NoWindException, InterruptedException, ExecutionException {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         
         Calendar dayToCheck = Calendar.getInstance();
@@ -3198,33 +3250,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Event event = getService().getEvent(eventId);
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (!visibleCourseAreaIds.contains(courseArea.getId())) {
-                    continue;
-                }
-                for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea().equals(courseArea)) {
-                        if (!visibleRegattas.contains(leaderboard.getName())) {
-                            continue;
-                        }
-                        String regattaName = getRegattaNameFromLeaderboard(leaderboard);
-                        if (leaderboard instanceof RegattaLeaderboard) {
-                            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                            for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
-                                Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
-                                for (RaceColumn raceColumn : series.getRaceColumns()) {
-                                    getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck,
-                                            courseArea, leaderboard, regattaName, series.getName(), raceColumn, entriesPerFleet);
-                                }
-                                result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
-                            }
-
-                        } else {
-                            Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
-                            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                                getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, courseArea,
-                                        leaderboard, regattaName, LeaderboardNameConstants.DEFAULT_SERIES_NAME, raceColumn, entriesPerFleet);
-                            }
-                            result.addAll(getRegattaOverviewEntriesToBeShown(showOnlyCurrentlyRunningRaces, entriesPerFleet));
+                if (visibleCourseAreaIds.contains(courseArea.getId())) {
+                    for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                        final CourseArea leaderboardDefaultCourseArea = leaderboard.getDefaultCourseArea();
+                        if (leaderboardDefaultCourseArea != null && leaderboardDefaultCourseArea.equals(courseArea)) {
+                            result.addAll(getRaceStateEntriesForLeaderboard(leaderboard.getName(),
+                                    showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, visibleRegattas));
                         }
                     }
                 }
@@ -3291,8 +3322,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private RegattaOverviewEntryDTO createRegattaOverviewEntryDTO(CourseArea courseArea, Leaderboard leaderboard,
             String regattaName, String seriesName, RaceColumn raceColumn, Fleet fleet, boolean showOnlyRacesOfSameDay, Calendar dayToCheck) {
         RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
-        entry.courseAreaName = courseArea.getName();
-        entry.courseAreaIdAsString = courseArea.getId().toString();
+        if (courseArea != null) {
+            entry.courseAreaName = courseArea.getName();
+            entry.courseAreaIdAsString = courseArea.getId().toString();
+        } else {
+            entry.courseAreaName = "Default";
+            entry.courseAreaIdAsString = "Default";
+        }
         entry.regattaDisplayName = regattaName;
         entry.regattaName = leaderboard.getName();
         entry.raceInfo = createRaceInfoDTO(seriesName, raceColumn, fleet);
@@ -3752,20 +3788,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public boolean setStartTime(RaceLogSetStartTimeDTO dto) {
+    public boolean setStartTimeAndProcedure(RaceLogSetStartTimeDTO dto) {
         TimePoint newStartTime = getService().setStartTime(dto.leaderboardName, dto.raceColumnName, 
                 dto.fleetName, dto.authorName, dto.authorPriority,
-                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime));
+                dto.passId, new MillisecondsTimePoint(dto.logicalTimePoint), new MillisecondsTimePoint(dto.startTime),
+                dto.racingProcedure);
         return new MillisecondsTimePoint(dto.startTime).equals(newStartTime);
     }
 
     @Override
-    public Pair<Date, Integer> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
-        Pair<TimePoint, Integer> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
+    public Triple<Date, Integer, RacingProcedureType> getStartTime(String leaderboardName, String raceColumnName, String fleetName) {
+        Triple<TimePoint, Integer, RacingProcedureType> result = getService().getStartTime(leaderboardName, raceColumnName, fleetName);
         if (result == null || result.getA() == null) {
             return null;
         }
-        return new Pair<Date, Integer>(result.getA() == null ? null : result.getA().asDate(), result.getB());
+        return new Triple<Date, Integer, RacingProcedureType>(result.getA() == null ? null : result.getA().asDate(), result.getB(), result.getC());
     }
 
     @Override

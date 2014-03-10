@@ -748,7 +748,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeDTO>() {
             @Override
             public void ok(RaceLogSetStartTimeDTO editedObject) {
-                sailingService.setStartTime(editedObject, new AsyncCallback<Boolean>() {
+                sailingService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
