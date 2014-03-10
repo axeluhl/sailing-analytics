@@ -14,6 +14,7 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.gwt.ui.client.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.DataMiningSerializationDummy;
@@ -25,26 +26,26 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private final BundleContext context;
 
-    private final ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> dataMiningServiceTracker;
+    private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
-        dataMiningServiceTracker = createAndOpenDataMiningServiceTracker(context);
+        dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
     }
 
-    private ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> createAndOpenDataMiningServiceTracker(
+    private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
             BundleContext context) {
-        ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService> result = 
-                new ServiceTracker<com.sap.sse.datamining.DataMiningService, com.sap.sse.datamining.DataMiningService>(
-                context, com.sap.sse.datamining.DataMiningService.class.getName(), null);
+        ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer> result = 
+                new ServiceTracker<com.sap.sse.datamining.DataMiningServer, com.sap.sse.datamining.DataMiningServer>(
+                context, com.sap.sse.datamining.DataMiningServer.class.getName(), null);
         result.open();
         return result;
     }
     
-    private com.sap.sse.datamining.DataMiningService getService() {
-        return dataMiningServiceTracker.getService();
+    private com.sap.sse.datamining.DataMiningServer getDataMiningServer() {
+        return dataMiningServerTracker.getService();
     }
 
     private ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(BundleContext context) {
@@ -61,7 +62,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public Collection<FunctionDTO> getDimensionsFor(DataTypes dataType) {
         Class<?> dataTypeBaseClass = getBaseClassFor(dataType);
-        Collection<Function<?>> dimensions = getService().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
+        Collection<Function<?>> dimensions = getDataMiningServer().getFunctionProvider().getDimensionsFor(dataTypeBaseClass);
         return functionsAsFunctionDTOs(dimensions);
     }
     
