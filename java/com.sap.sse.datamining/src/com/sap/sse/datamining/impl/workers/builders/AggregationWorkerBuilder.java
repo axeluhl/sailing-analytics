@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.impl.workers.builders;
 
 import com.sap.sse.datamining.components.AggregatorType;
-import com.sap.sse.datamining.components.ValueType;
+import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleArithmeticAverageAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleDoubleMedianAggregationWorker;
 import com.sap.sse.datamining.impl.workers.aggregators.SimpleIntegerArithmeticAverageAggregationWorker;
@@ -14,10 +14,10 @@ import com.sap.sse.datamining.workers.WorkerBuilder;
 
 public class AggregationWorkerBuilder<ExtractedType, AggregatedType> implements WorkerBuilder<AggregationWorker<ExtractedType, AggregatedType>> {
 
-    private ValueType valueType;
+    private ElementType valueType;
     private AggregatorType aggregatorType;
 
-    public AggregationWorkerBuilder(ValueType valueType, AggregatorType aggregatorType) {
+    public AggregationWorkerBuilder(ElementType valueType, AggregatorType aggregatorType) {
         this.valueType = valueType;
         this.aggregatorType = aggregatorType;
     }

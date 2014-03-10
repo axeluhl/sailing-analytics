@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sse.datamining.components.AggregatorType;
 import com.sap.sse.datamining.components.ParallelAggregator;
-import com.sap.sse.datamining.components.ValueType;
+import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.i18n.DataMiningStringMessages;
 import com.sap.sse.datamining.impl.components.deprecated.GroupDividingParallelAggregator;
 import com.sap.sse.datamining.impl.workers.builders.AggregationWorkerBuilder;
@@ -18,7 +18,7 @@ public final class AggregatorFactory {
 
     public static <ExtractedType, AggregatedType> ParallelAggregator<ExtractedType, AggregatedType> createAggregator(DataMiningStringMessages stringMessages,
                                                                                                                     Locale locale,
-                                                                                                                    ValueType valueType, AggregatorType aggregatorType, ThreadPoolExecutor executor) {
+                                                                                                                    ElementType valueType, AggregatorType aggregatorType, ThreadPoolExecutor executor) {
         WorkerBuilder<AggregationWorker<ExtractedType, AggregatedType>> workerBuilder = new AggregationWorkerBuilder<ExtractedType, AggregatedType>(valueType, aggregatorType);
         return new GroupDividingParallelAggregator<ExtractedType, AggregatedType>(stringMessages.get(locale, aggregatorType.getNameMessage()), workerBuilder, executor);
     }

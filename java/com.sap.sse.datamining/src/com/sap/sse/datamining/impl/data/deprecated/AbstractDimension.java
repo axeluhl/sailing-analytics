@@ -1,6 +1,6 @@
-package com.sap.sse.datamining.impl.data;
+package com.sap.sse.datamining.impl.data.deprecated;
 
-import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 
 public abstract class AbstractDimension<DataType, ValueType> implements Dimension<DataType, ValueType> {
 

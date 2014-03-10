@@ -1,25 +1,25 @@
 package com.sap.sailing.datamining.shared;
 
-import com.sap.sse.datamining.components.ValueType;
+import com.sap.sse.datamining.components.ElementType;
 import com.sap.sse.datamining.shared.Message;
 import com.sap.sse.datamining.shared.Unit;
 
 public enum StatisticType {
 
-    Speed(ValueType.Double, Unit.Knots, 2),
-    Distance(ValueType.Double, Unit.Meters, 2);
+    Speed(ElementType.Double, Unit.Knots, 2),
+    Distance(ElementType.Double, Unit.Meters, 2);
 
-    private final ValueType valueType;
+    private final ElementType valueType;
     private final Unit unit;
     private final int valueDecimals;
 
-    private StatisticType(ValueType valueType, Unit unit, int valueDecimals) {
+    private StatisticType(ElementType valueType, Unit unit, int valueDecimals) {
         this.valueType = valueType;
         this.unit = unit;
         this.valueDecimals = valueDecimals;
     }
 
-    public ValueType getValueType() {
+    public ElementType getValueType() {
         return valueType;
     }
     

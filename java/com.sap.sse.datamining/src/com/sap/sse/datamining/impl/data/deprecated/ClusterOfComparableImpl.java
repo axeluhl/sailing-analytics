@@ -1,6 +1,6 @@
-package com.sap.sse.datamining.impl.data;
+package com.sap.sse.datamining.impl.data.deprecated;
 
-import com.sap.sse.datamining.data.ClusterOfComparable;
+import com.sap.sse.datamining.data.deprecated.ClusterOfComparable;
 
 public class ClusterOfComparableImpl<ValueType extends Comparable<ValueType>> extends ClusterImpl<ValueType> implements
         ClusterOfComparable<ValueType> {

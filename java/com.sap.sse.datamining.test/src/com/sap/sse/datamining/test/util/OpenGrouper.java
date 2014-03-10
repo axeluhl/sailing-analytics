@@ -2,7 +2,7 @@ package com.sap.sse.datamining.test.util;
 
 import java.util.Collection;
 
-import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 import com.sap.sse.datamining.impl.workers.MultiDimensionalGroupingWorker;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;

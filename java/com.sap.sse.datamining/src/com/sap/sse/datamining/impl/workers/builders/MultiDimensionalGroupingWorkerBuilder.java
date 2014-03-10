@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.workers.builders;
 
 import java.util.Collection;
 
-import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 import com.sap.sse.datamining.impl.workers.MultiDimensionalGroupingWorker;
 import com.sap.sse.datamining.workers.GroupingWorker;
 import com.sap.sse.datamining.workers.WorkerBuilder;

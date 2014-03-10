@@ -11,7 +11,7 @@ import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sse.datamining.components.FilterCriteria;
 import com.sap.sse.datamining.components.ParallelFilter;
-import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 import com.sap.sse.datamining.impl.components.deprecated.NonFilteringFilter;
 import com.sap.sse.datamining.impl.components.deprecated.PartitioningParallelFilter;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriteria;

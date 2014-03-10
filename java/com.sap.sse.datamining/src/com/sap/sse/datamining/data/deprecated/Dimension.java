@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.data;
+package com.sap.sse.datamining.data.deprecated;
 
 public interface Dimension<DataType, ValueType> {
     

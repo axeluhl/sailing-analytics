@@ -9,9 +9,9 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.data.ClusterOfComparable;
+import com.sap.sse.datamining.data.deprecated.ClusterOfComparable;
 import com.sap.sse.datamining.impl.criterias.deprecated.SimpleRangeFilterCriteria;
-import com.sap.sse.datamining.impl.data.ClusterOfComparableImpl;
+import com.sap.sse.datamining.impl.data.deprecated.ClusterOfComparableImpl;
 import com.sap.sse.datamining.test.util.OpenDataReceiver;
 import com.sap.sse.datamining.workers.FiltrationWorker;
 

@@ -1,8 +1,8 @@
-package com.sap.sse.datamining.impl.data;
+package com.sap.sse.datamining.impl.data.deprecated;
 
 import java.util.Comparator;
 
-import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.data.deprecated.Cluster;
 
 public class ClusterImpl<ValueType> implements Cluster<ValueType> {
 

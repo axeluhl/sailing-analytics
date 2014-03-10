@@ -3,8 +3,8 @@ package com.sap.sailing.datamining.dimensions;
 import com.sap.sailing.datamining.data.TrackedLegOfCompetitorWithContext;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sse.datamining.data.Dimension;
-import com.sap.sse.datamining.impl.data.AbstractDimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
+import com.sap.sse.datamining.impl.data.deprecated.AbstractDimension;
 
 public final class TrackedLegOfCompetitorDimensionManager implements DimensionManager<TrackedLegOfCompetitorWithContext> {
 

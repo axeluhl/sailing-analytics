@@ -12,8 +12,8 @@ import java.util.Map.Entry;
 
 import org.junit.Test;
 
-import com.sap.sse.datamining.data.Dimension;
-import com.sap.sse.datamining.impl.data.AbstractDimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
+import com.sap.sse.datamining.impl.data.deprecated.AbstractDimension;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;

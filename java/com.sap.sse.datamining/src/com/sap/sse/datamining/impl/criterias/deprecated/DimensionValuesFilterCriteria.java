@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.sap.sse.datamining.components.FilterCriteria;
-import com.sap.sse.datamining.data.Dimension;
+import com.sap.sse.datamining.data.deprecated.Dimension;
 
 public class DimensionValuesFilterCriteria<DataType, ValueType> implements FilterCriteria<DataType> {
     
