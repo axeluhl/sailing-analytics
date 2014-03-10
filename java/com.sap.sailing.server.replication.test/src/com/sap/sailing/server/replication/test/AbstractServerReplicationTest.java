@@ -99,7 +99,7 @@ public abstract class AbstractServerReplicationTest {
         if (master != null) {
             this.master = master;
         } else {
-            this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+            this.master = createNewMaster(mongoDBService, mongoObjectFactory);
         }
         if (replica != null) {
             this.replica = replica;
@@ -122,7 +122,14 @@ public abstract class AbstractServerReplicationTest {
         this.replicaReplicator = replicaReplicator; 
         return result;
     }
-    
+
+    protected RacingEventServiceImpl createNewMaster(final MongoDBService mongoDBService,
+            final MongoObjectFactory mongoObjectFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
+                EmptyWindStore.INSTANCE);
+    }
+
     @After
     public void tearDown() throws Exception {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
