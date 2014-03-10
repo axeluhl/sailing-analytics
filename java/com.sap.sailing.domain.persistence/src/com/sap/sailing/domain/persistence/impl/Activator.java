@@ -11,18 +11,18 @@ import com.sap.sailing.mongodb.MongoDBService;
 
 public class Activator implements BundleActivator {
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
-	@Override
-	public void start(BundleContext context) throws Exception {
-	    for (CollectionNames name : CollectionNames.values())
-	        MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        for (CollectionNames name : CollectionNames.values())
+            MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
+    }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-	    for (ServiceRegistration<?> reg : registrations) {
-	        reg.unregister();
-	    }
-	    registrations.clear();
-	}
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        for (ServiceRegistration<?> reg : registrations) {
+            reg.unregister();
+        }
+        registrations.clear();
+    }
 
 }

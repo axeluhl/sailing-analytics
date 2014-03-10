@@ -4,8 +4,9 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
@@ -14,6 +15,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeseri
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
@@ -37,18 +39,18 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartPro
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 	
-	public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
-		return create(domainFactory,
-				new SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder());
-	}
+    public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
+        JsonDeserializer<DeviceIdentifier> deviceDeserializer = DeviceIdentifierJsonDeserializer.create(
+                new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE);
+        return create(domainFactory, deviceDeserializer);
+    }
 	
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory,
-    		TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
+            JsonDeserializer<DeviceIdentifier> deviceDeserializer) {
     	JsonDeserializer<Competitor> competitorDeserializer = CompetitorJsonDeserializer.create(domainFactory);
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(competitorDeserializer),
@@ -70,8 +72,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogWindFixEventDeserializer(competitorDeserializer,
                         new WindJsonDeserializer(
                                 new PositionJsonDeserializer())),
-                new RaceLogDeviceCompetitorMappingEventDeserializer(competitorDeserializer, deviceServiceFinder),
-                new RaceLogDeviceMarkMappingEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory), deviceServiceFinder),
+                new RaceLogDeviceCompetitorMappingEventDeserializer(competitorDeserializer, deviceDeserializer),
+                new RaceLogDeviceMarkMappingEventDeserializer(competitorDeserializer, new MarkDeserializer(domainFactory), deviceDeserializer),
                 new RaceLogDenoteForTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogStartTrackingEventDeserializer(competitorDeserializer),
                 new RaceLogRevokeEventDeserializer(competitorDeserializer),

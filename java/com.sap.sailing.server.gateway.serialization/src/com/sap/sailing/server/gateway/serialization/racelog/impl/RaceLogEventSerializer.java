@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -23,8 +22,10 @@ import com.sap.sailing.domain.racelog.RevokeEvent;
 import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
 import com.sap.sailing.domain.racelog.tracking.DeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
+import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.StartTrackingEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
@@ -32,17 +33,19 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJs
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, RaceLogEventVisitor {
-	public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
-		return create(competitorSerializer, new SmartphoneImeiJsonHandlerFactoryDefaultingToPlaceHolder());
-	}
+    public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer) {
+        return create(competitorSerializer, DeviceIdentifierJsonSerializer.create(
+                new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE));
+    }
+    
     public static JsonSerializer<RaceLogEvent> create(JsonSerializer<Competitor> competitorSerializer,
-    		TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
+    		JsonSerializer<DeviceIdentifier> deviceSerializer) {
         return new RaceLogEventSerializer(
                 new RaceLogFlagEventSerializer(competitorSerializer), 
                 new RaceLogStartTimeEventSerializer(competitorSerializer), 
@@ -64,8 +67,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogWindFixEventSerializer(competitorSerializer, 
                         new WindJsonSerializer(
                                 new PositionJsonSerializer())),
-                new RaceLogDeviceCompetitorMappingEventSerializer(competitorSerializer, deviceServiceFinder),
-                new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, new MarkJsonSerializer(), deviceServiceFinder),
+                new RaceLogDeviceCompetitorMappingEventSerializer(competitorSerializer, deviceSerializer),
+                new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, new MarkJsonSerializer(), deviceSerializer),
                 new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
                 new RaceLogStartTrackingEventSerializer(competitorSerializer),
                 new RaceLogRevokeEventSerializer(competitorSerializer),

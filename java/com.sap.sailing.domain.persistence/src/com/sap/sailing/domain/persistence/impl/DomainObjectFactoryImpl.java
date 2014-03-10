@@ -104,6 +104,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.CompetitorResults;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -171,6 +172,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         this.serviceFinderFactory = serviceFinderFactory;
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+            this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
         } else {
             this.deviceIdentifierServiceFinder = null;
         }
@@ -1568,6 +1570,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     throws TransformationException, NoCorrespondingServiceRegisteredException {
         String deviceType = (String) deviceId.get(FieldNames.DEVICE_TYPE.name());
         Object deviceTypeId = deviceId.get(FieldNames.DEVICE_TYPE_ID.name());
-        return deviceIdentifierServiceFinder.findService(deviceType).transformBack(deviceTypeId);
+        String stringRepresentation = (String) deviceId.get(FieldNames.DEVICE_STRING_REPRESENTATION.name());
+        return deviceIdentifierServiceFinder.findService(deviceType).deserialize(deviceTypeId, deviceType, stringRepresentation);
     }
 }

@@ -24,14 +24,16 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceAndSessionIdentifierWithGPSFixesSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.SmartphoneImeiIdentifierJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 public class PostFixes extends AbstractJsonOverHttpTest {
     protected static final SmartphoneImeiIdentifier device = new SmartphoneImeiIdentifier("a");
 
     private final DeviceAndSessionIdentifierWithGPSFixesSerializer<SmartphoneImeiIdentifier, GPSFixMoving> fixSerializer =
-            new DeviceAndSessionIdentifierWithGPSFixesSerializer<>(new SmartphoneImeiIdentifierJsonSerializer(), new GPSFixMovingNmeaDTOJsonSerializer());
+            new DeviceAndSessionIdentifierWithGPSFixesSerializer<>(DeviceIdentifierJsonSerializer.create(
+                    new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE), new GPSFixMovingNmeaDTOJsonSerializer());
 
             private void recordFix(GPSFixMoving... fix) throws IOException {
                 String request = fixSerializer.serialize(

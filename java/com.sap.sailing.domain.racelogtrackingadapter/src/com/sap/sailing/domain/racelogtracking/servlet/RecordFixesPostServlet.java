@@ -15,6 +15,7 @@ import com.sap.sailing.server.gateway.AbstractJsonPostServlet;
 import com.sap.sailing.server.gateway.HttpExceptionWithMessage;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
@@ -31,7 +32,8 @@ public class RecordFixesPostServlet extends
                 GPSFixJsonHandler.class);
         TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder = getServiceFinderFactory()
                 .createServiceFinder(DeviceIdentifierJsonHandler.class);
-        deserializer = new DeviceAndSessionIdentifierWithGPSFixesDeserializer(fixServiceFinder, deviceServiceFinder);
+        deserializer = new DeviceAndSessionIdentifierWithGPSFixesDeserializer(fixServiceFinder,
+                new DeviceIdentifierJsonDeserializer(deviceServiceFinder));
     }
 
     @Override

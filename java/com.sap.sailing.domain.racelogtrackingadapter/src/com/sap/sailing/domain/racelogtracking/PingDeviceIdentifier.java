@@ -12,5 +12,6 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
  *
  */
 public interface PingDeviceIdentifier extends DeviceIdentifier {
+    public static final String TYPE = "PING";
     UUID getId();
 }

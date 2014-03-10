@@ -5,10 +5,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMarkMappingEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 public class RaceLogDeviceMarkMappingEventSerializer extends RaceLogDeviceMappingEventSerializer<Mark> {
 	public static final String VALUE_CLASS = DeviceMarkMappingEvent.class.getSimpleName();
@@ -16,8 +15,8 @@ public class RaceLogDeviceMarkMappingEventSerializer extends RaceLogDeviceMappin
 	
 	public RaceLogDeviceMarkMappingEventSerializer(
 			JsonSerializer<Competitor> competitorSerializer, JsonSerializer<ControlPoint> markSerializer,
-			TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
-		super(competitorSerializer, deviceServiceFinder);
+			JsonSerializer<DeviceIdentifier> deviceSerializer) {
+		super(competitorSerializer, deviceSerializer);
 		this.markSerializer = markSerializer;
 	}
 	

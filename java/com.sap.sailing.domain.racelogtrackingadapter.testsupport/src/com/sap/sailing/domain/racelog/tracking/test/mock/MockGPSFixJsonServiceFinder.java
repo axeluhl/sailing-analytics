@@ -14,4 +14,8 @@ public class MockGPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFi
         }
         return null;
     }
+
+    @Override
+    public void setFallbackService(GPSFixJsonHandler fallback) {
+    }
 }

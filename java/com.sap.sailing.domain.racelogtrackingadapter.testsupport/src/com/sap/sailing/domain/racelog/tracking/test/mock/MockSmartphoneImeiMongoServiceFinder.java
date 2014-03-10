@@ -3,7 +3,7 @@ package com.sap.sailing.domain.racelog.tracking.test.mock;
 import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiMongoHandlerImpl;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiMongoHandler;
 
 /**
  * A simplified implementation of the {@link TypeBasedServiceFinder} interface that, when the device type
@@ -14,10 +14,17 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiMongoHandlerImp
  *
  */
 public class MockSmartphoneImeiMongoServiceFinder implements TypeBasedServiceFinder<DeviceIdentifierMongoHandler> {
-    private final SmartphoneImeiMongoHandlerImpl handler = new SmartphoneImeiMongoHandlerImpl();
+    private final SmartphoneImeiMongoHandler handler = new SmartphoneImeiMongoHandler();
+    private DeviceIdentifierMongoHandler fallback;
 
     @Override
     public DeviceIdentifierMongoHandler findService(String deviceType) {
-        return handler;
+        if (deviceType.equals(SmartphoneImeiIdentifier.TYPE)) return handler;
+        return fallback;
+    }
+
+    @Override
+    public void setFallbackService(DeviceIdentifierMongoHandler fallback) {
+        this.fallback = fallback;
     }
 }

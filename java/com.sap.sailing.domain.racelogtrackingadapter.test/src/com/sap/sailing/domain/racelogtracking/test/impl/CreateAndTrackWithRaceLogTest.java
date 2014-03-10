@@ -46,7 +46,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -73,7 +73,7 @@ public class CreateAndTrackWithRaceLogTest {
 
     @Before
     public void setup() {
-        service = new RacingEventServiceImpl(true, new MockServiceFinderFactory());
+        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
         gpsFixStore = service.getGPSFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
@@ -145,6 +145,7 @@ public class CreateAndTrackWithRaceLogTest {
         CourseBase course = new CourseDataImpl("test");
         course.addWaypoint(0, new WaypointImpl(new MarkImpl("mark")));
         raceLog.add(factory.createCourseDesignChangedEvent(t(), author, 0, course));
+        raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
 
         //start tracking
         raceLog.add(factory.createStartTrackingEvent(t(), author, 0));

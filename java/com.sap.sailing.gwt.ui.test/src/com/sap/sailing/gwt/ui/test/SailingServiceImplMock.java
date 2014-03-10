@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogTrackingAdapterFactoryImpl;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -41,7 +41,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
     
     public SailingServiceImplMock() {
         super();
-        service = new RacingEventServiceImpl(true, new MockServiceFinderFactory());
+        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
     }
 
     @Override

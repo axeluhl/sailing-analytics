@@ -24,7 +24,7 @@ import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer;
-import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
@@ -34,7 +34,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class AbstractGPSFixStoreTest {
     protected RacingEventService service;
-    protected final  MockServiceFinderFactory serviceFinderFactory = new MockServiceFinderFactory();
+    protected final  MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
     DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
             new MockDeviceAndSessioinIdentifierWithGPSFixesDeserializer();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");

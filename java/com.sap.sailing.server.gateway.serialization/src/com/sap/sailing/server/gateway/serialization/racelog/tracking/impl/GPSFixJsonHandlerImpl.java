@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.server.gateway.serialization.racelog.tracking.impl;
 
 import org.json.simple.JSONObject;
 

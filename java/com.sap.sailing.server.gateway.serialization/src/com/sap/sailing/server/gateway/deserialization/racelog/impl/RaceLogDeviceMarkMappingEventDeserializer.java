@@ -7,13 +7,11 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.racelog.tracking.TypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventAuthor;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 
 public class RaceLogDeviceMarkMappingEventDeserializer extends
 		RaceLogDeviceMappingEventDeserializer<Mark> {
@@ -21,8 +19,8 @@ public class RaceLogDeviceMarkMappingEventDeserializer extends
 	
 	public RaceLogDeviceMarkMappingEventDeserializer(
 			JsonDeserializer<Competitor> competitorDeserializer, JsonDeserializer<Mark> markDeserializer,
-			TypeBasedServiceFinder<DeviceIdentifierJsonHandler> deviceServiceFinder) {
-		super(competitorDeserializer, deviceServiceFinder);
+			JsonDeserializer<DeviceIdentifier> deviceDeserializer) {
+		super(competitorDeserializer, deviceDeserializer);
 		this.markDeserializer = markDeserializer;
 	}
 

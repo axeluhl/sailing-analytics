@@ -15,10 +15,10 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceIdentifier, F extends GPSFix> implements
         JsonSerializer<Triple<D, Serializable, List<F>>> {
     
-    private final JsonSerializer<D> deviceSerializer;
-    private  JsonSerializer<F> fixSerializer;
+    private final JsonSerializer<DeviceIdentifier> deviceSerializer;
+    private final JsonSerializer<F> fixSerializer;
 
-    public DeviceAndSessionIdentifierWithGPSFixesSerializer(JsonSerializer<D> deviceSerializer,
+    public DeviceAndSessionIdentifierWithGPSFixesSerializer(JsonSerializer<DeviceIdentifier> deviceSerializer,
             JsonSerializer<F> fixSerializer) {
         this.deviceSerializer = deviceSerializer;
         this.fixSerializer = fixSerializer;
@@ -34,7 +34,7 @@ public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceId
             fixesJson.add(fixSerializer.serialize(fix));
         }
         
-        result.put(DeviceAndSessionIdentifierWithGPSFixesDeserializer.FIELD_DEVICE_ID, deviceIdJson);
+        result.put(DeviceAndSessionIdentifierWithGPSFixesDeserializer.FIELD_DEVICE, deviceIdJson);
         if (data.getB() != null) {
             result.put(DeviceAndSessionIdentifierWithGPSFixesDeserializer.FIELD_SESSION_UUID, data.getB().toString());            
         }

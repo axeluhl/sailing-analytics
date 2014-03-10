@@ -29,7 +29,8 @@ import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJson
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixNmeaDTOJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
-import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandlerImpl;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
+import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneImeiJsonHandler;
 
 public class Activator implements BundleActivator {
 	private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -50,10 +51,11 @@ public class Activator implements BundleActivator {
     
     @Override
     public void start(BundleContext context) throws Exception {
-        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneImeiMongoHandlerImpl(), getDict(SmartphoneImeiIdentifier.TYPE)));
-        registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneImeiJsonHandlerImpl(), getDict(SmartphoneImeiIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new SmartphoneImeiMongoHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new SmartphoneImeiJsonHandler(), getDict(SmartphoneImeiIdentifier.TYPE)));
         
-        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new PingDeviceMongoHandlerImpl(), getDict(PingDeviceIdentifierImpl.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierMongoHandler.class, new PingDeviceIdentifierMongoHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));
+        registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new PingDeviceIdentifierJsonHandler(), getDict(PingDeviceIdentifierImpl.TYPE)));
         
         registerGPSFixJsonService(context, new GPSFixJsonDeserializer(), new GPSFixJsonSerializer(), GPSFixJsonDeserializer.TYPE);
         registerGPSFixJsonService(context, new GPSFixMovingJsonDeserializer(), new GPSFixMovingJsonSerializer(), GPSFixMovingJsonDeserializer.TYPE);

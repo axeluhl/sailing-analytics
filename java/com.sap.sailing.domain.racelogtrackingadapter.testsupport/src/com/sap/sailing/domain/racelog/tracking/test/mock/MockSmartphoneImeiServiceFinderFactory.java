@@ -19,10 +19,10 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
  * @author Fredrik Teschke
  *
  */
-public class MockServiceFinderFactory implements TypeBasedServiceFinderFactory {
+public class MockSmartphoneImeiServiceFinderFactory implements TypeBasedServiceFinderFactory {
     Map<Class<?>, TypeBasedServiceFinder<?>> serviceFinders = new HashMap<Class<?>, TypeBasedServiceFinder<?>>();
 
-    public MockServiceFinderFactory() {
+    public MockSmartphoneImeiServiceFinderFactory() {
         serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockSmartphoneImeiMongoServiceFinder());
         serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockSmartphoneImeiJsonServiceFinder());
         serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());

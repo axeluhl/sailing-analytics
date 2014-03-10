@@ -35,7 +35,7 @@ import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.test.mock.MockServiceFinderFactory;
+import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
@@ -56,7 +56,7 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     
     @Test
     public void testStoreAndLoadFixes() throws TransformationException, NoCorrespondingServiceRegisteredException {
-    	TypeBasedServiceFinderFactory factory = new MockServiceFinderFactory();
+    	TypeBasedServiceFinderFactory factory = new MockSmartphoneImeiServiceFinderFactory();
     	RaceLogEventAuthor author = new RaceLogEventAuthorImpl("author", 0);
     	Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null);
     	Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");

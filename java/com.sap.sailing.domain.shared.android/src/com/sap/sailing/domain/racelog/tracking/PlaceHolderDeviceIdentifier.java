@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelog.tracking;
 import com.sap.sailing.domain.base.IsManagedBySharedDomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 
+
 /**
  * If the proper identifier cannot be resolved, for example because the OSGi context is not available
  * on the smartphone receiving the {@code DevicieIdentifier} via its {@code RaceLog}, then this
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
  */
 public class PlaceHolderDeviceIdentifier implements DeviceIdentifier {
     private static final long serialVersionUID = 8642469389180406246L;
+    public static final String TYPE = "PLACEHOLDER";
     
     private final String type;
     private final String stringRepresentation;
@@ -38,4 +40,13 @@ public class PlaceHolderDeviceIdentifier implements DeviceIdentifier {
         return stringRepresentation;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DeviceIdentifier) {
+            DeviceIdentifier other = (DeviceIdentifier) obj;
+            return type.equals(other.getIdentifierType()) &&
+                    stringRepresentation.equals(other.getStringRepresentation());
+        }
+        return false;
+    }
 }

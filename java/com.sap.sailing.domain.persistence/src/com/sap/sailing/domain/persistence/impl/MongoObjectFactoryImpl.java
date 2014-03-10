@@ -48,6 +48,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.racelog.tracking.NoCorrespondingServiceRegisteredException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -62,6 +63,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -115,6 +117,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         this.database = database;
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
+            this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
         } else {
             this.deviceIdentifierServiceFinder = null;
         }
@@ -1146,9 +1149,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     				throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = device.getIdentifierType();
         DeviceIdentifierMongoHandler handler = deviceIdentifierServiceFinder.findService(type);
-    	Object deviceTypeId = handler.transformForth(device);
+        Pair<? extends Object, String> pair = handler.serialize(device);
+        type = pair.getB();
+    	Object deviceTypeId = pair.getA();
     	return new BasicDBObjectBuilder()
-    			.add(FieldNames.DEVICE_TYPE.name(), device.getIdentifierType())
-    			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId).get();
+    			.add(FieldNames.DEVICE_TYPE.name(), type)
+    			.add(FieldNames.DEVICE_TYPE_ID.name(), deviceTypeId)
+    			.add(FieldNames.DEVICE_STRING_REPRESENTATION.name(), device.getStringRepresentation()).get();
     }
 }

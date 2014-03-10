@@ -19,4 +19,8 @@ public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSF
         if (fixType.equals(GPSFixImpl.class.getName())) return new GPSFixMongoHandlerImpl(mof, dof);
         return null;
     }
+
+    @Override
+    public void setFallbackService(GPSFixMongoHandler fallback) {
+    }
 }

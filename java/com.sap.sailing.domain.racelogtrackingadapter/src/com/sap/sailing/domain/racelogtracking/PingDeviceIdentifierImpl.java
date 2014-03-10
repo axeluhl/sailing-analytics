@@ -8,7 +8,6 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     private static final long serialVersionUID = -4049961972156611640L;
 
-    public static final String TYPE = "PING";
     
     private final UUID id;
     

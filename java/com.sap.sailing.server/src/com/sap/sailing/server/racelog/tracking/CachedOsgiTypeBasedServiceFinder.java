@@ -25,6 +25,7 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     private final Map<String, ServiceT> services = new HashMap<>();
     private final BundleContext context;
     private Class<ServiceT> serviceType;
+    private ServiceT fallback;
 
     public CachedOsgiTypeBasedServiceFinder(Class<ServiceT> serviceType, BundleContext context) {
     	this.serviceType = serviceType;
@@ -35,8 +36,13 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     public ServiceT findService(String type) {
         ServiceT service = services.get(type);
 
-        if (service == null)
-            throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType);
+        if (service == null) {
+            if (fallback != null) {
+                return fallback;
+            } else {
+                throw new NoCorrespondingServiceRegisteredException("Could not find service", type, serviceType);       
+            }
+        }
 
         return service;
     }
@@ -59,5 +65,10 @@ public class CachedOsgiTypeBasedServiceFinder<ServiceT> implements ServiceTracke
     public void removedService(ServiceReference<ServiceT> reference, ServiceT service) {
         String type = (String) reference.getProperty(TypeBasedServiceFinder.TYPE);
         services.remove(type);
+    }
+
+    @Override
+    public void setFallbackService(ServiceT fallback) {
+        this.fallback = fallback;
     }
 }
