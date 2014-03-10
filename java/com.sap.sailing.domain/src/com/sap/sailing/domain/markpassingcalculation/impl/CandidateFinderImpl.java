@@ -60,7 +60,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             return o1.getName().compareTo(o2.getName());
         }
     });
-    private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> cteCandidates = new HashMap<>();
+    private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> xteCandidates = new HashMap<>();
     private Map<Competitor, Map<Waypoint, Map<GPSFix, Candidate>>> distanceCandidates = new HashMap<>();
     private final DynamicTrackedRace race;
     private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
@@ -84,7 +84,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             distances.put(c, new TreeMap<GPSFix, Map<Mark, Distance>>(comp));
             HashMap<Waypoint, Map<List<GPSFix>, Candidate>> competitorXTECandidates = new HashMap<Waypoint, Map<List<GPSFix>, Candidate>>();
             HashMap<Waypoint, Map<GPSFix, Candidate>> competitorDistanceCandidates = new HashMap<Waypoint, Map<GPSFix, Candidate>>();
-            cteCandidates.put(c, competitorXTECandidates);
+            xteCandidates.put(c, competitorXTECandidates);
             distanceCandidates.put(c, competitorDistanceCandidates);
             for (Waypoint w : waypoints) {
                 competitorXTECandidates.put(w, new HashMap<List<GPSFix>, Candidate>());
@@ -137,7 +137,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         distances.get(c).clear();
         crossTrackErrors.get(c).clear();
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-            cteCandidates.get(c).get(w).clear();
+            xteCandidates.get(c).get(w).clear();
             distanceCandidates.get(c).get(w).clear();
         }
         return getCandidateDeltas(c, fixes);
@@ -145,13 +145,13 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> markFixes) {
-        Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
+        Map<Competitor, List<GPSFix>> affextedFixes = new HashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
-            affectedFixes.put(c, new ArrayList<GPSFix>());
+            affextedFixes.put(c, new ArrayList<GPSFix>());
         }
         for (GPSFix fix : markFixes) {
             Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-            for (Entry<Competitor, List<GPSFix>> c : affectedFixes.entrySet()) {
+            for (Entry<Competitor, List<GPSFix>> c : affextedFixes.entrySet()) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c.getKey());
                 GPSFix comFix = track.getFirstFixAtOrAfter(timePoints.getA());
                 List<GPSFix> fixes = c.getValue();
@@ -170,7 +170,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
-        return affectedFixes;
+        return affextedFixes;
     }
 
     @Override
@@ -178,9 +178,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         Set<Candidate> newCans = new TreeSet<>();
         Set<Candidate> wrongCans = new TreeSet<>();
         Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> distanceCandidates = checkForDistanceCandidateChanges(c, fixes);
-        Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> cteCandidates = checkForXTECandidatesChanges(c, fixes);
+        Map<Waypoint, Pair<List<Candidate>, List<Candidate>>> xteCandidates = checkForXTECandidatesChanges(c, fixes);
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-            Pair<List<Candidate>, List<Candidate>> waypointXTECans = cteCandidates.get(w);
+            Pair<List<Candidate>, List<Candidate>> waypointXTECans = xteCandidates.get(w);
             Pair<List<Candidate>, List<Candidate>> waypointDistanceCandidates = distanceCandidates.get(w);
             newCans.addAll(waypointXTECans.getA());
             newCans.addAll(waypointDistanceCandidates.getA());
@@ -203,20 +203,20 @@ public class CandidateFinderImpl implements CandidateFinder {
         for (Waypoint w : waypoints) {
             result.put(w, new Pair<List<Candidate>, List<Candidate>>(new ArrayList<Candidate>(), new ArrayList<Candidate>()));
         }
-        Set<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
+        Set<GPSFix> affextedFixes = new TreeSet<GPSFix>(comp);
         TreeMap<GPSFix, Map<Mark, Distance>> competitorDistances = distances.get(c);
         for (GPSFix fix : fixes) {
-            affectedFixes.add(fix);
+            affextedFixes.add(fix);
             GPSFix fixBefore = competitorDistances.lowerKey(fix);
             GPSFix fixAfter = competitorDistances.higherKey(fix);
             if (fixBefore != null) {
-                affectedFixes.add(fixBefore);
+                affextedFixes.add(fixBefore);
             }
             if (fixAfter != null) {
-                affectedFixes.add(fixAfter);
+                affextedFixes.add(fixAfter);
             }
         }
-        for (GPSFix fix : affectedFixes) {
+        for (GPSFix fix : affextedFixes) {
             TimePoint t = null;
             Position p = null;
             GPSFix fixBefore = competitorDistances.lowerKey(fix);
@@ -340,7 +340,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 Pair<List<Candidate>, List<Candidate>> result = totalResult.get(w);
                 List<List<GPSFix>> oldCandidates = new ArrayList<>();
                 Map<List<GPSFix>, Candidate> newCandidates = new HashMap<List<GPSFix>, Candidate>();
-                Map<List<GPSFix>, Candidate> waypointCandidates = cteCandidates.get(c).get(w);
+                Map<List<GPSFix>, Candidate> waypointCandidates = xteCandidates.get(c).get(w);
                 for (List<GPSFix> fixPair : waypointCandidates.keySet()) {
                     if (fixPair.contains(fix)) {
                         oldCandidates.add(fixPair);
@@ -436,9 +436,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
-    private Candidate createCandidate(Competitor c, double cte1, double cte2, TimePoint t1, TimePoint t2, Waypoint w, Boolean portMark) {
+    private Candidate createCandidate(Competitor c, double xte1, double xte2, TimePoint t1, TimePoint t2, Waypoint w, Boolean portMark) {
         long differenceInMillis = t2.asMillis() - t1.asMillis();
-        double ratio = (Math.abs(cte1) / (Math.abs(cte1) + Math.abs(cte2)));
+        double ratio = (Math.abs(xte1) / (Math.abs(xte1) + Math.abs(xte2)));
         TimePoint t = t1.plus((long) (differenceInMillis * ratio));
         Position p = race.getTrack(c).getEstimatedPosition(t, false);
         Mark m = null;
@@ -453,8 +453,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         Distance d = calculateDistance(p, m, t);
         double cost = getDistanceBasedProbability(w, t, d);
-        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark), passesInTheRightDirection(w, cte1,
-                cte2, portMark), "CTE");
+        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark), passesInTheRightDirection(w, xte1,
+                xte2, portMark), "xte");
     }
 
     /**
@@ -503,13 +503,13 @@ public class CandidateFinderImpl implements CandidateFinder {
      * also from positive to negative as the cross-track error to a line is always positive when approaching it from the
      * correct side.
      */
-    private boolean passesInTheRightDirection(Waypoint w, double cte1, double cte2, boolean portMark) {
+    private boolean passesInTheRightDirection(Waypoint w, double xte1, double xte2, boolean portMark) {
         boolean result = true;
         PassingInstruction instruction = passingInstructions.get(w);
         if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Line || (instruction == PassingInstruction.Gate && portMark)) {
-            result = cte1 > cte2 ? true : false;
+            result = xte1 > xte2 ? true : false;
         } else if (instruction == PassingInstruction.Starboard || (instruction == PassingInstruction.Gate && !portMark)) {
-            result = cte1 < cte2 ? true : false;
+            result = xte1 < xte2 ? true : false;
         }
         return result;
     }
