@@ -440,7 +440,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         long differenceInMillis = t2.asMillis() - t1.asMillis();
         double ratio = (Math.abs(cte1) / (Math.abs(cte1) + Math.abs(cte2)));
         TimePoint t = t1.plus((long) (differenceInMillis * ratio));
-        Position p = race.getTrack(c).getEstimatedPosition(t, true);
+        Position p = race.getTrack(c).getEstimatedPosition(t, false);
         Mark m = null;
         PassingInstruction instruction = passingInstructions.get(w);
         if (instruction == PassingInstruction.Gate) {

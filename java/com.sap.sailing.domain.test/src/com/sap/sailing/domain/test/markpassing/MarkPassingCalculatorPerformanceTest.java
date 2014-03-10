@@ -45,13 +45,6 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     protected Random rnd = new Random();
     protected long time;
 
-    protected GPSFixMoving rndFix() {
-        DegreePosition position = new DegreePosition(37.8878 + rnd.nextDouble() * 0.0019, -122.268 - rnd.nextDouble() * 0.012);
-        TimePoint p = new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000))));
-        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
-        return new GPSFixMovingImpl(position, p, speed);
-    }
-
     @AfterClass
     public static void createXMLFile() throws IOException {
         MeasurementXMLFile performanceReport = new MeasurementXMLFile("TEST-MarkPassingCaculatorPerformanceTest.xml", "MarkPassingCaculatorPerformanceTest", className);
@@ -115,7 +108,14 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
-        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (System.currentTimeMillis() - 300000 + (Math.random() * (7800000)))), 0.5 + 0.5 * Math.random(),
-                Util.get(race.getRace().getCourse().getWaypoints(), id), true, true, "Test");
+        return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)), 0.5 + 0.5 * rnd.nextDouble(), Util.get(race.getRace().getCourse()
+                .getWaypoints(), id), true, true, "Test");
+    }
+
+    private GPSFixMoving rndFix() {
+        DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001, 0.0002 - rnd.nextDouble() * 0.0004);
+        TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
+        return new GPSFixMovingImpl(position, p, speed);
     }
 }

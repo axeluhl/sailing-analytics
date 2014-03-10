@@ -10,9 +10,6 @@ import java.util.NavigableSet;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -27,19 +24,12 @@ import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassingTest {
 
     public CandidateFinderAndChooserTest() {
-        race.setStartTimeReceived(new MillisecondsTimePoint(10000));
-        TimePoint t = new MillisecondsTimePoint(30000);
-        List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)),
-                new Pair<Mark, Position>(gate1, new DegreePosition(-0.001, -0.00005)), new Pair<Mark, Position>(gate2, new DegreePosition(-0.001, 0.00005)));
-        for (Pair<Mark, Position> pair : pos) {
-            race.recordFix(pair.getA(), new GPSFixImpl(pair.getB(), t));
-        }
+
     }
 
     @Test
@@ -143,6 +133,7 @@ public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassing
 
     @Test
     public void testGateAfterLine() {
+        // The problem of passing a gate right after the start line is crossed, solved by the distance estimation
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.001051, -0.000008), new MillisecondsTimePoint(10000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
                 5)));
         GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000942, 0.000022), new MillisecondsTimePoint(14000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
@@ -150,10 +141,17 @@ public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassing
         race.recordFix(jerry, fix1);
         race.recordFix(jerry, fix2);
         Candidate c1 = new CandidateImpl(1, new MillisecondsTimePoint(11000), 0.99, waypoints.get(0), true, true, "CTE");
-        Candidate c3 = new CandidateImpl(3, new MillisecondsTimePoint(13000), 0.99, waypoints.get(0), true, true, "CTE");
+        Candidate c3 = new CandidateImpl(3, new MillisecondsTimePoint(13000), 0.99, waypoints.get(2), true, true, "CTE");
+        // Good candidate but bad time
         CandidateChooser chooser = new CandidateChooserImpl(race);
         chooser.calculateMarkPassDeltas(jerry, Arrays.asList(c1, c3), new ArrayList<Candidate>());
         NavigableSet<MarkPassing> markPassings = race.getMarkPassings(jerry);
         assertEquals(markPassings.size(), 1);
+        assertEquals(markPassings.first().getWaypoint(), waypoints.get(0));
+    }
+    
+    @Test
+    public void testTrackerFails(){
+        
     }
 }

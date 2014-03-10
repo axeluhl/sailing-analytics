@@ -25,10 +25,16 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class AbstractMockedRaceMarkPassingTest {
@@ -56,6 +62,12 @@ public class AbstractMockedRaceMarkPassingTest {
         Course course = new CourseImpl("course", waypoints);
         RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(ron, jerry));
         race = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), 0, 10000, 10000);
-
+        race.setStartTimeReceived(new MillisecondsTimePoint(10000));
+        TimePoint t = new MillisecondsTimePoint(30000);
+        List<Pair<Mark, Position>> pos = Arrays.asList(new Pair<Mark, Position>(m, new DegreePosition(0, 0)),
+                new Pair<Mark, Position>(gate1, new DegreePosition(-0.001, -0.00005)), new Pair<Mark, Position>(gate2, new DegreePosition(-0.001, 0.00005)));
+        for (Pair<Mark, Position> pair : pos) {
+            race.recordFix(pair.getA(), new GPSFixImpl(pair.getB(), t));
+        }
     }
 }
