@@ -1,21 +1,18 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public abstract class AbstractRaceLogOperation extends AbstractRacingEventServiceOperation<RaceLogEvent> {
+public abstract class AbstractRaceLogOperation<T> extends AbstractRacingEventServiceOperation<T> {
     private static final long serialVersionUID = 2140858355670664173L;
 
     private final String raceColumnName;
     private final String fleetName;
-    private final RaceLogEvent event;
 
-    public AbstractRaceLogOperation(String raceColumnName, String fleetName, RaceLogEvent event) {
+    public AbstractRaceLogOperation(String raceColumnName, String fleetName) {
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
-        this.event = event;
     }
     
     protected String getRaceColumnName() {
@@ -24,10 +21,6 @@ public abstract class AbstractRaceLogOperation extends AbstractRacingEventServic
 
     protected String getFleetName() {
         return fleetName;
-    }
-
-    protected RaceLogEvent getEvent() {
-        return event;
     }
 
     abstract protected RaceColumn getRaceColumn(RacingEventService toState);

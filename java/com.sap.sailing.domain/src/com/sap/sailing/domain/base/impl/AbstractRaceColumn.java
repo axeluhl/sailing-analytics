@@ -176,29 +176,29 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleetImpl) {
+    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleet) {
         synchronized(raceLogs) {
             raceLogInformation = information;
             RaceLogStore store = information.getStore();
             HashSet<RaceLogEventVisitor> listeners = new HashSet<RaceLogEventVisitor>();
-            RaceLog raceLogAvailable = raceLogs.get(fleetImpl);
+            RaceLog raceLogAvailable = raceLogs.get(fleet);
             if (raceLogAvailable != null) {
                 store.removeListenersAddedByStoreFrom(raceLogAvailable);
                 listeners = raceLogAvailable.removeAllListeners();
-                raceLogs.remove(fleetImpl);
+                raceLogs.remove(fleet);
             }
             
             raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
-            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleetImpl);
+            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet);
             RaceLog raceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
-            
             if (listeners.isEmpty()) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
                 raceLog.addListener(listener);
             } else {
                 raceLog.addAllListeners(listeners);
             }
-            raceLogs.put(fleetImpl, raceLog);
+            raceLogs.put(fleet, raceLog);
+            getRaceColumnListeners().notifyListenersAboutRaceLogLoaded(this, identifier, raceLog);
         }
     }
 

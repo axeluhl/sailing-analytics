@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -151,10 +152,15 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
-    public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
-            RaceLogEvent event) {
+    public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        }
+    }
+
+    public void notifyListenersAboutRaceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceLogLoaded(raceColumn, identifier, raceLog);
         }
     }
 

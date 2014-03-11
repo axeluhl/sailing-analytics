@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -35,6 +36,13 @@ public interface RaceColumnListener extends Serializable {
     void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule);
 
     void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event);
+
+    /**
+     * A race log may be loaded initially when the column is created, or at a later point in time when the
+     * race log is explicitly re-loaded from the database, e.g., during a server instance switch-over.
+     * @param raceColumn TODO
+     */
+    void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog);
 
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.

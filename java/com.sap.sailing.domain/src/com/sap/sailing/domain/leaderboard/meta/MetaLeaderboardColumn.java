@@ -177,6 +177,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
+        getRaceColumnListeners().notifyListenersAboutRaceLogLoaded(raceColumn, identifier, raceLog);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -355,6 +356,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         raceColumnListeners.notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
     
+    @Override
+    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
+        raceColumnListeners.notifyListenersAboutRaceLogLoaded(raceColumn, identifier, raceLog);
+    }
+
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;

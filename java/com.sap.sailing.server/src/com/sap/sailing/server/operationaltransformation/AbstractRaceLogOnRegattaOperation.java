@@ -3,16 +3,15 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 
-public abstract class AbstractRaceLogOnRegattaOperation extends AbstractRaceLogOperation {
+public abstract class AbstractRaceLogOnRegattaOperation<T> extends AbstractRaceLogOperation<T> {
     private static final long serialVersionUID = -7174569054572099191L;
     private final String regattaName;
     
     public AbstractRaceLogOnRegattaOperation(String regattaName, String raceColumnName, 
-            String fleetName, RaceLogEvent event) {
-        super(raceColumnName, fleetName, event);
+            String fleetName) {
+        super(raceColumnName, fleetName);
         this.regattaName = regattaName;
     }
 
