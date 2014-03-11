@@ -282,7 +282,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     @Override
     public void merge(RaceLog other) {
-        lockForRead();
+        lockForWrite();
         other.lockForRead();
         try {
             RaceLogEventComparator comparator = RaceLogEventComparator.INSTANCE;
@@ -319,8 +319,8 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
                 }
             }
         } finally {
-            unlockAfterRead();
             other.unlockAfterRead();
+            unlockAfterWrite();
         }
     }
 }
