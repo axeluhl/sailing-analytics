@@ -145,13 +145,13 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> markFixes) {
-        Map<Competitor, List<GPSFix>> affextedFixes = new HashMap<>();
+        Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
         for (Competitor c : race.getRace().getCompetitors()) {
-            affextedFixes.put(c, new ArrayList<GPSFix>());
+            affectedFixes.put(c, new ArrayList<GPSFix>());
         }
         for (GPSFix fix : markFixes) {
             Pair<TimePoint, TimePoint> timePoints = race.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-            for (Entry<Competitor, List<GPSFix>> c : affextedFixes.entrySet()) {
+            for (Entry<Competitor, List<GPSFix>> c : affectedFixes.entrySet()) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c.getKey());
                 GPSFix comFix = track.getFirstFixAtOrAfter(timePoints.getA());
                 List<GPSFix> fixes = c.getValue();
@@ -170,7 +170,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
-        return affextedFixes;
+        return affectedFixes;
     }
 
     @Override
@@ -203,20 +203,20 @@ public class CandidateFinderImpl implements CandidateFinder {
         for (Waypoint w : waypoints) {
             result.put(w, new Pair<List<Candidate>, List<Candidate>>(new ArrayList<Candidate>(), new ArrayList<Candidate>()));
         }
-        Set<GPSFix> affextedFixes = new TreeSet<GPSFix>(comp);
+        Set<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         TreeMap<GPSFix, Map<Mark, Distance>> competitorDistances = distances.get(c);
         for (GPSFix fix : fixes) {
-            affextedFixes.add(fix);
+            affectedFixes.add(fix);
             GPSFix fixBefore = competitorDistances.lowerKey(fix);
             GPSFix fixAfter = competitorDistances.higherKey(fix);
             if (fixBefore != null) {
-                affextedFixes.add(fixBefore);
+                affectedFixes.add(fixBefore);
             }
             if (fixAfter != null) {
-                affextedFixes.add(fixAfter);
+                affectedFixes.add(fixAfter);
             }
         }
-        for (GPSFix fix : affextedFixes) {
+        for (GPSFix fix : affectedFixes) {
             TimePoint t = null;
             Position p = null;
             GPSFix fixBefore = competitorDistances.lowerKey(fix);
