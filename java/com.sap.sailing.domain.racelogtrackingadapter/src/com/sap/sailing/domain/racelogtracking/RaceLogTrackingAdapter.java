@@ -7,15 +7,21 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.racelog.tracking.DefineMarkEvent;
 import com.sap.sailing.domain.racelog.tracking.DenoteForTrackingEvent;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -69,4 +75,17 @@ public interface RaceLogTrackingAdapter {
      */
     void denoteForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
             throws NotDenotableForTrackingException;
+    
+    /**
+     * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that timepoint.
+     */
+    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
+    
+    /**
+     * Duplicate the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
+     * {@code to} race log.
+     * The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also inserts the necessary
+     * {@link DefineMarkEvent}s into the {@code to} race log.
+     */
+    void copyCourseToOtherRaceLog(RaceLog from, RaceLog to, SharedDomainFactory baseDomainFactory, RacingEventService service);
 }

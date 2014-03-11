@@ -555,7 +555,5 @@ public interface SailingServiceAsync {
 
     void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
             String leaderboardTo, String raceColumnTo, String fleetTo, AsyncCallback<Void> callback);
-
-    void getCoursesFromRaceLogsInLeaderboard(String leaderboardName, AsyncCallback<List<RaceCourseDTO>> callback);
 }
 

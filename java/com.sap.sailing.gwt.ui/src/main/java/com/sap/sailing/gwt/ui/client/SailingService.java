@@ -421,8 +421,6 @@ public interface SailingService extends RemoteService {
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
     
-    List<RaceCourseDTO> getCoursesFromRaceLogsInLeaderboard(String leaderboardName);
-    
     void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
             String leaderboardTo, String raceColumnTo, String fleetTo);
 }

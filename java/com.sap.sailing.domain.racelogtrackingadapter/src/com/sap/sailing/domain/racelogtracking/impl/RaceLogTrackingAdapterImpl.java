@@ -7,17 +7,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Function;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -32,8 +41,12 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -204,4 +217,80 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     public boolean isDenotedForRaceLogTracking(RacingEventService service, RaceColumn raceColumn, Fleet fleet) {
         return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze().isForTracking();
     }
+    
+
+    
+    private Waypoint duplicateWaypoint(Waypoint waypoint, Map<ControlPoint, ControlPoint> controlPointDuplicationCache,
+            Map<Mark, Mark> markDuplicationCache, SharedDomainFactory baseDomainFactory) {
+        ControlPoint oldCP = waypoint.getControlPoint();
+        ControlPoint newCP = null;
+        PassingInstruction pi = waypoint.getPassingInstructions();
+        if (controlPointDuplicationCache.get(oldCP) != null) {
+            newCP = controlPointDuplicationCache.get(oldCP);
+        } else {
+            Mark[] newMarks = new Mark[Util.size(oldCP.getMarks())];
+            int i = 0;
+            for (Mark oldMark : oldCP.getMarks()) {
+                newMarks[i] = null;
+                if (markDuplicationCache.get(oldMark) != null) {
+                    newMarks[i] = markDuplicationCache.get(oldMark);
+                } else {
+                    newMarks[i] = baseDomainFactory.getOrCreateMark(UUID.randomUUID(), oldMark.getName(), oldMark.getType(),
+                            oldMark.getColor(), oldMark.getShape(), oldMark.getPattern());
+                    markDuplicationCache.put(oldMark, newMarks[i]);
+                }
+                i++;
+            }
+            switch (newMarks.length) {
+            case 1:
+                newCP = newMarks[0];
+                break;
+            case 2:
+                newCP = baseDomainFactory.createControlPointWithTwoMarks(newMarks[0], newMarks[1], oldCP.getName());
+                break;
+            default:
+                logger.log(Level.WARNING, "Don't know how to duplicate CP with more than 2 marks");
+                throw new RuntimeException("Don't know how to duplicate CP with more than 2 marks");
+            }
+            controlPointDuplicationCache.put(oldCP, newCP);
+        }
+        
+        return baseDomainFactory.createWaypoint(newCP, pi);
+    }
+    
+    @Override
+    public void copyCourseToOtherRaceLog(RaceLog fromRaceLog, RaceLog toRaceLog, SharedDomainFactory baseDomainFactory,
+            RacingEventService service) {
+        CourseBase from = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        CourseBase to = new CourseDataImpl("Copy of \"" + from.getName());
+        TimePoint now = MillisecondsTimePoint.now();
+        if (from != null && new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
+            int i = 0;
+            Map<ControlPoint, ControlPoint> controlPointDuplicationCache = new HashMap<ControlPoint, ControlPoint>();
+            Map<Mark, Mark> markDuplicationCache = new HashMap<Mark, Mark>();
+            for (Waypoint oldWaypoint : from.getWaypoints()) {
+                to.addWaypoint(i++, duplicateWaypoint(oldWaypoint, controlPointDuplicationCache, markDuplicationCache, baseDomainFactory));
+            }
+            
+            for (Mark mark : markDuplicationCache.values()) {
+                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, service.getServerAuthor(),
+                        toRaceLog.getCurrentPassId(), mark);
+                toRaceLog.add(event);
+            }
+        }
+        
+        RaceLogEvent duplicatedEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, service.getServerAuthor(), toRaceLog.getCurrentPassId(), to);
+        toRaceLog.add(duplicatedEvent);
+    }
+    
+    @Override
+    public void pingMark(RaceLog raceLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
+        DeviceIdentifier device = new PingDeviceIdentifierImpl();
+        TimePoint time = gpsFix.getTimePoint();
+
+        RaceLogEvent mapping = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time,
+                service.getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
+        raceLog.add(mapping);
+        service.getGPSFixStore().storeFix(device, gpsFix);
+    }    
 }

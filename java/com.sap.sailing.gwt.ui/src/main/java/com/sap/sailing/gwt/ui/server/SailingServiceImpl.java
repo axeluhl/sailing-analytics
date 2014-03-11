@@ -188,7 +188,6 @@ import com.sap.sailing.domain.racelog.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.racelog.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.racelog.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.racelog.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
-import com.sap.sailing.domain.racelog.tracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.DeviceMappingEvent;
 import com.sap.sailing.domain.racelog.tracking.RegisterCompetitorEvent;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.DefinedMarkFinder;
@@ -196,7 +195,6 @@ import com.sap.sailing.domain.racelog.tracking.analyzing.impl.LastPingMappingEve
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.racelog.tracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
@@ -4077,75 +4075,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO, PositionDTO positionDTO) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        
         Mark mark = convertToMark(markDTO, true);
-        
         TimePoint time = MillisecondsTimePoint.now();
-        
         Position position = convertToPosition(positionDTO);
         GPSFix fix = new GPSFixImpl(position, time);
         
-        DeviceIdentifier device = new PingDeviceIdentifierImpl();
-        
-        RaceLogEvent mapping = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time,
-                getService().getServerAuthor(), device, mark, raceLog.getCurrentPassId(), time, time);
-        
-        raceLog.add(mapping);
-        
-        getService().getGPSFixStore().storeFix(device, fix);
-    }
-    
-    @Override
-    public List<RaceCourseDTO> getCoursesFromRaceLogsInLeaderboard(String leaderboardName) {
-        List<RaceCourseDTO> result = new ArrayList<RaceCourseDTO>();
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceCourseDTO last = getLastCourseDefinitionInRaceLog(leaderboardName, raceColumn.getName(), fleet.getName());
-                if (last != null) {
-                    result.add(last);
-                }
-            }
-        }
-        return result;
-    }
-    
-    private Waypoint duplicateWaypoint(Waypoint waypoint, Map<ControlPoint, ControlPoint> controlPointDuplicationCache,
-            Map<Mark, Mark> markDuplicationCache) {
-        ControlPoint oldCP = waypoint.getControlPoint();
-        ControlPoint newCP = null;
-        PassingInstruction pi = waypoint.getPassingInstructions();
-        if (controlPointDuplicationCache.get(oldCP) != null) {
-            newCP = controlPointDuplicationCache.get(oldCP);
-        } else {
-            Mark[] newMarks = new Mark[Util.size(oldCP.getMarks())];
-            int i = 0;
-            for (Mark oldMark : oldCP.getMarks()) {
-                newMarks[i] = null;
-                if (markDuplicationCache.get(oldMark) != null) {
-                    newMarks[i] = markDuplicationCache.get(oldMark);
-                } else {
-                    newMarks[i] = baseDomainFactory.getOrCreateMark(UUID.randomUUID(), oldMark.getName(), oldMark.getType(),
-                            oldMark.getColor(), oldMark.getShape(), oldMark.getPattern());
-                    markDuplicationCache.put(oldMark, newMarks[i]);
-                }
-                i++;
-            }
-            switch (newMarks.length) {
-            case 1:
-                newCP = newMarks[0];
-                break;
-            case 2:
-                newCP = baseDomainFactory.createControlPointWithTwoMarks(newMarks[0], newMarks[1], oldCP.getName());
-                break;
-            default:
-                logger.log(Level.WARNING, "Don't know how to duplicate CP with more than 2 marks");
-                throw new RuntimeException("Don't know how to duplicate CP with more than 2 marks");
-            }
-            controlPointDuplicationCache.put(oldCP, newCP);
-        }
-        
-        return baseDomainFactory.createWaypoint(newCP, pi);
+        getRaceLogTrackingAdapter().pingMark(raceLog, mark, fix, getService());
     }
     
     @Override
@@ -4154,28 +4089,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboardFrom == leaderboardTo && raceColumnFrom == raceColumnTo && fleetFrom == fleetTo) {
             return;
         }
-        TimePoint now = MillisecondsTimePoint.now();
         RaceLog fromRaceLog = getRaceLog(leaderboardFrom, raceColumnFrom, fleetFrom);
         RaceLog toRaceLog = getRaceLog(leaderboardTo, raceColumnTo, fleetTo);
-        CourseBase from = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
-        CourseBase to = new CourseDataImpl("Copy of \"" + from.getName()
-                + "\" for " + leaderboardTo + " - " + raceColumnTo + " - " + fleetTo);
-        if (from != null && new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
-            int i = 0;
-            Map<ControlPoint, ControlPoint> controlPointDuplicationCache = new HashMap<ControlPoint, ControlPoint>();
-            Map<Mark, Mark> markDuplicationCache = new HashMap<Mark, Mark>();
-            for (Waypoint oldWaypoint : from.getWaypoints()) {
-                to.addWaypoint(i++, duplicateWaypoint(oldWaypoint, controlPointDuplicationCache, markDuplicationCache));
-            }
-            
-            for (Mark mark : markDuplicationCache.values()) {
-                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, getService().getServerAuthor(),
-                        toRaceLog.getCurrentPassId(), mark);
-                toRaceLog.add(event);
-            }
-        }
-        
-        RaceLogEvent duplicatedEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, getService().getServerAuthor(), toRaceLog.getCurrentPassId(), to);
-        toRaceLog.add(duplicatedEvent);
+
+        getRaceLogTrackingAdapter().copyCourseToOtherRaceLog(fromRaceLog, toRaceLog, baseDomainFactory, getService());
     }
 }
