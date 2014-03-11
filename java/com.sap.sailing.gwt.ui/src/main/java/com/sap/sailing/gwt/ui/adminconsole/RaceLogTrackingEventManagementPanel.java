@@ -4,6 +4,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -17,7 +18,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -154,6 +157,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                             }
                         }
                     });
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_START_TIME.equals(value)) {
+                    setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
                 }
             }
         });
@@ -290,5 +295,32 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 errorReporter.reportError("Failed to start tracking: " + caught.getMessage());
             }
         });
+    }
+    
+    private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
+        new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
+                fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeDTO>() {
+            @Override
+            public void ok(RaceLogSetStartTimeDTO editedObject) {
+                sailingService.setStartTime(editedObject, new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (!result) {
+                            Window.alert(stringMessages.failedToSetNewStartTime());
+                        } else {
+                            trackedRacesListComposite.regattaRefresher.fillRegattas();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() { }
+        }).show();
     }
 }
