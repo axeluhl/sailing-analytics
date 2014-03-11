@@ -13,7 +13,7 @@ find_project_home ()
     fi
 
     if [ ! -d "$1/.git" ]; then
-        PARENT_DIR=`cd $1/..;pwd`
+        PARENT_DIR=`cd "$1/..";pwd`
         OUTPUT=$(find_project_home $PARENT_DIR)
 
         if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
