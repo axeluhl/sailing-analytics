@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
-import com.sap.sse.datamining.data.ClusterBoundary.ComparisonStrategy;
 
 public class TestClustersWithBoundaries {
 

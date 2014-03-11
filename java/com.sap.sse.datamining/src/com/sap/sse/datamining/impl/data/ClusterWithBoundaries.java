@@ -18,5 +18,10 @@ public class ClusterWithBoundaries<ElementType> extends AbstractCluster<ElementT
     public boolean isInRange(ElementType value) {
         return lowerBound.contains(value) && upperBound.contains(value);
     }
+    
+    @Override
+    public String toString() {
+        return super.toString() + " " + lowerBound + " - " + upperBound;
+    }
 
 }

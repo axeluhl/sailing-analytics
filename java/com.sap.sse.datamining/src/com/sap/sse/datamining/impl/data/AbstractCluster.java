@@ -14,5 +14,10 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
     public String getName() {
         return name;
     }
+    
+    @Override
+    public String toString() {
+        return getName();
+    }
 
 }

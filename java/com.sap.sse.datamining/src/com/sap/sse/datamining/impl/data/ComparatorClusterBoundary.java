@@ -19,21 +19,25 @@ public class ComparatorClusterBoundary<ElementType> implements ClusterBoundary<E
 
     @Override
     public boolean contains(ElementType value) {
-        return verifyComparisonResult(comparator.compare(value, boundaryValue));
+        return strategy.verifyComparisonResult(comparator.compare(value, boundaryValue));
     }
-
-    private boolean verifyComparisonResult(int comparisonResult) {
-        switch (strategy) {
-        case GREATER_EQUALS_THAN:
-            return comparisonResult == 0 || comparisonResult >= 1;
-        case GREATER_THAN:
-            return comparisonResult >= 1;
-        case LOWER_EQUALS_THAN:
-            return comparisonResult == 0 || comparisonResult <= -1;
-        case LOWER_THAN:
-            return comparisonResult <= -1;
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        if (strategy == ComparisonStrategy.GREATER_EQUALS_THAN || strategy == ComparisonStrategy.GREATER_THAN) {
+            builder.append(strategy.getSignifier());
         }
-        throw new UnsupportedOperationException("No implementation for the strategy " + strategy);
+        builder.append(boundaryValue);
+        if (strategy == ComparisonStrategy.LOWER_EQUALS_THAN || strategy == ComparisonStrategy.LOWER_THAN) {
+            builder.append(strategy.getSignifier());
+        }
+        return builder.toString();
+    }
+    
+    @Override
+    public ComparisonStrategy getStrategy() {
+        return strategy;
     }
 
 }

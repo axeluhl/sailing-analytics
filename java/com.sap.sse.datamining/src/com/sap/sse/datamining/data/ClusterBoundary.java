@@ -1,11 +1,11 @@
 package com.sap.sse.datamining.data;
 
+import com.sap.sse.datamining.impl.data.ComparisonStrategy;
+
 public interface ClusterBoundary<ElementType> {
-    
-    public enum ComparisonStrategy {
-        LOWER_THAN, LOWER_EQUALS_THAN, GREATER_THAN, GREATER_EQUALS_THAN
-    }
-    
+
     public boolean contains(ElementType value);
+
+    public ComparisonStrategy getStrategy();
 
 }
