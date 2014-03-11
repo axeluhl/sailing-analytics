@@ -420,4 +420,9 @@ public interface SailingService extends RemoteService {
      * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, PositionDTO position);
+    
+    List<RaceCourseDTO> getCoursesFromRaceLogsInLeaderboard(String leaderboardName);
+    
+    void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
+            String leaderboardTo, String raceColumnTo, String fleetTo);
 }

@@ -53,6 +53,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             });
             courseActionsPanel.insert(addMark, courseActionsPanel.getWidgetIndex(RaceLogCourseManagementWidget.this.saveButton));
             
+            
             Button cancel = new Button(stringMessages.cancel());
             cancel.addClickHandler(new ClickHandler() {
                 @Override

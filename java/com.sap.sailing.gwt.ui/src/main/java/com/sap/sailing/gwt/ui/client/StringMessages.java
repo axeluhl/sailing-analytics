@@ -980,4 +980,7 @@ public interface StringMessages extends Messages {
     String pleaseEnterA(String what);
     String pingPosition(String whose);
     String pleaseEnterAValidValueFor(String what, String validTemplate);
+    String copyCourseToOther();
+    String nowSelectRaceColumnAndFleetToCopyTo();
+    String selectRowInTableToCopyCourse();
 }

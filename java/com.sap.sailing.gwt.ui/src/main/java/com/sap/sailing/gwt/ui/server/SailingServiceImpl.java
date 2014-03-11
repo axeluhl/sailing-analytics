@@ -2021,6 +2021,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 fleetDTO.raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
                 fleetDTO.raceLogTrackerExists = getService().getRaceTrackerById(raceLog.getId()) != null;
+                fleetDTO.courseDefinitionInRaceLog = new LastPublishedCourseDesignFinder(raceLog).analyze() != null;
                 
                 if (getRaceLogTrackingAdapter().isDenotedForRaceLogTracking(getService(), raceColumn, fleet)) {
                     leaderboardDTO.isDenotedForRaceLogTracking = true;
@@ -4092,5 +4093,89 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(mapping);
         
         getService().getGPSFixStore().storeFix(device, fix);
+    }
+    
+    @Override
+    public List<RaceCourseDTO> getCoursesFromRaceLogsInLeaderboard(String leaderboardName) {
+        List<RaceCourseDTO> result = new ArrayList<RaceCourseDTO>();
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RaceCourseDTO last = getLastCourseDefinitionInRaceLog(leaderboardName, raceColumn.getName(), fleet.getName());
+                if (last != null) {
+                    result.add(last);
+                }
+            }
+        }
+        return result;
+    }
+    
+    private Waypoint duplicateWaypoint(Waypoint waypoint, Map<ControlPoint, ControlPoint> controlPointDuplicationCache,
+            Map<Mark, Mark> markDuplicationCache) {
+        ControlPoint oldCP = waypoint.getControlPoint();
+        ControlPoint newCP = null;
+        PassingInstruction pi = waypoint.getPassingInstructions();
+        if (controlPointDuplicationCache.get(oldCP) != null) {
+            newCP = controlPointDuplicationCache.get(oldCP);
+        } else {
+            Mark[] newMarks = new Mark[Util.size(oldCP.getMarks())];
+            int i = 0;
+            for (Mark oldMark : oldCP.getMarks()) {
+                newMarks[i] = null;
+                if (markDuplicationCache.get(oldMark) != null) {
+                    newMarks[i] = markDuplicationCache.get(oldMark);
+                } else {
+                    newMarks[i] = baseDomainFactory.getOrCreateMark(UUID.randomUUID(), oldMark.getName(), oldMark.getType(),
+                            oldMark.getColor(), oldMark.getShape(), oldMark.getPattern());
+                    markDuplicationCache.put(oldMark, newMarks[i]);
+                }
+                i++;
+            }
+            switch (newMarks.length) {
+            case 1:
+                newCP = newMarks[0];
+                break;
+            case 2:
+                newCP = baseDomainFactory.createControlPointWithTwoMarks(newMarks[0], newMarks[1], oldCP.getName());
+                break;
+            default:
+                logger.log(Level.WARNING, "Don't know how to duplicate CP with more than 2 marks");
+                throw new RuntimeException("Don't know how to duplicate CP with more than 2 marks");
+            }
+            controlPointDuplicationCache.put(oldCP, newCP);
+        }
+        
+        return baseDomainFactory.createWaypoint(newCP, pi);
+    }
+    
+    @Override
+    public void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
+            String leaderboardTo, String raceColumnTo, String fleetTo) {
+        if (leaderboardFrom == leaderboardTo && raceColumnFrom == raceColumnTo && fleetFrom == fleetTo) {
+            return;
+        }
+        TimePoint now = MillisecondsTimePoint.now();
+        RaceLog fromRaceLog = getRaceLog(leaderboardFrom, raceColumnFrom, fleetFrom);
+        RaceLog toRaceLog = getRaceLog(leaderboardTo, raceColumnTo, fleetTo);
+        CourseBase from = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        CourseBase to = new CourseDataImpl("Copy of \"" + from.getName()
+                + "\" for " + leaderboardTo + " - " + raceColumnTo + " - " + fleetTo);
+        if (from != null && new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
+            int i = 0;
+            Map<ControlPoint, ControlPoint> controlPointDuplicationCache = new HashMap<ControlPoint, ControlPoint>();
+            Map<Mark, Mark> markDuplicationCache = new HashMap<Mark, Mark>();
+            for (Waypoint oldWaypoint : from.getWaypoints()) {
+                to.addWaypoint(i++, duplicateWaypoint(oldWaypoint, controlPointDuplicationCache, markDuplicationCache));
+            }
+            
+            for (Mark mark : markDuplicationCache.values()) {
+                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now, getService().getServerAuthor(),
+                        toRaceLog.getCurrentPassId(), mark);
+                toRaceLog.add(event);
+            }
+        }
+        
+        RaceLogEvent duplicatedEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, getService().getServerAuthor(), toRaceLog.getCurrentPassId(), to);
+        toRaceLog.add(duplicatedEvent);
     }
 }

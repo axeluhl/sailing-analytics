@@ -552,5 +552,10 @@ public interface SailingServiceAsync {
 
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
             PositionDTO position, AsyncCallback<Void> callback);
+
+    void copyCourseToOtherRaceLog(String leaderboardFrom, String raceColumnFrom, String fleetFrom,
+            String leaderboardTo, String raceColumnTo, String fleetTo, AsyncCallback<Void> callback);
+
+    void getCoursesFromRaceLogsInLeaderboard(String leaderboardName, AsyncCallback<List<RaceCourseDTO>> callback);
 }
 

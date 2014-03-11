@@ -11,6 +11,7 @@ public class FleetDTO extends NamedDTO {
     public boolean raceLogTrackerCanBeAdded;
     public RaceLogTrackingState raceLogTrackingState;
     public boolean raceLogTrackerExists;
+    public boolean courseDefinitionInRaceLog;
     
     public FleetDTO() {}
 

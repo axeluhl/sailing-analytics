@@ -5,7 +5,11 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
@@ -18,8 +22,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {
-   
+public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel {   
     public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
             RegattaRefresher regattaRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
@@ -101,9 +104,9 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         raceActionColumn.setFieldUpdater(new FieldUpdater<RaceColumnDTOAndFleetDTOWithNameBasedEquality, String>() {
             @Override
             public void update(int index, RaceColumnDTOAndFleetDTOWithNameBasedEquality object, String value) {
-                String leaderboardName = getSelectedLeaderboardName();
-                String raceColumnName = object.getA().getName();
-                String fleetName = object.getB().getName();
+                final String leaderboardName = getSelectedLeaderboardName();
+                final String raceColumnName = object.getA().getName();
+                final String fleetName = object.getB().getName();
                 if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_ADD_RACELOG_TRACKER.equals(value)) {
                     addRaceLogTracker(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
@@ -118,6 +121,39 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     //TODO
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY_COURSE.equals(value)) {
+                    final Label selectToCopy = new Label(stringMessages.selectRowInTableToCopyCourse());
+                    final VerticalPanel panelToAddTo = (VerticalPanel) selectedLeaderBoardPanel.getContentWidget();
+                    panelToAddTo.add(selectToCopy);
+                    raceColumnTableSelectionModel.addSelectionChangeHandler(new Handler() {
+                        private boolean done = false;
+                        @Override
+                        public void onSelectionChange(SelectionChangeEvent event) {
+                            if (! done && raceColumnTableSelectionModel.getSelectedSet().size() == 1) {
+                                final String leaderboardTo = getSelectedLeaderboardName();
+                                final String raceColumnTo = getSelectedRaceColumnWithFleet().getA().getName();
+                                String fleetTo = getSelectedRaceColumnWithFleet().getB().getName();
+                                if (!(leaderboardTo.equals(leaderboardName) && raceColumnTo.equals(raceColumnName) && fleetTo
+                                        .equals(fleetName)) && getSelectedRaceColumnWithFleet().getB().raceLogTrackingState.isForTracking()) {
+
+                                    done = true;
+                                    panelToAddTo.remove(selectToCopy);
+                                    sailingService.copyCourseToOtherRaceLog(leaderboardName, raceColumnName, fleetName,
+                                            leaderboardTo, raceColumnTo, fleetTo, new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            loadAndRefreshLeaderboard(leaderboardTo, raceColumnTo);
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError("Could not copy course: " + caught.getMessage());
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });
