@@ -173,16 +173,20 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
     }
 
     /**
-     * Find the earliest device mapping, set this as start of tracking timepoint
+     * Use mapping time ranges to set time start and end of tracking time for race
      */
-    private void updateStartOfTracking() {
-        TimePoint earliestMapping = new MillisecondsTimePoint(Long.MAX_VALUE);
+    private void updateStartAndEndOfTracking() {
+        TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
+        TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
 
         synchronized (competitorMappings) {
             for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMapping)) {
-                        earliestMapping = mapping.getTimeRange().from();
+                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
+                        earliestMappingStart = mapping.getTimeRange().from();
+                    }
+                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
+                        latestMappingEnd = mapping.getTimeRange().to();
                     }
                 }
             }
@@ -191,14 +195,17 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
         synchronized (markMappings) {
             for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMapping)) {
-                        earliestMapping = mapping.getTimeRange().from();
+                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
+                        earliestMappingStart = mapping.getTimeRange().from();
+                    }
+                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
+                        latestMappingEnd = mapping.getTimeRange().to();
                     }
                 }
             }
         }
 
-        trackedRace.setStartOfTrackingReceived(earliestMapping);
+        trackedRace.setStartOfTrackingReceived(latestMappingEnd);
     }
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
@@ -259,7 +266,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             markMappingsByDevices.putAll(transformToMappingsByDevice(markMappings));
         }
 
-        updateStartOfTracking();
+        updateStartAndEndOfTracking();
     }
 
     @Override
@@ -295,7 +302,7 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
             competitorMappingsByDevices.putAll(transformToMappingsByDevice(competitorMappings));
         }
 
-        updateStartOfTracking();
+        updateStartAndEndOfTracking();
     }
 
     @Override
@@ -366,7 +373,6 @@ public class RaceLogRaceTracker extends BaseRaceLogEventVisitor implements RaceT
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null);
 
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
-        updateStartOfTracking();
 
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         updateCompetitorMappings(false);
