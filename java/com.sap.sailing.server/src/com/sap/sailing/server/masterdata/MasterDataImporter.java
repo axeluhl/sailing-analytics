@@ -64,9 +64,7 @@ public class MasterDataImporter {
                 creationCount,
                 baseDomainFactory);
         creationCount = racingEventService.apply(op);
-        racingEventService.replicateDataImportOperation(op);
         racingEventService.mediaTracksImported(topLevelMasterData.getAllMediaTracks(), override);
-
         return creationCount;
     }
 
