@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -277,5 +278,49 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
         edtc.addAll(result);
         return result;
+    }
+
+    @Override
+    public void merge(RaceLog other) {
+        lockForRead();
+        other.lockForRead();
+        try {
+            RaceLogEventComparator comparator = RaceLogEventComparator.INSTANCE;
+            Iterator<RaceLogEvent> thisIter = getRawFixes().iterator();
+            Iterator<RaceLogEvent> otherIter = other.getRawFixes().iterator();
+            RaceLogEvent thisEvent = null;
+            RaceLogEvent otherEvent = null;
+            while (otherIter.hasNext() || otherEvent != null) {
+                if (thisEvent == null && thisIter.hasNext()) {
+                    thisEvent = thisIter.next();
+                }
+                if (otherEvent == null) {
+                    otherEvent = otherIter.next();
+                }
+                if (thisEvent == null) {
+                    // All events of this race log have been consumed; simply keep adding the events
+                    // from the other race log to this race log.
+                    // otherEvent has to be non-null because if thisIter didn't have a next, otherIter must have had a next
+                    add(otherEvent);
+                    otherEvent = null; // "consumed" otherEvent; try to grab next if a next element exists in otherIter
+                } else {
+                    final int comparison = comparator.compare(thisEvent, otherEvent);
+                    if (comparison < 0) {
+                        thisEvent = null; // skip the "lesser" race log event on this race log
+                    } else if (comparison == 0) {
+                        // the race log event from the other log is already contained in this log; skip both
+                        thisEvent = null;
+                        otherEvent = null;
+                    } else {
+                        // comparison > 0; we skipped on this race log until we found a "greater" event on this race log; insert otherEvent
+                        add(otherEvent);
+                        otherEvent = null; // "consumed"
+                    }
+                }
+            }
+        } finally {
+            unlockAfterRead();
+            other.unlockAfterRead();
+        }
     }
 }

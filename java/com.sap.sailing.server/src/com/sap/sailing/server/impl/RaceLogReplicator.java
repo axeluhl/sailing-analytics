@@ -5,7 +5,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.operationaltransformation.RaceLogLoadedOnRegatta;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnRegatta;
 
@@ -43,31 +41,6 @@ public class RaceLogReplicator implements RaceColumnListener {
             @Override
             public void resolveOnLeaderboardIdentifierAndReplicate(RaceLogOnLeaderboardIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnLeaderboard(
-                        identifierTemplate.getParentObjectName(), 
-                        raceColumn.getName(), 
-                        identifier.getFleetName(), 
-                        event);
-                service.replicate(operation);
-            }
-        });
-    }
-
-    @Override
-    public void raceLogLoaded(final RaceColumn raceColumn, final RaceLogIdentifier identifier, final RaceLog raceLog) {
-        identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
-            @Override
-            public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
-                RacingEventServiceOperation<?> operation = new RaceLogLoadedOnRegatta(
-                        identifierTemplate.getParentObjectName(), 
-                        raceColumn.getName(), 
-                        identifier.getFleetName(), 
-                        raceLog);
-                service.replicate(operation);
-            }
-            
-            @Override
-            public void resolveOnLeaderboardIdentifierAndReplicate(RaceLogOnLeaderboardIdentifier identifierTemplate) {
-                RacingEventServiceOperation<?> operation = new RaceLogLoadedOnLeaderboard(
                         identifierTemplate.getParentObjectName(), 
                         raceColumn.getName(), 
                         identifier.getFleetName(), 

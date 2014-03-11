@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -450,10 +449,6 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
 
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-    }
-
-    @Override
-    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
     }
 
     @Override

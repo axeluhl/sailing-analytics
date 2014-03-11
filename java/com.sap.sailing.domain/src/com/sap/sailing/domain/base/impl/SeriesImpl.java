@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.impl.RenamableImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -318,11 +317,6 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         raceColumnListeners.notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
-    }
-
-    @Override
-    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
-        raceColumnListeners.notifyListenersAboutRaceLogLoaded(raceColumn, identifier, raceLog);
     }
 
     @Override

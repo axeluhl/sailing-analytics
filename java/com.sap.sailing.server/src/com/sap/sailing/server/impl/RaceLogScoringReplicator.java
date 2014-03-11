@@ -99,16 +99,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         }
     }
 
-    @Override
-    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLog raceLog) {
-        for (RaceLogEvent event : raceLog.getFixesDescending()) {
-            if (event instanceof RaceLogFinishPositioningConfirmedEvent) {
-                handleFinishPositioningList(raceColumn, raceLogIdentifier, event);
-                break; // only use the last finish positioning confirmed event
-            }
-        }
-    }
-
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getTemplate().getParentObjectName());
         if (leaderboard != null) {

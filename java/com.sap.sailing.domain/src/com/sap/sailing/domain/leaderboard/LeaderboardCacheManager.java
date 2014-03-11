@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
-import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -305,11 +304,6 @@ public class LeaderboardCacheManager {
                     @Override
                     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
                             RaceLogEvent event) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void raceLogLoaded(RaceColumn raceColumn, RaceLogIdentifier identifier, RaceLog raceLog) {
                         removeFromCache(leaderboard);
                     }
                 };
