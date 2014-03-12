@@ -23,6 +23,11 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -33,7 +38,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -354,21 +358,21 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         setLabelFormatter(tickLabelFormatter);
 
         // Create the outer shell
-        DOM.setStyleAttribute(getElement(), "position", "relative");
+        getElement().getStyle().setPosition(Position.RELATIVE);
         setStyleName("gwt-SliderBar-shell");
 
         // Create the line
         lineElement = DOM.createDiv();
         DOM.appendChild(getElement(), lineElement);
-        DOM.setStyleAttribute(lineElement, "position", "absolute");
-        DOM.setElementProperty(lineElement, "className", "gwt-SliderBar-line");
+        lineElement.getStyle().setPosition(Position.ABSOLUTE);
+        lineElement.setPropertyString("className", "gwt-SliderBar-line");
 
         // Create the knob
         knobImage.setResource(images.slider());
         Element knobElement = knobImage.getElement();
         DOM.appendChild(getElement(), knobElement);
-        DOM.setStyleAttribute(knobElement, "position", "absolute");
-        DOM.setElementProperty(knobElement, "className", "gwt-SliderBar-knob");
+        knobElement.getStyle().setPosition(Position.ABSOLUTE);
+        knobElement.setPropertyString("className", "gwt-SliderBar-knob");
 
         sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
 
@@ -511,8 +515,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
             // Mousewheel events
             case Event.ONMOUSEWHEEL:
-                int velocityY = DOM.eventGetMouseWheelVelocityY(event);
-                DOM.eventPreventDefault(event);
+                int velocityY = event.getMouseWheelVelocityY();
+                event.preventDefault();
                 if (velocityY > 0) {
                     shiftRight(1);
                 } else {
@@ -524,35 +528,35 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             case Event.ONKEYDOWN:
                 if (!slidingKeyboard) {
                     int multiplier = 1;
-                    if (DOM.eventGetCtrlKey(event)) {
+                    if (event.getCtrlKey()) {
                         multiplier = (int) (getTotalRange() / stepSize / 10);
                     }
 
-                    switch (DOM.eventGetKeyCode(event)) {
+                    switch (event.getKeyCode()) {
                     case KeyCodes.KEY_HOME:
-                        DOM.eventPreventDefault(event);
+                        event.preventDefault();
                         setCurrentValue(minValue);
                         break;
                     case KeyCodes.KEY_END:
-                        DOM.eventPreventDefault(event);
+                        event.preventDefault();
                         setCurrentValue(maxValue);
                         break;
                     case KeyCodes.KEY_LEFT:
-                        DOM.eventPreventDefault(event);
+                        event.preventDefault();
                         slidingKeyboard = true;
                         startSliding(false, true);
                         shiftLeft(multiplier);
                         keyTimer.schedule(400, false, multiplier);
                         break;
                     case KeyCodes.KEY_RIGHT:
-                        DOM.eventPreventDefault(event);
+                        event.preventDefault();
                         slidingKeyboard = true;
                         startSliding(false, true);
                         shiftRight(multiplier);
                         keyTimer.schedule(400, true, multiplier);
                         break;
                     case 32:
-                        DOM.eventPreventDefault(event);
+                        event.preventDefault();
                         setCurrentValue(minValue + getTotalRange() / 2);
                         break;
                     }
@@ -573,7 +577,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 slidingMouse = true;
                 DOM.setCapture(getElement());
                 startSliding(true, true);
-                DOM.eventPreventDefault(event);
+                event.preventDefault();
                 slideKnob(event);
                 break;
             case Event.ONMOUSEUP:
@@ -606,7 +610,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         // Center the line in the shell
         int lineWidth = lineElement.getOffsetWidth();
         lineLeftOffset = (width / 2) - (lineWidth / 2);
-        DOM.setStyleAttribute(lineElement, "left", lineLeftOffset + "px");
+        lineElement.getStyle().setLeft(lineLeftOffset, Unit.PX);
 
         // Draw the other components
         drawTickLabels();
@@ -675,10 +679,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         this.enabled = enabled;
         if (enabled) {
             knobImage.setResource(images.slider());
-            DOM.setElementProperty(lineElement, "className", "gwt-SliderBar-line");
+            lineElement.setPropertyString("className", "gwt-SliderBar-line");
         } else {
             knobImage.setResource(images.sliderDisabled());
-            DOM.setElementProperty(lineElement, "className", "gwt-SliderBar-line gwt-SliderBar-line-disabled");
+            lineElement.setPropertyString("className", "gwt-SliderBar-line gwt-SliderBar-line-disabled");
         }
         redraw();
     }
@@ -838,7 +842,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     @Override
     protected void onLoad() {
         // Reset the position attribute of the parent element
-        DOM.setStyleAttribute(getElement(), "position", "relative");
+        getElement().getStyle().setPosition(Position.RELATIVE);
     }
 
     /**
@@ -852,7 +856,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             int knobWidth = knobElement.getOffsetWidth();
             int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
             knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
-            DOM.setStyleAttribute(knobElement, "left", knobLeftOffset + "px");
+            knobElement.getStyle().setLeft(knobLeftOffset, Unit.PX);
         }
     }
 
@@ -872,12 +876,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = tickLabelElements.get(i);
                     } else { // Create the new label
                         label = DOM.createDiv();
-                        DOM.setStyleAttribute(label, "position", "absolute");
-                        DOM.setStyleAttribute(label, "display", "none");
+                        label.getStyle().setPosition(Position.ABSOLUTE);
+                        label.getStyle().setDisplay(Display.NONE);
                         if (enabled) {
-                            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel");
+                            label.setPropertyString("className", "gwt-SliderBar-ticklabel");
                         } else {
-                            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel-disabled");
+                            label.setPropertyString("className", "gwt-SliderBar-ticklabel-disabled");
                         }
                         DOM.appendChild(getElement(), label);
                         tickLabelElements.add(label);
@@ -885,32 +889,31 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
                     // Set the label text
                     double value = minValue + (getTotalRange() * i / numTickLabels);
-                    DOM.setStyleAttribute(label, "visibility", "hidden");
-                    DOM.setStyleAttribute(label, "display", "");
-                    DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
+                    label.getStyle().setVisibility(Visibility.HIDDEN);
+                    label.getStyle().setProperty("display", "");
+                    label.setPropertyString("innerHTML", formatTickLabel(value, previousValue));
 
-                    // Move to the left so the label width is not clipped by the
-                    // shell
-                    DOM.setStyleAttribute(label, "left", "0px");
+                    // Move to the left so the label width is not clipped by the shell
+                    label.getStyle().setLeft(0, Unit.PX);
 
                     // Position the label and make it visible
                     int labelWidth = label.getOffsetWidth();
                     int labelLeftOffset = lineLeftOffset + (lineWidth * i / numTickLabels) - (labelWidth / 2);
                     labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
                     labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
-                    DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
-                    DOM.setStyleAttribute(label, "visibility", "visible");
+                    label.getStyle().setLeft(labelLeftOffset, Unit.PX);
+                    label.getStyle().setVisibility(Visibility.VISIBLE);
 
                     previousValue = value;
                 }
 
                 // Hide unused labels
                 for (int i = (numTickLabels + 1); i < tickLabelElements.size(); i++) {
-                    DOM.setStyleAttribute(tickLabelElements.get(i), "display", "none");
+                    tickLabelElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all labels
                 for (Element elem : tickLabelElements) {
-                    DOM.setStyleAttribute(elem, "display", "none");
+                    elem.getStyle().setDisplay(Display.NONE);
                 }
             }
         }
@@ -931,33 +934,33 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         tick = tickElements.get(i);
                     } else { // Create the new tick
                         tick = DOM.createDiv();
-                        DOM.setStyleAttribute(tick, "position", "absolute");
-                        DOM.setStyleAttribute(tick, "display", "none");
+                        tick.getStyle().setPosition(Position.ABSOLUTE);
+                        tick.getStyle().setDisplay(Display.NONE);
                         DOM.appendChild(getElement(), tick);
                         tickElements.add(tick);
                     }
                     if (enabled) {
-                        DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick");
+                        tick.setPropertyString("className", "gwt-SliderBar-tick");
                     } else {
-                        DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
+                        tick.setPropertyString("className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
                     }
                     // Position the tick and make it visible
-                    DOM.setStyleAttribute(tick, "visibility", "hidden");
-                    DOM.setStyleAttribute(tick, "display", "");
+                    tick.getStyle().setVisibility(Visibility.HIDDEN);
+                    tick.getStyle().setProperty("display", "");
                     int tickWidth = tick.getOffsetWidth();
                     int tickLeftOffset = lineLeftOffset + (lineWidth * i / numTicks) - (tickWidth / 2);
                     tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
-                    DOM.setStyleAttribute(tick, "left", tickLeftOffset + "px");
-                    DOM.setStyleAttribute(tick, "visibility", "visible");
+                    tick.getStyle().setLeft(tickLeftOffset, Unit.PX);
+                    tick.getStyle().setVisibility(Visibility.VISIBLE);
                 }
 
                 // Hide unused ticks
                 for (int i = (numTicks + 1); i < tickElements.size(); i++) {
-                    DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+                    tickElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all ticks
                 for (Element elem : tickElements) {
-                    DOM.setStyleAttribute(elem, "display", "none");
+                    elem.getStyle().setDisplay(Display.NONE);
                 }
             }
         }
@@ -980,35 +983,34 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         markerElem = markerElements.get(i);
                     } else { // Create the new markes
                         markerElem = DOM.createDiv();
-                        DOM.setStyleAttribute(markerElem, "position", "absolute");
-                        DOM.setStyleAttribute(markerElem, "display", "none");
+                        markerElem.getStyle().setPosition(Position.ABSOLUTE);
+                        markerElem.getStyle().setDisplay(Display.NONE);
                         DOM.appendChild(getElement(), markerElem);
                         markerElements.add(markerElem);
                     }
                     if (enabled) {
-                        DOM.setElementProperty(markerElem, "className", "gwt-SliderBar-mark");
+                        markerElem.setPropertyString("className", "gwt-SliderBar-mark");
                     } else {
-                        DOM.setElementProperty(markerElem, "className",
-                                "gwt-SliderBar-mark gwt-SliderBar-mark-disabled");
+                        markerElem.setPropertyString("className", "gwt-SliderBar-mark gwt-SliderBar-mark-disabled");
                     }
                     // Position the marker and make it visible
-                    DOM.setStyleAttribute(markerElem, "visibility", "hidden");
-                    DOM.setStyleAttribute(markerElem, "display", "");
+                    markerElem.getStyle().setVisibility(Visibility.HIDDEN);
+                    markerElem.getStyle().setProperty("display", "");
                     double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
                     int markerWidth = markerElem.getOffsetWidth();
                     int markerLeftOffset = lineLeftOffset + (int) markerLinePosition - (markerWidth / 2);
                     markerLeftOffset = Math.min(markerLeftOffset, lineLeftOffset + lineWidth - markerWidth);
-                    DOM.setStyleAttribute(markerElem, "left", markerLeftOffset + "px");
-                    DOM.setStyleAttribute(markerElem, "visibility", "visible");
+                    markerElem.getStyle().setLeft(markerLeftOffset, Unit.PX);
+                    markerElem.getStyle().setVisibility(Visibility.VISIBLE);
                 }
 
                 // Hide unused markers
                 for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
-                    DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+                    tickElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all markers
                 for (Element elem : markerElements) {
-                    DOM.setStyleAttribute(elem, "display", "none");
+                    elem.getStyle().setDisplay(Display.NONE);
                 }
             }
         }
@@ -1031,25 +1033,24 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = markerLabelElements.get(i);
                     } else { // Create the new label
                         label = DOM.createDiv();
-                        DOM.setStyleAttribute(label, "position", "absolute");
-                        DOM.setStyleAttribute(label, "display", "none");
+                        label.getStyle().setPosition(Position.ABSOLUTE);
+                        label.getStyle().setDisplay(Display.NONE);
                         if (enabled) {
-                            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel");
+                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
                         } else {
-                            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel-disabled");
+                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
                         }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
                     }
 
                     // Set the marker label text
-                    DOM.setStyleAttribute(label, "visibility", "hidden");
-                    DOM.setStyleAttribute(label, "display", "");
-                    DOM.setElementProperty(label, "innerHTML", marker.name);
+                    label.getStyle().setVisibility(Visibility.HIDDEN);
+                    label.getStyle().setProperty("display", "");
+                    label.setPropertyString("innerHTML", marker.name);
 
-                    // Move to the left so the label width is not clipped by the
-                    // shell
-                    DOM.setStyleAttribute(label, "left", "0px");
+                    // Move to the left so the label width is not clipped by the shell
+                    label.getStyle().setLeft(0, Unit.PX);
 
                     // Position the label and make it visible
                     double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
@@ -1057,17 +1058,17 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
                     labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
 
-                    DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
-                    DOM.setStyleAttribute(label, "visibility", "visible");
+                    label.getStyle().setLeft(labelLeftOffset, Unit.PX);
+                    label.getStyle().setVisibility(Visibility.VISIBLE);
                 }
 
                 // Hide unused labels
                 for (int i = (numMarkers + 1); i < markerLabelElements.size(); i++) {
-                    DOM.setStyleAttribute(markerLabelElements.get(i), "display", "none");
+                    markerLabelElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all labels
                 for (Element elem : markerLabelElements) {
-                    DOM.setStyleAttribute(elem, "display", "none");
+                    elem.getStyle().setDisplay(Display.NONE);
                 }
             }
         }
@@ -1078,7 +1079,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void highlight() {
         String styleName = getStylePrimaryName();
-        DOM.setElementProperty(getElement(), "className", styleName + " " + styleName + "-focused");
+        getElement().setPropertyString("className", styleName + " " + styleName + "-focused");
     }
 
     /**
@@ -1096,7 +1097,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void slideKnob(Event event) {
         // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
-        int x = DOM.eventGetClientX(event) + Window.getScrollLeft();
+        int x = event.getClientX() + Window.getScrollLeft();
         if (x > 0) {
             int lineWidth = lineElement.getOffsetWidth();
             int lineLeft = lineElement.getAbsoluteLeft();
@@ -1115,8 +1116,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void startSliding(boolean highlight, boolean fireEvent) {
         if (highlight) {
-            DOM.setElementProperty(lineElement, "className", "gwt-SliderBar-line gwt-SliderBar-line-sliding");
-            DOM.setElementProperty(knobImage.getElement(), "className", "gwt-SliderBar-knob gwt-SliderBar-knob-sliding");
+            lineElement.setPropertyString("className", "gwt-SliderBar-line gwt-SliderBar-line-sliding");
+            knobImage.getElement().setPropertyString("className", "gwt-SliderBar-knob gwt-SliderBar-knob-sliding");
             knobImage.setResource(images.sliderSliding());
         }
     }
@@ -1131,9 +1132,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      */
     private void stopSliding(boolean unhighlight, boolean fireEvent) {
         if (unhighlight) {
-            DOM.setElementProperty(lineElement, "className", "gwt-SliderBar-line");
-
-            DOM.setElementProperty(knobImage.getElement(), "className", "gwt-SliderBar-knob");
+            lineElement.setPropertyString("className", "gwt-SliderBar-line");
+            knobImage.getElement().setPropertyString("className", "gwt-SliderBar-knob");
             knobImage.setResource(images.slider());
         }
     }
@@ -1142,7 +1142,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Unhighlight this widget.
      */
     private void unhighlight() {
-        DOM.setElementProperty(getElement(), "className", getStylePrimaryName());
+        getElement().setPropertyString("className", getStylePrimaryName());
     }
 
     @Override
