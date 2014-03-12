@@ -9,6 +9,8 @@ import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -45,18 +47,20 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
+    private final boolean showAddedScores;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
     private IntegerBox numberOfLastRacesToShowBox;
+    private CheckBox showAddedScoresCheckBox;
     
     protected LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection,
             List<DetailType> overallDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
-            boolean autoExpandPreSelectedRace, 
+            boolean autoExpandPreSelectedRace, boolean showAddedScores,
             long delayBetweenAutoAdvancesInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
@@ -74,6 +78,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.showAddedScores = showAddedScores;
     }
 
     @Override
@@ -130,6 +135,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
+        // Make it possible to configure added points
+        FlowPanel addedScoresFlowPanel = new FlowPanel();
+        showAddedScoresCheckBox = dialog.createCheckbox(stringMessages.showAddedScores());
+        showAddedScoresCheckBox.setValue(showAddedScores);
+        addedScoresFlowPanel.add(showAddedScoresCheckBox);
+        raceDetailDialog.add(addedScoresFlowPanel);
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         FlowPanel raceDetailDialogContent = null;
@@ -317,7 +328,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 lastNRacesToShowValue,
                 autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 null,
-                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy);
+                true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy,
+                /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue());
     }
 
     @Override

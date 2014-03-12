@@ -108,7 +108,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
-                /* autoExpandPreSelectedRace */ false,
+                /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, stringMessages);
         }
 

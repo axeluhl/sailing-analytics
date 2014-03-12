@@ -964,4 +964,5 @@ public interface StringMessages extends Messages {
     String eventOverview();
     String start();
     String overallProgress();
+    String showAddedScores();
 }

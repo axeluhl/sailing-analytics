@@ -202,6 +202,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private boolean autoExpandPreSelectedRace;
     
     private boolean autoExpandLastRaceColumn;
+    
+    private boolean showAddedScores;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
@@ -331,6 +333,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
+        setShowAddedScores(newSettings.isShowAddedScores());
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
@@ -614,10 +617,31 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         public boolean isLive(FleetDTO fleetDTO) {
             return race.isLive(fleetDTO, timer.getLiveTimePointInMillis());
         }
+        
+        public boolean doShowAddedScores() {
+            return isShowAddedScores();
+        }
 
         @Override
         public String getColumnStyle() {
             return columnStyle;
+        }
+        
+        /**
+         * Computes added scores for this RaceColumn
+         */
+        private double computeAddedScores(LeaderboardRowDTO object) {
+            double addedScores = 0;
+            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+                LeaderboardEntryDTO entryBefore = object.fieldsByRaceColumnName.get(raceColumn.getName());
+                if (entryBefore.totalPoints != null) {
+                    addedScores += entryBefore.totalPoints;
+                }
+                if (raceColumn.getName().equals(getRaceColumnName())) {
+                    break; // we've reached the current column - stop here
+                }
+            }
+            return addedScores;
         }
 
         /**
@@ -642,22 +666,27 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
                 String totalPointsAsText = entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
                 String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
+                
+                String addedPointsAsText = "";
+                if (doShowAddedScores()) {
+                    addedPointsAsText = scoreFormat.format(computeAddedScores(object));
+                }
 
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
                 	html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
                 } else {
                 	html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
                 }
-
+                
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(totalPointsAsText);
+                        html.appendHtmlConstant(doShowAddedScores() ? addedPointsAsText : totalPointsAsText);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(netPointsAsText);
+                        html.appendHtmlConstant(doShowAddedScores() ? addedPointsAsText : netPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
@@ -681,12 +710,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
-                            race);
-                    int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
-                    int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
-                    return o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
-                            : 1 : o1Rank - o2Rank;
+                    if (isShowAddedScores()) {
+                        double o1AddedScore = computeAddedScores(o1);
+                        double o2AddedScore = computeAddedScores(o2);
+                        double result = o1AddedScore == 0. ? o2AddedScore == 0. ? 0. : isAscending() ? 1. : -1. : o2AddedScore == 0. ? isAscending() ? -1. : 1. : o1AddedScore - o2AddedScore;
+                        return result > 0 ? 1 : result < 0 ? -1 : 0;
+                    } else {
+                        List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(
+                                race);
+                        int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
+                        int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
+                        return o1Rank == 0 ? o2Rank == 0 ? 0 : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1
+                                : 1 : o1Rank - o2Rank;
+                    }
                 }
             };
         }
@@ -1636,6 +1672,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
     
+    private boolean isShowAddedScores() {
+        return showAddedScores;
+    }
+    
+    private void setShowAddedScores(boolean showAddedScores) {
+        this.showAddedScores = showAddedScores;
+    }
+    
     /**
      * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
      * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to
@@ -2420,7 +2464,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                timer.getRefreshInterval(), stringMessages);
+                isShowAddedScores(), timer.getRefreshInterval(), stringMessages);
     }
 
     @Override
