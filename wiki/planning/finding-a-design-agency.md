@@ -195,9 +195,11 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based solutions, tech knowledge</td>
   <td></td>
   <td></td>
+  <td></td>
 </tr>
 <tr>
   <td>General Comments (contra)</td>
+  <td></td>
   <td></td>
   <td></td>
   <td></td>
