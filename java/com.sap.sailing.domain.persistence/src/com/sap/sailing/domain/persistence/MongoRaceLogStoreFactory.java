@@ -2,6 +2,8 @@ package com.sap.sailing.domain.persistence;
 
 
 import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreFactoryImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
 public interface MongoRaceLogStoreFactory {
@@ -12,4 +14,6 @@ public interface MongoRaceLogStoreFactory {
      * and mongo.dbName[=&lt;contents of constant {@link #DEFAULT_DB_NAME}&gt;] specified in the bundle context
      */
     RaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory);
+    
+    RaceLogEventVisitor getMongoRaceLogStoreVisitor(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory);
 }

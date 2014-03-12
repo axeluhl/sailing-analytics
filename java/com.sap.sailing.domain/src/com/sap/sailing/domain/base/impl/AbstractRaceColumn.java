@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
@@ -176,29 +174,22 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleetImpl) {
+    public void setOrReloadRaceLogInformation(RaceLogInformation information, Fleet fleet) {
         synchronized(raceLogs) {
             raceLogInformation = information;
             RaceLogStore store = information.getStore();
-            HashSet<RaceLogEventVisitor> listeners = new HashSet<RaceLogEventVisitor>();
-            RaceLog raceLogAvailable = raceLogs.get(fleetImpl);
-            if (raceLogAvailable != null) {
-                store.removeListenersAddedByStoreFrom(raceLogAvailable);
-                listeners = raceLogAvailable.removeAllListeners();
-                raceLogs.remove(fleetImpl);
-            }
-            
             raceLogIdentifierTemplate = raceLogInformation.getIdentifierTemplate();
-            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleetImpl);
-            RaceLog raceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
-            
-            if (listeners.isEmpty()) {
+            RaceLogIdentifier identifier = raceLogIdentifierTemplate.compileRaceLogIdentifier(fleet);
+            RaceLog newOrLoadedRaceLog = store.getRaceLog(identifier, /*ignoreCache*/ true);
+            RaceLog raceLogAvailable = raceLogs.get(fleet);
+            if (raceLogAvailable == null) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                raceLog.addListener(listener);
+                newOrLoadedRaceLog.addListener(listener);
+                raceLogs.put(fleet, newOrLoadedRaceLog);
             } else {
-                raceLog.addAllListeners(listeners);
+                // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
+                raceLogAvailable.merge(newOrLoadedRaceLog);
             }
-            raceLogs.put(fleetImpl, raceLog);
         }
     }
 
