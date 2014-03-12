@@ -291,7 +291,7 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
-  <td>++</td>
+  <td>+</td>
   <td>++</td>
   <td>-</td>
   <td>0</td>
@@ -327,7 +327,7 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td><b>16</b></td>
+  <td><b>15</b></td>
   <td><b>20</b></td>
   <td>5</td>
   <td>9</td>
@@ -370,4 +370,4 @@ The working relation and the communication style worked better for all of our te
 
 Last but not least, we felt that for Ubilabs, being a small, excellent and very ambitious company, the project will mean more to them than it would mean to Sovanta, giving the project more priority and the best of skills the company has to offer.
 
-All things considered, we think that partnering with Ubilabs will lead to better results at lower cost which is what we want. Although it was a close call, our thoughts are backed by the evaluation matrix above, which gives Ubilabs a four-point edge over Sovanta.
+All things considered, we think that partnering with Ubilabs will lead to better results at lower cost which is what we want. Although it was a close call, our thoughts are backed by the evaluation matrix above, which gives Ubilabs a five-point edge over Sovanta.
