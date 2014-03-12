@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.slider;
+package com.sap.sse.gwt.client.controls.slider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,8 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeTicksCalculator.NormalizedInterval;
-import com.sap.sailing.gwt.ui.client.shared.controls.slider.TimeTicksCalculator.TickPosition;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 
 public class TimeSlider extends SliderBar {
 

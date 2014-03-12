@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.slider;
+package com.sap.sse.gwt.client.controls.slider;
 
 import java.util.ArrayList;
 import java.util.Date;
