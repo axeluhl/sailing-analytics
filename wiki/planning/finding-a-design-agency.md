@@ -254,7 +254,7 @@ Telefon: 040 / 22 81 72 62 0
   <td>+</td>
 </tr>
 <tr>
-  <td>Transformation of domain knowledge to design ideas (general)</td>
+  <td>Transformation of domain knowledge to design ideas (general)*</td>
   <td>+</td>
   <td>++</td>
   <td>-</td>
@@ -299,7 +299,7 @@ Telefon: 040 / 22 81 72 62 0
   <td>0</td>
 </tr>
 <tr>
-  <td>Argumentation of task solution</td>
+  <td>Argumentation of task solution*</td>
   <td>0</td>
   <td>++</td>
   <td>+</td>
@@ -308,7 +308,7 @@ Telefon: 040 / 22 81 72 62 0
   <td>0</td>
 </tr>
 <tr>
-  <td style="color:red;font-weight:bold;">Transformation of domain knowledge to design ideas (Homepage task)</td>
+  <td>Transformation of domain knowledge to design ideas (Homepage task)*</td>
   <td>+</td>
   <td>++</td>
   <td>-</td>
@@ -336,6 +336,8 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 </table>
 
+Items marked with * have a heigher weight in theory. This weight is not reflected in the bare numbers.
+
 ## Comments
 
 <table>
@@ -351,8 +353,8 @@ Telefon: 040 / 22 81 72 62 0
 <tr>
   <td>General Comments (pro)</td>
   <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
-  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based   <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
-solutions, tech knowledge</td>
+  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based</td>
+  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
   <td></td>
   <td></td>
   <td></td>
