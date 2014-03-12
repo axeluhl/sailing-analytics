@@ -8,4 +8,3 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.datamining.shared
-Import-Package: com.google.gwt.i18n.client

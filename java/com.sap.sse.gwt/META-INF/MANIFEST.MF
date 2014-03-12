@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain.common,
  org.moxieapps.gwt.highcharts;bundle-version="1.5.0",
  de.csenk.gwt.ws,
- com.google.gwt.osgi;bundle-version="2.5.1"
+ com.google.gwt.osgi;bundle-version="2.6.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.6.0",
