@@ -5,7 +5,7 @@ Bundle-SymbolicName: de.csenk.gwt.ws
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.jetty.websocket.api;bundle-version="9.0.0",
- com.google.gwt.osgi;bundle-version="2.5.1"
+ com.google.gwt.osgi;bundle-version="2.6.0"
 Export-Package: de.csenk.gwt.ws.client,
  de.csenk.gwt.ws.client.filter,
  de.csenk.gwt.ws.client.filter.serialization,
@@ -22,5 +22,5 @@ Export-Package: de.csenk.gwt.ws.client,
  de.csenk.gwt.ws.shared.filter.requestresponse,
  de.csenk.gwt.ws.shared.filter.serialization,
  de.csenk.gwt.ws.shared.handler
-Import-Package: javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0"
+Import-Package: javax.servlet;version="2.6.0",
+ javax.servlet.http;version="2.6.0"
