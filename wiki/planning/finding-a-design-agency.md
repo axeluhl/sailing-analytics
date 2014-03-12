@@ -106,11 +106,19 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
-  <td>++ (20)</td>
+  <td>++ (30)</td>
   <td>0 (10)</td>
   <td>+ (20)</td>
   <td>0 (10)</td>
   <td>++ (30)</td>
+</tr>
+<tr>
+  <td>Cost per day</td>
+  <td>~1000</td>
+  <td>~800</td>
+  <td>~800</td>
+  <td>~700</td>
+  <td>~900</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
@@ -121,7 +129,39 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
 </tr>
 <tr>
-  <td>General Comments</td>
+  <td>Argumentation of task solution</td>
+  <td>0</td>
+  <td>+</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
+  <td>+</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Sympathy factor (gut feeling)</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>General Comments (pro)</td>
+  <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
+  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
+  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based solutions, tech knowledge</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>General Comments (contra)</td>
   <td></td>
   <td></td>
   <td></td>
