@@ -153,7 +153,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
 </tr>
 <tr>
-  <td>General Comments</td>
+  <td>General Comments (pro)</td>
+  <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
+  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
+  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based solutions, tech knowledge</td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>General Comments (contra)</td>
   <td></td>
   <td></td>
   <td></td>
