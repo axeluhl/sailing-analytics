@@ -378,7 +378,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
                 .next());
 
-        // Check for competitor desplay name
+        // Check for competitor display name
         Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
 
         // Check for race log event
