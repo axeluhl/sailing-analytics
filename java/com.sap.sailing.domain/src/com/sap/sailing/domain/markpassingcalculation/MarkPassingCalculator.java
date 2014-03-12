@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
@@ -87,6 +88,8 @@ public class MarkPassingCalculator {
             boolean finished = false;
             Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
             Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
+            List<Waypoint> newWaypoints = new ArrayList<>();
+            List<Waypoint> removedWaypoints = new ArrayList<>();
             while (!finished) {
                 List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                 try {
@@ -99,14 +102,25 @@ public class MarkPassingCalculator {
                     if (listener.isEndMarker(fixInsertion)) {
                         finished = true;
                     } else {
-                        fixInsertion.storePositionUpdate(competitorFixes, markFixes);
+                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, newWaypoints, removedWaypoints);
                     }
                 }
                 if (!suspended) {
+                    updateWaypoints(newWaypoints, removedWaypoints);
                     computeMarkPasses(competitorFixes, markFixes);
                     competitorFixes.clear();
                     markFixes.clear();
                 }
+            }
+        }
+
+        private void updateWaypoints(List<Waypoint> newWaypoints, List<Waypoint> removedWaypoints) {
+            // TODO Can probably be parallized
+            Map<Competitor, Iterable<Candidate>> addedCandidates = finder.addWaypoints(newWaypoints);
+            Map<Competitor, Iterable<Candidate>> removedCandidates = finder.removeWaypoints(removedWaypoints);
+            chooser.removeWaypoints(removedWaypoints);
+            for (Competitor c : race.getRace().getCompetitors()) {
+                chooser.calculateMarkPassDeltas(c, addedCandidates.get(c), removedCandidates.get(c));
             }
         }
 
@@ -211,7 +225,8 @@ public class MarkPassingCalculator {
         suspended = false;
         listener.getQueue().add(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                    List<Waypoint> removedWaypoints) {
             }
         });
     }

@@ -27,7 +27,8 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener implem
     private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
-        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                List<Waypoint> removedWaypoints) {
         }
     };
 
@@ -48,7 +49,8 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener implem
     public void competitorPositionChanged(final GPSFixMoving fix, final Competitor competitor) {
         queue.add(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                    List<Waypoint> removedWaypoints) {
                 List<GPSFix> list = competitorFixes.get(competitor);
                 if (list == null) {
                     list = new ArrayList<>();
@@ -63,7 +65,8 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener implem
     public void markPositionChanged(final GPSFix fix, final Mark mark) {
         queue.add(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                    List<Waypoint> removedWaypoints) {
                 List<GPSFix> list = markFixes.get(mark);
                 if (list == null) {
                     list = new ArrayList<>();
@@ -83,15 +86,27 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener implem
     }
 
     @Override
-    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        // TODO Auto-generated method stub
+    public void waypointAdded(int zeroBasedIndex, final Waypoint waypointThatGotAdded) {
+        queue.add(new StorePositionUpdateStrategy() {
+            @Override
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                    List<Waypoint> removedWaypoints) {
+                newWaypoints.add(waypointThatGotAdded);
 
+            }
+        });
     }
 
     @Override
-    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        // TODO Auto-generated method stub
+    public void waypointRemoved(int zeroBasedIndex, final Waypoint waypointThatGotRemoved) {
+        queue.add(new StorePositionUpdateStrategy() {
+            @Override
+            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> newWaypoints,
+                    List<Waypoint> removedWaypoints) {
+                removedWaypoints.add(waypointThatGotRemoved);
 
+            }
+        });
     }
 
 }

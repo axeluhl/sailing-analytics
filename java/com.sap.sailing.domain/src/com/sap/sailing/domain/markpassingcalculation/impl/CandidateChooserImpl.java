@@ -95,9 +95,12 @@ public class CandidateChooserImpl implements CandidateChooser {
         findShortestPath(c);
     }
 
-    public void removeWaypoint(Waypoint w) {
+    @Override
+    public void removeWaypoints(Iterable<Waypoint> ways) {
         for (Competitor c : currentMarkPasses.keySet()) {
-            currentMarkPasses.get(c).remove(w);
+            for (Waypoint w : ways) {
+                currentMarkPasses.get(c).remove(w);
+            }
         }
     }
 
