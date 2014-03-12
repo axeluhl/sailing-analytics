@@ -106,7 +106,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
-  <td>++ (20)</td>
+  <td>++ (30)</td>
   <td>0 (10)</td>
   <td>+ (20)</td>
   <td>0 (10)</td>
@@ -115,6 +115,30 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 <tr>
   <td>Task (Redesign of Homepage)</td>
   <td>++</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Argumentation of task solution</td>
+  <td>0</td>
+  <td>+</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Sympathy factor (gut feeling)</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Conversion of domain knowledge to design ideas</td>
+  <td>+</td>
   <td>-</td>
   <td>++</td>
   <td>0</td>
