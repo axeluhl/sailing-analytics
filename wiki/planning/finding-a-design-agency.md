@@ -345,26 +345,14 @@ Items marked with * have a heigher weight in theory. This weight is not reflecte
   <td>Objective</td>
   <td>Sovanta (Heidelberg)</td>
   <td>Ubilabs (Hamburg)</td>
-  <td>Digital Sunray (Wien)</td>
-  <td>Creative Workline (Berlin)</td>
-  <td>GMR (London)</td>
-  <td>Pier2Port (Hamburg)</td>
 </tr>
 <tr>
   <td>General Comments (pro)</td>
   <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
   <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based</td>
-  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
-  <td></td>
-  <td></td>
-  <td></td>
 </tr>
 <tr>
   <td>General Comments (contra)</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
   <td></td>
   <td></td>
 </tr>
