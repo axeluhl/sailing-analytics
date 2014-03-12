@@ -272,6 +272,15 @@ Telefon: 040 / 22 81 72 62 0
   <td>0 (10)</td>
 </tr>
 <tr>
+  <td>SAP Preferred Supplier?</td>
+  <td>+</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
   <td>Cost per day</td>
   <td>~1000 (-)</td>
   <td>~800 (0)</td>
