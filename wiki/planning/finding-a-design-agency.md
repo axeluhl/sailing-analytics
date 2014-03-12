@@ -281,13 +281,13 @@ Telefon: 040 / 22 81 72 62 0
   <td>0</td>
 </tr>
 <tr>
-  <td>Cost per day</td>
-  <td>~1000</td>
-  <td>~800</td>
-  <td>~800</td>
-  <td>~700</td>
-  <td>~900</td>
-  <td>~900</td>
+  <td>Cost per day (developer)</td>
+  <td>- (~1000)</td>
+  <td>0 (~800)</td>
+  <td>0 (~800)</td>
+  <td>+ (~700)</td>
+  <td>- (~900)</td>
+  <td>- (~900)</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
@@ -327,12 +327,12 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td><b>17</b></td>
+  <td><b>16</b></td>
   <td><b>20</b></td>
   <td>5</td>
-  <td>8</td>
-  <td>4</td>
-  <td>6</td>
+  <td>9</td>
+  <td>3</td>
+  <td>5</td>
 </tr>
 </table>
 
