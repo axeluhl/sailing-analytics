@@ -360,7 +360,7 @@ Items marked with * have a heigher weight in theory. This weight is not reflecte
 
 ## Resumee
 
-Two two only serious contenders in the process eventually turned out to be Sovanta and Ubilabs. After both agencies had presented themselves professionally and well-prepared at their respective offices, had listened carefully and created serious enthusiasm around the project, we tasked them with a tiny test project to better allow us to differentiate their skills and processes. In short, we asked them to spend a day or two into the re-design of our landing page sapsailing.com.
+The two only serious contenders in the process eventually turned out to be Sovanta and Ubilabs. After both agencies had presented themselves professionally and well-prepared at their respective offices, had listened carefully and created serious enthusiasm around the project, we tasked them with a tiny test project to better allow us to differentiate their skills and processes. In short, we asked them to spend a day or two into the re-design of our landing page sapsailing.com.
 
 Both completed the task in time, and we had both present their results and findings to our team. The Sovanta presentation demonstrated that they spent serious effort in understanding the domain. The scribbles they showed were OK but not overwhelming. The explanations of how they got there and why things were proposed the way they were was not entirely satisfactory to us. There was a very strong focus on a live video feed which is not always present. Some ideas such as the world map of events were nice and showed that Sovanta worked their way into the domain.
 
