@@ -50,9 +50,11 @@ public class PolarFixAggregationWorker implements Runnable {
 
     private PolarSheetGenerationSettings settings;
 
-    public PolarFixAggregationWorker(TrackedRace race,
-            PolarFixAggregator polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
-            Competitor competitor, PolarSheetGenerationSettings settings) {
+    private Pair<TimePoint, TimePoint> intervalBeginningAndEnd;
+
+    public PolarFixAggregationWorker(TrackedRace race, PolarFixAggregator polarSheetGenerationWorker,
+            TimePoint startTime, TimePoint endTime, Competitor competitor, PolarSheetGenerationSettings settings,
+            Pair<TimePoint, TimePoint> intervalBeginningAndEnd) {
         super();
         this.race = race;
         this.polarSheetGenerationWorker = polarSheetGenerationWorker;
@@ -60,9 +62,24 @@ public class PolarFixAggregationWorker implements Runnable {
         this.endTime = endTime;
         this.competitor = competitor;
         this.settings = settings;
+        this.intervalBeginningAndEnd = intervalBeginningAndEnd;
         optimizeStartTime();
         optimizeEndTime();
         checkIfRaceAborted();
+        checkIfIntervalBeforeOrAfterRace();
+    }
+
+    private void checkIfIntervalBeforeOrAfterRace() {
+        if (intervalBeginningAndEnd != null) {
+            TimePoint intervalStart = intervalBeginningAndEnd.getA();
+            if (intervalStart.after(endTime)) {
+                noConfidence = true;
+            }
+            TimePoint intervalEnd = intervalBeginningAndEnd.getB();
+            if (intervalEnd.before(startTime)) {
+                noConfidence = true;
+            }
+        }
     }
 
     private void checkIfRaceAborted() {
@@ -108,7 +125,17 @@ public class PolarFixAggregationWorker implements Runnable {
             GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
             track.lockForRead();
             try {
-                Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
+                Iterator<GPSFixMoving> fixesIterator;
+                if (intervalBeginningAndEnd != null) {
+                    TimePoint startOfIntervalToCheck = intervalBeginningAndEnd.getA().before(startTime) ? startTime
+                            : intervalBeginningAndEnd.getA();
+                    TimePoint endOfIntervalToCheck = intervalBeginningAndEnd.getB().after(endTime) ? endTime
+                            : intervalBeginningAndEnd.getB();
+                    fixesIterator = track.getFixes(startOfIntervalToCheck, true, endOfIntervalToCheck, true).iterator();
+                } else {
+                    // No timepoint interval given
+                    fixesIterator = track.getFixesIterator(startTime, true);
+                }
                 TimePoint lastConsideredTimePoint = null;
                 if (finishedEarlyAtWaypoint != -1) {
                     NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
@@ -159,7 +186,7 @@ public class PolarFixAggregationWorker implements Runnable {
                         && windWithConfidence.getConfidence() >= settings.getMinimumWindConfidence()) {
                     PolarFix polarFix = new PolarFixImpl(fix, race, track, windWithConfidence.getObject(),
                             settings, windWithSourceIdStringPair.getA());
-                    polarSheetGenerationWorker.addPolarFix(polarFix);
+                    polarSheetGenerationWorker.addPolarFix(race.getRaceIdentifier(), polarFix);
                 }
             }
         }

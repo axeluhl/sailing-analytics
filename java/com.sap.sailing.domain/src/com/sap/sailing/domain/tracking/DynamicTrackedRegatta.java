@@ -17,9 +17,10 @@ public interface DynamicTrackedRegatta extends TrackedRegatta {
      * @param raceDefinitionSetToUpdate
      *            may be <code>null</code> which means that no update will be fired to any
      *            {@link DynamicRaceDefinitionSet}.
+     * @param polarDataService
      */
-    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
 }

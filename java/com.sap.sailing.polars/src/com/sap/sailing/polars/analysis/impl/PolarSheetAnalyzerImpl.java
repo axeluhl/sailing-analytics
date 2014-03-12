@@ -24,7 +24,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-	public SpeedWithBearing getOptimalUpwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
+    public SpeedWithBearing getOptimalUpwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
         PolarSheetsData data = polarDataService.getPolarSheetForBoatClass(boatClass);
         Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
         int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());
@@ -46,7 +46,7 @@ public class PolarSheetAnalyzerImpl implements PolarSheetAnalyzer {
     }
 
     @Override
-	public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
+    public SpeedWithBearing getOptimalDownwindSpeedWithBearingFor(BoatClass boatClass, Speed windSpeed) {
         PolarSheetsData data = polarDataService.getPolarSheetForBoatClass(boatClass);
         Number[][] dataPerWindSpeed = data.getAveragedPolarDataByWindSpeed();
         int windSpeedIndex = data.getStepping().getLevelIndexForValue(windSpeed.getKnots());

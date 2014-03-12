@@ -62,6 +62,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.aggregation.PolarFixAggregationWorker;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
+import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.data.DataPointWithOriginInfo;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.polars.data.impl.DataPointWithOriginInfoImpl;
@@ -87,7 +88,8 @@ public class PolarSheetGenerationTest {
         TimePoint startTime = new MillisecondsTimePoint(9);
         TimePoint endTime = new MillisecondsTimePoint(80);
         // Only used for storing and exporting results in this test case:
-        PolarFixAggregator resultContainer = new PolarFixAggregator(new HashSet<TrackedRace>(),
+        PolarFixAggregator resultContainer = new PolarFixAggregator(new SimplePolarFixRaceInterval(
+                new HashSet<TrackedRace>()),
                 settings, executor);
 
         BoatClass forelle = new BoatClassImpl("Forelle", true);
@@ -95,7 +97,8 @@ public class PolarSheetGenerationTest {
                 new BoatImpl("Schnelle Forelle", forelle, "GER000"));
 
         PolarFixAggregationWorker task = new PolarFixAggregationWorker(race,
-                resultContainer, startTime, endTime, competitor, settings);
+ resultContainer, startTime, endTime,
+                competitor, settings, null);
   
         executor.execute(task);
         double timeUntilTimeout = 1000;
@@ -103,7 +106,8 @@ public class PolarSheetGenerationTest {
             Thread.sleep(100);
             timeUntilTimeout = timeUntilTimeout - 0.1;
         }
-        Set<PolarFix> fixes = resultContainer.get();
+
+        Set<PolarFix> fixes = resultContainer.getAggregationResultAsSingleList();
         
         PolarSheetGenerator generator = new PolarSheetGenerator(fixes, settings);
         PolarSheetsData data = generator.generate();

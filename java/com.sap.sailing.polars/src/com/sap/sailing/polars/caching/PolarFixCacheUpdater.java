@@ -1,18 +1,14 @@
 package com.sap.sailing.polars.caching;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
 import com.sap.sailing.polars.data.PolarFix;
 import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
@@ -29,25 +25,11 @@ public class PolarFixCacheUpdater implements
     @Override
     public Map<RegattaAndRaceIdentifier, List<PolarFix>> computeCacheUpdate(BoatClass key,
             PolarFixCacheRaceInterval updateInterval) throws Exception {
-        Set<TrackedRace> races = updateInterval.getRaces();
-        Map<RegattaAndRaceIdentifier, PolarFixAggregator> aggregators = new HashMap<RegattaAndRaceIdentifier, PolarFixAggregator>();
-        for (TrackedRace trackedRace : races) {
-            Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
-            trackedRaces.add(trackedRace);
-            PolarFixAggregator aggregator = new PolarFixAggregator(trackedRaces,
-                    PolarSheetGenerationSettingsImpl.createStandardPolarSettings(), executor);
-            aggregator.startPolarFixAggregation();
-            aggregators.put(trackedRace.getRaceIdentifier(), aggregator);
-        }
-        Map<RegattaAndRaceIdentifier, List<PolarFix>> resultMap = new HashMap<RegattaAndRaceIdentifier, List<PolarFix>>();
-        for (Entry<RegattaAndRaceIdentifier, PolarFixAggregator> entry : aggregators.entrySet()) {
-            PolarFixAggregator aggregator = entry.getValue();
-            Set<PolarFix> result = aggregator.get();
-            List<PolarFix> resultList = new ArrayList<PolarFix>(result);
-            resultMap.put(entry.getKey(), resultList);
-        }
-        return resultMap;
+        PolarFixAggregator aggregator = new PolarFixAggregator(updateInterval,
+                PolarSheetGenerationSettingsImpl.createStandardPolarSettings(), executor);
+        aggregator.startPolarFixAggregation();
 
+        return aggregator.get();
     }
 
     @Override

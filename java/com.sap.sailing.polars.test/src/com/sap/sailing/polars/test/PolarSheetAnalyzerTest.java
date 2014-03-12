@@ -30,7 +30,7 @@ public class PolarSheetAnalyzerTest {
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, 0, null,
                 settings.getWindStepping(), null);
         PolarSheetAnalyzer analyzer = new PolarSheetAnalyzerImpl(new MockedPolarDataService(null, data));
-        SpeedWithBearing result = analyzer.getOptimalUpwindSpeedWithBearingFor(null, new KnotSpeedImpl(6));
+        SpeedWithBearing result = analyzer.getOptimalUpwindSpeedWithBearingFor(null, new KnotSpeedImpl(4));
         Assert.assertEquals(0.5 * Math.cos(Math.toRadians(45)), result.getKnots(), 0.01);
         Assert.assertEquals(45, result.getBearing().getDegrees(), 0.01);
     }
@@ -50,7 +50,7 @@ public class PolarSheetAnalyzerTest {
         PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, 0, null,
                 settings.getWindStepping(), null);
         PolarSheetAnalyzer analyzer = new PolarSheetAnalyzerImpl(new MockedPolarDataService(null, data));
-        SpeedWithBearing result = analyzer.getOptimalDownwindSpeedWithBearingFor(null, new KnotSpeedImpl(6));
+        SpeedWithBearing result = analyzer.getOptimalDownwindSpeedWithBearingFor(null, new KnotSpeedImpl(4));
         Assert.assertEquals(4.5 * Math.sin(Math.toRadians(85)), result.getKnots(), 0.01);
         Assert.assertEquals(175, result.getBearing().getDegrees(), 0.01);
     }

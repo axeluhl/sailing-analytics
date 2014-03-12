@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -17,12 +19,15 @@ import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.NoPolarDataAvailableException;
 import com.sap.sailing.polars.PolarDataService;
 import com.sap.sailing.polars.aggregation.PolarFixAggregator;
+import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
 import com.sap.sailing.polars.analysis.PolarSheetAnalyzer;
 import com.sap.sailing.polars.analysis.impl.PolarSheetAnalyzerImpl;
 import com.sap.sailing.polars.caching.NoCacheEntryException;
@@ -164,14 +169,17 @@ public class PolarDataServiceImpl implements PolarDataService {
             } catch (NoCacheEntryException e) {
                 // If there is no cache entry for at least one of the races: Aggregate for non-cached races.
                 fixes = e.getCachedResultList();
-                PolarFixAggregator aggregator = new PolarFixAggregator(e.getNotCached(), settings, executor);
+                PolarFixAggregator aggregator = new PolarFixAggregator(
+                        new SimplePolarFixRaceInterval(e.getNotCached()),
+                        settings, executor);
                 aggregator.startPolarFixAggregation();
-                fixes.addAll(aggregator.get());
+                fixes = aggregator.getAggregationResultAsSingleList();
             }
         } else {
-            PolarFixAggregator aggregator = new PolarFixAggregator(trackedRaces, settings, executor);
+            PolarFixAggregator aggregator = new PolarFixAggregator(new SimplePolarFixRaceInterval(trackedRaces),
+                    settings, executor);
             aggregator.startPolarFixAggregation();
-            fixes = aggregator.get();
+            fixes = aggregator.getAggregationResultAsSingleList();
         }
         PolarSheetGenerator generator = new PolarSheetGenerator(fixes, settings);
         return generator.generate();
@@ -179,9 +187,10 @@ public class PolarDataServiceImpl implements PolarDataService {
 
     @Override
     public void newRaceFinishedTracking(TrackedRace trackedRace) {
-        HashSet<TrackedRace> set = new HashSet<TrackedRace>();
-        set.add(trackedRace);
-        polarFixCache.triggerUpdate(trackedRace.getRace().getBoatClass(), new PolarFixCacheRaceInterval(set));
+        // TODO add a similar listening method, that deletes all cached data on removal of race
+        // HashSet<TrackedRace> set = new HashSet<TrackedRace>();
+        // set.add(trackedRace);
+        // polarFixCache.triggerUpdate(trackedRace.getRace().getBoatClass(), new PolarFixCacheRaceInterval(set));
     }
 
     @Override
@@ -204,9 +213,28 @@ public class PolarDataServiceImpl implements PolarDataService {
         return polarSheetPerBoatClassCache.keySet();
     }
 
-	@Override
-	public PolarSheetAnalyzer getAnalyzer() {
-		return polarSheetAnalyzer;
-	}
+    @Override
+    public PolarSheetAnalyzer getAnalyzer() {
+        return polarSheetAnalyzer;
+    }
+
+    @Override
+    public void competitorPositionChanged(final TimePoint timePoint, final Competitor competitor,
+            final TrackedRace createdTrackedRace, long delay) {
+
+        PolarFixCacheRaceInterval interval = new PolarFixCacheRaceInterval(createIntervalSpecification(
+                createdTrackedRace, competitor, timePoint));
+        polarFixCache.triggerUpdate(createdTrackedRace.getRace().getBoatClass(), interval);
+
+    }
+
+    private Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> createIntervalSpecification(
+            TrackedRace createdTrackedRace, Competitor competitor, TimePoint timePoint) {
+        HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> result = new HashMap<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>>();
+        HashMap<Competitor, Pair<TimePoint, TimePoint>> competitorMap = new HashMap<Competitor, Pair<TimePoint, TimePoint>>();
+        competitorMap.put(competitor, new Pair<TimePoint, TimePoint>(timePoint, timePoint));
+        result.put(createdTrackedRace, competitorMap);
+        return result;
+    }
 
 }

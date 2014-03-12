@@ -1052,9 +1052,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
+        final DynamicTrackedRace createdTrackedRace = trackedRegatta.createTrackedRace(race,
+                Collections.<Sideline> emptyList(), windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null);
+        return createdTrackedRace;
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(
@@ -1081,6 +1083,9 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
      * race. When a tracked race is removed, the {@link TrackedRaceReplicator} that was added as listener to that
      * tracked race is removed again.
      * 
+     * A {@link PolarFixCacheUpdater} is added to every race so that polar fixes are aggregated when new GPS fixes
+     * arrive.
+     * 
      * @author Axel Uhl (d043530)
      * 
      */
@@ -1089,8 +1094,11 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
 
         private final Map<TrackedRace, TrackedRaceReplicator> trackedRaceReplicators;
 
+        private final Map<TrackedRace, PolarFixCacheUpdater> polarFixCacheUpdaters;
+
         public RaceAdditionListener() {
             this.trackedRaceReplicators = new HashMap<TrackedRace, TrackedRaceReplicator>();
+            this.polarFixCacheUpdaters = new HashMap<TrackedRace, PolarFixCacheUpdater>();
         }
 
         @Override
@@ -1098,6 +1106,10 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             TrackedRaceReplicator trackedRaceReplicator = trackedRaceReplicators.remove(trackedRace);
             if (trackedRaceReplicator != null) {
                 trackedRace.removeListener(trackedRaceReplicator);
+            }
+            PolarFixCacheUpdater polarFixCacheUpdater = polarFixCacheUpdaters.remove(trackedRace);
+            if (polarFixCacheUpdater != null) {
+                trackedRace.removeListener(polarFixCacheUpdater);
             }
         }
 
@@ -1119,7 +1131,27 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */ true);
+
+            PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
+            polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
+            trackedRace.addListener(polarFixCacheUpdater);
         }
+    }
+
+    private class PolarFixCacheUpdater extends AbstractRaceChangeListener {
+
+        private final TrackedRace race;
+
+        public PolarFixCacheUpdater(TrackedRace race) {
+            this.race = race;
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+            polarDataService.competitorPositionChanged(fix.getTimePoint(), item, race,
+                    race.getMillisecondsOverWhichToAverageSpeed());
+        }
+
     }
 
     private class TrackedRaceReplicator implements RaceChangeListener {
