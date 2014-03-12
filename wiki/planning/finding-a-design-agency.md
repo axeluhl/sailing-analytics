@@ -113,6 +113,14 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++ (30)</td>
 </tr>
 <tr>
+  <td>Cost per day</td>
+  <td>~1000</td>
+  <td>~800</td>
+  <td>~800</td>
+  <td>~700</td>
+  <td>~900</td>
+</tr>
+<tr>
   <td>Task (Redesign of Homepage)</td>
   <td>++</td>
   <td>-</td>
@@ -129,19 +137,19 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
 </tr>
 <tr>
+  <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
+  <td>+</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
   <td>Sympathy factor (gut feeling)</td>
   <td>0</td>
   <td>0</td>
   <td>++</td>
   <td>+</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Conversion of domain knowledge to design ideas</td>
-  <td>+</td>
-  <td>-</td>
-  <td>++</td>
-  <td>0</td>
   <td>0</td>
 </tr>
 <tr>
