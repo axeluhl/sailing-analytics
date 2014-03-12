@@ -178,9 +178,9 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td>16</td>
+  <td><b>16</b></td>
   <td>5</td>
-  <td>20</td>
+  <td><b>20</b></td>
   <td>7</td>
   <td>5</td>
   <td>7</td>
