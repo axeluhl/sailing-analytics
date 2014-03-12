@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -29,11 +30,27 @@ import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventAuthorImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
 public class RaceLogTest {
     
     private RaceLog raceLog;
+    
+    private static class MockRaceLogEventForSorting extends RaceLogEventImpl {
+        public MockRaceLogEventForSorting(long createdAtMillis) {
+            super(new MillisecondsTimePoint(createdAtMillis),
+                    /* author */ new RaceLogEventAuthorImpl("Dummy Author", /* priority */ 0),
+                    MillisecondsTimePoint.now(), /* ID */ UUID.randomUUID(), /* pInvolvedBoats */ null, /* pass ID */ 1);
+        }
+
+        private static final long serialVersionUID = 4928452859543831451L;
+
+        @Override
+        public void accept(RaceLogEventVisitor visitor) {
+        }
+        
+    }
     
     @Before
     public void setUp() {
@@ -65,6 +82,158 @@ public class RaceLogTest {
         assertTrue(isAdded);
         assertEquals(event, Util.get(raceLog.getRawFixes(), 0));
         raceLog.unlockAfterRead();
+    }
+
+    private RaceLog merge(long[] intoTimePoints, long[] mergeTimePoints) {
+        RaceLog into = new RaceLogImpl(UUID.randomUUID());
+        RaceLog merge = new RaceLogImpl(UUID.randomUUID());
+        for (long l : intoTimePoints) {
+            into.add(new MockRaceLogEventForSorting(l));
+        }
+        for (long l : mergeTimePoints) {
+            merge.add(new MockRaceLogEventForSorting(l));
+        }
+        into.merge(merge);
+        return into;
+    }
+    
+    @Test
+    public void testSimpleMergeOfEmptyLog() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] {});
+        into.lockForRead();
+        try {
+            assertEquals(2, Util.size(into.getRawFixes()));
+            assertBefore(into, 123, 234);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    /**
+     * Asserts that both, events with creation time stamp millis <code>eventOne</code> and <code>eventTwo</code> occur
+     * in <code>log</code> and the one with <code>eventOne</code> occurs before the one with <code>eventTwo</code> in
+     * the log's raw fixes iteration order.
+     */
+    private void assertBefore(RaceLog log, long eventOne, long eventTwo) {
+        log.lockForRead();
+        boolean foundEventOne = false;
+        try {
+            for (RaceLogEvent e : log.getRawFixes()) {
+                if (e.getCreatedAt().asMillis() == eventOne) {
+                    foundEventOne = true;
+                } else if (e.getCreatedAt().asMillis() == eventTwo) {
+                    if (foundEventOne) {
+                        break; // all is good
+                    } else {
+                        fail("Found "+eventTwo+" before "+eventOne+" but expected to find them in the opposite order");
+                    }
+                }
+            }
+        } finally {
+            log.unlockAfterRead();
+        }
+    }
+
+    @Test
+    public void testSimpleMergeIntoEmptyLog() {
+        RaceLog into = merge(new long[0], new long[] { 123, 234 });
+        into.lockForRead();
+        try {
+            assertEquals(2, Util.size(into.getRawFixes()));
+            assertBefore(into, 123, 234);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithOneElementToTheMiddle() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] { 200 });
+        into.lockForRead();
+        try {
+            assertEquals(3, Util.size(into.getRawFixes()));
+            assertBefore(into, 123, 200);
+            assertBefore(into, 200, 234);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithOneElementToTheBeginning() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] { 100 });
+        into.lockForRead();
+        try {
+            assertEquals(3, Util.size(into.getRawFixes()));
+            assertBefore(into, 100, 123);
+            assertBefore(into, 123, 234);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithOneElementToTheEnd() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] { 345 });
+        into.lockForRead();
+        try {
+            assertEquals(3, Util.size(into.getRawFixes()));
+            assertBefore(into, 123, 234);
+            assertBefore(into, 234, 345);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithThreeElementsAroundTwoOthers() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] { 100, 200, 345 });
+        into.lockForRead();
+        try {
+            assertEquals(5, Util.size(into.getRawFixes()));
+            assertBefore(into, 100, 123);
+            assertBefore(into, 123, 200);
+            assertBefore(into, 200, 234);
+            assertBefore(into, 234, 345);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithSequencesOfElementsAroundTwoOthers() {
+        RaceLog into = merge(new long[] { 123, 234 }, new long[] { 100, 101, 200, 201, 345, 346 });
+        into.lockForRead();
+        try {
+            assertEquals(8, Util.size(into.getRawFixes()));
+            assertBefore(into, 100, 101);
+            assertBefore(into, 101, 123);
+            assertBefore(into, 123, 200);
+            assertBefore(into, 200, 201);
+            assertBefore(into, 201, 234);
+            assertBefore(into, 234, 345);
+            assertBefore(into, 234, 346);
+        } finally {
+            into.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testSimpleMergeOfLogWithTwoElementsAroundSequenceOfOthers() {
+        RaceLog into = merge(new long[] { 100, 101, 200, 201, 345, 346 }, new long[] { 123, 234 });
+        into.lockForRead();
+        try {
+            assertEquals(8, Util.size(into.getRawFixes()));
+            assertBefore(into, 100, 101);
+            assertBefore(into, 101, 123);
+            assertBefore(into, 123, 200);
+            assertBefore(into, 200, 201);
+            assertBefore(into, 201, 234);
+            assertBefore(into, 234, 345);
+            assertBefore(into, 234, 346);
+        } finally {
+            into.unlockAfterRead();
+        }
     }
     
     @Test
