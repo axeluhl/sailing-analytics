@@ -133,12 +133,12 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>Cost per day</td>
-  <td>~1000</td>
-  <td>~800</td>
-  <td>~800</td>
-  <td>~700</td>
-  <td>~900</td>
-  <td>~900</td>
+  <td>~1000 (-)</td>
+  <td>~800 (0)</td>
+  <td>~800 (0)</td>
+  <td>~700 (+)</td>
+  <td>~900 (-)</td>
+  <td>~900 (-)</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
@@ -178,12 +178,12 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td><b>16</b></td>
+  <td><b>15</b></td>
   <td>5</td>
   <td><b>20</b></td>
-  <td>7</td>
-  <td>5</td>
-  <td>7</td>
+  <td>8</td>
+  <td>4</td>
+  <td>6</td>
 </tr>
 </table>
 
