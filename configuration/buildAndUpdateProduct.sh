@@ -7,14 +7,14 @@ PROJECT_TYPE="sailing"
 
 find_project_home () 
 {
-    if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
+    if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then
         echo ""
         return 0
     fi
 
     if [ ! -d "$1/.git" ]; then
-        PARENT_DIR=`cd $1/..;pwd`
-        OUTPUT=$(find_project_home $PARENT_DIR)
+        PARENT_DIR="`cd "$1/..";pwd`"
+        OUTPUT=$(find_project_home "$PARENT_DIR")
 
         if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
             OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
@@ -28,14 +28,14 @@ find_project_home ()
 
 # this holds for default installation
 USER_HOME=~
-START_DIR=`pwd`
+START_DIR="`pwd`"
 
 if [ "$PROJECT_HOME" = "" ]; then
-    PROJECT_HOME=$(find_project_home $START_DIR)
+    PROJECT_HOME=$(find_project_home "$START_DIR")
 fi
 
 # if project_home is still empty we could not determine any suitable directory
-if [[ $PROJECT_HOME == "" ]]; then
+if [[ "$PROJECT_HOME" == "" ]]; then
     echo "Could neither determine nor get PROJECT_HOME. Please provide it by setting an environment variable with this name."
     exit 1
 fi
@@ -53,7 +53,7 @@ if [ -f $USER_HOME/.bash_profile ]; then
     source $USER_HOME/.bash_profile
 fi
 
-cd $PROJECT_HOME
+cd "$PROJECT_HOME"
 active_branch=$(git symbolic-ref -q HEAD)
 if [[ $active_branch == "" ]]; then
     active_branch="build"
@@ -66,8 +66,8 @@ HEAD_DATE=$(date "+%Y%m%d%H%M")
 VERSION_INFO="$HEAD_SHA-$active_branch-$HEAD_DATE"
 SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 
-MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
-MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
+MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
+MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
 
 p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 
