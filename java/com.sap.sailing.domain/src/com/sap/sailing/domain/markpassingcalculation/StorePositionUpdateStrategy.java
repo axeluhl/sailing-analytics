@@ -1,11 +1,10 @@
-package com.sap.sailing.domain.markpassingcalculation.impl;
+package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 /**

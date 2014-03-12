@@ -55,6 +55,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final Candidate end;
     private final DynamicTrackedRace race;
 
+    // TODO Locking
+
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
@@ -91,6 +93,12 @@ public class CandidateChooserImpl implements CandidateChooser {
         removeCandidates(oldCans, c);
         addCandidates(c, newCans);
         findShortestPath(c);
+    }
+
+    public void removeWaypoint(Waypoint w) {
+        for (Competitor c : currentMarkPasses.keySet()) {
+            currentMarkPasses.get(c).remove(w);
+        }
     }
 
     private void createNewEdges(Competitor co, Iterable<Candidate> newCandidates) {
@@ -147,7 +155,6 @@ public class CandidateChooserImpl implements CandidateChooser {
                 return result != 0 ? result : o1.getA().compareTo(o2.getA());
             }
         });
-        // TODO Locking
         Map<Candidate, Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
         candidateWithParentAndSmallestTotalCost.put(start, null);
         Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(co);
@@ -209,7 +216,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         assert c2 != end;
         Distance totalEstimatedDistance = new MeterDistance(0);
         Waypoint first;
-        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis()/2);
+        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
         if (c1.getOneBasedIndexOfWaypoint() == 0) {
             first = race.getRace().getCourse().getFirstWaypoint();
         } else {
@@ -232,6 +239,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         Distance actualDistance = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         double differenceInMeters = actualDistance.getMeters() - totalEstimatedDistance.getMeters();
         double differenceInPercent = differenceInMeters / totalEstimatedDistance.getMeters();
+        // A smaller distance than estimated is very unlikely, somewhere between the distance estimated and double that
+        // is likely and anything greater than that gradually becomes unlikely
         if (differenceInPercent < 0) {
             result = 3.5 * differenceInPercent + 1;
         } else if (differenceInPercent > 1) {

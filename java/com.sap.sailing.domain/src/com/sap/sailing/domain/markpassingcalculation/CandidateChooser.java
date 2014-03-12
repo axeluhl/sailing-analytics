@@ -15,4 +15,5 @@ public interface CandidateChooser {
      */
 
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans);
+    
 }

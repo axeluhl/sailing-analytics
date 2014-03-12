@@ -119,7 +119,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         double incorrectPasses = 0;
         double incorrectStarts = 0;
 
-        boolean printRight = false;
+        boolean printRight = true;
         boolean printWrong = true;
         boolean printResult = true;
 
@@ -230,11 +230,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
             boolean gotPassed = true;
             boolean gotOther = false;
-            System.out.println(c);
+            //System.out.println(c);
             for (Waypoint w : getRace().getCourse().getWaypoints()) {
                 MarkPassing old = givenPasses.get(c).get(w);
                 MarkPassing newm = getTrackedRace().getMarkPassing(c, w);
-                System.out.println(newm);
+                //System.out.println(newm);
                 if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
                     if ((old == null) != (newm == null)) {
                         gotPassed = false;

@@ -23,8 +23,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
-import com.sap.sailing.domain.markpassingcalculation.impl.MarkPassingUpdateListener;
-import com.sap.sailing.domain.markpassingcalculation.impl.StorePositionUpdateStrategy;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -39,15 +37,15 @@ import com.sap.sailing.util.impl.ThreadFactoryWithPriority;
  * constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new fixes into a queue
  * as {@link StorePositionUpdateStrategy}. A new thread will also be started to evaluate the new fixes (See
  * {@link CandidateFinder} and {@link CandidateChooser}). This continues until the {@link MarkPassingUpdateListener}
- * signals that the race is over.
+ * signals that the race is over (after {@link #stop()} is called.
  * 
  * @author Nicolas Klose
  * 
  */
 public class MarkPassingCalculator {
-    // TODO Course changes (listener on course)
-    private final CandidateFinder finder;
-    private final CandidateChooser chooser;
+    private final DynamicTrackedRace race;
+    private CandidateFinder finder;
+    private CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
     private boolean suspended = false;
@@ -62,6 +60,7 @@ public class MarkPassingCalculator {
         } else {
             listener = null;
         }
+        this.race = race;
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -215,5 +214,18 @@ public class MarkPassingCalculator {
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes) {
             }
         });
+    }
+
+    public void stop() {
+        listener.stop();
+    }
+
+    public void recalculateEverything() {
+        finder = new CandidateFinderImpl(race);
+        chooser = new CandidateChooserImpl(race);
+        for (Competitor c : race.getRace().getCompetitors()) {
+            Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+            chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+        }
     }
 }

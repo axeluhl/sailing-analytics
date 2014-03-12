@@ -77,48 +77,16 @@ public class CandidateFinderImpl implements CandidateFinder {
         RaceDefinition raceDefinition = race.getRace();
         Course course = raceDefinition.getCourse();
         Iterable<Waypoint> waypoints = course.getWaypoints();
-        Waypoint firstWaypoint = course.getFirstWaypoint();
-        Waypoint lastWaypoint = course.getLastWaypoint();
+        Waypoint firstWaypointOfRace = course.getFirstWaypoint();
+        Waypoint lastWaypointOfRace = course.getLastWaypoint();
         for (Competitor c : raceDefinition.getCompetitors()) {
             crossTrackErrors.put(c, new TreeMap<GPSFix, Map<Waypoint, List<Double>>>(comp));
             distances.put(c, new TreeMap<GPSFix, Map<Mark, Distance>>(comp));
-            HashMap<Waypoint, Map<List<GPSFix>, Candidate>> competitorXTECandidates = new HashMap<Waypoint, Map<List<GPSFix>, Candidate>>();
-            HashMap<Waypoint, Map<GPSFix, Candidate>> competitorDistanceCandidates = new HashMap<Waypoint, Map<GPSFix, Candidate>>();
-            xteCandidates.put(c, competitorXTECandidates);
-            distanceCandidates.put(c, competitorDistanceCandidates);
-            for (Waypoint w : waypoints) {
-                competitorXTECandidates.put(w, new HashMap<List<GPSFix>, Candidate>());
-                competitorDistanceCandidates.put(w, new HashMap<GPSFix, Candidate>());
-            }
+            xteCandidates.put(c, new HashMap<Waypoint, Map<List<GPSFix>, Candidate>>());
+            distanceCandidates.put(c, new HashMap<Waypoint, Map<GPSFix, Candidate>>());
         }
         for (Waypoint w : waypoints) {
-            PassingInstruction instruction = w.getPassingInstructions();
-            if (instruction == PassingInstruction.None || instruction == null) {
-                if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
-                    instruction = PassingInstruction.Line;
-                } else {
-                    int numberofMarks = 0;
-                    Iterator<Mark> it = w.getMarks().iterator();
-                    while (it.hasNext()) {
-                        it.next();
-                        numberofMarks++;
-                    }
-                    if (numberofMarks == 2) {
-                        instruction = PassingInstruction.Gate;
-                    } else if (numberofMarks == 1) {
-                        instruction = PassingInstruction.Port;
-                    } else {
-                        instruction = PassingInstruction.None;
-                    }
-                }
-            }
-            passingInstructions.put(w, instruction);
-            if (instruction == PassingInstruction.Line) {
-                Mark proxy = new MarkImpl(w.getName());
-                lineMarks.put(w, proxy);
-                marks.add(proxy);
-            } else
-                Util.addAll(w.getMarks(), marks);
+            processNewWaypoint(w, firstWaypointOfRace, lastWaypointOfRace);
         }
     }
 
@@ -191,6 +159,97 @@ public class CandidateFinderImpl implements CandidateFinder {
             logger.finest(newCans.size() + " new Candidates and " + wrongCans.size() + " removed Candidates for " + c);
         }
         return new Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
+    }
+
+    public Map<Competitor, Iterable<Candidate>> addWaypoint(int zeroBasedIndex, Waypoint w) {
+        Course course = race.getRace().getCourse();
+        processNewWaypoint(w, course.getFirstWaypoint(), course.getLastWaypoint());
+        // TODO!!
+        return null;
+
+    }
+
+    public Map<Competitor, Iterable<Candidate>> removeWaypoint(Waypoint w) {
+        List<Mark> marksToRemove = new ArrayList<>();
+        if (passingInstructions.get(w) == PassingInstruction.Line) {
+            passingInstructions.remove(w);
+            marksToRemove.add(lineMarks.get(w));
+            lineMarks.remove(w);
+        } else {
+            passingInstructions.remove(w);
+            for (Mark m : w.getMarks()) {
+                boolean used = false;
+                for (Waypoint way : passingInstructions.keySet()) {
+                    if (Util.contains(way.getMarks(), m)) {
+                        used = true;
+                        break;
+                    }
+                }
+                if (!used) {
+                    marksToRemove.add(m);
+                }
+            }
+        }
+        for (Mark m : marksToRemove) {
+            marks.remove(m);
+            for (Map<GPSFix, Map<Mark, Distance>> map : distances.values()) {
+                for (Map<Mark, Distance> distance : map.values()) {
+                    distance.remove(m);
+                }
+            }
+        }
+        Map<Competitor, Iterable<Candidate>> result = new HashMap<>();
+        for (Competitor c : race.getRace().getCompetitors()) {
+            List<Candidate> badCans = new ArrayList<>();
+            for (Map<Waypoint, List<Double>> xtes : crossTrackErrors.get(c).values()) {
+                xtes.remove(w);
+            }
+            for (Map<Waypoint, Map<List<GPSFix>, Candidate>> xteCans : xteCandidates.values()) {
+                badCans.addAll(xteCans.get(w).values());
+                xteCans.remove(w);
+            }
+            for (Map<Waypoint, Map<GPSFix, Candidate>> disCans : distanceCandidates.values()) {
+                badCans.addAll(disCans.get(w).values());
+                disCans.remove(w);
+            }
+            result.put(c, badCans);
+        }
+        return result;
+    }
+
+    private void processNewWaypoint(Waypoint w, Waypoint firstWaypoint, Waypoint lastWaypoint) {
+        PassingInstruction instruction = w.getPassingInstructions();
+        if (instruction == PassingInstruction.None || instruction == null) {
+            if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
+                instruction = PassingInstruction.Line;
+            } else {
+                int numberofMarks = 0;
+                Iterator<Mark> it = w.getMarks().iterator();
+                while (it.hasNext()) {
+                    it.next();
+                    numberofMarks++;
+                }
+                if (numberofMarks == 2) {
+                    instruction = PassingInstruction.Gate;
+                } else if (numberofMarks == 1) {
+                    instruction = PassingInstruction.Port;
+                } else {
+                    instruction = PassingInstruction.None;
+                }
+            }
+        }
+        passingInstructions.put(w, instruction);
+        if (instruction == PassingInstruction.Line) {
+            Mark proxy = new MarkImpl(w.getName());
+            lineMarks.put(w, proxy);
+            marks.add(proxy);
+        } else {
+            Util.addAll(w.getMarks(), marks);
+        }
+        for (Competitor c : race.getRace().getCompetitors()) {
+            xteCandidates.get(c).put(w, new HashMap<List<GPSFix>, Candidate>());
+            distanceCandidates.get(c).put(w, new HashMap<GPSFix, Candidate>());
+        }
     }
 
     /**
@@ -521,7 +580,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         Distance legLength = getLegLength(t, w);
         if (legLength != null) {
             double result = 1 / (8/*Raising this will make is stricter*/* Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
-            // Auch NormalVerteilung?
             return result;
         }
         return null;

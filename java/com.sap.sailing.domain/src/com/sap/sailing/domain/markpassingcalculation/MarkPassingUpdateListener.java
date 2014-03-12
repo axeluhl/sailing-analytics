@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.markpassingcalculation.impl;
+package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -22,7 +23,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * @author Nicolas Klose
  * 
  */
-public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
+public class MarkPassingUpdateListener extends AbstractRaceChangeListener implements CourseListener {
     private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
@@ -31,11 +32,12 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     };
 
     /**
-     * Adds itself automatically as a Listener on the <code>race</code>.
+     * Adds itself automatically as a Listener on the <code>race</code> and its course.
      */
     public MarkPassingUpdateListener(TrackedRace race) {
         queue = new LinkedBlockingQueue<>();
         race.addListener(this);
+        race.getRace().getCourse().addCourseListener(this);
     }
 
     public BlockingQueue<StorePositionUpdateStrategy> getQueue() {
@@ -74,6 +76,22 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
 
     public boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
         return endMarkerCandidate == endMarker;
+    }
+
+    public void stop() {
+        queue.add(endMarker);
+    }
+
+    @Override
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // TODO Auto-generated method stub
+
     }
 
 }
