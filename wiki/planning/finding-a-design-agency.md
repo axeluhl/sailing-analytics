@@ -176,6 +176,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
   <td>++</td>
 </tr>
+<tr>
+  <td>&nbsp;</td>
+  <td>16</td>
+  <td>5</td>
+  <td>20</td>
+  <td>7</td>
+  <td>5</td>
+  <td>7</td>
+</tr>
 </table>
 
 <table>
