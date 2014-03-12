@@ -1,11 +1,9 @@
 package com.sap.sse.datamining.impl.components.deprecated;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.sap.sse.datamining.components.ParallelAggregator;
@@ -52,7 +50,7 @@ public class GroupDividingParallelAggregator<ExtractedType, AggregatedType> exte
         for (Map<GroupKey, AggregatedType> result : getResults()) {
             data.putAll(result);
         }
-        return Collections.unmodifiableMap(new ConcurrentHashMap<GroupKey, AggregatedType>(data));
+        return data;
     }
 
 }

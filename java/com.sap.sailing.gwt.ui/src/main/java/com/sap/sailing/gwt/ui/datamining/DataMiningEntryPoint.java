@@ -65,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractEntryPoint {
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         queryDefinitionProviderWithControls.addControl(createSettingsControlWidget(queryRunner, queryDefinitionProvider));
         
-        SimpleQueryDefinition queryDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
+        SimpleQueryDefinition queryDefinition = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale().getLocaleName(), GrouperType.Dimensions, StatisticType.Speed, AggregatorType.Average, DataTypes.GPSFix);
         queryDefinition.appendDimensionToGroupBy(DimensionIdentifier.RegattaName);
         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
         queryRunner.run(queryDefinitionProvider.getQueryDefinition());

@@ -1,6 +1,8 @@
 package com.sap.sse.datamining.shared;
 
-public interface AdditionalResultData {
+import java.io.Serializable;
+
+public interface AdditionalResultData extends Serializable {
 
     public int getRetrievedDataAmount();
 

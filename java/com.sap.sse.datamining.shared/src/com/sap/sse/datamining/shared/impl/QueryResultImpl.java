@@ -9,7 +9,7 @@ import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.Unit;
 
 public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
-    private static final long serialVersionUID = -8347731622150585715L;
+    private static final long serialVersionUID = 5173796619174827696L;
     
     private Map<GroupKey, AggregatedType> results;
     private AdditionalResultData additionalData;

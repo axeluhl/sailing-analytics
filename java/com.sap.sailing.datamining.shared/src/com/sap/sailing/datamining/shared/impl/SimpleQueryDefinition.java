@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sailing.datamining.shared.DataTypes;
 import com.sap.sailing.datamining.shared.DimensionIdentifier;
 import com.sap.sailing.datamining.shared.QueryDefinition;
@@ -15,9 +14,9 @@ import com.sap.sse.datamining.components.AggregatorType;
 import com.sap.sse.datamining.components.GrouperType;
 
 public class SimpleQueryDefinition implements QueryDefinition {
-    private static final long serialVersionUID = 3476324726640558091L;
+    private static final long serialVersionUID = 8408302866342877839L;
 
-    private LocaleInfo localeInfo;
+    private String localeInfoName;
     
     private GrouperType grouperType;
     private StatisticType statisticType;
@@ -33,8 +32,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     @Deprecated
     SimpleQueryDefinition() { }
 
-    public SimpleQueryDefinition(LocaleInfo localeInfo, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
-        this.localeInfo = localeInfo;
+    public SimpleQueryDefinition(String localeInfoName, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+        this.localeInfoName = localeInfoName;
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;
@@ -45,8 +44,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     }
     
     @Override
-    public LocaleInfo getLocaleInfo() {
-        return localeInfo;
+    public String getLocaleInfoName() {
+        return localeInfoName;
     }
 
     @Override

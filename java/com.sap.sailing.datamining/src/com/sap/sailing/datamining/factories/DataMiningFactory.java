@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sailing.datamining.shared.QueryDefinition;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.Query;
@@ -34,7 +33,7 @@ public final class DataMiningFactory {
 
     public static <DataType, AggregatedType extends Number> Query<AggregatedType> createQuery(
             QueryDefinition queryDefinition, RacingEventService racingService) {
-        Locale locale = getLocaleFrom(queryDefinition.getLocaleInfo());
+        Locale locale = getLocaleFrom(queryDefinition.getLocaleInfoName());
 
         ParallelDataRetriever<DataType> retriever = DataRetrieverFactory.createDataRetriever(
                 queryDefinition.getDataType(), racingService, DataMiningActivator.getExecutor());
@@ -54,8 +53,8 @@ public final class DataMiningFactory {
                 retriever, filter, grouper, extractor, aggregator);
     }
 
-    private static Locale getLocaleFrom(LocaleInfo localeInfo) {
-        Locale locale = supportedLocalesMappedByLocaleInfo.get(localeInfo.getLocaleName());
+    private static Locale getLocaleFrom(String localeInfoName) {
+        Locale locale = supportedLocalesMappedByLocaleInfo.get(localeInfoName);
         return locale != null ? locale : supportedLocalesMappedByLocaleInfo.get(DEFAULT_LOCALE_NAME);
     }
 

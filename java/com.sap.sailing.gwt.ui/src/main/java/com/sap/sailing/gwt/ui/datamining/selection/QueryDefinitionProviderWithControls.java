@@ -66,7 +66,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     @Override
     public QueryDefinition getQueryDefinition() {
-        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale(), groupBySelectionPanel.getGrouperType(),
+        SimpleQueryDefinition queryDTO = new SimpleQueryDefinition(LocaleInfo.getCurrentLocale().getLocaleName(), groupBySelectionPanel.getGrouperType(),
                                                                    statisticProvider.getStatisticType(), statisticProvider.getAggregatorType(), 
                                                                    statisticProvider.getDataType());
         
