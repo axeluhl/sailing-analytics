@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
+import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
@@ -26,23 +27,23 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
-public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassingTest {
-
-    public CandidateFinderAndChooserTest() {
-
-    }
+/**
+ * Tests tricky situation that can fail easily. Created with help of this site http://itouchmap.com/latlong.html
+ * 
+ */
+public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
     @Test
     public void testNormalPassing() {
         // Normal Passing of Single mark
-        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(System.currentTimeMillis() - 2000),
-                new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(330)));
-        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(System.currentTimeMillis()), new KnotSpeedWithBearingImpl(5,
-                new DegreeBearingImpl(270)));
-        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(System.currentTimeMillis() + 2000),
-                new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(225)));
-        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(System.currentTimeMillis() + 4000),
-                new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(190)));
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0.000003, 0.000049), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                330)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0.000062, 0.000029), new MillisecondsTimePoint(44000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                270)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000026, -0.000024), new MillisecondsTimePoint(47000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                225)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000056, -0.000049), new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                190)));
         race.recordFix(ron, fix1);
         race.recordFix(ron, fix2);
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
@@ -77,13 +78,13 @@ public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassing
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix3));
-        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(jerry, fixes);
+        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getA()), 0);
         assertEquals(Util.size(cans.getB()), 0);
 
         fixes.clear();
         fixes.add(fix2);
-        cans = finder.getCandidateDeltas(jerry, fixes);
+        cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getA()), 2); // 2 Distance candidates (mark is rounded twice in course)
         Double probability = cans.getA().iterator().next().getProbability();
         assertTrue(probability > 0.5 && probability < 0.8); // Close but distance candidate
@@ -102,26 +103,26 @@ public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassing
         GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(-0.000982, 0.000143), new MillisecondsTimePoint(125000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
                 45)));
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
-        race.recordFix(jerry, fix1);
-        race.recordFix(jerry, fix2);
+        race.recordFix(tom, fix1);
+        race.recordFix(tom, fix2);
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2));
-        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(jerry, fixes);
+        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         assertTrue(Util.size(cans.getA()) == 1 && cans.getA().iterator().next().getProbability() < 0.4);
         // Passing of one mark, close but wrong side and direction
         assertEquals(Util.size(cans.getB()), 0);
 
-        race.recordFix(jerry, fix3);
+        race.recordFix(tom, fix3);
         fixes.clear();
         fixes.add(fix3);
-        cans = finder.getCandidateDeltas(jerry, fixes);
+        cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(3, Util.size(cans.getA()));
         assertEquals(Util.size(cans.getB()), 0);
 
-        race.recordFix(jerry, fix4);
+        race.recordFix(tom, fix4);
         fixes.clear();
         fixes.add(fix4);
-        cans = finder.getCandidateDeltas(jerry, fixes);
+        cans = finder.getCandidateDeltas(tom, fixes);
         assertEquals(Util.size(cans.getB()), 0);
         for (Candidate c : cans.getA()) {
             if (c.getOneBasedIndexOfWaypoint() == 3) {
@@ -138,20 +139,49 @@ public class CandidateFinderAndChooserTest extends AbstractMockedRaceMarkPassing
                 5)));
         GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000942, 0.000022), new MillisecondsTimePoint(14000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
                 15)));
-        race.recordFix(jerry, fix1);
-        race.recordFix(jerry, fix2);
+        race.recordFix(tom, fix1);
+        race.recordFix(tom, fix2);
         Candidate c1 = new CandidateImpl(1, new MillisecondsTimePoint(11000), 0.99, waypoints.get(0), true, true, "CTE");
         Candidate c3 = new CandidateImpl(3, new MillisecondsTimePoint(13000), 0.99, waypoints.get(2), true, true, "CTE");
         // Good candidate but bad time
         CandidateChooser chooser = new CandidateChooserImpl(race);
-        chooser.calculateMarkPassDeltas(jerry, Arrays.asList(c1, c3), new ArrayList<Candidate>());
-        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(jerry);
+        chooser.calculateMarkPassDeltas(tom, Arrays.asList(c1, c3), new ArrayList<Candidate>());
+        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(tom);
         assertEquals(markPassings.size(), 1);
         assertEquals(markPassings.first().getWaypoint(), waypoints.get(0));
     }
-    
+
     @Test
-    public void testTrackerFails(){
-        
+    public void testVerySlowCompetitor() {
+
+    }
+
+    @Test
+    public void testSailingInFrontAndAroundMark() {
+        CandidateFinder finder = new CandidateFinderImpl(race);
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(-0.000037, -0.000126), new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                80)));
+        GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(-0.000022, 0.000001), new MillisecondsTimePoint(43000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                45)));
+        GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0.000018, 0.000038), new MillisecondsTimePoint(46000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                330)));
+        GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0.000084, -0.000004), new MillisecondsTimePoint(49000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                260)));
+        GPSFixMoving fix5 = new GPSFixMovingImpl(new DegreePosition(0.000054, -0.000153), new MillisecondsTimePoint(52000), new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(
+                200)));
+        race.recordFix(ben, fix1);
+        race.recordFix(ben, fix2);
+        race.recordFix(ben, fix3);
+        List<GPSFix> fixes = new ArrayList<>();
+        fixes.addAll(Arrays.asList(fix1, fix2, fix3));
+        Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(ben, fixes);
+        Candidate inFront = Util.get(cans.getA(), 0);
+        race.recordFix(ben, fix4);
+        race.recordFix(ben, fix5);
+        fixes.clear();
+        fixes.addAll(Arrays.asList(fix4, fix5));
+        cans = finder.getCandidateDeltas(ben, fixes);
+        Candidate behind = Util.get(cans.getA(), 0);
+        assertTrue(behind.getProbability() > inFront.getProbability());
     }
 }

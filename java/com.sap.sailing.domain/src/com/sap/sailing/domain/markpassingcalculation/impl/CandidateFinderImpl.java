@@ -101,20 +101,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         return getCandidateDeltas(c, fixes);
     }
 
-    private Set<GPSFix> getAllFixes(Competitor c) {
-        Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        try {
-            track.lockForRead();
-            for (GPSFix fix : track.getFixes()) {
-                fixes.add(fix);
-            }
-        } finally {
-            track.unlockAfterRead();
-        }
-        return fixes;
-    }
-
     @Override
     public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Mark mark, Iterable<GPSFix> markFixes) {
         Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
@@ -277,6 +263,20 @@ public class CandidateFinderImpl implements CandidateFinder {
                 distanceCandidates.get(c).put(w, new HashMap<GPSFix, Candidate>());
             }
         }
+    }
+
+    private Set<GPSFix> getAllFixes(Competitor c) {
+        Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        try {
+            track.lockForRead();
+            for (GPSFix fix : track.getFixes()) {
+                fixes.add(fix);
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return fixes;
     }
 
     /**

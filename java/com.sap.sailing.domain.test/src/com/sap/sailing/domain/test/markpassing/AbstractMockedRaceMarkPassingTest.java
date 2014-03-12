@@ -39,7 +39,8 @@ import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 
 public class AbstractMockedRaceMarkPassingTest {
     protected Competitor ron = new CompetitorImpl("Ron", "Ron", null, null, null);
-    protected Competitor jerry = new CompetitorImpl("Jerry", "Jerry", null, null, null);
+    protected Competitor tom = new CompetitorImpl("Tom", "Tom", null, null, null);
+    protected Competitor ben = new CompetitorImpl("Ben", "Ben", null, null, null);
 
     protected Mark m = new MarkImpl("mark");
     protected Mark gate1 = new MarkImpl("Gate1", "west");
@@ -60,7 +61,7 @@ public class AbstractMockedRaceMarkPassingTest {
         Regatta r = new RegattaImpl("regatta", new BoatClassImpl("boat", true), Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)));
         Course course = new CourseImpl("course", waypoints);
-        RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(ron, jerry));
+        RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, new BoatClassImpl("boat", true), Arrays.asList(ron, tom, ben));
         race = new DynamicTrackedRaceImpl(new TrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), 0, 10000, 10000);
         race.setStartTimeReceived(new MillisecondsTimePoint(10000));
         TimePoint t = new MillisecondsTimePoint(30000);
