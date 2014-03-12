@@ -282,12 +282,12 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>Cost per day</td>
-  <td>~1000 (-)</td>
-  <td>~800 (0)</td>
-  <td>~800 (0)</td>
-  <td>~700 (+)</td>
-  <td>~900 (-)</td>
-  <td>~900 (-)</td>
+  <td>~1000</td>
+  <td>~800</td>
+  <td>~800</td>
+  <td>~700</td>
+  <td>~900</td>
+  <td>~900</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
@@ -308,7 +308,7 @@ Telefon: 040 / 22 81 72 62 0
   <td>0</td>
 </tr>
 <tr>
-  <td>Transformation of domain knowledge to design ideas (Homepage task)</td>
+  <td style="color:red;font-weight:bold;">Transformation of domain knowledge to design ideas (Homepage task)</td>
   <td>+</td>
   <td>++</td>
   <td>-</td>
@@ -327,7 +327,7 @@ Telefon: 040 / 22 81 72 62 0
 </tr>
 <tr>
   <td>&nbsp;</td>
-  <td><b>15</b></td>
+  <td><b>17</b></td>
   <td><b>20</b></td>
   <td>5</td>
   <td>8</td>
