@@ -169,6 +169,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 </table>
 
+<table>
 <tr>
   <td>Objective</td>
   <td>Sovanta (Heidelberg)</td>
