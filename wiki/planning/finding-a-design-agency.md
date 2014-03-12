@@ -34,70 +34,134 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 <table>
 <tr>
   <td>Objective</td>
-  <td>Creative Workline</td>
-  <td>Ubilabs</td>
-  <td>GMR</td>
-  <td>Digitalsunray</td>
-  <td>Medienfabrik</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Digital Sunray (Wien)</td>
+  <td>Ubilabs (Hamburg)</td>
+  <td>Creative Workline (Berlin)</td>
+  <td>GMR (London)</td>
+</tr>
+<tr>
+  <td>Office Location</td>
+  <td>++</td>
+  <td>0</td>
+  <td>+ (STG)</td>
+  <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>Mobile HTML Knowledge, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>++</td>
+  <td>?</td>
 </tr>
 <tr>
   <td>Android Knowledge, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>+ (more iOS)</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>? (no news)</td>
 </tr>
 <tr>
   <td>iOS skills, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>+</td>
+  <td>?</td>
 </tr>
 <tr>
-  <td>Professional Meeting in terms of preparation and participants?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>Professional Meeting at the office in terms of preparation and participants?</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>GWT Knowledge?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
-  <td>Technical Knowledge (GIT, SVN, ...)?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>Technical Knowledge (GIT, Web-Technologies, Programming Languages)?</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Knowledge of Sailing Domain?</td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+</tr>
+<tr>
+  <td>Team size of developers and designers (10+)?</td>
+  <td>++ (30)</td>
+  <td>0 (10)</td>
+  <td>+ (20)</td>
+  <td>0 (10)</td>
+  <td>++ (30)</td>
+</tr>
+<tr>
+  <td>Cost per day</td>
+  <td>~1000</td>
+  <td>~800</td>
+  <td>~800</td>
+  <td>~700</td>
+  <td>~900</td>
+</tr>
+<tr>
+  <td>Task (Redesign of Homepage)</td>
+  <td>++</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Argumentation of task solution</td>
+  <td>0</td>
+  <td>+</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
+  <td>+</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Sympathy factor (gut feeling)</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>General Comments (pro)</td>
+  <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
+  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
+  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based solutions, tech knowledge</td>
   <td></td>
   <td></td>
 </tr>
 <tr>
-  <td>Team size of developers and designers (10+)?</td>
+  <td>General Comments (contra)</td>
   <td></td>
   <td></td>
   <td></td>

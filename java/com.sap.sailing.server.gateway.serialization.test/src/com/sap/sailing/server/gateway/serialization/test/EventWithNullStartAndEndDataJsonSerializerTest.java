@@ -1,10 +1,10 @@
 package com.sap.sailing.server.gateway.serialization.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Date;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -26,11 +25,12 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
-public class EventDataJsonSerializerTest {
+public class EventWithNullStartAndEndDataJsonSerializerTest {
+
     protected final UUID expectedId = UUID.randomUUID();
     protected final String expectedName = "ab";
-    protected final TimePoint expectedStartDate = new MillisecondsTimePoint(new Date());
-    protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
+    protected final TimePoint expectedStartDate = null;
+    protected final TimePoint expectedEndDate = null;
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
 
     protected JsonSerializer<Venue> venueSerializer;
@@ -38,7 +38,6 @@ public class EventDataJsonSerializerTest {
     protected EventBaseJsonDeserializer deserializer;
     protected EventBase event;
 
-    // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -48,6 +47,7 @@ public class EventDataJsonSerializerTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
+
         // ... and the serializer itself.		
         serializer = new EventJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)));
@@ -56,19 +56,10 @@ public class EventDataJsonSerializerTest {
     @Test
     public void testBasicAttributes() {
         JSONObject result = serializer.serialize(event);
-
-        assertEquals(
-                expectedId,
-                UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
-        assertEquals(
-                expectedName,
-                result.get(EventJsonSerializer.FIELD_NAME));
-        assertEquals(
-                expectedStartDate,
-                new MillisecondsTimePoint(((Number) result.get(EventJsonSerializer.FIELD_START_DATE)).longValue()));
-        assertEquals(
-                expectedEndDate,
-                new MillisecondsTimePoint(((Number) result.get(EventJsonSerializer.FIELD_END_DATE)).longValue()));
+        assertEquals(expectedId, UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
+        assertEquals(expectedName, result.get(EventJsonSerializer.FIELD_NAME));
+        assertNull(result.get(EventJsonSerializer.FIELD_START_DATE));
+        assertNull(result.get(EventJsonSerializer.FIELD_END_DATE));
     }
 
     @Test
@@ -77,8 +68,8 @@ public class EventDataJsonSerializerTest {
         final EventBase deserializedEvent = deserializer.deserialize(result);
         assertEquals(expectedId, deserializedEvent.getId());
         assertEquals(expectedName, deserializedEvent.getName());
-        assertEquals(expectedStartDate, deserializedEvent.getStartDate());
-        assertEquals(expectedEndDate, deserializedEvent.getEndDate());
+        assertNull(deserializedEvent.getStartDate());
+        assertNull(deserializedEvent.getEndDate());
     }
 
     @Test
@@ -87,5 +78,4 @@ public class EventDataJsonSerializerTest {
         EventBase event = deserializer.deserialize(result);
         assertEquals(expectedVenue.getName(), event.getVenue().getName());
     }
-
 }
