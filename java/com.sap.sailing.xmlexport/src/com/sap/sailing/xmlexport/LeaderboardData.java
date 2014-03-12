@@ -361,7 +361,7 @@ public class LeaderboardData extends ExportAction {
                 raceConfidenceAndErrorMessages.getB().add("It seems that competitor " + competitor.getName() + " has not finished first leg!");
                 addNamedElementWithValue(competitorRaceDataElement, "rank_at_end_of_first_leg", 0);
             }
-            Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getEndOfRace(), /*waitForLatestAnalysis*/ false);
+            Distance averageCrossTrackError = race.getAverageCrossTrackError(competitor, race.getStartOfRace(), race.getEndOfRace(), /*upwindOnly*/ false, /*waitForLatestAnalysis*/ false);
             addNamedElementWithValue(competitorRaceDataElement, "average_cross_track_error_in_meters", averageCrossTrackError != null ? averageCrossTrackError.getMeters() : -1.0);
             competitorElement.addContent(competitorRaceDataElement);
             raceElement.addContent(competitorElement);
