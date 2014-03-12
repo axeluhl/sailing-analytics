@@ -28,10 +28,9 @@ import javax.ws.rs.core.StreamingOutput;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -95,6 +94,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -125,8 +125,12 @@ public class MasterDataImportTest {
 
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
-        deleteCreatedDataFromDatabase();
+        deleteAllDataFromDatabase();
+    }
 
+    @Before
+    public void setUp() throws MalformedURLException, IOException, InterruptedException {
+        deleteAllDataFromDatabase();
     }
 
     private <T extends AbstractSailingServerResource> T spyResource(T resource, RacingEventService service) {
@@ -136,53 +140,10 @@ public class MasterDataImportTest {
         return spyResource;
     }
 
-    private void deleteCreatedDataFromDatabase() throws MalformedURLException, IOException, InterruptedException {
-        storedLogUUIDs.clear();
-        RacingEventService service = new RacingEventServiceImpl();
-        LeaderboardGroup group = service.getLeaderboardGroupByName(TEST_GROUP_NAME);
-        if (group != null) {
-            service.removeLeaderboardGroup(TEST_GROUP_NAME);
-        }
-        LeaderboardGroup group2 = service.getLeaderboardGroupByName(TEST_GROUP_NAME2);
-        if (group2 != null) {
-            service.removeLeaderboardGroup(TEST_GROUP_NAME2);
-        }
-        Leaderboard leaderboard = service.getLeaderboardByName(TEST_LEADERBOARD_NAME);
-        if (leaderboard != null) {
-            service.removeLeaderboard(TEST_LEADERBOARD_NAME);
-        }
-        Event event = service.getEvent(eventUUID);
-        if (event != null) {
-            service.removeEvent(eventUUID);
-        }
-        Regatta regatta = service.getRegattaByName(TEST_LEADERBOARD_NAME);
-        if (regatta != null) {
-            service.removeRegatta(regatta);
-        }
-        DBCollection raceLogCollection = MongoDBService.INSTANCE.getDB().getCollection("RACE_LOGS");
-        // Removes all race log events
-        DBCursor cursor = raceLogCollection.find();
-        while (cursor.hasNext()) {
-            raceLogCollection.remove(cursor.next());
-        }
-        // This should only delete those logs created during this test. Sadly it doesn't seem to work.
-        // Didnt use CollectionNames stuff since it was not visible in this package. Sucks as soon as these names
-        // change, I know..
-        // raceLogCollection.ensureIndex(new BasicDBObject("RACE_LOG_EVENT_ID", null));
-        // for (Serializable id : storedLogUUIDs) {
-        // BasicDBObject query = new BasicDBObject();
-        // query.put("RACE_LOG_EVENT.RACE_LOG_EVENT_ID", id);
-        // DBCursor result = raceLogCollection.find(query);
-        // while (result.hasNext()) {
-        // raceLogCollection.remove(result.next());
-        // }
-        // }
-
-        // Remove all media tracks
-        Collection<MediaTrack> tracks = service.getAllMediaTracks();
-        for (MediaTrack track : tracks) {
-            service.mediaTrackDeleted(track);
-        }
+    private void deleteAllDataFromDatabase() throws MalformedURLException, IOException, InterruptedException {
+        MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
+        service.getDB().getWriteConcern().fsync();
+        service.getDB().dropDatabase();
     }
 
     @Test
@@ -303,7 +264,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -378,7 +339,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(suppressedCompetitorOnTarget, leaderboardOnTarget.getSuppressedCompetitors().iterator()
                 .next());
 
-        // Check for competitor desplay name
+        // Check for competitor display name
         Assert.assertEquals(nickName, leaderboardOnTarget.getDisplayName(suppressedCompetitorOnTarget));
 
         // Check for race log event
@@ -491,7 +452,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -625,7 +586,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -775,7 +736,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -941,7 +902,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1133,7 +1094,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1278,7 +1239,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1401,7 +1362,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1536,7 +1497,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1599,7 +1560,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1719,7 +1680,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();
@@ -1790,7 +1751,7 @@ public class MasterDataImportTest {
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
-            deleteCreatedDataFromDatabase();
+            deleteAllDataFromDatabase();
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
             domainFactory = destService.getBaseDomainFactory();

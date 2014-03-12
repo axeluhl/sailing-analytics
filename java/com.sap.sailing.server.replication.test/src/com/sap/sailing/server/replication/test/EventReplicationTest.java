@@ -2,6 +2,7 @@ package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +37,25 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         assertEquals(replicatedEvent.getName(), eventName);
         assertEquals(replicatedEvent.getStartDate(), eventStartDate);
         assertEquals(replicatedEvent.getEndDate(), eventEndDate);
+        assertEquals(replicatedEvent.getVenue().getName(), venueName);
+    }
+
+    @Test
+    public void testEventReplicationWithNullStartAndEndDate() throws InterruptedException {
+        final String eventName = "ESS Masquat";
+        final String venueName = "Masquat, Oman";
+        final boolean isPublic = false;
+        List<String> regattas = new ArrayList<String>();
+        regattas.add("Day1");
+        regattas.add("Day2");
+        Event masterEvent = master.addEvent(eventName, null, null, venueName, isPublic, UUID.randomUUID());
+
+        Thread.sleep(1000);
+        Event replicatedEvent = replica.getEvent(masterEvent.getId());
+        assertNotNull(replicatedEvent);
+        assertEquals(replicatedEvent.getName(), eventName);
+        assertNull(replicatedEvent.getStartDate());
+        assertNull(replicatedEvent.getEndDate());
         assertEquals(replicatedEvent.getVenue().getName(), venueName);
     }
 

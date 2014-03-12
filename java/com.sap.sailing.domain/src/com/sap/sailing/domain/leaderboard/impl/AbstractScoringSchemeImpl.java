@@ -182,4 +182,10 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         }
         return numberOfCompetitorsInBetterFleets;
     }
+
+    @Override
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2,
+            TimePoint timePoint) throws NoWindException {
+        return 0;
+    }
 }
