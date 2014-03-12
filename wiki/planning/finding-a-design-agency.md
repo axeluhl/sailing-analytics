@@ -34,11 +34,19 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 <table>
 <tr>
   <td>Objective</td>
-  <td>Creative Workline</td>
-  <td>Ubilabs</td>
-  <td>GMR</td>
-  <td>Digitalsunray</td>
-  <td>Medienfabrik</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Ubilabs (Hamburg)</td>
+  <td>Creative Workline (Berlin)</td>
+  <td>GMR (London)</td>
+  <td>Digital Sunray (Wien)</td>
+</tr>
+<tr>
+  <td>Location</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
 </tr>
 <tr>
   <td>Mobile HTML Knowledge, References and Developers?</td>
@@ -98,6 +106,14 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>General Comments</td>
   <td></td>
   <td></td>
   <td></td>
