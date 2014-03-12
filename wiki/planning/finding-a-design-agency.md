@@ -35,15 +35,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 <tr>
   <td>Objective</td>
   <td>Sovanta (Heidelberg)</td>
+  <td>Digital Sunray (Wien)</td>
   <td>Ubilabs (Hamburg)</td>
   <td>Creative Workline (Berlin)</td>
   <td>GMR (London)</td>
-  <td>Digital Sunray (Wien)</td>
 </tr>
 <tr>
-  <td>Location</td>
-  <td></td>
-  <td></td>
+  <td>Office Location</td>
+  <td>++</td>
+  <td>+</td>
   <td></td>
   <td></td>
   <td></td>
@@ -106,6 +106,14 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td>Task (Redesign of Homepage)</td>
   <td></td>
   <td></td>
   <td></td>
