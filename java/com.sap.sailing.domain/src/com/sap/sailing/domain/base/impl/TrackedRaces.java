@@ -32,7 +32,7 @@ public class TrackedRaces implements Serializable {
      */
     private transient ThreadLocal<Boolean> ongoingMasterDataExport;
 
-    private final Map<Fleet, TrackedRace> trackedRaces;
+    private Map<Fleet, TrackedRace> trackedRaces;
 
     public TrackedRaces(Map<Fleet, TrackedRace> trackedRaces) {
         this.trackedRaces = trackedRaces;
@@ -80,14 +80,19 @@ public class TrackedRaces implements Serializable {
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
+        final boolean masterDataImportOngoing = ois.readBoolean();
+        if (masterDataImportOngoing) {
+            trackedRaces = new HashMap<>();
+        } else {
+            ois.defaultReadObject();
+        }
         this.ongoingMasterDataExport = createOngoingMasterDataExportThreadLocal();
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        if (ongoingMasterDataExport.get()) {
-            oos.writeObject(new HashMap<Fleet, TrackedRace>());
-        } else {
+        final Boolean masterDataExportOngoing = ongoingMasterDataExport.get();
+        oos.writeBoolean(masterDataExportOngoing);
+        if (!masterDataExportOngoing) {
             oos.defaultWriteObject();
         }
     }
