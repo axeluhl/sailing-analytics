@@ -43,82 +43,82 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 <tr>
   <td>Office Location</td>
   <td>++</td>
-  <td>+</td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>0</td>
+  <td>+ (STG)</td>
+  <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>Mobile HTML Knowledge, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>++</td>
+  <td>?</td>
 </tr>
 <tr>
   <td>Android Knowledge, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>+ (more iOS)</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>? (no news)</td>
 </tr>
 <tr>
   <td>iOS skills, References and Developers?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>+</td>
+  <td>?</td>
 </tr>
 <tr>
-  <td>Professional Meeting in terms of preparation and participants?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>Professional Meeting at the office in terms of preparation and participants?</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>GWT Knowledge?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
-  <td>Technical Knowledge (GIT, SVN, ...)?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>Technical Knowledge (GIT, Web-Technologies, Programming Languages)?</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Knowledge of Sailing Domain?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++ (20)</td>
+  <td>0 (10)</td>
+  <td>+ (20)</td>
+  <td>0 (10)</td>
+  <td>++ (30)</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>++</td>
+  <td>-</td>
+  <td>++</td>
+  <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>General Comments</td>
