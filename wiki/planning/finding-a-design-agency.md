@@ -114,6 +114,15 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>+</td>
 </tr>
 <tr>
+  <td>Transformation of domain knowledge to design ideas (general)</td>
+  <td>+</td>
+  <td>-</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+  <td>+</td>
+</tr>
+<tr>
   <td>Team size of developers and designers (10+)?</td>
   <td>++ (30)</td>
   <td>0 (10)</td>
@@ -150,7 +159,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
 </tr>
 <tr>
-  <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
+  <td>Transformation of domain knowledge to design ideas (Homepage task)</td>
   <td>+</td>
   <td>-</td>
   <td>++</td>
