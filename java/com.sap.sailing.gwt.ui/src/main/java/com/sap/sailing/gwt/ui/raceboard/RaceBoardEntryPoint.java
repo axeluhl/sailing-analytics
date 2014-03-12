@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sse.gwt.ui.GwtHttpRequestUtils;
+import com.sap.sse.gwt.server.GwtHttpRequestUtils;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;

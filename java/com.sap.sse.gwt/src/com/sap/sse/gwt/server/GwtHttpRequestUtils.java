@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.ui;
+package com.sap.sse.gwt.server;
 
 import java.util.List;
 

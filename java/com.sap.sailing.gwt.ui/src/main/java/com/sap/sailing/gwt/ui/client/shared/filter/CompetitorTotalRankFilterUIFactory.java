@@ -5,8 +5,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.filter.BinaryOperator;
-import com.sap.sse.gwt.ui.DataEntryDialog;
-import com.sap.sse.gwt.ui.IntegerBox;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CompetitorTotalRankFilterUIFactory extends AbstractCompetitorNumberFilterUIFactory<Integer> { 
     private IntegerBox valueIntegerBox;

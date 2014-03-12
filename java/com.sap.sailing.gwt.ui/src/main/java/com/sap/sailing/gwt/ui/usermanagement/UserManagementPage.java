@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public class UserManagementPage extends AbstractEntryPoint {
     @Override
@@ -41,6 +42,6 @@ public class UserManagementPage extends AbstractEntryPoint {
             }
         });
         vp.add(ok);
-        linkEnterToButton(ok, usernameField, passwordField);
+        DialogUtils.linkEnterToButton(ok, usernameField, passwordField);
     }
 }

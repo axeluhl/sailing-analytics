@@ -14,19 +14,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sse.gwt.ui.EntryPointUtils;
+import com.sap.sse.gwt.shared.DebugConstants;
 
-public abstract class AbstractEntryPoint extends EntryPointUtils implements EntryPoint, ErrorReporter, WindowSizeDetector {
-    /**
-     * <p>The attribute which is used for the debug id.</p>
-     */
-    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id"; //$NON-NLS-1$
-    
-    /**
-     * <p>The prefix which is used for the debug id.</p>
-     */
-    public static final String DEBUG_ID_PREFIX = ""; //$NON-NLS-1$
-    
+public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
@@ -63,8 +53,8 @@ public abstract class AbstractEntryPoint extends EntryPointUtils implements Entr
             TextResource script = bundle.ajaxSemaphoreJS();
             JavaScriptInjector.inject(script.getText());
             
-            DebugInfo.setDebugIdAttribute(DEBUG_ID_ATTRIBUTE, false);
-            DebugInfo.setDebugIdPrefix(DEBUG_ID_PREFIX);
+            DebugInfo.setDebugIdAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, false);
+            DebugInfo.setDebugIdPrefix(DebugConstants.DEBUG_ID_PREFIX);
         }
         doOnModuleLoad();
         if (DebugInfo.isDebugIdEnabled()) {

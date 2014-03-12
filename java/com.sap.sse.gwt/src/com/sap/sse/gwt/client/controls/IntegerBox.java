@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.ui;
+package com.sap.sse.gwt.client.controls;
 
 import java.io.IOException;
 

@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> {
 
@@ -46,7 +46,7 @@ public class SetStartTimeDialog extends DataEntryDialog<RaceLogSetStartTimeDTO> 
     private Label currentPassIdBox;
     private BetterDateTimeBox timeBox;
     private TextBox authorNameBox;
-    private com.sap.sse.gwt.ui.IntegerBox authorPriorityBox;
+    private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 

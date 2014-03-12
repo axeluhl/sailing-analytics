@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.client.shared.panels.LabeledAbstractFilterablePane
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
