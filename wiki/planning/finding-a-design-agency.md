@@ -39,6 +39,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>Ubilabs (Hamburg)</td>
   <td>Creative Workline (Berlin)</td>
   <td>GMR (London)</td>
+  <td>Pier2Port (Hamburg)</td>
 </tr>
 <tr>
   <td>Office Location</td>
@@ -47,6 +48,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>+ (STG)</td>
   <td>0</td>
   <td>0</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Mobile HTML Knowledge, References and Developers?</td>
@@ -55,6 +57,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++</td>
   <td>++</td>
   <td>?</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Android Knowledge, References and Developers?</td>
@@ -63,6 +66,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>+</td>
   <td>++</td>
   <td>? (no news)</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>iOS skills, References and Developers?</td>
@@ -71,6 +75,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++</td>
   <td>+</td>
   <td>?</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>Professional Meeting at the office in terms of preparation and participants?</td>
@@ -79,9 +84,11 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++</td>
   <td>-</td>
   <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>GWT Knowledge?</td>
+  <td>0</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -95,6 +102,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>+</td>
   <td>+</td>
   <td>+</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Knowledge of Sailing Domain?</td>
@@ -103,6 +111,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>0</td>
   <td>0</td>
   <td>++</td>
+  <td>+</td>
 </tr>
 <tr>
   <td>Team size of developers and designers (10+)?</td>
@@ -111,6 +120,7 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>+ (20)</td>
   <td>0 (10)</td>
   <td>++ (30)</td>
+  <td>0 (10)</td>
 </tr>
 <tr>
   <td>Cost per day</td>
@@ -119,12 +129,14 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>~800</td>
   <td>~700</td>
   <td>~900</td>
+  <td>~900</td>
 </tr>
 <tr>
   <td>Task (Redesign of Homepage)</td>
   <td>++</td>
   <td>-</td>
   <td>++</td>
+  <td>0</td>
   <td>0</td>
   <td>0</td>
 </tr>
@@ -135,12 +147,14 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++</td>
   <td>0</td>
   <td>0</td>
+  <td>0</td>
 </tr>
 <tr>
   <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
   <td>+</td>
   <td>-</td>
   <td>++</td>
+  <td>0</td>
   <td>0</td>
   <td>0</td>
 </tr>
@@ -151,6 +165,18 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
   <td>++</td>
   <td>+</td>
   <td>0</td>
+  <td>++</td>
+</tr>
+</table>
+
+<tr>
+  <td>Objective</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Digital Sunray (Wien)</td>
+  <td>Ubilabs (Hamburg)</td>
+  <td>Creative Workline (Berlin)</td>
+  <td>GMR (London)</td>
+  <td>Pier2Port (Hamburg)</td>
 </tr>
 <tr>
   <td>General Comments (pro)</td>
