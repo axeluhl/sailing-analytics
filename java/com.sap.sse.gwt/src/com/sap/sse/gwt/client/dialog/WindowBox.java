@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls.dialog;
+package com.sap.sse.gwt.client.dialog;
 
 /*
  * Copyright 2010 Traction Software, Inc.
@@ -19,6 +19,8 @@ package com.sap.sailing.gwt.ui.client.shared.controls.dialog;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,8 +29,10 @@ import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.Anchor;
@@ -68,6 +72,17 @@ import com.google.gwt.user.client.ui.Widget;
  * </pre>
  */
 public class WindowBox extends DialogBox {
+    /**
+     * A {@link ClientBundle} that provides css resources for {@link WindowBox}.
+     */
+    public static interface WindowBoxResources extends ClientBundle {
+        public static final WindowBoxResources INSTANCE = GWT.create(WindowBoxResources.class);
+
+        @NotStrict
+        @Source("WindowBox.css")
+        CssResource windowBoxCss();
+    }
+
     
     public interface PopoutHandler {
         void popout();
@@ -144,13 +159,13 @@ public class WindowBox extends DialogBox {
 
     public WindowBox(String title, String titleTooltip, Widget content, PopoutHandler popoutHandler) {
         super(false, false);
+        WindowBoxResources.INSTANCE.windowBoxCss().ensureInjected();
+
         this.popoutHandler = popoutHandler;
 
         this.setStyleName("gwt-extras-WindowBox", true);
 
         this.container = new FlowPanel();
-
-        // this.content = new FlowPanel();
 
         this.close = new Anchor();
         this.close.setStyleName("gwt-extras-dialog-close");
