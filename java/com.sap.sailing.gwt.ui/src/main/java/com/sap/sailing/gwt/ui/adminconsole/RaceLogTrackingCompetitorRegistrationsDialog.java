@@ -10,9 +10,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.ui.DataEntryDialog.DialogCallback;
 
 public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackingDialog {
     private CompetitorTableWrapper competitorTable;
@@ -81,6 +83,16 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
         });
         buttonPanel.add(toggleOnlyLeaderboard);
         buttonPanel.add(toggleSelection);
+        
+
+        Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                                openAddCompetitorDialog();
+                        }
+                });
+        buttonPanel.add(addCompetitorButton);
 
         super.addButtons(buttonPanel);
 
@@ -110,5 +122,29 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends RaceLogTrackin
                 errorReporter.reportError("Could not save competitor registrations: " + caught.getMessage());
             }
         });
+    }
+
+    private void openAddCompetitorDialog() {
+        new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(), new DialogCallback<CompetitorDTO>() {
+            @Override
+            public void ok(CompetitorDTO competitor) {
+                sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to add competitor: "+caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                        competitorTable.getAllCompetitors().add(updatedCompetitor);
+                        competitorTable.getFilterField().updateAll(competitorTable.getAllCompetitors());
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
 }
