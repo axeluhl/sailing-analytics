@@ -60,7 +60,6 @@ import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -530,7 +529,4 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void setDataImportDeleteProgressFromMapTimerWithReplication(UUID importOperationId);
 
     void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId);
-
-    void replicateDataImportOperation(ImportMasterDataOperation op);
-
 }

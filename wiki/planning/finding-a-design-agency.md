@@ -29,146 +29,6 @@ Fragen, die eher allgemeine Rahmenbedingungen betreffen:
 5. Sailing team starts integration with the server.
 6. Agency provides long-term support for changes. Lifecycle is communicated with agency.
 
-## Decision Matrix
-
-<table>
-<tr>
-  <td>Objective</td>
-  <td>Sovanta (Heidelberg)</td>
-  <td>Digital Sunray (Wien)</td>
-  <td>Ubilabs (Hamburg)</td>
-  <td>Creative Workline (Berlin)</td>
-  <td>GMR (London)</td>
-</tr>
-<tr>
-  <td>Office Location</td>
-  <td>++</td>
-  <td>0</td>
-  <td>+ (STG)</td>
-  <td>0</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Mobile HTML Knowledge, References and Developers?</td>
-  <td>++</td>
-  <td>+</td>
-  <td>++</td>
-  <td>++</td>
-  <td>?</td>
-</tr>
-<tr>
-  <td>Android Knowledge, References and Developers?</td>
-  <td>+ (more iOS)</td>
-  <td>++</td>
-  <td>+</td>
-  <td>++</td>
-  <td>? (no news)</td>
-</tr>
-<tr>
-  <td>iOS skills, References and Developers?</td>
-  <td>++</td>
-  <td>+</td>
-  <td>++</td>
-  <td>+</td>
-  <td>?</td>
-</tr>
-<tr>
-  <td>Professional Meeting at the office in terms of preparation and participants?</td>
-  <td>++</td>
-  <td>+</td>
-  <td>++</td>
-  <td>-</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>GWT Knowledge?</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Technical Knowledge (GIT, Web-Technologies, Programming Languages)?</td>
-  <td>+</td>
-  <td>+</td>
-  <td>+</td>
-  <td>+</td>
-  <td>+</td>
-</tr>
-<tr>
-  <td>Knowledge of Sailing Domain?</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>++</td>
-</tr>
-<tr>
-  <td>Team size of developers and designers (10+)?</td>
-  <td>++ (30)</td>
-  <td>0 (10)</td>
-  <td>+ (20)</td>
-  <td>0 (10)</td>
-  <td>++ (30)</td>
-</tr>
-<tr>
-  <td>Cost per day</td>
-  <td>~1000</td>
-  <td>~800</td>
-  <td>~800</td>
-  <td>~700</td>
-  <td>~900</td>
-</tr>
-<tr>
-  <td>Task (Redesign of Homepage)</td>
-  <td>++</td>
-  <td>-</td>
-  <td>++</td>
-  <td>0</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Argumentation of task solution</td>
-  <td>0</td>
-  <td>+</td>
-  <td>++</td>
-  <td>0</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Conversion of domain knowledge to design ideas (Homepage task)</td>
-  <td>+</td>
-  <td>-</td>
-  <td>++</td>
-  <td>0</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>Sympathy factor (gut feeling)</td>
-  <td>0</td>
-  <td>0</td>
-  <td>++</td>
-  <td>+</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>General Comments (pro)</td>
-  <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
-  <td>Marketing department and brand development, good tech skills, process knowledge and implementation</td>
-  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based solutions, tech knowledge</td>
-  <td></td>
-  <td></td>
-</tr>
-<tr>
-  <td>General Comments (contra)</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
-</tr>
-</table>
 
 # Meeting Notes (20.01.2014)
 
@@ -307,31 +167,195 @@ Telefon: 040 / 22 81 72 62 0
   </tr>
 </table>
 
-# Priority list
+# Final Decision
+
+## Decision Matrix
 
 <table>
- <tr>
-  <td>Simon</td>
-  <td>Axel</td>
-  <td>Frank</td>
-  <td>Jens</td>
- </tr>
- <tr>
-  <td>Ubilabs</td>
+<tr>
+  <td>Objective</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Ubilabs (Hamburg)</td>
+  <td>Digital Sunray (Wien)</td>
+  <td>Creative Workline (Berlin)</td>
+  <td>GMR (London)</td>
+  <td>Pier2Port (Hamburg)</td>
+</tr>
+<tr>
+  <td>Office Location</td>
+  <td>++</td>
+  <td>+ (STG)</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Mobile HTML Knowledge, References and Developers?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>++</td>
   <td>?</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Android Knowledge, References and Developers?</td>
+  <td>+ (more iOS)</td>
+  <td>+</td>
+  <td>++</td>
+  <td>++</td>
+  <td>? (no news)</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>iOS skills, References and Developers?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>+</td>
   <td>?</td>
-  <td>?</td>
- </tr>
- <tr>
-  <td>Creative Workline</td>
-  <td>?</td>
-  <td>?</td>
-  <td>?</td>
- </tr>
- <tr>
-  <td>Sysvision</td>
-  <td>?</td>
-  <td>?</td>
-  <td>?</td>
- </tr>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Professional Meeting at the office in terms of preparation and participants?</td>
+  <td>++</td>
+  <td>++</td>
+  <td>+</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>GWT Knowledge?</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Technical Knowledge (GIT, Web-Technologies, Programming Languages)?</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Knowledge of Sailing Domain?</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Transformation of domain knowledge to design ideas (general)*</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>+</td>
+  <td>0</td>
+  <td>+</td>
+</tr>
+<tr>
+  <td>Team size of developers and designers (10+)?</td>
+  <td>++ (30)</td>
+  <td>+ (20)</td>
+  <td>0 (10)</td>
+  <td>0 (10)</td>
+  <td>++ (30)</td>
+  <td>0 (10)</td>
+</tr>
+<tr>
+  <td>SAP Preferred Supplier?</td>
+  <td>+</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Cost per day (developer)</td>
+  <td>- (~1000)</td>
+  <td>0 (~800)</td>
+  <td>0 (~800)</td>
+  <td>+ (~700)</td>
+  <td>- (~900)</td>
+  <td>- (~900)</td>
+</tr>
+<tr>
+  <td>Task (Redesign of Homepage)</td>
+  <td>++</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Argumentation of task solution*</td>
+  <td>0</td>
+  <td>++</td>
+  <td>+</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Transformation of domain knowledge to design ideas (Homepage task)*</td>
+  <td>+</td>
+  <td>++</td>
+  <td>-</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Sympathy factor (gut feeling)</td>
+  <td>0</td>
+  <td>++</td>
+  <td>0</td>
+  <td>+</td>
+  <td>0</td>
+  <td>++</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td><b>16</b></td>
+  <td><b>20</b></td>
+  <td>5</td>
+  <td>9</td>
+  <td>3</td>
+  <td>5</td>
+</tr>
 </table>
+
+Items marked with * have a heigher weight in theory. This weight is not reflected in the bare numbers.
+
+## Pros/Cons
+
+<table>
+<tr>
+  <td>Objective</td>
+  <td>Sovanta (Heidelberg)</td>
+  <td>Ubilabs (Hamburg)</td>
+</tr>
+<tr>
+  <td>Pros</td>
+  <td><ul><li>Project is supported by Claus Heinrich (CEO)</li><li>Professional processes and environment</li><li> Near to SAP headquarters</li><li>Big, scalable team</li></ul></td>
+  <td><ul><li>Excellect design and user interaction understanding -> best prototype</li><li>CEO's are coming from the 'visual communication' world</li><li>Experience with map based solutions -> Google-Maps partner</li><li>Project references fit better to our project.</ul></td>
+</tr>
+<tr>
+  <td>Cons</td>
+  <td><ul><li>Expensive</li><li>We did not meet the people who made the prototype</li><li>People from the enterprise world -> not clear how flexible in dynamic event situations</li><li>We did not get a handout of the prototype</li></ul></td>
+  <td><ul><li>Small team, probably not scalable</li><li>Hamburg based -> communication overhead</li></ul></td>
+</tr>
+</table>
+
+## Resumee

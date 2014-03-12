@@ -141,7 +141,6 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -2374,10 +2373,4 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
         dataImportLock.setDeleteFromMapTimer(importOperationId);
     }
-
-    @Override
-    public void replicateDataImportOperation(ImportMasterDataOperation op) {
-        replicate(op);
-    }
-
 }
