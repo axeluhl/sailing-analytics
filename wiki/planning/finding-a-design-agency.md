@@ -338,7 +338,7 @@ Telefon: 040 / 22 81 72 62 0
 
 Items marked with * have a heigher weight in theory. This weight is not reflected in the bare numbers.
 
-## Comments
+## Pros/Cons
 
 <table>
 <tr>
@@ -347,14 +347,14 @@ Items marked with * have a heigher weight in theory. This weight is not reflecte
   <td>Ubilabs (Hamburg)</td>
 </tr>
 <tr>
-  <td>General Comments (pro)</td>
-  <td>Supported by Claus Heinrich, professional environment, near SAP headquarters, good design skills, big team</td>
-  <td>Very good design skills, good transformation of domain knowledge to design and user interaction, many location based</td>
+  <td>Pros</td>
+  <td><ul><li>Project is supported by Claus Heinrich (CEO)</li><li>Professional processes and environment</li><li> Near to SAP headquarters</li><li>Big, scalable team</li></ul></td>
+  <td><ul><li>Excellect design and user interaction understanding -> best prototype</li><li>CEO's are coming from the 'visual communication' world</li><li>Experience with map based solutions -> Google-Maps partner</li><li>Project references fit better to our project.</ul></td>
 </tr>
 <tr>
-  <td>General Comments (contra)</td>
-  <td></td>
-  <td></td>
+  <td>Cons</td>
+  <td><ul><li>Expensive</li><li>We did not meet the people who made the prototype</li><li>People from the enterprise world -> not clear how flexible in dynamic event situations</li><li>We did not get a handout of the prototype</li></ul></td>
+  <td><ul><li>Small team, probably not scalable</li><li>Hamburg based -> communication overhead</li></ul></td>
 </tr>
 </table>
 
