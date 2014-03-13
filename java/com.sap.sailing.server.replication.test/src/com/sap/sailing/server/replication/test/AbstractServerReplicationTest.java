@@ -27,6 +27,7 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -93,19 +94,19 @@ public abstract class AbstractServerReplicationTest {
             mongoDBService.getDB().dropDatabase();
         }
         resolveAgainst = DomainFactory.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestStart();
         if (master != null) {
             this.master = master;
         } else {
-            this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+            this.master = createNewMaster(mongoDBService, mongoObjectFactory);
         }
         if (replica != null) {
             this.replica = replica;
         } else {
             this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
                     // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), PersistenceFactory.INSTANCE
-                    .getMongoObjectFactory(mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
+                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, rim, this.master);
@@ -121,9 +122,19 @@ public abstract class AbstractServerReplicationTest {
         this.replicaReplicator = replicaReplicator; 
         return result;
     }
-    
+
+    protected RacingEventServiceImpl createNewMaster(final MongoDBService mongoDBService,
+            final MongoObjectFactory mongoObjectFactory) {
+        return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
+                EmptyWindStore.INSTANCE);
+    }
+
     @After
     public void tearDown() throws Exception {
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.getDatabase().requestDone();
         masterReplicator.unregisterReplica(replicaDescriptor);
         masterDescriptor.stopConnection();
         try {

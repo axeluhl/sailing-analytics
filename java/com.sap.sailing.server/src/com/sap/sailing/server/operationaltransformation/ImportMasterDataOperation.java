@@ -3,7 +3,6 @@ package com.sap.sailing.server.operationaltransformation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +34,12 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
+import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -103,7 +106,6 @@ public class ImportMasterDataOperation extends
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
             LeaderboardGroup leaderboardGroup) {
-        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = extractRaceLogEvents(leaderboardGroup);
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
         createCourseAreasAndEvents(toState, leaderboardGroup);
@@ -136,7 +138,7 @@ public class ImportMasterDataOperation extends
             }
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
-                addRaceLogEvents(leaderboard, raceLogEvents);
+                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
             }
@@ -189,39 +191,28 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addRaceLogEvents(Leaderboard leaderboard,
-            Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents) {
+    /**
+     * Ensures that the race log events are stored to the receiving instance's database. The race logs have been received
+     * in serialized form on the {@link RaceColumn} objects, but the database doesn't yet know about them. This method uses
+     * a <code>MongoRaceLogStoreVisitor</code> to store all race log events to the database.
+     */
+    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
-                Iterable<RaceLogEvent> raceLogsForColumnAndFleet = raceLogEvents.get(raceColumn).get(fleet);
-                for (RaceLogEvent event : raceLogsForColumnAndFleet) {
-                    log.add(event);
-                }
-            }
-        }
-
-    }
-
-    private Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> extractRaceLogEvents(LeaderboardGroup group) {
-        Map<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>> raceLogEvents = new HashMap<RaceColumn, Map<Fleet, Iterable<RaceLogEvent>>>();
-        for (Leaderboard leaderboard : group.getLeaderboards()) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                HashMap<Fleet, Iterable<RaceLogEvent>> raceLogEventsForRaceColumn = new HashMap<Fleet, Iterable<RaceLogEvent>>();
-                raceLogEvents.put(raceColumn, raceLogEventsForRaceColumn);
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    raceLog.lockForRead();
-                    try {
-                        Iterable<RaceLogEvent> fixes = raceLog.getRawFixes();
-                        raceLogEventsForRaceColumn.put(fleet, fixes);
-                    } finally {
-                        raceLog.unlockAfterRead();
+                RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
+                RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
+                log.lockForRead();
+                try {
+                    for (RaceLogEvent event : log.getRawFixes()) {
+                        event.accept(storeVisitor);
                     }
+                } finally {
+                    log.unlockAfterRead();
                 }
             }
         }
-        return raceLogEvents;
+
     }
 
     private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {

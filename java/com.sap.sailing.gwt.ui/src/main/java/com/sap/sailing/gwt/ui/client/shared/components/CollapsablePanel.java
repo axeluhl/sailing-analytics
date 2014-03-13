@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
@@ -12,7 +14,6 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.HasText;
@@ -91,7 +92,7 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
             if (!opening) {
                 curPanel.contentWrapper.setVisible(false);
             }
-            DOM.setStyleAttribute(curPanel.contentWrapper.getElement(), "height", "auto");
+            curPanel.contentWrapper.setHeight("auto");
             curPanel = null;
         }
 
@@ -107,14 +108,14 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
         @Override
         protected void onUpdate(double progress) {
-            int scrollHeight = DOM.getElementPropertyInt(curPanel.contentWrapper.getElement(), "scrollHeight");
+            int scrollHeight = curPanel.contentWrapper.getElement().getPropertyInt("scrollHeight");
             int height = (int) (progress * scrollHeight);
             if (!opening) {
                 height = scrollHeight - height;
             }
             height = Math.max(height, 1);
-            DOM.setStyleAttribute(curPanel.contentWrapper.getElement(), "height", height + "px");
-            DOM.setStyleAttribute(curPanel.contentWrapper.getElement(), "width", "auto");
+            curPanel.contentWrapper.getElement().getStyle().setHeight(height, Unit.PX);
+            curPanel.contentWrapper.setWidth("auto");
         }
     }
 
@@ -177,8 +178,8 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
 
         mainPanel.add(headerWrapper);
         mainPanel.add(contentWrapper);
-        DOM.setStyleAttribute(contentWrapper.getElement(), "padding", "0px");
-        DOM.setStyleAttribute(contentWrapper.getElement(), "overflow", "hidden");
+        contentWrapper.getElement().getStyle().setPadding(0, Unit.PX);
+        contentWrapper.getElement().getStyle().setOverflow(Overflow.HIDDEN);
         setStyleName(STYLENAME_DEFAULT);
         setContentDisplay(false);
     }
