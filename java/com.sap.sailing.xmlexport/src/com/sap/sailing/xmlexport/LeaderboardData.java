@@ -251,6 +251,32 @@ public class LeaderboardData extends ExportAction {
             competitorToDistanceRank.put(competitorSorted, raceRankSorted);
         }
         
+        // it can happen that there are competitors that did not race but got points
+        int additionalCompetitorCount = 0;
+        for (Competitor competitorInLeaderboard : leaderboard.getAllCompetitors()) {
+            if (!allCompetitors.contains(competitorInLeaderboard)) {
+                // found a competitor that is available in leaderboard but not in that race
+                // check if he has an overwritten score for that race
+                MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
+                if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
+                    // add this competitor to the list to have him evaluated
+                    Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                    Element competitorRaceDataElement = new Element("competitor_race_data");
+                    MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
+                    addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
+                    boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, race.getEndOfRace());
+                    addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
+                    Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, race.getEndOfRace());
+                    addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
+                    competitorElement.addContent(competitorRaceDataElement);
+                    raceElement.addContent(competitorElement);
+                    raceConfidenceAndErrorMessages.getB().add("Competitor " + competitorInLeaderboard.getName() + " has no valid data for this race!");
+                    additionalCompetitorCount++;
+                }
+            }
+        }
+        addNamedElementWithValue(raceElement, "race_score_participant_count", allCompetitors.size()+additionalCompetitorCount);
+        
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
             Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
@@ -366,7 +392,7 @@ public class LeaderboardData extends ExportAction {
             competitorElement.addContent(competitorRaceDataElement);
             raceElement.addContent(competitorElement);
         }
-        
+
         raceElement.addContent(createDataConfidenceXML(raceConfidenceAndErrorMessages));
         raceElement.addContent(legs);
         return raceElement;
@@ -470,7 +496,7 @@ public class LeaderboardData extends ExportAction {
             TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
             
             /* if there is no start time then ignore all data of this leg */
-            if (competitorLeg.getStartTime() == null || competitorLeg.getFinishTime() == null || competitorLeg.getTrackedLeg().getTrackedRace().getMarkPassings(competitor).isEmpty()) {
+            if (competitorLeg == null || competitorLeg.getStartTime() == null || competitorLeg.getFinishTime() == null || competitorLeg.getTrackedLeg().getTrackedRace().getMarkPassings(competitor).isEmpty()) {
                 competitorElement.addContent(competitorLegDataElement);
                 legElement.addContent(competitorElement);
                 continue;
