@@ -74,7 +74,7 @@ public class DataEntryPO extends CellTableRowPO {
         
         CompositeAction action = new CompositeAction();
         action.addAction(new MoveToOffsetAction(mouse, locatable, 1, 1));
-        action.addAction(new ClickAction(mouse, locatable));
+        action.addAction(new ClickAction(mouse, null));
         
         return action;
     }
