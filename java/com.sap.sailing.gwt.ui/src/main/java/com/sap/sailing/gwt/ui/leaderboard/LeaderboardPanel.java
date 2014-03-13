@@ -1471,6 +1471,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         } else {
             leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         }
+        setShowAddedScores(settings.isShowAddedScores());
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         if (this.preSelectedRace == null) {

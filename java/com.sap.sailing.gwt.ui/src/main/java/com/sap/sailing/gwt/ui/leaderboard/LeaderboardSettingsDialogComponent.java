@@ -100,6 +100,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(detailType));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
@@ -133,12 +134,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
-        // Make it possible to configure added points
-        FlowPanel addedScoresFlowPanel = new FlowPanel();
-        showAddedScoresCheckBox = dialog.createCheckbox(stringMessages.showAddedScores());
-        showAddedScoresCheckBox.setValue(showAddedScores);
-        addedScoresFlowPanel.add(showAddedScoresCheckBox);
-        raceDetailDialog.add(addedScoresFlowPanel);
         int detailCountInCurrentFlowPanel = 0;
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         FlowPanel raceDetailDialogContent = null;
@@ -150,10 +145,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
             detailCountInCurrentFlowPanel++;
         }
+        // Make it possible to configure added points
+        FlowPanel addedScoresFlowPanel = new FlowPanel();
+        addedScoresFlowPanel.addStyleName("dialogInnerContent");
+        showAddedScoresCheckBox = dialog.createCheckbox(stringMessages.showAddedScores());
+        dialog.addTooltip(showAddedScoresCheckBox, stringMessages.showAddedScores());
+        showAddedScoresCheckBox.setValue(showAddedScores);
+        addedScoresFlowPanel.add(showAddedScoresCheckBox);
+        raceDetailDialog.add(addedScoresFlowPanel);
         return raceDetailDialog;
     }
 
@@ -166,6 +170,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentOverallDetailSelection.contains(type));
             overallDetailCheckboxes.put(type, checkbox);
             overallDetailDialogContent.add(checkbox);
@@ -188,6 +193,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 legDetailsToShow.add(legDetailsContent);
             }
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
+            dialog.addTooltip(checkbox, DetailTypeFormatter.getTooltip(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
