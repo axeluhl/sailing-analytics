@@ -189,7 +189,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * </ul>
      * Potentially, you can create 8 threads per TTCM (connecting only with one single race)."
      */
-    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 8;
+    static final Integer MAX_STORED_PACKET_HOP_ALLOWANCE = 1000;
     
     private final Event tractracEvent;
     private final com.sap.sailing.domain.base.Regatta regatta;

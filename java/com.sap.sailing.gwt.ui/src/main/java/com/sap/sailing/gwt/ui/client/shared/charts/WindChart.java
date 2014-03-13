@@ -504,20 +504,20 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      * everything for the currently selected race is loaded; otherwise, no-op.
      */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if(!isVisible()) {
             return;
         }
 
-        updateTimePlotLine(date);
+        updateTimePlotLine(newTime);
         
         switch(timer.getPlayMode()) {
             case Live:
             {
                 // is date before first cache entry or is cache empty?
-                if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                    loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
-                } else if (date.getTime() > timeOfLatestRequestInMillis) {
+                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                    loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
+                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
                     loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
                 // otherwise the cache spans across date and so we don't need to load anything
@@ -530,10 +530,10 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                     loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
                 } else {
                     // replay mode during live play
-                    if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                        loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
-                    } else if (date.getTime() > timeOfLatestRequestInMillis) {
-                        loadData(new Date(timeOfLatestRequestInMillis), date, /* append */true);
+                    if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                        loadData(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
+                    } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
+                        loadData(new Date(timeOfLatestRequestInMillis), newTime, /* append */true);
                     }                    
                 }
                 break;

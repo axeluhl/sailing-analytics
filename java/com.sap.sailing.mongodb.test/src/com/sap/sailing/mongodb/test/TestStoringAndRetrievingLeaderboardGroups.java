@@ -67,6 +67,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
     @Before
     public void setUp() {
+        DomainFactory.INSTANCE.getCompetitorStore().clear();
         mongoObjectFactory = new MongoObjectFactoryImpl(db);
         domainObjectFactory = new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE);
     }

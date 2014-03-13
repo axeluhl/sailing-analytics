@@ -488,10 +488,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return isDiscarded(competitor, raceColumn, getRaceColumns(), timePoint);
     }
     
-    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
-        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
-                        raceColumn);
+    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
+        return !raceColumn.isMedalRace()
+                && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
+                && getResultDiscardingRule()
+                        .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
+                                raceColumn);
     }
 
     @Override
@@ -560,20 +563,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 if (o1 == o2) {
                     comparisonResult = 0;
                 } else {
-                    final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
-                    final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
-                    if (o1Fleet == null) {
-                        if (o2Fleet == null) {
-                            comparisonResult = 0;
+                    if (raceColumn.hasSplitFleets() && !raceColumn.hasSplitFleetContiguousScoring()) {
+                        // only check fleets if there are more than one and the column is not to be contiguously scored even in case
+                        // of split fleets
+                        final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
+                        final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
+                        if (o1Fleet == null) {
+                            if (o2Fleet == null) {
+                                comparisonResult = 0;
+                            } else {
+                                comparisonResult = 1; // o1 ranks "worse" because it doesn't have a fleet set while o2
+                                                      // has
+                            }
                         } else {
-                            comparisonResult = 1; // o1 ranks "worse" because it doesn't have a fleet set while o2 has
+                            if (o2Fleet == null) {
+                                comparisonResult = -1; // o1 ranks "better" because it has a fleet set while o2 hasn't
+                            } else {
+                                comparisonResult = o1Fleet.compareTo(o2Fleet);
+                            }
                         }
                     } else {
-                        if (o2Fleet == null) {
-                            comparisonResult = -1; // o1 ranks "better" because it has a fleet set while o2 hasn't
-                        } else {
-                            comparisonResult = o1Fleet.compareTo(o2Fleet);
-                        }
+                        // either there are no split fleets or the split isn't relevant for scoring as for ordered fleets
+                        // the scoring runs contiguously from top to bottom
+                        comparisonResult = 0;
                     }
                     if (comparisonResult == 0) {
                         comparisonResult = getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
@@ -670,7 +682,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException {
-        Map<RaceColumn, List<Competitor>> result = new HashMap<>();
+        Map<RaceColumn, List<Competitor>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
@@ -1120,11 +1132,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
         result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
         result.hasCarriedPoints = this.hasCarriedPoints();
-            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
-                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces();
-            } else {
-                result.discardThresholds = null;
-            }
+        if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+            result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
+                    .getDiscardIndexResultsStartingWithHowManyRaces();
+        } else {
+            result.discardThresholds = null;
+        }
         // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg
         // details
         // are requested only once and pass them into getLeaderboardEntryDTO

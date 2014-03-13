@@ -53,6 +53,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_CHART_DETAIL = "chartDetail";
     private static final String PARAM_SHOW_OVERALL_LEADERBOARD = "showOverallLeaderboard";
     private static final String PARAM_SHOW_SERIES_LEADERBOARDS = "showSeriesLeaderboards";
+    private static final String PARAM_SHOW_ADDED_SCORES = "showAddedScores";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the
@@ -205,12 +206,14 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
-                parameterMap.containsKey(PARAM_OVERALL_DETAIL)) {
+                parameterMap.containsKey(PARAM_OVERALL_DETAIL) || parameterMap.containsKey(PARAM_SHOW_ADDED_SCORES)) {
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_OVERALL_DETAIL));
             List<DetailType> legDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_LEG_DETAIL));
             List<String> namesOfRacesToShow = getStringListFromParamValue(parameterMap.get(PARAM_RACE_NAME));
+            boolean showAddedScores = parameterMap.containsKey(PARAM_SHOW_ADDED_SCORES) ? 
+                    Boolean.valueOf(parameterMap.get(PARAM_SHOW_ADDED_SCORES).get(0)) : false;
             boolean autoExpandPreSelectedRace = parameterMap.containsKey(PARAM_AUTO_EXPAND_PRESELECTED_RACE) ?
                     Boolean.valueOf(parameterMap.get(PARAM_AUTO_EXPAND_PRESELECTED_RACE).get(0)) :
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
@@ -220,7 +223,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null,
                             /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy);
+                                    raceColumnSelectionStrategy, showAddedScores);
 
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
@@ -371,6 +374,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             maneuverDetails.append('=');
             maneuverDetails.append(maneuverDetail.name());
         }
+        StringBuilder showAddedScores = new StringBuilder();
+        showAddedScores.append('&');
+        showAddedScores.append(PARAM_SHOW_ADDED_SCORES);
+        showAddedScores.append('=');
+        showAddedScores.append(settings.getLeaderboardSettings().isShowAddedScores());
+
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
@@ -391,6 +400,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.isAutoExpandLastRaceColumn() ? "&"+PARAM_AUTO_EXPAND_LAST_RACE_COLUMN+"=true" : "")
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
+                + showAddedScores.toString()
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
         return link;
     }

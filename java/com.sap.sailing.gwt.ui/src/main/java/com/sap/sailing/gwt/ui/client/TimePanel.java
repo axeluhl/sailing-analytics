@@ -291,16 +291,16 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
 
     @Override
-    public void timeChanged(Date time) {
+    public void timeChanged(Date newTime, Date oldTime) {
         if (timeRangeProvider.isZoomed()) {
-            timeSlider.setCurrentValue(new Double(time.getTime()), false);
+            timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
         } else {
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.
-                if (time.after(getToTime())) {
+                if (newTime.after(getToTime())) {
                     switch (timer.getPlayMode()) {
                     case Live:
-                        Date newMaxTime = new Date(time.getTime());
+                        Date newMaxTime = new Date(newTime.getTime());
                         if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
                             newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
                         }
@@ -311,15 +311,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         break;
                     }
                 }
-                timeSlider.setCurrentValue(new Double(time.getTime()), false);
+                timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
             }
         }
-        dateLabel.setText(getDateLabelText(time));
-        timeLabel.setText(getTimeLabelText(time));
-        String timeToStartLabelText = getTimeToStartLabelText(time);
+        dateLabel.setText(getDateLabelText(newTime));
+        timeLabel.setText(getTimeLabelText(newTime));
+        String timeToStartLabelText = getTimeToStartLabelText(newTime);
         if(timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
             timeToStartControlPanel.setVisible(true);
-            timeToStartLabel.setText(getTimeToStartLabelText(time));
+            timeToStartLabel.setText(getTimeToStartLabelText(newTime));
         } else {
             timeToStartControlPanel.setVisible(false);
             timeToStartLabel.setText("");

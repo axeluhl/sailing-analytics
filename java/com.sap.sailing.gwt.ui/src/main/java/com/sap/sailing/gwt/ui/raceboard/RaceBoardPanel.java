@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -168,10 +169,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         toolbarPanel.add(viewControlsPanel);
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
+        createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
         getElement().getStyle().setMarginRight(12, Unit.PX);
-        
+
+        // add busy indicator to toolbar panel because the embedded leaderboard has no space for it
+        toolbarPanel.add(leaderboardPanel.getBusyIndicator());
+        leaderboardPanel.getBusyIndicator().getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
+
         CompetitorsFilterSets loadedCompetitorsFilterSets = loadCompetitorsFilterSets();
         if (loadedCompetitorsFilterSets != null) {
             competitorsFilterSets = loadedCompetitorsFilterSets;
@@ -340,17 +345,14 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
     private void addCompetitorsFilterControl(Panel parentPanel) {
         String competitorsFilterTitle = stringMessages.competitorsFilter();
         competitorsFilterCheckBox = new CheckBox(competitorsFilterTitle);
-
         competitorsFilterCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-
         competitorsFilterCheckBox.setTitle(competitorsFilterTitle);
         competitorsFilterCheckBox.addStyleName("raceBoardNavigation-innerElement");
-
         competitorsFilterCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> newValue) {
                 boolean isChecked = competitorsFilterCheckBox.getValue();
-                if(isChecked) {
+                if (isChecked) {
                     if(lastActiveCompetitorFilterSet != null) {
                         competitorsFilterSets.setActiveFilterSet(lastActiveCompetitorFilterSet);
                         competitorSelectionModel.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSet());
@@ -365,9 +367,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
                 }
             }
         });
-
         parentPanel.add(competitorsFilterCheckBox);
-
         Button filterButton = new Button("");
         filterButton.addClickHandler(new ClickHandler() {
             @Override
@@ -378,7 +378,6 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
         filterButton.addStyleName("raceBoardNavigation-filterButton");
         filterButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         filterButton.setTitle(competitorsFilterTitle);
-        
         parentPanel.add(filterButton);
     }
     
@@ -473,7 +472,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
 
                 if (visible && component instanceof TimeListener) {
                     // trigger the component to update its data
-                    ((TimeListener) component).timeChanged(timer.getTime());
+                    ((TimeListener) component).timeChanged(timer.getTime(), null);
                 }
             }
         });
@@ -510,11 +509,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setLeaderboardVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
     }
 
     /**
@@ -526,11 +521,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
     public void setWindChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, windChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, windChart, visible);
     }
 
     /**
@@ -542,11 +533,7 @@ public class RaceBoardPanel extends SimplePanel implements RegattaDisplayer, Rac
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */
     public void setCompetitorChartVisible(boolean visible) {
-        switch (getConfiguration().getViewMode()) {
-        case ONESCREEN:
-            setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
-            break;
-        }
+        setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
     public Panel getToolbarPanel() {

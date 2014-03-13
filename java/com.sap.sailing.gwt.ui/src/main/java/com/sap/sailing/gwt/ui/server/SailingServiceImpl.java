@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.server;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -89,13 +89,13 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
+import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
@@ -162,7 +162,6 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
-import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -293,6 +292,7 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RemoveSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -1537,9 +1537,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         final List<PositionDTO> startMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
                         result.startMarkPositions = startMarkPositionDTOs;
                         result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                        result.startLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind();
+                        result.startLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind==null?null:absoluteAngleDifferenceToTrueWind.getDegrees();
                         result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                        result.startLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                        Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
+                        result.startLineAdvantageInMeters = advantage==null?null:advantage.getMeters();
                     }
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
@@ -1549,9 +1551,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         final List<PositionDTO> finishMarkPositionDTOs = getMarkPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
                         result.finishMarkPositions = finishMarkPositionDTOs;
                         result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                        result.finishLineAngleToCombinedWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind().getDegrees();
+                        Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage.getAbsoluteAngleDifferenceToTrueWind();
+                        result.finishLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind==null?null:absoluteAngleDifferenceToTrueWind.getDegrees();
                         result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage.getAdvantageousSideWhileApproachingLine();
-                        result.finishLineAdvantageInMeters = markPositionDTOsAndLineAdvantage.getAdvantage().getMeters();
+                        Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
+                        result.finishLineAdvantageInMeters = advantage==null?null:advantage.getMeters();
                     }
                 }
             }
@@ -2427,33 +2431,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private Triple<String, List<CompetitorDTO>, List<Double>> getLeaderboardDataEntriesForRaceColumn(DetailType detailType,
-            LeaderboardDTO leaderboard, RaceColumnDTO raceColumn) throws NoWindException {
+    private Triple<String, List<CompetitorDTO>, List<Double>> getTotalPointsForRaceColumn(LeaderboardDTO leaderboard,
+            RaceColumnDTO raceColumn) throws NoWindException {
         List<Double> values = new ArrayList<Double>();
         List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
-        if(detailType != null) {
-            switch (detailType) {
-            case REGATTA_TOTAL_POINTS:
-                for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
-                    LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
-                    values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
-                    competitorDTOs.add(entry.getKey());
-                }
-                
-                break;
-            case REGATTA_RANK:
-            case OVERALL_RANK:
-                List<CompetitorDTO> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumn);
-                int rank = 1;
-                for(CompetitorDTO competitor: competitorsFromBestToWorst) {
-                    values.add(new Double(rank));
-                    competitorDTOs.add(competitor);
-                    rank++;
-                }
-                break;
-            default:
-                break;
-            }
+        for (Entry<CompetitorDTO, LeaderboardRowDTO> entry : leaderboard.rows.entrySet()) {
+            LeaderboardEntryDTO leaderboardEntryDTO = entry.getValue().fieldsByRaceColumnName.get(raceColumn.getName());
+            values.add(leaderboardEntryDTO != null ? leaderboardEntryDTO.totalPoints : null);
+            competitorDTOs.add(entry.getKey());
         }
         return new Triple<String, List<CompetitorDTO>, List<Double>>(raceColumn.getName(), competitorDTOs, values);
     }
@@ -2462,9 +2447,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<Triple<String, List<CompetitorDTO>, List<Double>>> getLeaderboardDataEntriesForAllRaceColumns(String leaderboardName, 
             Date date, DetailType detailType) throws Exception {
         List<Triple<String, List<CompetitorDTO>, List<Double>>> result = new ArrayList<Util.Triple<String,List<CompetitorDTO>,List<Double>>>();
-
         // Attention: The reason why we read the data from the LeaderboardDTO and not from the leaderboard directly is to ensure
-        // the use of the leaderboard cache and the reuse of all the logic in the getLeaderboardByName method
+        // the use of the leaderboard cache.
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             TimePoint timePoint;
@@ -2473,11 +2457,38 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 timePoint = new MillisecondsTimePoint(date);
             }
-            LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
-                    getService(), baseDomainFactory);
-            for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
-                result.add(getLeaderboardDataEntriesForRaceColumn(detailType, leaderboardDTO, raceColumnDTO));
+            if (detailType != null) {
+                switch (detailType) {
+                case REGATTA_TOTAL_POINTS:
+                    LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, Collections.<String> emptyList(),
+                            getService(), baseDomainFactory);
+                    for (RaceColumnDTO raceColumnDTO : leaderboardDTO.getRaceList()) {
+                        result.add(getTotalPointsForRaceColumn(leaderboardDTO, raceColumnDTO));
+                    }
+                    break;
+                case REGATTA_RANK:
+                case OVERALL_RANK:
+                    TimePoint effectiveTimePoint = timePoint == null ?
+                            leaderboard.getNowMinusDelay() : timePoint;
+                    Map<RaceColumn, List<Competitor>> competitorsFromBestToWorst = leaderboard
+                            .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(effectiveTimePoint);
+                    for (Entry<RaceColumn, List<Competitor>> e : competitorsFromBestToWorst.entrySet()) {
+                        int rank = 1;
+                        List<Double> values = new ArrayList<Double>();
+                        List<CompetitorDTO> competitorDTOs = new ArrayList<CompetitorDTO>();
+                        for (Competitor competitor : e.getValue()) {
+                            values.add(new Double(rank));
+                            competitorDTOs.add(baseDomainFactory.convertToCompetitorDTO(competitor));
+                            rank++;
+                        }
+                        result.add(new Triple<String, List<CompetitorDTO>, List<Double>>(e.getKey().getName(), competitorDTOs, values));
+                    }
+                    break;
+                default:
+                    break;
+                }
             }
+
         }
         return result;
     }
@@ -2773,14 +2784,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventId, eventName, venue.getName(), publicationUrl, isPublic, regattaNames));
+    public void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(eventId, eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue.getName(), isPublic, regattaNames));
     }
 
     @Override
-    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
+    public EventDTO createEvent(String eventName, Date startDate, Date endDate, String venue, boolean isPublic, List<String> courseAreaNames) {
         UUID eventUuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid));
+        getService().apply(new CreateEvent(eventName, new MillisecondsTimePoint(startDate), new MillisecondsTimePoint(endDate), venue, isPublic, eventUuid));
         for (String courseAreaName : courseAreaNames) {
             createCourseArea(eventUuid, courseAreaName);
         }
@@ -2836,7 +2847,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
-        eventDTO.publicationUrl = event.getPublicationUrl();
+        eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
+        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = event.getId();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
@@ -2931,6 +2943,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));
+    }
+    
+    @Override
+    public void removeSeries(RegattaIdentifier identifier, String seriesName) {
+        getService().apply(new RemoveSeries(identifier, seriesName));
     }
 
     private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
@@ -3356,14 +3373,67 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public MasterDataImportObjectCreationCount importMasterData(String urlAsString, String[] groupNames, boolean override, boolean compress) {
-        long startTime = System.currentTimeMillis();
+    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
+        Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
+        String hostname = hostnameAndPort.getA();
+        int port = hostnameAndPort.getB();
+        final String path = "/sailingserver/api/v1/leaderboardgroups";
+        final String query = null;
+
+        HttpURLConnection connection = null;
+
+        URL serverAddress = null;
+        InputStream inputStream = null;
+        try {
+            serverAddress = createUrl(hostname, port, path, query);
+            // set up out communications stuff
+            connection = null;
+            // Set up the initial connection
+            connection = (HttpURLConnection) serverAddress.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+            connection.setReadTimeout(10000);
+            connection.connect();
+
+            inputStream = connection.getInputStream();
+
+            InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
+
+            org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+            org.json.simple.JSONArray array = (org.json.simple.JSONArray) parser.parse(in);
+            List<String> names = new ArrayList<String>();
+            for (Object obj : array) {
+                names.add((String) obj);
+            }
+            return names;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            // close the connection
+            if (connection != null) {
+                connection.disconnect();
+            }
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+            }
+        }
+
+    }
+
+    private Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
             URL url = new URL(urlAsString);
             hostname = url.getHost();
-            port = url.getPort();
+            int portFromUrl = url.getPort();
+            if (portFromUrl > 0) {
+                port = portFromUrl;
+            }
         } catch (MalformedURLException e1) {
             hostname = urlAsString;
             if (urlAsString.contains("://")) {
@@ -3375,73 +3445,109 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (hostname.contains(":")) {
                 String[] split = hostname.split(":");
                 hostname = split[0];
-                port = Integer.parseInt(split[1]);
-            }
-        }
-        String query;
-        try {
-            query = createLeaderboardQuery(groupNames, compress);
-        } catch (UnsupportedEncodingException e1) {
-            throw new RuntimeException(e1);
-        }
-        HttpURLConnection connection = null;
-
-        URL serverAddress = null;
-        InputStream inputStream = null;
-        ObjectInputStream objectInputStream = null;
-        try {
-            serverAddress = createUrl(hostname, port, query);
-            //set up out communications stuff
-            connection = null;
-            //Set up the initial connection
-            connection = (HttpURLConnection)serverAddress.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
-            connection.setReadTimeout(60000);
-            connection.connect();
-
-            
-            if (compress) {
-                InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(connection.getInputStream(),
-                        connection);
-                inputStream = new GZIPInputStream(timeoutExtendingInputStream);
-            } else {
-                inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
-            }
-
-            objectInputStream = getService().getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(
-                    inputStream);
-            TopLevelMasterData topLevelMasterData = (TopLevelMasterData) objectInputStream.readObject();
-            return importFromHttpResponse(topLevelMasterData, override);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            // close the connection, set all objects to null
-            connection.disconnect();
-            connection = null;
-            long timeToImport = System.currentTimeMillis() - startTime;
-            logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
+                if (port > 0) {
+                    port = Integer.parseInt(split[1]);
                 }
-                if (objectInputStream != null) {
-                    objectInputStream.close();
-                }
-            } catch (IOException e) {
             }
         }
+        return new Pair<String, Integer>(hostname, port);
+    }
+
+    @Override
+    public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
+            final boolean compress) {
+        final UUID importOperationId = UUID.randomUUID();
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, "Initializing", 0.0);
+        // Create a progress indicator for as long as the server gets data from the other server.
+        // As soon as the server starts the import operation, a progress object will be built on every server
+        Runnable masterDataImportTask = new Runnable() {
+
+            @Override
+            public void run() {
+                long startTime = System.currentTimeMillis();
+                getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
+                        "Setting up connection", 0.5);
+                Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
+                String hostname = hostnameAndPort.getA();
+                int port = hostnameAndPort.getB();
+                String query;
+                try {
+                    query = createLeaderboardQuery(groupNames, compress);
+                } catch (UnsupportedEncodingException e1) {
+                    throw new RuntimeException(e1);
+                }
+                HttpURLConnection connection = null;
+
+                URL serverAddress = null;
+                InputStream inputStream = null;
+                try {
+                    String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
+                    serverAddress = createUrl(hostname, port, path, query);
+                    // set up out communications stuff
+                    connection = null;
+                    // Set up the initial connection
+                    connection = (HttpURLConnection) serverAddress.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setDoOutput(true);
+                    // Initial timeout needs to be big enough to allow the first parts of the response to reach this
+                    // server
+                    connection.setReadTimeout(60000);
+                    connection.connect();
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
+                            0.5);
+
+                    if (compress) {
+                        InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(
+                                connection.getInputStream(), connection);
+                        inputStream = new GZIPInputStream(timeoutExtendingInputStream);
+                    } else {
+                        inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
+                    }
+
+                    final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
+                    importer.importFromStream(inputStream, importOperationId, override);
+                } catch (Exception e) {
+                    getService()
+                            .setDataImportFailedWithReplication(
+                                    importOperationId,
+                                    e.getMessage()
+                                            + "\n\nHave you checked if the"
+                                            + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
+                                            + "If the error still occurs, when both servers are running the same version, please report the problem.");
+                    throw new RuntimeException(e);
+                } finally {
+                    // close the connection, set all objects to null
+                    getService().setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
+                    connection.disconnect();
+                    connection = null;
+                    long timeToImport = System.currentTimeMillis() - startTime;
+                    logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
+                    try {
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        };
+        executor.execute(masterDataImportTask);
+
+        return importOperationId;
     }
     
-    private URL createUrl(String host, Integer port, String query) throws Exception {
-        return new URL("http://" + host + ":" + port + "/sailingserver/spi/v1/masterdata/leaderboardgroups?" + query);
+    private URL createUrl(String host, Integer port, String path, String query) throws Exception {
+        URL url;
+        if (query != null) {
+            url = new URL("http://" + host + ":" + port + path + "?" + query);
+        } else {
+            url = new URL("http://" + host + ":" + port + path);
+        }
+        return url;
     }
-    
-    protected MasterDataImportObjectCreationCount importFromHttpResponse(TopLevelMasterData topLevelMasterData,
-            boolean override) {
-        MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());       
-        return importer.importMasterData(topLevelMasterData, override);
+
+    public DataImportProgress getImportOperationProgress(UUID id) {
+        return getService().getDataImportLock().getProgress(id);
     }
 
     private String createLeaderboardQuery(String[] groupNames, boolean compress) throws UnsupportedEncodingException {

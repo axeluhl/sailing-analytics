@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sailing.datamining.shared.Components.AggregatorType;
 import com.sap.sailing.datamining.shared.Components.GrouperType;
 import com.sap.sailing.datamining.shared.Components.StatisticType;
@@ -30,8 +29,8 @@ public class SimpleQueryDefinition implements QueryDefinition {
     @Deprecated
     SimpleQueryDefinition() { }
 
-    public SimpleQueryDefinition(LocaleInfo localeInfo, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
-        this.localeName = localeInfo.getLocaleName();
+    public SimpleQueryDefinition(String localeName, GrouperType grouperType, StatisticType statisticType, AggregatorType aggregatorType, DataTypes dataType) {
+        this.localeName = localeName;
         this.grouperType = grouperType;
         this.statisticType = statisticType;
         this.aggregatorType = aggregatorType;

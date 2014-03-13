@@ -275,23 +275,35 @@ public abstract class CanvasOverlayV3 {
         return result;
     }
     
-    public void setCanvasPositionTransition(long durationInMilliseconds) {
+    public void setCanvasPositionAndRotationTransition(long durationInMilliseconds) {
         if (durationInMilliseconds != transitionTimeInMilliseconds) {
-            setProperty(canvas.getElement().getStyle(), "transition", "left "+durationInMilliseconds+"ms linear, top "+durationInMilliseconds+"ms linear");
+            for (String browserTypePrefix : getBrowserTypePrefixes()) {
+                StringBuilder transformPropertyList = new StringBuilder();
+                transformPropertyList.append("left ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, top ");
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear, ");
+                transformPropertyList.append(getBrowserSpecificDashedPropertyName(browserTypePrefix, "transform"));
+                transformPropertyList.append(' ');
+                transformPropertyList.append(durationInMilliseconds);
+                transformPropertyList.append("ms linear");
+                canvas.getElement().getStyle().setProperty(getBrowserSpecificPropertyName(browserTypePrefix, "transition"), transformPropertyList.toString());
+            }
             transitionTimeInMilliseconds = durationInMilliseconds;
         }
     }
     
-    public void removeCanvasPositionTransition() {
+    public void removeCanvasPositionAndRotationTransition() {
         if (transitionTimeInMilliseconds != -1) {
             setProperty(canvas.getElement().getStyle(), "transition", "none");
             transitionTimeInMilliseconds = -1;
         }
     }
-
+    
     private void setProperty(Style style, String baseCamelCasePropertyName, String value) {
         for (String browserTypePrefix : getBrowserTypePrefixes()) {
-                style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
+            style.setProperty(getBrowserSpecificPropertyName(browserTypePrefix, baseCamelCasePropertyName), value);
         }
     }
     
@@ -301,6 +313,32 @@ public abstract class CanvasOverlayV3 {
      */
     private String[] getBrowserTypePrefixes() {
         return new String[] { "", /* Firefox */ "moz", /* IE */ "ms", /* Opera */ "o", /* Chrome and Mobile */ "webkit" };
+    }
+    
+    /**
+     * Converts something like "transformOrigin" to "-<code>browserType</code>-transform-origin"
+     * 
+     * @param browserType
+     *            a browser type string as received from {@link #getBrowserTypePrefixes()}. If empty or null, the
+     *            original property name is returned unchanged
+     * @param camelCaseString
+     *            the original camel-cased property name, such as "transformOrigin"
+     */
+    private String getBrowserSpecificDashedPropertyName(String browserType, String camelCaseString) {
+        StringBuilder result = new StringBuilder();
+        if (browserType != null && !browserType.isEmpty()) {
+            result.append('-');
+            result.append(browserType);
+            result.append('-');
+        }
+        for (int i=0; i<camelCaseString.length(); i++) {
+            final char c = camelCaseString.charAt(i);
+            if (Character.isUpperCase(c)) {
+                result.append('-');
+            }
+            result.append(Character.toLowerCase(c));
+        }
+        return result.toString();
     }
 
     private String getBrowserSpecificPropertyName(String browserType, String basePropertyName) {
@@ -318,6 +356,11 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
     
+    protected void setCanvasRotation(double rotationInDegrees) {
+        setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
+        setProperty(canvas.getElement().getStyle(), "transform", "rotate("+Math.round(rotationInDegrees)+"deg)");
+    }
+
     protected double calculateRadiusOfBoundingBox(MapCanvasProjection projection, LatLng centerPosition, double lengthInMeter) {
         Position centerPos = new DegreePosition(centerPosition.getLatitude(), centerPosition.getLongitude());
         Position translateRhumbX = centerPos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));

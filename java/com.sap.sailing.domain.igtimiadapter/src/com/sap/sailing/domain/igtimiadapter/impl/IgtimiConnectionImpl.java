@@ -113,7 +113,7 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         HttpClient client = connectionFactory.getHttpClient();
         HttpGet getLatestData = new HttpGet(connectionFactory.getLatestDatumUrl(deviceSerialNumbers, type, account));
         JSONObject latestDataJson = ConnectivityUtils.getJsonFromResponse(client.execute(getLatestData));
-        return new FixFactory().createFixesFromLastDatum(latestDataJson, type);
+        return new FixFactory().createFixes(latestDataJson);
     }
     
     @Override

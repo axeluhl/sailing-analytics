@@ -36,6 +36,50 @@ Now click "Import selected Leaderboard Groups" to start the actual import proces
 
 For now, all media links are imported (even if they are not in the same time-frame as the leaderboard-grouped races). The process also looks for the override flag to decide whether it should overwrite the existing row, when there is an id-conflict.
 
+### Remove duplicates from WIND_TRACK collection
+
+The steps below can also be applied to other collections by adjusting the unique index parameters.
+These steps need to be done, when the amount of duplicates in the collection exceeds 1,000,000.
+
+<pre>
+#1
+#Dump the collection (or use mongoexport but you need to take care of rebuilding all indexes)
+mongodump --db winddb --collection WIND_TRACKS --out mongodump_wind_tracks
+
+#2
+#On mongo shell:
+#Option a: remove all (very slow but collection meta data is kept, so there is no need to recreate indexes and such)
+db.WIND_TRACKS.remove()
+
+#Option b: drop (almost instant, but you need to re-setup all indexes, since all meta data will be wiped (when using mongodump/mongorestore, metadata is taken care of too)
+db.WIND_TRACKS.drop()
+
+#3
+#Recreate collection
+db.createCollection("WIND_TRACKS")
+
+#3.1
+#Rebuild other indexes (is also backed up during mongodump, but not during mongoexport) 
+# so no need for this when using mongodump and mongorestore
+db.WIND_TRACKS.ensureIndex({ "RACE_ID" : 1 })
+db.WIND_TRACKS.ensureIndex({ "REGATTA_NAME" : 1 })
+db.WIND_TRACKS.ensureIndex({ "EVENT_NAME" : 1, "RACE_NAME" : 1 })
+#Don't really know if this one is necessary or if it even does anything. This was in the old collection meta data.
+db.WIND_TRACKS.ensureIndex({ "REGATTA_NAME" : null })
+
+
+#3
+#Set the new unique index on the empty collection
+db.WIND_TRACKS.ensureIndex( { "RACE_ID": 1 , "WIND_SOURCE_NAME" : 1, "WIND_SOURCE_ID": 1, "WIND.TIME_AS_MILLIS": 1}, {unique : true, dropDups : true})
+
+#dropDups option is not necessary, as the collection should be empty at that point. But it does not hurt. The mongod process should say that 0 duplicates were found.
+
+#4
+#Restore the documents dumped in step 1
+mongorestore mongodump_wind_tracks
+</pre>
+
+
 ### Hot Deploy Java Packages to a running Server
 
 Sometimes you need to deploy code to a running OSGi server without restarting the whole process. To ease this process the script buildAndUpdateProduct.sh provides an action called _hot-deploy_. To deploy a changed package you first need to know the fully qualified name. In most cases (for com.sap* packages) this corresponds to the package name (e.g. com.sap.sailing.gwt.ui). To hot-deploy the package _com.sap.sailing.server.gateway_ one can use the following call:

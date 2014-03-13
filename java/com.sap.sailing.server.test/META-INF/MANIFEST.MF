@@ -17,6 +17,10 @@ Require-Bundle: com.sap.sailing.domain,
  com.mongodb.driver;bundle-version="2.6.2",
  org.junit4;bundle-version="4.8.2",
  com.sap.sailing.domain.test,
- org.hamcrest;bundle-version="1.1.0"
-Import-Package: org.json.simple
+ org.hamcrest;bundle-version="1.1.0",
+ org.mockito.mockito-core;bundle-version="1.9.5"
+Import-Package: com.sap.sailing.server.gateway.jaxrs,
+ com.sap.sailing.server.gateway.jaxrs.spi,
+ org.json.simple,
+ javax.ws.rs.core;version="1.1.1"
 Export-Package: com.sap.sailing.server.impl

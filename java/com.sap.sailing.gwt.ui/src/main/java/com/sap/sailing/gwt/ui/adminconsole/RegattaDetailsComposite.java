@@ -8,7 +8,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -216,11 +216,24 @@ public class RegattaDetailsComposite extends Composite {
                 new SeriesConfigImagesBarCell(stringMessages));
         seriesActionColumn.setFieldUpdater(new FieldUpdater<SeriesDTO, String>() {
             @Override
-            public void update(int index, SeriesDTO series, String value) {
+            public void update(int index, final SeriesDTO series, String value) {
                 if (SeriesConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    Window.alert("This function is not implemented yet. To delete a series you have to recreate the regatta!");
+                    RegattaIdentifier identifier = new RegattaName(regatta.getName());
+                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>(
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable cause) {
+                                    errorReporter.reportError("Error trying to remove series " + series.getName()
+                                            + ": " + cause.getMessage());
+                                }
+        
+                                @Override
+                                public void onSuccess(Void result) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                    }));
                 }
 
             }

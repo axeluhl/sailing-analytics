@@ -186,11 +186,8 @@ public interface RaceColumn extends Named {
 
     /**
      * Sets (or reloads) {@link RaceLog} for this column with the given fleet
-     * 
-     * @param raceLogInformation
-     * @param fleetImpl
      */
-    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleetImpl);
+    void setOrReloadRaceLogInformation(RaceLogInformation raceLogInformation, Fleet fleet);
 
     /**
      * Remove the association between a race and a column. This is different from
@@ -227,4 +224,6 @@ public interface RaceColumn extends Named {
      * in the column as many times as there are fleets in the column. For the latter case, this method returns <code>true</code>.
      */
     boolean hasSplitFleetContiguousScoring();
+
+    boolean hasSplitFleets();
 }

@@ -109,6 +109,4 @@ public interface MongoObjectFactory {
 
     void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
 
-    void removeSeries(Series series);
-
 }
