@@ -60,6 +60,8 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
+    public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
+    
     private static final int LINE_WIDTH = 1;
 
     private final WindChartSettings settings;
@@ -449,8 +451,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
-                    from, to, settings.getResolutionInMilliseconds(),
-                    null, new AsyncCallback<WindInfoForRaceDTO>() {
+                    from, to, settings.getResolutionInMilliseconds(), null);
+            asyncActionsExecutor.execute(getWindInfoAction, LODA_WIND_CHART_DATA_CATEGORY,
+                    new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
@@ -463,7 +466,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                             }
                             hideLoading();
                         }
-
+        
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
@@ -471,7 +474,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                             hideLoading();
                         }
                     });
-            asyncActionsExecutor.execute(getWindInfoAction);
         }
     }
     
