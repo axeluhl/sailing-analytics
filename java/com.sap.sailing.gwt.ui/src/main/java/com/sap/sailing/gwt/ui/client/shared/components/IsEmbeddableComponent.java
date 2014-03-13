@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.shared.panels.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 
 public interface IsEmbeddableComponent {
 

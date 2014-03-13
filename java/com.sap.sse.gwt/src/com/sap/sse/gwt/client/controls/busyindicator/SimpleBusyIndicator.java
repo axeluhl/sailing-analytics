@@ -1,5 +1,6 @@
-package com.sap.sailing.gwt.ui.client.shared.panels;
+package com.sap.sse.gwt.client.controls.busyindicator;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
@@ -24,6 +25,7 @@ public class SimpleBusyIndicator extends BusyIndicator {
      */
     public SimpleBusyIndicator(boolean busy, float scale) {
         this.setStyleName(STYLE_NAME_PREFIX + "simpleBusyIndicator");
+        this.getElement().getStyle().setMarginTop(7, Unit.PX);
         ImageResource resource = RESOURCES.busyIndicatorCircle();
         busyIndicator = new Image(resource.getSafeUri());
         busyIndicator.setStyleName(STYLE_NAME_PREFIX + "busyIndicatorCircle");
@@ -34,7 +36,7 @@ public class SimpleBusyIndicator extends BusyIndicator {
 
     @Override
     public void setBusy(boolean busy) {
-        this.busy = busy;
+        super.setBusy(busy);
         busyIndicator.setVisible(busy);
     }
 

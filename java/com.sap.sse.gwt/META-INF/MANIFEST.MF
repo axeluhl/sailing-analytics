@@ -16,6 +16,7 @@ Import-Package: javax.servlet;version="2.6.0",
  org.osgi.util.tracker
 Export-Package: com.sap.sse.gwt.client,
  com.sap.sse.gwt.client.controls,
+ com.sap.sse.gwt.client.controls.busyindicator,
  com.sap.sse.gwt.client.controls.slider,
  com.sap.sse.gwt.client.dialog,
  com.sap.sse.gwt.server,
