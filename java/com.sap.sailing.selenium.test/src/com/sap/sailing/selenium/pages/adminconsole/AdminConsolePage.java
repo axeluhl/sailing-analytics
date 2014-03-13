@@ -98,7 +98,11 @@ public class AdminConsolePage extends HostPage {
     private WebElement tabPanel;
     
     @CacheLookup
-    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/..")
+    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabs\")]")
+    private WebElement tabsContainer;
+    
+    @CacheLookup
+    @FindBy(how = ByXPath.class, using = ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]")
     private List<WebElement> tabs;
     
     private AdminConsolePage(WebDriver driver) {
@@ -157,10 +161,7 @@ public class AdminConsolePage extends HostPage {
             WebElement scroller = this.tabPanel.findElement(direction.getBy());
             
             while(!tab.isDisplayed() && scroller.isDisplayed()) {
-                WebElement arrow = scroller.findElement(By.tagName("img"));
-                arrow.click();
-                
-                // QUESTION: Do we need some kind of delay because of the scrolling?
+                scrollAndWait(scroller);
             }
             
             
@@ -172,8 +173,7 @@ public class AdminConsolePage extends HostPage {
             int tabIndex = (direction == ScrollDirection.Left ? getFirstVisibleTabIndex() : getLastVisibleTabIndex());
             
             if(scroller.isDisplayed() && getTabIndex(tab) == tabIndex) {
-                WebElement arrow = scroller.findElement(By.tagName("img"));
-                arrow.click();
+                scrollAndWait(scroller);
             }
                 
         }
@@ -202,6 +202,17 @@ public class AdminConsolePage extends HostPage {
             return ScrollDirection.Rigth;
         
         return null;
+    }
+    
+    private void scrollAndWait(WebElement scroller) {
+        WebElement arrow = scroller.findElement(By.tagName("img"));
+        arrow.click();
+        
+        // TODO: Find a better solution with ImplicitWait
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException exception) {
+        }
     }
     
     private int getTabIndex(WebElement tab) {
