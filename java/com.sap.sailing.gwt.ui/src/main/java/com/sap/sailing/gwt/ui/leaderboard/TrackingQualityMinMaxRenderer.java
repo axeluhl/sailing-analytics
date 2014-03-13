@@ -13,19 +13,21 @@ public class TrackingQualityMinMaxRenderer extends MinMaxRenderer {
     }
     
     /**
-     * Renders the value of a {@link LeaderboardRowDTO}.
+     * Renders the value of a {@link LeaderboardRowDTO}. Values up to 1.5 are considered good, meaning that there is no more than
+     * 50% overshoot compared to the average sampling interval; values worse than 300% of the average sampling interval are considered
+     * bad; anything in between is "OK."
      * 
      * @param title
      *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
     public void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
-        int percent = getPercentage(row);
+        Double ratio = getValueProvider().getDoubleValue(row);
         String stringValue = getValueProvider().getStringValueToRender(row);
         stringValue = stringValue == null ? "" : stringValue;
         final String barStyle;
-        if (percent < 33) {
+        if (ratio <= 1.5) {
             barStyle = "minMaxBackgroundBarGood";
-        } else if (percent < 66) {
+        } else if (ratio <= 3) {
             barStyle = "minMaxBackgroundBar";
         } else {
             barStyle = "minMaxBackgroundBarBad";

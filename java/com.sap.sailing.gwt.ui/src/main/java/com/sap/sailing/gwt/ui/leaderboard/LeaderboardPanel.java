@@ -750,7 +750,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START,
                 DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS,
                 DetailType.START_TACK,
-                DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS };
+                DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -811,9 +811,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            result.put(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS,
-                    new TimeSinceLastGpsFixColumn(DetailType.RACE_TIME_SINCE_LAST_POSITION_FIX_IN_SECONDS, 
-                            new RaceTimeSinceLastPositionFixInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
+                    new TimeSinceLastGpsFixColumn(DetailType.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL, 
+                            new RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
@@ -923,7 +923,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
          * @author Axel Uhl (D043530)
          *
          */
-        private class RaceTimeSinceLastPositionFixInSeconds implements LegDetailField<Double> {
+        private class RaceRatioBetweenTimeSinceLastPositionFixAndAverageSamplingInterval implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
