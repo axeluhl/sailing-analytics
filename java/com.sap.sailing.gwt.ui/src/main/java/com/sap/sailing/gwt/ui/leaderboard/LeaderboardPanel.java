@@ -666,12 +666,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
                 String totalOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
                         : entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
-                String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
+                String netOrAddedPointsAsText = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object))
+                        : entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
                 
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
-                	html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
+                    html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
                 } else {
-                	html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
+                    html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
                 }
                 
                 // don't show points if max points / penalty
@@ -682,11 +683,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(netPointsAsText);
+                        html.appendHtmlConstant(netOrAddedPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\"" + netPointsAsText + "/" + totalOrAddedPointsAsText
+                    html.appendHtmlConstant(" <span title=\"" + netOrAddedPointsAsText + "/" + totalOrAddedPointsAsText
                             + "\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
