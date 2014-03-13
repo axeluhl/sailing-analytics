@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
  * <p>Models a condition that checks for the number of completed Ajax calls. The condition is used in tests where
  *   asynchronous request are triggered automatically to be able able to tell when a specified number of requests
  *   completed. The condition checks for the counter of a specified category as introduced by
- *   {@code PendingAjaxCallBundle} and {@code PendingAjaxCallMarker}.</p>
+ *   {@code PendingAjaxCallBundle}.</p>
  * 
  * @author
  *   D049941
@@ -46,13 +46,13 @@ public class AjaxCallsExecuted implements ExpectedCondition<Boolean> {
     }
     
     /**
-     * <p>Determines if all pending Ajax call have been completed. Returns a boolean representing {@code true} if so
+     * <p>Determines if the number of Ajax calls have been completed. Returns a boolean representing {@code true} if so
      *   and boolean representing {@code false} otherwise.</p>
      * 
      * @param driver
      *   The web driver to use.
      * @return
-     *   A boolean representing {@code true} if all pending Ajax calls have been completed and {@code false} otherwise.
+     *   A boolean representing {@code true} if the number of Ajax calls have been completed and {@code false} otherwise.
      */
     @Override
     public Boolean apply(WebDriver driver) {
