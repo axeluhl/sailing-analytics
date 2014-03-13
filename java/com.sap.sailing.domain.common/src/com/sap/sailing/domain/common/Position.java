@@ -71,4 +71,26 @@ public interface Position extends Serializable {
      * is positive if <code>left<code> is actually the position farther to the left, as seen from this position.
      */
     Distance getDistanceToLine(Position left, Position right);
+    
+    /**
+     * Transform a position into its representation in a local geo-coordinate frame where
+     * <code>localOrigin</code> is locally represented as <code>(latitude, longitude) = (0,0)</code>
+     * and <code>localEquatorBearing</code> is locally represented as <code>East = 90 degrees</code>.
+     * 
+     * This can be used to move a GPS-track to the origin <code>(0,0)</code> and aligning wind direction with North,
+     * or bearing of start line with East. 
+     */
+    Position getLocalCoordinates(Position localOrigin, Bearing localEquatorBearing);
+    
+    /**
+     * Transform a position from local geo-coordinate frame <code>(localOrigin, localEquatorBearing)</code>
+     * into the corresponding position in target geo-coordinate frame <code>(targetOrigin, targetEquatorBearing)</code>.
+     * The transformation is equivalent to a rotation of the earth, which moves <code>localOrigin</code>
+     * to <code>targetOrigin</code> while aligning <code>localEquatorBearing</code> to <code>targetEquatorBearing</code>.
+     * 
+     * This can be used to move a GPS-track from one location to another, in order to compare GPS-tracks from different areas
+     * by superposing and aligning them based on wind direction or bearing of start line.
+     */
+    Position getTargetCoordinates(Position localOrigin, Bearing localEquatorBearing, Position targetOrigin, Bearing targetEquatorBearing);
+    
 }

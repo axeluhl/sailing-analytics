@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
@@ -155,6 +156,20 @@ public class AbstractPosition implements Position {
         return result;
     }
 
+    @Override
+    public Position getLocalCoordinates(Position localOrigin, Bearing localEquatorBearing) {
+    	return this.getTargetCoordinates(localOrigin, localEquatorBearing, new DegreePosition(0.0, 0.0), new DegreeBearingImpl(90.0));
+    }
+
+    @Override
+    public Position getTargetCoordinates(Position localOrigin, Bearing localEquatorBearing, Position targetOrigin, Bearing targetEquatorBearing) {
+    	
+    	Bearing localBearing = localEquatorBearing.getDifferenceTo(localOrigin.getBearingGreatCircle(this));
+    	Distance localDistance = this.getDistance(localOrigin);
+    	
+    	return targetOrigin.translateGreatCircle(targetEquatorBearing.add(localBearing), localDistance);
+    }
+  
     @Override
     public String toString() {
         return "(" + getLatDeg() + "," + getLngDeg() + ")";
