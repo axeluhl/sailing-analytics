@@ -109,7 +109,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     private CandidateImpl randomCan() {
         int id = rnd.nextInt(3);
         return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)), 0.5 + 0.5 * rnd.nextDouble(), Util.get(race.getRace().getCourse()
-                .getWaypoints(), id), true, true, "Test");
+                .getWaypoints(), id));
     }
 
     private GPSFixMoving rndFix() {

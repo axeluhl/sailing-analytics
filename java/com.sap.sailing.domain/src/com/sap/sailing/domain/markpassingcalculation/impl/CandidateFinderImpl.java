@@ -168,8 +168,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, Iterable<Candidate>> removeWaypoints(Collection<Waypoint> waypoints) {
-        List<Mark> marksToRemove = getUniqueMarksOfWaypoints(waypoints);
-        for (Mark m : marksToRemove) {
+        for (Mark m : getUniqueMarksOfWaypoints(waypoints)) {
             marks.remove(m);
             for (Map<GPSFix, Map<Mark, Distance>> map : distances.values()) {
                 for (Map<Mark, Distance> distance : map.values()) {
@@ -334,7 +333,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         if (cost == null) {
                             continue;
                         }
-                        cost *= 0.8;
+                        cost *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? 0.8 : 0.56;
                         if (cost > penaltyForSkipping) {
                             isCan = true;
                             if (passingInstructions.get(w) == PassingInstruction.Gate) {
@@ -357,16 +356,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     }
                 }
                 if (!wasCan && isCan) {
-                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark),
-                    /* correct Direction */true, "Distance");
+                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
                     distanceCandidates.get(c).get(w).put(fix, newCan);
                     result.getA().add(newCan);
                 } else if (wasCan && !isCan) {
                     distanceCandidates.get(c).get(w).remove(fix);
                     result.getB().add(oldCan);
                 } else if (wasCan && isCan && oldCan.getProbability() != cost) {
-                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark),
-                    /* correct Direction */true, "Distance");
+                    Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
                     distanceCandidates.get(c).get(w).put(fix, newCan);
                     result.getA().add(newCan);
                     result.getB().add(oldCan);
@@ -531,8 +528,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         Distance d = calculateDistance(p, m, t);
         double cost = getDistanceBasedProbability(w, t, d);
-        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w, isOnCorrectSideOfWaypoint(w, p, t, portMark), passesInTheRightDirection(w, xte1,
-                xte2, portMark), "xte");
+        cost = isOnCorrectSideOfWaypoint(w, p, t, portMark) ? cost : cost * 0.7;
+        cost = passesInTheRightDirection(w, xte1, xte2, portMark) ? cost : cost * 0.7;
+        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
     }
 
     /**

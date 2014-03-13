@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 /**
- * Tests tricky situation that can fail easily. Created with help of this site http://itouchmap.com/latlong.html
+ * Tests tricky situation that can fail easily. Created with help of http://itouchmap.com/latlong.html
  * 
  */
 public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
@@ -108,7 +108,8 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         List<GPSFix> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2));
         Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
-        assertTrue(Util.size(cans.getA()) == 1 && cans.getA().iterator().next().getProbability() < 0.4);
+        Double inFront = cans.getA().iterator().next().getProbability();
+        assertTrue(Util.size(cans.getA()) == 1);
         // Passing of one mark, close but wrong side and direction
         assertEquals(Util.size(cans.getB()), 0);
 
@@ -126,7 +127,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         assertEquals(Util.size(cans.getB()), 0);
         for (Candidate c : cans.getA()) {
             if (c.getOneBasedIndexOfWaypoint() == 3) {
-                assertTrue(c.getProbability() > 0.6);
+                assertTrue(c.getProbability() > inFront);
                 // Passing of correct mark with greater distance
             }
         }
@@ -141,8 +142,8 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
                 15)));
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix2);
-        Candidate c1 = new CandidateImpl(1, new MillisecondsTimePoint(11000), 0.99, waypoints.get(0), true, true, "CTE");
-        Candidate c3 = new CandidateImpl(3, new MillisecondsTimePoint(13000), 0.99, waypoints.get(2), true, true, "CTE");
+        Candidate c1 = new CandidateImpl(1, new MillisecondsTimePoint(11000), 0.99, waypoints.get(0));
+        Candidate c3 = new CandidateImpl(3, new MillisecondsTimePoint(13000), 0.99, waypoints.get(2));
         // Good candidate but bad time
         CandidateChooser chooser = new CandidateChooserImpl(race);
         chooser.calculateMarkPassDeltas(tom, Arrays.asList(c1, c3), new ArrayList<Candidate>());
@@ -153,7 +154,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
     @Test
     public void testVerySlowCompetitor() {
-
+        // TODO
     }
 
     @Test
