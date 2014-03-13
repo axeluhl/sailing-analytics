@@ -203,6 +203,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     
     private boolean autoExpandLastRaceColumn;
     
+    /**
+     * When <code>true</code>, the race columns don't display the competitors' scores in the race represented by the column
+     * but the cumulative score up to that race.
+     */
     private boolean showAddedScores;
 
     /**
@@ -618,10 +622,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             return race.isLive(fleetDTO, timer.getLiveTimePointInMillis());
         }
         
-        public boolean doShowAddedScores() {
-            return isShowAddedScores();
-        }
-
         @Override
         public String getColumnStyle() {
             return columnStyle;
@@ -668,7 +668,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
                 
                 String addedPointsAsText = "";
-                if (doShowAddedScores()) {
+                if (isShowAddedScores()) {
                     addedPointsAsText = scoreFormat.format(computeAddedScores(object));
                 }
 
@@ -682,11 +682,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(doShowAddedScores() ? addedPointsAsText : totalPointsAsText);
+                        html.appendHtmlConstant(isShowAddedScores() ? addedPointsAsText : totalPointsAsText);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(doShowAddedScores() ? addedPointsAsText : netPointsAsText);
+                        html.appendHtmlConstant(isShowAddedScores() ? addedPointsAsText : netPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
