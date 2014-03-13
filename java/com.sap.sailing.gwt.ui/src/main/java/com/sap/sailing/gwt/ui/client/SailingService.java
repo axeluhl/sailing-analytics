@@ -257,10 +257,10 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateEvent(String eventName, UUID eventId, VenueDTO venue, String publicationUrl, boolean isPublic,
+    void updateEvent(UUID eventId, String eventName, Date startDate, Date endDate, VenueDTO venue, boolean isPublic,
             List<String> regattaNames);
 
-    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreaNames);
+    EventDTO createEvent(String eventName, Date startDate, Date endDate, String venueName, boolean isPublic, List<String> courseAreaNames);
 
     void removeEvent(UUID eventId);
 

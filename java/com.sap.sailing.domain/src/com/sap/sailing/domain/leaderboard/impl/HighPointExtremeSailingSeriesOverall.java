@@ -1,18 +1,25 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
  * the winner of a regatta, and one less for each subsequent position. This scheme is used particularly by the Extreme
- * Sailing Series' overall leaderboard.
+ * Sailing Series' overall leaderboard and can only be applied to {@link MetaLeaderboard}s.
  * <p>
  * 
  * From the Notices of Race: "13.5: If there is a tie in the Series score between two or more boats at any time, the tie
@@ -91,6 +98,50 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
             } else {
                 result = 0;
             }
+        }
+        return result;
+    }
+
+    /**
+     * Notice of Race (NOR) section 13.5 specifies for the series score: "If a tie still remains, it shall be broken in
+     * favor of the boat that had the better place at the last Regatta sailed."
+     * @throws NoWindException 
+     */
+    @Override
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard,
+            Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException {
+        assert leaderboard instanceof MetaLeaderboard;
+        // compare by last regatta if this leaderboard is a meta leaderboard
+        final int result;
+        if (leaderboard instanceof MetaLeaderboard) {
+            MetaLeaderboard overallLeaderboard = (MetaLeaderboard) leaderboard;
+            List<Double> o1PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
+            List<Double> o2PointsInLeaderboardsOfTheGroup = new ArrayList<Double>();
+            List<Leaderboard> randomAccessLeaderboardList = new ArrayList<Leaderboard>(Util.size(overallLeaderboard.getLeaderboards()));
+            Util.addAll(overallLeaderboard.getLeaderboards(), randomAccessLeaderboardList);
+            for (Leaderboard leaderboardInOverall : overallLeaderboard.getLeaderboards()) {
+                o1PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o1, timePoint));
+                o2PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o2, timePoint));
+            }
+            int localResult = 0;
+            for (ListIterator<Leaderboard> reverseLeaderbaordIterator=randomAccessLeaderboardList.listIterator(randomAccessLeaderboardList.size());
+                    reverseLeaderbaordIterator.hasPrevious(); ) {
+                Leaderboard leaderboardInOverall = reverseLeaderbaordIterator.previous();
+                final Double o1PointsForLeaderboard = leaderboardInOverall.getTotalPoints(o1, timePoint);
+                final Double o2PointsForLeaderboard = leaderboardInOverall.getTotalPoints(o2, timePoint);
+                if (o1PointsForLeaderboard != null && o2PointsForLeaderboard != null) {
+                    // we're in a scheme where points never get 0 so we can safely assume
+                    // that the last total points that are no 0 are the ones that we want to
+                    // look at. We also assume that the ordering matches the one in the group
+                    if (o1PointsForLeaderboard > 0 && o2PointsForLeaderboard > 0) {
+                        localResult = -o1PointsForLeaderboard.compareTo(o2PointsForLeaderboard);
+                        break;
+                    }
+                }
+            }
+            result = localResult;
+        } else {
+            result = 0;
         }
         return result;
     }

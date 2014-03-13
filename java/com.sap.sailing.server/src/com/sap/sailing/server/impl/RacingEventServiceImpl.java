@@ -134,7 +134,6 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDataImport
 import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
-import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
@@ -1913,17 +1912,17 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
+    public Event addEvent(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
         synchronized (eventsById) {
-            Event result = createEventWithoutReplication(eventName, venue, publicationUrl, isPublic, id);
-            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id));
+            Event result = createEventWithoutReplication(eventName, startDate, endDate, venue, isPublic, id);
+            replicate(new CreateEvent(eventName, startDate, endDate, venue, isPublic, id));
             return result;
         }
     }
 
     @Override
-    public Event createEventWithoutReplication(String eventName, String venue, String publicationUrl, boolean isPublic, UUID id) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
+    public Event createEventWithoutReplication(String eventName, TimePoint startDate, TimePoint endDate, String venue, boolean isPublic, UUID id) {
+        Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
                 throw new IllegalArgumentException("Event with ID " + result.getId()
@@ -1936,7 +1935,7 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     }
 
     @Override
-    public void updateEvent(UUID id, String eventName, String venueName, String publicationUrl,
+    public void updateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName,
             boolean isPublic, List<String> regattaNames) {
         synchronized (eventsById) {
             if (!eventsById.containsKey(id)) {
@@ -1944,14 +1943,15 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
             }
             Event event = eventsById.get(id);
             event.setName(eventName);
-            event.setPublicationUrl(publicationUrl);
+            event.setStartDate(startDate);
+            event.setEndDate(endDate);
             event.setPublic(isPublic);
             event.getVenue().setName(venueName);
 
             // TODO need to update regattas if they are once linked to event objects
             mongoObjectFactory.storeEvent(event);
 
-            replicate(new UpdateEvent(id, eventName, venueName, publicationUrl, isPublic, regattaNames));
+            replicate(new UpdateEvent(id, eventName, startDate, endDate, venueName, isPublic, regattaNames));
         }
     }
 
@@ -2297,10 +2297,4 @@ public class RacingEventServiceImpl implements RacingEventServiceWithTestSupport
     public void setDataImportDeleteProgressFromMapTimerWithoutReplication(UUID importOperationId) {
         dataImportLock.setDeleteFromMapTimer(importOperationId);
     }
-
-    @Override
-    public void replicateDataImportOperation(ImportMasterDataOperation op) {
-        replicate(op);
-    }
-
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -66,10 +68,16 @@ public class OfflineDataManager extends DataManager {
     }
 
     private void fillDataStore(DataStore dataStore) {
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, UUID.randomUUID()));
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, UUID.randomUUID()));
-        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, UUID.randomUUID()));
-        EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, UUID.randomUUID());
+        Calendar cal = Calendar.getInstance();
+        cal.set(2012, 12, 1);
+        final TimePoint startDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2012, 12, 5);
+        final TimePoint endDate = new MillisecondsTimePoint(cal.getTimeInMillis());
+
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", startDate, endDate, "Cardiff", true, UUID.randomUUID()));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", startDate, endDate, "Nice", true, UUID.randomUUID()));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", startDate, endDate, "Rio", true, UUID.randomUUID()));
+        EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", startDate, endDate, "Muscat", true, UUID.randomUUID());
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", UUID.randomUUID()));
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);

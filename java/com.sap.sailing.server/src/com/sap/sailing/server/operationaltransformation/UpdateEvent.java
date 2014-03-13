@@ -3,22 +3,25 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateEvent extends AbstractEventOperation<Void> {
     private static final long serialVersionUID = -8271559266421161532L;
     private final String venueName;
-    private final String publicationUrl;
+    private final TimePoint startDate;
+    private final TimePoint endDate;
     private final boolean isPublic;
     private final List<String> regattaNames;
     private final String eventName;
 
-    public UpdateEvent(UUID id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+    public UpdateEvent(UUID id, String eventName, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, List<String> regattaNames) {
         super(id);
         this.eventName = eventName;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.venueName = venueName;
-        this.publicationUrl = publicationUrl;
         this.isPublic = isPublic;
         this.regattaNames = regattaNames;
     }
@@ -37,7 +40,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.updateEvent(getId(), eventName, venueName, publicationUrl, isPublic, regattaNames);
+        toState.updateEvent(getId(), eventName, startDate, endDate, venueName, isPublic, regattaNames);
         return null;
     }
 }

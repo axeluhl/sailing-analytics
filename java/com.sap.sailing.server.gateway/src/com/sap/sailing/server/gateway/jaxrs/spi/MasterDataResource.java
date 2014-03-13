@@ -4,7 +4,9 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -56,6 +60,16 @@ public class MasterDataResource extends AbstractSailingServerResource {
             groupsToExport.addAll(allLeaderboardGroups.values());
         }
 
+        final List<Serializable> competitorIds = new ArrayList<Serializable>();
+
+        for (LeaderboardGroup lg : groupsToExport) {
+            for (Leaderboard leaderboard : lg.getLeaderboards()) {
+                for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                    competitorIds.add(competitor.getId());
+                }
+            }
+        }
+
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
                         .getAllMediaTracks());
@@ -74,6 +88,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
                         masterData.setMasterDataExportFlagOnRaceColumns(true);
                         // Actual start of streaming
+                        objectOutputStream.writeObject(competitorIds);
                         objectOutputStream.writeObject(masterData);
                     } finally {
                         objectOutputStream.close();
@@ -93,11 +108,14 @@ public class MasterDataResource extends AbstractSailingServerResource {
                     try {
                         OutputStream outputStreamWithByteCounter = new ByteCountOutputStreamDecorator(output);
                         objectOutputStream = new ObjectOutputStream(outputStreamWithByteCounter);
+                        masterData.setMasterDataExportFlagOnRaceColumns(true);
 
                         // Actual start of streaming
+                        objectOutputStream.writeObject(competitorIds);
                         objectOutputStream.writeObject(masterData);
                     } finally {
                         objectOutputStream.close();
+                        masterData.setMasterDataExportFlagOnRaceColumns(false);
                         long timeToExport = System.currentTimeMillis() - startTime;
                         logger.info(String.format("Took %s ms to finish masterdataexport", timeToExport));
                     }

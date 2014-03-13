@@ -9,7 +9,6 @@ public class RaceBoardViewConfiguration {
     private boolean showLeaderboard; 
     private boolean showWindChart; 
     private boolean showCompetitorsChart;
-    private ViewModes viewMode;
     private String activeCompetitorsFilterSetName;
     private boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
@@ -23,19 +22,15 @@ public class RaceBoardViewConfiguration {
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
 
-    public static enum ViewModes { ONESCREEN };
-    
     public RaceBoardViewConfiguration() {
-        viewMode = ViewModes.ONESCREEN;
         showLeaderboard = true;
         showWindChart = false;
         showCompetitorsChart = false;
         autoSelectMedia = false;
     }	
     
-    public RaceBoardViewConfiguration(ViewModes viewMode, String activeCompetitorsFilterSetName,
-            boolean showLeaderboard, boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
-        this.viewMode = viewMode;
+    public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
+            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces, boolean autoSelectMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
@@ -54,10 +49,6 @@ public class RaceBoardViewConfiguration {
 
     public boolean isShowCompetitorsChart() {
         return showCompetitorsChart;
-    }
-
-    public ViewModes getViewMode() {
-        return viewMode;
     }
 
     public String getActiveCompetitorsFilterSetName() {
